@@ -50,6 +50,11 @@ namespace MyWerehouse.Infrastructure
 				.HasForeignKey(pm => pm.PalletId)
 				.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
 
+			modelBuilder.Entity<Product>()
+				.HasOne(p => p.Details)
+				.WithOne(p => p.Product)
+				.HasForeignKey<ProductDetails>(p => p.ProductId);
+
 			//modelBuilder.Entity<PalletMovement>()
 			//	.HasKey(p => p.Id);
 

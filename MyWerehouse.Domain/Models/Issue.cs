@@ -14,6 +14,6 @@ namespace MyWerehouse.Domain.Models
 		public DateTime IssueDateTime { get; set; }
 		public virtual ICollection<Pallet> Pallets { get; set; } = new List<Pallet>();
 		public string? PerformedBy { get; set; } // opcjonalnie: user
-												 //public virtual ICollection<PalletIssue> IssuePallets { get; set; } = new List<PalletIssue>();
+												
 	}
 }

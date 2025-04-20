@@ -14,15 +14,17 @@ namespace MyWerehouse.Infrastructure
 	{
 		public static IServiceCollection AddInfrastructure(this IServiceCollection services)
 		{
-			services.AddTransient<IAddressRepo, AddressRepo>();
-			services.AddTransient<IClientRepo, ClientRepo>();
+			services.AddTransient<IAddressRepo, AddressRepo>();			
 			services.AddTransient<ICategoryRepo, CategoryRepo>();
+			services.AddTransient<IClientRepo, ClientRepo>();
 			services.AddTransient<IInventoryRepo, InventoryRepo>();
 			services.AddTransient<IIssueRepo, IssueRepo>();
-			services.AddTransient<IProductRepo, ProductRepo>();
-			services.AddTransient<IReceiptRepo, ReceiptRepo>();
 			services.AddTransient<ILocationRepo, LocationRepo>();
+			services.AddTransient<IPalletMovementRepo, PalletMovementRepo>();
+			services.AddTransient<IPalletRepo, PalletRepo>();
 			services.AddTransient<IProductOnPalletRepo, ProductOnPalletRepo>();
+			services.AddTransient<IProductRepo, ProductRepo>();
+			services.AddTransient<IReceiptRepo, ReceiptRepo>();					
 			return services;
 		}
 	}

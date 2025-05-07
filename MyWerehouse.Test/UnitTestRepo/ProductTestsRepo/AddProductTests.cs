@@ -33,53 +33,5 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 			Assert.NotNull(result);
 			Assert.Equal(1, result);
 		}
-		[Fact]
-		public void AddNotProperDataName_AddProduct_ShouldNotAddToCollection()
-		{
-			//Arrange
-			var productRepo = new Product
-			{
-				Id = 2,
-				//Name = "Banana",
-				SKU = "1234567890",
-				CategoryId = 1,
-			};
-			//Act
-			var result = _productRepo.AddProduct(productRepo);
-			//Assert
-			Assert.Equal(-1, result);
-		}
-		[Fact]
-		public void AddNotProperDataSku_AddProduct_ShouldNotAddToCollection()
-		{
-			//Arrange
-			var productRepo = new Product
-			{
-				Id = 3,
-				Name = "Banana",
-				//SKU = "1234567890",
-				CategoryId = 1,
-			};
-			//Act
-			var result = _productRepo.AddProduct(productRepo);
-			//Assert
-			Assert.Equal(-2, result);
-		}
-		[Fact]
-		public void AddNotProperDataCategory_AddProduct_ShouldNotAddToCollection()
-		{
-			//Arrange
-			var productRepo = new Product
-			{
-				Id = 4,
-				Name = "Banana",
-				SKU = "1234567890",
-				//CategoryId = 1,
-			};
-			//Act
-			var result = _productRepo.AddProduct(productRepo);
-			//Assert
-			Assert.Equal(-3, result);
-		}
 	}
 }

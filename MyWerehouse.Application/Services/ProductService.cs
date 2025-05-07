@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.ViewModels;
+using MyWerehouse.Application.ViewModels.ProductModels;
 
 namespace MyWerehouse.Application.Services
 {

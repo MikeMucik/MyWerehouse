@@ -19,20 +19,20 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 			_productRepo = new ProductRepo(_context);
 		}
 		[Fact]
-		public void ProperId_GetProductById_ReturnAllDates()
+		public void ProperId_GetProductById_ReturnAllDatas()
 		{
 			//Arrange
 			var id = 10;
 			//Act
 			var result = _productRepo.GetProductById(id);
 			//Assert
-																																																																					
+
 			Assert.NotNull(result);
 			Assert.Equal(id, result.Id);
 			Assert.Equal(10, result.Details.Length); // 10 -> FactoryBase
 		}
 		[Fact]
-		public void NotProperId_GetProductById_ReturnAllDates()
+		public void NotProperId_GetProductById_ReturnAllDatas()
 		{
 			//Arrange
 			var id = -1;
@@ -52,12 +52,36 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 			Assert.Equal(2, result.Count()); //2->Factory
 		}
 		[Fact]
-		public void ByName_FindProduct_ShowOneProduct()
+		public void ByName_FindProduct_ShowProductContainsWord()
 		{
 			//Arrange
-			//string name = "TestD";
+			var filter = new ProductSearchFilter { ProductName = "Test" };
 			//Act
-			var result = _productRepo.FindProduct("","",0,0,0,2);
+			var result = _productRepo.FindProducts(filter);
+			//Assert
+			Assert.NotNull(result);
+			Assert.IsType<Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable<Product>>(result);
+			Assert.Equal(2, result.Count()); //bo dwa zaczynają się na test
+		}
+		[Fact]
+		public void BySKUAndWidth_FindProduct_ShowProductsWithSKU()
+		{
+			//Arrange			
+			var filter = new ProductSearchFilter { SKU = "0987654321" };
+			//Act
+			var result = _productRepo.FindProducts(filter);
+			//Assert
+			Assert.NotNull(result);
+			Assert.IsType<Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable<Product>>(result);
+			Assert.Equal(1, result.Count());
+		}
+		[Fact]
+		public void ByWeightAndWidth_FindProduct_ShowProductsWithWeightAndWidth()
+		{
+			//Arrange
+			var filter = new ProductSearchFilter { Weight = 2, Width = 30 };			
+			//Act
+			var result = _productRepo.FindProducts(filter);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable<Product>>(result);

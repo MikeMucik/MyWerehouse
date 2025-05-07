@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Models
 		public DateTime DateReceived { get; set; }
 		public int LocationId { get; set; }
 		public virtual Location Location { get; set; }
-		public PalletStatus Status { get; set; } //np "Available", "To issue"
+		public PalletStatus Status { get; set; } = 0; //np "Available", "To issue"
 		public virtual ICollection<ProductOnPallet> ProductsOnPallet { get; set; } = new HashSet<ProductOnPallet>();
 		public virtual ICollection<PalletMovement> PalletMovements { get; set; } = new List<PalletMovement>();
 	}

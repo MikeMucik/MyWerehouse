@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Application.ViewModels
+namespace MyWerehouse.Application.ViewModels.ProductModels
 {
-	public class AddProductDTO
+	public class UpdateProductDTO
 	{
 		public int Id { get; set; }
-		public string Title { get; set; }
+		public string Name { get; set; }
 		public string SKU { get; set; }
 		public string Category { get; set; }
 		public int Length { get; set; } //cm
@@ -17,6 +17,5 @@ namespace MyWerehouse.Application.ViewModels
 		public int Width { get; set; } //cm
 		public int Weight { get; set; } //kg
 		public string Description { get; set; }
-		public DateTime AddedItemAd { get; set; } = DateTime.Now;
 	}
 }

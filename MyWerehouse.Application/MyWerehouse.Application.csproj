@@ -24,4 +24,15 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MyWerehouse.Domain\MyWerehouse.Domain.csproj" />
+    <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\IssueModels\" />
+    <Folder Include="ViewModels\PalletModels\" />
+    <Folder Include="ViewModels\ReceiptModels\" />
+  </ItemGroup>
+
 </Project>

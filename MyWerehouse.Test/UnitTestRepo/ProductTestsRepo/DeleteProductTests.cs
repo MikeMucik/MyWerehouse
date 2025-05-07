@@ -25,26 +25,25 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 				Id = 11
 			};
 			//Act
-			var result = _productRepo.DeleteProductById(product.Id);
+			_productRepo.DeleteProductById(product.Id);
 			//Assert
 			var productDeleted = _context.Products.Find(product.Id);
 			Assert.Null(productDeleted);
-			Assert.True(result);
+			
 		}
 		[Fact]
-		public void RemoveNotExixstingProduct_DeleteProduct_Should()
+		public void SwithOffProduct_SwithOffProduct_ShouldHideProduct()
 		{
 			//Arrange
 			var product = new Product
 			{
-				Id = 111
+				Id = 11
 			};
 			//Act
-			var result = _productRepo.DeleteProductById(product.Id);
+			_productRepo.SwitchOffProduct(product.Id);
 			//Assert
-			var productDeleted = _context.Products.Find(product.Id);
-			Assert.Null(productDeleted);
-			Assert.False(result);
+			var productDeleted = _context.Products.Find(product.Id);			
+			Assert.True(productDeleted.IsDeleted);			
 		}
 	}
 }

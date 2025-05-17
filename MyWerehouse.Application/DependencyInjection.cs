@@ -13,8 +13,7 @@ namespace MyWerehouse.Application
 	public static class DependencyInjection
 	{
 		public static IServiceCollection AddApplication (this IServiceCollection services)
-		{
-			services.AddTransient<IAddressService, AddressService>();
+		{			
 			services.AddTransient<ICategoryService, CategoryService>();
 			services.AddTransient<IClientService, ClientService>();
 			services.AddTransient<IInventoryService, InventoryService>();

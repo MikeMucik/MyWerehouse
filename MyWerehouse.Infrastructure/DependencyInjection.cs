@@ -13,8 +13,7 @@ namespace MyWerehouse.Infrastructure
 	public static class DependencyInjection
 	{
 		public static IServiceCollection AddInfrastructure(this IServiceCollection services)
-		{
-			services.AddTransient<IAddressRepo, AddressRepo>();			
+		{					
 			services.AddTransient<ICategoryRepo, CategoryRepo>();
 			services.AddTransient<IClientRepo, ClientRepo>();
 			services.AddTransient<IInventoryRepo, InventoryRepo>();

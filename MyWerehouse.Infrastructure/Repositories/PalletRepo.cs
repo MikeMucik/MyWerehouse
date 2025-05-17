@@ -32,12 +32,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				_werehouseDbContext.SaveChanges();
 			}
 		}
-
-		//public IQueryable<Pallet> GetAllPallets()
-		//{
-		//	return _werehouseDbContext.Pallets;
-		//}
-
+				
 		public Pallet GetPalletWithProducts(string palletId)
 		{
 			return _werehouseDbContext.Pallets
@@ -59,39 +54,31 @@ namespace MyWerehouse.Infrastructure.Repositories
 			{
 				_werehouseDbContext.Entry(pallet).Property(nameof(pallet.LocationId)).IsModified = true;
 			}
+			if (pallet.IssueId > 0)
+			{
+				_werehouseDbContext.Entry(pallet).Property(nameof(pallet.IssueId)).IsModified = true;
+			}
+			if(pallet.ReceiptId > 0)
+			{
+				_werehouseDbContext.Entry(pallet).Property(nameof(pallet.ReceiptId)).IsModified = true;
+			}
 			_werehouseDbContext.Entry(pallet).Property(nameof(pallet.Status)).IsModified = true;
 
 			_werehouseDbContext.SaveChanges();
 		}
-
-		//public IQueryable<Pallet> FindPalletsByProductId(int productId)
-		//{
-		//	var result = _werehouseDbContext.Pallets
-		//		//.Include(p => p.ProductsOnPallet)
-		//		.Where(i => i.ProductsOnPallet.Any(pp => pp.ProductId == productId));
-		//	return result;
-		//}
-
-		//public IQueryable<Pallet> FindPalletsInLocation(int locationId)
-		//{
-		//	var result = _werehouseDbContext.Pallets
-		//		//.Include(p => p.LocationId)
-		//		.Where(l => l.LocationId == locationId);
-		//	return result;
-		//}
 
 		public IQueryable<Pallet> GetPalletsByBasedFilter(PalletSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 					.ThenInclude(pp => pp.Product)
-						.ThenInclude(ppr=>ppr.ReceiptList)
+						.ThenInclude(ppr => ppr.ReceiptList)
 				.Include(p => p.PalletMovements)
 				.Include(p => p.Location)
 				.AsQueryable();
-			if(filter.ProductId > 0)
+			if (filter.ProductId > 0)
 			{
-				result = result.Where(p=>p.ProductsOnPallet.Any(pp=>pp.ProductId == filter.ProductId));
+				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
 			}
 			if (!string.IsNullOrWhiteSpace(filter.ProductName))
 			{
@@ -103,20 +90,25 @@ namespace MyWerehouse.Infrastructure.Repositories
 			{
 				result = result.Where(p => p.LocationId == filter.LocationId);
 			}
-			if(filter.PalletStatus.HasValue)
+			if (filter.PalletStatus.HasValue)
 			{
-				result = result.Where(p=>p.Status == filter.PalletStatus);
+				result = result.Where(p => p.Status == filter.PalletStatus);
 			}
-			if (filter.BestBefore != null)
-			{
-				result = result.Where(p => p.ProductsOnPallet.Any(pp=>
-				pp.BestBefore == filter.BestBefore));
-			}
-			if (filter.DateAdded != null)
-			{
+			if (filter.BestBefore != null || filter.BestBeforeTo != null)
+			{	
+				var bestBeforeStart = filter.BestBefore ??DateOnly.MinValue;
+				var bestBeforeEnd = filter.BestBeforeTo ??DateOnly.MaxValue;
 				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.DateAdded == filter.DateAdded));
-			}			
+				pp.BestBefore >= bestBeforeStart && pp.BestBefore <= bestBeforeEnd));
+			}
+			if (filter.StartDate != null)
+			{
+				var start = filter.StartDate.Value;
+				var end = filter.EndDate ?? DateTime.Now;
+
+				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
+				pp.DateAdded >= start && pp.DateAdded <= end));
+			}
 			return result;
 		}
 		public IQueryable<Pallet> GetPalletsByClientFilter(PalletSearchFilter filter)
@@ -124,42 +116,92 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var result = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 					.ThenInclude(pp => pp.Product)
-						.ThenInclude(ppc => ppc.IssueList)
-				.Include(p => p.ProductsOnPallet)
-					.ThenInclude(pp => pp.Product)
-						.ThenInclude(ppc => ppc.ReceiptList)
-				.Include(p => p.PalletMovements)
 				.Include(p => p.Location)
+				.Include(p => p.Issue)
+					.ThenInclude(pp => pp.Client)
+				.Include(p => p.Receipt)
+					.ThenInclude(pp => pp.Client)
 				.AsQueryable();
-			if(filter.ClientIdIn != null)
-			{
-				result = result.Where(p=>p.ProductsOnPallet.Any(pp=>
-				pp.Product.ReceiptList.Any(r=>r.ClientId ==filter.ClientIdIn)));
-			}
 			if (filter.ClientIdIn != null)
 			{
-				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.Product.IssueList.Any(r => r.ClientId == filter.ClientIdOut)));
+				result = result.Where(p => p.Receipt != null && p.Receipt.ClientId == filter.ClientIdIn);
+			}
+			if (filter.ClientIdOut != null)
+			{
+				result = result.Where(p => p.Issue != null && p.Issue.ClientId == filter.ClientIdOut);
 			}
 			return result;
 		}
 
-		public IQueryable<Pallet> GetPalletsByClientUser(PalletSearchFilter filter)
+		public IQueryable<Pallet> GetPalletsByUser(PalletSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 					.ThenInclude(pp => pp.Product)
-						.ThenInclude(ppr => ppr.ReceiptList)
-				.Include(p => p.PalletMovements)
 				.Include(p => p.Location)
+				.Include(p => p.Issue)
+					.ThenInclude(pp => pp.Client)
+				.Include(p => p.Receipt)
+					.ThenInclude(pp => pp.Client)
 				.AsQueryable();
 			if (!string.IsNullOrEmpty(filter.ReceiptUser))
 			{
-				result = result.Where(p =>
-				p.ProductsOnPallet.Any(pp =>
-				pp.Product != null && pp.Product.ReceiptList.Any(r => r.PerformedBy == filter.ReceiptUser)));
+				result = result.Where(p => p.Receipt != null && p.Receipt.PerformedBy == filter.ReceiptUser);
 			}
 			return result;
+		}
+
+		public IEnumerable<Pallet> GetAvailablePallets(int productId, DateOnly BestBefore)
+		{
+			return _werehouseDbContext.Pallets
+				.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == productId))
+				.Where(p => p.ProductsOnPallet.Any(pp => pp.BestBefore >= BestBefore));			  
+		}
+
+		public Pallet GetPalletById(string palletId)
+		{
+			return _werehouseDbContext.Pallets.FirstOrDefault(p=>p.Id == palletId);	
+		}
+
+		public void ClearPalletFromListReceipt(string palletId)
+		{
+			var pallet = _werehouseDbContext.Pallets
+				.FirstOrDefault(p => p.Id == palletId);
+			pallet.ReceiptId = 0;
+			pallet.Status = PalletStatus.Available;
+		}
+		public void ClearPalletFromListIssue(string palletId)
+		{
+			var pallet = _werehouseDbContext.Pallets
+				.FirstOrDefault(p => p.Id == palletId);
+			pallet.IssueId = null;
+			pallet.Status = PalletStatus.Available;
+		}
+
+		public void MarkPalletAsHold(string id)
+		{
+			var pallet = _werehouseDbContext.Pallets
+				.FirstOrDefault(p=>p.Id ==id);
+			pallet.Status = PalletStatus.OnHold;
+		}
+
+		public void MarkPalletAsAvailable(string id)
+		{
+			var pallet = _werehouseDbContext.Pallets
+				.FirstOrDefault(p => p.Id == id);
+			pallet.Status = PalletStatus.Available;
+		}
+		public void MarkPalletAsDamaged(string id)
+		{
+			var pallet = _werehouseDbContext.Pallets
+				.FirstOrDefault(p => p.Id == id);
+			pallet.Status = PalletStatus.Damaged;
+		}
+		public void MarkPalletAsLoaded(string id)
+		{
+			var pallet = _werehouseDbContext.Pallets
+				.FirstOrDefault(p => p.Id == id);
+			pallet.Status = PalletStatus.Loaded;
 		}
 	}
 }

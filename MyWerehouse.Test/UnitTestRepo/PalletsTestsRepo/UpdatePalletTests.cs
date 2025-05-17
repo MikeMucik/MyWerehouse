@@ -13,14 +13,15 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 	public class UpdatePalletTests
 	{
 		private readonly DbContextOptions<WerehouseDbContext> _contextOptions;
-		public UpdatePalletTests():base()
+		public UpdatePalletTests()
+			//:base()
 		{
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase("TestDatabase")
 				.Options;
 		}
 		[Fact]
-		public void UpdateLocationStatus_UpdatePallet_ShouldChangeLocationStatus()
+		public void UpdateLocationAndStatus_UpdatePallet_ShouldChangeLocationAndStatus()
 		{
 			//Arrange
 			var updatingPallet = new Pallet
@@ -55,6 +56,45 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				Assert.Equal(updatedPallet.LocationId, result.LocationId);
 				Assert.Equal(updatedPallet.Status, result.Status);
 			}
-		}		
+		}
+		[Fact]
+		public void AddIssueId_UpdatePallet_ShouldChangeStatusAddIssueId()
+		{
+			//Arrange
+			var updatingPallet = new Pallet
+			{
+				Id = "Q10001",
+				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
+				LocationId = 1,
+				Status = PalletStatus.Available,
+			};
+			using var arrangeContext = new WerehouseDbContext(_contextOptions);
+			arrangeContext.Pallets.Add(updatingPallet);
+			arrangeContext.SaveChanges();
+			//Act
+			var updatedPallet = new Pallet
+			{
+				Id = "Q10001",
+				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
+				LocationId = 2,
+				Status = PalletStatus.OnHold,
+				IssueId = 3
+			};
+			using (var actContext = new WerehouseDbContext(_contextOptions))
+			{
+				var repo = new PalletRepo(actContext);
+				repo.UpdatePallet(updatedPallet);
+			}
+
+			//Assert
+			using (var assertContext = new WerehouseDbContext(_contextOptions))
+			{
+				var result = assertContext.Pallets.Find(updatingPallet.Id);
+				Assert.NotNull(result);
+				Assert.Equal(updatedPallet.LocationId, result.LocationId);
+				Assert.Equal(updatedPallet.Status, result.Status);
+				Assert.Equal(updatedPallet.IssueId, result.IssueId);
+			}
+		}
 	}
 }

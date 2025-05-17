@@ -19,6 +19,19 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			_palletRepo = new PalletRepo(_context);
 		}
 		[Fact]
+		public void GetPalletById_GetPalletById_ReturnSimplyData()
+		{
+			//Arrange
+			var paletId = "Q1000";
+			//Act
+			var result = _palletRepo.GetPalletById(paletId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(PalletStatus.Available, result.Status);
+			Assert.Equal(1, result.LocationId);
+			Assert.Equal(1, result.ReceiptId);
+		}
+		[Fact]
 		public void GetPallet_GetPalletWithProducts_ReturnPalletWithProduct()
 		{
 			//Arrange
@@ -28,7 +41,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(10, result.ProductsOnPallet.First(p => p.Id == 1).Quantity);
-			Assert.Equal(new DateTime(2026, 2, 2, 0, 0, 0), result.ProductsOnPallet.First(p => p.Id == 1).DateAdded);
+			Assert.Equal(new DateTime(2024, 2, 2), result.ProductsOnPallet.First(p => p.Id == 1).DateAdded);
 		}
 		[Fact]
 		public void GetPallet_GetPalletWithHistory_ReturnPalletWithHistory()
@@ -58,6 +71,39 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			Assert.Contains(result, p => p.Id == "Q1000");
 		}
 		[Fact]
+		public void SearchPallets_FindPalletsByDateReceved_ReturnList()
+		{
+			//Arrange
+			var productId = new PalletSearchFilter
+			{
+				StartDate = new DateTime(2024, 1, 1),
+				EndDate = new DateTime(2024, 3,3)
+			};
+
+			//Act
+			var result = _palletRepo.GetPalletsByBasedFilter(productId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(4, result.Count());
+			Assert.Contains(result, p => p.Id == "Q1000");
+		}
+		[Fact]
+		public void SearchPallets_FindPalletsByDateBestBefore_ReturnList()
+		{
+			//Arrange
+			var productId = new PalletSearchFilter
+			{
+				BestBefore = new DateOnly(2026,1, 1)
+			};
+
+			//Act
+			var result = _palletRepo.GetPalletsByBasedFilter(productId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(1, result.Count());
+			Assert.Contains(result, p => p.Id == "Q1000");
+		}
+		[Fact]
 		public void SearchPallets_FindPalletsByLocationId_ReturnList()
 		{
 			//Arrange
@@ -69,21 +115,117 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			var result = _palletRepo.GetPalletsByBasedFilter(locationId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal("Q1000", result.First().Id);
+			Assert.Equal(2, result.Count());			
+			Assert.Equal("Q1001", result.First().Id);
 		}
 		[Fact]
-		public void SearchPallets_GetPalletsByClientFilter_ReturnList()
+		public void SearchPallets_FindPalletsByLocationId_ReturnNullList()
 		{
 			//Arrange
-			var ClientId = new PalletSearchFilter
+			var locationId = new PalletSearchFilter
+			{
+				LocationId = 2
+			};
+			//Act
+			var result = _palletRepo.GetPalletsByBasedFilter(locationId);
+			//Assert
+			Assert.Equal(0, result.Count());
+			
+		}
+		[Fact]
+		public void SearchPalletsReceipt_GetPalletsByClientFilter_ReturnList()
+		{
+			//Arrange
+			var clientId = new PalletSearchFilter
 			{
 				ClientIdIn = 10
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByClientFilter(ClientId);
+			var result = _palletRepo.GetPalletsByClientFilter(clientId);
 			//Assert
 			Assert.NotNull(result);
+			Assert.NotEmpty(result);
+			Assert.Equal(2, result.Count());
 
+			foreach (var pallet in result)
+			{
+				Assert.NotNull(pallet.Receipt); 
+				Assert.Equal(10, pallet.Receipt.ClientId);
+			}
+		}
+		[Fact]
+		public void SearchPalletsIssue_GetPalletsByClientFilter_ReturnList()
+		{
+			//Arrange
+			var clientId = new PalletSearchFilter
+			{
+				ClientIdOut = 11
+			};
+			//Act
+			var result = _palletRepo.GetPalletsByClientFilter(clientId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.NotEmpty(result); // zakładamy, że dane testowe zawierają takie palety
+			Assert.Contains(result, p => p.Id == "Q1001");
+			Assert.Contains(result, p => p.Id == "Q1000");
+			foreach (var pallet in result)
+			{
+				Assert.NotNull(pallet.Issue); // powinno być przypisane
+				Assert.Equal(11, pallet.Issue.ClientId);				
+			}
+		}
+		[Fact]
+		public void SearchPallets_GetPalletsByUser_ReturnList()
+		{
+			//Arrange
+			var userId = new PalletSearchFilter
+			{
+				ReceiptUser = "U001"
+			};
+			//Act
+			var result = _palletRepo.GetPalletsByUser(userId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.NotEmpty(result);
+
+			foreach (var pallet in result)
+			{
+				Assert.NotNull(pallet.Receipt);			
+				Assert.Equal("U001", pallet.Receipt.PerformedBy);
+			}
+		}
+		[Fact]
+		public void SearchPalletsStatus_GetPalletsByBasedFilter_ReturnList()
+		{
+			//Arrange
+			var status = new PalletSearchFilter
+			{
+				PalletStatus = PalletStatus.Damaged,
+			};
+			//Act
+			var result = _palletRepo.GetPalletsByBasedFilter(status);
+			//Assert
+			Assert.NotNull(result);
+			Assert.NotEmpty(result);
+
+			foreach (var pallet in result)
+			{
+				Assert.Equal("Q1010", pallet.Id);
+			}
+		}
+		[Fact]
+		public void ReturnPalletsByProductIdAndDate_GetAvailablePallets_ReturnList()
+		{
+			//Arrange
+			var productId = 10;
+			DateOnly date = new DateOnly(2024,2,2);
+			//Act
+			var result = _palletRepo.GetAvailablePallets(productId, date);//wynik IEnumerable
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(2, result.Count());			
+			Assert.Contains(result, p => p.Id == "Q1000");			
+			Assert.Contains(result, p => p.Id == "Q1001");			
 		}
 	}
 }

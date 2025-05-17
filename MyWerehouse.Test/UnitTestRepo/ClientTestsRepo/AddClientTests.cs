@@ -22,7 +22,7 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 			//Arrange
 			var client = new Client
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",

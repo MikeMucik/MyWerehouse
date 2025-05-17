@@ -15,7 +15,9 @@ namespace MyWerehouse.Domain.Models
 		public int? ClientIdIn { get; set; }
 		public int? ClientIdOut { get; set; }
 		public DateOnly? BestBefore {  get; set; }
-		public DateTime? DateAdded { get; set; }
+		public DateOnly? BestBeforeTo {  get; set; }
+		public DateTime? StartDate { get; set; }
+		public DateTime? EndDate { get; set; }
 		public string? ReceiptUser {  get; set; }
 	}
 }

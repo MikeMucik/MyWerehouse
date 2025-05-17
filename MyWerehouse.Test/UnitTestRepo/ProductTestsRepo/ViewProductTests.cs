@@ -49,7 +49,7 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 			var result = _productRepo.GetAllProducts();
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Count()); //2->Factory
+			Assert.Equal(3, result.Count()); //3->Factory
 		}
 		[Fact]
 		public void ByName_FindProduct_ShowProductContainsWord()

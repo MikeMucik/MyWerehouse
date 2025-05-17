@@ -16,17 +16,6 @@ namespace MyWerehouse.Domain.Models
 		public int Quantity { get; set; }
 		public DateTime DateAdded { get; set; }
 		public DateOnly? BestBefore { get; set; } // Może być null, jeśli produkt nie ma daty ważności
-		//public override bool Equals(object obj)
-		//{
-		//	if (obj is not ProductOnPallet other)
-		//	return false;
-		//	return ProductId == other.ProductId &&
-		//		PalletId == other.PalletId &&
-		//		Nullable.Equals(BestBefore, other.BestBefore);
-		//}
-		//public override int GetHashCode()
-		//{
-		//	return HashCode.Combine(ProductId, PalletId, BestBefore);
-		//}		
+			
 	}
 }

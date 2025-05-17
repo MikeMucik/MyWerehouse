@@ -13,6 +13,6 @@ namespace MyWerehouse.Domain.Models
 		public int Aisle { get; set; }
 		public int Position { get; set; }
 		public int Height { get; set; }			
-		//public virtual ICollection<ProductOnPallet> ProductInLocations { get; set; } = new List<ProductOnPallet>();
+		public virtual ICollection<Pallet> Pallets { get; set; }
 	}
 }

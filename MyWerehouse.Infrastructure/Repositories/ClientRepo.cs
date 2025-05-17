@@ -144,14 +144,14 @@ namespace MyWerehouse.Infrastructure.Repositories
 			{
 				_werehouseDbContext.Entry(client).Property(nameof(client.Description)).IsModified = true;
 			}
-			var existingAddress = _werehouseDbContext.Adresses
+			var existingAddress = _werehouseDbContext.Addresses
 				.Where(ca => ca.ClientId == client.Id)
 				.ToList();
 			foreach (var address in existingAddress)
 			{
 				if (!client.Addresses.Any(i => i.Id == address.Id))
 				{
-					_werehouseDbContext.Adresses.Remove(address);
+					_werehouseDbContext.Addresses.Remove(address);
 				}
 			}
 			if (client.Addresses != null)
@@ -161,7 +161,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 					if (!existingAddress.Any(i => i.Id == address.Id))
 					{
 						address.ClientId = client.Id;
-						_werehouseDbContext.Adresses.Add(address);
+						_werehouseDbContext.Addresses.Add(address);
 					}
 					else
 					{

@@ -33,8 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="MappingTest\" />
-    <Folder Include="IntegrationTest\" />
     <Folder Include="ValidationTest\" />
     <Folder Include="UnitTestService\" />
   </ItemGroup>

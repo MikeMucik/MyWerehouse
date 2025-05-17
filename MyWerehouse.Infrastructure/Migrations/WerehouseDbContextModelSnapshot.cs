@@ -239,10 +239,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Phone")
                         .HasColumnType("int");
 
@@ -266,7 +262,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Adresses");
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Category", b =>
@@ -276,6 +272,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -301,6 +300,13 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -408,7 +414,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReceiptId")
+                    b.Property<int>("ReceiptId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -481,6 +487,9 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -648,7 +657,7 @@ namespace MyWerehouse.Infrastructure.Migrations
             modelBuilder.Entity("MyWerehouse.Domain.Models.Address", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Models.Client", "Clients")
-                        .WithMany("Address")
+                        .WithMany("Addresses")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -691,21 +700,27 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Pallet", b =>
                 {
-                    b.HasOne("MyWerehouse.Domain.Models.Issue", null)
+                    b.HasOne("MyWerehouse.Domain.Models.Issue", "Issue")
                         .WithMany("Pallets")
                         .HasForeignKey("IssueId");
 
                     b.HasOne("MyWerehouse.Domain.Models.Location", "Location")
-                        .WithMany()
+                        .WithMany("Pallets")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MyWerehouse.Domain.Models.Receipt", null)
+                    b.HasOne("MyWerehouse.Domain.Models.Receipt", "Receipt")
                         .WithMany("Pallets")
-                        .HasForeignKey("ReceiptId");
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Issue");
 
                     b.Navigation("Location");
+
+                    b.Navigation("Receipt");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.PalletMovement", b =>
@@ -798,7 +813,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Client", b =>
                 {
-                    b.Navigation("Address");
+                    b.Navigation("Addresses");
 
                     b.Navigation("Issues");
 
@@ -811,6 +826,11 @@ namespace MyWerehouse.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Issue", b =>
+                {
+                    b.Navigation("Pallets");
+                });
+
+            modelBuilder.Entity("MyWerehouse.Domain.Models.Location", b =>
                 {
                     b.Navigation("Pallets");
                 });

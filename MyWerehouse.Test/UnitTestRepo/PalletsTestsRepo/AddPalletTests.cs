@@ -26,6 +26,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
+				ReceiptId = 10,
 			};
 			//Act
 			var result = _palletRepo.AddPallet(pallet);
@@ -33,6 +34,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			Assert.NotNull(result);
 			var createdPallet = _context.Pallets.Find(result);
 			Assert.Equal(pallet.Status, createdPallet.Status);
+			Assert.Equal(pallet.ReceiptId, createdPallet.ReceiptId);
 		}
 	}
 }

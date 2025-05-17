@@ -21,8 +21,7 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 		{
 			//Arrange
 			var productRepo = new Product
-			{
-				Id = 1,
+			{			
 				Name = "Banana",
 				SKU = "1234567890",
 				CategoryId = 1,
@@ -31,7 +30,35 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 			var result = _productRepo.AddProduct(productRepo);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(1, result);
+			var fullResult = _context.Products.FirstOrDefault(p => p.Name == productRepo.Name);
+			Assert.Equal("1234567890", fullResult.SKU);
+		}
+		[Fact]
+		public void AddProperDataWithDetails_AddProduct_ShouldAddToCollection()
+		{
+			//Arrange
+			var details = new ProductDetails
+			{
+				Length = 100,
+				Height = 200,
+				Width = 300,
+				Weight = 400,
+				Description = "500",
+			};
+			var productRepo = new Product
+			{
+				Name = "Apple",
+				SKU = "666666",
+				CategoryId = 1,
+				Details = details,
+			};
+			//Act
+			var result = _productRepo.AddProduct(productRepo);
+			//Assert
+			Assert.NotNull(result);
+			var fullResult = _context.Products.FirstOrDefault(p => p.Name == productRepo.Name);
+			Assert.Equal("666666", fullResult.SKU);
+			Assert.Equal(100, fullResult.Details.Length);
 		}
 	}
 }

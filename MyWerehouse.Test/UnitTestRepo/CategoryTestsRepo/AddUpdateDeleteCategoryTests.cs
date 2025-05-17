@@ -28,7 +28,7 @@ namespace MyWerehouse.Test.UnitTestRepo.CategoryTestsRepo
 			//Arrange
 			var newCategory = new Category
 			{
-				Id = 20,
+				//Id = 20,
 				Name = "CategoryName"
 			};
 			//Act

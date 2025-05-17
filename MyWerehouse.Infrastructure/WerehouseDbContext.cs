@@ -10,7 +10,7 @@ namespace MyWerehouse.Infrastructure
 		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options) : base(options) { }
 
 
-		public DbSet<Address> Adresses { get; set; }
+		public DbSet<Address> Addresses { get; set; }
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Client> Clients { get; set; }
 		public DbSet<Inventory> Inventory { get; set; }
@@ -22,9 +22,6 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<ProductDetails> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
 		public DbSet<Receipt> Receipts { get; set; }
-
-
-
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
@@ -53,20 +50,7 @@ namespace MyWerehouse.Infrastructure
 			modelBuilder.Entity<Product>()
 				.HasOne(p => p.Details)
 				.WithOne(p => p.Product)
-				.HasForeignKey<ProductDetails>(p => p.ProductId);
-
-			//modelBuilder.Entity<PalletMovement>()
-			//	.HasKey(p => p.Id);
-
-			//modelBuilder.Entity<PalletMovement>()
-			//	 .HasOne(ip => ip.Issue)
-			//	 .WithMany(i => i.IssuePallets)
-			//	 .HasForeignKey(ip => ip.IssueId);
-
-			//modelBuilder.Entity<PalletMovement>()
-			//	.HasOne(ip => ip.Pallet)
-			//	.WithMany(p => p.IssuePallets)
-			//	.HasForeignKey(ip => ip.PalletId);
+				.HasForeignKey<ProductDetails>(p => p.ProductId);			
 		}
 	}
 }

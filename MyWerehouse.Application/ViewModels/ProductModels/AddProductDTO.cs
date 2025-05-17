@@ -14,7 +14,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int Id { get; set; }
 		public string Name { get; set; }
 		public string SKU { get; set; }
-		public string Category { get; set; }
+		//public string Category { get; set; }
 		public int CategoryId { get; set; }
 		public int Length { get; set; } //cm
 		public int Height { get; set; } //cm
@@ -29,7 +29,9 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 				.ForMember(dest=>dest.Height, opt=>opt.MapFrom(src=>src.Details.Height))
 				.ForMember(dest=>dest.Width, opt=>opt.MapFrom(src=>src.Details.Width))
 				.ForMember(dest=>dest.Weight, opt=>opt.MapFrom(src=>src.Details.Weight))
-				.ForMember(dest=>dest.Category, opt=>opt.MapFrom(src=>src.Category.Name))
+				//.ForMember(dest=>dest.Category, opt=>opt.MapFrom(src=>src.Category.Name))
+				.ForMember(dest=>dest.Description, opt=>opt.MapFrom(src=>src.Details.Description))
+				.ForMember(dest=>dest.AddedItemAd, opt=>opt.MapFrom(src=>src.AddedItemAd))
 				.ReverseMap();
 		}
 	}

@@ -130,27 +130,15 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Where(p => p.IsDeleted == false)
 				.Include(p => p.Details)
 				.Include(p => p.Category)
-				.AsQueryable();
-			//if (!string.IsNullOrEmpty(filter.ProductName))
-			//{
-			//	result = result.Where(p => p.Name == filter.ProductName);
-			//}
+				.AsQueryable();			
 			if (!string.IsNullOrEmpty(filter.ProductName))
 			{
 				result = result.Where(p => p.Name != null && p.Name.Contains(filter.ProductName, StringComparison.OrdinalIgnoreCase));
-			}
-			//if (!string.IsNullOrEmpty(filter.SKU))
-			//{
-			//	result = result.Where(p => p.SKU == filter.SKU);
-			//}
+			}			
 			if (!string.IsNullOrEmpty(filter.SKU))
 			{
 				result = result.Where(p => p.SKU != null && p.SKU.Contains(filter.SKU, StringComparison.OrdinalIgnoreCase));
-			}
-			//if (!string.IsNullOrEmpty(filter.Category))
-			//{
-			//	result = result.Where(p => p.Category.Name == filter.Category);
-			//}
+			}			
 			if (!string.IsNullOrEmpty(filter.Category))
 			{
 				result = result.Where(p => p.Category.Name != null && p.Category.Name.Contains(filter.Category, StringComparison.OrdinalIgnoreCase));
@@ -177,7 +165,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			return result;
 		}
-
 		public void SwitchOffProduct(int id)
 		{
 			var product = _werehouseDbContext.Products.Find(id);

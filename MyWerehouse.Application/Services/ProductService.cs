@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using FluentValidation;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
@@ -16,58 +18,72 @@ namespace MyWerehouse.Application.Services
 		private readonly IProductRepo _productRepo;
 		private readonly IMapper _mapper;
 		private readonly IReceiptRepo _receiptRepo;
+		private readonly IValidator<AddProductDTO> _productValidator;
+
 		public ProductService(
 			IProductRepo repo,
 			IMapper mapper,
-			IReceiptRepo receiptRepo)
+			IReceiptRepo? receiptRepo = null,
+			IValidator<AddProductDTO>? productValidator = null)
 		{
 			_productRepo = repo;
 			_mapper = mapper;
 			_receiptRepo = receiptRepo;
+			_productValidator = productValidator;
 		}
 		public ProductService(
 			IProductRepo repo,
-			IMapper mapper
-			)
+			IMapper mapper,
+			IValidator<AddProductDTO>? productValidator = null)
 		{
 			_productRepo = repo;
 			_mapper = mapper;
-			
+			_productValidator = productValidator;
+		}
+		public ProductService(
+			IProductRepo repo,
+			IMapper mapper)
+		{
+			_productRepo = repo;
+			_mapper = mapper;
 		}
 
 		public int AddProduct(AddProductDTO product)
 		{
-			if (string.IsNullOrWhiteSpace(product.Name) ||
-				string.IsNullOrWhiteSpace(product.SKU) ||
-				product.CategoryId == 0 ||
-				product.Length == 0 ||
-				product.Width == 0 ||
-				product.Height == 0 ||
-				product.Weight == 0)
+			var validationResult = _productValidator.Validate(product);
+			if (!validationResult.IsValid)
 			{
-				throw new InvalidDataException("Uzupełnij wszystkie dane produktu.");
+				throw new ValidationException(validationResult.Errors);
+			}			
+			var existingProduct = _productRepo.FindProducts(new ProductSearchFilter { ProductName = product.Name });
+			if (existingProduct.Any())
+			{ 
+				throw new InvalidDataException("Produkt o tej nazwie już istnieje."); 
 			}
-
 			var productNew = _mapper.Map<Product>(product);
 			var id = _productRepo.AddProduct(productNew);
 			return id;
 		}
 
 		public void DeleteProduct(int productId)
-		{			
-			var filter = new IssueReceiptSearchFilter
+		{
+			if (_productRepo.GetProductById(productId) != null)
 			{
-				ProductId = productId
-			};
-			var receipt = _receiptRepo.GetReceiptByFilter(filter);
-			if (!receipt.Any())
-			{
-				_productRepo.DeleteProductById(productId);
+				var filter = new IssueReceiptSearchFilter
+				{
+					ProductId = productId
+				};
+				var receipt = _receiptRepo.GetReceiptByFilter(filter);
+				if (!receipt.Any())
+				{
+					_productRepo.DeleteProductById(productId);
+				}
+				else
+				{
+					_productRepo.SwitchOffProduct(productId);
+				}
 			}
-			else 
-			{ 
-				_productRepo.SwitchOffProduct(productId);
-			}
+			else{throw new InvalidDataException("Brak produktu o tym numerze");	}
 		}
 		public AddProductDTO GetProductToEdit(int productId)
 		{
@@ -78,19 +94,23 @@ namespace MyWerehouse.Application.Services
 
 		public void UpdateProduct(AddProductDTO product)
 		{
-			if (string.IsNullOrWhiteSpace(product.Name) ||
-				string.IsNullOrWhiteSpace(product.SKU) ||
-				product.CategoryId == 0 ||
-				product.Length == 0 ||
-				product.Width == 0 ||
-				product.Height == 0 ||
-				product.Weight == 0)
+			var validationResult = _productValidator.Validate(product);
+			if (!validationResult.IsValid)
 			{
-				throw new InvalidDataException("Uzupełnij wszystkie dane produktu.");
+				throw new ValidationException(validationResult.Errors);
 			}
-
+			//if (string.IsNullOrWhiteSpace(product.Name) ||
+			//	string.IsNullOrWhiteSpace(product.SKU) ||
+			//	product.CategoryId == 0 ||
+			//	product.Length == 0 ||
+			//	product.Width == 0 ||
+			//	product.Height == 0 ||
+			//	product.Weight == 0)
+			//{
+			//	throw new InvalidDataException("Uzupełnij wszystkie dane produktu.");
+			//}
 			var productNew = _mapper.Map<Product>(product);
-			 _productRepo.UpdateProduct(productNew);
+			_productRepo.UpdateProduct(productNew);
 		}
 
 		public DetailsOfProductDTO DetailsOfProduct(int productId)
@@ -100,6 +120,47 @@ namespace MyWerehouse.Application.Services
 			return productDTO;
 		}
 
-		
+		public ListProductsDTO GetProducts(int pageSize, int PageNumber)
+		{
+			var products = _productRepo.GetAllProducts()
+				.OrderBy(p => p.Id)
+				.ProjectTo<ProductToListDTO>(_mapper.ConfigurationProvider)
+				//.ToList
+				;
+			var productToShow = products
+				.Skip(pageSize * (PageNumber - 1))
+				.Take(pageSize)
+				.ToList()
+				;
+			var productList = new ListProductsDTO()
+			{
+				Products = productToShow,
+				PageSize = pageSize,
+				CurrentPage = PageNumber,
+				Count = products.Count()
+			};
+			return productList;
+		}
+
+		public ListProductsDTO FindProductsByFilter(int pageSize, int PageNumber, ProductSearchFilter filter)
+		{
+			var products = _productRepo.FindProducts(filter)
+				.OrderBy(p => p.Id)
+				.ProjectTo<ProductToListDTO>(_mapper.ConfigurationProvider)
+				//.ToList
+				;
+			var productToShow = products
+				.Skip(pageSize * (PageNumber - 1))
+				.Take(pageSize)
+				.ToList();
+			var productList = new ListProductsDTO()
+			{
+				Products = productToShow,
+				PageSize = pageSize,
+				CurrentPage = PageNumber,
+				Count = products.Count()
+			};
+			return productList;
+		}
 	}
 }

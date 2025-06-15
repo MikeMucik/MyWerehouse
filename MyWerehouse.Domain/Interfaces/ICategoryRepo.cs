@@ -10,9 +10,18 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface ICategoryRepo
 	{
 		void AddCategory(Category category);
-		void UpdateCategory(Category category);
+		Task AddCategoryAsync(Category category);		
 		void DeleteCategory(int idCategory);
+		Task DeleteCategoryAsync(int idCategory);
 		void SwitchOffCategory(int idCategory);
+		Task SwitchOffCategoryAsync(int idCategory);
+		void UpdateCategory(Category category);
+		Task UpdateCategoryAsync(Category category);		
+		Category? GetCategoryById(int id);
+		Task<Category?> GetCategoryByIdAsync(int id);
+		Category? GetCategoryByName(string name);
+		Task<Category?> GetCategoryByNameAsync(string name);
 		IQueryable<Category> GetAllCategories();
+		Task<List<Category>> GetAllCategoriesAsync();
 	}
 }

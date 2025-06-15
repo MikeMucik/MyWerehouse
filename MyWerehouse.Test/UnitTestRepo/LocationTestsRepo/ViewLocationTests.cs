@@ -33,6 +33,21 @@ namespace MyWerehouse.Test.UnitTestRepo.LocationTestsRepo
 			Assert.Equal(4, result.Height);
 		}
 		[Fact]
+		public async Task GetLocation_GetLocationByIdAsync_ReturnLocation()
+		{
+			//Arrange
+			var locationId = 1;
+			//Act
+			var result =await _locationRepo.GetLocationByIdAsync(locationId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(locationId, result.Id);
+			Assert.Equal(1, result.Aisle);
+			Assert.Equal(2, result.Bay);
+			Assert.Equal(3, result.Position);
+			Assert.Equal(4, result.Height);
+		}
+		[Fact]
 		public void GetEmptyLocation_GetAllAvailableLocations_ReturnList()
 		{
 			//Arrange&Act			

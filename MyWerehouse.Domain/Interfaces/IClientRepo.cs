@@ -10,10 +10,15 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IClientRepo
 	{
 		int AddClient (Client client);
-		Client GetClientById(int id);
-		void UpdateClient (Client client);
-		void DeleteClientById (int id);
+		Task<int> AddClientAsync (Client client);
+		void DeleteClientById(int id);
+		Task DeleteClientByIdAsync(int id);
 		void SwitchOffClient(int id);
+		Task SwitchOffClientAsync(int id);
+		Client? GetClientById(int id);
+		Task<Client?> GetClientByIdAsync (int id); 
+		void UpdateClient (Client client);
+		Task UpdateClientAsync(Client client);		
 		IQueryable<Client> GetAllClients();
 		IQueryable<Client> GetClients (ClientSearchFilter clientFilter);
 	}

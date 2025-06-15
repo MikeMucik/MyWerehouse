@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentValidation;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Domain.Models;
@@ -21,8 +22,27 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Client, AddClientDTO>()
-				.ForMember(dest=>dest.Addresses, opt=>opt.MapFrom(src=>src.Addresses))
+				.ForMember(dest => dest.Addresses, opt => opt.MapFrom(src => src.Addresses))
 				.ReverseMap();
 		}
 	}
+	public class AddClientDTOValidation : AbstractValidator<AddClientDTO>
+	{
+		public AddClientDTOValidation() 
+		{
+			RuleFor(c => c.Name)
+				.NotNull()
+				.WithMessage("Uzupełnij dane - nazwa");
+			RuleFor(c => c.Email)
+				.NotNull()
+				.WithMessage("Uzupełnij dane - email");
+			RuleFor(c => c.FullName)
+				.NotNull()
+				.WithMessage("Uzupełnij dane - pełna nazwa");
+			RuleFor(c => c.Addresses)
+				.NotEmpty()
+				.WithMessage("Uzupełnij dane - adress");
+		}
+	}
 }
+

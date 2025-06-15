@@ -17,12 +17,11 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 			_clientRepo = new ClientRepo(_context);
 		}
 		[Fact]
-		public void AddPorperData_AddClient_ShouldAddToCollection()
+		public void AddProperData_AddClient_ShouldAddToCollection()
 		{
 			//Arrange
 			var client = new Client
-			{
-				//Id = 1,
+			{				
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -30,9 +29,124 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 			};
 			//Act
 			var result = _clientRepo.AddClient(client);
-			//Assert
-			Assert.NotNull(result);
+			//Assert			
+			Assert.NotEqual(0, result);
 			Assert.Equal(client.Id, result);
-		}		
+		}
+		[Fact]
+		public async Task AddProperData_AddClientAsync_ShouldAddToCollection()
+		{
+			//Arrange
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany"
+			};
+			//Act
+			var result = await _clientRepo.AddClientAsync(client);
+			//Assert	
+			Assert.NotEqual(0,result);		
+			Assert.Equal(client.Id, result);
+		}
+		[Fact]
+		public void AddProperDataWithAddress_AddClient_ShouldAddToCollection()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			
+			};
+			//Act
+			var result = _clientRepo.AddClient(client);
+			//Assert
+			Assert.NotEqual(0, result);
+			Assert.Equal(client.Id, result);
+			var resultFull = _context.Clients.FirstOrDefault(c=>c.Id == client.Id);
+			Assert.NotNull(resultFull);
+			Assert.Single(resultFull.Addresses);
+			Assert.Equal(resultFull.Addresses.First().StreetName, address.StreetName);
+		}
+		[Fact]
+		public async Task AddProperDataWithAddress_AddClientAsync_ShouldAddToCollection()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+
+			};
+			//Act
+			var result =await _clientRepo.AddClientAsync(client);
+			//Assert
+			Assert.NotEqual(0,result);
+			Assert.Equal(client.Id, result);
+			var resultFull = _context.Clients
+				.FirstOrDefault(c => c.Id == client.Id);
+			Assert.NotNull(resultFull);
+			Assert.Single(resultFull.Addresses);
+			Assert.Equal(resultFull.Addresses.First().StreetName, address.StreetName);
+		}
+		//[Fact]
+		//public void AddNotPorperDataWithAddress_AddClient_ShouldAddToCollection()
+		//{
+		//	//Arrange
+		//	var address = new Address
+		//	{
+		//		City = "Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		//Phone = 4444444,
+		//		//Region = "Mazowieckie",
+		//		//StreetNumber = "23/3"
+		//	};
+		//	var client = new Client
+		//	{
+		//		Name = "TestCompany",
+		//		Email = "123@op.pl",
+		//		Description = "Description",
+		//		FullName = "FullNameCompany",
+		//		Addresses = [address]
+
+		//	};
+		//	//Act
+		//	var result = _clientRepo.AddClient(client);
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	Assert.Equal(client.Id, result);
+		//	var resultFull = _context.Clients.FirstOrDefault(c => c.Id == client.Id);
+		//	Assert.Equal(resultFull.Addresses.First().StreetName, address.StreetName);
+		//}
 	}
 }

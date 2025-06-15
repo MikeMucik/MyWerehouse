@@ -31,18 +31,51 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			Assert.InRange(result.LastUpdated, DateTime.UtcNow.AddSeconds(-15), DateTime.UtcNow);
 		}
 		[Fact]
+		public async Task AddNewProductAndQuanatity_IncreaseInventoryQuantityAsync_AddNewRecord()
+		{
+			//Arrange
+			var productId = 99;
+			var quantity = 10;
+			//Act
+			await _inventoryRepo.IncreaseInventoryQuantityAsync(productId, quantity);
+			//Assert
+			var result = _context.Inventory.FirstOrDefault(i => i.ProductId == productId);
+			Assert.NotNull(result);
+			Assert.Equal(quantity, result.Quantity);
+			Assert.InRange(result.LastUpdated, DateTime.UtcNow.AddSeconds(-15), DateTime.UtcNow);
+		}
+		[Fact]
 		public void AddQuanatityToExistRecord_IncreaseInventoryQuantity_UpdateNewRecord()
 		{
 			//Arrange
 			var productId = 10;
 			var quantity = 10;
+			var before = DateTime.UtcNow;
 			//Act
 			_inventoryRepo.IncreaseInventoryQuantity(productId, quantity);
+			var after = DateTime.UtcNow;
 			//Assert
 			var result = _context.Inventory.FirstOrDefault(i => i.ProductId == productId);
 			Assert.NotNull(result);
 			Assert.Equal(quantity+10, result.Quantity);//+10 DbContextFactory													   
-			Assert.InRange(result.LastUpdated, DateTime.UtcNow.AddSeconds(-15), DateTime.UtcNow);
+			//Assert.InRange(result.LastUpdated, DateTime.UtcNow.AddSeconds(-15), DateTime.UtcNow);
+			Assert.InRange(result.LastUpdated, before, after);
+		}
+		[Fact]
+		public async Task AddQuanatityToExistRecord_IncreaseInventoryQuantityAsync_UpdateNewRecord()
+		{
+			//Arrange
+			var productId = 10;
+			var quantity = 10;
+			var before = DateTime.UtcNow;
+			//Act
+			await _inventoryRepo.IncreaseInventoryQuantityAsync(productId, quantity);
+			var after = DateTime.UtcNow;
+			//Assert
+			var result = _context.Inventory.FirstOrDefault(i => i.ProductId == productId);
+			Assert.NotNull(result);
+			Assert.Equal(quantity + 10, result.Quantity);//+10 DbContextFactory													   
+			Assert.InRange(result.LastUpdated, before, after);
 		}
 	}
 }

@@ -22,17 +22,47 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext.SaveChanges();
 			return product.Id;
 		}
-		public Product GetProductById(int id)
+		public async Task<int> AddProductAsync(Product product)
 		{
-			if (id > 0)
+			await _werehouseDbContext.Products.AddAsync(product);
+			await _werehouseDbContext.SaveChangesAsync();
+			return product.Id;
+		}
+		public void DeleteProductById(int id)
+		{
+			var result = _werehouseDbContext.Products.Find(id);
+			if (result != null)
 			{
-				var product = _werehouseDbContext.Products
-					.Include(p => p.Category)
-					.Include(p => p.Details)
-					.FirstOrDefault(p => p.Id == id);
-				return product;
+				_werehouseDbContext.Remove(result);
+				_werehouseDbContext.SaveChanges();
 			}
-			return null;
+		}
+		public async Task DeleteProductByIdAsync(int id)
+		{
+			var result = await _werehouseDbContext.Products.FindAsync(id);
+			if (result != null)
+			{
+				_werehouseDbContext.Remove(result);
+				await _werehouseDbContext.SaveChangesAsync();
+			}
+		}
+		public void SwitchOffProduct(int id)
+		{
+			var product = _werehouseDbContext.Products.Find(id);
+			if (product != null)
+			{
+				product.IsDeleted = true;
+				_werehouseDbContext.SaveChangesAsync();
+			}
+		}
+		public async Task SwitchOffProductAsync(int id)
+		{
+			var product = await _werehouseDbContext.Products.FindAsync(id);
+			if (product != null)
+			{
+				product.IsDeleted = true;
+				await _werehouseDbContext.SaveChangesAsync();
+			}
 		}
 		public void UpdateProduct(Product product)
 		{
@@ -53,92 +83,103 @@ namespace MyWerehouse.Infrastructure.Repositories
 			{
 				_werehouseDbContext.Entry(product).Property(nameof(product.CategoryId)).IsModified = true;
 			}
+			if (product.CartonsPerPallet != 0)
+			{
+				_werehouseDbContext.Entry(product).Property(nameof(product.CartonsPerPallet)).IsModified = true;
+			}
 			if (product.Details != null)
 			{
-				_werehouseDbContext.Entry(product.Details).State = EntityState.Modified;
-			}
-			_werehouseDbContext.SaveChanges();
+				_werehouseDbContext.Attach(product.Details);
 
-			//if (_werehouseDbContext.Products.FirstOrDefault(x => x.Id == product.Id) == null)
-			//{
-			//	return false;
-			//}
-			//if (product != null && _werehouseDbContext.Products.Find(product.Id) != null)
-			//{
-			//	_werehouseDbContext.Attach(product);
-			//	if (product.Name != null)
-			//	{
-			//		_werehouseDbContext.Entry(product).Property(nameof(product.Name)).IsModified = true;
-			//	}
-			//	if (product.SKU != null)
-			//	{
-			//		_werehouseDbContext.Entry(product).Property(nameof(product.SKU)).IsModified = true;
-			//	}
-			//	if (product.CategoryId != 0)
-			//	{
-			//		_werehouseDbContext.Entry(product).Property(nameof(product.CategoryId)).IsModified = true;
-			//	}
-			//	_werehouseDbContext.SaveChanges();
-			//	return true;
-			//}
-			//return false;
-			//if (product == null)
-			//{
-			//	return false;
-			//}
-			//var existingProduct = _werehouseDbContext.Products.Find(product.Id);
-			//if (existingProduct != null)
-			//{
-			//	if (product.Name != null)
-			//	{
-			//		existingProduct.Name = product.Name;
-			//	}
-			//	if (product.SKU != null)
-			//	{
-			//		existingProduct.SKU = product.SKU;
-			//	}
-			//	if (product.CategoryId != 0)
-			//	{
-			//		existingProduct.CategoryId = product.CategoryId;
-			//	}
-			//	if (product.Category != null)
-			//	{
-			//		existingProduct.Category = product.Category;
-			//	}
-			//	_werehouseDbContext.SaveChanges();
-			//	return true;
-			//}
-			//return false;
-		}
-		public void DeleteProductById(int id)
-		{
-			var result = _werehouseDbContext.Products.Find(id);
-			if (result != null)
-			{
-				_werehouseDbContext.Remove(result);
-				_werehouseDbContext.SaveChanges();
+				_werehouseDbContext.Entry(product.Details).Property(d => d.Height).IsModified = true;
+				_werehouseDbContext.Entry(product.Details).Property(d => d.Width).IsModified = true;
+				_werehouseDbContext.Entry(product.Details).Property(d => d.Length).IsModified = true;
+				_werehouseDbContext.Entry(product.Details).Property(d => d.Weight).IsModified = true;
+				_werehouseDbContext.Entry(product.Details).Property(d => d.Description).IsModified = true;
 			}
+			_werehouseDbContext.Entry(product).Property(nameof(Product.IsDeleted)).IsModified = true;
+			_werehouseDbContext.SaveChanges();
 		}
+		public async Task UpdateProductAsync(Product product)
+		{
+			_werehouseDbContext.Attach(product);
+			var productEntry = _werehouseDbContext.Entry(product);
+			if (product.Name != null)
+			{
+				productEntry.Property(p => p.Name).IsModified = true;
+			}
+			if (product.SKU != null)
+			{
+				productEntry.Property(p => p.SKU).IsModified = true;
+			}
+			if (product.Category != null)
+			{
+				productEntry.Property(p => p.Category).IsModified = true;
+			}
+			if (product.CategoryId != 0)
+			{
+				productEntry.Property(p => p.CategoryId).IsModified = true;
+			}
+			if (product.CartonsPerPallet != 0)
+			{
+				productEntry.Property(p => p.CartonsPerPallet).IsModified = true;
+			}
+			if (product.Details != null)
+			{
+				_werehouseDbContext.Attach(product.Details);
+				var detailsEntry = _werehouseDbContext.Entry(product.Details);
+				detailsEntry.Property(d => d.Height).IsModified = true;
+				detailsEntry.Property(d => d.Width).IsModified = true;
+				detailsEntry.Property(d => d.Length).IsModified = true;
+				detailsEntry.Property(d => d.Weight).IsModified = true;
+				detailsEntry.Property(d => d.Description).IsModified = true;
+			}
+			productEntry.Property(p => p.IsDeleted).IsModified = true;
+			await _werehouseDbContext.SaveChangesAsync();
+		}
+		public Product? GetProductById(int id)
+		{
+			if (id > 0)
+			{
+				var product = _werehouseDbContext.Products
+					.Include(p => p.Category)
+					.Include(p => p.Details)
+					.FirstOrDefault(p => p.Id == id);
+				return product;
+			}
+			return null;
+		}
+		public async Task<Product?> GetProductByIdAsync(int id)
+		{
+			if (id > 0)
+			{
+				var product = await _werehouseDbContext.Products
+					.Include(p => p.Category)
+					.Include(p => p.Details)
+					.FirstOrDefaultAsync(p => p.Id == id);
+				return product;
+			}
+			return null;
+		}		
 		public IQueryable<Product> GetAllProducts()
 		{
-			return _werehouseDbContext.Products.Where(p=>p.IsDeleted ==false);
-		}
-
+			return _werehouseDbContext.Products.Where(p => p.IsDeleted == false);
+		}		
 		public IQueryable<Product> FindProducts(ProductSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Products
 				.Where(p => p.IsDeleted == false)
 				.Include(p => p.Details)
 				.Include(p => p.Category)
-				.AsQueryable();			
+				.AsQueryable();
 			if (!string.IsNullOrEmpty(filter.ProductName))
 			{
 				result = result.Where(p => p.Name != null && p.Name.Contains(filter.ProductName, StringComparison.OrdinalIgnoreCase));
-			}			
+			}
 			if (!string.IsNullOrEmpty(filter.SKU))
 			{
 				result = result.Where(p => p.SKU != null && p.SKU.Contains(filter.SKU, StringComparison.OrdinalIgnoreCase));
-			}			
+			}
 			if (!string.IsNullOrEmpty(filter.Category))
 			{
 				result = result.Where(p => p.Category.Name != null && p.Category.Name.Contains(filter.Category, StringComparison.OrdinalIgnoreCase));
@@ -164,15 +205,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(p => p.Details.Length == filter.Length);
 			}
 			return result;
-		}
-		public void SwitchOffProduct(int id)
-		{
-			var product = _werehouseDbContext.Products.Find(id);
-			if (product != null)
-			{
-				product.IsDeleted = true;
-				_werehouseDbContext.SaveChanges();
-			}
-		}
+		}		
 	}
 }

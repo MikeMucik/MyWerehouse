@@ -10,6 +10,7 @@
 		public string PostalCode { get; set; }
 		public string StreetName { get; set; }
 		public string StreetNumber { get; set; }
+		public string AdditionalEmail { get; set; } //migracja
 		public int ClientId { get; set; }
 		public Client Clients { get; set; }
 

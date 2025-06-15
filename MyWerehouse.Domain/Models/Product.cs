@@ -9,6 +9,7 @@
 		public int CategoryId { get; set; }
 		public virtual Category Category { get; set; }
 		public bool IsDeleted { get; set; } = false;//migracja
+		public int CartonsPerPallet { get; set; } //migracja
 		public virtual ICollection<Receipt> ReceiptList { get; set; } = new List<Receipt>();
 		public virtual ICollection<Issue> IssueList { get; set; } = new List<Issue>();
 		public ProductDetails Details { get; set; }

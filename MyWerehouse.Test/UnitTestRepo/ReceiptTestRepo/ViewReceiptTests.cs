@@ -33,6 +33,18 @@ namespace MyWerehouse.Test.UnitTestRepo.ReceiptTestRepo
 			Assert.Equal(10, result.ClientId);
 		}
 		[Fact]
+		public async Task ShowReceiptById_GetReceiptByIdAsync_ReturnList()
+		{
+			//Arrange
+			var id = 1;
+			//Act
+			var result =await _receiptRepo.GetReceiptByIdAsync(id);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(id, result.Id);
+			Assert.Equal(10, result.ClientId);
+		}
+		[Fact]
 		public void ShowListReceiptsByClient_GetIssuesByFilter_ReturnList()
 		{
 			//Arrange

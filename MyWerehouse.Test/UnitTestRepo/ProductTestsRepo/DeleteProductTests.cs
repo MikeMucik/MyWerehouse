@@ -32,6 +32,21 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 			
 		}
 		[Fact]
+		public async Task RemoveProduct_DeleteProductAsync_ShouldRemoveFromCollection()
+		{
+			//Arrange
+			var product = new Product
+			{
+				Id = 11
+			};
+			//Act
+			await _productRepo.DeleteProductByIdAsync(product.Id);
+			//Assert
+			var productDeleted = _context.Products.Find(product.Id);
+			Assert.Null(productDeleted);
+
+		}
+		[Fact]
 		public void SwithOffProduct_SwithOffProduct_ShouldHideProduct()
 		{
 			//Arrange
@@ -44,6 +59,20 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 			//Assert
 			var productDeleted = _context.Products.Find(product.Id);			
 			Assert.True(productDeleted.IsDeleted);			
+		}
+		[Fact]
+		public async Task SwithOffProduct_SwithOffProductAsync_ShouldHideProduct()
+		{
+			//Arrange
+			var product = new Product
+			{
+				Id = 11
+			};
+			//Act
+			await _productRepo.SwitchOffProductAsync(product.Id);
+			//Assert
+			var productDeleted = _context.Products.Find(product.Id);
+			Assert.True(productDeleted.IsDeleted);
 		}
 	}
 }

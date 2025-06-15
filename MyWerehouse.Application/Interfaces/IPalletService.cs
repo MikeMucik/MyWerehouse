@@ -8,5 +8,6 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IPalletService
 	{
+		//int AddPallet()
 	}
 }

@@ -29,6 +29,19 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			Assert.Equal(quantity, result.Quantity);
 		}
 		[Fact]
+		public async Task ChangeQuantityInRecord_UpdateInventoryAsync_UpdateQuantity()
+		{
+			//Arrange
+			var productId = 10;
+			var quantity = 8;
+			//Act
+			await _inventoryRepo.UpdateInventoryAsync(productId, quantity);
+			//Assert
+			var result = _context.Inventory.FirstOrDefault(p => p.ProductId == productId);
+			Assert.NotNull(result);
+			Assert.Equal(quantity, result.Quantity);
+		}
+		[Fact]
 		public void ChangeQuantityInNotExistingRecord_UpdateInventory_ThrowException()
 		{
 			//Arrange
@@ -36,6 +49,16 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var quantity = 8;
 			//Act&Assert
 			var ex = Assert.Throws<InvalidOperationException>(() => _inventoryRepo.UpdateInventory(productId, quantity));
+			Assert.Equal("Nie znaleziono towaru do zaktualizowania", ex.Message);
+		}
+		[Fact]
+		public async Task ChangeQuantityInNotExistingRecord_UpdateInventoryAsync_ThrowException()
+		{
+			//Arrange
+			var productId = 190;
+			var quantity = 8;
+			//Act&Assert
+			var ex =await Assert.ThrowsAsync<InvalidOperationException>(async() => await _inventoryRepo.UpdateInventoryAsync(productId, quantity));
 			Assert.Equal("Nie znaleziono towaru do zaktualizowania", ex.Message);
 		}
 		[Fact]
@@ -50,6 +73,17 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			Assert.True(result);
 		}
 		[Fact]
+		public async Task CheckStockEnough_HasStockAsync_ReturnTrue()
+		{
+			//Arrange
+			var productId = 10;
+			var quantity = 8;
+			//Act
+			var result =await _inventoryRepo.HasStockAsync(productId, quantity);
+			//Assert
+			Assert.True(result);
+		}
+		[Fact]
 		public void CheckStockNotEnough_HasStock_ReturnFalse()
 		{
 			//Arrange
@@ -57,6 +91,17 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var quantity = 80;
 			//Act
 			var result = _inventoryRepo.HasStock(productId, quantity);
+			//Assert
+			Assert.False(result);
+		}
+		[Fact]
+		public async Task CheckStockNotEnough_HasStockAsync_ReturnFalse()
+		{
+			//Arrange
+			var productId = 10;
+			var quantity = 80;
+			//Act
+			var result =await _inventoryRepo.HasStockAsync(productId, quantity);
 			//Assert
 			Assert.False(result);
 		}

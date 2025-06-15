@@ -26,5 +26,16 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			var result = _context.Pallets.Find(numberOfPallet);
 			Assert.Null(result);
 		}
+		[Fact]
+		public async Task RemovePallet_DeletePalletByIdAsync_RemoveFromList()
+		{
+			//Arrange
+			var numberOfPallet = "Q1000";
+			//Act
+			await _palletRepo.DeletePalletAsync(numberOfPallet);
+			//Assert
+			var result = _context.Pallets.Find(numberOfPallet);
+			Assert.Null(result);
+		}
 	}
 }

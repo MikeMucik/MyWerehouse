@@ -25,8 +25,8 @@ namespace MyWerehouse.Test.UnitTestRepo.IssueTestsRepo
 			//Arrange
 			var updatingIssue = new Issue
 			{
-				Id = 10,
-				ClientId = 1,
+				Id = 222,
+				ClientId = 2,
 				IssueDateTime = new DateTime(2025, 4, 4),
 				PerformedBy = "U0099",
 				Pallets =new List<Pallet>{
@@ -39,8 +39,8 @@ namespace MyWerehouse.Test.UnitTestRepo.IssueTestsRepo
 			//Act
 			var updatedIssue = new Issue
 			{
-				Id = 10,
-				ClientId = 1,
+				Id = 222,
+				ClientId = 2,
 				IssueDateTime = new DateTime(2026, 3, 3),
 				PerformedBy = "U0098",
 				Pallets = new List<Pallet>{
@@ -62,6 +62,51 @@ namespace MyWerehouse.Test.UnitTestRepo.IssueTestsRepo
 				Assert.NotNull(result);
 				Assert.Equal(updatedIssue.PerformedBy, result.PerformedBy);
 				Assert.Equal(updatedIssue.IssueDateTime, result.IssueDateTime);				
+			}
+		}
+		[Fact]
+		public async Task UpdateIssueData_UpdateIssueAsync_ChangeData()
+		{
+			//Arrange
+			var updatingIssue = new Issue
+			{
+				Id = 1110,
+				ClientId = 11,
+				IssueDateTime = new DateTime(2025, 4, 4),
+				PerformedBy = "U0099",
+				Pallets = new List<Pallet>{
+					new Pallet { Id = "0999" }, new Pallet {Id = "0998"}
+				}
+			};
+			using var arrangeContext = new WerehouseDbContext(_contextOptions);
+			arrangeContext.Issues.Add(updatingIssue);
+			arrangeContext.SaveChanges();
+			//Act
+			var updatedIssue = new Issue
+			{
+				Id = 1110,
+				ClientId = 11,
+				IssueDateTime = new DateTime(2026, 3, 3),
+				PerformedBy = "U0098",
+				Pallets = new List<Pallet>{
+					new Pallet { Id = "0999" },
+					new Pallet {Id = "0998"},
+					new Pallet{Id ="0997"}
+				}
+			};
+			using (var actContext = new WerehouseDbContext(_contextOptions))
+			{
+				var repo = new IssueRepo(actContext);
+				await repo.UpdateIssueAsync(updatedIssue);
+			}
+			//Assert
+			using (var assertContext = new WerehouseDbContext(_contextOptions))
+			{
+				var result = assertContext.Issues.FirstOrDefault(x => x.Id == updatingIssue.Id);
+
+				Assert.NotNull(result);
+				Assert.Equal(updatedIssue.PerformedBy, result.PerformedBy);
+				Assert.Equal(updatedIssue.IssueDateTime, result.IssueDateTime);
 			}
 		}
 	}

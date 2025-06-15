@@ -33,15 +33,38 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 			Assert.Equal(2, result.Addresses.Count);			
 		}
 		[Fact]
-		public void NotProperId_GetClientById_ReturnDataswithAddress()
+		public async Task ProperId_GetClientByIdAsync_ReturnDataswithAddress()
+		{
+			//Arrange
+			var id = 10;
+			//Act
+			var result =await _clientRepo.GetClientByIdAsync(id);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(id, result.Id);
+			Assert.Equal("ClientTest", result.Name);
+			Assert.Equal("FullNameTestAddress", result.FullName);
+			Assert.Equal(2, result.Addresses.Count);
+		}
+		[Fact]
+		public void NotProperId_GetClientById_NoReturnData()
 		{
 			//Arrange
 			var id = -1;
 			//Act
 			var result = _clientRepo.GetClientById(id);
 			//Assert
-			Assert.Equal(null, result);
-			//Assert.Equal("FullNameTestAddress1", result.Address.First(1). FullName);
+			Assert.Null(result);			
+		}
+		[Fact]
+		public async Task NotProperId_GetClientByIdAsync_NoReturnData()
+		{
+			//Arrange
+			var id = -1;
+			//Act
+			var result =await _clientRepo.GetClientByIdAsync(id);
+			//Assert
+			Assert.Null(result);
 		}
 		[Fact]
 		public void ShowAllClient_GetAllClient_ReturnList()
@@ -51,7 +74,7 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 			var result = _clientRepo.GetAllClients();
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Count());
+			Assert.Equal(3, result.Count());
 		}
 		[Fact]
 		public void ShowClientsByPropertyAdressFullName_GetClients_ReturnList()

@@ -11,6 +11,8 @@
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
     <PackageReference Include="FluentAssertions" Version="8.2.0" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="Moq.EntityFrameworkCore" Version="9.0.0.1" />
@@ -33,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ValidationTest\" />
     <Folder Include="UnitTestService\" />
   </ItemGroup>
 

@@ -13,5 +13,7 @@ namespace MyWerehouse.Domain.Models
 		Damaged = 2,
 		OnHold = 3,
 		Loaded = 4,
+		ToPicking = 5,
+		Archived = 6,
 	}
 }

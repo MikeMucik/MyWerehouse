@@ -27,5 +27,16 @@ namespace MyWerehouse.Test.UnitTestRepo.ReceiptTestRepo
 			var receipt = _context.Issues.Find(id);
 			Assert.Null(receipt);
 		}
+		[Fact]
+		public async Task RemoveReceipt_DeleteReceiptAsync_RemoveRecordFromList()
+		{
+			//Arrange
+			var id = 1;
+			//Act
+			await _receiptRepo.DeleteReceiptAsync(id);
+			//Assert
+			var receipt = _context.Issues.Find(id);
+			Assert.Null(receipt);
+		}
 	}
 }

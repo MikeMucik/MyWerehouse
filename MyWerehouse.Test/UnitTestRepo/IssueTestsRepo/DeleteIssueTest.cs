@@ -28,5 +28,16 @@ namespace MyWerehouse.Test.UnitTestRepo.IssueTestsRepo
 			var issue = _context.Issues.Find(2);
 			Assert.Null(issue);
 		}
+		[Fact]
+		public async Task RemoveIssue_DeleteIssueAsync_RemoveFromList()
+		{
+			//Arrange
+			var id = 2;
+			//Act
+			await _issueRepo.DeleteIssueAsync(id);
+			//Assert
+			var issue = _context.Issues.Find(2);
+			Assert.Null(issue);
+		}
 	}
 }

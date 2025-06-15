@@ -27,14 +27,29 @@ namespace MyWerehouse.Test.UnitTestRepo.CategoryTestsRepo
 		{
 			//Arrange
 			var newCategory = new Category
-			{
-				//Id = 20,
+			{				
 				Name = "CategoryName"
 			};
 			//Act
 			_categoryRepo.AddCategory(newCategory);
 			//Assert
 			var result = _context.Categories.Find(newCategory.Id);
+			Assert.NotNull(result);
+			Assert.Equal(newCategory.Name, result.Name);
+		}
+		[Fact]
+		public async Task AddCategory_AddCategoryAsync_ShouldAddToList()
+		{
+			//Arrange
+			var newCategory = new Category
+			{				
+				Name = "CategoryName"
+			};
+			//Act
+			await _categoryRepo.AddCategoryAsync(newCategory);
+			//Assert
+			var result = _context.Categories.Find(newCategory.Id);
+			Assert.NotNull(result);
 			Assert.Equal(newCategory.Name, result.Name);
 		}
 		[Fact]
@@ -49,6 +64,17 @@ namespace MyWerehouse.Test.UnitTestRepo.CategoryTestsRepo
 			Assert.Null(result);
 		}
 		[Fact]
+		public async Task DeleteCategory_DeleteCategoryAsync_ShouldRemoveFromList()
+		{
+			//Arrange
+			var idCategory = 20;
+			//Act
+			await _categoryRepo.DeleteCategoryAsync(idCategory);
+			//Assert
+			var result = _context.Categories.Find(idCategory);
+			Assert.Null(result);
+		}
+		[Fact]
 		public void SwithOffCategory_SwithOffCategory_ShouldHideFromList()
 		{
 			//Arrange
@@ -57,18 +83,31 @@ namespace MyWerehouse.Test.UnitTestRepo.CategoryTestsRepo
 			_categoryRepo.SwitchOffCategory(idCategory);
 			//Assert
 			var result = _context.Categories.Find(idCategory);
+			Assert.NotNull(result);
+			Assert.True(result.IsDeleted);
+		}
+		[Fact]
+		public async Task SwithOffCategory_SwithOffCategoryAsync_ShouldHideFromList()
+		{
+			//Arrange
+			var idCategory = 1;
+			//Act
+			await _categoryRepo.SwitchOffCategoryAsync(idCategory);
+			//Assert
+			var result = _context.Categories.Find(idCategory);
+			Assert.NotNull(result);
 			Assert.True(result.IsDeleted);
 		}
 		[Fact]
 		public void UpdateCategoryName_UpdateCategory_ChangeName()
 		{
 			//Arrange			
-			var updatingCategory = new Category { Id = 22, Name = "ToUpdateCategory" };
+			var updatingCategory = new Category { Id = 122, Name = "ToUpdateCategory" };
 			using var arrangeContext = new WerehouseDbContext(_contextOptions);
 			arrangeContext.Categories.Add(updatingCategory);
 			arrangeContext.SaveChanges();
 			//Act
-			var updatedCategory = new Category { Id = 22, Name = "NewCategoryName" };
+			var updatedCategory = new Category { Id = 122, Name = "NewCategoryName" };
 			using (var actContext = new WerehouseDbContext(_contextOptions))
 			{
 				var repo = new CategoryRepo(actContext);
@@ -82,6 +121,28 @@ namespace MyWerehouse.Test.UnitTestRepo.CategoryTestsRepo
 				Assert.Equal(updatedCategory.Name, result.Name);
 			}
 		}
-
+		[Fact]
+		public async Task UpdateCategoryName_UpdateCategoryAsync_ChangeName()
+		{
+			//Arrange			
+			var updatingCategory = new Category { Id = 22, Name = "ToUpdateCategory" };
+			using var arrangeContext = new WerehouseDbContext(_contextOptions);
+			arrangeContext.Categories.Add(updatingCategory);
+			arrangeContext.SaveChanges();
+			//Act
+			var updatedCategory = new Category { Id = 22, Name = "NewCategoryName" };
+			using (var actContext = new WerehouseDbContext(_contextOptions))
+			{
+				var repo = new CategoryRepo(actContext);
+				await repo.UpdateCategoryAsync(updatedCategory);
+			}
+			//Assert
+			using (var assertContext = new WerehouseDbContext(_contextOptions))
+			{
+				var result = assertContext.Categories.Find(updatingCategory.Id);
+				Assert.NotNull(result);
+				Assert.Equal(updatedCategory.Name, result.Name);
+			}
+		}
 	}
 }

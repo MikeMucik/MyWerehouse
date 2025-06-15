@@ -9,7 +9,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 	public class DeleteProductIntegrationTests : ProductIntegrationCommand
 	{
 		[Fact]
-		public void HideProduct_DeleteProduct_ChangeNotActice()
+		public void HideProduct_DeleteProduct_ChangeNotActive()
 		{
 			//Arrange
 			var productId = 10;
@@ -21,7 +21,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 			Assert.True(product.IsDeleted);
 		}
 		[Fact]
-		public void RemoveProduct_DeleteProduct_ChangeNotActice()
+		public void RemoveProduct_DeleteProduct_DeleteFromList()
 		{
 			//Arrange
 			var productId = 989;
@@ -30,6 +30,16 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 			//Assert
 			var product = _context.Products.FirstOrDefault(p => p.Id == productId);
 			Assert.Null(product);
+		}
+		[Fact]
+		public void RemoveNotProperIdProduct_DeleteProduct_ThrowException()
+		{
+			//Arrange
+			var productId = 9891;
+			//Act&Assert
+			var e = Assert.Throws<InvalidDataException>(() => _productService.DeleteProduct(productId));
+			Assert.NotNull(e);
+			Assert.Contains("Brak produktu o tym numerze", e.Message);
 		}
 	}
 }

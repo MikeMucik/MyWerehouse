@@ -44,6 +44,27 @@ namespace MyWerehouse.Test.UnitTestRepo.LocationTestsRepo
 			Assert.Equal(location.Position, result.Position);
 		}
 		[Fact]
+		public async Task AddNewLocation_AddLocationAsync_AddedLoaction()
+		{
+			//Arrange
+			var location = new Location
+			{
+				Aisle = 10,
+				Bay = 20,
+				Height = 6,
+				Position = 10
+			};
+			//Act
+			await _locationRepo.AddLocationAsync(location);
+			//Arrange
+			var result = _context.Locations
+				.FirstOrDefault(l => l.Aisle == 10);
+			Assert.NotNull(result);
+			Assert.Equal(location.Bay, result.Bay);
+			Assert.Equal(location.Height, result.Height);
+			Assert.Equal(location.Position, result.Position);
+		}
+		[Fact]
 		public void Removeloaction_DeleteLocation_RemoveFromList()
 		{
 			//Arrange
@@ -52,6 +73,17 @@ namespace MyWerehouse.Test.UnitTestRepo.LocationTestsRepo
 			_locationRepo.DeleteLocation(locationId);
 			//Assert
 			var result = _context.Locations .Find(locationId);
+			Assert.Null(result);
+		}
+		[Fact]
+		public async Task Removeloaction_DeleteLocationAsync_RemoveFromList()
+		{
+			//Arrange
+			var locationId = 1;
+			//Act
+			await _locationRepo.DeleteLocationAsync(locationId);
+			//Assert
+			var result = _context.Locations.Find(locationId);
 			Assert.Null(result);
 		}
 		[Fact]
@@ -93,6 +125,47 @@ namespace MyWerehouse.Test.UnitTestRepo.LocationTestsRepo
 				Assert.Equal(updatedLocation.Height, result.Height);
 				Assert.Equal(updatedLocation.Position, result.Position);
 				
+			}
+		}
+		[Fact]
+		public void UpdateLoaction_UpdateLocationAsync_ChangeProperties()
+		{
+			//Arrange
+			var updatingLocation = new Location
+			{
+				Id = 101,
+				Aisle = 100,
+				Bay = 100,
+				Height = 1,
+				Position = 1,
+			};
+			using var arrangeContext = new WerehouseDbContext(_contextOptions);
+			arrangeContext.Locations.Add(updatingLocation);
+			arrangeContext.SaveChanges();
+			//Act
+			var updatedLocation = new Location
+			{
+				Id = 101,
+				Aisle = 101,
+				Bay = 101,
+				Height = 5,
+				Position = 5,
+			};
+			using (var actContext = new WerehouseDbContext(_contextOptions))
+			{
+				var repo = new LocationRepo(actContext);
+				repo.UpdateLocation(updatedLocation);
+			}
+			//Assert
+			using (var assertContext = new WerehouseDbContext(_contextOptions))
+			{
+				var result = assertContext.Locations.Find(updatingLocation.Id);
+				Assert.NotNull(result);
+				Assert.Equal(updatedLocation.Aisle, result.Aisle);
+				Assert.Equal(updatedLocation.Bay, result.Bay);
+				Assert.Equal(updatedLocation.Height, result.Height);
+				Assert.Equal(updatedLocation.Position, result.Position);
+
 			}
 		}
 	}

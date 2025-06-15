@@ -24,7 +24,29 @@ namespace MyWerehouse.Test.UnitTestRepo.CategoryTestsRepo
 			var result = _categoryRepo.GetAllCategories();
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Count());
+			Assert.Equal(3, result.Count());
+		}
+		[Fact]
+		public void ShowOneCategory_GetAllCategories_Return()
+		{
+			//Arrange
+			var id = 1;
+			//Arrang&Act
+			var result = _categoryRepo.GetCategoryById(id);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal("TestCategory", result.Name);
+		}
+		[Fact]
+		public void ShowOneCategoryName_GetAllCategories_Return()
+		{
+			//Arrange
+			var name = "TestCategory";
+			//Arrang&Act
+			var result = _categoryRepo.GetCategoryByName(name);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(1, result.Id);
 		}
 	}
 }

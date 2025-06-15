@@ -32,7 +32,8 @@ namespace MyWerehouse.Test.Common
 			{
 				context.Clients.AddRange(
 					new Client { Id = 10, Name = "ClientTest", Email = "client@op.pl", Description = "ClientDescription", FullName = "FullNameTestAddress" },
-					new Client { Id = 11, Name = "ClientTest1", Email = "client1@op.pl", Description = "ClientDescription1", FullName = "FullNameTestAddress1" }
+					new Client { Id = 11, Name = "ClientTest1", Email = "client1@op.pl", Description = "ClientDescription1", FullName = "FullNameTestAddress1" },
+					new Client { Id = 989, Name = "ClientTest2", Email = "client2@op.pl", Description = "ClientDescription2", FullName = "FullNameTestAddress2" }
 				);
 			}
 
@@ -47,8 +48,9 @@ namespace MyWerehouse.Test.Common
 			if (!context.Categories.Any())
 			{
 				context.Categories.AddRange(
-					new Category { Id = 1, Name = "TestCategory" },
-					new Category { Id = 2, Name = "TestCategory1" }
+					new Category { Id = 1, Name = "TestCategory", IsDeleted = false },
+					new Category { Id = 2, Name = "TestCategory1" },
+					new Category { Id = 3, Name = "ToDeleted"}
 				);
 			}
 
@@ -69,9 +71,9 @@ namespace MyWerehouse.Test.Common
 			if (!context.Products.Any())
 			{
 				context.Products.AddRange(
-					new Product { Id = 10, Name = "Test", SKU = "0987654321", CategoryId = 1, IsDeleted = false },
-					new Product { Id = 11, Name = "TestD", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false },
-					new Product { Id = 989, Name = "NotAdded", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false }
+					new Product { Id = 10, Name = "Test", SKU = "0987654321", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 56, },
+					new Product { Id = 11, Name = "TestD", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 44, },
+					new Product { Id = 989, Name = "NotAdded", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 112, }
 				);
 			}
 
@@ -189,7 +191,7 @@ namespace MyWerehouse.Test.Common
 					{
 						Id = 1,
 						ProductId = 10,
-						Quantity = 10,
+						Quantity = 50,
 						BestBefore = new DateOnly(2026, 2, 2),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1000"

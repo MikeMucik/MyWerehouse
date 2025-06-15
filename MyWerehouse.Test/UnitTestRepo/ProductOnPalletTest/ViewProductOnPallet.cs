@@ -51,7 +51,19 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductOnPalletTest
 			//Act
 			var result = _productOnPalletRepo.GetQuantity(palletId, productId);
 			//Assert
-			Assert.NotNull(result);
+			Assert.NotEqual(0,result);
+			Assert.Equal(100, result);
+		}
+		[Fact]
+		public async Task ShowQuantityOfProductOnPallet_GetQuantityAsync_ReturnData()
+		{
+			//Arrange
+			var palletId = "Q1001";
+			var productId = 10;
+			//Act
+			var result = await _productOnPalletRepo.GetQuantityAsync(palletId, productId);
+			//Assert
+			Assert.NotEqual(0,result);
 			Assert.Equal(100, result);
 		}
 		[Fact]
@@ -62,7 +74,17 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductOnPalletTest
 			var productId = 1023;
 			//Act&Assert
 			var ex = Assert.Throws<InvalidOperationException>(() => _productOnPalletRepo.GetQuantity(palletId, productId));
-			Assert.Equal("Nie ma produktu na palecie",ex.Message);			
+			Assert.Equal("Nie ma produktu na palecie", ex.Message);
+		}
+		[Fact]
+		public async Task ShowQuantityOfProductNotExistOnPallet_GetQuantityAsync_ReturnException()
+		{
+			//Arrange
+			var palletId = "Q1001";
+			var productId = 1023;
+			//Act&Assert
+			var ex =await Assert.ThrowsAsync<InvalidOperationException>(async () => await _productOnPalletRepo.GetQuantityAsync(palletId, productId));
+			Assert.Equal("Nie ma produktu na palecie", ex.Message);
 		}
 	}
 }

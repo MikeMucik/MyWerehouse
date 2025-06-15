@@ -1,8 +1,11 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MyWerehouse.Application;
+using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Infrastructure;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,8 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddValidatorsFromAssemblyContaining<AddressDTOValidation>();
 
 //builder.Services.AddSwaggerGen();
 var app = builder.Build();

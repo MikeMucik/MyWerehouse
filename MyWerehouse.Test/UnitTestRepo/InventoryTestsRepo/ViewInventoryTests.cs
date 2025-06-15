@@ -30,6 +30,26 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			Assert.Equal(10, result.Quantity); //DbContextFactory Q=10
 		}
 		[Fact]
+		public async Task ShowDataByProductId_GetInventoryForProductAsync_ReturnInfoOfQuantity()
+		{
+			//Arrange
+			var productId = 10;
+			//Act
+			var result =await _inventoryRepo.GetInventoryForProductAsync(productId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(productId, result.ProductId);
+			Assert.Equal(10, result.Quantity); //DbContextFactory Q=10
+			Assert.Equal(1, result.Locations.Count);//zostawiam tak bo może zwiększymy ilośc lokalizacji 
+
+			Assert.True(result.Locations.Any(), "Brak lokalizacji");
+			Assert.Equal(1, result.Locations.First().Id);
+
+			var location = result.Locations.FirstOrDefault(l => l.Id == 1);
+			Assert.NotNull(location);
+			Assert.Equal(2, location.Bay);
+		}
+		[Fact]
 		public void ShowAllData_GetAllInventory_ReturnListOfInventory()
 		{
 			//Arrange&Act
@@ -37,8 +57,7 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());
-			Assert.Equal(10, result.FirstOrDefault(p=>p.ProductId == 10).Quantity);
-			//DbContext Factory ProductId = 10 & Q = 10 
+			Assert.Equal(10, result.FirstOrDefault(p=>p.ProductId == 10).Quantity);			
 		}
 	}
 }

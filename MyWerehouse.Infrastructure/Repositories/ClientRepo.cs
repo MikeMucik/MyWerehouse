@@ -24,6 +24,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext.SaveChanges();
 			return client.Id;
 		}
+		public async Task<int> AddClientAsync(Client client)
+		{
+			await _werehouseDbContext.Clients.AddAsync(client);
+			await _werehouseDbContext.SaveChangesAsync();
+			return client.Id;
+		}
 		public void DeleteClientById(int id)
 		{
 			var client = _werehouseDbContext.Clients.Find(id);
@@ -31,6 +37,15 @@ namespace MyWerehouse.Infrastructure.Repositories
 			{
 				_werehouseDbContext.Remove(client);
 				_werehouseDbContext.SaveChanges();
+			}
+		}
+		public async Task DeleteClientByIdAsync(int id)
+		{
+			var client = await _werehouseDbContext.Clients.FindAsync(id);
+			if (client != null)
+			{
+				_werehouseDbContext.Remove(client);
+				await _werehouseDbContext.SaveChangesAsync();
 			}
 		}
 		public void SwitchOffClient(int id)
@@ -42,13 +57,16 @@ namespace MyWerehouse.Infrastructure.Repositories
 				_werehouseDbContext.SaveChanges();
 			}
 		}
-
-		public IQueryable<Client> GetAllClients()
+		public async Task SwitchOffClientAsync(int id)
 		{
-			return _werehouseDbContext.Clients.Where(p => p.IsDeleted == false);
+			var client = await _werehouseDbContext.Clients.FindAsync(id);
+			if (client != null)
+			{
+				client.IsDeleted = true;
+				await _werehouseDbContext.SaveChangesAsync();
+			}
 		}
-
-		public Client GetClientById(int id)
+		public Client? GetClientById(int id)
 		{
 			if (id > 0)
 			{
@@ -56,15 +74,137 @@ namespace MyWerehouse.Infrastructure.Repositories
 						.Include(c => c.Addresses)
 						.Include(c => c.Issues)
 						.Include(c => c.Receipts)
-						.FirstOrDefault(c => c.Id == id);
-				if (client.IsDeleted == false)
+						.SingleOrDefault(c => c.Id == id);
+				if (client != null)
 				{
-					return client;
+					if (client.IsDeleted == false)
+					{
+						return client;
+					}
 				}
 			}
 			return null;
 		}
-
+		public async Task<Client?> GetClientByIdAsync(int id)
+		{
+			if (id > 0)
+			{
+				var client = await _werehouseDbContext.Clients
+						.Include(c => c.Addresses)
+						.Include(c => c.Issues)
+						.Include(c => c.Receipts)
+						.SingleOrDefaultAsync(c => c.Id == id);
+				if (client != null)
+				{
+					if (client.IsDeleted == false)
+					{
+						return client;
+					}
+				}
+			}
+			return null;
+		}
+		public void UpdateClient(Client client)
+		{
+			_werehouseDbContext.Attach(client);
+			if (client.Name != null)
+			{
+				_werehouseDbContext.Entry(client).Property(nameof(client.Name)).IsModified = true;
+			}
+			if (client.Email != null)
+			{
+				_werehouseDbContext.Entry(client).Property(nameof(client.Email)).IsModified = true;
+			}
+			if (client.Description != null)
+			{
+				_werehouseDbContext.Entry(client).Property(nameof(client.Description)).IsModified = true;
+			}
+			var existingAddress = _werehouseDbContext.Addresses
+				.Where(ca => ca.ClientId == client.Id)
+				.ToList();
+			foreach (var address in existingAddress)
+			{
+				if (!client.Addresses.Any(i => i.Id == address.Id))
+				{
+					_werehouseDbContext.Addresses.Remove(address);
+				}
+			}
+			if (client.Addresses != null)
+			{
+				foreach (var address in client.Addresses)
+				{
+					var existing = existingAddress.First(a => a.Id == address.Id);
+					if (existing ==null)
+					{
+						address.ClientId = client.Id;
+						_werehouseDbContext.Addresses.Add(address);
+					}
+					else
+					{
+						existing.Country = address.Country;
+						existing.City = address.City;
+						existing.Region = address.Region;
+						existing.Phone = address.Phone;
+						existing.PostalCode = address.PostalCode;
+						existing.StreetName = address.StreetName;
+						existing.StreetNumber = address.StreetNumber;
+						_werehouseDbContext.Entry(existing).State = EntityState.Modified;
+					}
+				}
+			}
+			_werehouseDbContext.SaveChanges();
+		}
+		public async Task UpdateClientAsync(Client client)
+		{			
+			_werehouseDbContext.Attach(client);
+			var clientEntry = _werehouseDbContext.Entry(client);
+			if (client.Name != null)
+			{
+				clientEntry.Property(c => c.Name).IsModified = true;
+			}
+			if (client.Email != null)
+			{
+				clientEntry.Property(c => c.Email).IsModified = true;
+			}
+			if (client.Description != null)
+			{
+				clientEntry.Property(c => c.Description).IsModified = true;
+			}
+			var existingAddress = _werehouseDbContext.Addresses
+				.Where(ca => ca.ClientId == client.Id)
+				.ToList();
+			foreach (var address in existingAddress)
+			{
+				if (!client.Addresses.Any(i => i.Id == address.Id))
+				{
+					_werehouseDbContext.Addresses.Remove(address);
+				}
+			}
+			if (client.Addresses != null)
+			{
+				foreach (var address in client.Addresses)
+				{
+					var existing = existingAddress.FirstOrDefault(a => a.Id == address.Id);
+					if (existing == null)
+					{
+						address.ClientId = client.Id;
+						_werehouseDbContext.Addresses.Add(address);
+					}
+					else
+					{
+						if (existing.Country != address.Country) existing.Country = address.Country;
+						if (existing.City != address.City) existing.City = address.City;
+						if (existing.Region != address.Region) existing.Region = address.Region;
+						if (existing.Phone != address.Phone) existing.Phone = address.Phone;
+						if (existing.PostalCode != address.PostalCode) existing.PostalCode = address.PostalCode;
+						if (existing.StreetName != address.StreetName) existing.StreetName = address.StreetName;
+						if (existing.StreetNumber != address.StreetNumber) existing.StreetNumber = address.StreetNumber;
+						_werehouseDbContext.Entry(existing).State = EntityState.Modified;
+					}
+				}
+			}
+			await _werehouseDbContext.SaveChangesAsync();
+		}
 		public IQueryable<Client> GetClients(ClientSearchFilter clientFilter)
 		{
 			var result = _werehouseDbContext.Clients
@@ -128,56 +268,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			// wyszukiwanie po składowych adresu
 			return result;
 		}
-
-		public void UpdateClient(Client client)
+		public IQueryable<Client> GetAllClients()
 		{
-			_werehouseDbContext.Attach(client);
-			if (client.Name != null)
-			{
-				_werehouseDbContext.Entry(client).Property(nameof(client.Name)).IsModified = true;
-			}
-			if (client.Email != null)
-			{
-				_werehouseDbContext.Entry(client).Property(nameof(client.Email)).IsModified = true;
-			}
-			if (client.Description != null)
-			{
-				_werehouseDbContext.Entry(client).Property(nameof(client.Description)).IsModified = true;
-			}
-			var existingAddress = _werehouseDbContext.Addresses
-				.Where(ca => ca.ClientId == client.Id)
-				.ToList();
-			foreach (var address in existingAddress)
-			{
-				if (!client.Addresses.Any(i => i.Id == address.Id))
-				{
-					_werehouseDbContext.Addresses.Remove(address);
-				}
-			}
-			if (client.Addresses != null)
-			{
-				foreach (var address in client.Addresses)
-				{
-					if (!existingAddress.Any(i => i.Id == address.Id))
-					{
-						address.ClientId = client.Id;
-						_werehouseDbContext.Addresses.Add(address);
-					}
-					else
-					{
-						var existing = existingAddress.First(a => a.Id == address.Id);						
-						existing.Country = address.Country;
-						existing.City = address.City;
-						existing.Region = address.Region;
-						existing.Phone = address.Phone;
-						existing.PostalCode = address.PostalCode;
-						existing.StreetName = address.StreetName;
-						existing.StreetNumber = address.StreetNumber;
-						_werehouseDbContext.Entry(existing).State = EntityState.Modified;
-					}
-				}
-			}
-			_werehouseDbContext.SaveChanges();
+			return _werehouseDbContext.Clients.Where(p => p.IsDeleted == false);
 		}
 	}
 }

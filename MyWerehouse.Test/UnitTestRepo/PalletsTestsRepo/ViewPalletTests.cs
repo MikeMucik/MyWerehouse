@@ -19,7 +19,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			_palletRepo = new PalletRepo(_context);
 		}
 		[Fact]
-		public void GetPalletById_GetPalletById_ReturnSimplyData()
+		public void GetPallet_GetPalletById_ReturnSimplyData()
 		{
 			//Arrange
 			var paletId = "Q1000";
@@ -27,7 +27,20 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			var result = _palletRepo.GetPalletById(paletId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(PalletStatus.Available, result.Status);
+			Assert.Equal(PalletStatus.Available, result.Status);//DbCOntextFactory
+			Assert.Equal(1, result.LocationId);
+			Assert.Equal(1, result.ReceiptId);
+		}
+		[Fact]
+		public async Task GetPallet_GetPalletByIdAsync_ReturnSimplyData()
+		{
+			//Arrange
+			var paletId = "Q1000";
+			//Act
+			var result =await _palletRepo.GetPalletByIdAsync(paletId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(PalletStatus.Available, result.Status);//DbCOntextFactory
 			Assert.Equal(1, result.LocationId);
 			Assert.Equal(1, result.ReceiptId);
 		}
@@ -40,7 +53,19 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			var result = _palletRepo.GetPalletWithProducts(paletId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(10, result.ProductsOnPallet.First(p => p.Id == 1).Quantity);
+			Assert.Equal(50, result.ProductsOnPallet.First(p => p.Id == 1).Quantity);
+			Assert.Equal(new DateTime(2024, 2, 2), result.ProductsOnPallet.First(p => p.Id == 1).DateAdded);
+		}
+		[Fact]
+		public async Task GetPallet_GetPalletWithProductsAsync_ReturnPalletWithProduct()
+		{
+			//Arrange
+			var paletId = "Q1000";
+			//Act
+			var result =await _palletRepo.GetPalletWithProductsAsync(paletId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(50, result.ProductsOnPallet.First(p => p.Id == 1).Quantity);//50 Db
 			Assert.Equal(new DateTime(2024, 2, 2), result.ProductsOnPallet.First(p => p.Id == 1).DateAdded);
 		}
 		[Fact]
@@ -50,6 +75,18 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			var paletId = "Q1000";
 			//Act
 			var result = _palletRepo.GetPalletWithHistory(paletId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(1, result.PalletMovements.First(p => p.Id == 1).Quantity);
+			Assert.Equal(new DateTime(2025, 2, 2, 0, 0, 0), result.PalletMovements.First(p => p.Id == 1).MovementDate);
+		}
+		[Fact]
+		public async Task GetPallet_GetPalletWithHistoryAsync_ReturnPalletWithHistory()
+		{
+			//Arrange
+			var paletId = "Q1000";
+			//Act
+			var result =await _palletRepo.GetPalletWithHistoryAsync(paletId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(1, result.PalletMovements.First(p => p.Id == 1).Quantity);
@@ -70,6 +107,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			Assert.Equal(2, result.Count());
 			Assert.Contains(result, p => p.Id == "Q1000");
 		}
+
 		[Fact]
 		public void SearchPallets_FindPalletsByDateReceved_ReturnList()
 		{
@@ -220,12 +258,28 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			var productId = 10;
 			DateOnly date = new DateOnly(2024,2,2);
 			//Act
-			var result = _palletRepo.GetAvailablePallets(productId, date);//wynik IEnumerable
+			var result = _palletRepo.GetAvailablePallets(productId, date);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Count());			
+			//Assert.Equal(2, result.Count());			
+			Assert.Equal(1, result.Count());			
 			Assert.Contains(result, p => p.Id == "Q1000");			
-			Assert.Contains(result, p => p.Id == "Q1001");			
+			//Assert.Contains(result, p => p.Id == "Q1001");			
+		}
+		[Fact]
+		public void ReturnPalletsByProductIdAndDate2_GetAvailablePallets_ReturnList()
+		{
+			//Arrange
+			var productId = 11;
+			DateOnly date = new DateOnly(2024, 2, 2);
+			//Act
+			var result = _palletRepo.GetAvailablePallets(productId, date);
+			//Assert
+			Assert.NotNull(result);
+			//Assert.Equal(2, result.Count());			
+			Assert.Equal(1, result.Count());
+			Assert.Contains(result, p => p.Id == "Q1002");
+			//Assert.Contains(result, p => p.Id == "Q1001");			
 		}
 	}
 }

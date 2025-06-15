@@ -13,7 +13,7 @@ namespace MyWerehouse.Test.Common
 	{
 		protected readonly WerehouseDbContext _context;
 		protected readonly Mock<WerehouseDbContext> _contextMock;
-
+		// może tu dodać mapera ??
 		public CommandTestBase()
 		{
 			_contextMock = DbContextFactory.Create();

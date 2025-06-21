@@ -95,7 +95,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			return await _werehouseDbContext.Locations.FindAsync(locationId);
 		}
-
 		public IQueryable<Location> GetAllAvailableLocations()
 		{
 			var locations = _werehouseDbContext.Locations

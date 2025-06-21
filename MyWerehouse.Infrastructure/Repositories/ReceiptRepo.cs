@@ -118,7 +118,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(i => i.PerformedBy == filter.UserId);
 			}
 			return result;			
-		}
-			
+		}			
 	}
 }

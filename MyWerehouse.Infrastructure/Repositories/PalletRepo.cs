@@ -256,6 +256,37 @@ namespace MyWerehouse.Infrastructure.Repositories
 					break;
 			}
 		}
+
+		public string GetNextPalletId()
+		{
+			var lastPallet = _werehouseDbContext.Pallets
+				.Where(p=>p.Id.StartsWith("Q"))
+				.OrderByDescending(p => p.Id)
+				.FirstOrDefault();
+
+			int lastNumber = 0;
+			if(lastPallet != null&&int.TryParse(lastPallet.Id.Substring(1), out var parsed))
+				{
+					lastNumber = parsed;
+				}
+			string nextId = $"Q{(lastNumber + 1).ToString("D4")}";
+			return nextId ;
+		}
+		public async Task<string> GetNextPalletIdAsync()
+		{
+			var lastPallet =await _werehouseDbContext.Pallets
+				.Where(p => p.Id.StartsWith("Q"))
+				.OrderByDescending(p => p.Id)
+				.FirstOrDefaultAsync();
+
+			int lastNumber = 0;
+			if (lastPallet != null && int.TryParse(lastPallet.Id.AsSpan(1), out var parsed))
+			{
+				lastNumber = parsed;
+			}
+			string nextId = $"Q{(lastNumber + 1).ToString("D4")}";
+			return nextId;
+		}
 		//zmiana koncepcji metoda zmiany statusów idzie do serwisu 
 		// a będzie się wykonywać za pomoca update
 		//public void MarkPalletAsHold(string id)

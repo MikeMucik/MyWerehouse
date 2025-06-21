@@ -28,12 +28,14 @@ namespace MyWerehouse.Domain.Interfaces
 		void ClearPalletFromListReceipt(string palletId);
 		void ClearPalletFromListIssue(string palletId);
 		void ChangePalletStatus(string palletId, PalletStatus palletStatus);
+		string GetNextPalletId();
+		Task<string> GetNextPalletIdAsync();
 		//TODO expand to methods
 		//void MarkPalletAsHold(string id);
 		//void MarkPalletAsAvailable(string id);
 		//void MarkPalletAsDamaged(string id);
 		//void MarkPalletAsLoaded(string id);
-		
+
 		//IQueryable<Location> GetLocationsFromFilteredPallets(PalletSearchFilter filter);
 	}
 }

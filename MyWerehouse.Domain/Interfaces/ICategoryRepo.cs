@@ -22,6 +22,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Category? GetCategoryByName(string name);
 		Task<Category?> GetCategoryByNameAsync(string name);
 		IQueryable<Category> GetAllCategories();
-		Task<List<Category>> GetAllCategoriesAsync();
+		//Task<List<Category>> GetAllCategoriesAsync();
 	}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
 using FluentValidation.TestHelper;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
@@ -15,7 +16,8 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientProperData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var validator = new AddClientDTOValidation();
+			var addressValidator = new AddressDTOValidation();
+			var validator = new AddClientDTOValidation(addressValidator);
 			var address = new AddressDTO
 			{
 				City = "Warsaw",
@@ -41,7 +43,8 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientNotProperData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var validator = new AddClientDTOValidation();
+			var addressValidator = new AddressDTOValidation();
+			var validator = new AddClientDTOValidation(addressValidator);
 			var address = new AddressDTO
 			{
 				City = "Warsaw",
@@ -67,7 +70,8 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientNoAddressData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var validator = new AddClientDTOValidation();			
+			var addressValidator = new AddressDTOValidation();
+			var validator = new AddClientDTOValidation(addressValidator);
 			var client = new AddClientDTO
 			{
 				Name = "name",

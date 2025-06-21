@@ -38,7 +38,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletMovementTestsRepo
 				.OrderByDescending(p=>p.MovementDate)
 				.FirstOrDefault();
 			Assert.NotNull(result);
-			Assert.Equal(2, resultList.Count()); // 1 record from DbContextFactory
+			Assert.Equal(3, resultList.Count()); // 2 record from DbContextFactory
 			Assert.Equal(-1, resultList.First(p=>p.PerformedBy == "U001").Quantity);
 			Assert.Equal(1, resultList.First(p=>p.MovementDate == new DateTime(2025,2,2)).Quantity);
 
@@ -72,7 +72,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletMovementTestsRepo
 				.OrderByDescending(p => p.MovementDate)
 				.FirstOrDefault();
 			Assert.NotNull(result);
-			Assert.Equal(2, resultList.Count()); // 1 record from DbContextFactory
+			Assert.Equal(3, resultList.Count()); // 2 record from DbContextFactory
 			Assert.Equal(-1, resultList.First(p => p.PerformedBy == "U001").Quantity);
 			Assert.Equal(1, resultList.First(p => p.MovementDate == new DateTime(2025, 2, 2)).Quantity);
 

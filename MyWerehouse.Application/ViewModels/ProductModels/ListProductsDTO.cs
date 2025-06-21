@@ -13,5 +13,9 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int CurrentPage { get; set; }
 		public int PageSize { get; set; }		
 		public int Count { get; set; }
+		//dane dla frontu
+		public int TotalPages => (int)Math.Ceiling((double)Count / PageSize);
+		public bool HasNextPage => CurrentPage < TotalPages;
+		public bool HasPreviousPage => CurrentPage > 1;
 	}
 }

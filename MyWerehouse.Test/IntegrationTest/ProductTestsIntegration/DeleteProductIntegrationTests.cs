@@ -41,5 +41,38 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 			Assert.NotNull(e);
 			Assert.Contains("Brak produktu o tym numerze", e.Message);
 		}
+		[Fact]
+		public async Task HideProduct_DeleteProductAsync_ChangeNotActive()
+		{
+			//Arrange
+			var productId = 10;
+			//Act
+			await _productService.DeleteProductAsync(productId);
+			//Assert
+			var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+			Assert.NotNull(product);
+			Assert.True(product.IsDeleted);
+		}
+		[Fact]
+		public async Task RemoveProduct_DeleteProductAsync_DeleteFromList()
+		{
+			//Arrange
+			var productId = 989;
+			//Act
+			await _productService.DeleteProductAsync(productId);
+			//Assert
+			var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+			Assert.Null(product);
+		}
+		[Fact]
+		public async Task RemoveNotProperIdProduct_DeleteProductAsync_ThrowException()
+		{
+			//Arrange
+			var productId = 9891;
+			//Act&Assert
+			var e =await Assert.ThrowsAsync<InvalidDataException>(() => _productService.DeleteProductAsync(productId));
+			Assert.NotNull(e);
+			Assert.Contains("Brak produktu o tym numerze", e.Message);
+		}
 	}
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Domain.Interfaces;
@@ -61,15 +62,26 @@ namespace MyWerehouse.Application.Services
 			}
 			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }
 		}
-
+		public async Task AddCategoryAsync(CategoryDTO categoryDTO)
+		{
+			if (string.IsNullOrEmpty(categoryDTO.Name))
+			{
+				throw new InvalidDataException("Brak nazwy kategorii");
+			}
+			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) == null)
+			{
+				var category = _mapper.Map<Category>(categoryDTO);
+				await _categoryRepo.AddCategoryAsync(category);
+			}
+			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }
+		}
 		public void DeleteCategory(int id)
 		{
 			if (_categoryRepo.GetCategoryById(id) != null)
 			{
 				var filter = new ProductSearchFilter//do przemyślenia
 				{
-					CategoryId = id,
-					Category = _categoryRepo.GetCategoryById(id).Name
+					CategoryId = id,					
 				};
 				var products = _productRepo.FindProducts(filter);
 				if (products.Any())
@@ -81,9 +93,55 @@ namespace MyWerehouse.Application.Services
 					_categoryRepo.DeleteCategory(id);
 				}
 			}
-			else { throw new InvalidDataException("Nie ma kategorii o tym numerze"); }
+			else { throw new ArgumentException($"Kategoria o ID {id} nie została znalezniona", nameof(id)); }
 		}
-
+		public async Task DeleteCategoryAsync(int id)
+		{
+			if (await _categoryRepo.GetCategoryByIdAsync(id) != null)
+			{
+				var filter = new ProductSearchFilter
+				{
+					CategoryId = id,					
+				};
+				var products = _productRepo.FindProducts(filter);
+				if (await products.AnyAsync())
+				{
+					await _categoryRepo.SwitchOffCategoryAsync(id);
+				}
+				else
+				{
+					await _categoryRepo.DeleteCategoryAsync(id);
+				}
+			}
+			else { throw new ArgumentException($"Kategoria o ID {id} nie została znalezniona", nameof(id)); }
+		}
+		
+		public void UpdateCategory(CategoryDTO categoryDTO)
+		{
+			if (string.IsNullOrEmpty(categoryDTO.Name))
+			{
+				throw new InvalidDataException("Brak nazwy kategorii - proszę podać");
+			}
+			if (_categoryRepo.GetCategoryByName(categoryDTO.Name) == null)
+			{
+				var category = _mapper.Map<Category>(categoryDTO);
+				_categoryRepo.UpdateCategory(category);
+			}			
+			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }			
+		}
+		public async Task UpdateCategoryAsync(CategoryDTO categoryDTO)
+		{
+			if (string.IsNullOrEmpty(categoryDTO.Name))
+			{
+				throw new InvalidDataException("Brak nazwy kategorii - proszę podać");
+			}
+			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) == null)
+			{
+				var category = _mapper.Map<Category>(categoryDTO);
+				await _categoryRepo.UpdateCategoryAsync(category);
+			}
+			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }
+		}
 		public ListCategoriesDTO GetCategories(int pageSize, int pageNumber)
 		{
 			var categories = _categoryRepo.GetAllCategories()
@@ -102,19 +160,24 @@ namespace MyWerehouse.Application.Services
 			};
 			return categoriesList;
 		}
-
-		public void UpdateCategory(CategoryDTO categoryDTO)
+		public async Task<ListCategoriesDTO> GetCategoriesAsync(int pageSize, int pageNumber)
 		{
-			if (string.IsNullOrEmpty(categoryDTO.Name))
+			var categories = _categoryRepo.GetAllCategories()
+				.OrderBy(c => c.Name)
+				.ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider);
+			var categoriesToShow =await categories
+				.Skip(pageSize * (pageNumber - 1))
+				.Take(pageSize)
+				.ToListAsync();
+			var categoriesList = new ListCategoriesDTO()
 			{
-				throw new InvalidDataException("Brak nazwy kategorii - proszę podać");
-			}
-			if (_categoryRepo.GetCategoryByName(categoryDTO.Name) == null)
-			{
-				var category = _mapper.Map<Category>(categoryDTO);
-				_categoryRepo.UpdateCategory(category);
-			}			
-			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }			
+				Categories = categoriesToShow,
+				PageSize = pageSize,
+				CurrentPage = pageNumber,
+				Count =await categories.CountAsync()
+			};
+			return categoriesList;
 		}
+
 	}
 }

@@ -277,6 +277,16 @@ namespace MyWerehouse.Test.Common
 						Reason = ReasonMovement.ManualMove,
 						Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
+					},
+					new PalletMovement
+					{
+						Id = 5,
+						PalletId = "Q1000",
+						ProductId = 10,
+						LocationId = 3,
+						Reason = ReasonMovement.ManualMove,
+						Quantity = 1,
+						MovementDate = new DateTime(2025, 2, 2)
 					}
 				);
 			}

@@ -176,66 +176,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(i => i.PerformedBy == filter.UserId);
 			}
 			return result;
-		}
-		//public IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly minBestBeforeDate)
-		//{
-		//	var pallets = _werehouseDbContext.Pallets
-		//		.Include(p=>p.ProductsOnPallet)
-		//		.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId
-		//		== productId && pp.BestBefore >= minBestBeforeDate && pp.Pallet.Status == PalletStatus.Available))
-		//		.OrderBy(p => p.ProductsOnPallet
-		//			.Where(pp => pp.ProductId == productId)
-		//			.Min(pp => pp.BestBefore))
-		//		.ThenBy(p => p.LocationId);
-		//	return pallets;
-		//}
-		//public List<Pallet> SelectPalletsForIssue(IQueryable<Pallet> pallets, int quantity)
-		//{
-		//	var result = new List<Pallet>();
-		//	int collected = 0;
-		//	foreach (var pallet in pallets)
-		//	{
-		//		var productOnPallet = pallet.ProductsOnPallet.FirstOrDefault();
-		//		if (productOnPallet == null)
-		//			continue;
-		//		collected += productOnPallet.Quantity;
-		//		result.Add(pallet);
-		//		if (collected >= quantity)
-		//		{
-		//			if (collected > quantity)
-		//			{
-		//				pallet.Status = PalletStatus.ToPicking;
-		//			}
-		//			break;
-		//		}
-		//	}
-		//	return result;
-		//}
-		//public async Task<List<Pallet>> SelectPalletsForIssueAsync(IQueryable<Pallet> pallets, int quantity)
-		//{
-		//	var palletsToIssue = await pallets
-		//		.Include(p => p.ProductsOnPallet)
-		//		.ToListAsync();
-		//	var result = new List<Pallet>();
-		//	int collected = 0;
-
-		//	foreach (var pallet in palletsToIssue)
-		//	{
-		//		var productOnPallet = pallet.ProductsOnPallet.FirstOrDefault();
-		//		if (productOnPallet == null)
-		//			continue;
-		//		collected += productOnPallet.Quantity;
-		//		result.Add(pallet);
-		//		if (collected >= quantity)
-		//		{
-		//			if (collected > quantity)
-		//			{
-		//				pallet.Status = PalletStatus.ToPicking;
-		//			}
-		//			break;
-		//		}
-		//	}
-		//	return result;
-		//}
+		}		
 	}
 }

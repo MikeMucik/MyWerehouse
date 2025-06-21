@@ -95,10 +95,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Category> GetAllCategories()
 		{
 			return _werehouseDbContext.Categories;
-		}
-		public async Task<List<Category>> GetAllCategoriesAsync()
-		{
-			return await _werehouseDbContext.Categories.ToListAsync();
-		}
+		}		
 	}
 }

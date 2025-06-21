@@ -41,6 +41,24 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			Assert.Null(result.IssueId);
 			Assert.Equal(Domain.Models.PalletStatus.Available, result.Status);
 		}
+		[Fact]
+		public void NextId_GetNextPalletId_ReturnNextId()
+		{
+			//Arrange&Act
+			var result = _palletRepo.GetNextPalletId();
+			//Assert
+			Assert.NotEmpty(result);
+			Assert.Equal("Q1011", result);
+		}
+		[Fact]
+		public async Task NextId_GetNextPalletIdAsync_ReturnNextId()
+		{
+			//Arrange&Act
+			var result =await _palletRepo.GetNextPalletIdAsync();
+			//Assert
+			Assert.NotEmpty(result);
+			Assert.Equal("Q1011", result);
+		}
 
 	}
 }

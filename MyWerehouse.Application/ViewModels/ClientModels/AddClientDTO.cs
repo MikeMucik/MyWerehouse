@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 	}
 	public class AddClientDTOValidation : AbstractValidator<AddClientDTO>
 	{
-		public AddClientDTOValidation() 
+		public AddClientDTOValidation(IValidator<AddressDTO> addressValidator) 
 		{
 			RuleFor(c => c.Name)
 				.NotNull()
@@ -42,6 +42,9 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 			RuleFor(c => c.Addresses)
 				.NotEmpty()
 				.WithMessage("Uzupełnij dane - adress");
+			RuleForEach(c => c.Addresses)
+				.SetValidator(addressValidator)
+				.When(a =>a.Addresses!=null&& a.Addresses.Count > 0);
 		}
 	}
 }

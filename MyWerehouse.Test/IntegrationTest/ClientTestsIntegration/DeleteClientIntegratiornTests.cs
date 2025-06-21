@@ -42,7 +42,7 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			//Arrange
 			var clientId = 9891;
 			//Act
-			var e = Assert.Throws<InvalidDataException>(() => _clientService.DeleteClient(clientId));
+			var e = Assert.Throws<ArgumentException>(() => _clientService.DeleteClient(clientId));
 			//Assert
 			Assert.Equal("Nie ma klienta o tym numerze", e.Message);
 		}

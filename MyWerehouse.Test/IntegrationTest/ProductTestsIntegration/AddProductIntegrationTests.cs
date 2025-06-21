@@ -28,7 +28,6 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 			//Act			
 			var result = _productService.AddProduct(productNew);
 			//Assert
-			Assert.NotNull(result);
 			var product = _context.Products.Find(result);
 			Assert.NotNull(product);
 			Assert.Equal(productNew.Length, product.Details.Length);
@@ -50,7 +49,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 			};
 			//Act&Assert
 			var ex = Assert.Throws<ValidationException>(() => _productService.AddProduct(productNew));
-			Assert.Contains("Uzupełnij dane - wysokość", ex.Message);			
+			Assert.Contains("Uzupełnij dane - wysokość", ex.Message);
 		}
 		[Fact]
 		public void NewProductInvalidDataName_AddNewProduct_NoAddedToCollection()
@@ -88,6 +87,86 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 			};
 			//Act&Assert
 			var ex = Assert.Throws<ValidationException>(() => _productService.AddProduct(productNew));
+			Assert.Contains("Uzupełnij dane - SKU", ex.Message);
+		}
+
+		[Fact]
+		public async Task NewProductProperData_AddNewProductAsync_AddedToCollection()
+		{
+			//Arrange
+			var productNew = new AddProductDTO
+			{
+				Name = "Apple",
+				SKU = "666666",
+				CategoryId = 1,
+				Length = 100,
+				Height = 200,
+				Width = 300,
+				Weight = 400,
+				Description = "500",
+			};
+			//Act			
+			var result = await _productService.AddProductAsync(productNew);
+			//Assert
+			var product = _context.Products.Find(result);
+			Assert.NotNull(product);
+			Assert.Equal(productNew.Length, product.Details.Length);
+		}
+		[Fact]
+		public async Task NewProductInvalidDataHeight_AddNewProductAsync_NoAddedToCollection()
+		{
+			//Arrange
+			var productNew = new AddProductDTO
+			{
+				Name = "Apple",
+				SKU = "666666",
+				CategoryId = 1,
+				Length = 100,
+				//Height = 200,
+				Width = 300,
+				Weight = 400,
+				Description = "500",
+			};
+			//Act&Assert
+			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
+			Assert.Contains("Uzupełnij dane - wysokość", ex.Message);
+		}
+		[Fact]
+		public async Task NewProductInvalidDataName_AddNewProductAsync_NoAddedToCollection()
+		{
+			//Arrange
+			var productNew = new AddProductDTO
+			{
+				Name = "Test",
+				SKU = "666666",
+				CategoryId = 1,
+				Length = 100,
+				Height = 200,
+				Width = 300,
+				Weight = 400,
+				Description = "500",
+			};
+			//Act&Assert
+			var ex =await Assert.ThrowsAsync<InvalidDataException>(() => _productService.AddProductAsync(productNew));
+			Assert.Contains("Produkt o tej nazwie już istnieje.", ex.Message);
+		}
+		[Fact]
+		public async Task NewProductInvalidDataSKU_AddNewProductAsync_NoAddedToCollection()
+		{
+			//Arrange
+			var productNew = new AddProductDTO
+			{
+				Name = "Apple",
+				//SKU = "666666",
+				CategoryId = 1,
+				Length = 100,
+				Height = 200,
+				Width = 300,
+				Weight = 400,
+				Description = "500",
+			};
+			//Act&Assert
+			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
 			Assert.Contains("Uzupełnij dane - SKU", ex.Message);
 		}
 	}

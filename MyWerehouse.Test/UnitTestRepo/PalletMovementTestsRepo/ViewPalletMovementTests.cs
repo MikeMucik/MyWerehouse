@@ -32,7 +32,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletMovementTestsRepo
 			var result = _palletMovementRepo.GetDataByFilter(filter);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(1, result.Count());
+			Assert.Equal(2, result.Count()); 
 		}
 		[Fact]
 		public void ShowRecordByFilter_GetDataByFilter_ShowNull()
@@ -48,6 +48,46 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletMovementTestsRepo
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(0, result.Count());
+		}
+		[Fact]
+		public void IsCanDelete_CanDeletePallet_ReturnFalse()
+		{
+			//Arrange
+			var palletId = "Q1000";
+			//Act
+			var result = _palletMovementRepo.CanDeletePallet(palletId);
+			//Assert
+			Assert.False(result);
+		}
+		[Fact]
+		public async Task IsCanDelete_CanDeletePalletAsync_ReturnFalse()
+		{
+			//Arrange
+			var palletId = "Q1000";
+			//Act
+			var result =await _palletMovementRepo.CanDeletePalletAsync(palletId);
+			//Assert
+			Assert.False(result);
+		}
+		[Fact]
+		public void IsCanDelete_CanDeletePallet_ReturnTrue()
+		{
+			//Arrange
+			var palletId = "Q1001";
+			//Act
+			var result = _palletMovementRepo.CanDeletePallet(palletId);
+			//Assert
+			Assert.True(result);
+		}
+		[Fact]
+		public async Task IsCanDelete_CanDeletePalletAsync_ReturnTrue()
+		{
+			//Arrange
+			var palletId = "Q1001";
+			//Act
+			var result = await _palletMovementRepo.CanDeletePalletAsync(palletId);
+			//Assert
+			Assert.True(result);
 		}
 	}
 }

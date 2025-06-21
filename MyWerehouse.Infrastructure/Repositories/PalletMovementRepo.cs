@@ -71,5 +71,21 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			return result;
 		}
+		public bool CanDeletePallet(string id)
+		{
+			int movementCount = _werehouseDbContext.PalletMovement
+				.Where(p=>p.PalletId == id)
+				.Take(2)
+				.Count();
+			return movementCount <= 1;		
+		}
+		public async Task<bool> CanDeletePalletAsync (string id)
+		{
+			int movementCount = await _werehouseDbContext.PalletMovement
+				.Where(p => p.PalletId == id)
+				.Take(2)
+				.CountAsync();
+			return movementCount <= 1;
+		}
 	}
 }

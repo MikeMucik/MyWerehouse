@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ProductModels;
+using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Test.MappingTest
@@ -65,14 +67,101 @@ namespace MyWerehouse.Test.MappingTest
 				Details = details,
 				AddedItemAd = DateTime.Now,
 			};
-			
+
 			//Act
 			var product = _mapper.Map<DetailsOfProductDTO>(productNew);
 			//Assert
 			Assert.Equal(product.Name, productNew.Name);
-			
+
 			Assert.Equal(product.Length, productNew.Details.Length);
 			Assert.Equal(product.CategoryName, productNew.Category.Name);
 		}
+		//[Fact]
+		//public void Should_Map_AddPalletDTO_To_Pallet()
+		//{
+
+		//	var dto = new AddPalletDTO
+		//	{
+		//		Id = "Q0001",
+		//		DateReceived = DateTime.Now,
+		//		LocationId = 1,
+		//		ReceiptId = 1,
+		//		Status = PalletStatus.Available,
+				
+		////		ProductsOnPallet = new List<ProductOnPalletDTO>
+		////{
+		////	new ProductOnPalletDTO
+		////	{
+		////		Id = 1,
+		////		ProductId = 10,
+		////		PalletId = "Q0001",
+		////		Quantity = 100,
+		////		DateAdded = DateTime.Now,
+		////		BestBefore = new DateOnly(2025, 1, 1)
+		////	}
+		////}
+		//	};
+
+		//	var entity = _mapper.Map<Pallet>(dto);
+
+		//	Assert.NotNull(entity);
+		//	Assert.Equal(dto.Id, entity.Id);
+		//	//Assert.Single(entity.ProductsOnPallet);
+		//	//Assert.Equal(10, entity.ProductsOnPallet.First().ProductId);
+		//}
+		[Fact]
+		public void Should_Map_AddPalletReceiptDTO_To_Pallet()
+		{
+
+			var dto = new CreatePalletReceiptDTO
+			{
+				Id = "Q0001",
+				DateReceived = DateTime.Now,
+				LocationId = 1,
+				ReceiptId = 1,
+				Status = PalletStatus.Available,				
+			};
+
+			var entity = _mapper.Map<Pallet>(dto);
+
+			Assert.NotNull(entity);
+			Assert.Equal(dto.Id, entity.Id);			
+		}
+		[Fact]
+		public void Should_Map_AddPalletPickingDTO_To_Pallet()
+		{
+			var dto = new CreatePalletPickingDTO
+			{
+				Id = "Q0001",
+				DateCreated = DateTime.Now,
+				LocationId = 1,
+				IssueId = 1,
+				Status = PalletStatus.ToIssue,
+			};
+			var entity = _mapper.Map<Pallet>(dto);
+
+			Assert.NotNull(entity);
+			Assert.Equal(dto.Id, entity.Id);
+		}
+		//[Fact]
+		//public void Should_Map_Single_ProductOnPalletDTO_To_ProductOnPallet()
+		//{
+		//	var dto = new ProductOnPalletDTO
+		//	{
+		//		Id = 1,
+		//		ProductId = 10,
+		//		PalletId = "Q0001",
+		//		Quantity = 100,
+		//		DateAdded = DateTime.Now,
+		//		BestBefore = new DateOnly(2025, 1, 1)
+		//	};
+
+		//	var entity = _mapper.Map<ProductOnPallet>(dto);
+
+		//	Assert.NotNull(entity);
+		//	Assert.Equal(dto.ProductId, entity.ProductId);
+		//	Assert.Equal(dto.Quantity, entity.Quantity);
+		//}
+
 	}
 }

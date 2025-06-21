@@ -10,6 +10,7 @@ using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
@@ -21,8 +22,8 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 		public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		public readonly ClientService _clientService;
 		public readonly IMapper _mapper;
-		public readonly IValidator<AddressDTO> _addressValidator;
-		public readonly IValidator<AddClientDTO> _clientValidator;
+		public readonly IClientRepo _clientRepo;
+		public readonly IReceiptRepo _receiptRepo;		
 		public ClientIntegrationCommand() : base()
 		{
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
@@ -33,14 +34,11 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				cfg.AddProfile<MappingProfile>();
 			});
 			_mapper = MapperConfig.CreateMapper();
-			var _clientRepo = new ClientRepo(_context);
-			var _receiptRepo = new ReceiptRepo(_context);
-			_addressValidator = new AddressDTOValidation();
-			_clientValidator = new AddClientDTOValidation();			
-			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo);
-			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo, _addressValidator, _clientValidator);
-
+			_clientRepo = new ClientRepo(_context);
+			_receiptRepo = new ReceiptRepo(_context);
+			var addressValidator = new AddressDTOValidation();
+			var validator = new AddClientDTOValidation(addressValidator);			
+			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo,	validator);
 		}
-
 	}
 }

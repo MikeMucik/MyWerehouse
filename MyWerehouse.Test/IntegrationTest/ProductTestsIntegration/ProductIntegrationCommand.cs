@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
@@ -21,6 +22,8 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public readonly ProductService _productService;
 		public readonly IMapper _mapper;
 		public readonly IValidator<AddProductDTO> _productValidator;
+		public readonly IProductRepo _productRepo;
+		public readonly IReceiptRepo _receiptRepo;
 		public ProductIntegrationCommand() : base()
 		{
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
@@ -32,10 +35,9 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 				cfg.AddProfile<MappingProfile>();
 			});
 			_mapper = MapperConfig.CreateMapper();
-			var _productRepo = new ProductRepo(_context);
-			var _receiptRepo = new ReceiptRepo(_context);
-			_productValidator = new AddProductDTOValidation();			
-			_productService = new ProductService(_productRepo, _mapper, _receiptRepo);
+			_productRepo = new ProductRepo(_context);
+			_receiptRepo = new ReceiptRepo(_context);
+			_productValidator = new AddProductDTOValidation();				
 			_productService = new ProductService(_productRepo, _mapper, _receiptRepo, _productValidator);
 		}
 	}

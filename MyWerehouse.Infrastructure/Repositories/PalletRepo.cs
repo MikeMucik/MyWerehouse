@@ -19,13 +19,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public string AddPallet(Pallet pallet)
 		{
 			_werehouseDbContext.Pallets.Add(pallet);
-			_werehouseDbContext.SaveChanges();
+			//_werehouseDbContext.SaveChanges();
 			return pallet.Id;
 		}
 		public async Task<string> AddPalletAsync(Pallet pallet)
 		{
 			await _werehouseDbContext.Pallets.AddAsync(pallet);
-			await _werehouseDbContext.SaveChangesAsync();
+			//await _werehouseDbContext.SaveChangesAsync();
 			return pallet.Id;
 		}
 		public void DeletePallet(string palletId)
@@ -48,21 +48,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public void UpdatePallet(Pallet pallet)
 		{
-			_werehouseDbContext.Attach(pallet);
-			if (pallet.LocationId > 0)
+			var entry = _werehouseDbContext.Entry(pallet);
+			if (entry.State == EntityState.Deleted || entry.State == EntityState.Unchanged)
 			{
-				_werehouseDbContext.Entry(pallet).Property(nameof(pallet.LocationId)).IsModified = true;
+				entry.State = EntityState.Modified;
 			}
-			if (pallet.IssueId > 0)
-			{
-				_werehouseDbContext.Entry(pallet).Property(nameof(pallet.IssueId)).IsModified = true;
-			}
-			if (pallet.ReceiptId > 0)
-			{
-				_werehouseDbContext.Entry(pallet).Property(nameof(pallet.ReceiptId)).IsModified = true;
-			}
-			_werehouseDbContext.Entry(pallet).Property(nameof(pallet.Status)).IsModified = true;
-
 			_werehouseDbContext.SaveChanges();
 		}
 		public async Task UpdatePalletAsync(Pallet pallet)
@@ -86,7 +76,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public Pallet? GetPalletById(string palletId)
 		{
-			return _werehouseDbContext.Pallets.FirstOrDefault(p => p.Id == palletId);
+			return _werehouseDbContext.Pallets
+				.Include(p=>p.ProductsOnPallet)
+				.Include(p=>p.PalletMovements)
+				//.Include(p=>p.Location)
+				//.Include(p=>p.Receipt)
+				//.Include(p=>p.Issue)
+				.FirstOrDefault(p => p.Id == palletId);
 		}
 		public async Task<Pallet?> GetPalletByIdAsync(string palletId)
 		{

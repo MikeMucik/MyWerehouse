@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
@@ -85,6 +86,6 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductOnPalletTest
 			//Act&Assert
 			var ex =await Assert.ThrowsAsync<InvalidOperationException>(async () => await _productOnPalletRepo.GetQuantityAsync(palletId, productId));
 			Assert.Equal("Nie ma produktu na palecie", ex.Message);
-		}
+		}		
 	}
 }

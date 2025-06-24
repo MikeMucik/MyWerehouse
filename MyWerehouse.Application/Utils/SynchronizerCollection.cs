@@ -37,7 +37,5 @@ namespace MyWerehouse.Application.Utils
 				}
 			}
 		}
-		
-
 	}
 }

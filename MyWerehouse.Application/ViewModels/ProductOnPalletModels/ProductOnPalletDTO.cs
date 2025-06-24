@@ -10,8 +10,7 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.ViewModels.ProductOnPalletModels
 {
-	public class ProductOnPalletDTO 
-		//:IMapFrom<ProductOnPallet>
+	public class ProductOnPalletDTO :IMapFrom<ProductOnPallet>
 	{
 		public int Id { get; set; }
 		public int ProductId { get; set; }		
@@ -19,11 +18,11 @@ namespace MyWerehouse.Application.ViewModels.ProductOnPalletModels
 		public int Quantity { get; set; }
 		public DateTime DateAdded { get; set; }
 		public DateOnly? BestBefore { get; set; } // Może być null, jeśli produkt nie ma daty ważności
-		//public void Mapping(Profile profile)
-		//{
-		//	profile.CreateMap<ProductOnPalletDTO, ProductOnPallet>()
-		//		.ReverseMap();
-		//}
+		public void Mapping(Profile profile)
+		{
+			profile.CreateMap<ProductOnPalletDTO, ProductOnPallet>()
+				.ReverseMap();
+		}
 	}
 	public class ProductOnPalletDTOValidation : AbstractValidator<ProductOnPalletDTO>
 	{

@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				ClientIdIn = 10
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByClientFilter(clientId);
+			var result = _palletRepo.GetPalletsByClientFilter(clientId).ToList();
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -189,6 +189,11 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			{
 				Assert.NotNull(pallet.Receipt); 
 				Assert.Equal(10, pallet.Receipt.ClientId);
+
+				Assert.Contains(result, p => p.Id == "Q1000");
+				Assert.Contains(result, p => p.Id == "Q1001");
+				Assert.DoesNotContain(result, p => p.Id == "Q1010"); 				
+				Assert.DoesNotContain(result, p => p.Id == "Q1002"); 				
 			}
 		}
 		[Fact]
@@ -200,7 +205,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				ClientIdOut = 11
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByClientFilter(clientId);
+			var result = _palletRepo.GetPalletsByClientFilter(clientId).ToList();
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result); // zakładamy, że dane testowe zawierają takie palety
@@ -209,7 +214,12 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			foreach (var pallet in result)
 			{
 				Assert.NotNull(pallet.Issue); // powinno być przypisane
-				Assert.Equal(11, pallet.Issue.ClientId);				
+				Assert.Equal(11, pallet.Issue.ClientId);
+
+				Assert.Contains(result, p => p.Id == "Q1000");
+				Assert.Contains(result, p => p.Id == "Q1001");
+				Assert.DoesNotContain(result, p => p.Id == "Q1010");
+				Assert.DoesNotContain(result, p => p.Id == "Q1002");
 			}
 		}
 		[Fact]

@@ -11,37 +11,37 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.ViewModels.PalletModels
 {
-	public class CreatePalletReceiptDTO :IMapFrom<Pallet>
+	public class UpdatePalletDTO : IMapFrom<Pallet>
 	{
 		public string Id { get; set; }
 		public DateTime DateReceived { get; set; }
-		public int LocationId { get; set; }		
-		public PalletStatus Status { get; set; } = 0; 
-		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();	
-		public int ReceiptId { get; set; }		
+		public int LocationId { get; set; }
+		public PalletStatus Status { get; set; } = 0; //np "Available", "To issue"
+		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();
+		public int? ReceiptId { get; set; }
+		public int? IssueId { get; set; }
 		public string? UserId { get; set; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<CreatePalletReceiptDTO, Pallet>()
-				.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src => src.ProductsOnPallet));				
+			profile.CreateMap<UpdatePalletDTO, Pallet>()
+				.ForMember(dest => dest.ProductsOnPallet, opt => opt.Ignore());
+			profile.CreateMap<Pallet, UpdatePalletDTO>()
+				.ForMember(dest => dest.ProductsOnPallet, opt=>opt.MapFrom(src=>src.ProductsOnPallet));
 		}
 	}
-	public class CreatePalletReceiptDTOValidation : AbstractValidator<CreatePalletReceiptDTO> 
+	public class UpdatePalletDTOValidation : AbstractValidator<UpdatePalletDTO>
 	{
-		public CreatePalletReceiptDTOValidation(IValidator<ProductOnPalletDTO> productOnPalletValidator)
+		public UpdatePalletDTOValidation(IValidator<ProductOnPalletDTO> productOnPalletValidator)
 		{
 			RuleFor(p => p.Status)
 				.NotNull()
 				.WithMessage("Paleta musi mieć status");
 			RuleFor(p => p.DateReceived)
 				.NotNull()
-				.WithMessage("Paleta musi mieć datę przyjęcia");
+				.WithMessage("Paleta musi mieć datę utworzenia");
 			RuleFor(p => p.LocationId)
 				.NotNull()
-				.WithMessage("Paleta musi mieć lokalizację początkową");
-			RuleFor(p => p.ReceiptId)
-				.NotNull()
-				.WithMessage("Paleta musi mieć numer przyjęcia");
+				.WithMessage("Paleta musi mieć lokalizację początkową");			
 			RuleFor(p => p.ProductsOnPallet)
 				.NotEmpty()
 				.WithMessage("Paleta musi zawierać towar/y");

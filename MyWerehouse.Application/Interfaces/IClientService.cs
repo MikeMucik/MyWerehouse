@@ -16,8 +16,8 @@ namespace MyWerehouse.Application.Interfaces
 		Task DeleteClientAsync(int id);
 		AddClientDTO GetClientToEdit(int id);
 		Task<AddClientDTO> GetClientToEditAsync(int id);
-		void UpdateClient(AddClientDTO updatedClient);
-		Task UpdateClientAsync(AddClientDTO updatedClient);
+		void UpdateClient(UpdateClientDTO updatedClient);
+		Task UpdateClientAsync(UpdateClientDTO updatedClient);
 		DetailsOfClientDTO DetailsOfClient(int id);
 		Task<DetailsOfClientDTO> DetailsOfClientAsync(int id);
 		ListClientsDTO GetClientsByFilter(int pageSize, int PageNumber, ClientSearchFilter filter);

@@ -9,6 +9,7 @@ using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Application.ViewModels.ProductModels;
@@ -24,26 +25,31 @@ namespace MyWerehouse.Application.Services
 		private readonly IMapper _mapper;
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IValidator<AddClientDTO> _addClientValidator;
+		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
 
 		public ClientService(
 			IClientRepo clientRepo,
 			IMapper mapper,
 			IReceiptRepo receiptRepo,
-			IValidator<AddClientDTO>? addClientValidator = null)
+			IValidator<AddClientDTO>? addClientValidator = null,
+			IValidator<UpdateClientDTO> updateClientValidator = null)
 		{
 			_clientRepo = clientRepo;
 			_mapper = mapper;
 			_receiptRepo = receiptRepo;
 			_addClientValidator = addClientValidator;
+			_updateClientValidator = updateClientValidator;
 		}
 		public ClientService(
 			IClientRepo clientRepo,
 			IMapper mapper,
-			IValidator<AddClientDTO>? addClientValidator = null)
+			IValidator<AddClientDTO>? addClientValidator = null,
+			IValidator<UpdateClientDTO>? updateClientValidator = null)
 		{
 			_clientRepo = clientRepo;
 			_mapper = mapper;
 			_addClientValidator = addClientValidator;
+			_updateClientValidator = updateClientValidator;
 		}
 		public ClientService(
 			IClientRepo clientRepo,
@@ -51,6 +57,15 @@ namespace MyWerehouse.Application.Services
 		{
 			_clientRepo = clientRepo;
 			_mapper = mapper;
+		}
+		public ClientService(
+			IClientRepo clientRepo,
+			IMapper mapper,
+			IValidator<UpdateClientDTO> updateClientValidator)
+		{
+			_clientRepo = clientRepo;
+			_mapper = mapper;
+			_updateClientValidator = updateClientValidator;
 		}
 
 		public int AddClient(AddClientDTO addClient)
@@ -129,26 +144,61 @@ namespace MyWerehouse.Application.Services
 			var clientDTO = _mapper.Map<AddClientDTO>(client);
 			return clientDTO;
 		}
-		public void UpdateClient(AddClientDTO updatedClient)
+		public void UpdateClient(UpdateClientDTO updatedClient)
 		{
-			var validationResult = _addClientValidator.Validate(updatedClient);//do testów
+			var existingClient = _clientRepo.GetClientById(updatedClient.Id);
+			var validationResult = _updateClientValidator.Validate(updatedClient);//do testów
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var client = _mapper.Map<Client>(updatedClient);
-			_clientRepo.UpdateClient(client);
+			//var client = _mapper.Map<Client>(updatedClient);
+			_mapper.Map(updatedClient, existingClient);
+			CollectionSynchronizer.SynchronizeCollection(
+				 existingClient.Addresses,
+				 updatedClient.Addresses,
+				 a => a.Id, // Klucz dla adresu
+				 a => a.Id, // Klucz dla AddressDTO
+				 dto =>
+				 {
+					 var newAddress = _mapper.Map<Address>(dto);
+					 newAddress.ClientId = existingClient.Id;
+					 return newAddress;
+				 },// Jak dodać nowy
+				 (dto, entity) => _mapper.Map(dto, entity) // Jak aktualizować
+				 );
+			_clientRepo.UpdateClient(existingClient);
 		}
-		public async Task UpdateClientAsync(AddClientDTO updatedClient)
+		public async Task UpdateClientAsync(UpdateClientDTO updatedClient)
 		{
-			var validationResult = _addClientValidator.Validate(updatedClient);//do testów
+			var existingClient = await _clientRepo.GetClientByIdAsync(updatedClient.Id);
+			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);//do testów
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var client = _mapper.Map<Client>(updatedClient);
-			await _clientRepo.UpdateClientAsync(client);
+			//var client = _mapper.Map<Client>(updatedClient);
+			_mapper.Map(updatedClient, existingClient);
+			CollectionSynchronizer.SynchronizeCollection(
+				 existingClient.Addresses,
+				 updatedClient.Addresses,
+				 a => a.Id, // Klucz dla adresu
+				 a => a.Id, // Klucz dla AddressDTO
+				 dto => _mapper.Map<Address>(dto), // Jak dodać nowy
+				 (dto, entity) => _mapper.Map(dto, entity) // Jak aktualizować
+				 );
+			await _clientRepo.UpdateClientAsync(existingClient);
 		}
+		//public async Task UpdateClientAsync1(AddClientDTO updatedClient)
+		//{
+		//	var validationResult = _addClientValidator.Validate(updatedClient);//do testów
+		//	if (!validationResult.IsValid)
+		//	{
+		//		throw new ValidationException(validationResult.Errors);
+		//	}
+		//	var client = _mapper.Map<Client>(updatedClient);
+		//	await _clientRepo.UpdateClientAsync(client);
+		//}
 		public DetailsOfClientDTO DetailsOfClient(int id)
 		{
 			var client = _clientRepo.GetClientById(id);

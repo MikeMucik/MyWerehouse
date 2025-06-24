@@ -26,31 +26,54 @@ namespace MyWerehouse.Infrastructure
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<ProductOnPallet>()
-				.Property(p => p.BestBefore)
+			modelBuilder.Entity<ProductOnPallet>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+
+				entity.HasOne<Pallet>(pop => pop.Pallet)
+				.WithMany(p => p.ProductsOnPallet)
+				.HasForeignKey(pop => pop.PalletId)
+				.IsRequired();
+
+				entity.Property(p => p.BestBefore)
 				.HasConversion(new ValueConverter<DateOnly?, DateTime?>(
 					v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : null,
 					v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null))
 				.HasColumnType("date");
+			});
 
-			modelBuilder.Entity<Pallet>()
-				.Property(p => p.Status)
+			modelBuilder.Entity<Pallet>(entity =>
+			{
+				entity.HasKey(p => p.Id);
+
+				entity.Property(p => p.Id)
+				.IsRequired()
+				.HasMaxLength(10);
+
+				entity.Property(p => p.Status)
 				.HasConversion<string>();
+			});
 
-			modelBuilder.Entity<PalletMovement>()
-				.Property(m => m.Reason)
+			modelBuilder.Entity<Address>(entity =>
+				entity.Property(x => x.Id)
+				.ValueGeneratedOnAdd()
+			);
+
+			modelBuilder.Entity<PalletMovement>(entity =>
+			{
+				entity.HasOne(pm => pm.Pallet)
+					.WithMany(p => p.PalletMovements)
+					.HasForeignKey(pm => pm.PalletId)
+					.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
+
+				entity.Property(m => m.Reason)
 				.HasConversion<string>();
+			});
 
-			modelBuilder.Entity<PalletMovement>()
-				.HasOne(pm => pm.Pallet)
-				.WithMany(p => p.PalletMovements) // Jeśli masz to w modelu
-				.HasForeignKey(pm => pm.PalletId)
-				.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
-
-			modelBuilder.Entity<Product>()
-				.HasOne(p => p.Details)
+			modelBuilder.Entity<Product>(entity =>
+				entity.HasOne(p => p.Details)
 				.WithOne(p => p.Product)
-				.HasForeignKey<ProductDetails>(p => p.ProductId);			
+				.HasForeignKey<ProductDetails>(p => p.ProductId));
 		}
 	}
 }

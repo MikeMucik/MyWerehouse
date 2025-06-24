@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.PalletModels;
@@ -24,12 +26,18 @@ namespace MyWerehouse.Test.IntegrationTest.PalletTestsIntegration
 		public readonly IPalletRepo _palletRepo;
 		public readonly IProductOnPalletRepo _productOnPalletRepo;
 		public readonly IPalletMovementRepo _palletMovementRepo;
+		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
+		protected readonly IValidator<CreatePalletPickingDTO> _createPalletPickingValidator;
+		protected readonly IValidator<CreatePalletReceiptDTO> _createPalletReceiptValidator;
+		protected readonly IValidator<UpdatePalletDTO> _updatePalletValidator;
+		//protected readonly WerehouseDbContext _werehouseDbContext;
 
 		public PalletIntergrationCommand() : base()
-		{
+		{			
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase("Shared Database")
 				.Options;
+
 			var MapperConfig = new MapperConfiguration(cfg =>
 			{ 
 				cfg.AddProfile<MappingProfile>();
@@ -38,10 +46,14 @@ namespace MyWerehouse.Test.IntegrationTest.PalletTestsIntegration
 			_palletRepo = new PalletRepo(_context);
 			_productOnPalletRepo = new ProductOnPalletRepo(_context);
 			_palletMovementRepo = new PalletMovementRepo(_context);
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var receiptValidator = new CreatePalletReceiptDTOValidation(productOnPalletValidator);
-			var pickingValidator = new CreatePalletPickingDTOValidation(productOnPalletValidator);
-			_palletService = new PalletService(_palletRepo, _palletMovementRepo  ,_productOnPalletRepo, _mapper, receiptValidator, pickingValidator);
+			_productOnPalletValidator = new ProductOnPalletDTOValidation();
+			_createPalletReceiptValidator = new CreatePalletReceiptDTOValidation(_productOnPalletValidator);
+			_createPalletPickingValidator = new CreatePalletPickingDTOValidation(_productOnPalletValidator);
+			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
+			//_werehouseDbContext = new WerehouseDbContext(_contextOptions);
+			_palletService = new PalletService(_palletRepo, _palletMovementRepo, _productOnPalletRepo,
+				_mapper,_createPalletReceiptValidator, _createPalletPickingValidator, _updatePalletValidator,
+				_context);
 		}
 	}
 }

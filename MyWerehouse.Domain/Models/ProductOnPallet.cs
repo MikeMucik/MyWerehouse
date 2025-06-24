@@ -15,7 +15,6 @@ namespace MyWerehouse.Domain.Models
 		public virtual Pallet Pallet { get; set; }		
 		public int Quantity { get; set; }
 		public DateTime DateAdded { get; set; }
-		public DateOnly? BestBefore { get; set; } // Może być null, jeśli produkt nie ma daty ważności
-			
+		public DateOnly? BestBefore { get; set; } 
 	}
 }

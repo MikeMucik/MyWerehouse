@@ -11,11 +11,12 @@ namespace MyWerehouse.Application.Interfaces
 	{
 		string AddPalletReceipt(CreatePalletReceiptDTO addPalletDTO);
 		Task <string> AddPalletReceiptAsync(CreatePalletReceiptDTO addPalletDTO);
-		string AddPalletPicking(CreatePalletPickingDTO addPalletDTO);
-		Task <string> AddPalletPickingAsync(CreatePalletPickingDTO addPalletDTO);
+		string CreatePickingPallet(CreatePalletPickingDTO addPalletDTO);
+		Task <string> CreatePickingPalletAsync(CreatePalletPickingDTO addPalletDTO);
 		void DeletePallet(string id);
 		Task DeletePalletAsync(string id);
-		CreatePalletReceiptDTO GetPalletToEdit(string id);
-		void UpdatePallet(CreatePalletReceiptDTO updatingPallet);
+		//CreatePalletReceiptDTO GetPalletToEdit(string id);
+		UpdatePalletDTO GetPalletToEdit(string id);
+		void UpdatePallet(UpdatePalletDTO updatingPallet);
 	}
 }

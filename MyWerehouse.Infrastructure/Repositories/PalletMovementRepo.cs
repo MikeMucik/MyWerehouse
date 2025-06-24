@@ -20,12 +20,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public void AddPalletMovement(PalletMovement palletMovement)
 		{
 			_werehouseDbContext.PalletMovement.Add(palletMovement);
-			_werehouseDbContext.SaveChanges();
+			//_werehouseDbContext.SaveChanges();
 		}
 		public async Task AddPalletMovementAsync(PalletMovement palletMovement)
 		{
 			await _werehouseDbContext.PalletMovement.AddAsync(palletMovement);
-			await _werehouseDbContext.SaveChangesAsync();
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
 		public IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter)
 		{

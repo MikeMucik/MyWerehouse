@@ -11,24 +11,24 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.ViewModels.ClientModels
 {
-	public class AddClientDTO : IMapFrom<Client>
+	public class UpdateClientDTO : IMapFrom<Client>
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
 		public string Email { get; set; }
 		public string Description { get; set; }
 		public string FullName { get; set; }
-		public ICollection<AddressDTO> Addresses { get; set; }
+		public ICollection<AddressDTO> Addresses { get; set; } = new List<AddressDTO>();
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<AddClientDTO, Client>()
-				.ForMember(dest => dest.Addresses, opt => opt.MapFrom(src => src.Addresses))
-				.ReverseMap();
+			profile.CreateMap<UpdateClientDTO, Client >()
+				.ForMember(dest => dest.Addresses, opt => opt.Ignore())
+				;
 		}
 	}
-	public class AddClientDTOValidation : AbstractValidator<AddClientDTO>
+	public class UpdateClientDTOValidation : AbstractValidator<UpdateClientDTO>
 	{
-		public AddClientDTOValidation(IValidator<AddressDTO> addressValidator) 
+		public UpdateClientDTOValidation(IValidator<AddressDTO> addressValidator)
 		{
 			RuleFor(c => c.Name)
 				.NotNull()
@@ -44,8 +44,7 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 				.WithMessage("Uzupełnij dane - adress");
 			RuleForEach(c => c.Addresses)
 				.SetValidator(addressValidator)
-				.When(a =>a.Addresses!=null&& a.Addresses.Count > 0);
+				.When(a => a.Addresses != null && a.Addresses.Count > 0);
 		}
 	}
 }
-

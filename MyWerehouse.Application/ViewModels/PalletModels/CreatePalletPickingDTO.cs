@@ -16,13 +16,14 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 		public string Id { get; set; }
 		public DateTime DateCreated { get; set; }
 		public int LocationId { get; set; }
-		public PalletStatus Status { get; set; } = 0; //np "Available", "To issue"
+		public PalletStatus Status { get; set; } = 0; 
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();
 		public int IssueId { get; set; }
+		public string? UserId { get; set; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<CreatePalletPickingDTO, Pallet>()
-				.ForMember(dest => dest.ProductsOnPallet, opt => opt.Ignore());			
+				.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src=>src.ProductsOnPallet));						
 		}
 	}
 	public class CreatePalletPickingDTOValidation : AbstractValidator<CreatePalletPickingDTO>
@@ -46,7 +47,7 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 				.WithMessage("Paleta musi zawierać towar/y");
 			RuleForEach(p => p.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)
-				.When(p => p.ProductsOnPallet != null && p.ProductsOnPallet.Count() > 0);
+				.When(p => p.ProductsOnPallet != null && p.ProductsOnPallet.Count > 0);
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			using var arrangeContext = new WerehouseDbContext(_contextOptions);
 			var address = new Address
 			{
-				Id = 1,
+				//Id = 200,
 				Country = "Poland",
 				City = "test",
 				Region = "test",
@@ -51,32 +51,43 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			//Act
 			var addressU = new AddressDTO
 			{
-				Id = 1,
+				Id = address.Id,
 				Country = "Silesia",
 				City = "test",
-				Region = "test",
-				Phone = 346456457,
+				Region = "testref",
+				Phone = 98765432,
+				PostalCode = "test66",
+				StreetName = "test66",
+				StreetNumber = "test66",
+			};
+			var addressU1 = new AddressDTO
+			{
+				//Id = 500,
+				Country = "Mazovia",
+				City = "test55",
+				Region = "test55",
+				Phone = 98765432,
 				PostalCode = "test",
 				StreetName = "test",
-				StreetNumber = "test",				
+				StreetNumber = "test",
 			};
-			var updatedClient = new AddClientDTO
+			var updatedClient = new UpdateClientDTO
 			{
 				Id = 1,
 				Name = "test1",
 				Email = "test1",
 				Description = "test1",
 				FullName = "test",
-				Addresses = new[] { addressU }
+				Addresses = new[] { addressU
+					,addressU1
+					}
 			};
 			using (var actContext = new WerehouseDbContext(_contextOptions))
 			{
-				var _clientRepo = new ClientRepo(actContext);				
+				var _clientRepo = new ClientRepo(actContext);
 				var _addressValidator = new AddressDTOValidation();
-				var _clientValidator = new AddClientDTOValidation(_addressValidator);
-				var _clientService = new ClientService(_clientRepo, _mapper,
-					//_addressValidator,
-					_clientValidator);
+				var _clientValidator = new UpdateClientDTOValidation(_addressValidator);
+				var _clientService = new ClientService(_clientRepo, _mapper, _clientValidator);
 
 				_clientService.UpdateClient(updatedClient);
 			}
@@ -91,6 +102,9 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				Assert.Equal(updatedClient.Name, result.Name);
 				Assert.Equal(updatedClient.Addresses.First().Country, result.Addresses.First().Country);
 				Assert.Equal(updatedClient.Addresses.First().City, result.Addresses.First().City);
+				var updatedPhone = updatedClient.Addresses.First(c => c.Id == addressU.Id).Phone;
+				var resultPhone = result.Addresses.First(c => c.Id == address.Id).Phone;
+				Assert.Equal(updatedPhone, resultPhone);
 			}
 		}
 		[Fact]
@@ -134,9 +148,9 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				//Phone = 346456457,
 				PostalCode = "test",
 				StreetName = "test",
-				StreetNumber = "test",				
+				StreetNumber = "test",
 			};
-			var updatedClient = new AddClientDTO
+			var updatedClient = new UpdateClientDTO
 			{
 				Id = 2,
 				Name = "test1",
@@ -149,14 +163,14 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			{
 				var _clientRepo = new ClientRepo(actContext);
 				var _addressValidator = new AddressDTOValidation();
-				var _clientValidator = new AddClientDTOValidation(_addressValidator);
-				var _clientService = new ClientService(_clientRepo, _mapper,
+				var _clientValidator = new UpdateClientDTOValidation(_addressValidator);
+				var _clientService = new ClientService(_clientRepo, _mapper, null,
 					//_addressValidator,
 					_clientValidator);
 
-				var ex = Assert.Throws<FluentValidation.ValidationException>(()=> _clientService.UpdateClient(updatedClient));
+				var ex = Assert.Throws<FluentValidation.ValidationException>(() => _clientService.UpdateClient(updatedClient));
 				Assert.Contains("tele", ex.Message);
-			}			
+			}
 		}
 		[Fact]
 		public void NotProperDataEmail_UpdateProduct_ThrowException()
@@ -201,7 +215,7 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				StreetName = "test",
 				StreetNumber = "test",
 			};
-			var updatedClient = new AddClientDTO
+			var updatedClient = new UpdateClientDTO
 			{
 				Id = 3,
 				Name = "test1",
@@ -214,8 +228,8 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			{
 				var _clientRepo = new ClientRepo(actContext);
 				var _addressValidator = new AddressDTOValidation();
-				var _clientValidator = new AddClientDTOValidation(_addressValidator);
-				var _clientService = new ClientService(_clientRepo, _mapper,
+				var _clientValidator = new UpdateClientDTOValidation(_addressValidator);
+				var _clientService = new ClientService(_clientRepo, _mapper, null,
 					//_addressValidator,
 					_clientValidator);
 
@@ -266,7 +280,7 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				StreetName = "test",
 				StreetNumber = "test",
 			};
-			var updatedClient = new AddClientDTO
+			var updatedClient = new UpdateClientDTO
 			{
 				Id = 10,
 				Name = "test1",
@@ -279,12 +293,12 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			{
 				var _clientRepo = new ClientRepo(actContext);
 				var _addressValidator = new AddressDTOValidation();
-				var _clientValidator = new AddClientDTOValidation(_addressValidator);
-				var _clientService = new ClientService(_clientRepo, _mapper,
+				var _clientValidator = new UpdateClientDTOValidation(_addressValidator);
+				var _clientService = new ClientService(_clientRepo, _mapper, null,
 					//_addressValidator,
 					_clientValidator);
 
-			await	_clientService.UpdateClientAsync(updatedClient);
+				await _clientService.UpdateClientAsync(updatedClient);
 			}
 			//Assert
 			using (var assertContext = new WerehouseDbContext(_contextOptions))
@@ -342,7 +356,7 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				StreetName = "test",
 				StreetNumber = "test",
 			};
-			var updatedClient = new AddClientDTO
+			var updatedClient = new UpdateClientDTO
 			{
 				Id = 20,
 				Name = "test1",
@@ -355,9 +369,9 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			{
 				var _clientRepo = new ClientRepo(actContext);
 				var _addressValidator = new AddressDTOValidation();
-				var _clientValidator = new AddClientDTOValidation(_addressValidator);
-				var _clientService = new ClientService(_clientRepo, _mapper,_clientValidator);
-				var ex =await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(updatedClient));
+				var _clientValidator = new UpdateClientDTOValidation(_addressValidator);
+				var _clientService = new ClientService(_clientRepo, _mapper, null, _clientValidator);
+				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(updatedClient));
 				Assert.Contains("tele", ex.Message);
 			}
 		}
@@ -404,7 +418,7 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				StreetName = "test",
 				StreetNumber = "test",
 			};
-			var updatedClient = new AddClientDTO
+			var updatedClient = new UpdateClientDTO
 			{
 				Id = 30,
 				Name = "test1",
@@ -417,12 +431,12 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 			{
 				var _clientRepo = new ClientRepo(actContext);
 				var _addressValidator = new AddressDTOValidation();
-				var _clientValidator = new AddClientDTOValidation(_addressValidator);
-				var _clientService = new ClientService(_clientRepo, _mapper,
+				var _clientValidator = new UpdateClientDTOValidation(_addressValidator);
+				var _clientService = new ClientService(_clientRepo, _mapper, null,
 					//_addressValidator,
 					_clientValidator);
 
-				var ex =await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(updatedClient));
+				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(updatedClient));
 				Assert.Contains("email", ex.Message);
 			}
 		}

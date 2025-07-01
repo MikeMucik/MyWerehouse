@@ -19,7 +19,9 @@ namespace MyWerehouse.Domain.Interfaces
 		void UpdateProduct(Product product);
 		Task UpdateProductAsync(Product product);
 		Product? GetProductById(int id);
+		Product? GetProductToEdit(int id);
 		Task<Product?> GetProductByIdAsync(int name);		
+		Task<Product?> GetProductToEditAsync(int name);		
 		IQueryable<Product> GetAllProducts();		
 		IQueryable<Product> FindProducts(ProductSearchFilter filter);		
 	}

@@ -53,7 +53,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.FirstOrDefault(p => p.PalletId == palletId && p.ProductId == productId);
 			if (productOnPallet == null)
 			{
-				throw new InvalidOperationException("Produkt nie istnieje na palecie");
+				throw new InvalidDataException("Produkt nie istnieje na palecie");
 			}
 			productOnPallet.Quantity = newQuantity;
 			productOnPallet.DateAdded = DateTime.Now;
@@ -63,7 +63,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			var productOnPallet = await _werehouseDbContext.ProductOnPallet
 				.FirstOrDefaultAsync(p => p.PalletId == palletId && p.ProductId == productId)
-				?? throw new InvalidOperationException("Produkt nie istnieje na palecie");
+				?? throw new InvalidDataException("Produkt nie istnieje na palecie");
 			productOnPallet.Quantity = newQuantity;
 			productOnPallet.DateAdded = DateTime.Now;
 			await _werehouseDbContext.SaveChangesAsync();

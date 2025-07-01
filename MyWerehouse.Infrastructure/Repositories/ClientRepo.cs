@@ -19,15 +19,14 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public int AddClient(Client client)
 		{
-
 			_werehouseDbContext.Clients.Add(client);
-			_werehouseDbContext.SaveChanges();
+			//_werehouseDbContext.SaveChanges();
 			return client.Id;
 		}
 		public async Task<int> AddClientAsync(Client client)
 		{
 			await _werehouseDbContext.Clients.AddAsync(client);
-			await _werehouseDbContext.SaveChangesAsync();
+			//await _werehouseDbContext.SaveChangesAsync();
 			return client.Id;
 		}
 		public void DeleteClientById(int id)
@@ -36,7 +35,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (client != null)
 			{
 				_werehouseDbContext.Remove(client);
-				_werehouseDbContext.SaveChanges();
+				//_werehouseDbContext.SaveChanges();
 			}
 		}
 		public async Task DeleteClientByIdAsync(int id)
@@ -45,7 +44,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (client != null)
 			{
 				_werehouseDbContext.Remove(client);
-				await _werehouseDbContext.SaveChangesAsync();
+				//await _werehouseDbContext.SaveChangesAsync();
 			}
 		}
 		public void SwitchOffClient(int id)
@@ -54,7 +53,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (client != null)
 			{
 				client.IsDeleted = true;
-				_werehouseDbContext.SaveChanges();
+				//_werehouseDbContext.SaveChanges();
 			}
 		}
 		public async Task SwitchOffClientAsync(int id)
@@ -63,7 +62,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (client != null)
 			{
 				client.IsDeleted = true;
-				await _werehouseDbContext.SaveChangesAsync();
+				//await _werehouseDbContext.SaveChangesAsync();
 			}
 		}
 		public Client? GetClientById(int id)
@@ -104,8 +103,8 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			return null;
 		}
-		public void UpdateClient(Client client)
-		{
+		//public void UpdateClient(Client client)
+		//{
 			//_werehouseDbContext.Attach(client);
 			//if (client.Name != null)
 			//{
@@ -153,19 +152,19 @@ namespace MyWerehouse.Infrastructure.Repositories
 			//	}
 			//}
 			// Sprawdź, czy encja jest już śledzona.
-			var entry = _werehouseDbContext.Entry(client);
+		//	var entry = _werehouseDbContext.Entry(client);
 
-			// Jeśli encja została 'odłączona' (detached), dołącz ją i oznacz jako zmodyfikowaną.
-			// Jeśli jest już śledzona (Unchanged, Modified), po prostu upewnij się, że stan jest Modified.
-			if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-			{
-				entry.State = EntityState.Modified;
-			}
-			// W przeciwnym razie (jeśli już jest Modified), nic nie rób, bo EF już wie.
-			_werehouseDbContext.SaveChanges();
-		}
-		public async Task UpdateClientAsync(Client client)
-		{
+		//	// Jeśli encja została 'odłączona' (detached), dołącz ją i oznacz jako zmodyfikowaną.
+		//	// Jeśli jest już śledzona (Unchanged, Modified), po prostu upewnij się, że stan jest Modified.
+		//	if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+		//	{
+		//		entry.State = EntityState.Modified;
+		//	}
+		//	// W przeciwnym razie (jeśli już jest Modified), nic nie rób, bo EF już wie.
+		//	_werehouseDbContext.SaveChanges();
+		//}
+		//public async Task UpdateClientAsync(Client client)
+		//{
 			//_werehouseDbContext.Attach(client);
 			//var clientEntry = _werehouseDbContext.Entry(client);
 			//if (client.Name != null)
@@ -213,17 +212,17 @@ namespace MyWerehouse.Infrastructure.Repositories
 			//		}
 			//	}
 			//}
-			var entry = _werehouseDbContext.Entry(client);
+		//	var entry = _werehouseDbContext.Entry(client);
 
-			// Jeśli encja została 'odłączona' (detached), dołącz ją i oznacz jako zmodyfikowaną.
-			// Jeśli jest już śledzona (Unchanged, Modified), po prostu upewnij się, że stan jest Modified.
-			if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-			{
-				entry.State = EntityState.Modified;
-			}
-			// W przeciwnym razie (jeśli już jest Modified), nic nie rób, bo EF już wie.
-			await _werehouseDbContext.SaveChangesAsync();
-		}
+		//	// Jeśli encja została 'odłączona' (detached), dołącz ją i oznacz jako zmodyfikowaną.
+		//	// Jeśli jest już śledzona (Unchanged, Modified), po prostu upewnij się, że stan jest Modified.
+		//	if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+		//	{
+		//		entry.State = EntityState.Modified;
+		//	}
+		//	// W przeciwnym razie (jeśli już jest Modified), nic nie rób, bo EF już wie.
+		//	await _werehouseDbContext.SaveChangesAsync();
+		//}
 		public IQueryable<Client> GetClients(ClientSearchFilter clientFilter)
 		{
 			var result = _werehouseDbContext.Clients

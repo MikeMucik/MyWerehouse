@@ -11,6 +11,7 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
+using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services
 {
@@ -20,15 +21,18 @@ namespace MyWerehouse.Application.Services
 		private readonly IMapper _mapper;
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IValidator<AddProductDTO> _productValidator;
+		private readonly WerehouseDbContext _werehouseDbContext;
 
 		public ProductService(
 			IProductRepo repo,
 			IMapper mapper,
+			WerehouseDbContext werehouseDbContext,
 			IReceiptRepo? receiptRepo = null,
 			IValidator<AddProductDTO>? productValidator = null)
 		{
 			_productRepo = repo;
 			_mapper = mapper;
+			_werehouseDbContext = werehouseDbContext;
 			_receiptRepo = receiptRepo;
 			_productValidator = productValidator;
 		}
@@ -134,45 +138,48 @@ namespace MyWerehouse.Application.Services
 			var productDTO = _mapper.Map<AddProductDTO>(product);
 			return productDTO;
 		}
-		public void UpdateProduct(AddProductDTO product)
+		public void UpdateProduct(AddProductDTO productDTO)
 		{
-			var validationResult = _productValidator.Validate(product);
+			var validationResult = _productValidator.Validate(productDTO);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
+			}		
+			var existingProduct = _productRepo.GetProductToEdit(productDTO.Id);
+			if (existingProduct == null)
+			{
+				throw new InvalidDataException($"Produkt o numerze {productDTO.Id} nie istnieje");
 			}
-			//if (string.IsNullOrWhiteSpace(product.Name) ||
-			//	string.IsNullOrWhiteSpace(product.SKU) ||
-			//	product.CategoryId == 0 ||
-			//	product.Length == 0 ||
-			//	product.Width == 0 ||
-			//	product.Height == 0 ||
-			//	product.Weight == 0)
-			//{
-			//	throw new InvalidDataException("Uzupełnij wszystkie dane produktu.");
-			//}
-			var productNew = _mapper.Map<Product>(product);
-			_productRepo.UpdateProduct(productNew);
+			_mapper.Map(productDTO, existingProduct);			
+			_productRepo.UpdateProduct(existingProduct);
 		}
-		public async Task UpdateProductAsync(AddProductDTO product)
+		
+		public async Task UpdateProductAsync(AddProductDTO productDTO)
 		{
-			var validationResult = _productValidator.Validate(product);
+			var validationResult = _productValidator.Validate(productDTO);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var productNew = _mapper.Map<Product>(product);
-			await _productRepo.UpdateProductAsync(productNew);
+			var existingProduct =await _productRepo.GetProductToEditAsync(productDTO.Id);
+			if (existingProduct == null)
+			{
+				throw new InvalidDataException($"Produkt o numerze {productDTO.Id} nie istnieje");
+			}
+			_mapper.Map(productDTO, existingProduct);
+			await _productRepo.UpdateProductAsync(existingProduct);
 		}
 		public DetailsOfProductDTO DetailsOfProduct(int productId)
 		{
-			var product = _productRepo.GetProductById(productId);
+			//var product = _productRepo.GetProductById(productId);
+			var product = _productRepo.GetProductToEdit(productId);
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
 			return productDTO;
 		}
 		public async Task<DetailsOfProductDTO> DetailsOfProductAsync(int productId)
 		{
-			var product = await _productRepo.GetProductByIdAsync(productId);
+			//var product = await _productRepo.GetProductByIdAsync(productId);
+			var product = await _productRepo.GetProductToEditAsync(productId);
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
 			return productDTO;
 		}

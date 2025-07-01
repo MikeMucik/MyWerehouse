@@ -18,6 +18,7 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<Location> Locations { get; set; }
 		public DbSet<Pallet> Pallets { get; set; }
 		public DbSet<PalletMovement> PalletMovement { get; set; }
+		public DbSet<PalletMovementDetails> PalletMovementDetails { get; set; }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<ProductDetails> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
@@ -67,7 +68,14 @@ namespace MyWerehouse.Infrastructure
 					.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
 
 				entity.Property(m => m.Reason)
-				.HasConversion<string>();
+				.HasConversion<string>();			
+			});
+
+			modelBuilder.Entity<PalletMovementDetails>(entity =>
+			{
+				entity.HasOne(md => md.PalletMovement)
+				.WithMany(pm => pm.PalletMovementDetails)
+				.HasForeignKey(md => md.PalletMovementId);
 			});
 
 			modelBuilder.Entity<Product>(entity =>

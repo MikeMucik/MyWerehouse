@@ -11,6 +11,7 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
+using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services
 {
@@ -20,47 +21,47 @@ namespace MyWerehouse.Application.Services
 		private readonly IProductRepo _productRepo;
 		private readonly IMapper _mapper;
 		private readonly IValidator<CategoryDTO> _validator;
+		private readonly WerehouseDbContext _werehouseDbContext;
 		public CategoryService(
-			ICategoryRepo categoryRepo,			
-			IMapper mapper,
+			ICategoryRepo categoryRepo,
+			IMapper mapper,			
+			WerehouseDbContext werehouseDbContext,
 			IProductRepo? productRepo = null,
 			IValidator<CategoryDTO>? validator = null)
 		{
-			_categoryRepo = categoryRepo;			
-			_mapper = mapper;
+			_categoryRepo = categoryRepo;
+			_mapper = mapper;			
+			_werehouseDbContext = werehouseDbContext;
 			_productRepo = productRepo;
 			_validator = validator;
 		}
 		public CategoryService(
 			ICategoryRepo categoryRepo,
 			IMapper mapper
-			, IValidator<CategoryDTO>? validator
+			//,WerehouseDbContext werehouseDbContext,
+			//IValidator<CategoryDTO>? validator
 			)
 		{
 			_categoryRepo = categoryRepo;
 			_mapper = mapper;
-			_validator = validator;
+			//_werehouseDbContext = werehouseDbContext;
+			//_validator = validator;
 		}
-		//public CategoryService(
-		//	ICategoryRepo categoryRepo,
-		//	IMapper mapper			
-		//	)
-		//{
-		//	_categoryRepo = categoryRepo;
-		//	_mapper = mapper;			
-		//}
+		
 		public void AddCategory(CategoryDTO categoryDTO)
 		{
 			if (string.IsNullOrEmpty(categoryDTO.Name))
 			{
 				throw new InvalidDataException("Brak nazwy kategorii");
 			}
-			if (_categoryRepo.GetCategoryByName(categoryDTO.Name) == null)
+			var nameOfCategory = _categoryRepo.GetCategoryByName(categoryDTO.Name);
+			if (nameOfCategory != null)
 			{
-				var category = _mapper.Map<Category>(categoryDTO);
-				_categoryRepo.AddCategory(category);
+				throw new InvalidDataException("Kategoria o tej nazwie już istnieje.");
 			}
-			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }
+			var category = _mapper.Map<Category>(categoryDTO);
+			_categoryRepo.AddCategory(category);
+			 _werehouseDbContext.SaveChanges();
 		}
 		public async Task AddCategoryAsync(CategoryDTO categoryDTO)
 		{
@@ -68,12 +69,13 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new InvalidDataException("Brak nazwy kategorii");
 			}
-			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) == null)
+			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) != null)
 			{
-				var category = _mapper.Map<Category>(categoryDTO);
-				await _categoryRepo.AddCategoryAsync(category);
+				throw new InvalidDataException("Kategoria o tej nazwie już istnieje.");				
 			}
-			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }
+			var category = _mapper.Map<Category>(categoryDTO);
+				await _categoryRepo.AddCategoryAsync(category);
+			await _werehouseDbContext.SaveChangesAsync();
 		}
 		public void DeleteCategory(int id)
 		{
@@ -81,7 +83,7 @@ namespace MyWerehouse.Application.Services
 			{
 				var filter = new ProductSearchFilter//do przemyślenia
 				{
-					CategoryId = id,					
+					CategoryId = id,
 				};
 				var products = _productRepo.FindProducts(filter);
 				if (products.Any())
@@ -92,6 +94,7 @@ namespace MyWerehouse.Application.Services
 				{
 					_categoryRepo.DeleteCategory(id);
 				}
+				_werehouseDbContext.SaveChanges() ;
 			}
 			else { throw new ArgumentException($"Kategoria o ID {id} nie została znalezniona", nameof(id)); }
 		}
@@ -101,7 +104,7 @@ namespace MyWerehouse.Application.Services
 			{
 				var filter = new ProductSearchFilter
 				{
-					CategoryId = id,					
+					CategoryId = id,
 				};
 				var products = _productRepo.FindProducts(filter);
 				if (await products.AnyAsync())
@@ -112,22 +115,30 @@ namespace MyWerehouse.Application.Services
 				{
 					await _categoryRepo.DeleteCategoryAsync(id);
 				}
+				await _werehouseDbContext.SaveChangesAsync();
 			}
 			else { throw new ArgumentException($"Kategoria o ID {id} nie została znalezniona", nameof(id)); }
 		}
-		
+
 		public void UpdateCategory(CategoryDTO categoryDTO)
 		{
 			if (string.IsNullOrEmpty(categoryDTO.Name))
 			{
 				throw new InvalidDataException("Brak nazwy kategorii - proszę podać");
 			}
-			if (_categoryRepo.GetCategoryByName(categoryDTO.Name) == null)
+			var existingCategory = _categoryRepo.GetCategoryById(categoryDTO.Id);
+			if (existingCategory != null)
 			{
-				var category = _mapper.Map<Category>(categoryDTO);
-				_categoryRepo.UpdateCategory(category);
-			}			
-			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }			
+				var categoryWithSameName = _categoryRepo.GetCategoryByName(categoryDTO.Name);
+				if (categoryWithSameName != null && categoryWithSameName.Id == existingCategory.Id)
+				{
+					throw new InvalidDataException("Kategoria o tej nazwie już istnieje.");
+				}
+				existingCategory.Name = categoryDTO.Name;
+				//_categoryRepo.UpdateCategory(existingCategory);
+				_werehouseDbContext.SaveChanges();
+			}
+			else throw new ArgumentException($"Brak kategori o numerze {existingCategory.Id}");
 		}
 		public async Task UpdateCategoryAsync(CategoryDTO categoryDTO)
 		{
@@ -135,12 +146,19 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new InvalidDataException("Brak nazwy kategorii - proszę podać");
 			}
-			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) == null)
+			var existingCategory = await _categoryRepo.GetCategoryByIdAsync(categoryDTO.Id);
+			if (existingCategory != null)
 			{
-				var category = _mapper.Map<Category>(categoryDTO);
-				await _categoryRepo.UpdateCategoryAsync(category);
+				var categoryWithSameName = await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name);
+				if (categoryWithSameName != null && categoryWithSameName.Id == existingCategory.Id)
+				{
+					throw new InvalidDataException("Kategoria o tej nazwie już istnieje.");
+				}
+				existingCategory.Name = categoryDTO.Name;
+				//await _categoryRepo.UpdateCategoryAsync(existingCategory);
+				await _werehouseDbContext.SaveChangesAsync();
 			}
-			else { throw new InvalidDataException("Kategoria o tej nazwie już istnieje."); }
+			else throw new ArgumentException($"Brak kategori o numerze {existingCategory.Id}");
 		}
 		public ListCategoriesDTO GetCategories(int pageSize, int pageNumber)
 		{
@@ -165,7 +183,7 @@ namespace MyWerehouse.Application.Services
 			var categories = _categoryRepo.GetAllCategories()
 				.OrderBy(c => c.Name)
 				.ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider);
-			var categoriesToShow =await categories
+			var categoriesToShow = await categories
 				.Skip(pageSize * (pageNumber - 1))
 				.Take(pageSize)
 				.ToListAsync();
@@ -174,10 +192,9 @@ namespace MyWerehouse.Application.Services
 				Categories = categoriesToShow,
 				PageSize = pageSize,
 				CurrentPage = pageNumber,
-				Count =await categories.CountAsync()
+				Count = await categories.CountAsync()
 			};
 			return categoriesList;
 		}
-
 	}
 }

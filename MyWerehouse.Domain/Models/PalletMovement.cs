@@ -11,13 +11,14 @@ namespace MyWerehouse.Domain.Models
 		public int Id { get; set; }
 		public string PalletId { get; set; }
 		public virtual Pallet Pallet { get; set; }		
-		public int ProductId { get; set; }
-		public virtual Product Product { get; set; }
+		//public int ProductId { get; set; }
+		//public virtual Product Product { get; set; }
 		public int LocationId { get; set; }
 		public virtual Location Location { get; set; }			  
 		public ReasonMovement Reason { get; set; } // np. "Picking", "Correction", "Merge"
 		public string? PerformedBy { get; set; } // opcjonalnie: user
-		public int Quantity { get; set; } //+ dodano do palet - usunięto z palety
+		//public int Quantity { get; set; } //+ dodano do palet - usunięto z palety
+		public virtual ICollection<PalletMovementDetails> PalletMovementDetails { get; set; }
 		public DateTime MovementDate { get; set; }
 	}
 }

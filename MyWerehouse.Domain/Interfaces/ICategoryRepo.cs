@@ -15,8 +15,8 @@ namespace MyWerehouse.Domain.Interfaces
 		Task DeleteCategoryAsync(int idCategory);
 		void SwitchOffCategory(int idCategory);
 		Task SwitchOffCategoryAsync(int idCategory);
-		void UpdateCategory(Category category);
-		Task UpdateCategoryAsync(Category category);		
+		//void UpdateCategory(Category category);
+		//Task UpdateCategoryAsync(Category category);		
 		Category? GetCategoryById(int id);
 		Task<Category?> GetCategoryByIdAsync(int id);
 		Category? GetCategoryByName(string name);

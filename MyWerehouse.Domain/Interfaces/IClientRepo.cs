@@ -17,8 +17,8 @@ namespace MyWerehouse.Domain.Interfaces
 		Task SwitchOffClientAsync(int id);
 		Client? GetClientById(int id);
 		Task<Client?> GetClientByIdAsync (int id); 
-		void UpdateClient (Client client);
-		Task UpdateClientAsync(Client client);		
+		//void UpdateClient (Client client);
+		//Task UpdateClientAsync(Client client);		
 		IQueryable<Client> GetAllClients();
 		IQueryable<Client> GetClients (ClientSearchFilter clientFilter);
 	}

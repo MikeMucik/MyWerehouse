@@ -65,76 +65,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 		}
 		public void UpdateProduct(Product product)
-		{
-			_werehouseDbContext.Attach(product);
-			if (product.Name != null)
-			{
-				_werehouseDbContext.Entry(product).Property(nameof(product.Name)).IsModified = true;
-			}
-			if (product.SKU != null)
-			{
-				_werehouseDbContext.Entry(product).Property(nameof(product.SKU)).IsModified = true;
-			}
-			if (product.Category != null)
-			{
-				_werehouseDbContext.Entry(product).Property(nameof(product.Category)).IsModified = true;
-			}
-			if (product.CategoryId != 0)
-			{
-				_werehouseDbContext.Entry(product).Property(nameof(product.CategoryId)).IsModified = true;
-			}
-			if (product.CartonsPerPallet != 0)
-			{
-				_werehouseDbContext.Entry(product).Property(nameof(product.CartonsPerPallet)).IsModified = true;
-			}
-			if (product.Details != null)
-			{
-				_werehouseDbContext.Attach(product.Details);
-
-				_werehouseDbContext.Entry(product.Details).Property(d => d.Height).IsModified = true;
-				_werehouseDbContext.Entry(product.Details).Property(d => d.Width).IsModified = true;
-				_werehouseDbContext.Entry(product.Details).Property(d => d.Length).IsModified = true;
-				_werehouseDbContext.Entry(product.Details).Property(d => d.Weight).IsModified = true;
-				_werehouseDbContext.Entry(product.Details).Property(d => d.Description).IsModified = true;
-			}
-			_werehouseDbContext.Entry(product).Property(nameof(Product.IsDeleted)).IsModified = true;
+		{			
 			_werehouseDbContext.SaveChanges();
 		}
 		public async Task UpdateProductAsync(Product product)
-		{
-			_werehouseDbContext.Attach(product);
-			var productEntry = _werehouseDbContext.Entry(product);
-			if (product.Name != null)
-			{
-				productEntry.Property(p => p.Name).IsModified = true;
-			}
-			if (product.SKU != null)
-			{
-				productEntry.Property(p => p.SKU).IsModified = true;
-			}
-			if (product.Category != null)
-			{
-				productEntry.Property(p => p.Category).IsModified = true;
-			}
-			if (product.CategoryId != 0)
-			{
-				productEntry.Property(p => p.CategoryId).IsModified = true;
-			}
-			if (product.CartonsPerPallet != 0)
-			{
-				productEntry.Property(p => p.CartonsPerPallet).IsModified = true;
-			}
-			if (product.Details != null)
-			{
-				_werehouseDbContext.Attach(product.Details);
-				var detailsEntry = _werehouseDbContext.Entry(product.Details);
-				detailsEntry.Property(d => d.Height).IsModified = true;
-				detailsEntry.Property(d => d.Width).IsModified = true;
-				detailsEntry.Property(d => d.Length).IsModified = true;
-				detailsEntry.Property(d => d.Weight).IsModified = true;
-				detailsEntry.Property(d => d.Description).IsModified = true;
-			}
-			productEntry.Property(p => p.IsDeleted).IsModified = true;
+		{			
 			await _werehouseDbContext.SaveChangesAsync();
 		}
 		public Product? GetProductById(int id)
@@ -142,7 +77,18 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (id > 0)
 			{
 				var product = _werehouseDbContext.Products
-					.Include(p => p.Category)
+					//.Include(p => p.Category)
+					//.Include(p => p.Details)
+					.FirstOrDefault(p => p.Id == id);
+				return product;
+			}
+			return null;
+		}
+		public Product? GetProductToEdit(int id)
+		{
+			if (id > 0)
+			{
+				var product = _werehouseDbContext.Products					
 					.Include(p => p.Details)
 					.FirstOrDefault(p => p.Id == id);
 				return product;
@@ -153,14 +99,23 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			if (id > 0)
 			{
-				var product = await _werehouseDbContext.Products
-					.Include(p => p.Category)
+				var product = await _werehouseDbContext.Products					
+					.FirstOrDefaultAsync(p => p.Id == id);
+				return product;
+			}
+			return null;
+		}
+		public async Task<Product?> GetProductToEditAsync(int id)
+		{
+			if (id > 0)
+			{
+				var product = await _werehouseDbContext.Products					
 					.Include(p => p.Details)
 					.FirstOrDefaultAsync(p => p.Id == id);
 				return product;
 			}
 			return null;
-		}		
+		}
 		public IQueryable<Product> GetAllProducts()
 		{
 			return _werehouseDbContext.Products.Where(p => p.IsDeleted == false);

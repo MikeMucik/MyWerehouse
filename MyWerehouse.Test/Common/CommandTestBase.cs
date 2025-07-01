@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Moq;
 using MyWerehouse.Infrastructure;
@@ -12,15 +13,30 @@ namespace MyWerehouse.Test.Common
 	public class CommandTestBase : IDisposable
 	{
 		protected readonly WerehouseDbContext _context;
-		protected readonly Mock<WerehouseDbContext> _contextMock;	
+		//protected readonly Mock<WerehouseDbContext> _contextMock;	
+		//public CommandTestBase()
+		//{
+		//	_contextMock = DbContextFactory.Create();
+		//	_context = _contextMock.Object;
+		//}
 		public CommandTestBase()
 		{
-			_contextMock = DbContextFactory.Create();
-			_context = _contextMock.Object;
+			var options = new DbContextOptionsBuilder<WerehouseDbContext>()
+				.UseInMemoryDatabase(Guid.NewGuid().ToString())
+				.Options;
+
+			_context = new WerehouseDbContext(options);
+
+			_context.Database.EnsureCreated();
 		}
+		//public void Dispose()
+		//{
+		//	DbContextFactory.Destroy(_context);
+		//}
 		public void Dispose()
 		{
-			DbContextFactory.Destroy(_context);
+			_context.Database.EnsureDeleted();
+			_context.Dispose();
 		}
 	}
 }

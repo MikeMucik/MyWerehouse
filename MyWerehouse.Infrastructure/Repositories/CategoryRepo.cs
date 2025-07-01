@@ -20,12 +20,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public void AddCategory(Category category)
 		{
 			_werehouseDbContext.Categories.Add(category);
-			_werehouseDbContext.SaveChanges();
+			//_werehouseDbContext.SaveChanges();
 		}
 		public async Task AddCategoryAsync(Category category)
 		{
 			await _werehouseDbContext.Categories.AddAsync(category);
-			await _werehouseDbContext.SaveChangesAsync();
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
 		public void DeleteCategory(int idCategory)
 		{
@@ -33,7 +33,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (category != null)
 			{
 				_werehouseDbContext.Categories.Remove(category);
-				_werehouseDbContext.SaveChanges();
+				//_werehouseDbContext.SaveChanges();
 			}
 		}
 		public async Task DeleteCategoryAsync(int idCategory)
@@ -42,7 +42,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (category != null)
 			{
 				_werehouseDbContext.Categories.Remove(category);
-				await _werehouseDbContext.SaveChangesAsync();
+			//	await _werehouseDbContext.SaveChangesAsync();
 			}
 		}
 		public void SwitchOffCategory(int idCategory)
@@ -63,19 +63,19 @@ namespace MyWerehouse.Infrastructure.Repositories
 				await _werehouseDbContext.SaveChangesAsync();
 			}
 		}
-		public void UpdateCategory(Category category)
-		{
-			_werehouseDbContext.Attach(category);			
-			_werehouseDbContext.Entry(category).Property(nameof(category.Name)).IsModified = true;
-			_werehouseDbContext.SaveChanges();
+		//public void UpdateCategory(Category category)
+		//{
+		//	//_werehouseDbContext.Attach(category);			
+		//	//_werehouseDbContext.Entry(category).Property(nameof(category.Name)).IsModified = true;
+		//	_werehouseDbContext.SaveChanges();
 			
-		}
-		public async Task UpdateCategoryAsync(Category category)
-		{
-			_werehouseDbContext.Attach(category);			
-			_werehouseDbContext.Entry(category).Property(nameof(category.Name)).IsModified = true;
-			await _werehouseDbContext.SaveChangesAsync();			
-		}
+		//}
+		//public async Task UpdateCategoryAsync(Category category)
+		//{
+		//	//_werehouseDbContext.Attach(category);			
+		//	//_werehouseDbContext.Entry(category).Property(nameof(category.Name)).IsModified = true;
+		//	await _werehouseDbContext.SaveChangesAsync();			
+		//}
 		public Category? GetCategoryById(int id)
 		{
 			return _werehouseDbContext.Categories.SingleOrDefault(c=>c.Id ==id);

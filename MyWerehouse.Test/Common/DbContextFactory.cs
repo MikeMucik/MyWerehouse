@@ -242,53 +242,92 @@ namespace MyWerehouse.Test.Common
 					{
 						Id = 1,
 						PalletId = "Q1000",
-						ProductId = 10,
+						//ProductId = 10,
 						LocationId = 2,
 						Reason = ReasonMovement.ManualMove,
-						Quantity = 1,
+						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
 					new PalletMovement
 					{
 						Id = 2,
 						PalletId = "Q1001",
-						ProductId = 10,
+						//ProductId = 10,
 						LocationId = 1,
 						Reason = ReasonMovement.ManualMove,
-						Quantity = 1,
+						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
 					new PalletMovement
 					{
 						Id = 3,
 						PalletId = "Q1002",
-						ProductId = 11,
+						//ProductId = 11,
 						LocationId = 3,
 						Reason = ReasonMovement.ManualMove,
-						Quantity = 1,
+						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
 					new PalletMovement
 					{
 						Id = 4,
 						PalletId = "Q1010",
-						ProductId = 10,
+						//ProductId = 10,
 						LocationId = 3,
 						Reason = ReasonMovement.ManualMove,
-						Quantity = 1,
+						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
 					new PalletMovement
 					{
 						Id = 5,
 						PalletId = "Q1000",
-						ProductId = 10,
+						//ProductId = 10,
 						LocationId = 3,
 						Reason = ReasonMovement.ManualMove,
-						Quantity = 1,
+						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					}
 				);
+			}
+			if(!context.PalletMovementDetails.Any())
+			{
+				context.PalletMovementDetails.AddRange(
+					new PalletMovementDetails
+					{
+						Id = 1,
+						PalletMovementId = 1,
+						ProductId = 10,
+						Quantity = 1,
+					},
+					new PalletMovementDetails
+					{
+						Id = 2,
+						PalletMovementId = 2,
+						ProductId = 11,
+						Quantity = 1,
+					},
+					new PalletMovementDetails
+					{
+						Id = 3,
+						PalletMovementId = 3,
+						ProductId = 11,
+						Quantity = 1,
+					},
+					new PalletMovementDetails
+					{
+						Id = 4,
+						PalletMovementId = 4,
+						ProductId = 10,
+						Quantity = 1,
+					},
+					new PalletMovementDetails
+					{
+						Id = 5,
+						PalletMovementId = 5,
+						ProductId = 10,
+						Quantity = 1,
+					});
 			}
 			if (!context.Inventory.Any())
 			{

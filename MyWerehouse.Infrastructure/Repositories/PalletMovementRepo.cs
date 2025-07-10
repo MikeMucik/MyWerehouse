@@ -19,17 +19,17 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 		public void AddPalletMovement(PalletMovement palletMovement)
 		{
-			_werehouseDbContext.PalletMovement.Add(palletMovement);
+			_werehouseDbContext.PalletMovements.Add(palletMovement);
 			//_werehouseDbContext.SaveChanges();
 		}
 		public async Task AddPalletMovementAsync(PalletMovement palletMovement)
 		{
-			await _werehouseDbContext.PalletMovement.AddAsync(palletMovement);
+			await _werehouseDbContext.PalletMovements.AddAsync(palletMovement);
 			//await _werehouseDbContext.SaveChangesAsync();
 		}
 		public IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter)
 		{
-			var result = _werehouseDbContext.PalletMovement
+			var result = _werehouseDbContext.PalletMovements
 				.Include(md => md.PalletMovementDetails)
 					.ThenInclude(m => m.Product)
 				.AsQueryable();
@@ -47,11 +47,15 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result
 					.Where(p => p.PalletMovementDetails
 					.Any(md => md.Product.Name != null && md.Product.Name
-					.Contains(filter.ProductName, StringComparison.CurrentCultureIgnoreCase)));				
+					.Contains(filter.ProductName, StringComparison.CurrentCultureIgnoreCase)));
 			}
-			if (filter.LocationId > 0)
+			if (filter.SourceLocationId > 0)
 			{
-				result = result.Where(p => p.LocationId == filter.LocationId);
+				result = result.Where(p => p.SourceLocationId == filter.SourceLocationId);
+			}
+			if (filter.DestinationLocationId > 0)
+			{
+				result = result.Where(p => p.DestinationLocationId == filter.DestinationLocationId);
 			}
 			if (filter.Reason != null)
 			{
@@ -64,7 +68,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (filter.Quantity != null)
 			{
 				result = result
-					.Where(p => p.PalletMovementDetails.Any(md => md.Quantity == filter.Quantity));					
+					.Where(p => p.PalletMovementDetails.Any(md => md.Quantity == filter.Quantity));
 			}
 			if (filter.MovementDateStart != null)
 			{
@@ -78,7 +82,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public bool CanDeletePallet(string id)
 		{
-			int movementCount = _werehouseDbContext.PalletMovement
+			int movementCount = _werehouseDbContext.PalletMovements
 				.Where(p => p.PalletId == id)
 				.Take(2)
 				.Count();
@@ -86,11 +90,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public async Task<bool> CanDeletePalletAsync(string id)
 		{
-			int movementCount = await _werehouseDbContext.PalletMovement
+			int movementCount = await _werehouseDbContext.PalletMovements
 				.Where(p => p.PalletId == id)
 				.Take(2)
 				.CountAsync();
 			return movementCount <= 1;
-		}
+		}		
 	}
 }

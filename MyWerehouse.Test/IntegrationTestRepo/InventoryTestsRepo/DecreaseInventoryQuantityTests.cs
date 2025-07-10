@@ -23,14 +23,14 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var initialQuantity = 10;
 			var initialProductId = 10;
 			var initialInventory = new Inventory { ProductId = initialProductId, Quantity = initialQuantity, LastUpdated = DateTime.UtcNow.AddDays(-1) };
-			_context.Inventory.Add(initialInventory);
+			_context.Inventories.Add(initialInventory);
 			_context.SaveChanges();
 			//Act
 			var productId = 10;
 			var quantity = 5;
 			_inventoryRepo.DecreaseInventoryQuantity(productId, quantity);
 			//Assert
-			var result = _context.Inventory.FirstOrDefault(i => i.ProductId == productId);
+			var result = _context.Inventories.FirstOrDefault(i => i.ProductId == productId);
 			Assert.NotNull(result);
 			Assert.Equal(quantity, result.Quantity);
 			Assert.InRange(result.LastUpdated, DateTime.UtcNow.AddSeconds(-15), DateTime.UtcNow);
@@ -42,14 +42,14 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var initialQuantity = 10;
 			var initialProductId = 10;
 			var initialInventory = new Inventory { ProductId = initialProductId, Quantity = initialQuantity, LastUpdated = DateTime.UtcNow.AddDays(-1) };
-			_context.Inventory.Add(initialInventory);
+			_context.Inventories.Add(initialInventory);
 			_context.SaveChanges();
 			//Act
 			var productId = 10;
 			var quantity = 5;
 			await _inventoryRepo.DecreaseInventoryQuantityAsync(productId, quantity);
 			//Assert
-			var result = _context.Inventory.FirstOrDefault(i => i.ProductId == productId);
+			var result = _context.Inventories.FirstOrDefault(i => i.ProductId == productId);
 			Assert.NotNull(result);
 			Assert.Equal(quantity, result.Quantity);//DbContextFactory Q=10 -> 10 - 5 =5
 			Assert.InRange(result.LastUpdated, DateTime.UtcNow.AddSeconds(-15), DateTime.UtcNow);
@@ -61,7 +61,7 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var initialQuantity = 10;
 			var initialProductId = 10;
 			var initialInventory = new Inventory { ProductId = initialProductId, Quantity = initialQuantity, LastUpdated = DateTime.UtcNow.AddDays(-1) };
-			_context.Inventory.Add(initialInventory);
+			_context.Inventories.Add(initialInventory);
 			_context.SaveChanges();
 			//Act&Assert
 			var productId = 10;
@@ -77,7 +77,7 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var initialQuantity = 10;
 			var initialProductId = 10;
 			var initialInventory = new Inventory { ProductId = initialProductId, Quantity = initialQuantity, LastUpdated = DateTime.UtcNow.AddDays(-1) };
-			_context.Inventory.Add(initialInventory);
+			_context.Inventories.Add(initialInventory);
 			_context.SaveChanges();
 			
 			//Act&Assert
@@ -94,7 +94,7 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var initialQuantity = 10;
 			var initialProductId = 10;
 			var initialInventory = new Inventory { ProductId = initialProductId, Quantity = initialQuantity, LastUpdated = DateTime.UtcNow.AddDays(-1) };
-			_context.Inventory.Add(initialInventory);
+			_context.Inventories.Add(initialInventory);
 			_context.SaveChanges();			
 			//Act&Assert
 			var productId = 1000;
@@ -109,7 +109,7 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			var initialQuantity = 10;
 			var initialProductId = 10;
 			var initialInventory = new Inventory { ProductId = initialProductId, Quantity = initialQuantity, LastUpdated = DateTime.UtcNow.AddDays(-1) };
-			_context.Inventory.Add(initialInventory);
+			_context.Inventories.Add(initialInventory);
 			_context.SaveChanges();			
 			//Act&Assert
 			var productId = 1000;

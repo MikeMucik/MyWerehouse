@@ -12,25 +12,6 @@ namespace MyWerehouse.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Adresses",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StreetName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StreetNumber = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Adresses", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -75,28 +56,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProductDetails",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Length = table.Column<int>(type: "int", nullable: false),
-                    Height = table.Column<int>(type: "int", nullable: false),
-                    Width = table.Column<int>(type: "int", nullable: false),
-                    Weight = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductDetails", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -106,19 +71,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AdressId = table.Column<int>(type: "int", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clients", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Clients_Adresses_AdressId",
-                        column: x => x.AdressId,
-                        principalTable: "Adresses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -236,7 +196,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SKU = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AddedItemAd = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CartonsPerPallet = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -250,21 +212,55 @@ namespace MyWerehouse.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Inventory",
+                name: "Addresses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Phone = table.Column<int>(type: "int", nullable: false),
+                    PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StreetName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StreetNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AdditionalEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClientId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Addresses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Addresses_Clients_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Inventories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId1 = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Inventory", x => x.Id);
+                    table.PrimaryKey("PK_Inventories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Inventory_Products_ProductId",
+                        name: "FK_Inventories_Products_ProductId",
                         column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Inventories_Products_ProductId1",
+                        column: x => x.ProductId1,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -279,6 +275,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     IssueDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    SendedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -295,6 +293,28 @@ namespace MyWerehouse.Infrastructure.Migrations
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductDetails",
+                columns: table => new
+                {
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Length = table.Column<int>(type: "int", nullable: false),
+                    Height = table.Column<int>(type: "int", nullable: false),
+                    Width = table.Column<int>(type: "int", nullable: false),
+                    Weight = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductDetails", x => x.ProductId);
+                    table.ForeignKey(
+                        name: "FK_ProductDetails_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -340,9 +360,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Locations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Locations_Inventory_InventoryId",
+                        name: "FK_Locations_Inventories_InventoryId",
                         column: x => x.InventoryId,
-                        principalTable: "Inventory",
+                        principalTable: "Inventories",
                         principalColumn: "Id");
                 });
 
@@ -350,12 +370,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "Pallets",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     DateReceived = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IssueId = table.Column<int>(type: "int", nullable: true),
-                    ReceiptId = table.Column<int>(type: "int", nullable: true)
+                    ReceiptId = table.Column<int>(type: "int", nullable: true),
+                    IssueId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -379,36 +399,57 @@ namespace MyWerehouse.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PalletMovement",
+                name: "PalletMovements",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PalletId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    PalletId = table.Column<string>(type: "nvarchar(10)", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
                     MovementDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PalletMovement", x => x.Id);
+                    table.PrimaryKey("PK_PalletMovements", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PalletMovement_Locations_LocationId",
+                        name: "FK_PalletMovements_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PalletMovement_Pallets_PalletId",
+                        name: "FK_PalletMovements_Pallets_PalletId",
                         column: x => x.PalletId,
                         principalTable: "Pallets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductOnPallet",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    PalletId = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BestBefore = table.Column<DateTime>(type: "date", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductOnPallet", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PalletMovement_Products_ProductId",
+                        name: "FK_ProductOnPallet_Pallets_PalletId",
+                        column: x => x.PalletId,
+                        principalTable: "Pallets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductOnPallet_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -416,39 +457,36 @@ namespace MyWerehouse.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductInLocations",
+                name: "PalletMovementDetails",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    PalletMovementId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    PalletId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    BestBefore = table.Column<DateTime>(type: "date", nullable: true),
-                    LocationId = table.Column<int>(type: "int", nullable: true)
+                    Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductInLocations", x => x.Id);
+                    table.PrimaryKey("PK_PalletMovementDetails", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductInLocations_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ProductInLocations_Pallets_PalletId",
-                        column: x => x.PalletId,
-                        principalTable: "Pallets",
+                        name: "FK_PalletMovementDetails_PalletMovements_PalletMovementId",
+                        column: x => x.PalletMovementId,
+                        principalTable: "PalletMovements",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductInLocations_Products_ProductId",
+                        name: "FK_PalletMovementDetails_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Addresses_ClientId",
+                table: "Addresses",
+                column: "ClientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -490,14 +528,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clients_AdressId",
-                table: "Clients",
-                column: "AdressId");
+                name: "IX_Inventories_ProductId",
+                table: "Inventories",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Inventory_ProductId",
-                table: "Inventory",
-                column: "ProductId");
+                name: "IX_Inventories_ProductId1",
+                table: "Inventories",
+                column: "ProductId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Issues_ClientId",
@@ -515,19 +553,24 @@ namespace MyWerehouse.Infrastructure.Migrations
                 column: "InventoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PalletMovement_LocationId",
-                table: "PalletMovement",
+                name: "IX_PalletMovementDetails_PalletMovementId",
+                table: "PalletMovementDetails",
+                column: "PalletMovementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PalletMovementDetails_ProductId",
+                table: "PalletMovementDetails",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PalletMovements_LocationId",
+                table: "PalletMovements",
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PalletMovement_PalletId",
-                table: "PalletMovement",
+                name: "IX_PalletMovements_PalletId",
+                table: "PalletMovements",
                 column: "PalletId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PalletMovement_ProductId",
-                table: "PalletMovement",
-                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pallets_IssueId",
@@ -545,18 +588,13 @@ namespace MyWerehouse.Infrastructure.Migrations
                 column: "ReceiptId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductInLocations_LocationId",
-                table: "ProductInLocations",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductInLocations_PalletId",
-                table: "ProductInLocations",
+                name: "IX_ProductOnPallet_PalletId",
+                table: "ProductOnPallet",
                 column: "PalletId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductInLocations_ProductId",
-                table: "ProductInLocations",
+                name: "IX_ProductOnPallet_ProductId",
+                table: "ProductOnPallet",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
@@ -579,6 +617,9 @@ namespace MyWerehouse.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Addresses");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -594,19 +635,22 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "PalletMovement");
+                name: "PalletMovementDetails");
 
             migrationBuilder.DropTable(
                 name: "ProductDetails");
 
             migrationBuilder.DropTable(
-                name: "ProductInLocations");
+                name: "ProductOnPallet");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "PalletMovements");
 
             migrationBuilder.DropTable(
                 name: "Pallets");
@@ -621,16 +665,13 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "Receipts");
 
             migrationBuilder.DropTable(
-                name: "Inventory");
+                name: "Inventories");
 
             migrationBuilder.DropTable(
                 name: "Clients");
 
             migrationBuilder.DropTable(
                 name: "Products");
-
-            migrationBuilder.DropTable(
-                name: "Adresses");
 
             migrationBuilder.DropTable(
                 name: "Categories");

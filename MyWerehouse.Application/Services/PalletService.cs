@@ -18,9 +18,9 @@ namespace MyWerehouse.Application.Services
 	{
 		private readonly IPalletRepo _palletRepo;
 		private readonly IPalletMovementRepo _palletMovementRepo;
-		private readonly IProductOnPalletRepo _productOnPalletRepo;
+		//private readonly IProductOnPalletRepo _productOnPalletRepo;
 		private readonly IMapper _mapper;
-		private readonly IValidator<CreatePalletReceiptDTO> _receiptValidator;
+		//private readonly IValidator<CreatePalletReceiptDTO> _receiptValidator;
 		private readonly IValidator<CreatePalletPickingDTO> _pickingValidator;
 		private readonly IValidator<UpdatePalletDTO> _updateValidator;
 		private readonly WerehouseDbContext _werehouseDbContext;
@@ -28,133 +28,102 @@ namespace MyWerehouse.Application.Services
 		public PalletService(
 			IPalletRepo palletRepo,
 			IPalletMovementRepo? palletMovementRepo,
-			IProductOnPalletRepo productOnPalletRepo,
+			//IProductOnPalletRepo productOnPalletRepo,
 			IMapper mapper,
-			IValidator<CreatePalletReceiptDTO>? receiptValidator,
+			//IValidator<CreatePalletReceiptDTO>? receiptValidator,
 			IValidator<CreatePalletPickingDTO>? pickingValidator,
 			IValidator<UpdatePalletDTO>? updateValidator,
 			WerehouseDbContext werehouseDbContext)
 		{
 			_palletRepo = palletRepo;
 			_palletMovementRepo = palletMovementRepo;
-			_productOnPalletRepo = productOnPalletRepo;
+			//_productOnPalletRepo = productOnPalletRepo;
 			_mapper = mapper;
-			_receiptValidator = receiptValidator;
+			//_receiptValidator = receiptValidator;
 			_pickingValidator = pickingValidator;
 			_updateValidator = updateValidator;
 			_werehouseDbContext = werehouseDbContext;
 		}
-
 		public PalletService(
 			IPalletRepo palletRepo,
-			IMapper mapper,
-			IValidator<UpdatePalletDTO> updateValidator)
+			IMapper mapper)
 		{
 			_palletRepo = palletRepo;
 			_mapper = mapper;
-			_updateValidator = updateValidator;
 		}
 
-		public string AddPalletReceipt(CreatePalletReceiptDTO addPalletDTO)
-		{
-			addPalletDTO.Id = _palletRepo.GetNextPalletId();//kolejny numer palety
-			addPalletDTO.LocationId = 0;//lokalizacja początkowa
-			addPalletDTO.DateReceived = DateTime.Now;
-			var validationResult = _receiptValidator.Validate(addPalletDTO);
-			if (!validationResult.IsValid)
-			{
-				throw new ValidationException(validationResult.Errors);
-			}
-			var pallet = _mapper.Map<Pallet>(addPalletDTO);
-			var id = _palletRepo.AddPallet(pallet);
+		//public string AddPalletReceipt(CreatePalletReceiptDTO addPalletDTO)
+		//{
+		//	addPalletDTO.Id = _palletRepo.GetNextPalletId();//kolejny numer palety
+		//	addPalletDTO.LocationId = 1;//lokalizacja początkowa
+		//	addPalletDTO.DateReceived = DateTime.Now;
+		//	var validationResult = _receiptValidator.Validate(addPalletDTO);
+		//	if (!validationResult.IsValid)
+		//	{
+		//		throw new ValidationException(validationResult.Errors);
+		//	}
+		//	var pallet = _mapper.Map<Pallet>(addPalletDTO);
+		//	var id = _palletRepo.AddPallet(pallet);
 
-			var listRecordsPMD = new List<PalletMovementDetails>();
-			foreach (var product in pallet.ProductsOnPallet)
-			{
-				var recordPalletMovementDetails = new PalletMovementDetails
-				{
-					ProductId = product.Id,
-					Quantity = product.Quantity,
-				};
-				listRecordsPMD.Add(recordPalletMovementDetails);
-			}
-			var recordPM = new PalletMovement
-			{
-				PalletId = id,
-				LocationId = pallet.LocationId,
-				Reason = ReasonMovement.Received,
-				PerformedBy = addPalletDTO.UserId,
-				MovementDate = DateTime.Now,
-				PalletMovementDetails = listRecordsPMD
-			};
-			_palletMovementRepo.AddPalletMovement(recordPM);
-			//foreach (var product in pallet.ProductsOnPallet)
-			//{
-			//	var record = new PalletMovement
-			//	{
-			//		PalletId = id,
-			//		ProductId = product.ProductId,
-			//		LocationId = pallet.LocationId,
-			//		Reason = ReasonMovement.Received,
-			//		PerformedBy = addPalletDTO.UserId,
-			//		Quantity = product.Quantity,
-			//		MovementDate = DateTime.Now,
-			//	};
-			//	_palletMovementRepo.AddPalletMovement(record);
-			//}
-			_werehouseDbContext.SaveChanges();
-			return id;
-		}
-		public async Task<string> AddPalletReceiptAsync(CreatePalletReceiptDTO addPalletDTO)
-		{
-			addPalletDTO.Id = await _palletRepo.GetNextPalletIdAsync();
-			addPalletDTO.LocationId = 0;//lokalizacja początkowa
-			addPalletDTO.DateReceived = DateTime.Now;
-			var validationResult = await _receiptValidator.ValidateAsync(addPalletDTO);
-			if (!validationResult.IsValid)
-			{
-				throw new ValidationException(validationResult.Errors);
-			}
-			var pallet = _mapper.Map<Pallet>(addPalletDTO);
-			var id = await _palletRepo.AddPalletAsync(pallet);
+		//	var listRecordsPMD = new List<PalletMovementDetail>();
+		//	foreach (var product in pallet.ProductsOnPallet)
+		//	{
+		//		var recordPalletMovementDetails = new PalletMovementDetail
+		//		{
+		//			ProductId = product.ProductId,
+		//			Quantity = product.Quantity,
+		//		};
+		//		listRecordsPMD.Add(recordPalletMovementDetails);
+		//	}
+		//	var recordPM = new PalletMovement
+		//	{
+		//		PalletId = id,
+		//		DestinationLocationId = pallet.LocationId,
+		//		Reason = ReasonMovement.Received,
+		//		PerformedBy = addPalletDTO.UserId,
+		//		MovementDate = DateTime.Now,
+		//		PalletMovementDetails = listRecordsPMD
+		//	};
+		//	_palletMovementRepo.AddPalletMovement(recordPM);
+		//	_werehouseDbContext.SaveChanges();// usunąć do receiptService ?
+		//	return id;
+		//}
+		//public async Task<string> AddPalletReceiptAsync(CreatePalletReceiptDTO addPalletDTO)
+		//{
+		//	addPalletDTO.Id = await _palletRepo.GetNextPalletIdAsync();
+		//	addPalletDTO.LocationId = 1;//lokalizacja początkowa
+		//	addPalletDTO.DateReceived = DateTime.Now;
+		//	var validationResult = await _receiptValidator.ValidateAsync(addPalletDTO);
+		//	if (!validationResult.IsValid)
+		//	{
+		//		throw new ValidationException(validationResult.Errors);
+		//	}
+		//	var pallet = _mapper.Map<Pallet>(addPalletDTO);
+		//	var id = await _palletRepo.AddPalletAsync(pallet);
 
-			var listRecordsPMD = new List<PalletMovementDetails>();
-			foreach (var product in pallet.ProductsOnPallet)
-			{
-				var recordPalletMovementDetails = new PalletMovementDetails
-				{
-					ProductId = product.Id,
-					Quantity = product.Quantity,
-				};
-				listRecordsPMD.Add(recordPalletMovementDetails);
-			}
-			var recordPM = new PalletMovement
-			{
-				PalletId = id,
-				LocationId = pallet.LocationId,
-				Reason = ReasonMovement.Received,
-				PerformedBy = addPalletDTO.UserId,
-				MovementDate = DateTime.Now,
-				PalletMovementDetails = listRecordsPMD
-			};
-			await _palletMovementRepo.AddPalletMovementAsync(recordPM);
-			//foreach (var product in pallet.ProductsOnPallet)
-			//{
-			//	var record = new PalletMovement
-			//	{
-			//		PalletId = id,
-			//		ProductId = product.ProductId,
-			//		LocationId = pallet.LocationId,
-			//		Reason = ReasonMovement.Received,
-			//		PerformedBy = addPalletDTO.UserId,
-			//		Quantity = product.Quantity,
-			//		MovementDate = DateTime.Now,
-			//	};
-			//	await _palletMovementRepo.AddPalletMovementAsync(record);
-			//}
-			await _werehouseDbContext.SaveChangesAsync();
-			return id;
-		}
+		//	var listRecordsPMD = new List<PalletMovementDetail>();
+		//	foreach (var product in pallet.ProductsOnPallet)
+		//	{
+		//		var recordPalletMovementDetails = new PalletMovementDetail
+		//		{
+		//			ProductId = product.ProductId,
+		//			Quantity = product.Quantity,
+		//		};
+		//		listRecordsPMD.Add(recordPalletMovementDetails);
+		//	}
+		//	var recordPM = new PalletMovement
+		//	{
+		//		PalletId = id,
+		//		DestinationLocationId = pallet.LocationId,
+		//		Reason = ReasonMovement.Received,
+		//		PerformedBy = addPalletDTO.UserId,
+		//		MovementDate = DateTime.Now,
+		//		PalletMovementDetails = listRecordsPMD
+		//	};
+		//	await _palletMovementRepo.AddPalletMovementAsync(recordPM);
+		//	await _werehouseDbContext.SaveChangesAsync();
+		//	return id;
+		//}
 		public string CreatePickingPallet(CreatePalletPickingDTO addPalletDTO)
 		{
 			addPalletDTO.Id = _palletRepo.GetNextPalletId();
@@ -167,12 +136,12 @@ namespace MyWerehouse.Application.Services
 			var pallet = _mapper.Map<Pallet>(addPalletDTO);
 			var id = _palletRepo.AddPallet(pallet);
 
-			var listRecordsPMD = new List<PalletMovementDetails>();
+			var listRecordsPMD = new List<PalletMovementDetail>();
 			foreach (var product in pallet.ProductsOnPallet)
 			{
-				var recordPalletMovementDetails = new PalletMovementDetails
+				var recordPalletMovementDetails = new PalletMovementDetail
 				{
-					ProductId = product.Id,
+					ProductId = product.ProductId,
 					Quantity = product.Quantity,
 				};
 				listRecordsPMD.Add(recordPalletMovementDetails);
@@ -180,27 +149,13 @@ namespace MyWerehouse.Application.Services
 			var recordPM = new PalletMovement
 			{
 				PalletId = id,
-				LocationId = pallet.LocationId,
+				DestinationLocationId = pallet.LocationId,
 				Reason = ReasonMovement.Picking,
 				PerformedBy = addPalletDTO.UserId,
 				MovementDate = DateTime.Now,
 				PalletMovementDetails = listRecordsPMD
 			};
 			_palletMovementRepo.AddPalletMovement(recordPM);
-			//foreach (var product in pallet.ProductsOnPallet)
-			//{
-			//	var record = new PalletMovement
-			//	{
-			//		PalletId = id,
-			//		ProductId = product.ProductId,
-			//		LocationId = pallet.LocationId,
-			//		Reason = ReasonMovement.Picking,
-			//		PerformedBy = addPalletDTO.UserId,
-			//		Quantity = product.Quantity,
-			//		MovementDate = DateTime.Now,
-			//	};
-			//	_palletMovementRepo.AddPalletMovement(record);
-			//}
 			_werehouseDbContext.SaveChanges();
 			return id;
 		}
@@ -216,12 +171,12 @@ namespace MyWerehouse.Application.Services
 			var pallet = _mapper.Map<Pallet>(addPalletDTO);
 			var id = await _palletRepo.AddPalletAsync(pallet);
 
-			var listRecordsPMD = new List<PalletMovementDetails>();
+			var listRecordsPMD = new List<PalletMovementDetail>();
 			foreach (var product in pallet.ProductsOnPallet)
 			{
-				var recordPalletMovementDetails = new PalletMovementDetails
+				var recordPalletMovementDetails = new PalletMovementDetail
 				{
-					ProductId = product.Id,
+					ProductId = product.ProductId,
 					Quantity = product.Quantity,
 				};
 				listRecordsPMD.Add(recordPalletMovementDetails);
@@ -229,28 +184,13 @@ namespace MyWerehouse.Application.Services
 			var recordPM = new PalletMovement
 			{
 				PalletId = id,
-				LocationId = pallet.LocationId,
+				DestinationLocationId = pallet.LocationId,
 				Reason = ReasonMovement.Picking,
 				PerformedBy = addPalletDTO.UserId,
 				MovementDate = DateTime.Now,
 				PalletMovementDetails = listRecordsPMD
 			};
 			await _palletMovementRepo.AddPalletMovementAsync(recordPM);
-
-			//foreach (var product in pallet.ProductsOnPallet)
-			//{
-			//	var record = new PalletMovement
-			//	{
-			//		PalletId = pallet.Id,
-			//		ProductId = product.ProductId,
-			//		LocationId = pallet.LocationId,
-			//		Reason = ReasonMovement.Picking,
-			//		PerformedBy = addPalletDTO.UserId,
-			//		Quantity = product.Quantity,
-			//		MovementDate = DateTime.Now,
-			//	};
-			//	await _palletMovementRepo.AddPalletMovementAsync(record);
-			//}
 			await _werehouseDbContext.SaveChangesAsync();
 			return id;
 		}
@@ -264,6 +204,7 @@ namespace MyWerehouse.Application.Services
 				throw new InvalidOperationException($"Palety o numerze {id} nie można usunąć");
 
 			_palletRepo.DeletePallet(id);
+			_werehouseDbContext.SaveChanges();
 		}
 		public async Task DeletePalletAsync(string id)
 		{
@@ -276,6 +217,7 @@ namespace MyWerehouse.Application.Services
 				throw new InvalidOperationException($"Palety o numerze {id} nie można usunąć");
 
 			await _palletRepo.DeletePalletAsync(id);
+			_werehouseDbContext.SaveChangesAsync();
 		}
 		public UpdatePalletDTO GetPalletToEdit(string id)
 		{
@@ -283,10 +225,16 @@ namespace MyWerehouse.Application.Services
 			var palletDTO = _mapper.Map<UpdatePalletDTO>(pallet);
 			return palletDTO;
 		}
+		public async Task<UpdatePalletDTO> GetPalletToEditAsync(string id)
+		{
+			var pallet = await _palletRepo.GetPalletByIdAsync(id);
+			var palletDTO = _mapper.Map<UpdatePalletDTO>(pallet);
+			return palletDTO;
+		}
 		public void UpdatePallet(UpdatePalletDTO updatingPallet)
 		{
 			var existingPallet = _palletRepo.GetPalletById(updatingPallet.Id);
-			var a = existingPallet.ProductsOnPallet.Count();
+			//var a = existingPallet.ProductsOnPallet.Count();
 			var validationResult = _updateValidator.Validate(updatingPallet);
 			if (!validationResult.IsValid)
 			{
@@ -305,7 +253,130 @@ namespace MyWerehouse.Application.Services
 					return newProduct;
 				},
 				(dto, entity) => _mapper.Map(dto, entity));
-			_palletRepo.UpdatePallet(existingPallet);
+			_werehouseDbContext.SaveChanges();
+		}
+		public async Task UpdatePalletAsync(UpdatePalletDTO updatingPallet)
+		{
+			var existingPallet = await _palletRepo.GetPalletByIdAsync(updatingPallet.Id);
+			var a = existingPallet.ProductsOnPallet.Count();
+			var validationResult = await _updateValidator.ValidateAsync(updatingPallet);
+			if (!validationResult.IsValid)
+			{
+				throw new ValidationException(validationResult.Errors);
+			}
+			_mapper.Map(updatingPallet, existingPallet);
+			CollectionSynchronizer.SynchronizeCollection(
+				existingPallet.ProductsOnPallet,
+				updatingPallet.ProductsOnPallet,
+				a => a.Id,
+				a => a.Id,
+				dto =>
+				{
+					var newProduct = _mapper.Map<ProductOnPallet>(dto);
+					newProduct.PalletId = existingPallet.Id;
+					return newProduct;
+				},
+				(dto, entity) => _mapper.Map(dto, entity));
+			await _werehouseDbContext.SaveChangesAsync();
+		}
+		public PalletHistoryDTO ShowHistoryPallet(string id)
+		{
+			var pallet = _palletRepo.GetPalletById(id);
+			if (pallet == null) throw new ArgumentNullException($"Paleta o numerze {id} nie istnieje");
+			var palletHistory = _mapper.Map<PalletHistoryDTO>(pallet);
+			return palletHistory;
+		}
+		public async Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id)
+		{
+			var pallet = await _palletRepo.GetPalletByIdAsync(id)
+			?? throw new ArgumentNullException($"Paleta o numerze {id} nie istnieje");
+			var palletHistory = _mapper.Map<PalletHistoryDTO>(pallet);
+			return palletHistory;
+		}
+
+		public void ChangeLocationPallet(string palletId, int destinationLocation, string userId)
+		{
+			
+
+			var pallet = _palletRepo.GetPalletById(palletId);
+			if(pallet == null)
+			{
+				throw new ArgumentNullException($"Paleta o numerze {palletId} nie została znaleziona");
+			}
+
+			//sprawdzenie czy lokalizacja jest zajęta
+			var existingPalletInDestination = _palletRepo.GetPalletByLocation(destinationLocation); // Nowa metoda repo
+			//var locationOccupied = pobranie lokalizacji do błędy ??
+			if (existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id) // Jeśli lokalizacja jest zajęta przez inną paletę
+			{
+				throw new InvalidOperationException($"Lokalizacja {destinationLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}.");
+			}
+
+			var sourceLocation = pallet.LocationId;
+			pallet.LocationId = destinationLocation;
+			var listRecordsPMD = new List<PalletMovementDetail>();
+			foreach (var product in pallet.ProductsOnPallet)
+			{
+				var recordPalletMovementDetails = new PalletMovementDetail
+				{
+					ProductId = product.ProductId,
+					Quantity = product.Quantity,
+				};
+				listRecordsPMD.Add(recordPalletMovementDetails);
+			}
+			var recordPM = new PalletMovement
+			{
+				PalletId = palletId,
+				SourceLocationId = sourceLocation,
+				DestinationLocationId = destinationLocation,
+				Reason = ReasonMovement.ManualMove,
+				PerformedBy = userId,
+				MovementDate = DateTime.Now,
+				PalletMovementDetails = listRecordsPMD
+			};
+			_palletMovementRepo.AddPalletMovement(recordPM);
+			_werehouseDbContext.SaveChanges();
+		}
+		public async Task ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId)
+		{
+			var pallet =await _palletRepo.GetPalletByIdAsync(palletId);
+			if (pallet == null)
+			{
+				throw new ArgumentNullException($"Paleta o numerze {palletId} nie została znaleziona");
+			}
+
+			//sprawdzenie czy lokalizacja jest zajęta
+			var existingPalletInDestination =await _palletRepo.GetPalletByLocationAsync(destinationLocation); // Nowa metoda repo
+			
+			if (existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id) // Jeśli lokalizacja jest zajęta przez inną paletę
+			{
+				throw new InvalidOperationException($"Lokalizacja {destinationLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}.");
+			}
+
+			var sourceLocation = pallet.LocationId;
+			pallet.LocationId = destinationLocation;
+			var listRecordsPMD = new List<PalletMovementDetail>();
+			foreach (var product in pallet.ProductsOnPallet)
+			{
+				var recordPalletMovementDetails = new PalletMovementDetail
+				{
+					ProductId = product.ProductId,
+					Quantity = product.Quantity,
+				};
+				listRecordsPMD.Add(recordPalletMovementDetails);
+			}
+			var recordPM = new PalletMovement
+			{
+				PalletId = palletId,
+				SourceLocationId = sourceLocation,
+				DestinationLocationId = destinationLocation,
+				Reason = ReasonMovement.ManualMove,
+				PerformedBy = userId,
+				MovementDate = DateTime.Now,
+				PalletMovementDetails = listRecordsPMD
+			};
+			await _palletMovementRepo.AddPalletMovementAsync(recordPM);
+			await _werehouseDbContext.SaveChangesAsync();
 		}
 	}
 }

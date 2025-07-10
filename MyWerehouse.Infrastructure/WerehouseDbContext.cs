@@ -8,32 +8,130 @@ namespace MyWerehouse.Infrastructure
 	public class WerehouseDbContext : IdentityDbContext
 	{
 		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options) : base(options) { }
-
-
 		public DbSet<Address> Addresses { get; set; }
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Client> Clients { get; set; }
-		public DbSet<Inventory> Inventory { get; set; }
+		public DbSet<Inventory> Inventories { get; set; }
 		public DbSet<Issue> Issues { get; set; }
 		public DbSet<Location> Locations { get; set; }
 		public DbSet<Pallet> Pallets { get; set; }
-		public DbSet<PalletMovement> PalletMovement { get; set; }
-		public DbSet<PalletMovementDetails> PalletMovementDetails { get; set; }
+		public DbSet<PalletMovement> PalletMovements { get; set; }
+		public DbSet<PalletMovementDetail> PalletMovementDetails { get; set; }
 		public DbSet<Product> Products { get; set; }
-		public DbSet<ProductDetails> ProductDetails { get; set; }
+		public DbSet<ProductDetail> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
 		public DbSet<Receipt> Receipts { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
-
-			modelBuilder.Entity<ProductOnPallet>(entity =>
+			modelBuilder.Entity<Address>(entity =>
 			{
 				entity.HasKey(e => e.Id);
 
-				entity.HasOne<Pallet>(pop => pop.Pallet)
+				entity.Property(x => x.Id)	.ValueGeneratedOnAdd();
+			});
+			modelBuilder.Entity<Category>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+			});
+			modelBuilder.Entity<Client>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+			});
+			modelBuilder.Entity<Inventory>(entity =>
+			{
+				entity.HasKey(e => e.ProductId);
+				entity.Property(x => x.ProductId).ValueGeneratedNever();
+
+				entity.HasOne(i => i.Product)
+				.WithOne(p=>p.InventoryItem)
+				.HasForeignKey<Inventory>(i => i.ProductId);
+			});
+			modelBuilder.Entity<Issue>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+			});
+			modelBuilder.Entity<Location>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+			});
+			modelBuilder.Entity<Pallet>(entity =>
+			{
+				entity.HasKey(p => p.Id);
+				entity.Property(p => p.Id)
+				.IsRequired()
+				.HasMaxLength(10);
+
+				entity.Property(p => p.Status)
+				.HasConversion<string>();
+
+				entity.HasMany(p => p.ProductsOnPallet)
+				.WithOne()
+				.HasForeignKey(pop => pop.PalletId)
+				.IsRequired()
+				.OnDelete(DeleteBehavior.Cascade);
+			});
+			modelBuilder.Entity<PalletMovement>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+				entity.HasOne(pm => pm.Pallet)
+					.WithMany(p => p.PalletMovements)
+					.HasForeignKey(pm => pm.PalletId)
+					.IsRequired()
+					.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
+
+				entity.Property(m => m.Reason)
+				.HasConversion<string>();
+			});
+			modelBuilder.Entity<PalletMovementDetail>(entity =>
+			{
+				entity.HasOne(md => md.PalletMovement)
+				.WithMany(pm => pm.PalletMovementDetails)
+				.HasForeignKey(md => md.PalletMovementId);
+			});
+			modelBuilder.Entity<Product>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+				entity.HasOne(pm => pm.InventoryItem)
+				.WithOne(i => i.Product)
+				.HasForeignKey<Inventory>(i => i.ProductId);
+
+				entity.HasOne(p => p.Details)
+				.WithOne(p => p.Product)
+				.HasForeignKey<ProductDetail>(p => p.ProductId)
+				.IsRequired()
+				.OnDelete(DeleteBehavior.Cascade);
+			});
+			modelBuilder.Entity<ProductDetail>(entity =>
+			{
+				entity.HasKey(e => e.ProductId);
+				entity.Property(e => e.ProductId).ValueGeneratedNever();
+			});
+			modelBuilder.Entity<ProductOnPallet>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+				entity.Property(e => e.PalletId)
+				.IsRequired()
+				.HasMaxLength(10);
+
+				entity.HasOne(pop => pop.Pallet)
 				.WithMany(p => p.ProductsOnPallet)
 				.HasForeignKey(pop => pop.PalletId)
+				.IsRequired();
+
+				entity.HasOne(pop => pop.Product)
+				.WithMany()
+				.HasForeignKey(pop => pop.ProductId)
 				.IsRequired();
 
 				entity.Property(p => p.BestBefore)
@@ -42,46 +140,11 @@ namespace MyWerehouse.Infrastructure
 					v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null))
 				.HasColumnType("date");
 			});
-
-			modelBuilder.Entity<Pallet>(entity =>
-			{
-				entity.HasKey(p => p.Id);
-
-				entity.Property(p => p.Id)
-				.IsRequired()
-				.HasMaxLength(10);
-
-				entity.Property(p => p.Status)
-				.HasConversion<string>();
-			});
-
-			modelBuilder.Entity<Address>(entity =>
-				entity.Property(x => x.Id)
-				.ValueGeneratedOnAdd()
-			);
-
-			modelBuilder.Entity<PalletMovement>(entity =>
-			{
-				entity.HasOne(pm => pm.Pallet)
-					.WithMany(p => p.PalletMovements)
-					.HasForeignKey(pm => pm.PalletId)
-					.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
-
-				entity.Property(m => m.Reason)
-				.HasConversion<string>();			
-			});
-
-			modelBuilder.Entity<PalletMovementDetails>(entity =>
-			{
-				entity.HasOne(md => md.PalletMovement)
-				.WithMany(pm => pm.PalletMovementDetails)
-				.HasForeignKey(md => md.PalletMovementId);
-			});
-
-			modelBuilder.Entity<Product>(entity =>
-				entity.HasOne(p => p.Details)
-				.WithOne(p => p.Product)
-				.HasForeignKey<ProductDetails>(p => p.ProductId));
+			modelBuilder.Entity<Receipt>(entity =>
+			 {
+				 entity.HasKey(e => e.Id);
+				 entity.Property(x => x.Id).ValueGeneratedOnAdd();
+			 });
 		}
 	}
 }

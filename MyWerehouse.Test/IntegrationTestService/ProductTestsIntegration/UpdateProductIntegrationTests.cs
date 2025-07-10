@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 
-namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	public class UpdateProductIntegrationTests : ProductIntegrationCommand
 	{
@@ -19,9 +19,8 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public void ProperData_UpdateProduct_ChangeData()
 		{
 			// Arrange
-			var details = new ProductDetails
-			{
-				Id = 1,
+			var details = new ProductDetail
+			{				
 				ProductId = 1,
 				Height = 1,
 				Width = 1,
@@ -51,7 +50,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 				SKU = "q1233",
 				IsDeleted=false,
 				AddedItemAd = DateTime.Now,
-				DetailsId = 1,
+				//DetailsId = 1,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -77,9 +76,9 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public void NotProperDataName_UpdateProduct_ThrowsException()
 		{
 			// Arrange			
-			var details = new ProductDetails
+			var details = new ProductDetail
 			{
-				Id = 2,
+				//Id = 2,
 				ProductId = 2,
 				Height = 1,
 				Width = 1,
@@ -109,7 +108,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 				SKU = "q1233",
 				IsDeleted = false,
 				AddedItemAd = DateTime.Now,
-				DetailsId = 2,
+				//DetailsId = 2,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -123,9 +122,9 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public void NotProperDataLength_UpdateProduct_ThrowsException()
 		{
 			// Arrange			
-			var details = new ProductDetails
+			var details = new ProductDetail
 			{
-				Id = 3,
+				//Id = 3,
 				ProductId = 3,
 				Height = 1,
 				Width = 1,
@@ -155,7 +154,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 				SKU = "q1233",
 				IsDeleted = false,
 				AddedItemAd = DateTime.Now,
-				DetailsId = 3,
+				//DetailsId = 3,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -169,9 +168,9 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public async Task ProperData_UpdateProductAsync_ChangeData()
 		{
 			// Arrange			
-			var details = new ProductDetails
+			var details = new ProductDetail
 			{
-				Id = 4,
+				//Id = 4,
 				ProductId = 4,
 				Height = 1,
 				Width = 1,
@@ -201,7 +200,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 				SKU = "q1233",
 				IsDeleted = false,
 				AddedItemAd = DateTime.Now,
-				DetailsId = 4,
+				//DetailsId = 4,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -230,9 +229,9 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public async Task NotProperDataName_UpdateProductAsync_ThrowsException()
 		{
 			// Arrange			
-			var details = new ProductDetails
+			var details = new ProductDetail
 			{
-				Id = 5,
+				//Id = 5,
 				ProductId = 5,
 				Height = 1,
 				Width = 1,
@@ -262,7 +261,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 				SKU = "q1233",
 				IsDeleted = false,
 				AddedItemAd = DateTime.Now,
-				DetailsId = 5,
+				//DetailsId = 5,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -278,9 +277,9 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public async Task NotProperDataLength_UpdateProductAsync_ThrowsException()
 		{
 			// Arrange			
-			var details = new ProductDetails
+			var details = new ProductDetail
 			{
-				Id = 6,
+				//Id = 6,
 				ProductId = 6,
 				Height = 1,
 				Width = 1,
@@ -310,7 +309,7 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 				SKU = "q1233",
 				IsDeleted = false,
 				AddedItemAd = DateTime.Now,
-				DetailsId = 6,
+				//DetailsId = 6,
 				Height = 10,
 				Weight = 10,
 				Width = 10,

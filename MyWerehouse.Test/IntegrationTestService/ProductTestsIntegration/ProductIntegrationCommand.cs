@@ -14,7 +14,7 @@ using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	public class ProductIntegrationCommand : CommandTestBase
 	{
@@ -26,9 +26,9 @@ namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
 		public readonly IReceiptRepo _receiptRepo;
 		public ProductIntegrationCommand() : base()
 		{
-			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
-				.UseInMemoryDatabase("SharedTestDatabase")
-				.Options;
+			//_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
+			//	.UseInMemoryDatabase("SharedTestDatabase")
+			//	.Options;
 
 			var MapperConfig = new MapperConfiguration(cfg =>
 			{ 

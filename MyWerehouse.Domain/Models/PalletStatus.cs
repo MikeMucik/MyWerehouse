@@ -15,5 +15,8 @@ namespace MyWerehouse.Domain.Models
 		Loaded = 4,
 		ToPicking = 5,
 		Archived = 6,
+		Receiving = 7,
+		InStock =8,
+		InTransit =9,
 	}
 }

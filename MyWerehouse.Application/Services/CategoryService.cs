@@ -37,15 +37,11 @@ namespace MyWerehouse.Application.Services
 		}
 		public CategoryService(
 			ICategoryRepo categoryRepo,
-			IMapper mapper
-			//,WerehouseDbContext werehouseDbContext,
-			//IValidator<CategoryDTO>? validator
+			IMapper mapper			
 			)
 		{
 			_categoryRepo = categoryRepo;
 			_mapper = mapper;
-			//_werehouseDbContext = werehouseDbContext;
-			//_validator = validator;
 		}
 		
 		public void AddCategory(CategoryDTO categoryDTO)
@@ -119,7 +115,6 @@ namespace MyWerehouse.Application.Services
 			}
 			else { throw new ArgumentException($"Kategoria o ID {id} nie została znalezniona", nameof(id)); }
 		}
-
 		public void UpdateCategory(CategoryDTO categoryDTO)
 		{
 			if (string.IsNullOrEmpty(categoryDTO.Name))
@@ -134,8 +129,7 @@ namespace MyWerehouse.Application.Services
 				{
 					throw new InvalidDataException("Kategoria o tej nazwie już istnieje.");
 				}
-				existingCategory.Name = categoryDTO.Name;
-				//_categoryRepo.UpdateCategory(existingCategory);
+				existingCategory.Name = categoryDTO.Name;				
 				_werehouseDbContext.SaveChanges();
 			}
 			else throw new ArgumentException($"Brak kategori o numerze {existingCategory.Id}");
@@ -154,8 +148,7 @@ namespace MyWerehouse.Application.Services
 				{
 					throw new InvalidDataException("Kategoria o tej nazwie już istnieje.");
 				}
-				existingCategory.Name = categoryDTO.Name;
-				//await _categoryRepo.UpdateCategoryAsync(existingCategory);
+				existingCategory.Name = categoryDTO.Name;				
 				await _werehouseDbContext.SaveChangesAsync();
 			}
 			else throw new ArgumentException($"Brak kategori o numerze {existingCategory.Id}");

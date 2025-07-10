@@ -19,7 +19,8 @@ namespace MyWerehouse.Test.UnitTestRepo.CategoryTestsRepo
 		{
 			_categoryRepo = new CategoryRepo(_context);
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
-				.UseInMemoryDatabase("TestDatabase")
+				//.UseInMemoryDatabase("TestDatabase")
+				.UseSqlite("DataSource:=memory")
 				.Options;
 		}
 		[Fact]

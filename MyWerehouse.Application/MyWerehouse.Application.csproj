@@ -34,8 +34,6 @@
   <ItemGroup>
     <Folder Include="ViewModels\InventoryModels\" />
     <Folder Include="ViewModels\LocationModels\" />
-    <Folder Include="ViewModels\PalletMovementModels\" />
-    <Folder Include="ViewModels\ReceiptModels\" />
   </ItemGroup>
 
 </Project>

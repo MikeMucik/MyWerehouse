@@ -8,10 +8,11 @@
 		public DateTime AddedItemAd {  get; set; } = DateTime.Now;
 		public int CategoryId { get; set; }
 		public virtual Category Category { get; set; }
-		public bool IsDeleted { get; set; } = false;//migracja
-		public int CartonsPerPallet { get; set; } //migracja
+		public bool IsDeleted { get; set; } = false;
+		public int CartonsPerPallet { get; set; }
 		public virtual ICollection<Receipt> ReceiptList { get; set; } = new List<Receipt>();
 		public virtual ICollection<Issue> IssueList { get; set; } = new List<Issue>();
-		public ProductDetails Details { get; set; }
+		public ProductDetail Details { get; set; }
+		public virtual Inventory InventoryItem { get; set; }
 	}
 }

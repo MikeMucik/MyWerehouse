@@ -9,7 +9,7 @@ using MyWerehouse.Application.Services;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	[Collection("QuerryCollection")]
 	public class ProductIntegrationView : CommandTestBase

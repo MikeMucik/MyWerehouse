@@ -14,5 +14,6 @@ namespace MyWerehouse.Domain.Models
 		public DateTime ReceiptDateTime { get; set; }
 		public virtual ICollection<Pallet> Pallets { get; set; } = new List<Pallet>();
 		public string? PerformedBy { get; set; } // opcjonalnie: user
+		public ReceiptStatus ReceiptStatus { get; set; }
 	}
 }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Models;
 
-namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	public class DeleteProductIntegrationTests : ProductIntegrationCommand
 	{

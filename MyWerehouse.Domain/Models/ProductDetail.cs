@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.Models
 {
-	public class ProductDetails
+	public class ProductDetail
 	{
-		public int Id { get; set; }
+		//public int Id { get; set; }
 		public int Length { get; set; }
 		public int Height {  get; set; }
 		public int Width { get; set; }

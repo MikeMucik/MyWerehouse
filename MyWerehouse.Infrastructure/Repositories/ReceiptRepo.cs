@@ -19,12 +19,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public void AddReceipt(Receipt receipt)
 		{
 			_werehouseDbContext.Receipts.Add(receipt);
-			_werehouseDbContext.SaveChanges();
+			//_werehouseDbContext.SaveChanges();
 		}
 		public async Task AddReceiptAsync(Receipt receipt)
 		{
 			await _werehouseDbContext.Receipts.AddAsync(receipt);
-			await _werehouseDbContext.SaveChangesAsync();
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
 		public void DeleteReceipt(int id)
 		{
@@ -74,12 +74,14 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			return _werehouseDbContext.Receipts
 				.Include(r => r.Pallets)
-				.SingleOrDefault(r => r.Id == id);
+					.ThenInclude(pr=>pr.ProductsOnPallet)
+				.FirstOrDefault(r => r.Id == id);
 		}
 		public async Task<Receipt?> GetReceiptByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Receipts
 				.Include(r => r.Pallets)
+					.ThenInclude(pr => pr.ProductsOnPallet)
 				.SingleOrDefaultAsync(r => r.Id == id);
 		}
 		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)

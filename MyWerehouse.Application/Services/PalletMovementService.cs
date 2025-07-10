@@ -17,21 +17,47 @@ namespace MyWerehouse.Application.Services
 		{
 			_palletMovementRepo = palletMovementRepo;
 		}
-
-		//public void RegisterPalletMovement(string palletId, int productId, int locationId, int quantity, ReasonMovement reason, string performedBy)
-		//{
-		//	var movement = new PalletMovement
-		//	{
-		//		PalletId = palletId,
-		//		ProductId = productId,
-		//		LocationId = locationId,
-		//		Quantity = quantity,
-		//		Reason = reason,
-		//		PerformedBy = performedBy,
-		//		MovementDate = DateTime.UtcNow
-		//	};
-
-		//	_palletMovementRepo.AddPalletMovement(movement);
-		//}
+		public void CreateMovement(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, IEnumerable<PalletMovementDetail> details = null)
+		{
+			if (details == null)
+			{
+				details = pallet.ProductsOnPallet.Select(p => new PalletMovementDetail
+				{
+					ProductId = p.ProductId,
+					Quantity = p.Quantity,
+				}).ToList();
+			}
+			var movement = new PalletMovement
+			{
+				PalletId = pallet.Id,
+				SourceLocationId = pallet.LocationId,
+				DestinationLocationId = destinationLocationId,
+				Reason = reasonMovement,
+				PerformedBy = userId,
+				PalletMovementDetails = details.ToList()
+			};
+			 _palletMovementRepo.AddPalletMovement(movement);
+		}
+		public async Task CreateMovementAsync(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, IEnumerable<PalletMovementDetail> details=null)
+		{
+			if (details == null)
+			{
+				details = pallet.ProductsOnPallet.Select(p => new PalletMovementDetail
+				{
+					ProductId = p.ProductId,
+					Quantity = p.Quantity,
+				}).ToList();
+			}
+			var movement = new PalletMovement
+			{
+				PalletId = pallet.Id,
+				SourceLocationId = pallet.LocationId,
+				DestinationLocationId = destinationLocationId,
+				Reason = reasonMovement,
+				PerformedBy = userId,
+				PalletMovementDetails = details.ToList()
+			};
+			await _palletMovementRepo.AddPalletMovementAsync(movement);			
+		}		
 	}
 }

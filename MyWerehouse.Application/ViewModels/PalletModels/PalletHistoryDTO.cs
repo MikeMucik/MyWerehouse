@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AutoMapper;
+using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.ViewModels.PalletMovementModels;
+using MyWerehouse.Domain.Models;
+
+namespace MyWerehouse.Application.ViewModels.PalletModels
+{
+	public class PalletHistoryDTO : IMapFrom<Pallet>
+	{
+		public string Id { get; set; }
+		public DateTime DateReceived { get; set; }
+		public ICollection<PalletMovementDTO> PalletMovementsDTO { get; set; } = new List<PalletMovementDTO>();
+		public int? ReceiptId { get; set; }
+		public int? IssueId { get; set; }
+		public void Mapping(Profile profile)
+		{
+			profile.CreateMap<Pallet, PalletHistoryDTO>()
+				.ForMember(dest => dest.PalletMovementsDTO, opt => opt.MapFrom(src => src.PalletMovements));
+		}
+	}
+
+}
+//public int LocationId { get; set; }		
+//public PalletStatus Status { get; set; }  
+//public ICollection<ProductOnPallet> ProductsOnPallet { get; set; } = new HashSet<ProductOnPallet>();

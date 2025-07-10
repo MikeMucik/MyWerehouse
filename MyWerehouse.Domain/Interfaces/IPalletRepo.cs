@@ -13,14 +13,8 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<string> AddPalletAsync(Pallet pallet);
 		void DeletePallet(string palletId);
 		Task DeletePalletAsync(string palletId);
-		void UpdatePallet(Pallet pallet);
-		Task UpdatePalletAsync(Pallet pallet);
 		Pallet? GetPalletById(string palletId);
 		Task<Pallet?> GetPalletByIdAsync(string palletId);
-		Pallet GetPalletWithProducts(string palletId);
-		Task<Pallet> GetPalletWithProductsAsync(string palletId);
-		Pallet GetPalletWithHistory(string palletId);
-		Task<Pallet> GetPalletWithHistoryAsync(string palletId);
 		IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly minBestBefore);
 		IQueryable<Pallet> GetPalletsByBasedFilter(PalletSearchFilter filter);
 		IQueryable<Pallet> GetPalletsByClientFilter(PalletSearchFilter filter);
@@ -30,11 +24,14 @@ namespace MyWerehouse.Domain.Interfaces
 		void ChangePalletStatus(string palletId, PalletStatus palletStatus);
 		string GetNextPalletId();
 		Task<string> GetNextPalletIdAsync();
+		Pallet GetPalletByLocation(int locationId); //numer lokacji
+		Task<Pallet> GetPalletByLocationAsync(int locationId); //numer lokacji
+															   
 		//TODO expand to methods
-		//void MarkPalletAsHold(string id);
-		//void MarkPalletAsAvailable(string id);
-		//void MarkPalletAsDamaged(string id);
-		//void MarkPalletAsLoaded(string id);
+	   //void MarkPalletAsHold(string id);
+	   //void MarkPalletAsAvailable(string id);
+	   //void MarkPalletAsDamaged(string id);
+	   //void MarkPalletAsLoaded(string id);
 
 		//IQueryable<Location> GetLocationsFromFilteredPallets(PalletSearchFilter filter);
 	}

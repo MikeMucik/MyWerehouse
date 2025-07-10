@@ -19,7 +19,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 		public void IncreaseInventoryQuantity(int productId, int quantity)//zmiana ilości po przyjęciu
 		{
-			var inventoryItem = _werehouseDbContext.Inventory
+			var inventoryItem = _werehouseDbContext.Inventories
 				.SingleOrDefault(i => i.ProductId == productId);
 
 			if (inventoryItem != null)
@@ -29,7 +29,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			else
 			{
-				_werehouseDbContext.Inventory.Add(new Inventory
+				_werehouseDbContext.Inventories.Add(new Inventory
 				{
 					ProductId = productId,
 					Quantity = quantity,
@@ -40,7 +40,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public async Task IncreaseInventoryQuantityAsync(int productId, int quantity)//zmiana ilości po przyjęciu
 		{
-			var inventoryItem = await _werehouseDbContext.Inventory
+			var inventoryItem = await _werehouseDbContext.Inventories
 				.SingleOrDefaultAsync(i => i.ProductId == productId);
 
 			if (inventoryItem != null)
@@ -50,7 +50,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			else
 			{
-				await _werehouseDbContext.Inventory.AddAsync(new Inventory
+				await _werehouseDbContext.Inventories.AddAsync(new Inventory
 				{
 					ProductId = productId,
 					Quantity = quantity,
@@ -61,7 +61,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public void DecreaseInventoryQuantity(int productId, int quantity)//zmiana ilości po wydaniu
 		{
-			var inventoryItem = _werehouseDbContext.Inventory
+			var inventoryItem = _werehouseDbContext.Inventories	
 				.SingleOrDefault(i => i.ProductId == productId) ?? throw new InvalidOperationException("Nie można odjąć ze stanu – produkt nie istnieje.");
 			if (inventoryItem.Quantity < quantity)
 				throw new InvalidOperationException("Za mało towaru w magazynie.");
@@ -73,7 +73,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public async Task DecreaseInventoryQuantityAsync(int productId, int quantity)//zmiana ilości po wydaniu
 		{
-			var inventoryItem = await _werehouseDbContext.Inventory
+			var inventoryItem = await _werehouseDbContext.Inventories
 				.SingleOrDefaultAsync(i => i.ProductId == productId) ?? throw new InvalidOperationException("Nie można odjąć ze stanu – produkt nie istnieje.");
 			if (inventoryItem.Quantity < quantity)
 				throw new InvalidOperationException("Za mało towaru w magazynie.");
@@ -83,27 +83,27 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 			await _werehouseDbContext.SaveChangesAsync();
 		}
-		public Inventory? GetInventoryForProduct(int productId)//pobranie danych dla produktu z ostatniej aktualizacji
+		public Inventory? GetInventoryForProduct(int productId)//pobranie danych/ilość dla produktu z ostatniej aktualizacji
 		{
-			var result = _werehouseDbContext.Inventory
-				.Include(i => i.Product)
+			var result = _werehouseDbContext.Inventories
+				.Include(i => i.Product)				
 				.FirstOrDefault(p => p.ProductId == productId);
 			return result;
 		}
-		public async Task<Inventory?> GetInventoryForProductAsync(int productId)//pobranie danych dla produktu z ostatniej aktualizacji
+		public async Task<Inventory?> GetInventoryForProductAsync(int productId)//pobranie danych/ilość dla produktu z ostatniej aktualizacji
 		{
-			var result = await _werehouseDbContext.Inventory
+			var result = await _werehouseDbContext.Inventories
 				.Include(i => i.Product)
 				.FirstOrDefaultAsync(p => p.ProductId == productId);
 			return result;
 		}
 		public IQueryable<Inventory> GetAllInventory()
 		{
-			return _werehouseDbContext.Inventory;
+			return _werehouseDbContext.Inventories;
 		}
 		public void UpdateInventory(int productId, int quantity) //zmiana ilości po ręcznej inwenturze
 		{
-			var result = _werehouseDbContext.Inventory
+			var result = _werehouseDbContext.Inventories
 				.FirstOrDefault(p => p.ProductId == productId);
 			if (result == null)
 			{
@@ -114,7 +114,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public async Task UpdateInventoryAsync(int productId, int quantity) //zmiana ilości po ręcznej inwenturze
 		{
-			var result = await _werehouseDbContext.Inventory
+			var result = await _werehouseDbContext.Inventories
 				.FirstOrDefaultAsync(p => p.ProductId == productId);
 			if (result == null)
 			{
@@ -125,14 +125,14 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public bool HasStock(int productId, int quantity)
 		{
-			var quantityBased = _werehouseDbContext.Inventory
+			var quantityBased = _werehouseDbContext.Inventories
 				.FirstOrDefault(p => p.ProductId == productId);
 			if (quantityBased == null) return false;
 			return quantityBased.Quantity >= quantity;
 		}
 		public async Task<bool> HasStockAsync(int productId, int quantity)
 		{
-			var quantityBased = await _werehouseDbContext.Inventory
+			var quantityBased = await _werehouseDbContext.Inventories
 				.FirstOrDefaultAsync(p => p.ProductId == productId);
 			if (quantityBased == null) return false;
 			return quantityBased.Quantity >= quantity;

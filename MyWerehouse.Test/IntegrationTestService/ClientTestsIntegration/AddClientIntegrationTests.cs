@@ -8,7 +8,7 @@ using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 
-namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
 	public class AddClientIntegrationTests : ClientIntegrationCommand
 	{

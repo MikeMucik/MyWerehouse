@@ -9,7 +9,7 @@ using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 
-namespace MyWerehouse.Test.IntegrationTest.CategoryTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 {
 	public class AddDeleteUpdateCategoryIntegrationTests : CategoryIntegrationCommand
 	{

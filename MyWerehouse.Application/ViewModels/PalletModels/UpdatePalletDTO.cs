@@ -24,7 +24,9 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<UpdatePalletDTO, Pallet>()
-				.ForMember(dest => dest.ProductsOnPallet, opt => opt.Ignore());
+				.ForMember(dest => dest.ProductsOnPallet, opt => opt.Ignore())
+				//.ForMember(dest => dest.Id, opt=>opt.Ignore())
+				;
 			profile.CreateMap<Pallet, UpdatePalletDTO>()
 				.ForMember(dest => dest.ProductsOnPallet, opt=>opt.MapFrom(src=>src.ProductsOnPallet));
 		}
@@ -33,15 +35,15 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 	{
 		public UpdatePalletDTOValidation(IValidator<ProductOnPalletDTO> productOnPalletValidator)
 		{
-			RuleFor(p => p.Status)
-				.NotNull()
+			RuleFor(p => p.Status)				
+				.NotEmpty()
 				.WithMessage("Paleta musi mieć status");
 			RuleFor(p => p.DateReceived)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Paleta musi mieć datę utworzenia");
 			RuleFor(p => p.LocationId)
-				.NotNull()
-				.WithMessage("Paleta musi mieć lokalizację początkową");			
+				.GreaterThan(0)
+				.WithMessage("Paleta musi mieć lokalizację");			
 			RuleFor(p => p.ProductsOnPallet)
 				.NotEmpty()
 				.WithMessage("Paleta musi zawierać towar/y");

@@ -80,9 +80,8 @@ namespace MyWerehouse.Test.Common
 			if (!context.ProductDetails.Any())
 			{
 				context.ProductDetails.AddRange(
-					new ProductDetails
-					{
-						Id = 10,
+					new ProductDetail
+					{						
 						ProductId = 10,
 						Length = 10,
 						Height = 20,
@@ -90,9 +89,8 @@ namespace MyWerehouse.Test.Common
 						Weight = 2,
 						Description = "TestDetails"
 					},
-					new ProductDetails
-					{
-						Id = 11,
+					new ProductDetail
+					{						
 						ProductId = 11,
 						Length = 20,
 						Height = 40,
@@ -235,15 +233,15 @@ namespace MyWerehouse.Test.Common
 				);
 			}
 
-			if (!context.PalletMovement.Any())
+			if (!context.PalletMovements.Any())
 			{
-				context.PalletMovement.AddRange(
+				context.PalletMovements.AddRange(
 					new PalletMovement
 					{
 						Id = 1,
 						PalletId = "Q1000",
 						//ProductId = 10,
-						LocationId = 2,
+						DestinationLocationId = 2,
 						Reason = ReasonMovement.ManualMove,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
@@ -253,7 +251,7 @@ namespace MyWerehouse.Test.Common
 						Id = 2,
 						PalletId = "Q1001",
 						//ProductId = 10,
-						LocationId = 1,
+						DestinationLocationId = 1,
 						Reason = ReasonMovement.ManualMove,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
@@ -263,7 +261,7 @@ namespace MyWerehouse.Test.Common
 						Id = 3,
 						PalletId = "Q1002",
 						//ProductId = 11,
-						LocationId = 3,
+						DestinationLocationId = 3,
 						Reason = ReasonMovement.ManualMove,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
@@ -273,7 +271,7 @@ namespace MyWerehouse.Test.Common
 						Id = 4,
 						PalletId = "Q1010",
 						//ProductId = 10,
-						LocationId = 3,
+						DestinationLocationId = 3,
 						Reason = ReasonMovement.ManualMove,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
@@ -283,7 +281,7 @@ namespace MyWerehouse.Test.Common
 						Id = 5,
 						PalletId = "Q1000",
 						//ProductId = 10,
-						LocationId = 3,
+						DestinationLocationId = 3,
 						Reason = ReasonMovement.ManualMove,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
@@ -293,35 +291,42 @@ namespace MyWerehouse.Test.Common
 			if(!context.PalletMovementDetails.Any())
 			{
 				context.PalletMovementDetails.AddRange(
-					new PalletMovementDetails
+					new PalletMovementDetail
 					{
 						Id = 1,
 						PalletMovementId = 1,
 						ProductId = 10,
+						Quantity = 100,
+					},
+					new PalletMovementDetail
+					{
+						Id = 6,
+						PalletMovementId = 1,
+						ProductId = 11,
 						Quantity = 1,
 					},
-					new PalletMovementDetails
+					new PalletMovementDetail
 					{
 						Id = 2,
 						PalletMovementId = 2,
 						ProductId = 11,
 						Quantity = 1,
 					},
-					new PalletMovementDetails
+					new PalletMovementDetail
 					{
 						Id = 3,
 						PalletMovementId = 3,
 						ProductId = 11,
 						Quantity = 1,
 					},
-					new PalletMovementDetails
+					new PalletMovementDetail
 					{
 						Id = 4,
 						PalletMovementId = 4,
 						ProductId = 10,
 						Quantity = 1,
 					},
-					new PalletMovementDetails
+					new PalletMovementDetail
 					{
 						Id = 5,
 						PalletMovementId = 5,
@@ -329,27 +334,19 @@ namespace MyWerehouse.Test.Common
 						Quantity = 1,
 					});
 			}
-			if (!context.Inventory.Any())
+			if (!context.Inventories.Any())
 			{
-				context.Inventory.AddRange(
+				context.Inventories.AddRange(
 					new Inventory
 					{
-						Id = 1,
-						Locations = new List<Location>
-						{
-							location1
-						},
+						//Id = 1,						
 						ProductId = 10,
 						Quantity = 10,
 						LastUpdated = new DateTime(2025, 5, 6)
 					},
 					new Inventory
 					{
-						Id = 2,
-						Locations = new List<Location>
-						{
-
-						},
+						//Id = 2,						
 						ProductId = 11,
 						Quantity = 0,
 						LastUpdated = new DateTime(2025, 5, 6)

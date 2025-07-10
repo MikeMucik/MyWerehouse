@@ -13,19 +13,15 @@ using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.IntegrationTest.CategoryTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 {
 	public class CategoryIntegrationCommand :CommandTestBase
-	{
-		//public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
+	{		
 		public readonly CategoryService _categoryService;
 		public readonly IMapper _mapper;
 		public readonly IValidator<CategoryDTO> _validator;
 		public CategoryIntegrationCommand() : base()
 		{
-			//_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
-			//	.UseInMemoryDatabase("SharedDatabase")
-			//	.Options;
 			var MapperConfig = new MapperConfiguration(cfg =>
 			{
 				cfg.AddProfile<MappingProfile>();

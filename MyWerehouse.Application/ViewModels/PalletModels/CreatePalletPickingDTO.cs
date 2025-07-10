@@ -30,21 +30,29 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 	{
 		public CreatePalletPickingDTOValidation(IValidator<ProductOnPalletDTO> productOnPalletValidator)
 		{
-			RuleFor(p => p.Status)
-				.NotNull()
-				.WithMessage("Paleta musi mieć status");
+			//RuleFor(p => p.Status)
+			//	.NotEmpty()
+			//	.WithMessage("Paleta musi mieć status");
 			RuleFor(p => p.DateCreated)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Paleta musi mieć datę utworzenia");
 			RuleFor(p => p.LocationId)
-				.NotNull()
+				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć lokalizację początkową");
 			RuleFor(p => p.IssueId)
-				.NotNull()
+				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć numer wydania");
 			RuleFor(p => p.ProductsOnPallet)
 				.NotEmpty()
 				.WithMessage("Paleta musi zawierać towar/y");
+			RuleFor(p => p.ProductsOnPallet)
+				.Must(po => po.GroupBy(p => p.ProductId).All(g => g.Count() == 1))
+				.WithMessage("Na palecie pickowanej każdy produkt może być tylko raz");
+			RuleFor(p => p.ProductsOnPallet)
+				.Must(po => po.GroupBy(pi=>pi.ProductId)
+				.All(g=>g.Select(pp => pp.BestBefore)
+				.Count() <= 1))
+				.WithMessage("Każdy produkt musi mieć jedną datą BestBefore");
 			RuleForEach(p => p.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)
 				.When(p => p.ProductsOnPallet != null && p.ProductsOnPallet.Count > 0);

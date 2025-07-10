@@ -50,7 +50,7 @@ namespace MyWerehouse.Test.MappingTest
 		{
 			//Arrange
 			var category = new Category { Id = 1, Name = "TestCategory" };
-			var details = new ProductDetails
+			var details = new ProductDetail
 			{
 				Length = 100,
 				Height = 200,

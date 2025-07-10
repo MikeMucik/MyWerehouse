@@ -11,7 +11,7 @@ using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
 	[Collection("QuerryCollection")]
 	public class ClientIntegrationView : CommandTestBase
@@ -19,8 +19,6 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 		public readonly ClientService _clientService;
 		public readonly ClientRepo _clientRepo;
 		public readonly IMapper _mapper;
-		//public readonly IValidator<AddressDTO> _validator;		
-
 		public ClientIntegrationView(QuerryTestFixture fixture)
 		{
 			var _context = fixture.Context;
@@ -29,13 +27,8 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				cfg.AddProfile<MappingProfile>();
 			});
 			_mapper = mapperConfig.CreateMapper();
-			_clientRepo = new ClientRepo(_context);
-			//var _receiptRepo = new ReceiptRepo(_context);
-			//_validator = new IValidator<AddressDTO>	(_validator);
-			_clientService = new ClientService(_clientRepo, _mapper
-				//, _receiptRepo 
-			//	,validator
-				);
+			_clientRepo = new ClientRepo(_context);			
+			_clientService = new ClientService(_clientRepo, _mapper);
 		}
 	}
 }

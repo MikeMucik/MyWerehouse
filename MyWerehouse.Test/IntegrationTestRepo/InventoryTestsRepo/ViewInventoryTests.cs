@@ -39,15 +39,7 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(productId, result.ProductId);
-			Assert.Equal(10, result.Quantity); //DbContextFactory Q=10
-			Assert.Equal(1, result.Locations.Count);//zostawiam tak bo może zwiększymy ilośc lokalizacji 
-
-			Assert.True(result.Locations.Any(), "Brak lokalizacji");
-			Assert.Equal(1, result.Locations.First().Id);
-
-			var location = result.Locations.FirstOrDefault(l => l.Id == 1);
-			Assert.NotNull(location);
-			Assert.Equal(2, location.Bay);
+			Assert.Equal(10, result.Quantity); //DbContextFactory Q=10			
 		}
 		[Fact]
 		public void ShowAllData_GetAllInventory_ReturnListOfInventory()

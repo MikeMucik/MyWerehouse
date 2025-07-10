@@ -85,7 +85,7 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<int> AddClientAsync(AddClientDTO addClient)
 		{
-			var validationResult = await _addClientValidator.ValidateAsync(addClient);//do testów
+			var validationResult = await _addClientValidator.ValidateAsync(addClient);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
@@ -154,12 +154,11 @@ namespace MyWerehouse.Application.Services
 		public void UpdateClient(UpdateClientDTO updatedClient)
 		{
 			var existingClient = _clientRepo.GetClientById(updatedClient.Id);
-			var validationResult = _updateClientValidator.Validate(updatedClient);//do testów
+			var validationResult = _updateClientValidator.Validate(updatedClient);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
-			}
-			//var client = _mapper.Map<Client>(updatedClient);
+			}			
 			_mapper.Map(updatedClient, existingClient);
 			CollectionSynchronizer.SynchronizeCollection(
 				 existingClient.Addresses,
@@ -173,8 +172,7 @@ namespace MyWerehouse.Application.Services
 					 return newAddress;
 				 },// Jak dodać nowy
 				 (dto, entity) => _mapper.Map(dto, entity) // Jak aktualizować
-				 );
-			//_clientRepo.UpdateClient(existingClient);
+				 );			
 			_werehouseDbContext.SaveChanges();
 		}
 		public async Task UpdateClientAsync(UpdateClientDTO updatedClient)
@@ -184,8 +182,7 @@ namespace MyWerehouse.Application.Services
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
-			}
-			//var client = _mapper.Map<Client>(updatedClient);
+			}			
 			_mapper.Map(updatedClient, existingClient);
 			CollectionSynchronizer.SynchronizeCollection(
 				 existingClient.Addresses,
@@ -194,8 +191,7 @@ namespace MyWerehouse.Application.Services
 				 a => a.Id, // Klucz dla AddressDTO
 				 dto => _mapper.Map<Address>(dto), // Jak dodać nowy
 				 (dto, entity) => _mapper.Map(dto, entity) // Jak aktualizować
-				 );
-			//await _clientRepo.UpdateClientAsync(existingClient);
+				 );			
 			await _werehouseDbContext.SaveChangesAsync();
 		}		
 		public DetailsOfClientDTO DetailsOfClient(int id)
@@ -298,7 +294,5 @@ namespace MyWerehouse.Application.Services
 			};
 			return clientList;
 		}
-
-
 	}
 }

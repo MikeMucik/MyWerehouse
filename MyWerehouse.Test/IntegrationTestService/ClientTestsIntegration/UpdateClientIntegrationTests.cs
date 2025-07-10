@@ -13,15 +13,14 @@ using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 
-namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
 	public class UpdateClientIntegrationTests : ClientIntegrationCommand
 	{
 		[Fact]
 		public void ProperData_UpdateProduct_ChangeData()
 		{
-			//Arrange
-			//using var arrangeContext = new WerehouseDbContext(_contextOptions);
+			//Arrange			
 			var address = new Address
 			{
 				//Id = 200,
@@ -80,12 +79,8 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				FullName = "test",
 				Addresses = new[] { addressU,addressU1	}
 			};
-			
-
-				_clientService.UpdateClient(updatedClient);
-			
-			//Assert
-			
+				_clientService.UpdateClient(updatedClient);			
+			//Assert			
 				var result = _context.Clients
 					.Include(x => x.Addresses)
 					.FirstOrDefault(x => x.Id == updatingClient.Id);
@@ -150,17 +145,13 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};
-			
-
 				var ex = Assert.Throws<FluentValidation.ValidationException>(() => _clientService.UpdateClient(updatedClient));
-				Assert.Contains("tele", ex.Message);
-			
+				Assert.Contains("tele", ex.Message);			
 		}
 		[Fact]
 		public void NotProperDataEmail_UpdateProduct_ThrowException()
 		{
-			//Arrange
-			
+			//Arrange			
 			var address = new Address
 			{
 				Id = 3,
@@ -236,7 +227,6 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				FullName = "test",
 				IsDeleted = false,
 				Addresses = new List<Address> { address }
-
 			};
 			_context.Addresses.Add(address);
 			_context.Clients.Add(updatingClient);
@@ -262,19 +252,15 @@ namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};			
-				await _clientService.UpdateClientAsync(updatedClient);
-			
-			//Assert
-			
+				await _clientService.UpdateClientAsync(updatedClient);			
+			//Assert			
 				var result = _context.Clients
 					.Include(x => x.Addresses)
 					.FirstOrDefault(x => x.Id == updatingClient.Id);
-
 				Assert.NotNull(result);
 				Assert.Equal(updatedClient.Name, result.Name);
 				Assert.Equal(updatedClient.Addresses.First().Country, result.Addresses.First().Country);
-				Assert.Equal(updatedClient.Addresses.First().City, result.Addresses.First().City);
-			
+				Assert.Equal(updatedClient.Addresses.First().City, result.Addresses.First().City);			
 		}
 		[Fact]
 		public async Task NotProperData_UpdateProductAsync_ThrowException()

@@ -14,14 +14,11 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeleteCategory(int idCategory);
 		Task DeleteCategoryAsync(int idCategory);
 		void SwitchOffCategory(int idCategory);
-		Task SwitchOffCategoryAsync(int idCategory);
-		//void UpdateCategory(Category category);
-		//Task UpdateCategoryAsync(Category category);		
+		Task SwitchOffCategoryAsync(int idCategory);				
 		Category? GetCategoryById(int id);
 		Task<Category?> GetCategoryByIdAsync(int id);
 		Category? GetCategoryByName(string name);
 		Task<Category?> GetCategoryByNameAsync(string name);
-		IQueryable<Category> GetAllCategories();
-		//Task<List<Category>> GetAllCategoriesAsync();
+		IQueryable<Category> GetAllCategories();		
 	}
 }

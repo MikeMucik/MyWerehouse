@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int CategoryId { get; set; }
 		public bool? IsDeleted { get; set; }
 		public int CartonsPerPallet { get; set; }
-		public int? DetailsId { get; set; }// Update !!!
+		//public int? DetailsId { get; set; }// Update !!!
 		public int Length { get; set; } //cm
 		public int Height { get; set; } //cm
 		public int Width { get; set; } //cm
@@ -35,7 +35,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 				.ForMember(dest=>dest.Weight, opt=>opt.MapFrom(src=>src.Details.Weight))
 				//.ForMember(dest=>dest.Category, opt=>opt.MapFrom(src=>src.Category.Name))
 				.ForMember(dest=>dest.Description, opt=>opt.MapFrom(src=>src.Details.Description))
-				.ForMember(dest=>dest.DetailsId, opt=>opt.MapFrom(src=>src.Details.Id))
+				//.ForMember(dest=>dest.DetailsId, opt=>opt.MapFrom(src=>src.Details.Id))
 				.ForMember(dest=>dest.AddedItemAd, opt=>opt.MapFrom(src=>src.AddedItemAd))
 				.ReverseMap();
 		}

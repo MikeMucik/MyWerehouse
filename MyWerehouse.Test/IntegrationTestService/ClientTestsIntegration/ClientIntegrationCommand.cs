@@ -15,7 +15,7 @@ using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
 	public class ClientIntegrationCommand : CommandTestBase
 	{

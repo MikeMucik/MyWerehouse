@@ -7,7 +7,7 @@ using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	[Collection("QuerryCollection")]
 	public class ViewProductIntegrationTests(QuerryTestFixture fixture) : ProductIntegrationView(fixture)

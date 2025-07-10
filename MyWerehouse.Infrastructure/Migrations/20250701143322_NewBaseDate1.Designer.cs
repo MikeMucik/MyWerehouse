@@ -12,8 +12,8 @@ using MyWerehouse.Infrastructure;
 namespace MyWerehouse.Infrastructure.Migrations
 {
     [DbContext(typeof(WerehouseDbContext))]
-    [Migration("20250409173519_NewBaseDate")]
-    partial class NewBaseDate
+    [Migration("20250701143322_NewBaseDate1")]
+    partial class NewBaseDate1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -231,17 +231,22 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdditionalEmail")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Phone")
+                        .HasColumnType("int");
 
                     b.Property<string>("PostalCode")
                         .IsRequired()
@@ -261,7 +266,9 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Adresses");
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Category", b =>
@@ -271,6 +278,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -289,9 +299,6 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AdressId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -300,39 +307,41 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdressId");
-
                     b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Inventory", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int>("ProductId1")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProductId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId1");
 
-                    b.ToTable("Inventory");
+                    b.ToTable("Inventories");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Issue", b =>
@@ -353,6 +362,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SendedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -381,15 +396,10 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("Height")
                         .HasColumnType("int");
 
-                    b.Property<int?>("InventoryId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Position")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("InventoryId");
 
                     b.ToTable("Locations");
                 });
@@ -397,7 +407,8 @@ namespace MyWerehouse.Infrastructure.Migrations
             modelBuilder.Entity("MyWerehouse.Domain.Models.Pallet", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime>("DateReceived")
                         .HasColumnType("datetime2");
@@ -442,16 +453,10 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<string>("PalletId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("PerformedBy")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
 
                     b.Property<string>("Reason")
                         .IsRequired()
@@ -463,9 +468,33 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("PalletId");
 
+                    b.ToTable("PalletMovements");
+                });
+
+            modelBuilder.Entity("MyWerehouse.Domain.Models.PalletMovementDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PalletMovementId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PalletMovementId");
+
                     b.HasIndex("ProductId");
 
-                    b.ToTable("PalletMovement");
+                    b.ToTable("PalletMovementDetails");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Product", b =>
@@ -479,8 +508,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("AddedItemAd")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CartonsPerPallet")
+                        .HasColumnType("int");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -497,13 +532,10 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Models.ProductDetails", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Models.ProductDetail", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -521,7 +553,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("Width")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProductId");
 
                     b.ToTable("ProductDetails");
                 });
@@ -540,12 +572,10 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("LocationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PalletId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -555,13 +585,11 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationId");
-
                     b.HasIndex("PalletId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductInLocations");
+                    b.ToTable("ProductOnPallet");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Receipt", b =>
@@ -644,22 +672,22 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Models.Client", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Models.Address", b =>
                 {
-                    b.HasOne("MyWerehouse.Domain.Models.Address", "Adress")
-                        .WithMany("Clients")
-                        .HasForeignKey("AdressId")
+                    b.HasOne("MyWerehouse.Domain.Models.Client", "Clients")
+                        .WithMany("Addresses")
+                        .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Adress");
+                    b.Navigation("Clients");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Inventory", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Models.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -681,30 +709,27 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Models.Location", b =>
-                {
-                    b.HasOne("MyWerehouse.Domain.Models.Inventory", null)
-                        .WithMany("Locations")
-                        .HasForeignKey("InventoryId");
-                });
-
             modelBuilder.Entity("MyWerehouse.Domain.Models.Pallet", b =>
                 {
-                    b.HasOne("MyWerehouse.Domain.Models.Issue", null)
+                    b.HasOne("MyWerehouse.Domain.Models.Issue", "Issue")
                         .WithMany("Pallets")
                         .HasForeignKey("IssueId");
 
                     b.HasOne("MyWerehouse.Domain.Models.Location", "Location")
-                        .WithMany()
+                        .WithMany("Pallets")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MyWerehouse.Domain.Models.Receipt", null)
+                    b.HasOne("MyWerehouse.Domain.Models.Receipt", "Receipt")
                         .WithMany("Pallets")
                         .HasForeignKey("ReceiptId");
 
+                    b.Navigation("Issue");
+
                     b.Navigation("Location");
+
+                    b.Navigation("Receipt");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.PalletMovement", b =>
@@ -721,15 +746,26 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Location");
+
+                    b.Navigation("Pallet");
+                });
+
+            modelBuilder.Entity("MyWerehouse.Domain.Models.PalletMovementDetail", b =>
+                {
+                    b.HasOne("MyWerehouse.Domain.Models.PalletMovement", "PalletMovement")
+                        .WithMany("PalletMovementDetails")
+                        .HasForeignKey("PalletMovementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MyWerehouse.Domain.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
-
-                    b.Navigation("Pallet");
+                    b.Navigation("PalletMovement");
 
                     b.Navigation("Product");
                 });
@@ -745,12 +781,19 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("MyWerehouse.Domain.Models.ProductDetail", b =>
+                {
+                    b.HasOne("MyWerehouse.Domain.Models.Product", "Product")
+                        .WithOne("Details")
+                        .HasForeignKey("MyWerehouse.Domain.Models.ProductDetail", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("MyWerehouse.Domain.Models.ProductOnPallet", b =>
                 {
-                    b.HasOne("MyWerehouse.Domain.Models.Location", null)
-                        .WithMany("ProductInLocations")
-                        .HasForeignKey("LocationId");
-
                     b.HasOne("MyWerehouse.Domain.Models.Pallet", "Pallet")
                         .WithMany("ProductsOnPallet")
                         .HasForeignKey("PalletId")
@@ -783,11 +826,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Models.Address", b =>
-                {
-                    b.Navigation("Clients");
-                });
-
             modelBuilder.Entity("MyWerehouse.Domain.Models.Category", b =>
                 {
                     b.Navigation("Products");
@@ -795,14 +833,11 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Client", b =>
                 {
+                    b.Navigation("Addresses");
+
                     b.Navigation("Issues");
 
                     b.Navigation("Receipts");
-                });
-
-            modelBuilder.Entity("MyWerehouse.Domain.Models.Inventory", b =>
-                {
-                    b.Navigation("Locations");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Issue", b =>
@@ -812,7 +847,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Location", b =>
                 {
-                    b.Navigation("ProductInLocations");
+                    b.Navigation("Pallets");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Models.Pallet", b =>
@@ -822,8 +857,16 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("ProductsOnPallet");
                 });
 
+            modelBuilder.Entity("MyWerehouse.Domain.Models.PalletMovement", b =>
+                {
+                    b.Navigation("PalletMovementDetails");
+                });
+
             modelBuilder.Entity("MyWerehouse.Domain.Models.Product", b =>
                 {
+                    b.Navigation("Details")
+                        .IsRequired();
+
                     b.Navigation("IssueList");
 
                     b.Navigation("ReceiptList");

@@ -7,7 +7,7 @@ using FluentValidation;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Models;
 
-namespace MyWerehouse.Test.IntegrationTest.ProductTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	public class AddProductIntegrationTests : ProductIntegrationCommand
 	{

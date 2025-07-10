@@ -19,14 +19,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public int AddClient(Client client)
 		{
-			_werehouseDbContext.Clients.Add(client);
-			//_werehouseDbContext.SaveChanges();
+			_werehouseDbContext.Clients.Add(client);			
 			return client.Id;
 		}
 		public async Task<int> AddClientAsync(Client client)
 		{
-			await _werehouseDbContext.Clients.AddAsync(client);
-			//await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.Clients.AddAsync(client);			
 			return client.Id;
 		}
 		public void DeleteClientById(int id)
@@ -34,8 +32,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var client = _werehouseDbContext.Clients.Find(id);
 			if (client != null)
 			{
-				_werehouseDbContext.Remove(client);
-				//_werehouseDbContext.SaveChanges();
+				_werehouseDbContext.Remove(client);				
 			}
 		}
 		public async Task DeleteClientByIdAsync(int id)
@@ -43,8 +40,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var client = await _werehouseDbContext.Clients.FindAsync(id);
 			if (client != null)
 			{
-				_werehouseDbContext.Remove(client);
-				//await _werehouseDbContext.SaveChangesAsync();
+				_werehouseDbContext.Remove(client);				
 			}
 		}
 		public void SwitchOffClient(int id)
@@ -52,8 +48,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var client = _werehouseDbContext.Clients.Find(id);
 			if (client != null)
 			{
-				client.IsDeleted = true;
-				//_werehouseDbContext.SaveChanges();
+				client.IsDeleted = true;				
 			}
 		}
 		public async Task SwitchOffClientAsync(int id)
@@ -61,8 +56,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var client = await _werehouseDbContext.Clients.FindAsync(id);
 			if (client != null)
 			{
-				client.IsDeleted = true;
-				//await _werehouseDbContext.SaveChangesAsync();
+				client.IsDeleted = true;				
 			}
 		}
 		public Client? GetClientById(int id)
@@ -102,127 +96,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				}
 			}
 			return null;
-		}
-		//public void UpdateClient(Client client)
-		//{
-			//_werehouseDbContext.Attach(client);
-			//if (client.Name != null)
-			//{
-			//	_werehouseDbContext.Entry(client).Property(nameof(client.Name)).IsModified = true;
-			//}
-			//if (client.Email != null)
-			//{
-			//	_werehouseDbContext.Entry(client).Property(nameof(client.Email)).IsModified = true;
-			//}
-			//if (client.Description != null)
-			//{
-			//	_werehouseDbContext.Entry(client).Property(nameof(client.Description)).IsModified = true;
-			//}
-			//var existingAddress = _werehouseDbContext.Addresses
-			//	.Where(ca => ca.ClientId == client.Id)
-			//	.ToList();
-			//foreach (var address in existingAddress)
-			//{
-			//	if (!client.Addresses.Any(i => i.Id == address.Id))
-			//	{
-			//		_werehouseDbContext.Addresses.Remove(address);
-			//	}
-			//}
-			//if (client.Addresses != null)
-			//{
-			//	foreach (var address in client.Addresses)
-			//	{
-			//		var existing = existingAddress.First(a => a.Id == address.Id);
-			//		if (existing ==null)
-			//		{
-			//			address.ClientId = client.Id;
-			//			_werehouseDbContext.Addresses.Add(address);
-			//		}
-			//		else
-			//		{
-			//			existing.Country = address.Country;
-			//			existing.City = address.City;
-			//			existing.Region = address.Region;
-			//			existing.Phone = address.Phone;
-			//			existing.PostalCode = address.PostalCode;
-			//			existing.StreetName = address.StreetName;
-			//			existing.StreetNumber = address.StreetNumber;
-			//			_werehouseDbContext.Entry(existing).State = EntityState.Modified;
-			//		}
-			//	}
-			//}
-			// Sprawdź, czy encja jest już śledzona.
-		//	var entry = _werehouseDbContext.Entry(client);
-
-		//	// Jeśli encja została 'odłączona' (detached), dołącz ją i oznacz jako zmodyfikowaną.
-		//	// Jeśli jest już śledzona (Unchanged, Modified), po prostu upewnij się, że stan jest Modified.
-		//	if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-		//	{
-		//		entry.State = EntityState.Modified;
-		//	}
-		//	// W przeciwnym razie (jeśli już jest Modified), nic nie rób, bo EF już wie.
-		//	_werehouseDbContext.SaveChanges();
-		//}
-		//public async Task UpdateClientAsync(Client client)
-		//{
-			//_werehouseDbContext.Attach(client);
-			//var clientEntry = _werehouseDbContext.Entry(client);
-			//if (client.Name != null)
-			//{
-			//	clientEntry.Property(c => c.Name).IsModified = true;
-			//}
-			//if (client.Email != null)
-			//{
-			//	clientEntry.Property(c => c.Email).IsModified = true;
-			//}
-			//if (client.Description != null)
-			//{
-			//	clientEntry.Property(c => c.Description).IsModified = true;
-			//}
-			//var existingAddress = _werehouseDbContext.Addresses
-			//	.Where(ca => ca.ClientId == client.Id)
-			//	.ToList();
-			//foreach (var address in existingAddress)
-			//{
-			//	if (!client.Addresses.Any(i => i.Id == address.Id))
-			//	{
-			//		_werehouseDbContext.Addresses.Remove(address);
-			//	}
-			//}
-			//if (client.Addresses != null)
-			//{
-			//	foreach (var address in client.Addresses)
-			//	{
-			//		var existing = existingAddress.FirstOrDefault(a => a.Id == address.Id);
-			//		if (existing == null)
-			//		{
-			//			address.ClientId = client.Id;
-			//			_werehouseDbContext.Addresses.Add(address);
-			//		}
-			//		else
-			//		{
-			//			if (existing.Country != address.Country) existing.Country = address.Country;
-			//			if (existing.City != address.City) existing.City = address.City;
-			//			if (existing.Region != address.Region) existing.Region = address.Region;
-			//			if (existing.Phone != address.Phone) existing.Phone = address.Phone;
-			//			if (existing.PostalCode != address.PostalCode) existing.PostalCode = address.PostalCode;
-			//			if (existing.StreetName != address.StreetName) existing.StreetName = address.StreetName;
-			//			if (existing.StreetNumber != address.StreetNumber) existing.StreetNumber = address.StreetNumber;
-			//			_werehouseDbContext.Entry(existing).State = EntityState.Modified;
-			//		}
-			//	}
-			//}
-		//	var entry = _werehouseDbContext.Entry(client);
-
-		//	// Jeśli encja została 'odłączona' (detached), dołącz ją i oznacz jako zmodyfikowaną.
-		//	// Jeśli jest już śledzona (Unchanged, Modified), po prostu upewnij się, że stan jest Modified.
-		//	if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-		//	{
-		//		entry.State = EntityState.Modified;
-		//	}
-		//	// W przeciwnym razie (jeśli już jest Modified), nic nie rób, bo EF już wie.
-		//	await _werehouseDbContext.SaveChangesAsync();
-		//}
+		}	
 		public IQueryable<Client> GetClients(ClientSearchFilter clientFilter)
 		{
 			var result = _werehouseDbContext.Clients

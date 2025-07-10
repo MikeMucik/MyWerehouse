@@ -8,7 +8,7 @@ using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using Xunit.Sdk;
 
-namespace MyWerehouse.Test.IntegrationTest.ClientTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
 	public class DeleteClientIntegratiornTests : ClientIntegrationCommand
 	{		

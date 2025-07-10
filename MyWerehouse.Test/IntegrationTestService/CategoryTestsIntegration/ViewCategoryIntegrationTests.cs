@@ -9,7 +9,7 @@ using MyWerehouse.Application.Services;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.IntegrationTest.CategoryTestsIntegration
+namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 {
 	[Collection("QuerryCollection")]
 	public class ViewCategoryIntegrationTests : CommandTestBase
@@ -17,7 +17,6 @@ namespace MyWerehouse.Test.IntegrationTest.CategoryTestsIntegration
 		private readonly CategoryService _categoryService;
 		private readonly CategoryRepo _categoryRepo;
 		private readonly IMapper _mapper;
-
 		public ViewCategoryIntegrationTests(QuerryTestFixture fixture)
 		{
 			var _context = fixture.Context;

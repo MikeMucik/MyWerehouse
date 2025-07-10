@@ -29,11 +29,8 @@ namespace MyWerehouse.Application.ViewModels.ProductOnPalletModels
 		public ProductOnPalletDTOValidation() 
 		{
 			RuleFor(pp => pp.ProductId)
-				.NotEqual(0)
-				.WithMessage("Produkt na palecie musi mieć numer produktu");
-			//RuleFor(pp => pp.PalletId)
-			//	.NotNull()
-			//	.WithMessage("Produkt na palecie musi mieć numer palety");
+				.GreaterThan(0)
+				.WithMessage("Produkt na palecie musi mieć numer produktu");			
 			RuleFor(pp => pp.Quantity)
 				.GreaterThan(0)
 				.WithMessage("Ilość produktu musi być większa od zera");
@@ -43,7 +40,7 @@ namespace MyWerehouse.Application.ViewModels.ProductOnPalletModels
 			RuleFor(pp => pp.BestBefore)
 				.GreaterThan(DateOnly.FromDateTime(DateTime.Now))
 				.WithMessage("Data do spożycia musi być późniejsza niż data dzisiejsza")
-				.When(pp => pp.BestBefore != null);
+				.When(pp => pp.BestBefore != null);			
 		}
 	}
 }

@@ -12,32 +12,59 @@ namespace MyWerehouse.Application.Services
 	public class PalletMovementService : IPalletMovementService
 	{
 		private readonly IPalletMovementRepo _palletMovementRepo;
+		private readonly IHistoryIssueRepo _historyIssueRepo;
 
-		public PalletMovementService(IPalletMovementRepo palletMovementRepo)
+		public PalletMovementService(
+			IPalletMovementRepo palletMovementRepo,
+			IHistoryIssueRepo historyIssueRepo)
 		{
 			_palletMovementRepo = palletMovementRepo;
+			_historyIssueRepo = historyIssueRepo;
 		}
-		public void CreateMovement(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, IEnumerable<PalletMovementDetail> details = null)
+
+		public async Task CreateHistoryIssueAsync(Issue issue, IssueStatus status, string userId, IEnumerable<HistoryIssueDetail> details)
 		{
 			if (details == null)
 			{
-				details = pallet.ProductsOnPallet.Select(p => new PalletMovementDetail
+				details = issue.Pallets.Select(p => new HistoryIssueDetail
 				{
-					ProductId = p.ProductId,
-					Quantity = p.Quantity,
+					PalletId = p.Id,
+					LocationId = p.LocationId,
 				}).ToList();
 			}
-			var movement = new PalletMovement
+			var history = new HistoryIssue
 			{
-				PalletId = pallet.Id,
-				SourceLocationId = pallet.LocationId,
-				DestinationLocationId = destinationLocationId,
-				Reason = reasonMovement,
-				PerformedBy = userId,
-				PalletMovementDetails = details.ToList()
+				IssueId = issue.Id,
+				Status = status,
+				PerfomedBy = userId,
+				Details = details.ToList(),
+				DateTime = DateTime.UtcNow,
+				
 			};
-			 _palletMovementRepo.AddPalletMovement(movement);
+			await _historyIssueRepo.AddHistoryIssueAsync(history);
 		}
+
+		//public void CreateMovement(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, IEnumerable<PalletMovementDetail> details = null)
+		//{
+		//	if (details == null)
+		//	{
+		//		details = pallet.ProductsOnPallet.Select(p => new PalletMovementDetail
+		//		{
+		//			ProductId = p.ProductId,
+		//			Quantity = p.Quantity,
+		//		}).ToList();
+		//	}
+		//	var movement = new PalletMovement
+		//	{
+		//		PalletId = pallet.Id,
+		//		SourceLocationId = pallet.LocationId,
+		//		DestinationLocationId = destinationLocationId,
+		//		Reason = reasonMovement,
+		//		PerformedBy = userId,
+		//		PalletMovementDetails = details.ToList()
+		//	};
+		//	 _palletMovementRepo.AddPalletMovement(movement);
+		//}
 		public async Task CreateMovementAsync(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, IEnumerable<PalletMovementDetail> details=null)
 		{
 			if (details == null)
@@ -45,7 +72,7 @@ namespace MyWerehouse.Application.Services
 				details = pallet.ProductsOnPallet.Select(p => new PalletMovementDetail
 				{
 					ProductId = p.ProductId,
-					Quantity = p.Quantity,
+					Quantity = p.Quantity,					
 				}).ToList();
 			}
 			var movement = new PalletMovement
@@ -55,7 +82,8 @@ namespace MyWerehouse.Application.Services
 				DestinationLocationId = destinationLocationId,
 				Reason = reasonMovement,
 				PerformedBy = userId,
-				PalletMovementDetails = details.ToList()
+				PalletMovementDetails = details.ToList(),
+				MovementDate = DateTime.UtcNow,
 			};
 			await _palletMovementRepo.AddPalletMovementAsync(movement);			
 		}		

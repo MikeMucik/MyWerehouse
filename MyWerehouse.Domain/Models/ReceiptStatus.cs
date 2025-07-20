@@ -12,8 +12,7 @@ namespace MyWerehouse.Domain.Models
 		InProgress = 1,
 		PhysicallyCompleted = 2,
 		Verified = 3,
-		Closed = 4,
-		Cancelled =5,
-
+		Closed = 4,//czy potrzebne tylko jeśli nie usuwamy przyjęcia i zostawiamy historie
+		Cancelled =5,//czy potrzebne
 	}
 }

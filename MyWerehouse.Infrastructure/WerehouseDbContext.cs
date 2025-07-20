@@ -11,6 +11,8 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<Address> Addresses { get; set; }
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Client> Clients { get; set; }
+		public DbSet<HistoryIssue> HistoryIssues { get; set; }
+		public DbSet<HistoryIssueDetail> HistoryIssuesDetail { get; set; }
 		public DbSet<Inventory> Inventories { get; set; }
 		public DbSet<Issue> Issues { get; set; }
 		public DbSet<Location> Locations { get; set; }
@@ -28,7 +30,7 @@ namespace MyWerehouse.Infrastructure
 			{
 				entity.HasKey(e => e.Id);
 
-				entity.Property(x => x.Id)	.ValueGeneratedOnAdd();
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 			});
 			modelBuilder.Entity<Category>(entity =>
 			{
@@ -40,13 +42,32 @@ namespace MyWerehouse.Infrastructure
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 			});
+			modelBuilder.Entity<HistoryIssue>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+					entity.HasOne(e => e.Issue)
+						.WithMany(p => p.HistoryIssues)
+						.HasForeignKey(e => e.IssueId)
+						.IsRequired();
+
+				entity.Property(r => r.Status)
+				.HasConversion<string>();
+			});
+			modelBuilder.Entity<HistoryIssueDetail>(entity =>
+			{
+				entity.HasOne(h => h.HistoryIssue)
+				.WithMany(hd => hd.Details)
+				.HasForeignKey(h => h.HistoryIssueId);
+			});
 			modelBuilder.Entity<Inventory>(entity =>
 			{
 				entity.HasKey(e => e.ProductId);
 				entity.Property(x => x.ProductId).ValueGeneratedNever();
 
 				entity.HasOne(i => i.Product)
-				.WithOne(p=>p.InventoryItem)
+				.WithOne(p => p.InventoryItem)
 				.HasForeignKey<Inventory>(i => i.ProductId);
 			});
 			modelBuilder.Entity<Issue>(entity =>
@@ -84,8 +105,9 @@ namespace MyWerehouse.Infrastructure
 					.WithMany(p => p.PalletMovements)
 					.HasForeignKey(pm => pm.PalletId)
 					.IsRequired()
-					.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
-
+					//.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
+					.OnDelete(DeleteBehavior.Cascade);
+				// Zrób cascade bo to tyczy się tylko jak przyjęcie jeszcze nie zweryfikowane
 				entity.Property(m => m.Reason)
 				.HasConversion<string>();
 			});
@@ -144,6 +166,11 @@ namespace MyWerehouse.Infrastructure
 			 {
 				 entity.HasKey(e => e.Id);
 				 entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+				 entity.HasMany(r => r.Pallets)
+				 .WithOne(p => p.Receipt)
+				 .HasForeignKey(p => p.ReceiptId)
+				 .OnDelete(DeleteBehavior.Cascade);
 			 });
 		}
 	}

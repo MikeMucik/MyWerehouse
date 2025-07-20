@@ -199,8 +199,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				CategoryId = 2,
 				SKU = "q1233",
 				IsDeleted = false,
-				AddedItemAd = DateTime.Now,
-				//DetailsId = 4,
+				AddedItemAd = DateTime.Now,				
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -211,8 +210,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		
 				await _productService.UpdateProductAsync(updatedProduct);
 			
-			//Assert
-			
+			//Assert			
 				var result = _context.Products
 					.Include(d => d.Details)
 					.FirstOrDefault(x => x.Id == updatingProduct.Id);

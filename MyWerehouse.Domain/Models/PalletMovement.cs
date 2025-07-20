@@ -17,7 +17,7 @@ namespace MyWerehouse.Domain.Models
 		public virtual Location DestinationLocation { get; set; }			  
 		public ReasonMovement Reason { get; set; } // np. "Picking", "Correction", "Merge"
 		public string? PerformedBy { get; set; } // opcjonalnie: user		
-		public virtual ICollection<PalletMovementDetail> PalletMovementDetails { get; set; }
+		public virtual ICollection<PalletMovementDetail> PalletMovementDetails { get; set; } = new List<PalletMovementDetail>();
 		public DateTime MovementDate { get; set; }
 	}
 }

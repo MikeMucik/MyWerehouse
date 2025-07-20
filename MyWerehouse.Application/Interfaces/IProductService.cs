@@ -24,5 +24,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task <ListProductsDTO> GetProductsAsync(int pageSize, int PageNumber);
 		ListProductsDTO FindProductsByFilter(int pageSize, int PageNumber, ProductSearchFilter filter);
 		Task <ListProductsDTO> FindProductsByFilterAsync(int pageSize, int PageNumber, ProductSearchFilter filter);
+		
 	}
 }

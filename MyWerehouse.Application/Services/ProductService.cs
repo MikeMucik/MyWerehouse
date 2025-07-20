@@ -19,22 +19,25 @@ namespace MyWerehouse.Application.Services
 	{
 		private readonly IProductRepo _productRepo;
 		private readonly IMapper _mapper;
+		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IValidator<AddProductDTO> _productValidator;
-		private readonly WerehouseDbContext _werehouseDbContext;
+		private readonly IProductOnPalletRepo _productOnPalletRepo;
 
 		public ProductService(
 			IProductRepo repo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IReceiptRepo? receiptRepo = null,
-			IValidator<AddProductDTO>? productValidator = null)
+			IValidator<AddProductDTO>? productValidator = null,
+			IProductOnPalletRepo productOnPalletRepo = null)
 		{
 			_productRepo = repo;
 			_mapper = mapper;
-			_werehouseDbContext = werehouseDbContext;
+			//_werehouseDbContext = werehouseDbContext;
 			_receiptRepo = receiptRepo;
 			_productValidator = productValidator;
+			_productOnPalletRepo = productOnPalletRepo;
 		}
 		public ProductService(
 			IProductRepo repo,
@@ -83,6 +86,7 @@ namespace MyWerehouse.Application.Services
 			}
 			var productNew = _mapper.Map<Product>(product);
 			var id = await _productRepo.AddProductAsync(productNew);
+			//await _werehouseDbContext.SaveChangesAsync();
 			return id;
 		}
 
@@ -125,6 +129,7 @@ namespace MyWerehouse.Application.Services
 				}
 			}
 			else { throw new InvalidDataException("Brak produktu o tym numerze"); }
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
 		public AddProductDTO GetProductToEdit(int productId)
 		{
@@ -144,16 +149,16 @@ namespace MyWerehouse.Application.Services
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
-			}		
+			}
 			var existingProduct = _productRepo.GetProductToEdit(productDTO.Id);
 			if (existingProduct == null)
 			{
 				throw new InvalidDataException($"Produkt o numerze {productDTO.Id} nie istnieje");
 			}
-			_mapper.Map(productDTO, existingProduct);			
+			_mapper.Map(productDTO, existingProduct);
 			_productRepo.UpdateProduct(existingProduct);
 		}
-		
+
 		public async Task UpdateProductAsync(AddProductDTO productDTO)
 		{
 			var validationResult = _productValidator.Validate(productDTO);
@@ -161,13 +166,13 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var existingProduct =await _productRepo.GetProductToEditAsync(productDTO.Id);
+			var existingProduct = await _productRepo.GetProductToEditAsync(productDTO.Id);
 			if (existingProduct == null)
 			{
 				throw new InvalidDataException($"Produkt o numerze {productDTO.Id} nie istnieje");
 			}
 			_mapper.Map(productDTO, existingProduct);
-			await _productRepo.UpdateProductAsync(existingProduct);
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
 		public DetailsOfProductDTO DetailsOfProduct(int productId)
 		{
@@ -260,5 +265,7 @@ namespace MyWerehouse.Application.Services
 			};
 			return productList;
 		}
+
+		
 	}
 }

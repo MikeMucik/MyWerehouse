@@ -19,25 +19,17 @@ using MyWerehouse.Test.Common;
 namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 {
 	public class PalletIntergrationCommand : CommandTestBase
-	{
-		//public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
+	{		
 		public readonly PalletService _palletService;
 		public readonly IMapper _mapper;
 		public readonly IPalletRepo _palletRepo;
-		//public readonly IProductOnPalletRepo _productOnPalletRepo;
 		public readonly IPalletMovementRepo _palletMovementRepo;
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
 		protected readonly IValidator<CreatePalletPickingDTO> _createPalletPickingValidator;
-		//protected readonly IValidator<CreatePalletReceiptDTO> _createPalletReceiptValidator;
 		protected readonly IValidator<UpdatePalletDTO> _updatePalletValidator;
-		//protected readonly WerehouseDbContext _werehouseDbContext;
 
 		public PalletIntergrationCommand() : base()
 		{			
-			//_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
-			//	.UseInMemoryDatabase("Shared Database")
-			//	.Options;
-
 			var MapperConfig = new MapperConfiguration(cfg =>
 			{ 
 				cfg.AddProfile<MappingProfile>();
@@ -45,14 +37,12 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			_mapper  = MapperConfig.CreateMapper();
 
 			_palletRepo = new PalletRepo(_context);
-			//_productOnPalletRepo = new ProductOnPalletRepo(_context);
+			
 			_palletMovementRepo = new PalletMovementRepo(_context);
 
-			_productOnPalletValidator = new ProductOnPalletDTOValidation();
-			//_createPalletReceiptValidator = new CreatePalletReceiptDTOValidation(_productOnPalletValidator);
+			_productOnPalletValidator = new ProductOnPalletDTOValidation();			
 			_createPalletPickingValidator = new CreatePalletPickingDTOValidation(_productOnPalletValidator);
-			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
-			//_werehouseDbContext = new WerehouseDbContext(_contextOptions);
+			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);			
 			_palletService = new PalletService(_palletRepo, _palletMovementRepo,
 				_mapper, _createPalletPickingValidator, _updatePalletValidator,
 				_context);

@@ -16,23 +16,13 @@ namespace MyWerehouse.Domain.Interfaces
 		Pallet? GetPalletById(string palletId);
 		Task<Pallet?> GetPalletByIdAsync(string palletId);
 		IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly minBestBefore);
-		IQueryable<Pallet> GetPalletsByBasedFilter(PalletSearchFilter filter);
-		IQueryable<Pallet> GetPalletsByClientFilter(PalletSearchFilter filter);
-		IQueryable<Pallet> GetPalletsByUser(PalletSearchFilter filter);
-		void ClearPalletFromListReceipt(string palletId);
+		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);			
 		void ClearPalletFromListIssue(string palletId);
+		Task ClearPalletFromListIssueAsync(string palletId);
 		void ChangePalletStatus(string palletId, PalletStatus palletStatus);
 		string GetNextPalletId();
 		Task<string> GetNextPalletIdAsync();
 		Pallet GetPalletByLocation(int locationId); //numer lokacji
-		Task<Pallet> GetPalletByLocationAsync(int locationId); //numer lokacji
-															   
-		//TODO expand to methods
-	   //void MarkPalletAsHold(string id);
-	   //void MarkPalletAsAvailable(string id);
-	   //void MarkPalletAsDamaged(string id);
-	   //void MarkPalletAsLoaded(string id);
-
-		//IQueryable<Location> GetLocationsFromFilteredPallets(PalletSearchFilter filter);
+		Task<Pallet> GetPalletByLocationAsync(int locationId); //numer lokacji	
 	}
 }

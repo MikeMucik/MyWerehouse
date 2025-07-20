@@ -12,6 +12,8 @@ namespace MyWerehouse.Domain.Models
 		InProgress = 1,
 		IsShipped = 2,
 		IsClosed = 3,
-		Archived = 4
+		Archived = 4,
+		ConfirmedToLoad= 5,
+		ChangingPallet =6,
 	}
 }

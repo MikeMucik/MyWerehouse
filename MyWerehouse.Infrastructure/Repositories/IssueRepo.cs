@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
@@ -132,13 +133,25 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			return _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
-				.SingleOrDefault(i => i.Id == id);
+				.FirstOrDefault(i => i.Id == id);
 		}
+		
 		public async Task<Issue?> GetIssueByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
-				.SingleOrDefaultAsync(i => i.Id == id);
+				.FirstOrDefaultAsync(i => i.Id == id);
+		}
+		public async Task<Issue?> GetIssueForLoadAsync(int id)
+		{
+			return await _werehouseDbContext.Issues
+				.Include(i => i.Pallets)
+					.ThenInclude(p=>p.ProductsOnPallet)
+						.ThenInclude(pr=>pr.Product)
+				.Include(i => i.Pallets)
+					.ThenInclude(p => p.Location)
+						
+				.FirstOrDefaultAsync(i => i.Id == id);
 		}
 		public IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter)
 		{
@@ -176,6 +189,23 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(i => i.PerformedBy == filter.UserId);
 			}
 			return result;
-		}		
+		}
+
+		public async Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id)
+		{
+			var list = await _werehouseDbContext.Pallets
+				.AsNoTracking()
+				.Where(p => p.IssueId == id)
+				.OrderBy(p => p.LocationId)
+				.Select(p => new PalletWithLocation
+				{
+					PalletId = p.Id.ToString(),
+					LocationId = p.LocationId,
+				})
+				.ToListAsync();
+			return list;		
+		}
+
+		
 	}
 }

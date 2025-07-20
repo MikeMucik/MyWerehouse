@@ -31,9 +31,4 @@
     <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ViewModels\InventoryModels\" />
-    <Folder Include="ViewModels\LocationModels\" />
-  </ItemGroup>
-
 </Project>

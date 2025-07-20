@@ -13,8 +13,10 @@ namespace MyWerehouse.Domain.Models
 		Picking = 2,
 		Correction = 3,
 		Merge = 4,
-		Split = 5,
+		ToLoad = 5,
 		ManualMove = 6,
 		Loaded = 7,
+		InStock = 8,
+		Archived= 9,
 	}
 }

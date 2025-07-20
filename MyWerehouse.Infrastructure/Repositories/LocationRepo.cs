@@ -22,10 +22,10 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext.Locations.Add(location);
 			_werehouseDbContext.SaveChanges();
 		}
-		public async Task AddLocationAsync(Location location)
+		public async Task<int> AddLocationAsync(Location location)
 		{
 			await _werehouseDbContext.Locations.AddAsync(location);
-			await _werehouseDbContext.SaveChangesAsync();
+			return location.Id;
 		}
 		public void DeleteLocation(int locationId)
 		{
@@ -44,49 +44,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				_werehouseDbContext.Locations.Remove(location);
 				await _werehouseDbContext.SaveChangesAsync();
 			}
-		}
-		public void UpdateLocation(Location location)
-		{
-			_werehouseDbContext.Attach(location);
-			if (location.Aisle > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Aisle)).IsModified = true;
-			}
-			if (location.Bay > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Bay)).IsModified = true;
-			}
-			if (location.Position > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Position)).IsModified = true;
-			}
-			if (location.Height > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Height)).IsModified = true;
-			}
-			_werehouseDbContext.SaveChanges();
-		}
-		public async Task UpdateLocationAsync(Location location)
-		{
-			_werehouseDbContext.Attach(location);
-			if (location.Aisle > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Aisle)).IsModified = true;
-			}
-			if (location.Bay > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Bay)).IsModified = true;
-			}
-			if (location.Position > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Position)).IsModified = true;
-			}
-			if (location.Height > 0)
-			{
-				_werehouseDbContext.Entry(location).Property(nameof(location.Height)).IsModified = true;
-			}
-			await _werehouseDbContext.SaveChangesAsync();
-		}
+		}		
 		public Location? GetLocationById(int locationId)
 		{
 			return _werehouseDbContext.Locations.Find(locationId);
@@ -100,6 +58,19 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var locations = _werehouseDbContext.Locations
 				.Where(l => l.Pallets.Count() == 0);
 			return locations;
+		}
+		public async Task AddManyLocationAsync(IEnumerable<Location> locations)
+		{
+			await _werehouseDbContext.Locations.AddRangeAsync(locations);
+		}
+		public async Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt)
+		{
+			var location =await _werehouseDbContext.Locations
+				.FirstOrDefaultAsync(x => x.Bay == Bay &&
+								x.Aisle == Aisle && 
+								x.Position == Position &&
+								x.Height == Heigt);
+			return location;
 		}
 	}
 }

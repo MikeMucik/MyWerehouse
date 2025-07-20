@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
+using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Services
 {
@@ -99,6 +101,16 @@ namespace MyWerehouse.Application.Services
 			{
 				// gdy jest za mało na pierwszej palecie produktu i trzeba dobrać z drugiej
 			}
+		}
+		public async Task<ProductQunatityLocationsDTO> GetQuantityLocationProduct(int productId)
+		{			
+			var list = await _productOnPalletRepo.GetQuantityLocation(productId);
+			var listForProduct = new ProductQunatityLocationsDTO
+			{
+				ProductId = productId,
+				ListLocation = list
+			};
+			return listForProduct;
 		}
 	}
 }

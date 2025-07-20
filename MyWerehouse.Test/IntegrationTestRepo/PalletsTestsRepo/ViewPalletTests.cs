@@ -111,7 +111,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				ProductId = 10
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByBasedFilter(productId);
+			var result = _palletRepo.GetPalletsByFilter(productId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());
@@ -128,7 +128,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				EndDate = new DateTime(2024, 3,3)
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByBasedFilter(productId);
+			var result = _palletRepo.GetPalletsByFilter(productId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(4, result.Count());
@@ -143,7 +143,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				BestBefore = new DateOnly(2026,1, 1)
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByBasedFilter(productId);
+			var result = _palletRepo.GetPalletsByFilter(productId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(1, result.Count());
@@ -158,7 +158,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				LocationId = 1
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByBasedFilter(locationId);
+			var result = _palletRepo.GetPalletsByFilter(locationId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());			
@@ -173,12 +173,12 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				LocationId = 2
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByBasedFilter(locationId);
+			var result = _palletRepo.GetPalletsByFilter(locationId);
 			//Assert
 			Assert.Equal(0, result.Count());			
 		}
 		[Fact]
-		public void SearchPalletsReceipt_GetPalletsByClientFilter_ReturnList()
+		public void SearchPalletsReceipt_GetPalletsByFilter_ReturnList()
 		{
 			//Arrange
 			var clientId = new PalletSearchFilter
@@ -186,7 +186,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				ClientIdIn = 10
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByClientFilter(clientId).ToList();
+			var result = _palletRepo.GetPalletsByFilter(clientId).ToList();
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -203,7 +203,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			}
 		}
 		[Fact]
-		public void SearchPalletsIssue_GetPalletsByClientFilter_ReturnList()
+		public void SearchPalletsIssue_GetPalletsByFilter_ReturnList()
 		{
 			//Arrange
 			var clientId = new PalletSearchFilter
@@ -211,7 +211,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				ClientIdOut = 11
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByClientFilter(clientId).ToList();
+			var result = _palletRepo.GetPalletsByFilter(clientId).ToList();
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result); // zakładamy, że dane testowe zawierają takie palety
@@ -228,7 +228,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			}
 		}
 		[Fact]
-		public void SearchPallets_GetPalletsByUser_ReturnList()
+		public void SearchPallets_GetPalletsByFilter_ReturnList()
 		{
 			//Arrange
 			var userId = new PalletSearchFilter
@@ -236,7 +236,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				ReceiptUser = "U001"
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByUser(userId);
+			var result = _palletRepo.GetPalletsByFilter(userId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -247,7 +247,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			}
 		}
 		[Fact]
-		public void SearchPalletsStatus_GetPalletsByBasedFilter_ReturnList()
+		public void SearchPalletsStatus_GetPalletsByFilter_ReturnList()
 		{
 			//Arrange
 			var status = new PalletSearchFilter
@@ -255,7 +255,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 				PalletStatus = PalletStatus.Damaged,
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByBasedFilter(status);
+			var result = _palletRepo.GetPalletsByFilter(status);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);

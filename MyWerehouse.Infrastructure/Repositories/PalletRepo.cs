@@ -18,12 +18,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		public string AddPallet(Pallet pallet)
 		{
-			_werehouseDbContext.Pallets.Add(pallet);			
+			_werehouseDbContext.Pallets.Add(pallet);
 			return pallet.Id;
 		}
 		public async Task<string> AddPalletAsync(Pallet pallet)
 		{
-			await _werehouseDbContext.Pallets.AddAsync(pallet);			
+			await _werehouseDbContext.Pallets.AddAsync(pallet);
 			return pallet.Id;
 		}
 		public void DeletePallet(string palletId)
@@ -31,7 +31,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var pallet = _werehouseDbContext.Pallets.Find(palletId);
 			if (pallet != null)
 			{
-				_werehouseDbContext.Pallets.Remove(pallet);				
+				_werehouseDbContext.Pallets.Remove(pallet);
 			}
 		}
 		public async Task DeletePalletAsync(string palletId)
@@ -39,39 +39,38 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var pallet = await _werehouseDbContext.Pallets.FindAsync(palletId);
 			if (pallet != null)
 			{
-				_werehouseDbContext.Pallets.Remove(pallet);				
+				_werehouseDbContext.Pallets.Remove(pallet);
 			}
-		}		
+		}
 		public Pallet? GetPalletById(string palletId)
 		{
 			return _werehouseDbContext.Pallets
-				.Include(p=>p.ProductsOnPallet)
-				.Include(p=>p.PalletMovements)
-				.Include(p=>p.Location)
-				.Include(p=>p.Receipt)
-				.Include(p=>p.Issue)				
+				.Include(p => p.ProductsOnPallet)
+				.Include(p => p.PalletMovements)
+				.Include(p => p.Location)
+				.Include(p => p.Receipt)
+				.Include(p => p.Issue)
 				.FirstOrDefault(p => p.Id == palletId);
 		}
 		public async Task<Pallet?> GetPalletByIdAsync(string palletId)
 		{
 			return await _werehouseDbContext.Pallets
-				.Include(p=>p.ProductsOnPallet)
-				.Include(p=>p.PalletMovements)
-					//.ThenInclude(l=>l.DestinationLocation)
+				.Include(p => p.ProductsOnPallet)
+				.Include(p => p.PalletMovements)				
 				.Include(p => p.Location)
 				.Include(p => p.Receipt)
 				.Include(p => p.Issue)
 				.FirstOrDefaultAsync(p => p.Id == palletId);
-		}		
-		public IQueryable<Pallet> GetPalletsByBasedFilter(PalletSearchFilter filter)
+		}
+		public IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 					.ThenInclude(pp => pp.Product)
-						.ThenInclude(ppr => ppr.ReceiptList)
 				.Include(p => p.PalletMovements)
-				.Include(p => p.Location)
-				.AsQueryable();
+				.Include(p => p.Issue)
+				.Include(p => p.Receipt)
+					.AsQueryable();
 			if (filter.ProductId > 0)
 			{
 				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
@@ -105,19 +104,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
 				pp.DateAdded >= start && pp.DateAdded <= end));
 			}
-			return result;
-		}
-		public IQueryable<Pallet> GetPalletsByClientFilter(PalletSearchFilter filter)
-		{
-			var result = _werehouseDbContext.Pallets
-				.Include(p => p.ProductsOnPallet)
-					.ThenInclude(pp => pp.Product)
-				.Include(p => p.Location)
-				.Include(p => p.Issue)
-					.ThenInclude(pp => pp.Client)
-				.Include(p => p.Receipt)
-					.ThenInclude(pp => pp.Client)
-				.AsQueryable();
 			if (filter.ClientIdIn != null)
 			{
 				result = result.Where(p => p.Receipt != null && p.Receipt.ClientId == filter.ClientIdIn);
@@ -126,22 +112,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 			{
 				result = result.Where(p => p.Issue != null && p.Issue.ClientId == filter.ClientIdOut);
 			}
-			return result;
-		}
-		public IQueryable<Pallet> GetPalletsByUser(PalletSearchFilter filter)
-		{
-			var result = _werehouseDbContext.Pallets
-				.Include(p => p.ProductsOnPallet)
-					.ThenInclude(pp => pp.Product)
-				.Include(p => p.Location)
-				.Include(p => p.Issue)
-					.ThenInclude(pp => pp.Client)
-				.Include(p => p.Receipt)
-					.ThenInclude(pp => pp.Client)
-				.AsQueryable();
 			if (!string.IsNullOrEmpty(filter.ReceiptUser))
 			{
 				result = result.Where(p => p.Receipt != null && p.Receipt.PerformedBy == filter.ReceiptUser);
+			}
+			if (!string.IsNullOrEmpty(filter.IssueUser))
+			{
+				result = result.Where(p => p.Issue != null && p.Issue.PerformedBy == filter.IssueUser);//dodaj test
 			}
 			return result;
 		}
@@ -150,26 +127,29 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var pallets = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Where(p =>
-				p.ProductsOnPallet.Any(pp => pp.ProductId
-				== productId && pp.BestBefore >= minBestBefore
-				&& pp.Pallet.Status == PalletStatus.Available))
+					(p.Status == PalletStatus.Available || p.Status== PalletStatus.InStock) &&
+					p.ProductsOnPallet.Any(pp =>
+						pp.ProductId == productId &&
+						pp.BestBefore >= minBestBefore
+					)
+				)
 				.OrderBy(p => p.ProductsOnPallet
 					.Where(pp => pp.ProductId == productId)
 					.Min(pp => pp.BestBefore))
 				.ThenBy(p => p.LocationId);
 			return pallets;
 		}
-		public void ClearPalletFromListReceipt(string palletId)
-		{
-			var pallet = _werehouseDbContext.Pallets
-				.FirstOrDefault(p => p.Id == palletId);
-			pallet.ReceiptId = 0;
-			pallet.Status = PalletStatus.Available;//??
-		}
 		public void ClearPalletFromListIssue(string palletId)
 		{
 			var pallet = _werehouseDbContext.Pallets
 				.FirstOrDefault(p => p.Id == palletId);
+			pallet.IssueId = null;
+			pallet.Status = PalletStatus.Available;
+		}
+		public async Task ClearPalletFromListIssueAsync(string palletId)
+		{
+			var pallet =await _werehouseDbContext.Pallets
+				.FirstOrDefaultAsync(p => p.Id == palletId);
 			pallet.IssueId = null;
 			pallet.Status = PalletStatus.Available;
 		}
@@ -205,21 +185,21 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public string GetNextPalletId()
 		{
 			var lastPallet = _werehouseDbContext.Pallets
-				.Where(p=>p.Id.StartsWith("Q"))
+				.Where(p => p.Id.StartsWith("Q"))
 				.OrderByDescending(p => p.Id)
 				.FirstOrDefault();
 
 			int lastNumber = 0;
-			if(lastPallet != null&&int.TryParse(lastPallet.Id.Substring(1), out var parsed))
-				{
-					lastNumber = parsed;
-				}
+			if (lastPallet != null && int.TryParse(lastPallet.Id.Substring(1), out var parsed))
+			{
+				lastNumber = parsed;
+			}
 			string nextId = $"Q{(lastNumber + 1).ToString("D4")}";
-			return nextId ;
+			return nextId;
 		}
 		public async Task<string> GetNextPalletIdAsync()
 		{
-			var lastPallet =await _werehouseDbContext.Pallets
+			var lastPallet = await _werehouseDbContext.Pallets
 				.Where(p => p.Id.StartsWith("Q"))
 				.OrderByDescending(p => p.Id)
 				.FirstOrDefaultAsync();
@@ -232,46 +212,17 @@ namespace MyWerehouse.Infrastructure.Repositories
 			string nextId = $"Q{(lastNumber + 1).ToString("D4")}";
 			return nextId;
 		}
-
 		public Pallet GetPalletByLocation(int locationId)
 		{
-			var pallet = _werehouseDbContext.Pallets.FirstOrDefault(p=>p.LocationId == locationId);
+			var pallet = _werehouseDbContext.Pallets.FirstOrDefault(p => p.LocationId == locationId);
 			return pallet;
 		}
 		public async Task<Pallet> GetPalletByLocationAsync(int locationId)
 		{
-			var pallet =await _werehouseDbContext.Pallets.FirstOrDefaultAsync(p => p.LocationId == locationId);
+			var pallet = await _werehouseDbContext.Pallets.FirstOrDefaultAsync(p => p.LocationId == locationId);
 			return pallet;
 		}
 
-		//zmiana koncepcji metoda zmiany statusów idzie do serwisu 
-		// a będzie się wykonywać za pomoca update
-		//public void MarkPalletAsHold(string id)
-		//{
-		//	var pallet = _werehouseDbContext.Pallets
-		//		.FirstOrDefault(p => p.Id == id);
-		//	pallet.Status = PalletStatus.OnHold;
-		//}
-
-		//public void MarkPalletAsAvailable(string id)
-		//{
-		//	var pallet = _werehouseDbContext.Pallets
-		//		.FirstOrDefault(p => p.Id == id);
-		//	pallet.Status = PalletStatus.Available;
-		//}//dodaj więcej by wszytkie statusy i przerób które potrzebne na async - raczej większość
-		//public void MarkPalletAsDamaged(string id)
-		//{
-		//	var pallet = _werehouseDbContext.Pallets
-		//		.FirstOrDefault(p => p.Id == id);
-		//	pallet.Status = PalletStatus.Damaged;
-		//}
-		//public void MarkPalletAsLoaded(string id)
-		//{
-		//	var pallet = _werehouseDbContext.Pallets
-		//		.FirstOrDefault(p => p.Id == id);
-		//	pallet.Status = PalletStatus.Loaded;
-		//}
 	}
 }
 
-	

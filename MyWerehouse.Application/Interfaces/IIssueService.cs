@@ -10,15 +10,21 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IIssueService
 	{
-		void AddIssue(int clientId, string perfomedBy, List<IssueItemDTO> values);
-		Task AddIssueAsync(int clientId, string perfomedBy, List<IssueItemDTO> values);
-		void UpdateIssue(int clientId, string perfomedBy, List<IssueItemDTO> values);
-		void DeleteIssue(int issueId);
-
-		List<Pallet> SelectPalletsForIssue(IQueryable<Pallet> pallet, int quantity);
-		Task<List<Pallet>> SelectPalletsForIssueAsync(IQueryable<Pallet> pallet, int quantity);
-
-		void LoadingIssue(int clientId, int issueId, string sendedBy);
-		void CompletedIssue(int clientId, int issueId, string confirmedBy);
+		Task<int> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, string userId);		
+		Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product);		
+		Task <IssueToUpdateDTO> GetIssueByIdAsync(int numberIssue);
+		Task UpdateIssueAsync(int numberIssue, string perfomedBy, ListProductsOfIssue products);		
+		Task DeleteIssueAsync(int issueId);//warunki				
+		Task VerifyIssueToLoadAsync(int issueId, string userId);		
+		Task<ListPalletsToLoadDTO> LoadingIssueAsync(int issueId, string sendedBy);
+		Task MarkAsLoadedAsync(string palletId, string sendedBy);
+		Task FinishIssueNotCompleted(int issueId,string performedBy);
+		//możesz zakończyć załadunek gdy wszystkie załadowane, chyba że biuro zamknie bez pełnego załadunku
+		Task CompletedIssueAsync(int issueId, string confirmedBy);
+		//zrobienie kompletacji x1
+		Task VerifyIssueAfterLoadingAsync(int issueId, string verifyBy);
+		Task ChangePalletDuringLoadingAsync(int issueId,string oldPalletId, string newPalletId, string performedBy);		
+		Task <IssuePalletsWithLocationDTO> PalletsToTakeOffList(int issueId, string userId);
+		// zebranie całych palet i z pickingu
 	}
 }

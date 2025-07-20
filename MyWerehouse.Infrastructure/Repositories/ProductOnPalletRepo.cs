@@ -155,5 +155,20 @@ namespace MyWerehouse.Infrastructure.Repositories
 			productOnPallet.DateAdded = DateTime.Now;
 			await _werehouseDbContext.SaveChangesAsync();
 		}
+		public async Task<List<QuantityLocation>> GetQuantityLocation(int productId)
+		{
+			var list = await _werehouseDbContext.ProductOnPallet
+				.Where(pop => pop.ProductId == productId)
+				.Include(pop => pop.Pallet)
+				.Select(pop => new
+				{
+					LocationId = pop.Pallet.LocationId,
+					Quantity = pop.Quantity
+				})
+				.GroupBy(p => p.LocationId)
+				.Select(g => new QuantityLocation { LocationId = g.Key, Quantity = g.Sum(x => x.Quantity) })
+				.ToListAsync();
+			return list;
+		}
 	}
 }

@@ -26,8 +26,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Task IncreaseQuantityOnPalletAsync(string palletId, int productId, int quantity);
 		void DecreaseQuantityOnPallet(string palletId, int productId, int quantity);
 		Task DecreaseQuantityOnPalletAsync(string palletId, int productId, int quantity);
+		Task<List<QuantityLocation>> GetQuantityLocation(int productId);// do testu
 	}
 }
 
-//GetAllAsync() (opcjonalnie)
-//Pobiera wszystkie wpisy – przydatne np. do eksportów, raportów.

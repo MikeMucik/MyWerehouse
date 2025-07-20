@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Application.ViewModels.IssueModels
 {
-	public class AddIssueDTO
+	public class ListPalletsToLoadDTO
 	{
-		public int Id { get; set; }
+		public int IssueId { get; set; }
 		public int ClientId { get; set; }
-		public DateTime IssueDateTime { get; set; }
-		public string? PerfomedBy { get; set; }
-		public required List<IssueItemDTO> Values { get; set; }
+		public string ClientName { get; set; }
+		public List<PalletToLoadDTO> Pallets { get; set; } = new List<PalletToLoadDTO>();
 	}
 }

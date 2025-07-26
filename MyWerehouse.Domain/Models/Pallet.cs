@@ -18,6 +18,6 @@ namespace MyWerehouse.Domain.Models
 		public int? ReceiptId {  get; set; }
 		public virtual Receipt Receipt { get; set; }
 		public int? IssueId { get; set; }
-		public virtual Issue? Issue { get; set; }
+		public virtual Issue? Issue { get; set; }	
 	}
 }

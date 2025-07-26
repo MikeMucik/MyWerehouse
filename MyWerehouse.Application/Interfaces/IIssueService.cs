@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.Interfaces
 	public interface IIssueService
 	{
 		Task<int> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, string userId);		
-		Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product);		
+		Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product, string userId);		
 		Task <IssueToUpdateDTO> GetIssueByIdAsync(int numberIssue);
 		Task UpdateIssueAsync(int numberIssue, string perfomedBy, ListProductsOfIssue products);		
 		Task DeleteIssueAsync(int issueId);//warunki				

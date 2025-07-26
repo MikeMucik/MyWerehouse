@@ -17,19 +17,7 @@ namespace MyWerehouse.Test.UnitTestRepo.IssueTestsRepo
 		{
 			var _context = fixture.Context;
 			_issueRepo = new IssueRepo(_context);
-		}
-		[Fact]
-		public void ShowIssueById_GetIssueFilter_ReturnIssue()
-		{
-			//Arrange
-			var id = 2;
-			//Act
-			var result = _issueRepo.GetIssueById(id);
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal(id, result.Id);
-			Assert.Equal(11, result.ClientId);
-		}
+		}		
 		[Fact]
 		public async Task ShowIssueById_GetIssueFilterAsync_ReturnIssue()
 		{

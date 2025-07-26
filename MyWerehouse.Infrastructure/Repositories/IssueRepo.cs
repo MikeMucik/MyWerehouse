@@ -17,79 +17,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-
-		public void AddIssue(Issue issue)
-		{
-			_werehouseDbContext.Issues
-				.Add(issue);
-			_werehouseDbContext.SaveChanges();
-		}
+			
 		public async Task AddIssueAsync(Issue issue)
 		{
 			_werehouseDbContext.Issues
 			   .Add(issue);
 			await _werehouseDbContext.SaveChangesAsync();
-		}
-		//public void AddPalletsToIssue(int issueId, int productId, int quantityRequested, DateOnly bestBefore)
-		//{
-		//	var issue = _werehouseDbContext.Issues
-		//		.Include(p=>p.Pallets)
-		//		.FirstOrDefault(p=>p.Id == issueId);
-
-		//	var availablePallets = _werehouseDbContext.Pallets
-		//		.Include(p => p.ProductsOnPallet)
-		//		.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == productId))
-		//		.Where(p => p.IssueId == null)
-		//		.AsQueryable();
-
-		//	if (bestBefore != null)
-		//	{
-		//		availablePallets = availablePallets
-		//			.Where(p => p.ProductsOnPallet.Any(pp => pp.BestBefore >= bestBefore));
-		//	}
-		//	var selectedPallets = new List<Pallet>();
-		//	int totalQuantity = 0;
-		//	foreach (var pallet in availablePallets.OrderBy(p=>p.ProductsOnPallet.Min(pp=>pp.DateAdded)))
-		//	{
-		//		var quantittOnPallet = pallet.ProductsOnPallet
-		//			.Where(pp => pp.ProductId == productId)
-		//			.Sum(pp => pp.Quantity);
-
-		//		selectedPallets.Add(pallet);
-		//		totalQuantity += quantittOnPallet;
-
-		//		if(totalQuantity >= quantityRequested) 
-		//			break;
-		//	}
-		//	if (totalQuantity < quantityRequested)
-		//		throw new InvalidOperationException("Brak wystarczającej ilości do zamówienia");
-		//	foreach (var pallet in selectedPallets)
-		//	{
-		//		pallet.IssueId = issue.Id;
-		//		issue.Pallets.Add (pallet);
-		//	}
-		//	_werehouseDbContext.SaveChanges();
-		//}
-		//// TODO: Improve pallet selection logic.
-		//// Current implementation selects full pallets using FIFO based on BestBefore date.
-		//// Future improvements might include:
-		//// - Handling partial pallet picks (splitting pallet content).
-		//// - Considering pallet location priorities (e.g., pick from closest).
-		//// - Avoiding reserved or blocked pallets.
-		//// - Ensuring stock availability and over-issue prevention.
-		//// - Tracking remaining quantities and multiple product batches.
-		////
-		//// Note: This logic is sufficient for MVP/basic release. Ensure test coverage.
-
-		public void DeleteIssue(int id)
-		{
-			var issue = _werehouseDbContext.Issues.Find(id);
-			if (issue != null)
-			{
-				_werehouseDbContext.Remove(issue);
-				_werehouseDbContext.SaveChanges();
-			}
-		}
+		}		
 		public async Task DeleteIssueAsync(int id)
 		{
 			var issue = await _werehouseDbContext.Issues.FindAsync(id);
@@ -98,24 +32,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				_werehouseDbContext.Remove(issue);
 				await _werehouseDbContext.SaveChangesAsync();
 			}
-		}
-		public void UpdateIssue(Issue issue)
-		{
-			_werehouseDbContext.Attach(issue);
-			var existingPallets = _werehouseDbContext.Pallets
-				.Where(p => p.IssueId == issue.Id)
-				.ToList();
-			_werehouseDbContext.Attach(issue);
-			if (issue.IssueDateTime != DateTime.MinValue)
-			{
-				_werehouseDbContext.Entry(issue).Property(nameof(issue.IssueDateTime)).IsModified = true;
-			}
-			if (issue.PerformedBy != null)
-			{
-				_werehouseDbContext.Entry(issue).Property(nameof(issue.PerformedBy)).IsModified = true;
-			}
-			_werehouseDbContext.SaveChanges();
-		}
+		}		
 		public async Task UpdateIssueAsync(Issue issue)
 		{
 			_werehouseDbContext.Attach(issue);
@@ -128,14 +45,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				_werehouseDbContext.Entry(issue).Property(nameof(issue.PerformedBy)).IsModified = true;
 			}
 			await _werehouseDbContext.SaveChangesAsync();
-		}
-		public Issue? GetIssueById(int id)
-		{
-			return _werehouseDbContext.Issues
-				.Include(i => i.Pallets)
-				.FirstOrDefault(i => i.Id == id);
-		}
-		
+		}		
 		public async Task<Issue?> GetIssueByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Issues
@@ -156,11 +66,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Issues
-				.Include(i => i.Client)
-				.Include(i => i.Pallets)
-					.ThenInclude(ip => ip.ProductsOnPallet)
-						.ThenInclude(ipp => ipp.Product)
-				.AsQueryable();
+				.Where(i=>i.IssueStatus != IssueStatus.Archived)
+				//.Include(i => i.Client)
+				//.Include(i => i.Pallets)
+				//	.ThenInclude(ip => ip.ProductsOnPallet)
+				//		.ThenInclude(ipp => ipp.Product)
+				//.AsQueryable()
+				;
 			if (filter.ClientId > 0)
 			{
 				result = result.Where(i => i.ClientId == filter.ClientId);
@@ -190,7 +102,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			return result;
 		}
-
 		public async Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id)
 		{
 			var list = await _werehouseDbContext.Pallets
@@ -204,8 +115,16 @@ namespace MyWerehouse.Infrastructure.Repositories
 				})
 				.ToListAsync();
 			return list;		
-		}
-
-		
+		}		
 	}
 }
+//// TODO: Improve pallet selection logic.
+//// Current implementation selects full pallets using FIFO based on BestBefore date.
+//// Future improvements might include:
+//// - Handling partial pallet picks (splitting pallet content).
+//// - Considering pallet location priorities (e.g., pick from closest).
+//// - Avoiding reserved or blocked pallets.
+//// - Ensuring stock availability and over-issue prevention.
+//// - Tracking remaining quantities and multiple product batches.
+////
+//// Note: This logic is sufficient for MVP/basic release. Ensure test coverage.

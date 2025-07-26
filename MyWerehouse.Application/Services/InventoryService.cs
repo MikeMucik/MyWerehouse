@@ -10,14 +10,14 @@ using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Services
 {
-	public class InventoryService :IInventoryService
+	public class InventoryService : IInventoryService
 	{
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly IMapper _mapper;
 
 		public InventoryService(
 			IInventoryRepo inventoryRepo
-			,IMapper mapper
+			, IMapper mapper
 			)
 		{
 			_inventoryRepo = inventoryRepo;
@@ -26,7 +26,11 @@ namespace MyWerehouse.Application.Services
 
 		public async Task ChangeProductQunatityAsync(int productId, int quantity)
 		{
-
+			var inventory = _inventoryRepo.GetInventoryForProductAsync(productId);
+			if( inventory == null )
+			{
+				await _inventoryRepo.AddInventoryAsync(productId, quantity);
+			}
 			if (quantity > 0)
 			{
 				await _inventoryRepo.IncreaseInventoryQuantityAsync(productId, quantity);
@@ -41,14 +45,12 @@ namespace MyWerehouse.Application.Services
 				await _inventoryRepo.DecreaseInventoryQuantityAsync(productId, quantity);
 			}
 		}
-
-		public async Task< InventoryDTO >GetInventoryAsync(int productId)
+		public async Task<InventoryDTO> GetInventoryAsync(int productId)
 		{
-			var inventory =  await _inventoryRepo.GetInventoryForProductAsync(productId);
+			var inventory = await _inventoryRepo.GetInventoryForProductAsync(productId);
 			var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
 			return inventoryDTO;
 		}
-
 		public async Task UpdateProductQunatityAsync(int productId, int quantity)
 		{
 			await _inventoryRepo.UpdateInventoryAsync(productId, quantity);

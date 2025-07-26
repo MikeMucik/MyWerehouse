@@ -17,21 +17,7 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 		{
 			var _context = fixture.Context;
 			_clientRepo = new ClientRepo(_context);
-		}
-		[Fact]
-		public void ProperId_GetClientById_ReturnDataswithAddress()
-		{
-			//Arrange
-			var id = 10;
-			//Act
-			var result = _clientRepo.GetClientById(id);
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal(id, result.Id);
-			Assert.Equal("ClientTest", result.Name);
-			Assert.Equal("FullNameTestAddress", result.FullName);
-			Assert.Equal(2, result.Addresses.Count);			
-		}
+		}		
 		[Fact]
 		public async Task ProperId_GetClientByIdAsync_ReturnDataswithAddress()
 		{
@@ -45,17 +31,7 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 			Assert.Equal("ClientTest", result.Name);
 			Assert.Equal("FullNameTestAddress", result.FullName);
 			Assert.Equal(2, result.Addresses.Count);
-		}
-		[Fact]
-		public void NotProperId_GetClientById_NoReturnData()
-		{
-			//Arrange
-			var id = -1;
-			//Act
-			var result = _clientRepo.GetClientById(id);
-			//Assert
-			Assert.Null(result);			
-		}
+		}		
 		[Fact]
 		public async Task NotProperId_GetClientByIdAsync_NoReturnData()
 		{

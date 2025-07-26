@@ -8,17 +8,13 @@ using MyWerehouse.Domain.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IInventoryRepo
-	{
-		void IncreaseInventoryQuantity(int productId, int quantity);
-		Task IncreaseInventoryQuantityAsync(int productId, int quantity);
-		void DecreaseInventoryQuantity(int productId, int quantity);
-		Task DecreaseInventoryQuantityAsync(int productId, int quantity);
-		Inventory? GetInventoryForProduct(int productId);		
-		Task<Inventory?> GetInventoryForProductAsync(int productId);		
-		void UpdateInventory(int productId, int quantity);
+	{		
+		Task AddInventoryAsync (int productId, int quantity);
+		Task IncreaseInventoryQuantityAsync(int productId, int quantity);		
+		Task DecreaseInventoryQuantityAsync(int productId, int quantity);		
+		Task<Inventory?> GetInventoryForProductAsync(int productId);			
 		Task UpdateInventoryAsync(int productId, int quantity);
-		IQueryable<Inventory> GetAllInventory();
-		bool HasStock(int productId, int quantity);
+		IQueryable<Inventory> GetAllInventory();		
 		Task <bool> HasStockAsync(int productId, int quantity);
 		 
 	}

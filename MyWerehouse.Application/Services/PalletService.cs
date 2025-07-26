@@ -49,42 +49,7 @@ namespace MyWerehouse.Application.Services
 		{
 			_palletRepo = palletRepo;
 			_mapper = mapper;
-		}
-		public string CreatePickingPallet(CreatePalletPickingDTO addPalletDTO)
-		{
-			addPalletDTO.Id = _palletRepo.GetNextPalletId();
-			addPalletDTO.DateCreated = DateTime.Now;
-			var validationResult = _pickingValidator.Validate(addPalletDTO);
-			if (!validationResult.IsValid)
-			{
-				throw new ValidationException(validationResult.Errors);
-			}
-			var pallet = _mapper.Map<Pallet>(addPalletDTO);
-			var id = _palletRepo.AddPallet(pallet);
-
-			var listRecordsPMD = new List<PalletMovementDetail>();
-			foreach (var product in pallet.ProductsOnPallet)
-			{
-				var recordPalletMovementDetails = new PalletMovementDetail
-				{
-					ProductId = product.ProductId,
-					Quantity = product.Quantity,
-				};
-				listRecordsPMD.Add(recordPalletMovementDetails);
-			}
-			var recordPM = new PalletMovement
-			{
-				PalletId = id,
-				DestinationLocationId = pallet.LocationId,
-				Reason = ReasonMovement.Picking,
-				PerformedBy = addPalletDTO.UserId,
-				MovementDate = DateTime.Now,
-				PalletMovementDetails = listRecordsPMD
-			};
-			_palletMovementRepo.AddPalletMovement(recordPM);
-			_werehouseDbContext.SaveChanges();
-			return id;
-		}
+		}		
 		public async Task<string> CreatePickingPalletAsync(CreatePalletPickingDTO addPalletDTO)
 		{
 			addPalletDTO.Id = await _palletRepo.GetNextPalletIdAsync();
@@ -119,19 +84,7 @@ namespace MyWerehouse.Application.Services
 			await _palletMovementRepo.AddPalletMovementAsync(recordPM);
 			await _werehouseDbContext.SaveChangesAsync();
 			return id;
-		}
-		public void DeletePallet(string id)
-		{
-			var pallet = _palletRepo.GetPalletById(id);
-			if (pallet == null)
-				throw new ArgumentException("Nie ma palety o tym numerze");
-			bool canDelete = _palletMovementRepo.CanDeletePallet(id);
-			if (!canDelete)
-				throw new InvalidOperationException($"Palety o numerze {id} nie można usunąć");
-
-			_palletRepo.DeletePallet(id);
-			_werehouseDbContext.SaveChanges();
-		}
+		}		
 		public async Task DeletePalletAsync(string id)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(id);
@@ -144,43 +97,13 @@ namespace MyWerehouse.Application.Services
 
 			await _palletRepo.DeletePalletAsync(id);
 			await _werehouseDbContext.SaveChangesAsync();
-		}
-		public UpdatePalletDTO GetPalletToEdit(string id)
-		{
-			var pallet = _palletRepo.GetPalletById(id);
-			var palletDTO = _mapper.Map<UpdatePalletDTO>(pallet);
-			return palletDTO;
-		}
+		}		
 		public async Task<UpdatePalletDTO> GetPalletToEditAsync(string id)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(id);
 			var palletDTO = _mapper.Map<UpdatePalletDTO>(pallet);
 			return palletDTO;
-		}
-		public void UpdatePallet(UpdatePalletDTO updatingPallet)
-		{
-			var existingPallet = _palletRepo.GetPalletById(updatingPallet.Id);
-			//var a = existingPallet.ProductsOnPallet.Count();
-			var validationResult = _updateValidator.Validate(updatingPallet);
-			if (!validationResult.IsValid)
-			{
-				throw new ValidationException(validationResult.Errors);
-			}
-			_mapper.Map(updatingPallet, existingPallet);
-			CollectionSynchronizer.SynchronizeCollection(
-				existingPallet.ProductsOnPallet,
-				updatingPallet.ProductsOnPallet,
-				a => a.Id,
-				a => a.Id,
-				dto =>
-				{
-					var newProduct = _mapper.Map<ProductOnPallet>(dto);
-					newProduct.PalletId = existingPallet.Id;
-					return newProduct;
-				},
-				(dto, entity) => _mapper.Map(dto, entity));
-			_werehouseDbContext.SaveChanges();
-		}
+		}		
 		public async Task UpdatePalletAsync(UpdatePalletDTO updatingPallet)
 		{
 			var existingPallet = await _palletRepo.GetPalletByIdAsync(updatingPallet.Id);
@@ -206,59 +129,13 @@ namespace MyWerehouse.Application.Services
 
 
 			await _werehouseDbContext.SaveChangesAsync();
-		}
-		public PalletHistoryDTO ShowHistoryPallet(string id)
-		{
-			var pallet = _palletRepo.GetPalletById(id);
-			if (pallet == null) throw new ArgumentNullException($"Paleta o numerze {id} nie istnieje");
-			var palletHistory = _mapper.Map<PalletHistoryDTO>(pallet);
-			return palletHistory;
-		}
+		}		
 		public async Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(id)
 			?? throw new ArgumentNullException($"Paleta o numerze {id} nie istnieje");
 			var palletHistory = _mapper.Map<PalletHistoryDTO>(pallet);
 			return palletHistory;
-		}
-		public void ChangeLocationPallet(string palletId, int destinationLocation, string userId)
-		{
-			var pallet = _palletRepo.GetPalletById(palletId);
-			if (pallet == null)
-			{
-				throw new ArgumentNullException($"Paleta o numerze {palletId} nie została znaleziona");
-			}
-			//sprawdzenie czy lokalizacja jest zajęta
-			var existingPalletInDestination = _palletRepo.GetPalletByLocation(destinationLocation); // Nowa metoda repo
-																									//var locationOccupied = pobranie lokalizacji do błędy ??
-			if (existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id) // Jeśli lokalizacja jest zajęta przez inną paletę
-			{
-				throw new InvalidOperationException($"Lokalizacja {destinationLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}.");
-			}
-			var sourceLocation = pallet.LocationId;
-			pallet.LocationId = destinationLocation;
-			var listRecordsPMD = new List<PalletMovementDetail>();
-			foreach (var product in pallet.ProductsOnPallet)
-			{
-				var recordPalletMovementDetails = new PalletMovementDetail
-				{
-					ProductId = product.ProductId,
-					Quantity = product.Quantity,
-				};
-				listRecordsPMD.Add(recordPalletMovementDetails);
-			}
-			var recordPM = new PalletMovement
-			{
-				PalletId = palletId,
-				SourceLocationId = sourceLocation,
-				DestinationLocationId = destinationLocation,
-				Reason = ReasonMovement.ManualMove,
-				PerformedBy = userId,
-				MovementDate = DateTime.Now,
-				PalletMovementDetails = listRecordsPMD
-			};
-			_palletMovementRepo.AddPalletMovement(recordPM);
-			_werehouseDbContext.SaveChanges();
 		}
 		public async Task ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId)
 		{

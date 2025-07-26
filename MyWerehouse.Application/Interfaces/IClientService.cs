@@ -9,20 +9,13 @@ using MyWerehouse.Domain.Models;
 namespace MyWerehouse.Application.Interfaces
 {
 	public interface IClientService
-	{
-		int AddClient(AddClientDTO addClient);
-		Task<int> AddClientAsync(AddClientDTO addClient);
-		void DeleteClient(int id);
+	{		
+		Task<int> AddClientAsync(AddClientDTO addClient);		
 		Task DeleteClientAsync(int id);
-		AddClientDTO GetClientToEdit(int id);
 		Task<AddClientDTO> GetClientToEditAsync(int id);
-		void UpdateClient(UpdateClientDTO updatedClient);
 		Task UpdateClientAsync(UpdateClientDTO updatedClient);
-		DetailsOfClientDTO DetailsOfClient(int id);
 		Task<DetailsOfClientDTO> DetailsOfClientAsync(int id);
-		ListClientsDTO GetClientsByFilter(int pageSize, int PageNumber, ClientSearchFilter filter);
-		Task<ListClientsDTO> GetClientsByFilterAsync(int pageSize, int PageNumber, ClientSearchFilter filter);
-		ListClientsDTO GetAllClients(int pageSize, int PageNumber);
+		Task<ListClientsDTO> GetClientsByFilterAsync(int pageSize, int PageNumber, ClientSearchFilter filter);		
 		Task<ListClientsDTO> GetAllClientsAsync(int pageSize, int PageNumber);
 	}
 }

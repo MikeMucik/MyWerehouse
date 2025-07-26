@@ -13,7 +13,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 	public class AddClientIntegrationTests : ClientIntegrationCommand
 	{
 		[Fact]
-		public void ProperData_AddClient_AddedToBase()
+		public async Task ProperData_AddClientAsync_AddedToBase()
 		{
 			//Arrange
 			var address = new AddressDTO
@@ -35,7 +35,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Description = "description",
 			};
 			//Act
-			var result = _clientService.AddClient(client);
+			var result =await _clientService.AddClientAsync(client);
 			//Assert			
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
@@ -45,7 +45,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			Assert.Equal("Wiejska", resultAddress.First().StreetName);
 		}
 		[Fact]
-		public void ProperDataTwoAdresses_AddClient_AddedToBase()
+		public async Task ProperDataTwoAdresses_AddClientAsync_AddedToBase()
 		{
 			//Arrange
 			var address = new AddressDTO
@@ -77,7 +77,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Description = "description",
 			};
 			//Act
-			var result = _clientService.AddClient(client);
+			var result =await _clientService.AddClientAsync(client);
 			//Assert			
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			Assert.Contains(resultClient.Addresses, a => a.StreetName == address1.StreetName);
 		}
 		[Fact]
-		public void NotProperDataPostalCode_AddClient_NoAddedToBase()
+		public async Task NotProperDataPostalCode_AddClientAsync_NoAddedToBase()
 		{
 			//Arrange
 			var address = new AddressDTO
@@ -110,11 +110,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Description = "description",
 			};
 			//Act&Assert
-			var exceptionMessage = Assert.Throws<ValidationException>(() => _clientService.AddClient(client));
+			var exceptionMessage =await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
 			Assert.Contains("numer pocztowy", exceptionMessage.Message);
 		}
 		[Fact]
-		public void NotProperDataName_AddClient_NoAddedToBase()
+		public async Task NotProperDataName_AddClientAsync_NoAddedToBase()
 		{
 			//Arrange
 			var address = new AddressDTO
@@ -136,7 +136,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Description = "description",
 			};
 			//Act&Assert
-			var exceptionMessage = Assert.Throws<ValidationException>(() => _clientService.AddClient(client));
+			var exceptionMessage =await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
 			Assert.Contains("nazwa", exceptionMessage.Message);
 		}
 	}

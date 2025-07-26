@@ -16,23 +16,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-
-		public void AddCategory(Category category)
-		{
-			_werehouseDbContext.Categories.Add(category);			
-		}
+				
 		public async Task AddCategoryAsync(Category category)
 		{
 			await _werehouseDbContext.Categories.AddAsync(category);			
-		}
-		public void DeleteCategory(int idCategory)
-		{
-			var category = _werehouseDbContext.Categories.Find(idCategory);
-			if (category != null)
-			{
-				_werehouseDbContext.Categories.Remove(category);				
-			}
-		}
+		}		
 		public async Task DeleteCategoryAsync(int idCategory)
 		{
 			var category =await _werehouseDbContext.Categories.FindAsync(idCategory);
@@ -40,16 +28,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			{
 				_werehouseDbContext.Categories.Remove(category);			
 			}
-		}
-		public void SwitchOffCategory(int idCategory)
-		{
-			var category = _werehouseDbContext.Categories.Find(idCategory);
-			if (category != null)
-			{
-				category.IsDeleted = true;
-				_werehouseDbContext.SaveChanges();
-			}
-		}
+		}		
 		public async Task SwitchOffCategoryAsync(int idCategory)
 		{
 			var category = await _werehouseDbContext.Categories.FindAsync(idCategory);
@@ -58,19 +37,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 				category.IsDeleted = true;
 				await _werehouseDbContext.SaveChangesAsync();
 			}
-		}		
-		public Category? GetCategoryById(int id)
-		{
-			return _werehouseDbContext.Categories.SingleOrDefault(c=>c.Id ==id);
-		}
+		}				
 		public async Task<Category?> GetCategoryByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Categories.SingleOrDefaultAsync(c => c.Id == id);
-		}
-		public	Category? GetCategoryByName(string name)
-		{
-			return _werehouseDbContext.Categories.SingleOrDefault(c => c.Name == name);
-		}
+		}		
 		public async Task<Category?> GetCategoryByNameAsync(string name)
 		{
 			return await _werehouseDbContext.Categories.SingleOrDefaultAsync(c => c.Name == name);

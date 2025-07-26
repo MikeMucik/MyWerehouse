@@ -8,14 +8,9 @@ using MyWerehouse.Domain.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IReceiptRepo
-	{
-		void AddReceipt(Receipt receipt);
-		Task AddReceiptAsync(Receipt receipt);
-		void DeleteReceipt(int id);
-		Task DeleteReceiptAsync(int id);
-		void UpdateReceipt(Receipt receipt);
-		Task UpdateReceiptAsync(Receipt receipt);
-		Receipt? GetReceiptById(int id);
+	{		
+		Task AddReceiptAsync(Receipt receipt);		
+		Task DeleteReceiptAsync(int id);					
 		Task<Receipt?> GetReceiptByIdAsync(int id);
 		IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter);
 	}

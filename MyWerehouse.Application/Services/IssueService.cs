@@ -7,11 +7,13 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Services;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Services
 {
@@ -23,6 +25,9 @@ namespace MyWerehouse.Application.Services
 		private readonly IPalletMovementService _palletMovementService;
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly IPalletRepo _palletRepo;
+		private readonly IProductRepo _productRepo;
+		private readonly IPickingPalletRepo _pickingPalletRepo;
+
 
 		public IssueService(
 			IIssueRepo issueRepo,
@@ -30,7 +35,9 @@ namespace MyWerehouse.Application.Services
 			WerehouseDbContext werehouseDbContext,
 			IPalletMovementService palletMovementService,
 			IInventoryRepo inventoryRepo,
-			IPalletRepo palletRepo)
+			IPalletRepo palletRepo,
+			IProductRepo productRepo,
+			IPickingPalletRepo pickingPalletRepo)
 		{
 			_issueRepo = issueRepo;
 			_mapper = mapper;
@@ -38,6 +45,8 @@ namespace MyWerehouse.Application.Services
 			_palletMovementService = palletMovementService;
 			_inventoryRepo = inventoryRepo;
 			_palletRepo = palletRepo;
+			_productRepo = productRepo;
+			_pickingPalletRepo = pickingPalletRepo;
 		}
 		public async Task<int> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, string userId)
 		{
@@ -48,55 +57,197 @@ namespace MyWerehouse.Application.Services
 
 			foreach (var item in createIssueDTO.Items)
 			{
-				await AddPalletsToIssueByProductAsync(issue, item);
+				await AddPalletsToIssueByProductAsync(issue, item, userId);
 			}
 			await _palletMovementService.CreateHistoryIssueAsync(issue, IssueStatus.New, userId, null);
 			await _werehouseDbContext.SaveChangesAsync();
 			return issue.Id;
 		}
-		public async Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product)
+		public async Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product, string userId)// dla jednego produktu
 		{
-			var availablePalletsQuery = _palletRepo.GetAvailablePallets(product.ProductId, product.BestBefore);			
-			var palletsToAsign = await SelectedRequiredPalletsAsync(availablePalletsQuery, product.Quantity);
-			int totalCollected = palletsToAsign.Sum(p => p.ProductsOnPallet.First().Quantity); // lub bardziej dokładnie
-			if (totalCollected < product.Quantity)
+			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
+
+			try
 			{
-				throw new InvalidOperationException($"Brak wystarczającej ilości towaru id {product.ProductId}");
+				var availablePalletsQuery = await _palletRepo.GetAvailablePallets(product.ProductId, product.BestBefore)
+					.ToListAsync(); //dostępne palety					
+
+				//var availablePalletsQuery = _palletRepo.GetAvailablePallets(product.ProductId, product.BestBefore);
+
+				var totalAvailable = availablePalletsQuery //całkowita ilość kartonów po parametrach
+						.SelectMany(p => p.ProductsOnPallet)
+						.Where(p => p.ProductId == product.ProductId)
+						.Sum(i => i.Quantity);
+
+				if (product.Quantity > totalAvailable)
+				{
+					throw new InvalidOperationException($"Brak wystarczającej ilości towaru o id {product.ProductId}.Potrzeba: {product.Quantity}, Dostępne: {totalAvailable}");
+				}
+				var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(product.ProductId);//ilość kartonów pełnej palety
+				if (numberUnitOnPallet == null) { throw new Exception("Produkt nie ma ustawionej ilosci kartonów na paletę."); }
+				var number = numberUnitOnPallet.CartonsPerPallet;
+				var amountPallets = product.Quantity / number; //liczba palet
+				var rest = product.Quantity % number;           //liczba kartonów
+
+				issue.IssueStatus = IssueStatus.InProgress;
+				issue.PerformedBy = userId;
+
+				var palletsToAsign = availablePalletsQuery.Take(amountPallets);
+				foreach (var pallet in palletsToAsign)// dodanie do zlecenia pełnych palet
+				{
+					pallet.IssueId = issue.Id;
+					pallet.Status = PalletStatus.InTransit;
+					await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.ToLoad, issue.PerformedBy, null);
+					issue.Pallets.Add(pallet);
+				}
+				await _werehouseDbContext.SaveChangesAsync();
+				await AddAllocationToIssue(issue.Id, product.ProductId, rest, product.BestBefore, userId);// pakety do pickingu
+				await transaction.CommitAsync();
 			}
-			issue.IssueStatus = IssueStatus.InProgress;
-			foreach (var pallet in palletsToAsign)
+			catch (Exception ex)
 			{
-				pallet.IssueId = issue.Id;
-				pallet.Status = PalletStatus.InTransit;
-				
-				if (totalCollected > product.Quantity && pallet == palletsToAsign.Last())
-				{
-					pallet.Status = PalletStatus.ToPicking;
-				}
-				await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.ToLoad, issue.PerformedBy, null);
-				issue.Pallets.Add(pallet);
+				await transaction.RollbackAsync();
+				// Loguj błąd
+				throw new InvalidOperationException("Wystąpił błąd podczas przypisywania palet do zlecenia.", ex);
 			}
-		}				
-		private static async Task<List<Pallet>> SelectedRequiredPalletsAsync(IQueryable<Pallet> availablePalletsQuery, int requiredQuantity)
-		{
-			var selectedPallets = new List<Pallet>();
-			int collected = 0;
-			await foreach (var pallet in availablePalletsQuery.Include(p => p.ProductsOnPallet).AsAsyncEnumerable())
-			{
-				var productOnPallet = pallet.ProductsOnPallet.FirstOrDefault();
-				if (productOnPallet == null || productOnPallet.Quantity <= 0)
-				{
-					continue;
-				}
-				selectedPallets.Add(pallet);
-				collected += productOnPallet.Quantity;
-				if (collected >= requiredQuantity)
-				{
-					break;
-				}
-			}
-			return selectedPallets;
 		}
+
+		//private async Task<List<Pallet>> SelectedRequiredPalletsAsync(IQueryable<Pallet> availablePalletsQuery, int requiredQuantity, int productId)
+		//{
+		//	var selectedPallets = new List<Pallet>();
+		//	//var dateBestBefore = availablePalletsQuery.
+
+		//	//var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(productId);
+		//	//if (numberUnitOnPallet == null) { throw new Exception(""); } //do zrobienia
+		//	//var number = numberUnitOnPallet.CartonsPerPallet;
+		//	//var amountPallets = requiredQuantity / number;
+		//	//var rest = requiredQuantity % number;
+		//	selectedPallets = availablePalletsQuery.Take(requiredQuantity).ToList();
+		//	// rezerwacja 
+		//	//if(rest > 0) { 
+		//	//var pickingPallet = _palletRepo.GetPalletsByFilter(new PalletSearchFilter { PalletStatus = PalletStatus.ToPicking, ProductId = productId }).ToList();
+		//	//foreach (var pallet in pickingPallet)
+		//	//	{
+
+		//	//	}
+		//	//		}
+		//	//for (int i = 1; i <= number; i++)
+		//	//{
+		//	//	selectedPallets.Add(availablePalletsQuery[i]);
+		//	//}
+
+
+		//	//int collected = 0;
+		//	//await foreach (var pallet in availablePalletsQuery.Include(p => p.ProductsOnPallet).AsAsyncEnumerable())
+		//	//{
+		//	//	var productOnPallet = pallet.ProductsOnPallet.FirstOrDefault();
+		//	//	if (productOnPallet == null || productOnPallet.Quantity <= 0)
+		//	//	{
+		//	//		continue;
+		//	//	}
+		//	//	selectedPallets.Add(pallet);//warunek dla ostatniej palety, może sprawdzić 
+
+
+
+		//	//	collected += productOnPallet.Quantity;
+		//	//	if (collected >= requiredQuantity)
+		//	//	{
+		//	//		break;
+		//	//	}
+		//	//}
+		//	return selectedPallets;
+		//}
+
+		private async Task AddAllocationToIssue(int issueId, int productId, int quantity, DateOnly bestBefore, string userId)
+		{
+			if (quantity <= 0) return;
+			using (var tranaction = await _werehouseDbContext.Database.BeginTransactionAsync())
+			{
+				var pickingPallets = await _pickingPalletRepo.GetPickingPalletsAsync(productId);
+				foreach (var pickingPallet in pickingPallets)
+				{
+					var alreadyAllocated = pickingPallet.Allocation.Sum(a => a.Quantity);
+					var availableOnThisPallet = pickingPallet.IssueInitialQuantity - alreadyAllocated;
+					if (availableOnThisPallet <= 0) continue;
+					var quantityToTake = Math.Min(quantity, availableOnThisPallet);
+					await _pickingPalletRepo.AddAllocationAsync(pickingPallet.Id, issueId, quantityToTake);
+					quantity -= quantityToTake;
+					if (quantity <= 0) break;					
+				}
+				await tranaction.CommitAsync();
+				if (quantity > 0)
+				{					
+					await AddPalletToPicking(issueId, productId, quantity, bestBefore, userId);
+					await AddAllocationToIssue(issueId, productId, quantity, bestBefore, userId);
+				}								
+			}
+		}
+		//if (quantity <= 0) return;
+		//while (quantity > 0)
+		//{
+		//	var pickingPallets = await _pickingPalletRepo.GetPickingPalletsAsync(productId);//sprawdzam czy są palety w pickingu z danym produktem
+
+		//	foreach (var pallet in pickingPallets)
+		//	{
+		//		var alreadyAllocated = pallet.Allocation.Sum(a => a.Quantity);
+		//		var availableOnThisPallet = pallet.IssueInitialQuantity - alreadyAllocated;
+		//		if (availableOnThisPallet <= 0) continue;
+		//		int quantityToTake = Math.Min(quantity, availableOnThisPallet);
+		//		await _pickingPalletRepo.AddAllocationAsync(pallet.Id, issueId, quantityToTake);
+		//		await _werehouseDbContext.SaveChangesAsync();
+		//		quantity -= quantityToTake;
+		//		if (quantity <= 0)
+		//		{
+		//			break;
+		//		}
+		//	}
+		//	if (quantity > 0) //dobieram nową paletę do pickingu
+		//	{
+		//		var newPalletsToPicking = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
+		//		var newPallet = newPalletsToPicking.First();
+		//		if (newPallet == null) throw new InvalidOperationException("Brak palet do pickingu");
+		//		await _pickingPalletRepo.AddPalletToPickingAsync(newPallet.Id);
+		//		await _palletRepo.ChangePalletStatusAsync(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
+		//		await _palletMovementService.CreateMovementAsync(newPallet, newPallet.LocationId, ReasonMovement.Picking, userId, null);
+		//		await _werehouseDbContext.SaveChangesAsync();//by wykluczyć wzięcie palety do Issue i dodać paletę do pickingu
+		//	}
+
+
+
+		private async Task AddPalletToPicking(int issueId, int productId, int quantity, DateOnly bestBefore, string userId)
+		{
+			var newPalletsToPicking = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
+			var newPallet = newPalletsToPicking.First();
+			if (newPallet == null) throw new InvalidOperationException("Brak palet do pickingu");
+			await _pickingPalletRepo.AddPalletToPickingAsync(newPallet.Id);
+			await _palletRepo.ChangePalletStatusAsync(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
+			await _palletMovementService.CreateMovementAsync(newPallet, newPallet.LocationId, ReasonMovement.Picking, userId, null);
+			await _werehouseDbContext.SaveChangesAsync();//by wykluczyć wzięcie palety do Issue i dodać paletę do pickingu
+			
+		}
+
+		//if (quantity > availableOnThisPallet)
+		//{
+		//	_pickingPalletRepo.
+		//}
+		//else
+		//{
+
+		//}
+
+		//await _pickingPalletRepo.AddAllocationAsync(pallet.Id, issueId, availableOnThisPallet);
+		//	quantity = quantity - availableOnThisPallet;
+		//	var availablePallet = _palletRepo.GetAvailablePallets(productId, bestBefore)
+		//	.Take(1);
+		//	await _pickingPalletRepo.AddPalletPickingAsync(availablePallet.First().Id, issueId, quantity);
+		//	if(quantity <= 0)
+		//	{
+		//		break;
+		//	}
+
+
+
+
 		public async Task<IssueToUpdateDTO> GetIssueByIdAsync(int numberIssue)
 		{
 			var issue = await _issueRepo.GetIssueByIdAsync(numberIssue);
@@ -116,7 +267,7 @@ namespace MyWerehouse.Application.Services
 				}
 				foreach (var item in products.Values)
 				{
-					await AddPalletsToIssueByProductAsync(issueToUpdate, item);
+					await AddPalletsToIssueByProductAsync(issueToUpdate, item, perfomedBy);
 				}
 				await _palletMovementService.CreateHistoryIssueAsync(issueToUpdate, issueToUpdate.IssueStatus, perfomedBy, null);
 			}
@@ -129,7 +280,7 @@ namespace MyWerehouse.Application.Services
 					PerformedBy = perfomedBy,
 				};
 				await CreateNewIssueAsync(dataForNewIssue, perfomedBy);
-			}			
+			}
 			else throw new InvalidOperationException($"Nie można atkualizować zlecenia o numerze {issueToUpdate.Id}");
 		}
 		public async Task DeleteIssueAsync(int issueId)
@@ -201,7 +352,7 @@ namespace MyWerehouse.Application.Services
 					issue.Pallets.Remove(pallet);
 					await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Correction, performedBy, null);
 				}
-				else 
+				else
 				{
 					await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Loaded, performedBy, null);
 					foreach (var product in pallet.ProductsOnPallet)
@@ -328,3 +479,45 @@ namespace MyWerehouse.Application.Services
 //		}
 //	}
 //	return result;
+
+
+//public async Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product)// dla jednego produktu
+//{
+//	var availablePalletsQuery = _palletRepo.GetAvailablePallets(product.ProductId, product.BestBefore);
+//	var totalAvailable = availablePalletsQuery
+//		.SelectMany(p => p.ProductsOnPallet)
+//			.Where(p => p.ProductId == product.ProductId)
+//			.Sum(i => i.Quantity);
+//	if (product.Quantity > totalAvailable)
+//	{
+//		throw new InvalidOperationException($"Brak wystarczającej ilości towaru id {product.ProductId}");
+//	}
+//	var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(product.ProductId);
+//	if (numberUnitOnPallet == null) { throw new Exception(""); } //do zrobienia
+//	var number = numberUnitOnPallet.CartonsPerPallet;
+//	var amountPallets = product.Quantity / number;
+//	var rest = product.Quantity % number;
+
+//	//var palletsToAsign = await SelectedRequiredPalletsAsync(availablePalletsQuery, amountPallets, product.ProductId);
+//	var palletsToAsign = availablePalletsQuery.Take(amountPallets);
+//	//trzeba sprawdzić chyba z inventory ile jest dostępnych kartonów
+//	//int totalCollected = palletsToAsign.Sum(p => p.ProductsOnPallet.First().Quantity); // lub bardziej dokładnie
+//	//if (totalCollected < product.Quantity)
+//	//{
+//	//	throw new InvalidOperationException($"Brak wystarczającej ilości towaru id {product.ProductId}");
+//	//}
+//	issue.IssueStatus = IssueStatus.InProgress;
+//	foreach (var pallet in palletsToAsign)
+//	{
+//		pallet.IssueId = issue.Id;
+//		pallet.Status = PalletStatus.InTransit;
+
+//		//if (totalCollected > product.Quantity && pallet == palletsToAsign.Last())
+//		//{
+//		//	pallet.Status = PalletStatus.ToPicking;
+//		//}
+//		await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.ToLoad, issue.PerformedBy, null);
+//		issue.Pallets.Add(pallet);
+//	}
+//	await AddAllocationToIssue(issue.Id, product.ProductId, rest, product.BestBefore);
+//}

@@ -18,17 +18,14 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	public class ProductIntegrationCommand : CommandTestBase
 	{
-		public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
+		//public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		public readonly ProductService _productService;
 		public readonly IMapper _mapper;
 		public readonly IValidator<AddProductDTO> _productValidator;
 		public readonly IProductRepo _productRepo;
 		public readonly IReceiptRepo _receiptRepo;
 		public ProductIntegrationCommand() : base()
-		{
-			//_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
-			//	.UseInMemoryDatabase("SharedTestDatabase")
-			//	.Options;
+		{	
 
 			var MapperConfig = new MapperConfiguration(cfg =>
 			{ 

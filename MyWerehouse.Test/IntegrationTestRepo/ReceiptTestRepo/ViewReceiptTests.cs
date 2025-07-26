@@ -19,19 +19,7 @@ namespace MyWerehouse.Test.UnitTestRepo.ReceiptTestRepo
 		{
 			var context = fixture.Context;
 			_receiptRepo = new ReceiptRepo(context);
-		}
-		[Fact]
-		public void ShowReceiptById_GetReceiptById_ReturnList()
-		{
-			//Arrange
-			var id = 1;
-			//Act
-			var result = _receiptRepo.GetReceiptById(id);
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal(id, result.Id);
-			Assert.Equal(10, result.ClientId);
-		}
+		}		
 		[Fact]
 		public async Task ShowReceiptById_GetReceiptByIdAsync_ReturnList()
 		{

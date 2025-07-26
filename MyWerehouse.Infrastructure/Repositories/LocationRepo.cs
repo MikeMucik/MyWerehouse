@@ -16,39 +16,21 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-
-		public void AddLocation(Location location)
-		{
-			_werehouseDbContext.Locations.Add(location);
-			_werehouseDbContext.SaveChanges();
-		}
+		
 		public async Task<int> AddLocationAsync(Location location)
 		{
 			await _werehouseDbContext.Locations.AddAsync(location);
 			return location.Id;
-		}
-		public void DeleteLocation(int locationId)
-		{
-			var location = _werehouseDbContext.Locations.Find(locationId);
-			if (location != null)
-			{
-				_werehouseDbContext.Locations.Remove(location);
-				_werehouseDbContext.SaveChanges();
-			}
-		}
+		}		
 		public async Task DeleteLocationAsync(int locationId)
 		{
 			var location = await _werehouseDbContext.Locations.FindAsync(locationId);
 			if (location != null)
 			{
 				_werehouseDbContext.Locations.Remove(location);
-				await _werehouseDbContext.SaveChangesAsync();
+				
 			}
-		}		
-		public Location? GetLocationById(int locationId)
-		{
-			return _werehouseDbContext.Locations.Find(locationId);
-		}
+		}				
 		public async Task<Location?> GetLocationByIdAsync(int locationId)
 		{
 			return await _werehouseDbContext.Locations.FindAsync(locationId);

@@ -17,20 +17,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 		{
 			var _context = fixture.Context;
 			_palletRepo = new PalletRepo(_context);
-		}
-		[Fact]
-		public void GetPallet_GetPalletById_ReturnSimplyData()
-		{
-			//Arrange
-			var paletId = "Q1000";
-			//Act
-			var result = _palletRepo.GetPalletById(paletId);
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal(PalletStatus.Available, result.Status);//DbCOntextFactory
-			Assert.Equal(1, result.LocationId);
-			Assert.Equal(1, result.ReceiptId);
-		}
+		}		
 		[Fact]
 		public async Task GetPallet_GetPalletByIdAsync_ReturnSimplyData()
 		{
@@ -44,18 +31,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 			Assert.Equal(1, result.LocationId);
 			Assert.Equal(1, result.ReceiptId);
 		}
-		//[Fact]
-		//public void GetPallet_GetPalletWithProducts_ReturnPalletWithProduct()
-		//{
-		//	//Arrange
-		//	var paletId = "Q1000";
-		//	//Act
-		//	var result = _palletRepo.GetPalletWithProducts(paletId);
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.Equal(50, result.ProductsOnPallet.First(p => p.Id == 1).Quantity);
-		//	Assert.Equal(new DateTime(2024, 2, 2), result.ProductsOnPallet.First(p => p.Id == 1).DateAdded);
-		//}
+		
 		//[Fact]
 		//public async Task GetPallet_GetPalletWithProductsAsync_ReturnPalletWithProduct()
 		//{
@@ -68,23 +44,7 @@ namespace MyWerehouse.Test.UnitTestRepo.PalletsTestsRepo
 		//	Assert.Equal(50, result.ProductsOnPallet.First(p => p.Id == 1).Quantity);//50 Db
 		//	Assert.Equal(new DateTime(2024, 2, 2), result.ProductsOnPallet.First(p => p.Id == 1).DateAdded);
 		//}
-		//[Fact]
-		//public void GetPallet_GetPalletWithHistory_ReturnPalletWithHistory()
-		//{
-		//	//Arrange
-		//	var paletId = "Q1000";
-		//	//Act
-		//	var result = _palletRepo.GetPalletWithHistory(paletId);
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	var specificDetails = result.PalletMovements
-		//		.SelectMany(pm => pm.PalletMovementDetails)
-		//		.FirstOrDefault(pr => pr.ProductId == 10);
-
-		//	Assert.NotNull(specificDetails);
-		//	Assert.Equal(1, specificDetails.Quantity);	
-		//	Assert.Equal(new DateTime(2025, 2, 2, 0, 0, 0), result.PalletMovements.First(p => p.Id == 1).MovementDate);
-		//}
+		
 		//[Fact]
 		//public async Task GetPallet_GetPalletWithHistoryAsync_ReturnPalletWithHistory()
 		//{

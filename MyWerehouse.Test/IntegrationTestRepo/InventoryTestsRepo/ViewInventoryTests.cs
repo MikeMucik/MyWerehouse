@@ -16,19 +16,7 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 		{
 			var _context = fixture.Context;
 			_inventoryRepo = new InventoryRepo(_context);
-		}
-		[Fact]
-		public void ShowDataByProductId_GetInventoryForProduct_ReturnInfoOfQuantity()
-		{
-			//Arrange
-			var productId = 10;
-			//Act
-			var result = _inventoryRepo.GetInventoryForProduct(productId);
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal(productId, result.ProductId);
-			Assert.Equal(10, result.Quantity); //DbContextFactory Q=10
-		}
+		}		
 		[Fact]
 		public async Task ShowDataByProductId_GetInventoryForProductAsync_ReturnInfoOfQuantity()
 		{

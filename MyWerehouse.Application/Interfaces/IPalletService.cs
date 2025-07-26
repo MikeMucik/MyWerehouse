@@ -9,18 +9,12 @@ using MyWerehouse.Domain.Models;
 namespace MyWerehouse.Application.Interfaces
 {
 	public interface IPalletService
-	{		
-		string CreatePickingPallet(CreatePalletPickingDTO addPalletDTO);
-		Task<string> CreatePickingPalletAsync(CreatePalletPickingDTO addPalletDTO);
-		void DeletePallet(string id);
-		Task DeletePalletAsync(string id);
-		UpdatePalletDTO GetPalletToEdit(string id);
-		Task<UpdatePalletDTO> GetPalletToEditAsync(string id);
-		void UpdatePallet(UpdatePalletDTO updatingPallet);
-		Task UpdatePalletAsync(UpdatePalletDTO updatingPallet);
-		PalletHistoryDTO ShowHistoryPallet(string id);
-		Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id);
-		void ChangeLocationPallet(string palletId, int destinationLocation, string userId);
+	{				
+		Task<string> CreatePickingPalletAsync(CreatePalletPickingDTO addPalletDTO);		
+		Task DeletePalletAsync(string id);	
+		Task<UpdatePalletDTO> GetPalletToEditAsync(string id);		
+		Task UpdatePalletAsync(UpdatePalletDTO updatingPallet);		
+		Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id);		
 		Task ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId);
 		Task <List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter);
 	}

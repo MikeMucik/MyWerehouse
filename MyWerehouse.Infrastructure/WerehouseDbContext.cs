@@ -9,6 +9,7 @@ namespace MyWerehouse.Infrastructure
 	{
 		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options) : base(options) { }
 		public DbSet<Address> Addresses { get; set; }
+		public DbSet<Allocation> Allocations { get; set; }
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Client> Clients { get; set; }
 		public DbSet<HistoryIssue> HistoryIssues { get; set; }
@@ -19,6 +20,7 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<Pallet> Pallets { get; set; }
 		public DbSet<PalletMovement> PalletMovements { get; set; }
 		public DbSet<PalletMovementDetail> PalletMovementDetails { get; set; }
+		public DbSet<PickingPallet> PickingPallets { get; set; }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<ProductDetail> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
@@ -29,28 +31,82 @@ namespace MyWerehouse.Infrastructure
 			modelBuilder.Entity<Address>(entity =>
 			{
 				entity.HasKey(e => e.Id);
-
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+				if (Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+				{
+					entity.Property(e => e.Country)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.City)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.Region)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.StreetName)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.PostalCode)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.StreetNumber)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+				}
+			});
+			modelBuilder.Entity<Allocation>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+				entity.Property(a => a.PickingStatus)
+				.HasConversion<string>();
+
+				 entity.HasOne(a => a.PickingPallet)
+				     .WithMany(p => p.Allocation)
+				     .HasForeignKey(a => a.PickingPalletId);
 			});
 			modelBuilder.Entity<Category>(entity =>
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+				if (Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+				{
+					entity.Property(e => e.Name)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");					
+				}
 			});
 			modelBuilder.Entity<Client>(entity =>
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+				if (Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+				{
+					entity.Property(e => e.Name)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.FullName)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.Email)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.Description)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+				}
 			});
 			modelBuilder.Entity<HistoryIssue>(entity =>
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 
-					entity.HasOne(e => e.Issue)
-						.WithMany(p => p.HistoryIssues)
-						.HasForeignKey(e => e.IssueId)
-						.IsRequired();
+				entity.HasOne(e => e.Issue)
+					.WithMany(p => p.HistoryIssues)
+					.HasForeignKey(e => e.IssueId)
+					.IsRequired();
 
 				entity.Property(r => r.Status)
 				.HasConversion<string>();
@@ -68,7 +124,8 @@ namespace MyWerehouse.Infrastructure
 
 				entity.HasOne(i => i.Product)
 				.WithOne(p => p.InventoryItem)
-				.HasForeignKey<Inventory>(i => i.ProductId);
+				.HasForeignKey<Inventory>(i => i.ProductId)
+				.OnDelete(DeleteBehavior.Restrict);//do przemyślenia
 			});
 			modelBuilder.Entity<Issue>(entity =>
 			{
@@ -117,10 +174,29 @@ namespace MyWerehouse.Infrastructure
 				.WithMany(pm => pm.PalletMovementDetails)
 				.HasForeignKey(md => md.PalletMovementId);
 			});
+			modelBuilder.Entity<PickingPallet>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(entity => entity.Id).ValueGeneratedOnAdd();
+
+				entity.HasMany(p=>p.Allocation)
+				.WithOne()
+				.HasForeignKey(p=>p.PickingPalletId)
+				.OnDelete(DeleteBehavior.Cascade);
+			});
 			modelBuilder.Entity<Product>(entity =>
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(e => e.Id).ValueGeneratedOnAdd();
+				if (Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+				{
+					entity.Property(e => e.Name)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+					entity.Property(e => e.SKU)
+					.HasMaxLength(20)
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+				}
 
 				entity.HasOne(pm => pm.InventoryItem)
 				.WithOne(i => i.Product)

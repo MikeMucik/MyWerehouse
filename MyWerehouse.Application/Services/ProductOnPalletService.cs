@@ -34,50 +34,50 @@ namespace MyWerehouse.Application.Services
 			throw new NotImplementedException();
 		}
 
-		public void AddProductToPalletPicking(string palletId, int productId, int quantity)
-		{
-			var pallet = _palletRepo.GetPalletById(palletId);
-			if (pallet.ProductsOnPallet.Where(p => p.ProductId == productId).Any())
-			{
-				_productOnPalletRepo.IncreaseQuantityOnPallet(palletId, productId, quantity);
-			}
-			else
-			{
-				var productOnPallet = new Domain.Models.ProductOnPallet
-				{
-					PalletId = palletId,
-					ProductId = productId,
-					Quantity = quantity,
-					DateAdded = DateTime.UtcNow
-				};
-				_productOnPalletRepo.AddProductToPallet(productOnPallet);
-			}
-		}
+		//public void AddProductToPalletPicking(string palletId, int productId, int quantity)
+		//{
+		//	var pallet = _palletRepo.GetPalletById(palletId);
+		//	if (pallet.ProductsOnPallet.Where(p => p.ProductId == productId).Any())
+		//	{
+		//		_productOnPalletRepo.IncreaseQuantityOnPallet(palletId, productId, quantity);
+		//	}
+		//	else
+		//	{
+		//		var productOnPallet = new Domain.Models.ProductOnPallet
+		//		{
+		//			PalletId = palletId,
+		//			ProductId = productId,
+		//			Quantity = quantity,
+		//			DateAdded = DateTime.UtcNow
+		//		};
+		//		_productOnPalletRepo.AddProductToPallet(productOnPallet);
+		//	}
+		//}
 
-		public void ProductToPalletPicking(string palletIdFrom, string palletIdTo, int productId, int quantity)
-		{
-			var palletFrom = _palletRepo.GetPalletById(palletIdFrom);
-			var palletTo = _palletRepo.GetPalletById(palletIdTo);
-			if(_productOnPalletRepo.GetQuantity(palletIdFrom, productId) 
-				>= _productOnPalletRepo.GetQuantity(palletIdTo, productId))
-			{
-				_productOnPalletRepo.DecreaseQuantityOnPallet(palletIdFrom, productId, quantity);
-				if (palletTo.ProductsOnPallet.Where(p => p.ProductId == productId).Any())
-				{
-					_productOnPalletRepo.IncreaseQuantityOnPallet(palletIdTo, productId, quantity);
-				}
-				else
-				{
-					var productOnPallet = new Domain.Models.ProductOnPallet
-					{
-						PalletId = palletIdTo,
-						ProductId = productId,
-						Quantity = quantity,
-						DateAdded = DateTime.UtcNow
-					};
-					_productOnPalletRepo.AddProductToPallet(productOnPallet);
-				}
-			}
+		//public void ProductToPalletPicking(string palletIdFrom, string palletIdTo, int productId, int quantity)
+		//{
+		//	var palletFrom = _palletRepo.GetPalletById(palletIdFrom);
+		//	var palletTo = _palletRepo.GetPalletById(palletIdTo);
+		//	if(_productOnPalletRepo.GetQuantity(palletIdFrom, productId) 
+		//		>= _productOnPalletRepo.GetQuantity(palletIdTo, productId))
+		//	{
+		//		_productOnPalletRepo.DecreaseQuantityOnPallet(palletIdFrom, productId, quantity);
+		//		if (palletTo.ProductsOnPallet.Where(p => p.ProductId == productId).Any())
+		//		{
+		//			_productOnPalletRepo.IncreaseQuantityOnPallet(palletIdTo, productId, quantity);
+		//		}
+		//		else
+		//		{
+		//			var productOnPallet = new Domain.Models.ProductOnPallet
+		//			{
+		//				PalletId = palletIdTo,
+		//				ProductId = productId,
+		//				Quantity = quantity,
+		//				DateAdded = DateTime.UtcNow
+		//			};
+		//			_productOnPalletRepo.AddProductToPallet(productOnPallet);
+		//		}
+		//	}
 			//if (palletFrom.ProductsOnPallet.Where(p => p.ProductId == productId).Any())
 			//{
 			//	_productOnPalletRepo.DecreaseQuantityOnPallet(palletIdFrom, productId, quantity);
@@ -97,11 +97,11 @@ namespace MyWerehouse.Application.Services
 			//	};
 			//	_productOnPalletRepo.AddProductToPallet(productOnPallet);
 			//}
-			else
-			{
+			//else
+			//{
 				// gdy jest za mało na pierwszej palecie produktu i trzeba dobrać z drugiej
-			}
-		}
+			//}
+	//	}
 		public async Task<ProductQunatityLocationsDTO> GetQuantityLocationProduct(int productId)
 		{			
 			var list = await _productOnPalletRepo.GetQuantityLocation(productId);

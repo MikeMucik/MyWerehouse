@@ -9,17 +9,11 @@ using MyWerehouse.Domain.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IProductRepo
-	{
-		int AddProduct(Product product);
-		Task<int> AddProductAsync(Product product);
-		void DeleteProductById(int id);
-		Task DeleteProductByIdAsync(int id);
-		void SwitchOffProduct(int id);
-		Task SwitchOffProductAsync(int id);
-		void UpdateProduct(Product product);
-		Task UpdateProductAsync(Product product);
-		Product? GetProductById(int id);
-		Product? GetProductToEdit(int id);
+	{		
+		Task<int> AddProductAsync(Product product);		
+		Task DeleteProductByIdAsync(int id);		
+		Task SwitchOffProductAsync(int id);		
+		//Task UpdateProductAsync(Product product);		
 		Task<Product?> GetProductByIdAsync(int name);		
 		Task<Product?> GetProductToEditAsync(int name);		
 		IQueryable<Product> GetAllProducts();		

@@ -15,26 +15,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public ReceiptRepo(WerehouseDbContext werehouseDbContext)
 		{
 			_werehouseDbContext = werehouseDbContext;
-		}
-		public void AddReceipt(Receipt receipt)
-		{
-			_werehouseDbContext.Receipts.Add(receipt);
-			//_werehouseDbContext.SaveChanges();
-		}
+		}		
 		public async Task AddReceiptAsync(Receipt receipt)
 		{
-			await _werehouseDbContext.Receipts.AddAsync(receipt);
-			//await _werehouseDbContext.SaveChangesAsync();
-		}
-		public void DeleteReceipt(int id)
-		{
-			var receipt = _werehouseDbContext.Receipts.Find(id);
-			if (receipt != null)
-			{
-				_werehouseDbContext.Receipts.Remove(receipt);
-				_werehouseDbContext.SaveChanges(true);
-			}
-		}
+			await _werehouseDbContext.Receipts.AddAsync(receipt);		
+		}		
 		public async Task DeleteReceiptAsync(int id)
 		{
 			var receipt =await _werehouseDbContext.Receipts.FindAsync(id);
@@ -43,40 +28,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				_werehouseDbContext.Receipts.Remove(receipt);
 				await _werehouseDbContext.SaveChangesAsync(true);
 			}
-		}
-		public void UpdateReceipt(Receipt receipt)
-		{
-			_werehouseDbContext.Attach(receipt);
-			if (receipt.ReceiptDateTime != DateTime.MinValue)
-			{
-				_werehouseDbContext.Entry(receipt).Property(nameof(receipt.ReceiptDateTime)).IsModified = true;
-			}
-			if (receipt.PerformedBy != null)
-			{
-				_werehouseDbContext.Entry(receipt).Property(nameof(receipt.PerformedBy)).IsModified = true;
-			}
-			_werehouseDbContext.SaveChanges();
-		}
-		public async Task UpdateReceiptAsync(Receipt receipt)
-		{
-			_werehouseDbContext.Attach(receipt);
-			if (receipt.ReceiptDateTime != DateTime.MinValue)
-			{
-				_werehouseDbContext.Entry(receipt).Property(nameof(receipt.ReceiptDateTime)).IsModified = true;
-			}
-			if (receipt.PerformedBy != null)
-			{
-				_werehouseDbContext.Entry(receipt).Property(nameof(receipt.PerformedBy)).IsModified = true;
-			}
-			await _werehouseDbContext.SaveChangesAsync();
-		}
-		public Receipt? GetReceiptById(int id)
-		{
-			return _werehouseDbContext.Receipts
-				.Include(r => r.Pallets)
-					.ThenInclude(pr=>pr.ProductsOnPallet)
-				.FirstOrDefault(r => r.Id == id);
-		}
+		}		
 		public async Task<Receipt?> GetReceiptByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Receipts
@@ -87,11 +39,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Receipts
-				.Include(r=>r.Client)
-				.Include(r=>r.Pallets)
-					.ThenInclude(rp=>rp.ProductsOnPallet)
-						.ThenInclude(rpp=>rpp.Product)
-				.AsQueryable();
+				//.Include(r=>r.Client)
+				//.Include(r=>r.Pallets)
+				//	.ThenInclude(rp=>rp.ProductsOnPallet)
+				//		.ThenInclude(rpp=>rpp.Product)
+				.AsQueryable()
+				;
 			if (filter.ClientId > 0)
 			{
 				result = result.Where(i => i.ClientId == filter.ClientId);

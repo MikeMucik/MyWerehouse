@@ -17,30 +17,8 @@ namespace MyWerehouse.Test.UnitTestRepo.ProductTestsRepo
 		{
 			var _context = fixture.Context;
 			_productRepo = new ProductRepo(_context);
-		}
-		[Fact]
-		public void ProperId_GetProductById_ReturnAllDatas()
-		{
-			//Arrange
-			var id = 10;
-			//Act
-			var result = _productRepo.GetProductById(id);
-			//Assert
-
-			Assert.NotNull(result);
-			Assert.Equal(id, result.Id);
-			Assert.Equal(10, result.Details.Length); // 10 -> FactoryBase
-		}
-		[Fact]
-		public void NotProperId_GetProductById_ReturnAllDatas()
-		{
-			//Arrange
-			var id = -1;
-			//Act
-			var result = _productRepo.GetProductById(id);
-			//Assert
-			Assert.Equal(null, result);
-		}
+		}		
+		
 		[Fact]
 		public void ShowAllProduct_GetAllProducts_ReturnList()
 		{

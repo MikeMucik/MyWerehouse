@@ -15,86 +15,28 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public ProductRepo(WerehouseDbContext werehouseDbContext)
 		{
 			_werehouseDbContext = werehouseDbContext;
-		}
-		public int AddProduct(Product product)
-		{
-			_werehouseDbContext.Products.Add(product);
-			_werehouseDbContext.SaveChanges();
-			return product.Id;
-		}
+		}		
 		public async Task<int> AddProductAsync(Product product)
 		{
-			await _werehouseDbContext.Products.AddAsync(product);
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.Products.AddAsync(product);			
 			return product.Id;
-		}
-		public void DeleteProductById(int id)
-		{
-			var result = _werehouseDbContext.Products.Find(id);
-			if (result != null)
-			{
-				_werehouseDbContext.Remove(result);
-				_werehouseDbContext.SaveChanges();
-			}
-		}
+		}		
 		public async Task DeleteProductByIdAsync(int id)
 		{
 			var result = await _werehouseDbContext.Products.FindAsync(id);
 			if (result != null)
 			{
-				_werehouseDbContext.Remove(result);
-				await _werehouseDbContext.SaveChangesAsync();
+				_werehouseDbContext.Remove(result);				
 			}
-		}
-		public void SwitchOffProduct(int id)
-		{
-			var product = _werehouseDbContext.Products.Find(id);
-			if (product != null)
-			{
-				product.IsDeleted = true;
-				_werehouseDbContext.SaveChangesAsync();
-			}
-		}
+		}	
 		public async Task SwitchOffProductAsync(int id)
 		{
 			var product = await _werehouseDbContext.Products.FindAsync(id);
 			if (product != null)
 			{
-				product.IsDeleted = true;
-				await _werehouseDbContext.SaveChangesAsync();
+				product.IsDeleted = true;				
 			}
-		}
-		public void UpdateProduct(Product product)
-		{			
-			_werehouseDbContext.SaveChanges();
-		}
-		public async Task UpdateProductAsync(Product product)
-		{			
-			await _werehouseDbContext.SaveChangesAsync();
-		}
-		public Product? GetProductById(int id)
-		{
-			if (id > 0)
-			{
-				var product = _werehouseDbContext.Products
-					//.Include(p => p.Category)
-					//.Include(p => p.Details)
-					.FirstOrDefault(p => p.Id == id);
-				return product;
-			}
-			return null;
-		}
-		public Product? GetProductToEdit(int id)
-		{
-			if (id > 0)
-			{
-				var product = _werehouseDbContext.Products					
-					.Include(p => p.Details)
-					.FirstOrDefault(p => p.Id == id);
-				return product;
-			}
-			return null;
-		}
+		}				
 		public async Task<Product?> GetProductByIdAsync(int id)
 		{
 			if (id > 0)
@@ -123,21 +65,20 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Product> FindProducts(ProductSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Products
-				.Where(p => p.IsDeleted == false)
-				.Include(p => p.Details)
-				.Include(p => p.Category)
-				.AsQueryable();
+				.Where(p => p.IsDeleted == false);
+
 			if (!string.IsNullOrEmpty(filter.ProductName))
 			{
-				result = result.Where(p => p.Name != null && p.Name.Contains(filter.ProductName, StringComparison.OrdinalIgnoreCase));
+				result = result.Where(p => p.Name != null && p.Name.StartsWith(filter.ProductName));
+				
 			}
 			if (!string.IsNullOrEmpty(filter.SKU))
 			{
-				result = result.Where(p => p.SKU != null && p.SKU.Contains(filter.SKU, StringComparison.OrdinalIgnoreCase));
+				result = result.Where(p => p.SKU != null && p.SKU.StartsWith(filter.SKU));
 			}
 			if (!string.IsNullOrEmpty(filter.Category))
 			{
-				result = result.Where(p => p.Category.Name != null && p.Category.Name.Contains(filter.Category, StringComparison.OrdinalIgnoreCase));
+				result = result.Where(p => p.Category.Name != null && p.Category.Name.StartsWith(filter.Category));				
 			}
 			if (filter.CategoryId > 0)
 			{

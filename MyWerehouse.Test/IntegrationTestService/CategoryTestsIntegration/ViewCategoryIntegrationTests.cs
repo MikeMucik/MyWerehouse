@@ -30,18 +30,6 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			_categoryService = new CategoryService(_categoryRepo, _mapper);
 		}
 		[Fact]
-		public void ShowAllCategories_GetCategories_ReturnList()
-		{
-			//Arrange
-			var pageSize = 5;
-			var pagenumber = 1;
-			//Act
-			var result = _categoryService.GetCategories(pageSize, pagenumber);
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal(3, result.Categories.Count);
-		}
-		[Fact]
 		public async Task ShowAllCategories_GetCategoriesAsync_ReturnList()
 		{
 			//Arrange

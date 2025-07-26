@@ -8,11 +8,9 @@ using MyWerehouse.Domain.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IPalletMovementRepo
-	{
-		void AddPalletMovement(PalletMovement palletMovement);
+	{		
 		Task AddPalletMovementAsync(PalletMovement palletMovement);
-		IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter);
-		bool CanDeletePallet(string id);
+		IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter);		
 		Task<bool> CanDeletePalletAsync(string id);		
 	}
 }

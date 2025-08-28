@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MyWerehouse.Domain.Models;
+
+namespace MyWerehouse.Application.ViewModels.AllocationModels
+{
+	public class AllocationDTO
+	{
+		public int AllocationId { get; set; }
+		public int IssueId { get; set; }
+		public required string SourcePalletId { get; set; }
+		//public int ClientOut {  get; set; } ?
+		public int ProductId { get; set; }
+		public int Quantity { get; set; }
+		public PickingStatus PickingStatus { get; set; }
+	}
+}

@@ -135,7 +135,7 @@ namespace MyWerehouse.Test.Common
 					Id = 2,
 					ClientId = 11,
 					PerformedBy = "U002",
-					IssueDateTime = new DateTime(2025, 5, 5),
+					IssueDateTimeCreate = new DateTime(2025, 5, 5),
 				});
 			}
 

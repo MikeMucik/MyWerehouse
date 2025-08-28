@@ -13,10 +13,11 @@ namespace MyWerehouse.Domain.Models
 		Damaged = 2,
 		OnHold = 3,
 		Loaded = 4,
-		ToPicking = 5,
+		ToPicking = 5, //source
 		Archived = 6,
 		Receiving = 7,
 		InStock = 8,
 		InTransit = 9,
+		Picking = 10, //destination					  
 	}
 }

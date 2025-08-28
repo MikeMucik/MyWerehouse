@@ -170,10 +170,3 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 	}
 }
-
-//.Include(p => p.ProductsOnPallet)
-//	.ThenInclude(pp => pp.Product)
-//.Include(p => p.PalletMovements)
-//.Include(p => p.Issue)
-//.Include(p => p.Receipt)
-//.AsQueryable()

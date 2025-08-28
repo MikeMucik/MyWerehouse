@@ -14,6 +14,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Task UpdateIssueAsync(Issue issue);			
 		Task<Issue?> GetIssueByIdAsync(int id);
 		Task<Issue?> GetIssueForLoadAsync(int id);
+		Task <List<Issue>> GetIssuesByIdsAsync(List<int> ids);
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
 		Task <List<PalletWithLocation>> GetPalletByIssueIdAsync(int id);			
 	}

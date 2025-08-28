@@ -22,6 +22,7 @@ namespace MyWerehouse.Infrastructure
 			services.AddTransient<ILocationRepo, LocationRepo>();
 			services.AddTransient<IPalletMovementRepo, PalletMovementRepo>();
 			services.AddTransient<IPalletRepo, PalletRepo>();
+			services.AddTransient<IPickingPalletRepo, PickingPalletRepo>();
 			services.AddTransient<IProductOnPalletRepo, ProductOnPalletRepo>();
 			services.AddTransient<IProductRepo, ProductRepo>();
 			services.AddTransient<IReceiptRepo, ReceiptRepo>();					

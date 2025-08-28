@@ -36,9 +36,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public async Task UpdateIssueAsync(Issue issue)
 		{
 			_werehouseDbContext.Attach(issue);
-			if (issue.IssueDateTime != DateTime.MinValue)
+			if (issue.IssueDateTimeCreate!= DateTime.MinValue)
 			{
-				_werehouseDbContext.Entry(issue).Property(nameof(issue.IssueDateTime)).IsModified = true;
+				_werehouseDbContext.Entry(issue).Property(nameof(issue.IssueDateTimeCreate)).IsModified = true;
 			}
 			if (issue.PerformedBy != null)
 			{
@@ -63,17 +63,22 @@ namespace MyWerehouse.Infrastructure.Repositories
 						
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}
+		public async Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids)
+		{
+			return await _werehouseDbContext.Issues
+				.Where(i => i.IssueStatus != IssueStatus.Archived && ids.Contains(i.Id))
+				.ToListAsync();
+		}
 		public IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Issues
-				.Where(i=>i.IssueStatus != IssueStatus.Archived)
-				//.Include(i => i.Client)
-				//.Include(i => i.Pallets)
-				//	.ThenInclude(ip => ip.ProductsOnPallet)
-				//		.ThenInclude(ipp => ipp.Product)
-				//.AsQueryable()
+				.Where(i=>i.IssueStatus != IssueStatus.Archived)				
 				;
-			if (filter.ClientId > 0)
+			if (filter.IssueId > 0)
+			{ 
+				result = result.Where(i=>i.Id == filter.IssueId);
+			}
+				if (filter.ClientId > 0)
 			{
 				result = result.Where(i => i.ClientId == filter.ClientId);
 			}
@@ -94,12 +99,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 				var start = filter.DateTimeStart;
 				var end = filter.DateTimeEnd ?? DateTime.Now;
 
-				result = result.Where(i => i.IssueDateTime >= start && i.IssueDateTime <= end);
+				result = result.Where(i => i.IssueDateTimeCreate >= start && i.IssueDateTimeCreate <= end);
 			}
 			if (filter.UserId != null)
 			{
 				result = result.Where(i => i.PerformedBy == filter.UserId);
 			}
+			
 			return result;
 		}
 		public async Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id)

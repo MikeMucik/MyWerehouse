@@ -12,6 +12,7 @@ namespace MyWerehouse.Domain.Models
 		public int PickingPalletId { get; set; }
 		public  virtual PickingPallet PickingPallet { get; set; }
 		public int IssueId { get; set; }
+		public Issue Issue { get; set; }
 		public int Quantity { get; set; }
 		public PickingStatus PickingStatus { get; set; }
 	}

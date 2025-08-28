@@ -10,11 +10,13 @@ namespace MyWerehouse.Domain.Models
 	public class PickingPallet
 	{
 		public int Id { get; set; }
-		public required string PalletId { get; set; }
+		public string PalletId { get; set; }
 		public Pallet Pallet { get; set; }
 		public int IssueInitialQuantity { get; set; }
 		public int LocationId { get; set; }
+		public Location Location { get; set; }
 		public DateTime DateMoved { get; set; }
+		//public int IssueId { get; set; }
 		public virtual ICollection<Allocation> Allocation { get; set; } = new List<Allocation>();
 		[NotMapped]
 		public int RemainingQuantity => IssueInitialQuantity - (Allocation?.Sum(a=>a.Quantity) ?? 0);

@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.ViewModels.IssueModels
 		{
 			profile.CreateMap<CreateIssueDTO, Issue>()
 				.ForMember(d => d.Id, opt => opt.Ignore())
-			.ForMember(d => d.IssueDateTime, opt => opt.Ignore())
+			.ForMember(d =>d.IssueDateTimeCreate, opt => opt.Ignore())
 			.ForMember(d => d.IssueStatus, opt => opt.Ignore())
 			.ForMember(d => d.PerformedBy, opt => opt.Ignore());//czy potrzebne te Ignore
 		}		

@@ -282,15 +282,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
-			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo.Object, palletRepo.Object, issueRepo);
+			var palletMovementRepo = new Mock<IPalletMovementRepo>();
+			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo.Object, palletRepo.Object, issueRepo, palletMovementRepo.Object);
 
 			// Act
-			var result = await service.GetListToPicking(
+			var result = await service.GetListToPickingAsync(
 				new DateTime(2024, 8, 12),
 				new DateTime(2026, 8, 12));
 
 			// Assert
-			result.Should().HaveCount(5); //Tu daje 5  bo daje alokacje każdą osobno
+			result.Should().HaveCount(5); //Tu daje 5 bo daje alokacje każdą osobno
 
 			// Client1, Issue1, Product1 → 10 + 20 = 30
 			result.Should().ContainEquivalentOf(new ProductToIssueDTO
@@ -320,7 +321,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			});
 		}
 
-		//Nowa metoda
+		//Nowa metoda inne dane wyjściowe
 		[Fact]
 		public async Task GetListIssueToPickingAsync_ShouldGroupByClientIssueAndProduct()
 		{
@@ -563,8 +564,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueRepo = new IssueRepo(DbContext);
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
-			var palletRepo = new Mock<IPalletRepo>();			
-			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo.Object, palletRepo.Object, issueRepo);
+			var palletRepo = new Mock<IPalletRepo>();		
+			var palletMovementRepo = new Mock<IPalletMovementRepo>();
+			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo.Object, palletRepo.Object, issueRepo, palletMovementRepo.Object);
 
 			// Act
 			var result = await service.GetListIssueToPickingAsync(

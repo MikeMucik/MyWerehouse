@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<string> AddPalletAsync(Pallet pallet);		
 		Task DeletePalletAsync(string palletId);		
 		Task<Pallet?> GetPalletByIdAsync(string palletId);
-		IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly minBestBefore);
+		IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly? minBestBefore);
 		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);			
 		Task ClearPalletFromListIssueAsync(string palletId);
 		Task ChangePalletStatusAsync(string palletId, PalletStatus palletStatus);//może nie być potrzebne		

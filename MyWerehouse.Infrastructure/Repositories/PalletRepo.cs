@@ -95,7 +95,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			return result;
 		}
-		public IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly minBestBefore)
+		public IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly? minBestBefore)
 		{
 			var pallets = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)

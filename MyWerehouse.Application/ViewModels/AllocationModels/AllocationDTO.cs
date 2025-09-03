@@ -11,10 +11,12 @@ namespace MyWerehouse.Application.ViewModels.AllocationModels
 	{
 		public int AllocationId { get; set; }
 		public int IssueId { get; set; }
-		public required string SourcePalletId { get; set; }
-		//public int ClientOut {  get; set; } ?
+		public required string SourcePalletId { get; set; }		
 		public int ProductId { get; set; }
 		public int Quantity { get; set; }
+		public int PickedQuantity { get; set; }//faktyczna pobrana ilość
 		public PickingStatus PickingStatus { get; set; }
+		public DateOnly? BestBefore { get; set; }
 	}
 }
+//public int ClientOut {  get; set; } ?

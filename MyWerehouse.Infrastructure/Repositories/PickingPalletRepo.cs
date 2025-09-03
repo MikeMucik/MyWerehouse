@@ -114,5 +114,10 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			return await _werehouseDbContext.Allocations.FirstOrDefaultAsync(a => a.Id == allocationId);
 		}
+
+		public async Task<PickingPallet> GetPickingPalletByIdAsync(int palletId)
+		{
+			return await _werehouseDbContext.PickingPallets.FirstAsync(p => p.Id == palletId);
+		}
 	}
 }

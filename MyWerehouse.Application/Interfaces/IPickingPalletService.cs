@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Interfaces
 	public interface IPickingPalletService
 	{
 		Task<List<PickingPalletWithLocationDTO>> GetListPickingPalletAsync(DateTime dateMovedStart, DateTime dateMovedEnd);
-		Task<List<ProductToIssueDTO>> GetListToPicking(DateTime dateIssueStart, DateTime dateIssueEnd); //podaje pojedyncze alokacje
+		Task<List<ProductToIssueDTO>> GetListToPickingAsync(DateTime dateIssueStart, DateTime dateIssueEnd); //podaje pojedyncze alokacje
 		Task<List<PickingGuideLineDTO>> GetListIssueToPickingAsync(DateTime dateIssueStart, DateTime dateIssueEnd); //podaje według klienta -> drzewko		
 		Task <List<AllocationDTO>> ShowTaskToDoAsync(string palletSouceScanned, DateTime pickingDate);
 		Task DoPickingAsync(AllocationDTO allocationDTO, string userId);

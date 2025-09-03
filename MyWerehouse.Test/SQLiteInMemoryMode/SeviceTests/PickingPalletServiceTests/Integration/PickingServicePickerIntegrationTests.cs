@@ -122,9 +122,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();			
 			var locationRepo = new LocationRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
+			var palletMovementRepo = new Mock<IPalletMovementRepo>();
 			//var allocationRepo = new AllocationRepo(DbContext);			
 			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo, palletRepo, issueRepo
-				//,allocationRepo
+				,palletMovementRepo.Object
 				);
 
 			// Act
@@ -134,6 +135,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue.Id,
 				ProductId = product.Id,
 				Quantity = 30,
+				PickedQuantity = 30,
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
 			};
@@ -267,9 +269,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new LocationRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
-			//var allocationRepo = new AllocationRepo(DbContext);			
+			var palletMovementRepo = new Mock<IPalletMovementRepo>();
 			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo, palletRepo, issueRepo
-				//,allocationRepo
+				, palletMovementRepo.Object
 				);
 
 			// Act
@@ -279,6 +281,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue.Id,
 				ProductId = product.Id,
 				Quantity = 40,
+				PickedQuantity = 40,
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
 			};
@@ -428,8 +431,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueRepo = new IssueRepo(DbContext);
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new LocationRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);			
-			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo, palletRepo, issueRepo);
+			var palletRepo = new PalletRepo(DbContext);
+			var palletMovementRepo = new Mock<IPalletMovementRepo>();
+			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo, palletRepo, issueRepo, palletMovementRepo.Object);
 
 			// Act
 			var allocationDTO = new AllocationDTO
@@ -438,6 +442,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue.Id,
 				ProductId = product.Id,
 				Quantity = 30,
+				PickedQuantity = 30,
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
@@ -596,7 +601,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new LocationRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
-			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo, palletRepo, issueRepo);
+			var palletMovementRepo = new Mock<PalletMovementRepo>();
+			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo, palletRepo, issueRepo, palletMovementRepo.Object);
 
 			// Act
 			var allocationDTO = new AllocationDTO
@@ -605,6 +611,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				Quantity = 30,
+				PickedQuantity = 30,
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};

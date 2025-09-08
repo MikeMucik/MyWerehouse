@@ -16,7 +16,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Task UpdateInventoryAsync(int productId, int quantity);
 		IQueryable<Inventory> GetAllInventory();		
 		Task <bool> HasStockAsync(int productId, int quantity);
-		 
+		Task<int> GetAvailableQuantityAsync(int productId, DateOnly? bestBefore);
 	}
 }
 //Exists(int productId)

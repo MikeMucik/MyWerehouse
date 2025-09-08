@@ -127,22 +127,22 @@ namespace MyWerehouse.Test.MappingTest
 			Assert.NotNull(entity);
 			Assert.Equal(dto.Id, entity.Id);			
 		}
-		[Fact]
-		public void Should_Map_AddPalletPickingDTO_To_Pallet()
-		{
-			var dto = new CreatePalletPickingDTO
-			{
-				Id = "Q0001",
-				DateCreated = DateTime.Now,
-				LocationId = 1,
-				IssueId = 1,
-				Status = PalletStatus.ToIssue,
-			};
-			var entity = _mapper.Map<Pallet>(dto);
+		//[Fact]
+		//public void Should_Map_AddPalletPickingDTO_To_Pallet()
+		//{
+		//	var dto = new CreatePalletPickingDTO
+		//	{
+		//		Id = "Q0001",
+		//		DateCreated = DateTime.Now,
+		//		LocationId = 1,
+		//		IssueId = 1,
+		//		Status = PalletStatus.ToIssue,
+		//	};
+		//	var entity = _mapper.Map<Pallet>(dto);
 
-			Assert.NotNull(entity);
-			Assert.Equal(dto.Id, entity.Id);
-		}
+		//	Assert.NotNull(entity);
+		//	Assert.Equal(dto.Id, entity.Id);
+		//}
 		//[Fact]
 		//public void Should_Map_Single_ProductOnPalletDTO_To_ProductOnPallet()
 		//{

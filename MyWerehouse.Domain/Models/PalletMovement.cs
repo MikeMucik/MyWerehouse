@@ -19,5 +19,6 @@ namespace MyWerehouse.Domain.Models
 		public string? PerformedBy { get; set; } // opcjonalnie: user		
 		public virtual ICollection<PalletMovementDetail> PalletMovementDetails { get; set; } = new List<PalletMovementDetail>();
 		public DateTime MovementDate { get; set; }
+		public PalletStatus PalletStatus { get; set; } //migracja jaka jest paleta po ruchu
 	}
 }

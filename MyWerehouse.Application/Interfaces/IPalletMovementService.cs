@@ -10,6 +10,8 @@ namespace MyWerehouse.Application.Interfaces
 	public interface IPalletMovementService
 	{
 		Task CreateHistoryIssueAsync(Issue issue, IssueStatus status, string userId, IEnumerable<HistoryIssueDetail> details);
-		Task CreateMovementAsync(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, IEnumerable<PalletMovementDetail> details);
+		Task CreateMovementAsync(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, 
+			PalletStatus palletStatus, IEnumerable<PalletMovementDetail>? details);
+		Task CreateMovementAsync(Pallet pallet, string userId, PalletStatus newStatus); //overload
 	}
 }

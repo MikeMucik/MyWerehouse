@@ -4,15 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.IssueModels;
+using MyWerehouse.Application.ViewModels.PalletModels;
+using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
+using static MyWerehouse.Application.ViewModels.IssueModels.CreateIssueDTO;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 {
@@ -114,17 +118,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			DbContext.Clients.Add(initailCLient);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			var mockMapper = new Mock<IMapper>();
 
+			var mockMapper = new Mock<IMapper>();
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issueId))
 						 .ReturnsAsync(issue);
-
 			var palletMovementServiceMock = new Mock<IPalletMovementService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var productRepoMock = new Mock<IProductRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			var palletService = new Mock<IPalletService>();
+			var validator = new Mock<IValidator<CreateIssueDTO>>();
+			
 			var service = new IssueService(
 				issueRepoMock.Object,
 				mockMapper.Object,
@@ -133,7 +139,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				inventoryRepoMock.Object,
 				palletRepo.Object,
 				productRepoMock.Object,
-				pickingRepoMock.Object
+				pickingRepoMock.Object,
+				palletService.Object,
+				validator.Object
 			);
 
 			// Act
@@ -145,10 +153,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			Assert.Null(notLoadedPallet.IssueId);
 
 			palletMovementServiceMock.Verify(x =>
-				x.CreateMovementAsync(notLoadedPallet, 20, ReasonMovement.Correction, performedBy, null), Times.Once);
+				x.CreateMovementAsync(notLoadedPallet, 20, ReasonMovement.Correction, performedBy, PalletStatus.Available, null), Times.Once);
 
 			palletMovementServiceMock.Verify(x =>
-				x.CreateMovementAsync(loadedPallet, 10, ReasonMovement.Loaded, performedBy, null), Times.Once);
+				x.CreateMovementAsync(loadedPallet, 10, ReasonMovement.Loaded, performedBy, PalletStatus.Loaded, null), Times.Once);
 
 			inventoryRepoMock.Verify(x =>
 				x.DecreaseInventoryQuantityAsync(101, 5), Times.Once);
@@ -176,10 +184,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var product = new IssueItemDTO { ProductId = 10, Quantity = 200, BestBefore = new DateOnly(2025, 8, 1) };
 			var cartonsPerPallet = 100;
 			var pallets = new List<Pallet>
-	{
-		new() { Id = "Q1000", Status = PalletStatus.Available, ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = cartonsPerPallet } }, LocationId = 1 },
-		new() { Id = "Q1001", Status = PalletStatus.Available, ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = cartonsPerPallet } }, LocationId = 2 }
-	};
+				{
+					new() { Id = "Q1000", Status = PalletStatus.Available, ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = cartonsPerPallet, BestBefore = new DateOnly(2026, 8, 1) } }, LocationId = 1 },
+					new() { Id = "Q1001", Status = PalletStatus.Available, ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = cartonsPerPallet, BestBefore = new DateOnly(2026, 8, 1) } }, LocationId = 2 }
+				};
+			//DbContext.Pallets.AddRange(pallets);
+			//DbContext.SaveChanges();
 			var mockMapper = new Mock<IMapper>();
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id))
@@ -190,11 +200,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var productRepoMock = new Mock<IProductRepo>();
 			var palletRepoMock = new Mock<IPalletRepo>();
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			var palletService = new Mock<IPalletService>();
 			palletRepoMock.Setup(r => r.GetAvailablePallets(10, product.BestBefore))
 				.Returns(pallets.AsQueryable());
 
 			productRepoMock.Setup(r => r.GetProductByIdAsync(10))
 				.ReturnsAsync(new Product { Id = 10, CartonsPerPallet = cartonsPerPallet });
+
+			inventoryRepoMock.Setup(r => r.GetAvailableQuantityAsync(10, product.BestBefore))
+				.ReturnsAsync(cartonsPerPallet * pallets.Count);
+
+			var validator = new Mock<IValidator<CreateIssueDTO>>();
+
 			var service = new IssueService(
 				issueRepoMock.Object,
 				mockMapper.Object,
@@ -203,7 +220,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				inventoryRepoMock.Object,
 				palletRepoMock.Object,
 				productRepoMock.Object,
-				pickingRepoMock.Object
+				pickingRepoMock.Object,
+				palletService.Object,
+				validator.Object
 			);
 			// Act
 			await service.AddPalletsToIssueByProductAsync(issue, product, "user");
@@ -233,8 +252,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var productRepoMock = new Mock<IProductRepo>();
 			var palletRepoMock = new Mock<IPalletRepo>();
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			var palletService = new Mock<IPalletService>();
 			palletRepoMock.Setup(r => r.GetAvailablePallets(10, product.BestBefore))
 				.Returns(pallets.AsQueryable());
+
+			var validator = new Mock<IValidator<CreateIssueDTO>>();
+
 			var service = new IssueService(
 				issueRepoMock.Object,
 				mockMapper.Object,
@@ -243,7 +266,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				inventoryRepoMock.Object,
 				palletRepoMock.Object,
 				productRepoMock.Object,
-				pickingRepoMock.Object
+				pickingRepoMock.Object,
+				palletService.Object,
+				validator.Object
 			);
 			// Act & Assert
 			var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -251,16 +276,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 
 			Assert.Contains("Brak wystarczającej ilości", ex.InnerException!.Message);
 		}
-			
 		[Fact]
 		public async Task AddPalletsToIssueByProductAsync_AssignsFullPalletsAndAllocatesRest()
 		{
 			// Arrange
-
 			var productId = 100;
 			var bestBefore = new DateOnly(2025, 10, 10);
 			var cartonsPerPallet = 10;
-
 			var issueItem = new IssueItemDTO
 			{
 				ProductId = productId,
@@ -269,40 +291,40 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			};
 
 			var availablePallets = new List<Pallet>
-	{
-		new Pallet
-		{
-			Id = "P1",
-			LocationId = 1,
-			Status = PalletStatus.Available,
-			ProductsOnPallet = new List<ProductOnPallet>
-			{
-				new ProductOnPallet { ProductId = productId, Quantity = 10,
+				{
+				new Pallet
+					{
+						Id = "P1",
+					LocationId = 1,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { ProductId = productId, Quantity = 10,
 					BestBefore =new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-			}
-		},
-		new Pallet
-		{
-			Id = "P2",
-			LocationId = 2,
-			Status = PalletStatus.Available,
-			ProductsOnPallet = new List<ProductOnPallet>
-			{
-				new ProductOnPallet { ProductId = productId, Quantity = 10,
-					BestBefore =new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-			}
-		},
-		new Pallet
-		{
-			Id = "P3",
-			LocationId = 1,
-			Status = PalletStatus.Available,
-			ProductsOnPallet = new List<ProductOnPallet>
-			{
-				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore =new DateOnly(2026,1,1) }
-			}
-		}
-	};
+				}
+			},
+				new Pallet
+				{
+					Id = "P2",
+					LocationId = 2,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { ProductId = productId, Quantity = 10,
+							BestBefore =new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+					}
+				},
+				new Pallet
+				{
+					Id = "P3",
+					LocationId = 1,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore =new DateOnly(2026,1,1) }
+					}
+				}
+			};
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -346,50 +368,39 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id))
 						 .ReturnsAsync(issue);
-			var inventoryRepoMock = new Mock<IInventoryRepo>();
-			//pickingRepoMock
-			//	.Setup(r => r.GetPickingPalletsAsync(productId))
-			//	.ReturnsAsync(new List<PickingPallet>
-			//	{
-			//new PickingPallet
-			//{
-			//	Id = 1,
-			//	PalletId = "P2",
-			//	IssueInitialQuantity = 10,
-			//	Allocation = new List<Allocation>()
-			//}
-			//	});
-
-
-			//pickingRepoMock
-			//	.Setup(r => r.GetPickingPalletsAsync(productId))
-			//	.ReturnsAsync(new List<PickingPallet>()); // PUSTA lista
-
+			var inventoryRepo = new InventoryRepo(DbContext);
 			var mockMapper = new Mock<IMapper>();
-			//pickingRepoMock
-			//	.Setup(r => r.AddAllocationAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-			//	.Returns(Task.CompletedTask);
-
-			//pickingRepoMock
-			//	.Setup(r => r.AddPalletToPickingAsync(It.IsAny<string>()))
-			//	.Returns(Task.CompletedTask);
-
 			movementServiceMock
-				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), null))
+				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
 
 			var palletRepo = new PalletRepo(DbContext);
 			var productRepo = new ProductRepo(DbContext);
 
+			var palletMovementRepo = new PalletMovementRepo(DbContext);
+			var historyIssueRepo = new HistoryIssueRepo(DbContext);
+			var palletMovementService = new PalletMovementService(palletMovementRepo, historyIssueRepo);
+			var productOnPalletValidator = new ProductOnPalletDTOValidation();
+			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
+			var palletService = new PalletService(palletRepo,
+				palletMovementService,
+				palletMovementRepo,
+				pickingRepo,
+				mockMapper.Object,
+				updatePalletValidator, DbContext);
+			var validatorItem = new IssueItemDTOValidion();
+			var validator = new CreateIssueDTOValidion(validatorItem);
 			var service = new IssueService(
 				issueRepoMock.Object,
 				mockMapper.Object,
 				DbContext,
 				movementServiceMock.Object,
-				inventoryRepoMock.Object,
+				inventoryRepo,
 				palletRepo,
 				productRepo,
-				pickingRepo
+				pickingRepo,
+				palletService,
+				validator
 				);
 
 			// Act
@@ -402,10 +413,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
 
 			//pickingRepoMock.Verify(r => r.AddAllocationAsync(It.IsAny<int>(), issue.Id, 5), Times.Once);
-			movementServiceMock.Verify(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.ToLoad, It.IsAny<string>(), null), Times.Exactly(2));
+			movementServiceMock.Verify(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.ToLoad, It.IsAny<string>(), It.IsAny<PalletStatus>(), null), Times.Exactly(2));
 
 			movementServiceMock.Verify(m => m.CreateMovementAsync(
-	It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, "user1", null), Times.Once);
+	It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, "user1", PalletStatus.InTransit, null), Times.Once);
 
 			//pickingRepoMock.Verify(p => p.AddAllocationAsync(1, issue.Id, 5), Times.Once);
 
@@ -427,38 +438,38 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			};
 
 			var availablePallets = new List<Pallet>
-	{
-		new Pallet
-		{
-			Id = "P1",
-			LocationId = 1,
-			Status = PalletStatus.Available,
-			ProductsOnPallet = new List<ProductOnPallet>
 			{
-				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-			}
-		},
-		new Pallet
-		{
-			Id = "P2",
-			LocationId = 2,
-			Status = PalletStatus.Available,
-			ProductsOnPallet = new List<ProductOnPallet>
-			{
-				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-			}
-		},
-		new Pallet
-		{
-			Id = "P3",
-			LocationId = 1,
-			Status = PalletStatus.Available,
-			ProductsOnPallet = new List<ProductOnPallet>
-			{
-				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-			}
-		}
-	};
+				new Pallet
+				{
+					Id = "P1",
+					LocationId = 1,
+					Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
+				{
+					new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+				}
+			},
+				new Pallet
+				{
+					Id = "P2",
+					LocationId = 2,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+					}
+				},
+				new Pallet
+				{
+					Id = "P3",
+					LocationId = 1,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+					}
+				}
+			};
 
 			var address = new Address
 			{
@@ -504,7 +515,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			// Mocki
 			var movementServiceMock = new Mock<IPalletMovementService>();
 			movementServiceMock
-				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), null))
+				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
 
 			var pickingRepo = new PickingPalletRepo(DbContext);
@@ -512,18 +523,35 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var productRepo = new ProductRepo(DbContext);
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);
-			var inventoryRepoMock = new Mock<IInventoryRepo>();
+			var inventoryRepo = new InventoryRepo(DbContext);
 			var mockMapper = new Mock<IMapper>();
 
+			var palletMovementRepo = new PalletMovementRepo(DbContext);
+			var historyIssueRepo = new HistoryIssueRepo(DbContext);
+			var palletMovementService = new PalletMovementService(palletMovementRepo, historyIssueRepo);
+			var productOnPalletValidator = new ProductOnPalletDTOValidation();
+			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
+			var palletService = new PalletService(palletRepo,
+				palletMovementService,
+				palletMovementRepo,
+				pickingRepo,
+				mockMapper.Object,
+				updatePalletValidator, DbContext);
+			var validatorItem = new IssueItemDTOValidion();
+			var validator = new CreateIssueDTOValidion(validatorItem);
+
+			//var palletService = new Mock<IPalletService>();
 			var service = new IssueService(
 				issueRepoMock.Object,
 				mockMapper.Object,
 				DbContext,
 				movementServiceMock.Object,
-				inventoryRepoMock.Object,
+				inventoryRepo,
 				palletRepo,
 				productRepo,
-				pickingRepo
+				pickingRepo,
+				palletService,
+				validator
 			);
 
 			// Act
@@ -536,10 +564,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
 
 			movementServiceMock.Verify(r =>
-				r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.ToLoad, It.IsAny<string>(), null), Times.Exactly(2));
+				r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.ToLoad, It.IsAny<string>(), It.IsAny<PalletStatus>(), null), Times.Exactly(2));
 
 			movementServiceMock.Verify(m =>
-				m.CreateMovementAsync(It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, "user1", null), Times.Once);
+				m.CreateMovementAsync(It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, "user1", PalletStatus.InTransit, null), Times.Once);
 		}
 		[Fact]
 		public async Task AddPalletsToIssueByProductAsync_NotEnoughProduct_FullIntegration()
@@ -634,7 +662,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			// Mocki
 			var movementServiceMock = new Mock<IPalletMovementService>();
 			movementServiceMock
-				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), null))
+				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
 
 			var pickingRepo = new PickingPalletRepo(DbContext);
@@ -644,7 +672,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var mockMapper = new Mock<IMapper>();
-
+			var palletService = new Mock<IPalletService>();
+			var validator = new Mock<IValidator<CreateIssueDTO>>();
 			var service = new IssueService(
 				issueRepoMock.Object,
 				mockMapper.Object,
@@ -653,7 +682,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				inventoryRepoMock.Object,
 				palletRepo,
 				productRepo,
-				pickingRepo
+				pickingRepo,
+				palletService.Object,
+				validator.Object
 			);
 
 			// Act&&Assert
@@ -661,7 +692,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				 service.AddPalletsToIssueByProductAsync(issue, issueItem, "user1"));
 
 			//Assert.IsType<InvalidDataException>(ex.InnerException);
-			Assert.Contains("Brak wystarczającej ilości", ex.InnerException!.Message);	
+			Assert.Contains("Brak wystarczającej ilości", ex.InnerException!.Message);
 		}
 	}
 }

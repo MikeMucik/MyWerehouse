@@ -40,10 +40,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				cfg.AddProfile<MappingProfile>();
 			});
 			_mapper = MapperConfig.CreateMapper();
+
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
 			_updateValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
 			_receiptValidator = new ReceiptDTOValidation(_updateValidator);
 			_palletValidator = new CreatePalletReceiptDTOValidation(_productOnPalletValidator);
+			
 			_palletMovementRepo = new PalletMovementRepo(DbContext);
 			_historyIssueRepo = new HistoryIssueRepo(DbContext);
 			_palletMovementService = new PalletMovementService(_palletMovementRepo, _historyIssueRepo);
@@ -59,9 +61,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				_palletMovementService,
 				_inventoryService,
 				_palletValidator,
-				_receiptValidator
-				//,_updateValidator
-				);
+				_receiptValidator);
 		}
 	}
 }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
+using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Infrastructure.Repositories
 {
@@ -88,6 +90,69 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (quantityBased == null) return false;
 			return quantityBased.Quantity >= quantity;
 		}
-		
+
+		public async Task<int> GetAvailableQuantityAsync(int productId, DateOnly? bestBefore)
+		{
+			// 1. pełne dostępne palety
+			var fullPalletsQuery = _werehouseDbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.Where(p => p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock)
+				.AsQueryable();
+
+			if (bestBefore.HasValue)
+			{
+				fullPalletsQuery = fullPalletsQuery
+					.Where(p => p.ProductsOnPallet.Any(pop =>
+						pop.ProductId == productId && pop.BestBefore >= bestBefore));
+			}
+
+			var totalFromFullPallets = await fullPalletsQuery
+				.SelectMany(p => p.ProductsOnPallet)
+				.Where(pop => pop.ProductId == productId)
+				.SumAsync(pop => pop.Quantity);
+
+			// 2. palety rozbite (ToPicking)
+			var pickingQuery = _werehouseDbContext.PickingPallets
+				.Include(pp => pp.Pallet)
+				.Where(pp => pp.Pallet.Status == PalletStatus.ToPicking &&
+							 pp.Pallet.ProductsOnPallet.Any(pop => pop.ProductId == productId));
+
+			if (bestBefore.HasValue)
+			{
+				pickingQuery = pickingQuery.Where(pp => pp.Pallet.ProductsOnPallet
+					.Any(pop => pop.ProductId == productId && pop.BestBefore >= bestBefore));
+			}
+
+			//var totalFromPicking = await pickingQuery.SumAsync(pp => pp.RemainingQuantity);
+			var totalFromPicking = await pickingQuery
+				.Select(pp => pp.IssueInitialQuantity - (pp.Allocation.Sum(a =>(int?) a.Quantity) ?? 0))
+				.SumAsync();
+
+			return totalFromFullPallets + totalFromPicking;
+		}
+
 	}
 }
+//public async Task<int> GetAvailableQuantityAsync(int productId, DateOnly? bestBefore)
+//{
+//	// filtr na BestBefore
+//	Expression<Func<ProductOnPallet, bool>> bestBeforeFilter = pop =>
+//		pop.ProductId == productId &&
+//		(!bestBefore.HasValue || pop.BestBefore >= bestBefore.Value);
+
+//	// 1. pełne dostępne palety
+//	var totalFromFullPallets = await _werehouseDbContext.Pallets
+//		.Where(p => p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock)
+//		.SelectMany(p => p.ProductsOnPallet)
+//		.Where(bestBeforeFilter)
+//		.SumAsync(pop => pop.Quantity);
+
+//	// 2. palety rozbite (ToPicking)
+//	var totalFromPicking = await _werehouseDbContext.PickingPallets
+//		.Where(pp => pp.Pallet.Status == PalletStatus.ToPicking &&
+//					 pp.Pallet.ProductsOnPallet.Any(bestBeforeFilter))
+//		.Select(pp => pp.IssueInitialQuantity - (pp.Allocation.Sum(a => (int?)a.Quantity) ?? 0))
+//		.SumAsync();
+
+//	return totalFromFullPallets + totalFromPicking;
+//}

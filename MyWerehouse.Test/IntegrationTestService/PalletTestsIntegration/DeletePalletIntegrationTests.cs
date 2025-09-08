@@ -60,7 +60,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				MovementDate = DateTime.Now,
 				PalletId = pallet.Id,
 				//ProductId = 1,
-				Reason = ReasonMovement.ManualMove,
+				Reason = ReasonMovement.Moved,
 			};
 			var movement2 = new PalletMovement
 			{
@@ -71,7 +71,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				MovementDate = DateTime.Now,
 				PalletId = pallet.Id,
 				//ProductId = 1,
-				Reason = ReasonMovement.ManualMove,
+				Reason = ReasonMovement.Moved,
 			};
 			var movementDetails1 = new PalletMovementDetail
 			{

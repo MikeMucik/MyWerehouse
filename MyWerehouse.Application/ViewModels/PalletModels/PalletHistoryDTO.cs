@@ -23,8 +23,5 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 				.ForMember(dest => dest.PalletMovementsDTO, opt => opt.MapFrom(src => src.PalletMovements));
 		}
 	}
-
 }
-//public int LocationId { get; set; }		
-//public PalletStatus Status { get; set; }  
-//public ICollection<ProductOnPallet> ProductsOnPallet { get; set; } = new HashSet<ProductOnPallet>();
+

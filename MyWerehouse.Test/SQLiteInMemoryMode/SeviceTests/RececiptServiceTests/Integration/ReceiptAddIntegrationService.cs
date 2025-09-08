@@ -15,7 +15,7 @@ using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptAddIntegrationService:ReceiptIntegratioCommandService
+	public class ReceiptAddIntegrationService : ReceiptIntegratioCommandService
 	{
 		[Fact]
 		public async Task ProperDataOnePalletFullTest_AddPalletToReceiptAsync_AddedToBase()
@@ -33,7 +33,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialCLient = new Client
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -42,14 +42,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialReceipt = new Receipt
 			{
-				Id = 1,
+				//Id = 1,
 				ClientId = 1,
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002"
 			};
 			var initialLocation = new Location
 			{
-				Id = 1,
+				//Id = 1,
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
@@ -57,7 +57,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var product = new Product
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
@@ -65,7 +65,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialCategory = new Category
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "name",
 				IsDeleted = false
 			};
@@ -74,14 +74,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Clients.Add(initialCLient);
 			DbContext.Receipts.Add(initialReceipt);
 			DbContext.Locations.Add(initialLocation);
-			await DbContext.SaveChangesAsync();	
-
+			await DbContext.SaveChangesAsync();
+			//Act
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
 				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
 				UserId = "U001"
-			};			
-			//Act
+			};
+
 			string newPallet = await _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto);
 			//Assert
 			Assert.NotNull(newPallet);
@@ -169,13 +169,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(initialReceipt);
 			DbContext.Locations.Add(initialLocation);
 			await DbContext.SaveChangesAsync();
-			
+			//Act&Assert
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
 				ProductsOnPallet = [new() { ProductId = 0, Quantity = 0, }],
 				UserId = "U001"
-			};			
-			//Act&Assert
+			};
+
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
 
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
@@ -247,17 +247,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(initialReceipt);
 			DbContext.Locations.Add(initialLocation);
 			await DbContext.SaveChangesAsync();
-			
+			//Act&Assert
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
 				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }, new() { ProductId = 2, Quantity = 100 }],
 				UserId = "U001"
 			};
-			
-			//Act&Assert
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
 
-			Assert.Contains("Paleta przyjmowana może mieć tylko jeden rodzaj produktu", ex.Message);			
+			Assert.Contains("Paleta przyjmowana może mieć tylko jeden rodzaj produktu", ex.Message);
 		}
 	}
 }

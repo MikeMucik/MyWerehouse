@@ -65,7 +65,9 @@ namespace MyWerehouse.Application.Services
 		//	};
 		//	 _palletMovementRepo.AddPalletMovement(movement);
 		//}
-		public async Task CreateMovementAsync(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, IEnumerable<PalletMovementDetail> details=null)
+		public async Task CreateMovementAsync(Pallet pallet, int destinationLocationId,
+			ReasonMovement reasonMovement, string userId,
+			PalletStatus palletStatus, IEnumerable<PalletMovementDetail>? details)
 		{
 			if (details == null)
 			{
@@ -84,8 +86,20 @@ namespace MyWerehouse.Application.Services
 				PerformedBy = userId,
 				PalletMovementDetails = details.ToList(),
 				MovementDate = DateTime.UtcNow,
+				PalletStatus = palletStatus
 			};
 			await _palletMovementRepo.AddPalletMovementAsync(movement);			
+		}
+
+		public Task CreateMovementAsync(Pallet pallet, string userId, PalletStatus newStatus)
+		{
+			return CreateMovementAsync(
+				pallet,
+				pallet.LocationId,
+				ReasonMovement.Picking,
+				userId,
+				newStatus,
+				null);
 		}		
 	}
 }

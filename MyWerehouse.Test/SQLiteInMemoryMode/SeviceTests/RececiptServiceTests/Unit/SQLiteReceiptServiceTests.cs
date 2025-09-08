@@ -89,7 +89,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
 			mockPalletMovementService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), null))
+				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
 			var mockInventoryService = new Mock<IInventoryService>();
 			var receiptRepo = new ReceiptRepo(DbContext);
@@ -114,7 +114,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var updatedReceipt = await DbContext.Receipts.FindAsync(1);
 			Assert.NotNull(updatedReceipt);
 			Assert.Equal(ReceiptStatus.InProgress, updatedReceipt.ReceiptStatus);
-			mockPalletMovementService.Verify(s => s.CreateMovementAsync(It.IsAny<Pallet>(), 1, ReasonMovement.Received, "U001", null), Times.Once);
+			mockPalletMovementService.Verify(s => s.CreateMovementAsync(It.IsAny<Pallet>(), 1, ReasonMovement.Received, "U001", PalletStatus.Receiving, null), Times.Once);
 		}
 		[Fact]
 		//przeniesienie do kontrolera
@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				new FluentValidation.Results.ValidationResult());
 			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
 			mockPalletMovementService.Setup(s => s.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(),
-				It.IsAny<ReasonMovement>(), It.IsAny<string>(), null))
+				It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.ThrowsAsync(new Exception("Błąd zapisu ruchu - symulacja"));
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
@@ -357,7 +357,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 
 			mockPalletMovementService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), null))
+				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
 
 			var receiptRepo = new ReceiptRepo(DbContext);
@@ -535,7 +535,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 
 			mockPalletMovementService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), null))
+				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
 
 			var receiptRepo = new ReceiptRepo(DbContext);
@@ -712,7 +712,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 
 			mockPalletMovementService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), null))
+				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
 
 			var receiptRepo = new ReceiptRepo(DbContext);
@@ -726,8 +726,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				mockPalletMovementService.Object,
 				mockInventory.Object,
 				mockValidator.Object,
-				mockReceiptValidator.Object
-				//,mockUpdateValidator.Object
+				mockReceiptValidator.Object				
 				);
 			//Act			
 			await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
@@ -750,8 +749,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			Assert.Equal(1, product.ProductId);
 
 			mockPalletMovementService.Verify(p =>
-			p.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Received, userId, null),
+			p.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, PalletStatus.Receiving, null),
 			Times.AtLeastOnce);
+			mockPalletMovementService.Verify(p =>
+			p.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, It.IsAny<PalletStatus>(), null),
+			Times.AtLeastOnce);
+			//Sprawdzić co się dzieje z paletą wyrzuconą z przyjęcia			
 		}
 	}
 }

@@ -36,8 +36,7 @@ namespace MyWerehouse.Application.Services
 			IPalletMovementService palletMovementService,
 			IInventoryService inventoryService,
 			IValidator<CreatePalletReceiptDTO>? palletValidator,
-			IValidator<ReceiptDTO>? receiptValidator
-			//,IValidator<UpdatePalletDTO>? updateValidator
+			IValidator<ReceiptDTO>? receiptValidator			
 			)
 		{
 			_receiptRepo = receiptRepo;
@@ -47,8 +46,7 @@ namespace MyWerehouse.Application.Services
 			_palletMovementService = palletMovementService;
 			_inventoryService = inventoryService;
 			_palletValidator = palletValidator;
-			_receiptValidator = receiptValidator;
-			//_updateValidator = updateValidator;
+			_receiptValidator = receiptValidator;			
 		}		
 		public async Task<int> CreateReceiptPlanAsync(CreateReceiptPlanDTO createReceiptPlanDTO)
 		{
@@ -88,7 +86,7 @@ namespace MyWerehouse.Application.Services
 					pallet.Status = PalletStatus.Receiving;
 					await _palletRepo.AddPalletAsync(pallet);
 					await _werehouseDbContext.SaveChangesAsync();
-					await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, newPalletDto.UserId, null);
+					await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, newPalletDto.UserId, PalletStatus.Receiving, null);
 					await _werehouseDbContext.SaveChangesAsync();
 					await transaction.CommitAsync();
 					return pallet.Id;
@@ -122,7 +120,7 @@ namespace MyWerehouse.Application.Services
 			foreach (var pallet in receipt.Pallets)
 			{
 				pallet.Status = PalletStatus.InStock;
-				await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.InStock, userId, null);
+				await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, userId, PalletStatus.InStock, null);
 				foreach (var product in pallet.ProductsOnPallet)
 				{
 					await _inventoryService.ChangeProductQunatityAsync(product.Id, product.Quantity);
@@ -184,7 +182,7 @@ namespace MyWerehouse.Application.Services
 				newPalletDto.Id = newId;
 			}
 			//zebranie palet do stworzenia historii
-			var palletsToRegistermovement = new List<Pallet>();
+			var palletsToRegisterMovement = new List<Pallet>();
 			//Faktyczny update
 			CollectionSynchronizer.SynchronizeCollection(
 				existingReceipt.Pallets,
@@ -200,19 +198,19 @@ namespace MyWerehouse.Application.Services
 					newPallet.ReceiptId = existingReceipt.Id;
 					newPallet.ProductsOnPallet = newPalletDto.ProductsOnPallet
 					  .Select(p => _mapper.Map<ProductOnPallet>(p)).ToList();
-					palletsToRegistermovement.Add(newPallet);
+					palletsToRegisterMovement.Add(newPallet);
 					return newPallet;
 				},
 				(updatingPalletDto, existingPallet) =>
 				{
 					_mapper.Map(updatingPalletDto, existingPallet);
 					SynchronizeProducts(existingPallet, updatingPalletDto.ProductsOnPallet);
-					palletsToRegistermovement.Add(existingPallet);
+					palletsToRegisterMovement.Add(existingPallet);
 				});
 			//tworzenie historii palety
-			foreach (var pallet in palletsToRegistermovement)
+			foreach (var pallet in palletsToRegisterMovement)
 			{
-				await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, userId, null);
+				await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Correction, userId, PalletStatus.Receiving, null);
 			}
 			await _werehouseDbContext.SaveChangesAsync();
 		}

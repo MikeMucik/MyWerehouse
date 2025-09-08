@@ -22,5 +22,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate);
 		Task<Allocation> GetAllocationAsync(int allocationId);
 		Task<PickingPallet> GetPickingPalletByIdAsync(int palletId);
+
+		//Task<List<PickingPallet>> GetPickingPalletsByProductAsync(int productId);
 	}
 }

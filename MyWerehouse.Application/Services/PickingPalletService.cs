@@ -23,9 +23,9 @@ namespace MyWerehouse.Application.Services
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly ILocationRepo _locationRepo;
 		private readonly IPalletRepo _palletRepo;
-		private readonly IIssueRepo _issueRepo;
-		private readonly IPalletMovementRepo _palletMovementRepo;
-		//private readonly IAllocationRepo _allocationRepo;
+		private readonly IIssueRepo _issueRepo;		
+		private readonly IPalletMovementService _palletMovementService;
+		private readonly IPalletService _palletService;
 
 		public PickingPalletService(
 			IPickingPalletRepo pickingPalletRepo,
@@ -33,17 +33,21 @@ namespace MyWerehouse.Application.Services
 			WerehouseDbContext werehouseDbContext,
 			ILocationRepo locationRepo,
 			IPalletRepo palletRepo,
-			IIssueRepo issueRepo,
-			IPalletMovementRepo palletMovementRepo)
+			IIssueRepo issueRepo,			
+			IPalletMovementService palletMovementService,
+			IPalletService palletService)
 		{
 			_pickingPalletRepo = pickingPalletRepo;
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
 			_locationRepo = locationRepo;
 			_palletRepo = palletRepo;
-			_issueRepo = issueRepo;
-			_palletMovementRepo = palletMovementRepo;
+			_issueRepo = issueRepo;			
+			_palletMovementService = palletMovementService;
+			_palletService = palletService;
 		}
+
+		//Część do odczytu z bazy
 		//lista palet do zdjęcia przez wózkowego
 		public async Task<List<PickingPalletWithLocationDTO>> GetListPickingPalletAsync(DateTime dateMovedStart, DateTime dateMovedEnd)
 		//lista palet dla wózkowego do dostaczenia do strafy pickingu
@@ -54,7 +58,7 @@ namespace MyWerehouse.Application.Services
 			{
 				//var palletInWarehosue = await _palletRepo.GetPalletByIdAsync(pallet.PalletId);
 				var locationName = await _locationRepo.GetLocationByIdAsync(pallet.LocationId);
-				if (locationName == null) throw new InvalidDataException ($"Brak lokalizacji {pallet.LocationId} w magazynie");
+				if (locationName == null) throw new InvalidDataException($"Brak lokalizacji {pallet.LocationId} w magazynie");
 				var addedToPicking = await _pickingPalletRepo.TakeDateAddedToPickingAsync(pallet.Id);
 				var palletInWarehouseDTO = new PickingPalletWithLocationDTO
 				{
@@ -188,83 +192,55 @@ namespace MyWerehouse.Application.Services
 				SourcePalletId = allocation.PickingPallet.Pallet.Id,
 				ProductId = allocation.PickingPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
 				PickingStatus = allocation.PickingStatus,
-				Quantity = allocation.Quantity,
+				RequestedQuantity = allocation.Quantity,
 				BestBefore = allocation.PickingPallet.Pallet.ProductsOnPallet.First().BestBefore
 			}).ToList();
 		}
-		//faktyczne działanie pickingu
+		//faktyczne działanie pickingu - zmiany w bazie
 		public async Task DoPickingAsync(AllocationDTO allocationDTO, string userId)
 		{
-			var allocationtoChange = await _pickingPalletRepo.GetAllocationAsync(allocationDTO.AllocationId);
+			var allocationToChange = await _pickingPalletRepo.GetAllocationAsync(allocationDTO.AllocationId);
 
-			var issueId = allocationtoChange.IssueId;
+			var issueId = allocationToChange.IssueId;
 			var sourcePallet = await _palletRepo.GetPalletByIdAsync(allocationDTO.SourcePalletId);
-			await CreatePalletOrAddNewPalletAsync(issueId, allocationDTO.ProductId, allocationDTO.PickedQuantity, userId, sourcePallet);
-
-			//var sourcePallet = await _palletRepo.GetPalletByIdAsync(allocationtoChange.PickingPallet.PalletId);
-			
+		
 			if (sourcePallet == null)
 			{
 				throw new InvalidOperationException($"Paleta o numerze {allocationDTO.SourcePalletId} nie istnieje");
 			}
-			sourcePallet.ProductsOnPallet.First().Quantity -= allocationtoChange.Quantity;
-		
-
-			if (sourcePallet.ProductsOnPallet.First().Quantity == 0)
+			await CreatePalletOrAddNewPalletAsync(issueId, allocationDTO.ProductId, allocationDTO.PickedQuantity, userId, sourcePallet);
+			sourcePallet.ProductsOnPallet.Single().Quantity -= allocationToChange.Quantity;
+			if (sourcePallet.ProductsOnPallet.Single().Quantity == 0)
 			{
 				sourcePallet.Status = PalletStatus.Archived;
-				//tu już nie ma produktów
-				var listRecordsPMD = new List<PalletMovementDetail>();
-				foreach (var product in sourcePallet.ProductsOnPallet)
-				{
-					var recordPalletMovementDetails = new PalletMovementDetail
-					{
-						ProductId = product.ProductId,
-						Quantity = product.Quantity,
-					};
-					listRecordsPMD.Add(recordPalletMovementDetails);
-				}
-				var newPalletMovement = new PalletMovement
-				{
-					//Pallet = sourcePallet,
-					PalletId = sourcePallet.Id,
-					DestinationLocationId = sourcePallet.LocationId,
-					Reason = ReasonMovement.Archived,
-					PerformedBy = userId,
-					MovementDate = DateTime.Now,
-					PalletMovementDetails = listRecordsPMD
-
-				};
-				await _palletMovementRepo.AddPalletMovementAsync(newPalletMovement);
+				await _palletMovementService.CreateMovementAsync(sourcePallet, sourcePallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.Archived, null);
 			}
-
-			if (allocationDTO.Quantity == allocationDTO.PickedQuantity)
+			else 
 			{
-				allocationtoChange.PickingStatus = PickingStatus.Picked;
+				await _palletMovementService.CreateMovementAsync(sourcePallet, sourcePallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.ToPicking, null);
 			}
-			else if (allocationDTO.Quantity > allocationDTO.PickedQuantity)
+			if (allocationDTO.RequestedQuantity == allocationDTO.PickedQuantity)
 			{
-				var newQuantityToAllocation = allocationDTO.Quantity - allocationDTO.PickedQuantity;
-				//var issue = await _issueRepo.GetIssueByIdAsync(issueId);
-
+				allocationToChange.PickingStatus = PickingStatus.Picked;
+			}
+			else if (allocationDTO.RequestedQuantity > allocationDTO.PickedQuantity)
+			{
+				var newQuantityToAllocation = allocationDTO.RequestedQuantity - allocationDTO.PickedQuantity;
 				var dateBestBefore = allocationDTO.BestBefore;
 				var listSourcePallet = await _palletRepo.GetAvailablePallets(allocationDTO.ProductId, dateBestBefore).ToListAsync();
-				var nextSourcePallet = listSourcePallet.First();//pobranie pierwszej pasującej palety
+				var nextSourcePallet = listSourcePallet.First();//pobranie pierwszej pasującej palety rozwinąć żeby można było wybrać z listy
+
+				await _palletService.AddPalletToPickingAsync(issueId, allocationDTO.ProductId, allocationDTO.BestBefore, userId);
 
 				await _pickingPalletRepo.AddPalletToPickingAsync(nextSourcePallet.Id);
 				// tu trzeba uprościć
 				var pickingPalletId = await _pickingPalletRepo.GetPickingPalletIdFromPalletIdAsync(nextSourcePallet.Id);
 				var pickingPalletSource = await _pickingPalletRepo.GetPickingPalletByIdAsync(pickingPalletId);
-
 				await _pickingPalletRepo.AddAllocationAsync(pickingPalletSource, issueId, newQuantityToAllocation);
-
-				//zablokowanie palety źródłowej
+				//zablokowanie palety źródłowej bo się nie zgadza stan fizyczny/system fizyczny 0 a system więcej niż 0
 				sourcePallet.Status = PalletStatus.OnHold;
+				await _palletMovementService.CreateMovementAsync(sourcePallet, userId, PalletStatus.OnHold);
 			}
-
-
-			//PalletMovements
-
 			await _werehouseDbContext.SaveChangesAsync();
 		}
 
@@ -274,14 +250,13 @@ namespace MyWerehouse.Application.Services
 			{
 				IssueId = issueId,
 				PalletStatus = PalletStatus.Picking,
-			};			
-			var oldPallet =await _palletRepo.GetPalletsByFilter(filter).FirstOrDefaultAsync();
+			};
+			var oldPallet = await _palletRepo.GetPalletsByFilter(filter).FirstOrDefaultAsync();
 			if (oldPallet == null)
 			{
 				//pokaż komunikat weź nową paletę
 				var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
-				var sourcePalletBB = sourcePallet.ProductsOnPallet.Single().BestBefore;
-				//var forNewPalletBestBefore = oldPallet[0].ProductsOnPallet.First().BestBefore;
+				var sourcePalletBB = sourcePallet.ProductsOnPallet.Single().BestBefore;				
 				var pallet = new Pallet
 				{
 					Id = newIdPallet,
@@ -292,50 +267,28 @@ namespace MyWerehouse.Application.Services
 					ProductsOnPallet = new List<ProductOnPallet>
 					{
 						new ProductOnPallet
-						{							
+						{
 							PalletId = newIdPallet,
 							ProductId = productId,
 							Quantity = quantity,
 							DateAdded = DateTime.UtcNow,
 							BestBefore = sourcePalletBB
 						}
-					},					
+					},
 				};
 				var newPalletId = await _palletRepo.AddPalletAsync(pallet);
+				await _werehouseDbContext.SaveChangesAsync();//potrzebny zapis by paleta była już w bazie inaczej brak palety w systemie błąd niżej
 				var newPallet = await _palletRepo.GetPalletByIdAsync(newPalletId);
-				if (newPallet == null) throw new InvalidOperationException($"Brak palety {newPalletId} w systemie");
-				//PalletMovements
-				
-				var listRecordsPMD = new List<PalletMovementDetail>();
-				foreach (var product in newPallet.ProductsOnPallet)
-				{
-					var recordPalletMovementDetails = new PalletMovementDetail
-					{
-						ProductId = product.ProductId,
-						Quantity = product.Quantity,
-					};
-					listRecordsPMD.Add(recordPalletMovementDetails);
-				}
-				var newPalletMovement = new PalletMovement
-				{
-					//Pallet = newPallet,
-					PalletId = newPalletId,
-					DestinationLocationId = 100100,//lokacja pickingZone
-					Reason = ReasonMovement.Picking,
-					PerformedBy = userId,
-					MovementDate = DateTime.Now,
-					PalletMovementDetails = listRecordsPMD
-				};
-				await _palletMovementRepo.AddPalletMovementAsync(newPalletMovement);
+				if (newPallet == null) throw new InvalidOperationException($"Brak palety {newPalletId} w systemie");				
+				await _palletMovementService.CreateMovementAsync(newPallet, userId, PalletStatus.Picking);
 			}
 			else
 			{
 				var pickingPallet = oldPallet;
 				var existingProduct = pickingPallet.ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId);
-
 				if (existingProduct != null)
 				{
-					existingProduct.Quantity += quantity;					
+					existingProduct.Quantity += quantity;
 				}
 				else
 				{
@@ -344,30 +297,10 @@ namespace MyWerehouse.Application.Services
 						ProductId = productId,
 						Quantity = quantity,
 						DateAdded = DateTime.UtcNow,
-					});					
+					});
 				}
-				//PalletMovements
-				var listRecordsPMD = new List<PalletMovementDetail>();
-				foreach (var product in pickingPallet.ProductsOnPallet)
-				{
-					var recordPalletMovementDetails = new PalletMovementDetail
-					{
-						ProductId = product.ProductId,
-						Quantity = product.Quantity,
-					};
-					listRecordsPMD.Add(recordPalletMovementDetails);
-				}
-				var newPalletMovement = new PalletMovement
-				{					
-					PalletId = pickingPallet.Id,
-					DestinationLocationId = 100100,//lokacja pickingZone
-					Reason = ReasonMovement.Picking,
-					PerformedBy = userId,
-					MovementDate = DateTime.Now,
-					PalletMovementDetails = listRecordsPMD
-				};
-				await _palletMovementRepo.AddPalletMovementAsync(newPalletMovement);
-			}
+				await _palletMovementService.CreateMovementAsync(oldPallet, userId, PalletStatus.Picking);				
+			}			
 		}
 	}
 }

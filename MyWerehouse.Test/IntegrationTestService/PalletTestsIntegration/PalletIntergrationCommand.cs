@@ -24,8 +24,10 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 		public readonly IMapper _mapper;
 		public readonly IPalletRepo _palletRepo;
 		public readonly IPalletMovementRepo _palletMovementRepo;
+		public readonly IPalletMovementService _palletMovementService;
+		protected readonly IPickingPalletRepo _pickingPalletRepo;
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
-		protected readonly IValidator<CreatePalletPickingDTO> _createPalletPickingValidator;
+		//protected readonly IValidator<CreatePalletPickingDTO> _createPalletPickingValidator;
 		protected readonly IValidator<UpdatePalletDTO> _updatePalletValidator;
 
 		public PalletIntergrationCommand() : base()
@@ -39,12 +41,18 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			_palletRepo = new PalletRepo(_context);
 			
 			_palletMovementRepo = new PalletMovementRepo(_context);
-
-			_productOnPalletValidator = new ProductOnPalletDTOValidation();			
-			_createPalletPickingValidator = new CreatePalletPickingDTOValidation(_productOnPalletValidator);
+//_createPalletPickingValidator = new CreatePalletPickingDTOValidation(_productOnPalletValidator);
+			_productOnPalletValidator = new ProductOnPalletDTOValidation();
+			var historyRepo = new HistoryIssueRepo(_context);
+			_palletMovementService = new PalletMovementService(_palletMovementRepo, historyRepo);
+			_pickingPalletRepo = new PickingPalletRepo(_context);
 			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);			
-			_palletService = new PalletService(_palletRepo, _palletMovementRepo,
-				_mapper, _createPalletPickingValidator, _updatePalletValidator,
+			_palletService = new PalletService(_palletRepo,
+				_palletMovementService,
+				_palletMovementRepo,
+				_pickingPalletRepo,
+				_mapper,
+				_updatePalletValidator,
 				_context);
 		}
 	}

@@ -11,12 +11,12 @@ namespace MyWerehouse.Domain.Models
 		Unknown = 0,
 		Received = 1,
 		Picking = 2,
-		Correction = 3,
-		Merge = 4,
-		ToLoad = 5,
-		ManualMove = 6,
+		Moved =3,
+		Correction = 4,
+		Merge = 5,
+		ToLoad = 6,		
 		Loaded = 7,
-		InStock = 8,
-		Archived= 9,
+		//InStock = 8,
+		//Archived= 9,
 	}
 }

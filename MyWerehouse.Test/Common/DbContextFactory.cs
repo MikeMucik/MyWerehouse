@@ -242,7 +242,7 @@ namespace MyWerehouse.Test.Common
 						PalletId = "Q1000",
 						//ProductId = 10,
 						DestinationLocationId = 2,
-						Reason = ReasonMovement.ManualMove,
+						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
@@ -252,7 +252,7 @@ namespace MyWerehouse.Test.Common
 						PalletId = "Q1001",
 						//ProductId = 10,
 						DestinationLocationId = 1,
-						Reason = ReasonMovement.ManualMove,
+						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
@@ -262,7 +262,7 @@ namespace MyWerehouse.Test.Common
 						PalletId = "Q1002",
 						//ProductId = 11,
 						DestinationLocationId = 3,
-						Reason = ReasonMovement.ManualMove,
+						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
@@ -272,7 +272,7 @@ namespace MyWerehouse.Test.Common
 						PalletId = "Q1010",
 						//ProductId = 10,
 						DestinationLocationId = 3,
-						Reason = ReasonMovement.ManualMove,
+						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					},
@@ -282,7 +282,7 @@ namespace MyWerehouse.Test.Common
 						PalletId = "Q1000",
 						//ProductId = 10,
 						DestinationLocationId = 3,
-						Reason = ReasonMovement.ManualMove,
+						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2)
 					}

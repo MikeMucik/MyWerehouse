@@ -14,7 +14,7 @@ using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptUpdateIntegrationService:ReceiptIntegratioCommandService
+	public class ReceiptUpdateIntegrationService : ReceiptIntegratioCommandService
 	{
 		[Fact]
 		public async Task ProperDataOneAddedOneRemoveOnePalletsAndClientFullTest_UpdatePalletToReceiptAsync_AddedToBase()
@@ -123,7 +123,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
 
-			
+			//Act
 			var updatingReceipt = new ReceiptDTO
 			{
 				Id = 1,
@@ -152,8 +152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					}
 				}
 			};
-			var userId = "U100";			
-			//Act			
+			var userId = "U100";						
 			await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
 
 			//Assert
@@ -173,7 +172,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 
 			// Sprawdzenie czy utworzono ruch palety
 			var movement = await DbContext.PalletMovements
-				.FirstOrDefaultAsync(m => m.PalletId == newPallet.Id && m.Reason == ReasonMovement.Received);
+				.FirstOrDefaultAsync(m => m.PalletId == newPallet.Id && m.Reason == ReasonMovement.Correction);
 			Assert.NotNull(movement);
 			Assert.Equal("U100", movement.PerformedBy);
 
@@ -182,11 +181,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				.FirstOrDefaultAsync(r => r.Id == 1);
 
 			//Nie powinno tam być palety Q1000
-			Assert.DoesNotContain(receiptWithPallets.Pallets, p => p.Id == "Q1000");			
+			Assert.DoesNotContain(receiptWithPallets.Pallets, p => p.Id == "Q1000");
 			using var arrangeContext = CreateNewContext();
 			//Stara paleta(Q1000) powinna być usunięta z bazy
 			var oldPallet = await arrangeContext.Pallets.FindAsync("Q1000");
-			
+
 			Assert.Null(oldPallet);
 			var allPallets = await DbContext.Pallets.ToListAsync();
 			Assert.Single(allPallets); // tylko nowa paleta powinna być

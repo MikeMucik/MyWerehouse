@@ -47,7 +47,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			var move1 = result.PalletMovementsDTO.Single(x => x.Id == 5);
 			var move2 = result.PalletMovementsDTO.Single(x => x.Id == 1);
 			Assert.Equal(3, move1.DestinationLocationId);
-			Assert.Equal(ReasonMovement.ManualMove, move1.Reason);
+			Assert.Equal(ReasonMovement.Moved, move1.Reason);
 			Assert.Equal(new DateTime(2025, 2, 2), move1.MovementDate);
 			Assert.Equal(2, move2.PalletMovementDetailsDTO.Count());
 			Assert.Equal(100, move2.PalletMovementDetailsDTO.Single(x => x.ProductId == 10).QuantityChange);

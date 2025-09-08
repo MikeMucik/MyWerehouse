@@ -8,7 +8,7 @@ namespace MyWerehouse.Application.ViewModels.CategoryModels
 {
 	public class ListCategoriesDTO
 	{
-		public List<CategoryDTO> Categories { get; set; }
+		public required List<CategoryDTO> Categories { get; set; }
 		public int CurrentPage { get; set; }
 		public int PageSize { get; set; }
 		public int Count { get; set; }

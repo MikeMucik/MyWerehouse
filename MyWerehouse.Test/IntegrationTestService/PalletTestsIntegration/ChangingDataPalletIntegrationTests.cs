@@ -62,7 +62,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				DestinationLocationId = 1,
 				MovementDate = DateTime.Now,
 				PalletId = pallet.Id,				
-				Reason = ReasonMovement.ManualMove,
+				Reason = ReasonMovement.Moved,
 			};
 			var movement2 = new PalletMovement
 			{
@@ -71,7 +71,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				DestinationLocationId = 2,
 				MovementDate = DateTime.Now,
 				PalletId = pallet.Id,				
-				Reason = ReasonMovement.ManualMove,
+				Reason = ReasonMovement.Moved,
 			};
 			var movementDetails1 = new PalletMovementDetail
 			{
@@ -162,7 +162,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				DestinationLocationId = 1,
 				MovementDate = DateTime.Now,
 				PalletId = pallet.Id,
-				Reason = ReasonMovement.ManualMove,
+				Reason = ReasonMovement.Moved,
 			};
 			var movement2 = new PalletMovement
 			{
@@ -171,7 +171,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				DestinationLocationId = 2,
 				MovementDate = DateTime.Now,
 				PalletId = pallet.Id,
-				Reason = ReasonMovement.ManualMove,
+				Reason = ReasonMovement.Moved,
 			};
 			var movementDetails1 = new PalletMovementDetail
 			{

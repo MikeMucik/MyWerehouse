@@ -14,7 +14,7 @@ namespace MyWerehouse.Application.ViewModels.CategoryModels
 	public class CategoryDTO : IMapFrom<Category>
 	{
 		public int Id { get; set; }
-		public string Name { get; set; }
+		public required string Name { get; set; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Category, CategoryDTO>().ReverseMap();				

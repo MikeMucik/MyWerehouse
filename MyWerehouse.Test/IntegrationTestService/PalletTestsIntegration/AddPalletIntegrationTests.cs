@@ -190,57 +190,57 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 		//	var exMessage = Assert.Throws<ValidationException>(() => _palletService.CreatePickingPallet(palletDTO));
 		//	Assert.Contains("Ilość", exMessage.Message);
 		//}
-		[Fact]
-		public async Task CreateNewPallet_CreatePickingPalletAsync_AddToList()
-		{
-			//Arrange
-			var location = new Location
-			{
-				Id = 1,
-				Aisle = 0,
-				Bay = 0,
-				Height = 0,
-				Position = 0
-			};
-			_context.Locations.Add(location);
-			//Act
-			var palletDTO = new CreatePalletPickingDTO
-			{
-				LocationId = 1,
-				IssueId = 200,
-				ProductsOnPallet = [new(){ProductId = 1,Quantity = 10,}]
-			};
-			var result = await _palletService.CreatePickingPalletAsync(palletDTO);
-			//Assert
-			Assert.NotNull(result);
-			var pallet =await _palletRepo.GetPalletByIdAsync(result);
-			Assert.Equal(10, pallet.ProductsOnPallet.First().Quantity);
-		}
-		[Fact]
-		public async Task NoProduct_CreatePickingPalletAsync_AddToList()
-		{
-			//Arrange			
-			var palletDTO = new CreatePalletPickingDTO
-			{
-				IssueId = 100,
-			};
-			//Act&Assert
-			var ex = await Assert.ThrowsAsync<ValidationException>(() => _palletService.CreatePickingPalletAsync(palletDTO));
-			Assert.Contains("Paleta musi zawierać towar/y", ex.Message);
+		//[Fact]
+		//public async Task CreateNewPallet_CreatePickingPalletAsync_AddToList()
+		//{
+		//	//Arrange
+		//	var location = new Location
+		//	{
+		//		Id = 1,
+		//		Aisle = 0,
+		//		Bay = 0,
+		//		Height = 0,
+		//		Position = 0
+		//	};
+		//	_context.Locations.Add(location);
+		//	//Act
+		//	var palletDTO = new CreatePalletPickingDTO
+		//	{
+		//		LocationId = 1,
+		//		IssueId = 200,
+		//		ProductsOnPallet = [new(){ProductId = 1,Quantity = 10,}]
+		//	};
+		//	var result = await _palletService.CreatePickingPalletAsync(palletDTO);
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	var pallet =await _palletRepo.GetPalletByIdAsync(result);
+		//	Assert.Equal(10, pallet.ProductsOnPallet.First().Quantity);
+		//}
+		//[Fact]
+		//public async Task NoProduct_CreatePickingPalletAsync_AddToList()
+		//{
+		//	//Arrange			
+		//	var palletDTO = new CreatePalletPickingDTO
+		//	{
+		//		IssueId = 100,
+		//	};
+		//	//Act&Assert
+		//	var ex = await Assert.ThrowsAsync<ValidationException>(() => _palletService.CreatePickingPalletAsync(palletDTO));
+		//	Assert.Contains("Paleta musi zawierać towar/y", ex.Message);
 
-		}
-		[Fact]
-		public async Task InCorrectData_CreatePickingPalletAsync_ReturnException()
-		{
-			//Arrange			
-			var palletDTO = new CreatePalletPickingDTO
-			{
-				IssueId = 200,
-				ProductsOnPallet = [new() { Quantity = 1, }]
-			};
-			//Act&Assert
-			var ex = await Assert.ThrowsAsync<ValidationException>(() => _palletService.CreatePickingPalletAsync(palletDTO));
-			Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
-		}
+		//}
+		//[Fact]
+		//public async Task InCorrectData_CreatePickingPalletAsync_ReturnException()
+		//{
+		//	//Arrange			
+		//	var palletDTO = new CreatePalletPickingDTO
+		//	{
+		//		IssueId = 200,
+		//		ProductsOnPallet = [new() { Quantity = 1, }]
+		//	};
+		//	//Act&Assert
+		//	var ex = await Assert.ThrowsAsync<ValidationException>(() => _palletService.CreatePickingPalletAsync(palletDTO));
+		//	Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
+		//}
 	}
 }

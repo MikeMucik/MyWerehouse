@@ -13,3 +13,29 @@ namespace MyWerehouse.Domain.Models
 		Picked = 2,
 	}
 }
+//TODO
+//HistoryAllocation
+
+//Id
+
+//VirtualPalletId
+
+//AllocationStatus (Allocated, Picked, Archived, …)
+
+//PerformedBy
+
+//DateTime
+
+//HistoryAllocationDetail
+
+//Id
+
+//HistoryAllocationId
+
+//IssueId (albo IssueDetailId, jeśli masz takie rozbicie)
+
+//ProductId
+
+//QuantityAllocated
+
+//QuantityPicked

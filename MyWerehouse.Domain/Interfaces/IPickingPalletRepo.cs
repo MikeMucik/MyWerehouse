@@ -10,18 +10,18 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IPickingPalletRepo
 	{
 		Task AddPalletToPickingAsync(string palletId);		
-		Task DeletePalletPickingAsync(int id);
-		Task AddAllocationAsync(PickingPallet pallet, int issueId, int quantity);
-		Task<List<PickingPallet>> GetPickingPalletsAsync(int productId);
-		Task<List<PickingPallet>> GetPickingPalletsByTimeAsync(DateTime start, DateTime end);
+		Task DeleteVirtualPickingAsync(int id);
+		Task AddAllocationAsync(VirtualPallet pallet, int issueId, int quantity);
+		Task<List<VirtualPallet>> GetVirtualPalletsAsync(int productId);
+		Task<List<VirtualPallet>> GetVirtualPalletsByTimeAsync(DateTime start, DateTime end);
 		Task<DateTime> TakeDateAddedToPickingAsync(int pickingPalletId);
 		//Task<List<Allocation>> GetAllocationsForIssueAsync(int issueId);
-		Task<int> GetPickingPalletIdFromPalletIdAsync (string palletId);
+		Task<int> GetVirtualPalletIdFromPalletIdAsync(string palletId);
 		//Task<string> GetPalletIdFromPalletPickingIdAsync (int palletPickingId);
 		//Task<List<PickingPalletDTO>>
 		Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate);
 		Task<Allocation> GetAllocationAsync(int allocationId);
-		Task<PickingPallet> GetPickingPalletByIdAsync(int palletId);
+		Task<VirtualPallet> GetVirtualPalletByIdAsync(int palletId);
 
 		//Task<List<PickingPallet>> GetPickingPalletsByProductAsync(int productId);
 	}

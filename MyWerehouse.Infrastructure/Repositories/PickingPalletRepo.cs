@@ -22,7 +22,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var pallet = await _werehouseDbContext.Pallets
 				.FirstAsync(p => p.Id == palletId);
 
-			var newPalletPicking = new PickingPallet
+			var newVirtualPicking = new VirtualPallet
 			{
 				Pallet = pallet,
 				PalletId = palletId,
@@ -31,34 +31,34 @@ namespace MyWerehouse.Infrastructure.Repositories
 				IssueInitialQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == palletId).Quantity,//zakładam że jest jeden towar
 				Allocation = new List<Allocation>()
 			};
-			await _werehouseDbContext.PickingPallets.AddAsync(newPalletPicking);
+			await _werehouseDbContext.VirtualPallets.AddAsync(newVirtualPicking);
 		}
-		public async Task DeletePalletPickingAsync(int id)
+		public async Task DeleteVirtualPickingAsync(int id)
 		{
-			var pallet = await _werehouseDbContext.PickingPallets.FindAsync(id);
+			var pallet = await _werehouseDbContext.VirtualPallets.FindAsync(id);
 			if (pallet != null) { throw new InvalidOperationException("Brak palety do usunięcia"); }
-			_werehouseDbContext.PickingPallets.Remove(pallet);
+			_werehouseDbContext.VirtualPallets.Remove(pallet);
 		}
-		public async Task AddAllocationAsync(PickingPallet pallet, int issueId, int quantity)
+		public async Task AddAllocationAsync(VirtualPallet pallet, int issueId, int quantity)
 		{
 			await _werehouseDbContext.Allocations.AddAsync(new Allocation
 			{
 				IssueId = issueId,
-				PickingPallet = pallet,
+				VirtualPallet = pallet,
 				PickingPalletId = pallet.Id,
 				Quantity = quantity,
 				PickingStatus = PickingStatus.Allocated,
 			});
-			var pickingPallet = await _werehouseDbContext.PickingPallets.FindAsync(pallet.Id);
+			var pickingPallet = await _werehouseDbContext.VirtualPallets.FindAsync(pallet.Id);
 			if (pickingPallet == null) { throw new InvalidOperationException("Brak palety do pickingu"); }
 			if (pickingPallet.RemainingQuantity <= 0)
 			{
-				await DeletePalletPickingAsync(pallet.Id);
+				await DeleteVirtualPickingAsync(pallet.Id);
 			}
 		}
-		public async Task<List<PickingPallet>> GetPickingPalletsAsync(int productId)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(int productId)
 		{
-			var list = await _werehouseDbContext.PickingPallets
+			var list = await _werehouseDbContext.VirtualPallets
 					.Include(a => a.Allocation)
 					.Include(p => p.Pallet)
 						.ThenInclude(pp => pp.ProductsOnPallet)
@@ -68,9 +68,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return list;
 		}
 
-		public async Task<List<PickingPallet>> GetPickingPalletsByTimeAsync(DateTime start, DateTime end)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsByTimeAsync(DateTime start, DateTime end)
 		{
-			var list = await _werehouseDbContext.PickingPallets
+			var list = await _werehouseDbContext.VirtualPallets
 				.Include(a => a.Allocation)
 				.Include(p => p.Pallet)
 					.ThenInclude(pp => pp.ProductsOnPallet)
@@ -81,21 +81,21 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 		public async Task<DateTime> TakeDateAddedToPickingAsync(int pickingPalletId)
 		{
-			var pickingPallet = await _werehouseDbContext.PickingPallets.FirstOrDefaultAsync(p => p.Id == pickingPalletId);
+			var pickingPallet = await _werehouseDbContext.VirtualPallets.FirstOrDefaultAsync(p => p.Id == pickingPalletId);
 			if (pickingPallet == null) { throw new InvalidDataException($"Brak palety pickingowej o numerze {pickingPalletId}"); }
 			return pickingPallet.DateMoved;
 		}
 		
-		public async Task<int> GetPickingPalletIdFromPalletIdAsync(string palletId)
+		public async Task<int> GetVirtualPalletIdFromPalletIdAsync(string palletId)
 		{
-			var palletPicking = await _werehouseDbContext.PickingPallets
+			var palletPicking = await _werehouseDbContext.VirtualPallets
 				.FirstOrDefaultAsync(p=>p.PalletId == palletId);
 			return palletPicking.Id;
 		}
 		public async Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate)
 		{
 			var allocation = await _werehouseDbContext.Allocations
-				.Include(a => a.PickingPallet)
+				.Include(a => a.VirtualPallet)
 					.ThenInclude(b => b.Pallet)
 						.ThenInclude(c => c.ProductsOnPallet)
 				.Where(p =>
@@ -115,9 +115,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return await _werehouseDbContext.Allocations.FirstOrDefaultAsync(a => a.Id == allocationId);
 		}
 
-		public async Task<PickingPallet> GetPickingPalletByIdAsync(int palletId)
+		public async Task<VirtualPallet> GetVirtualPalletByIdAsync(int palletId)
 		{
-			return await _werehouseDbContext.PickingPallets.FirstAsync(p => p.Id == palletId);
+			return await _werehouseDbContext.VirtualPallets.FirstAsync(p => p.Id == palletId);
 		}
 
 		//public async Task<List<PickingPallet>> GetPickingPalletsByProductAsync(int productId)

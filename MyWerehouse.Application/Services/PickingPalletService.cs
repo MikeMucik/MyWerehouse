@@ -53,7 +53,7 @@ namespace MyWerehouse.Application.Services
 		//lista palet dla wózkowego do dostaczenia do strafy pickingu
 		{
 			var pickingPallets = new List<PickingPalletWithLocationDTO>();
-			var palletPicking = await _pickingPalletRepo.GetPickingPalletsByTimeAsync(dateMovedStart, dateMovedEnd);
+			var palletPicking = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(dateMovedStart, dateMovedEnd);
 			foreach (var pallet in palletPicking)
 			{
 				//var palletInWarehosue = await _palletRepo.GetPalletByIdAsync(pallet.PalletId);
@@ -73,7 +73,7 @@ namespace MyWerehouse.Application.Services
 		//Lista ile danego towaru dla danego zlecenia posegregowane i zgrupowane po kliencie
 		public async Task<List<PickingGuideLineDTO>> GetListIssueToPickingAsync(DateTime dateIssueStart, DateTime dateIssueEnd)
 		{
-			var pickingPallets = await _pickingPalletRepo.GetPickingPalletsByTimeAsync(dateIssueStart, dateIssueEnd);
+			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(dateIssueStart, dateIssueEnd);
 			if (pickingPallets.Count == 0)
 			{
 				return new List<PickingGuideLineDTO>();
@@ -121,7 +121,7 @@ namespace MyWerehouse.Application.Services
 		//wytyczne- lista ile jakiego produktu do konkretnego zlecenia - zlecenia na daną chwilę, bierzemy zlecenia z danego okresu/dnia
 		// pojedyncze rekordy dla każdej alokacji
 		{
-			var pickingPallets = await _pickingPalletRepo.GetPickingPalletsByTimeAsync(dateIssueStart, dateIssueEnd);
+			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(dateIssueStart, dateIssueEnd);
 			if (pickingPallets.Count == 0)
 			{
 				return new List<ProductToIssueDTO>();
@@ -182,18 +182,18 @@ namespace MyWerehouse.Application.Services
 		//pokaż alokacje dla palety
 		public async Task<List<AllocationDTO>> ShowTaskToDoAsync(string palletSouceScanned, DateTime pickingDate)
 		{
-			var palletPickingId = await _pickingPalletRepo.GetPickingPalletIdFromPalletIdAsync(palletSouceScanned);
+			var palletPickingId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletSouceScanned);
 			var allocations = await _pickingPalletRepo.GetAllocationListAsync(palletPickingId, pickingDate);
 			//czy tu użyć mapera??
 			return allocations.Select(allocation => new AllocationDTO
 			{
 				AllocationId = allocation.Id,
 				IssueId = allocation.IssueId,
-				SourcePalletId = allocation.PickingPallet.Pallet.Id,
-				ProductId = allocation.PickingPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
+				SourcePalletId = allocation.VirtualPallet.Pallet.Id,
+				ProductId = allocation.VirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
 				PickingStatus = allocation.PickingStatus,
 				RequestedQuantity = allocation.Quantity,
-				BestBefore = allocation.PickingPallet.Pallet.ProductsOnPallet.First().BestBefore
+				BestBefore = allocation.VirtualPallet.Pallet.ProductsOnPallet.First().BestBefore
 			}).ToList();
 		}
 		//faktyczne działanie pickingu - zmiany w bazie
@@ -233,9 +233,9 @@ namespace MyWerehouse.Application.Services
 				await _palletService.AddPalletToPickingAsync(issueId, allocationDTO.ProductId, allocationDTO.BestBefore, userId);
 
 				await _pickingPalletRepo.AddPalletToPickingAsync(nextSourcePallet.Id);
-				// tu trzeba uprościć
-				var pickingPalletId = await _pickingPalletRepo.GetPickingPalletIdFromPalletIdAsync(nextSourcePallet.Id);
-				var pickingPalletSource = await _pickingPalletRepo.GetPickingPalletByIdAsync(pickingPalletId);
+				
+				var pickingPalletId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(nextSourcePallet.Id);
+				var pickingPalletSource = await _pickingPalletRepo.GetVirtualPalletByIdAsync(pickingPalletId);
 				await _pickingPalletRepo.AddAllocationAsync(pickingPalletSource, issueId, newQuantityToAllocation);
 				//zablokowanie palety źródłowej bo się nie zgadza stan fizyczny/system fizyczny 0 a system więcej niż 0
 				sourcePallet.Status = PalletStatus.OnHold;

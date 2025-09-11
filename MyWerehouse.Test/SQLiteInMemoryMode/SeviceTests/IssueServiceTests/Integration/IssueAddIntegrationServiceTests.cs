@@ -146,7 +146,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
 			// Picking pallet
 			var palletToPicking = DbContext.Pallets.FirstOrDefault(p => p.Id == "P3");
-			var pickingPallet = DbContext.PickingPallets.Include(pp => pp.Allocation).SingleOrDefault();
+			var pickingPallet = DbContext.VirtualPallets.Include(pp => pp.Allocation).SingleOrDefault();
 			Assert.NotNull(palletToPicking);
 			Assert.NotNull(pickingPallet);
 			Assert.Equal(6, pickingPallet.Allocation.First().Quantity);
@@ -352,7 +352,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 
 			var palletToPicking1 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P3");
-			var pickingPallet1 = DbContext.PickingPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P3");
+			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P3");
 			Assert.NotNull(palletToPicking1);
 			Assert.NotNull(pickingPallet1);
 			Assert.Equal(6, pickingPallet1.Allocation.First().Quantity);
@@ -363,7 +363,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(issue.Id, pickingPallet1.Allocation.First().IssueId);
 
 			var palletToPicking2 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P5");
-			var pickingPallet2 = DbContext.PickingPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P5");
+			var pickingPallet2 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P5");
 			Assert.NotNull(palletToPicking2);
 			Assert.NotNull(pickingPallet2);
 			Assert.Equal(7, pickingPallet2.Allocation.First().Quantity);
@@ -531,7 +531,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				//Pallets,
 				IssueStatus = IssueStatus.New,
 			};
-			var sourcePallet = new PickingPallet
+			var sourcePallet = new VirtualPallet
 			{
 				Pallet = pallet3,
 				Location = pallet3.Location,
@@ -540,7 +540,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var allocation = new Allocation
 			{
-				PickingPallet = sourcePallet,
+				VirtualPallet = sourcePallet,
 				Quantity = 2,
 				PickingStatus = PickingStatus.Allocated,
 				Issue = oldIssue
@@ -554,7 +554,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4, pallet5);
 			DbContext.Issues.Add(oldIssue);
 			DbContext.Allocations.Add(allocation);
-			DbContext.PickingPallets.Add(sourcePallet);
+			DbContext.VirtualPallets.Add(sourcePallet);
 			await DbContext.SaveChangesAsync();
 
 			// Act
@@ -594,7 +594,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 
 			var palletToPicking1 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P3");
-			var pickingPallet1 = DbContext.PickingPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P3");
+			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P3");
 			Assert.NotNull(palletToPicking1);
 			Assert.NotNull(pickingPallet1);
 			//Assert.Equal(6, pickingPallet1.Allocation.First().Quantity);
@@ -605,7 +605,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			//Assert.Equal(issue.Id, pickingPallet1.Allocation.FirstOrDefault(i=>i.).IssueId);
 
 			var palletToPicking2 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P5");
-			var pickingPallet2 = DbContext.PickingPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P5");
+			var pickingPallet2 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P5");
 			Assert.NotNull(palletToPicking2);
 			Assert.NotNull(pickingPallet2);
 			Assert.Equal(7, pickingPallet2.Allocation.First().Quantity);

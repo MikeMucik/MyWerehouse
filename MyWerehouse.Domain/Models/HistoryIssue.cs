@@ -15,6 +15,5 @@ namespace MyWerehouse.Domain.Models
 		public string? PerfomedBy { get; set; }
 		public DateTime DateTime { get; set; }
 		public virtual ICollection<HistoryIssueDetail> Details { get; set; } = new List<HistoryIssueDetail>();
-
 	}
 }

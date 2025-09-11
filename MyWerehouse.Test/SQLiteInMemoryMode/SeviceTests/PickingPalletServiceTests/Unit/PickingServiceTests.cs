@@ -224,7 +224,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
 			DbContext.Issues.AddRange(issue1, issue2, issue3);
 			//await DbContext.SaveChangesAsync();
-			var pickingPallet1 = new PickingPallet
+			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = pallet1,
 				IssueInitialQuantity = 40,
@@ -232,11 +232,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a11 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet1 };
-			var a12 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet1 };
-			pickingPallet1.Allocation = new List<Allocation> { a11, a12 };
+			var a11 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1 };
+			var a12 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1 };
+			virtualPallet1.Allocation = new List<Allocation> { a11, a12 };
 
-			var pickingPallet2 = new PickingPallet
+			var virtualPallet2 = new VirtualPallet
 			{
 				Pallet = pallet2,
 				IssueInitialQuantity = 50,
@@ -244,11 +244,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a21 = new Allocation { Issue = issue1, Quantity = 20, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet2 };
-			var a22 = new Allocation { Issue = issue3, Quantity = 25, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet2 };
-			pickingPallet2.Allocation = new List<Allocation> { a21, a22 };
+			var a21 = new Allocation { Issue = issue1, Quantity = 20, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2 };
+			var a22 = new Allocation { Issue = issue3, Quantity = 25, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2 };
+			virtualPallet2.Allocation = new List<Allocation> { a21, a22 };
 
-			var pickingPallet3 = new PickingPallet
+			var virtualPallet3 = new VirtualPallet
 			{
 				Pallet = pallet3,
 				IssueInitialQuantity = 50,
@@ -256,10 +256,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a31 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet3 };
-			pickingPallet3.Allocation = new List<Allocation> { a31 };
+			var a31 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet3 };
+			virtualPallet3.Allocation = new List<Allocation> { a31 };
 
-			var pickingPallet4 = new PickingPallet
+			var virtualPallet4 = new VirtualPallet
 			{
 				Pallet = pallet4,
 				IssueInitialQuantity = 40,
@@ -267,11 +267,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a41 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet4 };
-			pickingPallet4.Allocation = new List<Allocation> { a41 };
+			var a41 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet4 };
+			virtualPallet4.Allocation = new List<Allocation> { a41 };
 
 			DbContext.Allocations.AddRange(a11, a12, a21, a22, a31, a41);
-			DbContext.PickingPallets.AddRange(pickingPallet1, pickingPallet2, pickingPallet3, pickingPallet4);
+			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);			
@@ -527,7 +527,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
 			DbContext.Issues.AddRange(issue1, issue2, issue3);			
 
-			var pickingPallet1 = new PickingPallet
+			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = pallet1,
 				IssueInitialQuantity = 40,
@@ -535,11 +535,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a11 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet1 };
-			var a12 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet1 };
-			pickingPallet1.Allocation = new List<Allocation> { a11, a12 };
+			var a11 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1 };
+			var a12 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1 };
+			virtualPallet1.Allocation = new List<Allocation> { a11, a12 };
 
-			var pickingPallet2 = new PickingPallet
+			var virtualPallet2 = new VirtualPallet
 			{
 				Pallet = pallet2,
 				IssueInitialQuantity = 50,
@@ -547,11 +547,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a21 = new Allocation { Issue = issue1, Quantity = 20, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet2 };
-			var a22 = new Allocation { Issue = issue3, Quantity = 25, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet2 };
-			pickingPallet2.Allocation = new List<Allocation> { a21, a22 };
+			var a21 = new Allocation { Issue = issue1, Quantity = 20, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2 };
+			var a22 = new Allocation { Issue = issue3, Quantity = 25, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2 };
+			virtualPallet2.Allocation = new List<Allocation> { a21, a22 };
 
-			var pickingPallet3 = new PickingPallet
+			var virtualPallet3 = new VirtualPallet
 			{
 				Pallet = pallet3,
 				IssueInitialQuantity = 50,
@@ -559,10 +559,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a31 = new Allocation { Issue = issue3, Quantity = 15, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet3 };
-			pickingPallet3.Allocation = new List<Allocation> { a31 };
+			var a31 = new Allocation { Issue = issue3, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet3 };
+			virtualPallet3.Allocation = new List<Allocation> { a31 };
 
-			var pickingPallet4 = new PickingPallet
+			var virtualPallet4 = new VirtualPallet
 			{
 				Pallet = pallet4,
 				IssueInitialQuantity = 40,
@@ -570,11 +570,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a41 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, PickingPallet = pickingPallet4 };
-			pickingPallet4.Allocation = new List<Allocation> { a41 };
+			var a41 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet4 };
+			virtualPallet4.Allocation = new List<Allocation> { a41 };
 
 			DbContext.Allocations.AddRange(a11, a12, a21, a22, a31, a41);
-			DbContext.PickingPallets.AddRange(pickingPallet1, pickingPallet2, pickingPallet3, pickingPallet4);
+			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);
 			var issueRepo = new IssueRepo(DbContext);

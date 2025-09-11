@@ -20,7 +20,7 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<Pallet> Pallets { get; set; }
 		public DbSet<PalletMovement> PalletMovements { get; set; }
 		public DbSet<PalletMovementDetail> PalletMovementDetails { get; set; }
-		public DbSet<PickingPallet> PickingPallets { get; set; }
+		public DbSet<VirtualPallet> VirtualPallets { get; set; }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<ProductDetail> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
@@ -63,7 +63,7 @@ namespace MyWerehouse.Infrastructure
 				entity.Property(a => a.PickingStatus)
 				.HasConversion<string>();
 
-				 entity.HasOne(a => a.PickingPallet)
+				 entity.HasOne(a => a.VirtualPallet)
 				     .WithMany(p => p.Allocation)
 				     .HasForeignKey(a => a.PickingPalletId);
 			});
@@ -174,7 +174,7 @@ namespace MyWerehouse.Infrastructure
 				.WithMany(pm => pm.PalletMovementDetails)
 				.HasForeignKey(md => md.PalletMovementId);
 			});
-			modelBuilder.Entity<PickingPallet>(entity =>
+			modelBuilder.Entity<VirtualPallet>(entity =>
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(entity => entity.Id).ValueGeneratedOnAdd();

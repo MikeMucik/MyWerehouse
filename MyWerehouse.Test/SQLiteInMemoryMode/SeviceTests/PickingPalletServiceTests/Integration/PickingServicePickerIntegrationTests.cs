@@ -22,7 +22,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 	public class PickingServicePickerIntegrationTests : TestBase
 	{
 		[Fact]
-		public async Task DoPickingAsync_HappyPath_CreatesNewPickingPallet()
+		public async Task DoPickingAsync_HappyPath_CreatesNewVirtualPallet()
 		{
 			// Arrange
 			var category = new Category
@@ -102,7 +102,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Products.AddRange(product);
 			DbContext.Pallets.AddRange(sourcePallet);
 			DbContext.Issues.AddRange(issue);
-			var pickingPallet = new PickingPallet
+			var virtualPallet = new VirtualPallet
 			{
 				Pallet = sourcePallet,
 				IssueInitialQuantity = 40,
@@ -114,11 +114,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Issue = issue,
 				Quantity = 30,
 				PickingStatus = PickingStatus.Allocated,
-				PickingPallet = pickingPallet,
+				VirtualPallet = virtualPallet,
 			};
-			pickingPallet.Allocation = new List<Allocation> { allocation};
+			virtualPallet.Allocation = new List<Allocation> { allocation};
 			DbContext.Allocations.Add(allocation);
-			DbContext.PickingPallets.Add(pickingPallet);
+			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
 
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);
@@ -187,7 +187,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		}
 		//Cała paleta jest pobierana bo to końcówka palety
 		[Fact]
-		public async Task DoPickingAsync_HappyPathTakeWholePallet_CreatesNewPickingPallet()
+		public async Task DoPickingAsync_HappyPathTakeWholePallet_CreatesNewVirtualPallet()
 		{
 			// Arrange
 			var category = new Category
@@ -267,7 +267,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Products.AddRange(product);
 			DbContext.Pallets.AddRange(sourcePallet);
 			DbContext.Issues.AddRange(issue);
-			var pickingPallet = new PickingPallet
+			var virtualPallet = new VirtualPallet
 			{
 				Pallet = sourcePallet,
 				IssueInitialQuantity = 40,
@@ -279,11 +279,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Issue = issue,
 				Quantity = 40,
 				PickingStatus = PickingStatus.Allocated,
-				PickingPallet = pickingPallet,
+				VirtualPallet = virtualPallet,
 			};
-			pickingPallet.Allocation = new List<Allocation> { allocation };
+			virtualPallet.Allocation = new List<Allocation> { allocation };
 			DbContext.Allocations.Add(allocation);
-			DbContext.PickingPallets.Add(pickingPallet);
+			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
 
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);
@@ -352,7 +352,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(PalletStatus.Picking, newPallet.Status);
 		}
 		[Fact]
-		public async Task DoPickingAsync_HappyPathAddTheSameProductToExistPickingPallet_AddToPickingPallet()
+		public async Task DoPickingAsync_HappyPathAddTheSameProductToExistPickingPallet_AddToVirrtualPallet()
 		{
 			// Arrange
 			var category = new Category
@@ -418,7 +418,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						DateAdded = new DateTime(2025, 8, 8) }
 				}
 			};
-			var oldPickingPallet = new Pallet
+			var oldVirtualPallet = new Pallet
 			{
 				Id = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
@@ -446,10 +446,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Clients.AddRange(client);
 			DbContext.Products.AddRange(product);
 			DbContext.Pallets.AddRange(sourcePallet1
-				, oldPickingPallet
+				, oldVirtualPallet
 				);
 			DbContext.Issues.AddRange(issue);
-			var pickingPallet1 = new PickingPallet
+			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = sourcePallet1,
 				IssueInitialQuantity = 10,
@@ -461,11 +461,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Issue = issue,
 				Quantity = 10,
 				PickingStatus = PickingStatus.Allocated,
-				PickingPallet = pickingPallet1,
-			};			
-			pickingPallet1.Allocation = new List<Allocation> { allocation1 };			
+				VirtualPallet = virtualPallet1,
+			};
+			virtualPallet1.Allocation = new List<Allocation> { allocation1 };			
 			DbContext.Allocations.AddRange(allocation1);
-			DbContext.PickingPallets.AddRange(pickingPallet1);
+			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
 
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);
@@ -531,7 +531,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(PalletStatus.Picking, newPallet.Status);
 		}
 		[Fact]
-		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPallet_AddToPickingPallet()
+		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPallet_AddToVirtualPallet()
 		{
 			// Arrange
 			var category = new Category
@@ -606,7 +606,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						DateAdded = new DateTime(2025, 8, 8) }
 				}
 			};
-			var oldPickingPallet = new Pallet
+			var oldVirtualPallet = new Pallet
 			{
 				Id = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
@@ -634,10 +634,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Clients.AddRange(client);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Pallets.AddRange(sourcePallet1
-				, oldPickingPallet
+				, oldVirtualPallet
 				);
 			DbContext.Issues.AddRange(issue);
-			var pickingPallet1 = new PickingPallet
+			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = sourcePallet1,
 				IssueInitialQuantity = 10,
@@ -649,11 +649,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Issue = issue,
 				Quantity = 10,
 				PickingStatus = PickingStatus.Allocated,
-				PickingPallet = pickingPallet1,
+				VirtualPallet = virtualPallet1,
 			};
-			pickingPallet1.Allocation = new List<Allocation> { allocation1 };
+			virtualPallet1.Allocation = new List<Allocation> { allocation1 };
 			DbContext.Allocations.AddRange(allocation1);
-			DbContext.PickingPallets.AddRange(pickingPallet1);
+			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
 
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);
@@ -719,7 +719,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(PalletStatus.Picking, newPallet.Status);
 		}
 		[Fact]
-		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPalletWithHistory_AddToPickingPallet()
+		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPalletWithHistory_AddToVirtualPallet()
 		{
 			// Arrange
 			var category = new Category
@@ -794,7 +794,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						DateAdded = new DateTime(2025, 8, 8) }
 				}
 			};
-			var oldPickingPallet = new Pallet
+			var oldVirtualPallet = new Pallet
 			{
 				Id = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
@@ -822,10 +822,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Clients.AddRange(client);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Pallets.AddRange(sourcePallet1
-				, oldPickingPallet
+				, oldVirtualPallet
 				);
 			DbContext.Issues.AddRange(issue);
-			var pickingPallet1 = new PickingPallet
+			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = sourcePallet1,
 				IssueInitialQuantity = 10,
@@ -837,11 +837,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Issue = issue,
 				Quantity = 10,
 				PickingStatus = PickingStatus.Allocated,
-				PickingPallet = pickingPallet1,
+				VirtualPallet = virtualPallet1,
 			};
-			pickingPallet1.Allocation = new List<Allocation> { allocation1 };
+			virtualPallet1.Allocation = new List<Allocation> { allocation1 };
 			DbContext.Allocations.AddRange(allocation1);
-			DbContext.PickingPallets.AddRange(pickingPallet1);
+			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
 
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);

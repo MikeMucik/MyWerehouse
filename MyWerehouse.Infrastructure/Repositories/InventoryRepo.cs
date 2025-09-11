@@ -112,7 +112,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.SumAsync(pop => pop.Quantity);
 
 			// 2. palety rozbite (ToPicking)
-			var pickingQuery = _werehouseDbContext.PickingPallets
+			var pickingQuery = _werehouseDbContext.VirtualPallets
 				.Include(pp => pp.Pallet)
 				.Where(pp => pp.Pallet.Status == PalletStatus.ToPicking &&
 							 pp.Pallet.ProductsOnPallet.Any(pop => pop.ProductId == productId));

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.Models
 {
-	public class PickingPallet
+	public class VirtualPallet
 	{
 		public int Id { get; set; }
 		public string PalletId { get; set; }

@@ -86,15 +86,6 @@ namespace MyWerehouse.Application.Services
 
 				var availablePalletsQuery = _palletRepo.GetAvailablePallets(product.ProductId, product.BestBefore); //do teestów z Mockami
 
-				//var totalAvailableFromFullPallets = availablePalletsQuery //całkowita ilość kartonów po parametrach dla pełnych palet
-				//		.SelectMany(p => p.ProductsOnPallet)
-				//		.Where(p => p.ProductId == product.ProductId)
-				//		.Sum(i => i.Quantity);
-
-				//var pickingPalletsByProduct = _pickingPalletRepo.GetPickingPalletsAsync(product.ProductId);
-				//var availableFromPickingPallets = pickingPalletsByProduct					
-				//	.Sum(i => i.);
-				//var totalAvailable = totalAvailableFromFullPallets;// + availableFromPickingPallets;
 				var totalAvailable = await _inventoryRepo.GetAvailableQuantityAsync(product.ProductId, product.BestBefore);
 				if (product.Quantity > totalAvailable)
 				{
@@ -139,14 +130,14 @@ namespace MyWerehouse.Application.Services
 		{
 			if (quantity <= 0) return;
 
-			var pickingPallets = await _pickingPalletRepo.GetPickingPalletsAsync(productId);
-			foreach (var pickingPallet in pickingPallets)
+			var virtualPallets = await _pickingPalletRepo.GetVirtualPalletsAsync(productId);
+			foreach (var virtualPallet in virtualPallets)
 			{
-				var alreadyAllocated = pickingPallet.Allocation.Sum(a => a.Quantity);
-				var availableOnThisPallet = pickingPallet.IssueInitialQuantity - alreadyAllocated;
+				var alreadyAllocated = virtualPallet.Allocation.Sum(a => a.Quantity);
+				var availableOnThisPallet = virtualPallet.IssueInitialQuantity - alreadyAllocated;
 				if (availableOnThisPallet <= 0) continue;
 				var quantityToTake = Math.Min(quantity, availableOnThisPallet);
-				await _pickingPalletRepo.AddAllocationAsync(pickingPallet, issueId, quantityToTake);
+				await _pickingPalletRepo.AddAllocationAsync(virtualPallet, issueId, quantityToTake);
 				quantity -= quantityToTake;
 				if (quantity <= 0) break;
 			}

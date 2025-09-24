@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MyWerehouse.Domain.Models
+{
+	public class HistoryReceiptDetail
+	{
+		public int Id { get; set; }
+		public string PalletId { get; set; }
+		public int LocationId { get; set; } // tu będzie lokalizacja określająca na której rampie przyjęto
+		//public int ProductId { get; set; }
+		//public int Quantity { get; set; }
+		public int HistoryReceiptId { get; set; }
+		public virtual HistoryReceipt HistoryReceipt { get; set; }
+
+	}
+}

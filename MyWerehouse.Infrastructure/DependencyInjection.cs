@@ -17,6 +17,8 @@ namespace MyWerehouse.Infrastructure
 			services.AddTransient<ICategoryRepo, CategoryRepo>();
 			services.AddTransient<IClientRepo, ClientRepo>();
 			services.AddTransient<IHistoryIssueRepo, HistoryIssueRepo>();
+			services.AddTransient<IHistoryReceiptRepo, HistoryReceiptRepo>();
+			services.AddTransient<IHistoryPickingRepo, HistoryPickingRepo>();
 			services.AddTransient<IInventoryRepo, InventoryRepo>();
 			services.AddTransient<IIssueRepo, IssueRepo>();
 			services.AddTransient<ILocationRepo, LocationRepo>();

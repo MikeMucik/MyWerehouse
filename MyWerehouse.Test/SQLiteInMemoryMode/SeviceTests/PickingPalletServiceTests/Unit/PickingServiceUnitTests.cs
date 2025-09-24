@@ -18,15 +18,12 @@ using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Unit
 {
-	public class PickingServiceTests : TestBase
+	public class PickingServiceUnitTests : TestBase
 	{
 		[Fact]
 		public async Task GetListToPicking_ShouldGroupByClientIssueAndProduct()
 		{
 			// Arrange		
-
-			// Dane podstawowe
-
 			var category = new Category
 			{
 				Name = "Category",
@@ -36,8 +33,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			{
 				Name = "Prod A",
 				SKU = "666",
-				AddedItemAd = new DateTime(2025, 1, 1),
-				//CategoryId = category.Id,
+				AddedItemAd = new DateTime(2025, 1, 1),				
 				Category = category,
 				IsDeleted = false,
 				CartonsPerPallet = 50
@@ -117,21 +113,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				FullName = "full333",
 				Addresses = [address2],
 				IsDeleted = false,
-			};
-			//ProductsOnPallet
-			//PalletMovements
+			};			
 			var pallet1 = new Pallet
 			{
 				Id = "Q10",
-				DateReceived = new DateTime(2025, 8, 8),
-				//LocationId = location1.Id,
+				DateReceived = new DateTime(2025, 8, 8),				
 				Location = location1,
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{
 					new ProductOnPallet
-					{
-						//ProductId = product1.Id,
+					{						
 						Product = product1,
 						Quantity = 40,
 						DateAdded = new DateTime(2025, 8, 8) }
@@ -140,15 +132,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pallet2 = new Pallet
 			{
 				Id = "Q11",
-				DateReceived = new DateTime(2025, 9, 9),
-				//LocationId = location2.Id,
+				DateReceived = new DateTime(2025, 9, 9),				
 				Location = location2,
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{
 					new ProductOnPallet
 					{	
-						//ProductId = product1.Id,
 						Product = product1,
 						Quantity = 50,
 						DateAdded = new DateTime(2025, 9, 9)
@@ -189,31 +179,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				}
 			};
 			var issue1 = new Issue
-			{
-				//Id = 100,
-				//ClientId = client1.Id,
+			{				
 				Client = client1,
-				IssueDateTimeCreate = new DateTime(2025, 8, 12),
-				//Pallets,
+				IssueDateTimeCreate = new DateTime(2025, 8, 12),				
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			var issue2 = new Issue
 			{
-				//Id = 101,
-				//ClientId = client1.Id,
 				Client = client1,
-				IssueDateTimeCreate = new DateTime(2025, 8, 12),
-				//Pallets,
+				IssueDateTimeCreate = new DateTime(2025, 8, 12),				
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			var issue3 = new Issue
 			{
-				//Id = 102,
-				//ClientId = client2.Id,
 				Client = client2,
 				IssueDateTimeCreate = new DateTime(2025, 8, 12),
-				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 
 			DbContext.Addresses.AddRange(address1, address2);
@@ -222,8 +206,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Clients.AddRange(client1, client2);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
-			DbContext.Issues.AddRange(issue1, issue2, issue3);
-			//await DbContext.SaveChangesAsync();
+			DbContext.Issues.AddRange(issue1, issue2, issue3);			
 			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = pallet1,
@@ -279,20 +262,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
-			var palletMovementService = new Mock<IPalletMovementService>();
+			var historyService = new Mock<IHistoryService>();
 
-			//var palletMovementRepo = new PalletMovementRepo(DbContext);
-			//var historyRepo = new HistoryIssueRepo(DbContext);
-			////var palletMovementService = new PalletMovementService(palletMovementRepo, historyRepo);
-			//var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			//var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			//var palletService = new PalletService(palletRepo.Object,
-			//	palletMovementService.Object,
-			//	palletMovementRepo,
-			//	pickingPalletRepo,
-			//	mapper.Object,
-			//	updatePalletValidator,
-			//	DbContext);
+			
 			var palletService = new Mock<IPalletService>();
 
 			var service = new PickingPalletService(pickingPalletRepo,
@@ -301,7 +273,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				locationRepo.Object,
 				palletRepo.Object,
 				issueRepo, 
-				palletMovementService.Object,
+				historyService.Object,
 				palletService.Object);
 
 			// Act
@@ -503,6 +475,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = new DateTime(2025, 8, 12),
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			var issue2 = new Issue
 			{				
@@ -510,6 +483,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = new DateTime(2025, 8, 12),
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			var issue3 = new Issue
 			{				
@@ -517,6 +491,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = new DateTime(2025, 8, 12),
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 
 			DbContext.Addresses.AddRange(address1, address2);
@@ -581,7 +556,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();		
-			var palletMovementService = new Mock<IPalletMovementService>();
+			var historyService = new Mock<IHistoryService>();
 			var palletService = new Mock<IPalletService>();
 			var service = new PickingPalletService(pickingPalletRepo,
 				mapper.Object,
@@ -589,7 +564,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				locationRepo.Object,
 				palletRepo.Object,
 				issueRepo,
-				palletMovementService.Object,
+				historyService.Object,
 				palletService.Object);
 
 			// Act

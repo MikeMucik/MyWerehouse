@@ -15,16 +15,16 @@ namespace MyWerehouse.Application.ViewModels.IssueModels
 		public int Id { get; set; }
 		public int ClientId { get; set; }
 		public DateTime IssueDateTime { get; set; } = DateTime.UtcNow;
-		public string? PerformedBy { get; set; }
+		public string PerformedBy { get; set; }
 		public IssueStatus IssueStatus { get; set; } = IssueStatus.New;
 		public List<IssueItemDTO> Items { get; set; } = new List<IssueItemDTO>();
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<CreateIssueDTO, Issue>()
 				.ForMember(d => d.Id, opt => opt.Ignore())
-			.ForMember(d =>d.IssueDateTimeCreate, opt => opt.Ignore())
-			.ForMember(d => d.IssueStatus, opt => opt.Ignore())
-			.ForMember(d => d.PerformedBy, opt => opt.Ignore());//czy potrzebne te Ignore
+			.ForMember(d => d.IssueDateTimeCreate, opt => opt.Ignore())
+			.ForMember(d => d.IssueStatus, opt => opt.Ignore());
+			//.ForMember(d => d.PerformedBy, opt => opt.Ignore());//czy potrzebne te Ignore
 		}
 		public class CreateIssueDTOValidion : AbstractValidator<CreateIssueDTO>
 		{

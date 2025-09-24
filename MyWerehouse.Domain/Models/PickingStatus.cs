@@ -11,6 +11,7 @@ namespace MyWerehouse.Domain.Models
 		Available = 0,
 		Allocated = 1,
 		Picked = 2,
+		Correction =3,
 	}
 }
 //TODO

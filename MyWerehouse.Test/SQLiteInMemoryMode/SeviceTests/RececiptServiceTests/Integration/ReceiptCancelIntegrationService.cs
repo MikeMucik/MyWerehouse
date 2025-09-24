@@ -13,8 +13,9 @@ using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptDeleteIntegrationService : ReceiptIntegratioCommandService
+	public class ReceiptCancelIntegrationService : ReceiptIntegratioCommandService
 	{
+		//Zmiana metody z delete na cancel
 		[Fact]
 		public async Task NotVerifiedReceipt_DeleteReceiptAsync_RemoveFromBase()
 		{
@@ -120,12 +121,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
 
-			
-			//Act
-			await _receiptService.DeleteReceiptAsync(initialReceipt.Id);
-			//Assert		
 
-			Assert.Empty(DbContext.Receipts);
+			//Act
+			await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
+			//Assert	
+			var receipt = DbContext.Receipts.FirstOrDefault(receipt => receipt.Id == initialReceipt.Id);
+			Assert.NotNull(receipt);
+			Assert.Equal(ReceiptStatus.Cancelled, receipt.ReceiptStatus);
+			//Assert.Empty(DbContext.Receipts);
 			Assert.Empty(DbContext.Pallets);
 			Assert.Empty(DbContext.ProductOnPallet);
 
@@ -239,7 +242,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			await DbContext.SaveChangesAsync();
 
 			//Act&Assert			
-			var ex = await Assert.ThrowsAsync<InvalidDataException>(() => _receiptService.DeleteReceiptAsync(initialReceipt.Id));
+			var ex = await Assert.ThrowsAsync<InvalidDataException>(() => _receiptService.CancelReceiptAsync(initialReceipt.Id, "user"));
 			Assert.Contains("Nie można usunąć zweryfikowanego przyjęcia", ex.Message);
 		}
 	}

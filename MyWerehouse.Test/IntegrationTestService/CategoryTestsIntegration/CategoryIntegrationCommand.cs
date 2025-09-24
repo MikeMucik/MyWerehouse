@@ -15,11 +15,11 @@ using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 {
-	public class CategoryIntegrationCommand :CommandTestBase
-	{		
-		public readonly CategoryService _categoryService;
-		public readonly IMapper _mapper;
-		public readonly IValidator<CategoryDTO> _validator;
+	public class CategoryIntegrationCommand : CommandTestBase
+	{
+		protected readonly CategoryService _categoryService;
+		protected readonly IMapper _mapper;
+		protected readonly IValidator<CategoryDTO> _validator;
 		public CategoryIntegrationCommand() : base()
 		{
 			var MapperConfig = new MapperConfiguration(cfg =>
@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			var _categoryRepo = new CategoryRepo(_context);
 			var _productRepo = new ProductRepo(_context);
 			_validator = new CategoryDTOValidation();
-			_categoryService = new CategoryService(_categoryRepo,_mapper,_context, _productRepo,  _validator);
+			_categoryService = new CategoryService(_categoryRepo, _mapper, _context, _productRepo, _validator);
 		}
 
 	}

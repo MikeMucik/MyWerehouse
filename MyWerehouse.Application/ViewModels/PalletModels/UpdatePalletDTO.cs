@@ -20,7 +20,7 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();
 		public int? ReceiptId { get; set; }
 		public int? IssueId { get; set; }
-		public string? UserId { get; set; }
+		public string UserId { get; set; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<UpdatePalletDTO, Pallet>()

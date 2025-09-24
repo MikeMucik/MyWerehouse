@@ -19,7 +19,7 @@ namespace MyWerehouse.Application
 			services.AddTransient<IInventoryService, InventoryService>();
 			services.AddTransient<IIssueService, IssueService>();
 			services.AddTransient<ILocationService, LocationService>();
-			services.AddTransient<IPalletMovementService, PalletMovementService>();
+			services.AddTransient<IHistoryService, HistoryService>();
 			services.AddTransient<IPalletService, PalletService>();
 			services.AddTransient<IPickingPalletService, PickingPalletService>();
 			services.AddTransient<IProductOnPalletService, ProductOnPalletService>();

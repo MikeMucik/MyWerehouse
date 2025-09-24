@@ -14,8 +14,8 @@ namespace MyWerehouse.Domain.Models
 		public int? ProductId { get; set; }
 		public string? ProductName { get; set; }
 		//public int Iss
-		public DateTime? DateTimeStart { get; set; } //zakres dat
-		public DateTime? DateTimeEnd { get; set; } //zakres dat
+		public DateTime? DateTimeStart { get; set; } //zakres dat dla issue data wysyłki, receipt dzień przyjęcia
+		public DateTime? DateTimeEnd { get; set; } //zakres dat dla issue data wysyłki, receipt dzień przyjęcia
 		public string? UserId { get; set; }
 	}
 }

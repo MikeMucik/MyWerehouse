@@ -19,16 +19,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public async Task AddReceiptAsync(Receipt receipt)
 		{
 			await _werehouseDbContext.Receipts.AddAsync(receipt);		
-		}		
-		public async Task DeleteReceiptAsync(int id)
-		{
-			var receipt =await _werehouseDbContext.Receipts.FindAsync(id);
-			if (receipt != null)
-			{
-				_werehouseDbContext.Receipts.Remove(receipt);
-				await _werehouseDbContext.SaveChangesAsync(true);
-			}
-		}		
+		}				
 		public async Task<Receipt?> GetReceiptByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Receipts
@@ -76,3 +67,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}			
 	}
 }
+//public async Task DeleteReceiptAsync(int id)
+//{
+//	var receipt =await _werehouseDbContext.Receipts.FindAsync(id);
+//	if (receipt != null)
+//	{
+//		_werehouseDbContext.Receipts.Remove(receipt);
+//		await _werehouseDbContext.SaveChangesAsync(true);
+//	}
+//}		

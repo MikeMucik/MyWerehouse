@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 		public PalletStatus Status { get; set; } = 0; 
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();	
 		public int ReceiptId { get; set; }		
-		public string? UserId { get; set; }
+		public string UserId { get; set; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<CreatePalletReceiptDTO, Pallet>()

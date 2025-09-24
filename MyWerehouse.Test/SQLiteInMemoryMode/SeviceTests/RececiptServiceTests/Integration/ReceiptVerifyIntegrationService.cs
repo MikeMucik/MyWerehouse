@@ -96,11 +96,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			await _receiptService.VerifyAndFinalizeReceiptAsync(receipt.Id, "U001");
 
 			// Assert
-			var updatedReceipt = await DbContext.Receipts.FindAsync(receipt.Id);
-			updatedReceipt.ReceiptStatus.Should().Be(ReceiptStatus.Verified);
+			var receiptVeryfying = await DbContext.Receipts.FindAsync(receipt.Id);
+			Assert.NotNull(receiptVeryfying);
+			receiptVeryfying.ReceiptStatus.Should().Be(ReceiptStatus.Verified);
 
 			var updatedPallet = await DbContext.Pallets.FindAsync(pallet.Id);
+			Assert.NotNull(updatedPallet);
 			updatedPallet.Status.Should().Be(PalletStatus.InStock);
+
+			var historyRecipt = DbContext.HistoryReceipts
+				.FirstOrDefault(x => x.Id == receipt.Id);
+			Assert.NotNull(historyRecipt);
+			Assert.Equal(ReceiptStatus.Verified, historyRecipt.StatusAfter);
 
 			var inventory = await DbContext.Inventories.FirstOrDefaultAsync(i => i.ProductId == product.Id);
 			inventory.Should().NotBeNull();

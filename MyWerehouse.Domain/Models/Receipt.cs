@@ -13,7 +13,8 @@ namespace MyWerehouse.Domain.Models
 		public virtual Client Client { get; set; }
 		public DateTime ReceiptDateTime { get; set; }
 		public virtual ICollection<Pallet> Pallets { get; set; } = new List<Pallet>();
-		public string? PerformedBy { get; set; } // opcjonalnie: user
+		public virtual ICollection<HistoryReceipt> HistoryReceipt { get; set; } = new List<HistoryReceipt>();
+		public string PerformedBy { get; set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; set; }
 	}
 }

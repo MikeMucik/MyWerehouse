@@ -12,11 +12,12 @@ namespace MyWerehouse.Domain.Models
 		public int ClientId { get; set; }
 		public virtual Client Client { get; set; }
 		public DateTime IssueDateTimeCreate { get; set; }
-		public DateTime? IssueDateTimeSend { get; set; } 
+		public DateTime IssueDateTimeSend { get; set; } 
 		public virtual ICollection<Pallet> Pallets { get; set; } = new List<Pallet>();
 		public virtual ICollection<HistoryIssue> HistoryIssues { get; set; } = new List<HistoryIssue>();
-		public string? PerformedBy { get; set; } // opcjonalnie: user
+		public virtual ICollection<HistoryPicking> HistoryPickings { get; set; } = new List<HistoryPicking>();
+		public string PerformedBy { get; set; } // opcjonalnie: user
 		public IssueStatus IssueStatus { get; set; } // migracja
-		public string? SendedBy { get; set; } //migracja												
+		//public string? SendedBy { get; set; } //migracja												
 	}
 }

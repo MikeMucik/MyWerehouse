@@ -14,7 +14,7 @@ namespace MyWerehouse.Application.ViewModels.ReceiptModels
 		public int Id { get; set; }
 		public int ClientId { get; set; }		
 		public DateTime ReceiptDateTime { get; set; }		
-		public string? PerformedBy { get; set; } // opcjonalnie: user
+		public string PerformedBy { get; set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; set; }
 		public void Mapping(Profile profile)
 		{

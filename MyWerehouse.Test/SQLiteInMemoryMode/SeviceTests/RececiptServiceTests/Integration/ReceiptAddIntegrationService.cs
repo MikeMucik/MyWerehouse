@@ -105,6 +105,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal("U001", movement.PerformedBy);
 			Assert.Equal(ReasonMovement.Received, movement.Reason);
 
+			var historyRecipt = DbContext.HistoryReceipts
+				.FirstOrDefault(x => x.Id == initialReceipt.Id);
+			Assert.NotNull(historyRecipt);
+			Assert.Equal(ReceiptStatus.InProgress, historyRecipt.StatusAfter);
+
 			var receipt = await DbContext.Receipts
 				.Include(x => x.Pallets)
 				.FirstOrDefaultAsync(x => x.Id == initialReceipt.Id);

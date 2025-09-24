@@ -30,7 +30,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				_werehouseDbContext.Pallets.Remove(pallet);
 			}
 		}
-		public async Task<Pallet?> GetPalletByIdAsync(string palletId)
+		public async Task<Pallet> GetPalletByIdAsync(string palletId)
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)

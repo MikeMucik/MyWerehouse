@@ -99,7 +99,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				var start = filter.DateTimeStart;
 				var end = filter.DateTimeEnd ?? DateTime.Now;
 
-				result = result.Where(i => i.IssueDateTimeCreate >= start && i.IssueDateTimeCreate <= end);
+				result = result.Where(i => i.IssueDateTimeSend >= start && i.IssueDateTimeSend <= end);
 			}
 			if (filter.UserId != null)
 			{

@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.ViewModels.ReceiptModels
 		public int ClientId { get; set; }
 		public DateTime ReceiptDateTime { get; set; }
 		public ICollection<UpdatePalletDTO> Pallets { get; set; } = new List<UpdatePalletDTO>();
-		public string? PerformedBy { get; set; } // opcjonalnie: user
+		public string PerformedBy { get; set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; set; }
 		public void Mapping(Profile profile)
 		{

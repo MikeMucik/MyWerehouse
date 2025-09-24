@@ -79,7 +79,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			};
 			var issueId = 1;
 			var performedBy = "Janek";
-
 			var loadedPallet = new Pallet
 			{
 				Id = "P1",
@@ -90,7 +89,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			new ProductOnPallet { ProductId = 101, Quantity = 5, }
 		}
 			};
-
 			var notLoadedPallet = new Pallet
 			{
 				Id = "P2",
@@ -98,13 +96,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				LocationId = 20,
 				ProductsOnPallet = new List<ProductOnPallet>()
 			};
-
 			var issue = new Issue
 			{
 				Id = issueId,
 				ClientId = initailCLient.Id,
 				IssueDateTimeCreate = new DateTime(2025, 6, 6, 2, 2, 2),
-				Pallets = new List<Pallet> { loadedPallet, notLoadedPallet }
+				Pallets = new List<Pallet> { loadedPallet, notLoadedPallet },
+				PerformedBy = "TestUser",
 			};
 			var initialCategory = new Category
 			{
@@ -123,19 +121,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issueId))
 						 .ReturnsAsync(issue);
-			var palletMovementServiceMock = new Mock<IPalletMovementService>();
+			var historyServiceMock = new Mock<IHistoryService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var productRepoMock = new Mock<IProductRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
 			var palletService = new Mock<IPalletService>();
 			var validator = new Mock<IValidator<CreateIssueDTO>>();
-			
+
 			var service = new IssueService(
 				issueRepoMock.Object,
 				mockMapper.Object,
 				DbContext,
-				palletMovementServiceMock.Object,
+				historyServiceMock.Object,
 				inventoryRepoMock.Object,
 				palletRepo.Object,
 				productRepoMock.Object,
@@ -152,17 +150,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			Assert.Equal(PalletStatus.Available, notLoadedPallet.Status);
 			Assert.Null(notLoadedPallet.IssueId);
 
-			palletMovementServiceMock.Verify(x =>
+			historyServiceMock.Verify(x =>
 				x.CreateMovementAsync(notLoadedPallet, 20, ReasonMovement.Correction, performedBy, PalletStatus.Available, null), Times.Once);
 
-			palletMovementServiceMock.Verify(x =>
+			historyServiceMock.Verify(x =>
 				x.CreateMovementAsync(loadedPallet, 10, ReasonMovement.Loaded, performedBy, PalletStatus.Loaded, null), Times.Once);
 
 			inventoryRepoMock.Verify(x =>
 				x.DecreaseInventoryQuantityAsync(101, 5), Times.Once);
 
-			palletMovementServiceMock.Verify(x =>
-				x.CreateHistoryIssueAsync(issue, IssueStatus.IsShipped, performedBy, null), Times.Once);
+			historyServiceMock.Verify(x =>
+				x.CreateHistoryIssueAsync(issue //IssueStatus.IsShipped, null), Times.Once
+												 ))
 			;
 			var updatedIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
@@ -195,7 +194,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id))
 						 .ReturnsAsync(issue);
 
-			var palletMovementServiceMock = new Mock<IPalletMovementService>();
+			var historyServiceMock = new Mock<IHistoryService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var productRepoMock = new Mock<IProductRepo>();
 			var palletRepoMock = new Mock<IPalletRepo>();
@@ -216,7 +215,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				issueRepoMock.Object,
 				mockMapper.Object,
 				DbContext,
-				palletMovementServiceMock.Object,
+				historyServiceMock.Object,
 				inventoryRepoMock.Object,
 				palletRepoMock.Object,
 				productRepoMock.Object,
@@ -225,7 +224,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				validator.Object
 			);
 			// Act
-			await service.AddPalletsToIssueByProductAsync(issue, product, "user");
+			await service.AddPalletsToIssueByProductAsync(issue, product);
 
 			// Assert
 			Assert.Equal(2, issue.Pallets.Count);
@@ -238,16 +237,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var issue = new Issue { Id = 1 };
 			var product = new IssueItemDTO { ProductId = 10, Quantity = 300, BestBefore = new DateOnly(2025, 8, 1) };
 			var pallets = new List<Pallet>
-	{
-		new() { Id = "Q1000", ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = 100 } } },
-		new() { Id = "Q1001", ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = 100 } } }
-	};
+				{
+					new() { Id = "Q1000", ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = 100 } } },
+					new() { Id = "Q1001", ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 10, Quantity = 100 } } }
+				};
 			var mockMapper = new Mock<IMapper>();
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id))
 						 .ReturnsAsync(issue);
 
-			var palletMovementServiceMock = new Mock<IPalletMovementService>();
+			var historyServiceMock = new Mock<IHistoryService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var productRepoMock = new Mock<IProductRepo>();
 			var palletRepoMock = new Mock<IPalletRepo>();
@@ -262,7 +261,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				issueRepoMock.Object,
 				mockMapper.Object,
 				DbContext,
-				palletMovementServiceMock.Object,
+				historyServiceMock.Object,
 				inventoryRepoMock.Object,
 				palletRepoMock.Object,
 				productRepoMock.Object,
@@ -272,7 +271,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			);
 			// Act & Assert
 			var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-				service.AddPalletsToIssueByProductAsync(issue, product, "user"));
+				service.AddPalletsToIssueByProductAsync(issue, product));
 
 			Assert.Contains("Brak wystarczającej ilości", ex.InnerException!.Message);
 		}
@@ -349,9 +348,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				//Id = 1,
 				ClientId = initailCLient.Id,
 				IssueDateTimeCreate = DateTime.Now,
-
 				IssueStatus = IssueStatus.InProgress,
-				Pallets = new List<Pallet>()
+				Pallets = new List<Pallet>(),
+				PerformedBy = "TestUser",
 			};
 			DbContext.Clients.Add(initailCLient);
 			DbContext.Locations.AddRange(new Location { Id = 1, Aisle = 1, Bay = 1, Height = 1, Position = 1 }, new Location { Id = 2, Aisle = 2, Bay = 1, Height = 1, Position = 1 });
@@ -362,7 +361,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			await DbContext.SaveChangesAsync();
 
 			// Mocky
-			var movementServiceMock = new Mock<IPalletMovementService>();
+			var movementServiceMock = new Mock<IHistoryService>();
 			//var pickingRepoMock = new Mock<IPickingPalletRepo>();
 			var pickingRepo = new PickingPalletRepo(DbContext);
 			var issueRepoMock = new Mock<IIssueRepo>();
@@ -379,11 +378,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 
 			var palletMovementRepo = new PalletMovementRepo(DbContext);
 			var historyIssueRepo = new HistoryIssueRepo(DbContext);
-			var palletMovementService = new PalletMovementService(palletMovementRepo, historyIssueRepo);
+			var historyReceiptRepo = new HistoryReceiptRepo(DbContext);
+			var historyAllocationRepo = new HistoryPickingRepo(DbContext);
+			var historyService = new HistoryService(palletMovementRepo, historyIssueRepo, historyReceiptRepo, historyAllocationRepo);
+
+			var locationService = new Mock<ILocationService>();
+
 			var productOnPalletValidator = new ProductOnPalletDTOValidation();
 			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
 			var palletService = new PalletService(palletRepo,
-				palletMovementService,
+				historyService,
+				locationService.Object,
 				palletMovementRepo,
 				pickingRepo,
 				mockMapper.Object,
@@ -404,7 +409,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				);
 
 			// Act
-			await service.AddPalletsToIssueByProductAsync(issue, issueItem, "user1");
+			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
 			await DbContext.SaveChangesAsync();
 
 			// Assert
@@ -416,7 +421,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			movementServiceMock.Verify(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.ToLoad, It.IsAny<string>(), It.IsAny<PalletStatus>(), null), Times.Exactly(2));
 
 			movementServiceMock.Verify(m => m.CreateMovementAsync(
-	It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, "user1", PalletStatus.InTransit, null), Times.Once);
+				It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, It.IsAny<string>(), PalletStatus.InTransit, null), Times.Once);
 
 			//pickingRepoMock.Verify(p => p.AddAllocationAsync(1, issue.Id, 5), Times.Once);
 
@@ -497,7 +502,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				ClientId = initailClient.Id,
 				IssueDateTimeCreate = DateTime.Now,
 				IssueStatus = IssueStatus.InProgress,
-				Pallets = new List<Pallet>()
+				Pallets = new List<Pallet>(),
+				PerformedBy = "TestUser",
 			};
 
 			// Dodanie do DbContext
@@ -513,7 +519,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			await DbContext.SaveChangesAsync();
 
 			// Mocki
-			var movementServiceMock = new Mock<IPalletMovementService>();
+			var movementServiceMock = new Mock<IHistoryService>();
 			movementServiceMock
 				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
@@ -528,11 +534,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 
 			var palletMovementRepo = new PalletMovementRepo(DbContext);
 			var historyIssueRepo = new HistoryIssueRepo(DbContext);
-			var palletMovementService = new PalletMovementService(palletMovementRepo, historyIssueRepo);
+			var historyReceiptRepo = new HistoryReceiptRepo(DbContext);
+			var historyAllocationRepo = new HistoryPickingRepo(DbContext);
+			var historyService = new HistoryService(palletMovementRepo, historyIssueRepo, historyReceiptRepo, historyAllocationRepo);
 			var productOnPalletValidator = new ProductOnPalletDTOValidation();
 			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
+			var locationService = new Mock<ILocationService>();
 			var palletService = new PalletService(palletRepo,
-				palletMovementService,
+				historyService,
+				locationService.Object,
 				palletMovementRepo,
 				pickingRepo,
 				mockMapper.Object,
@@ -555,7 +565,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			);
 
 			// Act
-			await service.AddPalletsToIssueByProductAsync(issue, issueItem, "user1");
+			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
 			await DbContext.SaveChangesAsync();
 
 			// Assert
@@ -567,7 +577,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.ToLoad, It.IsAny<string>(), It.IsAny<PalletStatus>(), null), Times.Exactly(2));
 
 			movementServiceMock.Verify(m =>
-				m.CreateMovementAsync(It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, "user1", PalletStatus.InTransit, null), Times.Once);
+				m.CreateMovementAsync(It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, It.IsAny<string>(), PalletStatus.InTransit, null), Times.Once);
 		}
 		[Fact]
 		public async Task AddPalletsToIssueByProductAsync_NotEnoughProduct_FullIntegration()
@@ -644,7 +654,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				ClientId = initailClient.Id,
 				IssueDateTimeCreate = DateTime.Now,
 				IssueStatus = IssueStatus.InProgress,
-				Pallets = new List<Pallet>()
+				Pallets = new List<Pallet>(),
+				PerformedBy = "TestUser",
 			};
 
 			// Dodanie do DbContext
@@ -660,7 +671,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			await DbContext.SaveChangesAsync();
 
 			// Mocki
-			var movementServiceMock = new Mock<IPalletMovementService>();
+			var movementServiceMock = new Mock<IHistoryService>();
 			movementServiceMock
 				.Setup(r => r.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				.Returns(Task.CompletedTask);
@@ -689,7 +700,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 
 			// Act&&Assert
 			var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-				 service.AddPalletsToIssueByProductAsync(issue, issueItem, "user1"));
+				 service.AddPalletsToIssueByProductAsync(issue, issueItem));
 
 			//Assert.IsType<InvalidDataException>(ex.InnerException);
 			Assert.Contains("Brak wystarczającej ilości", ex.InnerException!.Message);

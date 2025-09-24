@@ -36,7 +36,7 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			var pageSize = 5;
 			var pagenumber = 1;
 			//Act
-			var result =await _categoryService.GetCategoriesAsync(pageSize, pagenumber);
+			var result = await _categoryService.GetCategoriesAsync(pageSize, pagenumber);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(3, result.Categories.Count);

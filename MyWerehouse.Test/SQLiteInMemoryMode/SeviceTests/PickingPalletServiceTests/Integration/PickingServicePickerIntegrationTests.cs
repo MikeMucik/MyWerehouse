@@ -19,7 +19,7 @@ using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
-	public class PickingServicePickerIntegrationTests : TestBase
+	public class PickingServicePickerIntegrationTests : PickingIntegrationCommandService
 	{
 		[Fact]
 		public async Task DoPickingAsync_HappyPath_CreatesNewVirtualPallet()
@@ -91,9 +91,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issue = new Issue
 			{
 				Client = client,
-				IssueDateTimeCreate = DateTime.UtcNow,
-				//Pallets,
+				IssueDateTimeCreate = DateTime.UtcNow,				
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -120,36 +120,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Allocations.Add(allocation);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
-
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
-			var issueRepo = new IssueRepo(DbContext);
-			var mapper = new Mock<IMapper>();			
-			var locationRepo = new LocationRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			var palletMovementService = new Mock<IPalletMovementService>();
-
-			//var palletService = new Mock<IPalletService>();
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
-
-			//var palletMovementRepo = new PalletMovementRepo(DbContext);
-			var historyRepo = new HistoryIssueRepo(DbContext);
-			//var palletMovementService = new PalletMovementService(palletMovementRepo, historyRepo);
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			var palletService = new PalletService(palletRepo,
-				palletMovementService.Object,
-				palletMovementRepo,
-				pickingPalletRepo,
-				mapper.Object,
-				updatePalletValidator,
-				DbContext);
-
-			//var palletService = new PalletService(palletRepo,palletMovementService, palletMovementRepo, mapper.Object, );
-			//var allocationRepo = new AllocationRepo(DbContext);			
-			var service = new PickingPalletService(pickingPalletRepo, mapper.Object, DbContext, locationRepo, palletRepo, issueRepo
-				, palletMovementService.Object, palletService
-				);
-
 			// Act
 			var allocationDTO = new AllocationDTO
 			{
@@ -161,7 +131,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
 			};
-			await service.DoPickingAsync(allocationDTO, "user1");
+			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation.Id);
@@ -259,6 +229,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = DateTime.UtcNow,
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -286,35 +257,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
 
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
-			var issueRepo = new IssueRepo(DbContext);
-			var mapper = new Mock<IMapper>();
-			var locationRepo = new LocationRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
-			var historyRepo = new HistoryIssueRepo(DbContext);
-			var palletMovementService = new PalletMovementService(palletMovementRepo, historyRepo);			
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			var palletService = new PalletService(palletRepo,
-				palletMovementService,
-				palletMovementRepo,
-				pickingPalletRepo,
-				mapper.Object, 
-				updatePalletValidator,
-				DbContext);
-			//var palletMovementService = new Mock<IPalletMovementService>();
-			var service = new PickingPalletService(pickingPalletRepo,
-				mapper.Object,
-				DbContext,
-				locationRepo, 
-				palletRepo,
-				issueRepo, 
-				palletMovementService,
-				palletService
-				);
-
 			// Act
 			var allocationDTO = new AllocationDTO
 			{
@@ -326,7 +268,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
 			};
-			await service.DoPickingAsync(allocationDTO, "user1");
+			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation.Id);
@@ -439,6 +381,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = DateTime.UtcNow,
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -468,33 +411,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
 
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
-			var issueRepo = new IssueRepo(DbContext);
-			var mapper = new Mock<IMapper>();
-			var locationRepo = new LocationRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			var palletMovementService = new Mock<IPalletMovementService>();
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
-			var historyRepo = new HistoryIssueRepo(DbContext);
-			//var palletMovementService = new PalletMovementService(palletMovementRepo, historyRepo);
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			var palletService = new PalletService(palletRepo,
-				palletMovementService.Object,
-				palletMovementRepo,
-				pickingPalletRepo,
-				mapper.Object,
-				updatePalletValidator,
-				DbContext);
-			var service = new PickingPalletService(pickingPalletRepo,
-				mapper.Object,
-				DbContext,
-				locationRepo,
-				palletRepo,
-				issueRepo,
-				palletMovementService.Object,
-				palletService);
-
 			// Act
 			var allocationDTO = new AllocationDTO
 			{
@@ -506,7 +422,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			await service.DoPickingAsync(allocationDTO, "user1");
+			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation1.Id);
@@ -520,10 +436,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Assert Allocation
 			Assert.NotNull(updatedAllocation);
 			Assert.Equal(PickingStatus.Picked, updatedAllocation.PickingStatus);
-			// Assert Source Pallet (powinno zostać 90)
+			
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
 			Assert.Equal(90, updatedSourcePallet.ProductsOnPallet.First().Quantity);
-			// Assert New Pallet (powinno powstać 20 sztuk na palecie Picking)
+			
 			Assert.NotNull(newPallet);
 			Assert.Single(newPallet.ProductsOnPallet);
 			Assert.Equal(product.Id, newPallet.ProductsOnPallet.First().ProductId);
@@ -627,6 +543,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = DateTime.UtcNow,
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -656,33 +573,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
 
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
-			var issueRepo = new IssueRepo(DbContext);
-			var mapper = new Mock<IMapper>();
-			var locationRepo = new LocationRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			var palletMovementService = new Mock<IPalletMovementService>();
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
-			var historyRepo = new HistoryIssueRepo(DbContext);
-			//var palletMovementService = new PalletMovementService(palletMovementRepo, historyRepo);
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			var palletService = new PalletService(palletRepo,
-				palletMovementService.Object,
-				palletMovementRepo,
-				pickingPalletRepo,
-				mapper.Object,
-				updatePalletValidator,
-				DbContext);
-			var service = new PickingPalletService(pickingPalletRepo,
-				mapper.Object,
-				DbContext,
-				locationRepo,
-				palletRepo,
-				issueRepo,
-				palletMovementService.Object,
-				palletService);
-
 			// Act
 			var allocationDTO = new AllocationDTO
 			{
@@ -694,7 +584,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			await service.DoPickingAsync(allocationDTO, "user1");
+			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation1.Id);
@@ -815,15 +705,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = DateTime.UtcNow,
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, locationPicking);
 			DbContext.Clients.AddRange(client);
 			DbContext.Products.AddRange(product1, product2);
-			DbContext.Pallets.AddRange(sourcePallet1
-				, oldVirtualPallet
-				);
+			DbContext.Pallets.AddRange(sourcePallet1, oldVirtualPallet);
 			DbContext.Issues.AddRange(issue);
 			var virtualPallet1 = new VirtualPallet
 			{
@@ -843,33 +732,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Allocations.AddRange(allocation1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
-
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
-			var issueRepo = new IssueRepo(DbContext);
-			var mapper = new Mock<IMapper>();
-			var locationRepo = new LocationRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			//var palletMovementService = new Mock<IPalletMovementService>();
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
-			var historyIssueRepo = new HistoryIssueRepo(DbContext);
-			var palletMovementService = new PalletMovementService(palletMovementRepo, historyIssueRepo);
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			var palletService = new PalletService(palletRepo,
-				palletMovementService,
-				palletMovementRepo,
-				pickingPalletRepo,
-				mapper.Object,
-				updatePalletValidator, DbContext);
-			var service = new PickingPalletService(pickingPalletRepo,
-				mapper.Object,
-				DbContext,
-				locationRepo,
-				palletRepo,
-				issueRepo,
-				palletMovementService,
-				palletService);
-
+			
 			// Act
 			var allocationDTO = new AllocationDTO
 			{
@@ -881,7 +744,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			await service.DoPickingAsync(allocationDTO, "user1");
+			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation1.Id);

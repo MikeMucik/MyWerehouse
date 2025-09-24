@@ -29,13 +29,13 @@ namespace MyWerehouse.Application.Services
 			_werehouseDbContext = werehouseDbContext;
 		}
 
-		public async Task<int> AddLocation(LocationDTO locationDTO)
+		public async Task<int> AddLocationServiceAsync(LocationDTO locationDTO)
 		{
 			var location = _mapper.Map<Location>(locationDTO);
 			var result = await _locationRepo.AddLocationAsync(location);
 			return result;
 		}
-		public async Task CreateManySpots(int Bay, int Aisle, int Position, int Height)
+		public async Task CreateManySpotsAsync(int Bay, int Aisle, int Position, int Height)
 		{
 			var location = new List<Location>();
 			for (int i = 1; i <= Bay; i++)
@@ -60,9 +60,9 @@ namespace MyWerehouse.Application.Services
 			await _locationRepo.AddManyLocationAsync(location);
 			await _werehouseDbContext.SaveChangesAsync();
 		}
-		public async Task DeleteLocation(int id)
+		public async Task DeleteLocationServiceAsync(int id)
 		{
-			//warunek czy jest pusts
+			//TODO warunek czy jest puste
 			var location = await _locationRepo.GetLocationByIdAsync(id);
 			if (location == null)
 			{
@@ -80,7 +80,7 @@ namespace MyWerehouse.Application.Services
 			}
 			return location;
 		}
-		public async Task<LocationDTO> GetLocation(int id)
+		public async Task<LocationDTO> GetLocationServiceAsync(int id)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(id);
 			var locationDTO = _mapper.Map<LocationDTO>(location);

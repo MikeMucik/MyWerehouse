@@ -61,6 +61,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				PalletId = pallet.Id,
 				//ProductId = 1,
 				Reason = ReasonMovement.Moved,
+				PerformedBy = "TestUser",
 			};
 			var movement2 = new PalletMovement
 			{
@@ -72,6 +73,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				PalletId = pallet.Id,
 				//ProductId = 1,
 				Reason = ReasonMovement.Moved,
+				PerformedBy = "TestUser",
 			};
 			var movementDetails1 = new PalletMovementDetail
 			{

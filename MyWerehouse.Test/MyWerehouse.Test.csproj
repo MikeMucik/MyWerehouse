@@ -42,6 +42,8 @@
     <Folder Include="IntegrationTestService\IssueTestsIntegration\" />
     <Folder Include="IntegrationTestService\LocationTestsIntegration\" />
     <Folder Include="IntegrationTestService\ProductOnPalletIntegration\" />
+    <Folder Include="SQLiteInMemoryMode\SeviceTests\PalletServiceTests\Integration\" />
+    <Folder Include="SQLiteInMemoryMode\SeviceTests\PalletServiceTests\Unit\" />
     <Folder Include="UnitTestService\" />
   </ItemGroup>
 

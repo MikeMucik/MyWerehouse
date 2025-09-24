@@ -9,7 +9,7 @@ namespace MyWerehouse.Domain.Models
 	public class Allocation
 	{
 		public int Id { get; set; }
-		public int PickingPalletId { get; set; }
+		public int VirtualPalletId { get; set; }
 		public  virtual VirtualPallet VirtualPallet { get; set; }
 		public int IssueId { get; set; }
 		public Issue Issue { get; set; }

@@ -24,17 +24,25 @@ namespace MyWerehouse.Test.IntegrationTestService.ReceiptTestsIntegration
 		public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		public readonly ReceiptService _receiptService;
 		public readonly IMapper _mapper;
+
 		public readonly IReceiptRepo _receiptRepo;
 		public readonly IPalletService _palletService;
 		public readonly IPalletRepo _palletRepo;
 		public readonly IProductOnPalletRepo _productOnPalletRepo;
-		public readonly IPalletMovementService _palletMovementService;
+		protected readonly IInventoryRepo _inventoryRepo;
+		protected readonly IInventoryService _inventoryService;
+
+		public readonly IHistoryService _historyService;		
+		protected readonly IPalletMovementRepo _palletMovementRepo;
+		protected readonly IHistoryIssueRepo _historyIssueRepo;
+		protected readonly IHistoryPickingRepo _historyAllocationRepo;
+		protected readonly IHistoryReceiptRepo _historyReceiptRepo;
+
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;		
 		protected readonly IValidator<CreatePalletReceiptDTO> _validator;
 		protected readonly IValidator<ReceiptDTO> _receiptValidator;
 		protected readonly IValidator<UpdatePalletDTO> _validatorUpdate;
-		protected readonly IInventoryRepo _inventoryRepo;
-		protected readonly IInventoryService _inventoryService;
+		
 
 
 		public ReceiptIntegrationCommand() : base() 
@@ -48,9 +56,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ReceiptTestsIntegration
 
 			_palletRepo = new PalletRepo(_context);
 			_productOnPalletRepo = new ProductOnPalletRepo(_context);
-			var _palletMovementRepo = new PalletMovementRepo(_context);
-			var _historyIssueRepo = new HistoryIssueRepo(_context);
-			_palletMovementService = new PalletMovementService(_palletMovementRepo, _historyIssueRepo);
+			_palletMovementRepo = new PalletMovementRepo(_context);
+			_historyIssueRepo = new HistoryIssueRepo(_context);
+			_historyAllocationRepo = new HistoryPickingRepo(_context);
+			_historyReceiptRepo = new HistoryReceiptRepo(_context);
+			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo);
 			_inventoryRepo = new InventoryRepo(_context);
 			_inventoryService = new InventoryService(_inventoryRepo, _mapper);
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
@@ -58,7 +68,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ReceiptTestsIntegration
 			_validatorUpdate = new UpdatePalletDTOValidation(_productOnPalletValidator);
 			_receiptValidator = new ReceiptDTOValidation(_validatorUpdate);
 			
-			_receiptService =new ReceiptService(_receiptRepo, _mapper,_context,_palletRepo, _palletMovementService, _inventoryService, _validator, _receiptValidator);
+			_receiptService =new ReceiptService(_receiptRepo, _mapper,_context,_palletRepo, _historyService, _inventoryService, _validator, _receiptValidator);
 		}
 	}
 }

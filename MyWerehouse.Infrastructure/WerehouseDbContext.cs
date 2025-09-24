@@ -13,18 +13,21 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Client> Clients { get; set; }
 		public DbSet<HistoryIssue> HistoryIssues { get; set; }
-		public DbSet<HistoryIssueDetail> HistoryIssuesDetail { get; set; }
+		public DbSet<HistoryIssueDetail> HistoryIssueDetails { get; set; }
+		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }//
+		//public DbSet<HistoryReceiptDetail> HistoryReceiptDetails { get; set; }//
+		public DbSet<HistoryPicking> HistoryPickings { get; set; }//		
 		public DbSet<Inventory> Inventories { get; set; }
 		public DbSet<Issue> Issues { get; set; }
 		public DbSet<Location> Locations { get; set; }
 		public DbSet<Pallet> Pallets { get; set; }
 		public DbSet<PalletMovement> PalletMovements { get; set; }
 		public DbSet<PalletMovementDetail> PalletMovementDetails { get; set; }
-		public DbSet<VirtualPallet> VirtualPallets { get; set; }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<ProductDetail> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
 		public DbSet<Receipt> Receipts { get; set; }
+		public DbSet<VirtualPallet> VirtualPallets { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
@@ -63,9 +66,13 @@ namespace MyWerehouse.Infrastructure
 				entity.Property(a => a.PickingStatus)
 				.HasConversion<string>();
 
-				 entity.HasOne(a => a.VirtualPallet)
-				     .WithMany(p => p.Allocation)
-				     .HasForeignKey(a => a.PickingPalletId);
+				entity.HasOne(a => a.VirtualPallet)
+					.WithMany(p => p.Allocation)
+					.HasForeignKey(a => a.VirtualPalletId);
+
+				entity.HasOne(a => a.Issue)
+				 .WithMany()
+				 .HasForeignKey(a => a.IssueId);
 			});
 			modelBuilder.Entity<Category>(entity =>
 			{
@@ -75,7 +82,7 @@ namespace MyWerehouse.Infrastructure
 				{
 					entity.Property(e => e.Name)
 					.HasMaxLength(20)
-					.UseCollation("SQL_Latin1_General_CP1_CI_AS");					
+					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
 				}
 			});
 			modelBuilder.Entity<Client>(entity =>
@@ -108,7 +115,7 @@ namespace MyWerehouse.Infrastructure
 					.HasForeignKey(e => e.IssueId)
 					.IsRequired();
 
-				entity.Property(r => r.Status)
+				entity.Property(r => r.StatusAfter)
 				.HasConversion<string>();
 			});
 			modelBuilder.Entity<HistoryIssueDetail>(entity =>
@@ -117,6 +124,53 @@ namespace MyWerehouse.Infrastructure
 				.WithMany(hd => hd.Details)
 				.HasForeignKey(h => h.HistoryIssueId);
 			});
+			modelBuilder.Entity<HistoryReceipt>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+				entity.HasOne(e => e.Receipt)
+					.WithMany(p => p.HistoryReceipt)
+					.HasForeignKey(e => e.ReceiptId)
+					.IsRequired();
+
+				entity.Property(r => r.StatusAfter)
+				.HasConversion<string>();
+			});
+			//modelBuilder.Entity<HistoryReceiptDetail>(entity =>
+			//{
+			//	entity.HasOne(h => h.HistoryReceipt)
+			//	.WithMany(hd => hd.Details)
+			//	.HasForeignKey(h => h.HistoryReceiptId);
+			//});
+			modelBuilder.Entity<HistoryPicking>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+				entity.HasOne(a => a.VirtualPallet)
+				.WithMany()
+				.HasForeignKey(a => a.VirtualPalletId)
+				.IsRequired()
+				.OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasOne(a => a.Allocation)
+				.WithMany()
+				.HasForeignKey(h => h.AllocationId)
+				 .OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasOne(a => a.Issue)
+				  .WithMany()
+				   .HasForeignKey(h => h.IssueId)
+				   .OnDelete(DeleteBehavior.Restrict);
+
+				entity.Property(a => a.StatusBefore)
+				.HasConversion<string>();
+
+				entity.Property(a => a.StatusAfter)
+				.HasConversion<string>();
+			});
+
 			modelBuilder.Entity<Inventory>(entity =>
 			{
 				entity.HasKey(e => e.ProductId);
@@ -131,6 +185,7 @@ namespace MyWerehouse.Infrastructure
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
 			});
 			modelBuilder.Entity<Location>(entity =>
 			{
@@ -162,12 +217,12 @@ namespace MyWerehouse.Infrastructure
 					.WithMany(p => p.PalletMovements)
 					.HasForeignKey(pm => pm.PalletId)
 					.IsRequired()
-					//.OnDelete(DeleteBehavior.Restrict); // ⛔️ NIE rób Cascade
 					.OnDelete(DeleteBehavior.Cascade);
 				// Zrób cascade bo to tyczy się tylko jak przyjęcie jeszcze nie zweryfikowane
 				entity.Property(m => m.Reason)
 				.HasConversion<string>();
 			});
+
 			modelBuilder.Entity<PalletMovementDetail>(entity =>
 			{
 				entity.HasOne(md => md.PalletMovement)
@@ -179,10 +234,21 @@ namespace MyWerehouse.Infrastructure
 				entity.HasKey(e => e.Id);
 				entity.Property(entity => entity.Id).ValueGeneratedOnAdd();
 
-				entity.HasMany(p=>p.Allocation)
+				entity.HasMany(p => p.Allocation)
 				.WithOne()
-				.HasForeignKey(p=>p.PickingPalletId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.HasForeignKey(p => p.VirtualPalletId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasOne(vp => vp.Location)
+					  .WithMany()
+					  .HasForeignKey(vp => vp.LocationId)
+					  .OnDelete(DeleteBehavior.Cascade);
+
+				entity.HasOne(vp => vp.Pallet)
+					  .WithMany()
+					  .HasForeignKey(vp => vp.PalletId)
+					  .OnDelete(DeleteBehavior.Restrict);
+
 			});
 			modelBuilder.Entity<Product>(entity =>
 			{
@@ -238,6 +304,7 @@ namespace MyWerehouse.Infrastructure
 					v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null))
 				.HasColumnType("date");
 			});
+
 			modelBuilder.Entity<Receipt>(entity =>
 			 {
 				 entity.HasKey(e => e.Id);

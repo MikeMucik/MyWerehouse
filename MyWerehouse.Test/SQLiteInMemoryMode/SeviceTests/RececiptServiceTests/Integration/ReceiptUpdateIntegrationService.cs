@@ -176,6 +176,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.NotNull(movement);
 			Assert.Equal("U100", movement.PerformedBy);
 
+			var historyRecipt = DbContext.HistoryReceipts
+				.FirstOrDefault(x => x.Id == initialReceipt.Id);
+			Assert.NotNull(historyRecipt);
+			Assert.Equal(ReceiptStatus.Correction, historyRecipt.StatusAfter);
+
 			var receiptWithPallets = await DbContext.Receipts
 				.Include(r => r.Pallets)
 				.FirstOrDefaultAsync(r => r.Id == 1);

@@ -16,9 +16,9 @@ namespace MyWerehouse.Domain.Models
 		public int? DestinationLocationId { get; set; }
 		public virtual Location DestinationLocation { get; set; }			  
 		public ReasonMovement Reason { get; set; } // np. "Picking", "Correction", "Merge"
-		public string? PerformedBy { get; set; } // opcjonalnie: user		
+		public string PerformedBy { get; set; } // opcjonalnie: user		
 		public virtual ICollection<PalletMovementDetail> PalletMovementDetails { get; set; } = new List<PalletMovementDetail>();
 		public DateTime MovementDate { get; set; }
-		public PalletStatus PalletStatus { get; set; } //migracja jaka jest paleta po ruchu
+		public PalletStatus PalletStatus { get; set; } 
 	}
 }

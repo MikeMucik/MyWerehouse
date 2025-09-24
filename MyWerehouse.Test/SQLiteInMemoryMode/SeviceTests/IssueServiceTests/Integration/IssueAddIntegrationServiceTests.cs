@@ -119,7 +119,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IssueDateTimeCreate = DateTime.Now,
 				IssueStatus = IssueStatus.InProgress,
 				IssueDateTimeSend = new DateTime(2025, 9, 9),
-				Pallets = new List<Pallet>()
+				Pallets = new List<Pallet>(),
+				PerformedBy = "TestUser",
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Clients.Add(initailClient);
@@ -135,9 +136,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			{
 				ProductId = product.Id,
 				Quantity = 26, // 2 pełne palety + 5 do pickingu
-				BestBefore = new DateOnly(2025, 10, 10)
+				BestBefore = new DateOnly(2025, 10, 10),
 			};
-			await _issueService.AddPalletsToIssueByProductAsync(issue, issueItem, "user1");
+			await _issueService.AddPalletsToIssueByProductAsync(issue, issueItem);
 			await DbContext.SaveChangesAsync();
 
 			// Assert
@@ -339,7 +340,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					issueItem1, issueItem2
 				}
 			};
-			await _issueService.CreateNewIssueAsync(createIssue, "user2", new DateTime(2025, 9, 15));
+			await _issueService.CreateNewIssueAsync(createIssue, new DateTime(2025, 9, 15));
 
 			// Assert
 			var issue = DbContext.Issues.First();
@@ -530,6 +531,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IssueDateTimeCreate = new DateTime(2025, 8, 8),
 				//Pallets,
 				IssueStatus = IssueStatus.New,
+				PerformedBy = "TestUser",
 			};
 			var sourcePallet = new VirtualPallet
 			{
@@ -581,7 +583,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					issueItem1, issueItem2
 				}
 			};
-			await _issueService.CreateNewIssueAsync(createIssue, "user2", new DateTime(2025, 9, 15));
+			await _issueService.CreateNewIssueAsync(createIssue, new DateTime(2025, 9, 15));
 
 			// Assert
 			var issue = DbContext.Issues.FirstOrDefault(i=>i.Id == 2);

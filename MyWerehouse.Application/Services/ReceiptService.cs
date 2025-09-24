@@ -22,18 +22,17 @@ namespace MyWerehouse.Application.Services
 		private readonly IMapper _mapper;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IPalletRepo _palletRepo;
-		private readonly IPalletMovementService _palletMovementService;
+		private readonly IHistoryService _historyService;
 		private readonly IInventoryService _inventoryService;
 		private readonly IValidator<CreatePalletReceiptDTO> _palletValidator;
 		private readonly IValidator<ReceiptDTO> _receiptValidator;
-		//private readonly IValidator<UpdatePalletDTO> _updateValidator;//chyba do wywalenia
-
+		
 		public ReceiptService(
 			IReceiptRepo receiptRepo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IPalletRepo palletRepo,
-			IPalletMovementService palletMovementService,
+			IHistoryService historyService,
 			IInventoryService inventoryService,
 			IValidator<CreatePalletReceiptDTO>? palletValidator,
 			IValidator<ReceiptDTO>? receiptValidator			
@@ -43,7 +42,7 @@ namespace MyWerehouse.Application.Services
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
 			_palletRepo = palletRepo;
-			_palletMovementService = palletMovementService;
+			_historyService = historyService;
 			_inventoryService = inventoryService;
 			_palletValidator = palletValidator;
 			_receiptValidator = receiptValidator;			
@@ -53,7 +52,7 @@ namespace MyWerehouse.Application.Services
 			var receipt = _mapper.Map<Receipt>(createReceiptPlanDTO);
 			receipt.ReceiptDateTime = DateTime.UtcNow;
 			receipt.ReceiptStatus = ReceiptStatus.Planned;
-
+			await _historyService.CreateHistoryReceiptAsync(receipt);
 			await _receiptRepo.AddReceiptAsync(receipt);
 			await _werehouseDbContext.SaveChangesAsync();
 			return receipt.Id;
@@ -61,7 +60,7 @@ namespace MyWerehouse.Application.Services
 		public async Task<string> AddPalletToReceiptAsync(int receiptId, CreatePalletReceiptDTO newPalletDto)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(receiptId);
-			if (receipt == null || receipt.ReceiptStatus != ReceiptStatus.Planned && receipt.ReceiptStatus != ReceiptStatus.InProgress)
+			if (receipt == null || (receipt.ReceiptStatus != ReceiptStatus.Planned && receipt.ReceiptStatus != ReceiptStatus.InProgress))
 			{
 				throw new InvalidOperationException("Nie można dodać palety zły status przyjęcia lub brak otworzenia przyjęcia");
 			}
@@ -77,6 +76,8 @@ namespace MyWerehouse.Application.Services
 					if (receipt.ReceiptStatus == ReceiptStatus.Planned)
 					{
 						receipt.ReceiptStatus = ReceiptStatus.InProgress;
+						receipt.ReceiptDateTime = DateTime.UtcNow;
+						await _historyService.CreateHistoryReceiptAsync(receipt);
 					}
 					var pallet = _mapper.Map<Pallet>(newPalletDto);
 					pallet.ReceiptId = receiptId;
@@ -86,7 +87,7 @@ namespace MyWerehouse.Application.Services
 					pallet.Status = PalletStatus.Receiving;
 					await _palletRepo.AddPalletAsync(pallet);
 					await _werehouseDbContext.SaveChangesAsync();
-					await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, newPalletDto.UserId, PalletStatus.Receiving, null);
+					await _historyService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, newPalletDto.UserId, PalletStatus.Receiving, null);
 					await _werehouseDbContext.SaveChangesAsync();
 					await transaction.CommitAsync();
 					return pallet.Id;
@@ -106,6 +107,7 @@ namespace MyWerehouse.Application.Services
 				throw new InvalidOperationException("Nie można zakończyć przyjęcia");
 			}
 			receipt.ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
+			await _historyService.CreateHistoryReceiptAsync(receipt);
 			await _werehouseDbContext.SaveChangesAsync();
 		}		
 		public async Task VerifyAndFinalizeReceiptAsync(int receiptId, string userId)
@@ -117,10 +119,12 @@ namespace MyWerehouse.Application.Services
 			}
 			//logika zatwierdzenia dokumentów
 			receipt.ReceiptStatus = ReceiptStatus.Verified;
+			receipt.ReceiptDateTime = DateTime.UtcNow;
+			await _historyService.CreateHistoryReceiptAsync(receipt);
 			foreach (var pallet in receipt.Pallets)
 			{
 				pallet.Status = PalletStatus.InStock;
-				await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, userId, PalletStatus.InStock, null);
+				await _historyService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Received, userId, PalletStatus.InStock, null);
 				foreach (var product in pallet.ProductsOnPallet)
 				{
 					await _inventoryService.ChangeProductQunatityAsync(product.Id, product.Quantity);
@@ -207,10 +211,13 @@ namespace MyWerehouse.Application.Services
 					SynchronizeProducts(existingPallet, updatingPalletDto.ProductsOnPallet);
 					palletsToRegisterMovement.Add(existingPallet);
 				});
+			//historia przyjęcia			
+			await _historyService.CreateHistoryReceiptAsync(existingReceipt, ReceiptStatus.Correction, userId);
+
 			//tworzenie historii palety
 			foreach (var pallet in palletsToRegisterMovement)
 			{
-				await _palletMovementService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Correction, userId, PalletStatus.Receiving, null);
+				await _historyService.CreateMovementAsync(pallet, pallet.LocationId, ReasonMovement.Correction, userId, PalletStatus.Receiving, null);
 			}
 			await _werehouseDbContext.SaveChangesAsync();
 		}
@@ -225,18 +232,28 @@ namespace MyWerehouse.Application.Services
 			(dto, entity) => _mapper.Map(dto, entity)
 				);
 		}
-		public async Task DeleteReceiptAsync(int receiptId)
+		public async Task CancelReceiptAsync(int receiptId, string userId)
 		{
-			var receiptToDelete = await _receiptRepo.GetReceiptByIdAsync(receiptId);
-			if (receiptToDelete == null)
+			var receipt = await _receiptRepo.GetReceiptByIdAsync(receiptId);
+			if (receipt == null)
 			{
 				throw new InvalidDataException($"Brak przyjęcia o numerze{receiptId}");
 			}
-			if (receiptToDelete.ReceiptStatus == ReceiptStatus.Verified)
+			if (receipt.ReceiptStatus == ReceiptStatus.Verified)
 			{
 				throw new InvalidDataException("Nie można usunąć zweryfikowanego przyjęcia");
 			}
-			await _receiptRepo.DeleteReceiptAsync(receiptId);
+			receipt.ReceiptStatus = ReceiptStatus.Cancelled;
+			receipt.PerformedBy = userId;
+			receipt.ReceiptDateTime = DateTime.UtcNow;
+
+			await _historyService.CreateHistoryReceiptAsync(receipt, ReceiptStatus.Cancelled, userId);
+			//usuwanie palet które jeszcze nie weszły w "życie" magazynu
+			foreach (var pallet in receipt.Pallets.ToList())
+			{
+				await _palletRepo.DeletePalletAsync(pallet.Id);
+			}
+			await _werehouseDbContext.SaveChangesAsync();
 		}
 	}
 }

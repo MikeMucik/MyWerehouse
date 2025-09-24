@@ -10,8 +10,8 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IIssueService
 	{
-		Task<int> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, string userId, DateTime dateToSend);		
-		Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product, string userId);		
+		Task<int> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, DateTime dateToSend);		
+		//Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product);		
 		Task <IssueToUpdateDTO> GetIssueByIdAsync(int numberIssue);
 		Task UpdateIssueAsync(int numberIssue, string perfomedBy, ListProductsOfIssue products, DateTime dateToSend);		
 		Task DeleteIssueAsync(int issueId);//warunki				

@@ -10,10 +10,10 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface ILocationService
 	{
-		Task<int> AddLocation(LocationDTO locationDTO);
-		Task CreateManySpots(int Bay, int Aisle, int Position, int Height);
-		Task DeleteLocation(int id);		
-		Task<LocationDTO> GetLocation(int id);
+		Task<int> AddLocationServiceAsync(LocationDTO locationDTO);
+		Task CreateManySpotsAsync(int Bay, int Aisle, int Position, int Height);
+		Task DeleteLocationServiceAsync(int id);		
+		Task<LocationDTO> GetLocationServiceAsync(int id);
 		Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt);
 	}
 }

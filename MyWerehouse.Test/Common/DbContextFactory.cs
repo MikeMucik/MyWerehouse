@@ -117,7 +117,7 @@ namespace MyWerehouse.Test.Common
 						Id = 1,
 						ClientId = 10,
 						PerformedBy = "U001",
-						ReceiptDateTime = new DateTime(2023, 3, 3)
+						ReceiptDateTime = new DateTime(2023, 3, 3),
 					},
 					new Receipt
 					{
@@ -136,6 +136,7 @@ namespace MyWerehouse.Test.Common
 					ClientId = 11,
 					PerformedBy = "U002",
 					IssueDateTimeCreate = new DateTime(2025, 5, 5),
+					IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
 				});
 			}
 
@@ -244,7 +245,8 @@ namespace MyWerehouse.Test.Common
 						DestinationLocationId = 2,
 						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
-						MovementDate = new DateTime(2025, 2, 2)
+						MovementDate = new DateTime(2025, 2, 2),
+						PerformedBy = "TestUser",
 					},
 					new PalletMovement
 					{
@@ -254,7 +256,8 @@ namespace MyWerehouse.Test.Common
 						DestinationLocationId = 1,
 						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
-						MovementDate = new DateTime(2025, 2, 2)
+						MovementDate = new DateTime(2025, 2, 2),
+						PerformedBy = "TestUser",
 					},
 					new PalletMovement
 					{
@@ -264,7 +267,8 @@ namespace MyWerehouse.Test.Common
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
-						MovementDate = new DateTime(2025, 2, 2)
+						MovementDate = new DateTime(2025, 2, 2),
+						PerformedBy = "TestUser",
 					},
 					new PalletMovement
 					{
@@ -274,7 +278,8 @@ namespace MyWerehouse.Test.Common
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
-						MovementDate = new DateTime(2025, 2, 2)
+						MovementDate = new DateTime(2025, 2, 2),
+						PerformedBy = "TestUser",
 					},
 					new PalletMovement
 					{
@@ -284,7 +289,8 @@ namespace MyWerehouse.Test.Common
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
 						//Quantity = 1,
-						MovementDate = new DateTime(2025, 2, 2)
+						MovementDate = new DateTime(2025, 2, 2),
+						PerformedBy = "TestUser",
 					}
 				);
 			}

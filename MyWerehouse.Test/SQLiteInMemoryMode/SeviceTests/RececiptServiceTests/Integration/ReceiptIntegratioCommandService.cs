@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
@@ -25,8 +26,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 		protected readonly IPalletRepo _palletRepo;
 		protected readonly IProductOnPalletRepo _productOnPalletRepo;
 		protected readonly IPalletMovementRepo _palletMovementRepo;
+
 		protected readonly IHistoryIssueRepo _historyIssueRepo;
-		protected readonly IPalletMovementService _palletMovementService;
+		protected readonly IHistoryPickingRepo _historyAllocationRepo;
+		protected readonly IHistoryReceiptRepo _historyReceiptRepo;
+		protected readonly IHistoryService _historyService;
+
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
 		protected readonly IValidator<CreatePalletReceiptDTO> _palletValidator;
 		protected readonly IValidator<ReceiptDTO> _receiptValidator;
@@ -48,7 +53,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			
 			_palletMovementRepo = new PalletMovementRepo(DbContext);
 			_historyIssueRepo = new HistoryIssueRepo(DbContext);
-			_palletMovementService = new PalletMovementService(_palletMovementRepo, _historyIssueRepo);
+			_historyReceiptRepo = new HistoryReceiptRepo(DbContext);
+			_historyAllocationRepo = new HistoryPickingRepo(DbContext);
+			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo);
+
 			_receiptRepo = new ReceiptRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
 			_inventoryRepo = new InventoryRepo(DbContext);
@@ -58,7 +66,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				_mapper,
 				DbContext,
 				_palletRepo,
-				_palletMovementService,
+				_historyService,
 				_inventoryService,
 				_palletValidator,
 				_receiptValidator);

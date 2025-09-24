@@ -16,6 +16,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task VerifyAndFinalizeReceiptAsync(int receiptId, string userId);
 		Task UpdateReceiptPalletsAsync(ReceiptDTO updatingReceipt, string userId);
 		Task<ReceiptDTO> GetReceiptDTOAsync(int receiptId);
-		Task DeleteReceiptAsync(int receiptId);
+		Task CancelReceiptAsync(int receiptId, string userId);
 	}
 }

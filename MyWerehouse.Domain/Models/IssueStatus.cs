@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Models
 		IsShipped = 2,
 		IsClosed = 3,
 		Archived = 4,
-		ConfirmedToLoad= 5,
-		ChangingPallet =6,
+		ConfirmedToLoad = 5,
+		ChangingPallet = 6,
 	}
 }

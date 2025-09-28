@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Application.Results
 {
-	public class ManualPickingResult
+	public class PickingResult
 	{
 		public bool Success { get; set; }
 		public bool RequiresOrderNumber { get; set; }
@@ -14,14 +14,14 @@ namespace MyWerehouse.Application.Results
 		public List<IssueOptions> IssueOptions { get; set; } = new List<IssueOptions>();
 		public string ProductInfo { get; set; }
 
-		public ManualPickingResult() { }
+		public PickingResult() { }
 
-		public static ManualPickingResult Ok(
+		public static PickingResult Ok(
 			string message ,
 			string productInfo = null,
 			List<IssueOptions> issueOptions = null)
 		{
-			return new ManualPickingResult
+			return new PickingResult
 			{
 				Success = true,
 				Message = message,
@@ -30,12 +30,12 @@ namespace MyWerehouse.Application.Results
 			};
 		}	
 
-		public static ManualPickingResult RequiresOrder(
+		public static PickingResult RequiresOrder(
 			string productInfo,
 			List<IssueOptions> issueOptions,
 			string message)
 		{
-			return new ManualPickingResult
+			return new PickingResult
 			{
 				Success = false,
 				RequiresOrderNumber = true,
@@ -45,9 +45,9 @@ namespace MyWerehouse.Application.Results
 			};
 		}
 
-		public static ManualPickingResult Fail(string message)
+		public static PickingResult Fail(string message)
 		{
-			return new ManualPickingResult
+			return new PickingResult
 			{
 				Success = false,
 				Message = message

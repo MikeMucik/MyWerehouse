@@ -24,23 +24,23 @@ namespace MyWerehouse.Domain.Models
 		[NotMapped]
 		public int RemainingQuantity => IssueInitialQuantity - (Allocation?.Sum(a=>a.Quantity) ?? 0);
 
-		public VirtualPallet() { }
+		//public VirtualPallet() { }
 
-		public VirtualPallet(string palletId, int issueInitialQuantity, int locationId, DateTime dateMoved)
-		{
-			if (string.IsNullOrWhiteSpace(palletId))
-				throw new DomainVirtualPalletException("Brak źródłowej palety");
+		//public VirtualPallet(string palletId, int issueInitialQuantity, int locationId, DateTime dateMoved)
+		//{
+		//	if (string.IsNullOrWhiteSpace(palletId))
+		//		throw new DomainVirtualPalletException("Brak źródłowej palety");
 
-			if (issueInitialQuantity <= 0)
-				throw new DomainVirtualPalletException("Ilość początkowa dla pickingu musi być > 0");
+		//	if (issueInitialQuantity <= 0)
+		//		throw new DomainVirtualPalletException("Ilość początkowa dla pickingu musi być > 0");
 
-			if (locationId <= 0)
-				throw new DomainVirtualPalletException("Wirtualna paleta musi mieć przypisaną lokalizację");
+		//	if (locationId <= 0)
+		//		throw new DomainVirtualPalletException("Wirtualna paleta musi mieć przypisaną lokalizację");
 
-			PalletId = palletId;
-			IssueInitialQuantity = issueInitialQuantity;
-			LocationId = locationId;
-			DateMoved = dateMoved == default ? DateTime.UtcNow : dateMoved;
-		}
+		//	PalletId = palletId;
+		//	IssueInitialQuantity = issueInitialQuantity;
+		//	LocationId = locationId;
+		//	DateMoved = dateMoved == default ? DateTime.UtcNow : dateMoved;
+		//}
 	}
 }

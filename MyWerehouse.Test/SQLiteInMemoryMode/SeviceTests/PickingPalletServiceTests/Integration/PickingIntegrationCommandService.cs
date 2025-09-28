@@ -61,7 +61,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			
 			_pickingPalletRepo = new PickingPalletRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
-			_pickingPalletService = new PickingPalletService(_pickingPalletRepo, _mapper, DbContext, _locationRepo,_palletRepo, _issueRepo, _historyService,_palletService);
+			_pickingPalletService = new PickingPalletService(_pickingPalletRepo, DbContext, _locationRepo,_palletRepo, _issueRepo, _historyService,_palletService);
 		}
 	}
 }

@@ -130,7 +130,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 			return totalFromFullPallets + totalFromPicking;
 		}
-
 	}
 }
 //public async Task<int> GetAvailableQuantityAsync(int productId, DateOnly? bestBefore)

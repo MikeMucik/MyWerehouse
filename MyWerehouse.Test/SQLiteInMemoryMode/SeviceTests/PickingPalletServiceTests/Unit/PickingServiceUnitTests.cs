@@ -268,7 +268,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var palletService = new Mock<IPalletService>();
 
 			var service = new PickingPalletService(pickingPalletRepo,
-				mapper.Object,
+				//mapper.Object,
 				DbContext,
 				locationRepo.Object,
 				palletRepo.Object,
@@ -559,7 +559,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var historyService = new Mock<IHistoryService>();
 			var palletService = new Mock<IPalletService>();
 			var service = new PickingPalletService(pickingPalletRepo,
-				mapper.Object,
+				//mapper.Object,
 				DbContext,
 				locationRepo.Object,
 				palletRepo.Object,

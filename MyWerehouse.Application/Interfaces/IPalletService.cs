@@ -19,6 +19,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task<ChangeLocationResults> ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId, bool force = false);
 		//zrobić też gdy lokalizacja zajęta
 		Task <List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter);
-		Task<int> AddPalletToPickingAsync(int issueId, int productId, DateOnly? bestBefore, string userId);
+		Task<VirtualPallet> AddPalletToPickingAsync(int issueId, int productId, DateOnly? bestBefore, string userId);
 	}
 }

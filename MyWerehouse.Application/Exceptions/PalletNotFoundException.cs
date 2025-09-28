@@ -8,9 +8,10 @@ namespace MyWerehouse.Application.Exceptions
 {
 	public class PalletNotFoundException : Exception
 	{
-		public string PalletId { get; }
-		public string? Message {  get; set; }
-		public PalletNotFoundException(string palletId, string message = null)
+		public string? PalletId { get; }
+		
+		public PalletNotFoundException() { }
+		public PalletNotFoundException(string palletId, string? message = null)
 			: base(message?? $"Paleta o numerze {palletId} nie została znaleziona.")
 		{
 			PalletId = palletId;

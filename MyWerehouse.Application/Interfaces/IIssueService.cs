@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Results;
 using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Domain.Models;
 
@@ -10,7 +11,7 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IIssueService
 	{
-		Task<int> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, DateTime dateToSend);		
+		Task <List<IssueResult>> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, DateTime dateToSend);		
 		//Task AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product);		
 		Task <IssueToUpdateDTO> GetIssueByIdAsync(int numberIssue);
 		Task UpdateIssueAsync(int numberIssue, string perfomedBy, ListProductsOfIssue products, DateTime dateToSend);		

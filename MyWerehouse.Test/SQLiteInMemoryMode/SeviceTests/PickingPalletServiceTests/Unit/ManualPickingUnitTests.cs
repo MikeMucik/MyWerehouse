@@ -61,7 +61,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				mockMapper.Object,
+				//mockMapper.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,
@@ -135,7 +135,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				mockMapper.Object,
+				//mockMapper.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,
@@ -226,7 +226,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				mockMapper.Object,
+				//mockMapper.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,
@@ -305,7 +305,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				mockMapper.Object,
+				//mockMapper.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,

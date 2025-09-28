@@ -17,14 +17,8 @@ namespace MyWerehouse.Application.Interfaces
 		Task<List<ProductToIssueDTO>> GetListToPickingAsync(DateTime dateIssueStart, DateTime dateIssueEnd); //podaje pojedyncze alokacje
 		Task<List<PickingGuideLineDTO>> GetListIssueToPickingAsync(DateTime dateIssueStart, DateTime dateIssueEnd); //podaje według klienta -> drzewko		
 		Task <List<AllocationDTO>> ShowTaskToDoAsync(string palletSouceScanned, DateTime pickingDate);
-		Task DoPickingAsync(AllocationDTO allocationDTO, string userId);
-		//Ręczny picking, klikasz paletę musi ona mieć status ToPicking, z palety pobierany jest ProductId
-		//wstawiasz numer IssueId, powinno dać ile dla tego zlecenia jeszcze trzeba pobrać tego produktu
-		//Czyli wyszukać w alokacjach po issueId i ProductId ile quantity potrzeba 
-		Task<ManualPickingResult> DoManualPickingAsync(string palletId, int? IssueId, string userId);
-
-
-		Task<ManualPickingResult> PrepareManualPickingAsync(string palletId);
-		Task<ManualPickingResult> ExecuteManualPickingAsync(string palletId, int issueId, string userId);
+		Task<PickingResult> DoPickingAsync(AllocationDTO allocationDTO, string userId);		
+		Task<PickingResult> PrepareManualPickingAsync(string palletId);
+		Task<PickingResult> ExecuteManualPickingAsync(string palletId, int issueId, string userId);
 	}
 }

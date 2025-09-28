@@ -43,6 +43,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Pallets
+				.Include(a=>a.ProductsOnPallet)
 				.Where(p => p.Status != PalletStatus.Archived);
 			if (filter.ProductId > 0)
 			{

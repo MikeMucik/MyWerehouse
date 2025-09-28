@@ -18,6 +18,11 @@ namespace MyWerehouse.Domain.Models
 		public virtual ICollection<HistoryPicking> HistoryPickings { get; set; } = new List<HistoryPicking>();
 		public string PerformedBy { get; set; } // opcjonalnie: user
 		public IssueStatus IssueStatus { get; set; } // migracja
-		//public string? SendedBy { get; set; } //migracja												
+													 //public string? SendedBy { get; set; } //migracja		
+		public Issue() { }
+		public Issue(int clientId, DateTime dateSend)
+		{
+
+		}
 	}
 }

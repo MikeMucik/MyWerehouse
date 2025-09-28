@@ -36,7 +36,7 @@ namespace MyWerehouse.Application.ViewModels.IssueModels
 					.GreaterThan(DateTime.MinValue).WithMessage("Nie prawidłowa data zamówienia");
 				RuleForEach(x => x.Items).SetValidator(itemValidator);
 				RuleFor(x => x.Items)
-					.NotEmpty().WithMessage("Brak palet z towarem w zamówieniu");
+					.NotEmpty().WithMessage("Brak ilości z towarem w zamówieniu");
 			}
 		}
 	}

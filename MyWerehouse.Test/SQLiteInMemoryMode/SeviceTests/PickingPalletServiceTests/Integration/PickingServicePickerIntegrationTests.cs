@@ -131,9 +131,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
 			};
-			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
+			var result = await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
+			Assert.NotNull(result);
+			Assert.True(result.Success);
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p=>p.ProductsOnPallet)				
@@ -268,9 +270,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
 			};
-			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
+			var result = await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
+			Assert.NotNull(result);
+			Assert.True(result.Success);
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -422,9 +426,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
+			var result = await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
+			Assert.NotNull(result);
+			Assert.True(result.Success);
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation1.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -584,9 +590,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
+			var result = await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
+			Assert.NotNull(result);
+			Assert.True(result.Success);
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation1.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -744,9 +752,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
+			var result = await _pickingPalletService.DoPickingAsync(allocationDTO, "user1");
 
 			// Assert
+			Assert.NotNull(result);
+			Assert.True(result.Success);
 			var updatedAllocation = await DbContext.Allocations.FindAsync(allocation1.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -776,7 +786,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// powinny być 2 wpisy: jeden dla źródłowej palety, jeden dla kompletacyjnej
 			Assert.Equal(2, movements.Count);
 
-			// źródłowa paleta (powinna mieć ruch typu Picking)
+			// źródłowa paleta (powinna mieć ruch typu ToPicking)
 			var sourceMovement = movements.FirstOrDefault(m => m.PalletId == sourcePallet1.Id);
 			Assert.NotNull(sourceMovement);
 			Assert.Equal(ReasonMovement.Picking, sourceMovement.Reason);

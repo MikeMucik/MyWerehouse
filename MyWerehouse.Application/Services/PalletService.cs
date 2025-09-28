@@ -7,6 +7,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Results;
 using MyWerehouse.Application.Utils;
@@ -116,7 +117,7 @@ namespace MyWerehouse.Application.Services
 			var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
 			if (pallet == null)
 			{
-				throw new ArgumentNullException($"Paleta o numerze {palletId} nie została znaleziona");
+				throw new PalletNotFoundException(palletId);
 			}
 			//sprawdzenie czy lokalizacja jest zajęta
 			var existingPalletInDestination = await _palletRepo.GetPalletByLocationAsync(destinationLocation); // Nowa metoda repo
@@ -149,15 +150,15 @@ namespace MyWerehouse.Application.Services
 			return palletDTO;
 		}
 
-		public async Task<int> AddPalletToPickingAsync(int issueId, int productId, DateOnly? bestBefore, string userId)
+		public async Task<VirtualPallet> AddPalletToPickingAsync(int issueId, int productId, DateOnly? bestBefore, string userId)
 		{
 			var newPalletsToPicking = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
-			var newPallet = newPalletsToPicking.First() ?? throw new InvalidOperationException("Brak palet do pickingu");
-			var virtualPalletId = await _pickingPalletRepo.AddPalletToPickingAsync(newPallet.Id);
+			var newPallet = newPalletsToPicking.Where(a=>a.Status == PalletStatus.Available||
+			a.Status == PalletStatus.InStock || a.Status == PalletStatus.Receiving).First() ?? throw new PalletNotFoundException("Brak palet do pickingu");
+			var virtualPallet = await _pickingPalletRepo.AddPalletToPickingAsync(newPallet.Id);
 			await _palletRepo.ChangePalletStatusAsync(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
 			await _historyService.CreateMovementAsync(newPallet, newPallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.ToPicking, null);
-			await _werehouseDbContext.SaveChangesAsync();//by wykluczyć wzięcie palety do Issue i dodać paletę do pickingu	
-			return virtualPalletId;
+			return virtualPallet;
 		}
 	}
 }

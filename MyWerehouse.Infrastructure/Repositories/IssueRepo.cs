@@ -18,11 +18,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext = werehouseDbContext;
 		}
 			
-		public async Task AddIssueAsync(Issue issue)
+		public void AddIssue(Issue issue)
 		{
-			_werehouseDbContext.Issues
-			   .Add(issue);
-			await _werehouseDbContext.SaveChangesAsync();
+			_werehouseDbContext.Issues.Add(issue);			
 		}		
 		public async Task DeleteIssueAsync(int id)
 		{
@@ -30,39 +28,16 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (issue != null)
 			{
 				_werehouseDbContext.Remove(issue);
-				await _werehouseDbContext.SaveChangesAsync();
 			}
 		}		
-		public async Task UpdateIssueAsync(Issue issue)
-		{
-			_werehouseDbContext.Attach(issue);
-			if (issue.IssueDateTimeCreate!= DateTime.MinValue)
-			{
-				_werehouseDbContext.Entry(issue).Property(nameof(issue.IssueDateTimeCreate)).IsModified = true;
-			}
-			if (issue.PerformedBy != null)
-			{
-				_werehouseDbContext.Entry(issue).Property(nameof(issue.PerformedBy)).IsModified = true;
-			}
-			await _werehouseDbContext.SaveChangesAsync();
-		}		
+			
 		public async Task<Issue?> GetIssueByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}
-		public async Task<Issue?> GetIssueForLoadAsync(int id)
-		{
-			return await _werehouseDbContext.Issues
-				.Include(i => i.Pallets)
-					.ThenInclude(p=>p.ProductsOnPallet)
-						.ThenInclude(pr=>pr.Product)
-				.Include(i => i.Pallets)
-					.ThenInclude(p => p.Location)
-						
-				.FirstOrDefaultAsync(i => i.Id == id);
-		}
+		
 		public async Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids)
 		{
 			return await _werehouseDbContext.Issues
@@ -121,7 +96,8 @@ namespace MyWerehouse.Infrastructure.Repositories
 				})
 				.ToListAsync();
 			return list;		
-		}		
+		}
+		
 	}
 }
 //// TODO: Improve pallet selection logic.

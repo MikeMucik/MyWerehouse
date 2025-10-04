@@ -145,19 +145,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.True(result.Success);
 			Assert.Contains("Towar dołączono do wydania", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
-			Assert.Equal(IssueStatus.InProgress, issue.IssueStatus);
+			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
 			// Picking pallet
 			var palletToPicking = DbContext.Pallets.FirstOrDefault(p => p.Id == "P3");
-			var pickingPallet = DbContext.VirtualPallets.Include(pp => pp.Allocation).SingleOrDefault();
+			var pickingPallet = DbContext.VirtualPallets.Include(pp => pp.Allocations).SingleOrDefault();
 			Assert.NotNull(palletToPicking);
 			Assert.NotNull(pickingPallet);
-			Assert.Equal(6, pickingPallet.Allocation.First().Quantity);
+			Assert.Equal(6, pickingPallet.Allocations.First().Quantity);
 			Assert.Equal(4, pickingPallet.RemainingQuantity);
 			Assert.Equal("P3", pickingPallet.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking.Status);
-			Assert.Equal(issue.Id, pickingPallet.Allocation.First().IssueId);
+			Assert.Equal(issue.Id, pickingPallet.Allocations.First().IssueId);
 			// Movements
 			var movements = DbContext.PalletMovements.ToList();
 			Assert.NotEmpty(movements);
@@ -290,10 +290,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Assert
 			Assert.False(result.Success);
-			Assert.Contains("Brak odpowiedniej ilości towaru", result.Message);
+			Assert.Contains("Produkt o numerze 1 nie został dodany do", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Quantity, result.QuantityRequest);
-			
+
 			var stock = 30; //Quantity P1+P2+P3
 			Assert.Equal(stock, result.QuantityOnStock);
 		}
@@ -421,7 +421,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Assert
 			Assert.False(result.Success);
-			Assert.Contains("Brak odpowiedniej ilości towaru", result.Message);
+			Assert.Contains("Produkt o numerze 1 nie został dodany do", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Quantity, result.QuantityRequest);
 
@@ -582,32 +582,42 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			await DbContext.SaveChangesAsync();
 
 			// Act
-			var issueItem1 = new IssueItemDTO
-			{
-				ProductId = product1.Id,
-				Quantity = 26, // 2 pełne palety + 6 do pickingu
-				BestBefore = new DateOnly(2025, 10, 10)
-			};
-			var issueItem2 = new IssueItemDTO
-			{
-				ProductId = product2.Id,
-				Quantity = 17, // 1 pełne palety + 7 do pickingu
-				BestBefore = new DateOnly(2025, 10, 10)
-			};
+			//var issueItem1 = new IssueItemDTO
+			//{
+			//	ProductId = product1.Id,
+			//	Quantity = 26, // 2 pełne palety + 6 do pickingu
+			//	BestBefore = new DateOnly(2025, 10, 10)
+			//};
+			//var issueItem2 = new IssueItemDTO
+			//{
+			//	IssueId = 
+			//	ProductId = product2.Id,
+			//	Quantity = 17, // 1 pełne palety + 7 do pickingu
+			//	BestBefore = new DateOnly(2025, 10, 10)
+			//};
 			var createIssue = new CreateIssueDTO
 			{
 				ClientId = initailClient.Id,
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
-				{
-					issueItem1, issueItem2
+				{	new IssueItemDTO
+					{
+						ProductId = product1.Id,
+						Quantity = 26, // 2 pełne palety + 6 do pickingu
+						BestBefore = new DateOnly(2025, 10, 10)
+					},  new IssueItemDTO
+					{
+						ProductId = product2.Id,
+						Quantity = 17, // 1 pełne palety + 7 do pickingu
+						BestBefore = new DateOnly(2025, 10, 10)
+					}
 				}
 			};
-			await _issueService.CreateNewIssueAsync(createIssue, new DateTime(2025, 9, 15));
+			await _issueService.CreateNewIssueAsync(createIssue, DateTime.UtcNow.AddDays(7));
 
 			// Assert
 			var issue = DbContext.Issues.First();
-			Assert.Equal(IssueStatus.InProgress, issue.IssueStatus);
+			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
 			// Picking pallet
@@ -616,25 +626,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 
 			var palletToPicking1 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P3");
-			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P3");
+			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.Allocations).FirstOrDefault(p => p.PalletId == "P3");
 			Assert.NotNull(palletToPicking1);
 			Assert.NotNull(pickingPallet1);
-			Assert.Equal(6, pickingPallet1.Allocation.First().Quantity);
+			Assert.Equal(6, pickingPallet1.Allocations.First().Quantity);
 			//Assert.Equal(6, pickingPallet1.Allocation.FirstOrDefault(i=>i.IssueId == issue.Id).Quantity);
 			Assert.Equal(4, pickingPallet1.RemainingQuantity);
 			Assert.Equal("P3", pickingPallet1.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking1.Status);
-			Assert.Equal(issue.Id, pickingPallet1.Allocation.First().IssueId);
+			Assert.Equal(issue.Id, pickingPallet1.Allocations.First().IssueId);
 
 			var palletToPicking2 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P5");
-			var pickingPallet2 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P5");
+			var pickingPallet2 = DbContext.VirtualPallets.Include(pp => pp.Allocations).FirstOrDefault(p => p.PalletId == "P5");
 			Assert.NotNull(palletToPicking2);
 			Assert.NotNull(pickingPallet2);
-			Assert.Equal(7, pickingPallet2.Allocation.First().Quantity);
+			Assert.Equal(7, pickingPallet2.Allocations.First().Quantity);
 			Assert.Equal(3, pickingPallet2.RemainingQuantity);
 			Assert.Equal("P5", pickingPallet2.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking2.Status);
-			Assert.Equal(issue.Id, pickingPallet2.Allocation.First().IssueId);
+			Assert.Equal(issue.Id, pickingPallet2.Allocations.First().IssueId);
 
 			// Movements
 			var movements = DbContext.PalletMovements.ToList();
@@ -763,7 +773,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Status = PalletStatus.ToPicking,//paleta jest już paletą źródłową pickingu
 				ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
 					}
 			};
 			var pallet4 = new Pallet
@@ -810,7 +820,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				PickingStatus = PickingStatus.Allocated,
 				Issue = oldIssue
 			};
-			sourcePallet.Allocation = new List<Allocation> { allocation };
+			sourcePallet.Allocations = new List<Allocation> { allocation };
 			DbContext.Addresses.Add(address);
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.AddRange(initialCategory1, initialCategory2);
@@ -846,11 +856,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					issueItem1, issueItem2
 				}
 			};
-			await _issueService.CreateNewIssueAsync(createIssue, new DateTime(2025, 9, 15));
-
+			var result = await _issueService.CreateNewIssueAsync(createIssue, new DateTime(2025, 9, 30));
+			Assert.NotNull(result);
 			// Assert
+			Assert.NotNull(result);
+			//Assert.False(result.S)
 			var issue = DbContext.Issues.FirstOrDefault(i => i.Id == 2);
-			Assert.Equal(IssueStatus.InProgress, issue.IssueStatus);
+			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
 			// Picking pallet
@@ -859,25 +871,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 
 			var palletToPicking1 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P3");
-			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P3");
+			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.Allocations).FirstOrDefault(p => p.PalletId == "P3");
 			Assert.NotNull(palletToPicking1);
 			Assert.NotNull(pickingPallet1);
 			//Assert.Equal(6, pickingPallet1.Allocation.First().Quantity);
-			Assert.Equal(6, pickingPallet1.Allocation.FirstOrDefault(i => i.IssueId == issue.Id).Quantity);
+			Assert.Equal(6, pickingPallet1.Allocations.FirstOrDefault(i => i.IssueId == issue.Id).Quantity);
 			Assert.Equal(2, pickingPallet1.RemainingQuantity); //bo zarezerzowane z innego wydania
 			Assert.Equal("P3", pickingPallet1.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking1.Status);
 			//Assert.Equal(issue.Id, pickingPallet1.Allocation.FirstOrDefault(i=>i.).IssueId);
 
 			var palletToPicking2 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P5");
-			var pickingPallet2 = DbContext.VirtualPallets.Include(pp => pp.Allocation).FirstOrDefault(p => p.PalletId == "P5");
+			var pickingPallet2 = DbContext.VirtualPallets.Include(pp => pp.Allocations).FirstOrDefault(p => p.PalletId == "P5");
 			Assert.NotNull(palletToPicking2);
 			Assert.NotNull(pickingPallet2);
-			Assert.Equal(7, pickingPallet2.Allocation.First().Quantity);
+			Assert.Equal(7, pickingPallet2.Allocations.First().Quantity);
 			Assert.Equal(3, pickingPallet2.RemainingQuantity);
 			Assert.Equal("P5", pickingPallet2.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking2.Status);
-			Assert.Equal(issue.Id, pickingPallet2.Allocation.First().IssueId);
+			Assert.Equal(issue.Id, pickingPallet2.Allocations.First().IssueId);
 
 			// Movements
 			var movements = DbContext.PalletMovements.ToList();

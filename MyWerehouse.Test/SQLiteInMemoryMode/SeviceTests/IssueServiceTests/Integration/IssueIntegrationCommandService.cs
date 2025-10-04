@@ -15,6 +15,7 @@ using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Repositories;
 using static MyWerehouse.Application.ViewModels.IssueModels.CreateIssueDTO;
+using static MyWerehouse.Application.ViewModels.IssueModels.UpdateIssueDTO;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
@@ -43,6 +44,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		protected readonly IValidator<CreateIssueDTO> _createIssueValidator;
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
 		protected readonly IValidator<UpdatePalletDTO> _updatePalletValidator;
+		protected readonly IValidator<UpdateIssueDTO> _updateIssueValidator;
+
+		protected readonly IIssueItemRepo _issueItemRepo;
 		public IssueIntegrationCommandService()
 		{
 			var MapperConfig = new MapperConfiguration(cfg =>
@@ -69,6 +73,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			_palletRepo = new PalletRepo(DbContext);
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
 			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
+			//_updateIssueValidator = new UpdateIssueDTOValidion();
 			_palletService = new PalletService(
 				_palletRepo,
 				_historyService,
@@ -78,18 +83,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				_mapper,
 				_updatePalletValidator
 				, DbContext);
+			_issueItemRepo = new IssueItemRepo(DbContext);
 			_inventoryRepo = new InventoryRepo(DbContext);
+			_inventoryService = new InventoryService(_inventoryRepo, _mapper);
 			_issueService = new IssueService(
 				_issueRepo,
 				_mapper,
 				DbContext,
 				_historyService,
-				_inventoryRepo,
+				_inventoryService,
 				_palletRepo,
 				_productRepo,
 				_pickingPalletRepo,
 				_palletService,
-				_createIssueValidator
+				_issueItemRepo,
+				_createIssueValidator,
+				_updateIssueValidator
 				);
 		}
 	}

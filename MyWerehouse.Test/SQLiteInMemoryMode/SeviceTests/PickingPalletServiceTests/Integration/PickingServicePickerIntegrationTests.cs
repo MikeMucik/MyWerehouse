@@ -116,7 +116,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet,
 			};
-			virtualPallet.Allocation = new List<Allocation> { allocation};
+			virtualPallet.Allocations = new List<Allocation> { allocation};
 			DbContext.Allocations.Add(allocation);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
@@ -254,7 +254,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet,
 			};
-			virtualPallet.Allocation = new List<Allocation> { allocation };
+			virtualPallet.Allocations = new List<Allocation> { allocation };
 			DbContext.Allocations.Add(allocation);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
@@ -410,7 +410,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet1,
 			};
-			virtualPallet1.Allocation = new List<Allocation> { allocation1 };			
+			virtualPallet1.Allocations = new List<Allocation> { allocation1 };			
 			DbContext.Allocations.AddRange(allocation1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
@@ -574,7 +574,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet1,
 			};
-			virtualPallet1.Allocation = new List<Allocation> { allocation1 };
+			virtualPallet1.Allocations = new List<Allocation> { allocation1 };
 			DbContext.Allocations.AddRange(allocation1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
@@ -736,7 +736,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet1,
 			};
-			virtualPallet1.Allocation = new List<Allocation> { allocation1 };
+			virtualPallet1.Allocations = new List<Allocation> { allocation1 };
 			DbContext.Allocations.AddRange(allocation1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();

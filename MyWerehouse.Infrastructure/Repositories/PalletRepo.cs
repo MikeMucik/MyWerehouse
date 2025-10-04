@@ -43,7 +43,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Pallets
-				.Include(a=>a.ProductsOnPallet)
+				.Include(a => a.ProductsOnPallet)
 				.Where(p => p.Status != PalletStatus.Archived);
 			if (filter.ProductId > 0)
 			{
@@ -113,16 +113,27 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.ThenBy(p => p.LocationId);
 			return pallets;
 		}
-		public async Task ClearPalletFromListIssueAsync(string palletId)
-		{
-			var pallet = await _werehouseDbContext.Pallets
-				.FirstOrDefaultAsync(p => p.Id == palletId);
+		//public async Task ClearPalletFromListIssueAsync(string palletId)
+		//{
+		//	var pallet = await _werehouseDbContext.Pallets
+		//		.FirstOrDefaultAsync(p => p.Id == palletId);
+		//	if (pallet is null) return;
+
+		//	pallet.IssueId = null;
+		//	pallet.Status = PalletStatus.Available;
+		//	await _werehouseDbContext.SaveChangesAsync();
+		//}
+
+		public void ClearPalletFromListIssue(Pallet pallet)
+		{			
+			if (pallet is null) return;
 			pallet.IssueId = null;
-			pallet.Status = PalletStatus.Available;
+			pallet.Status = PalletStatus.Available;					
 		}
+//issue.Pallets.Remove(pallet);	
 		public async Task ChangePalletStatusAsync(string palletId, PalletStatus palletStatus)
 		{
-			var pallet =await _werehouseDbContext.Pallets
+			var pallet = await _werehouseDbContext.Pallets
 				.FirstOrDefaultAsync(p => p.Id == palletId);
 			switch (palletStatus)
 			{

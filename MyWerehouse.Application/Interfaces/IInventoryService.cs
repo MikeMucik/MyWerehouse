@@ -12,5 +12,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task ChangeProductQunatityAsync(int productId, int quantity);
 		Task UpdateProductQunatityAsync(int productId, int quantity);
 		Task<InventoryDTO> GetInventoryAsync(int productId);
+		Task<int> GetProductCountAsync(int productId, DateOnly? BestBefore);
 	}
 }

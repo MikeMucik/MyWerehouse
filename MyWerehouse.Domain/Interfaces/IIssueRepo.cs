@@ -8,14 +8,15 @@ using MyWerehouse.Domain.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IIssueRepo
-	{		
-		Task AddIssueAsync(Issue issue);		
-		Task DeleteIssueAsync(int id);		
-		Task UpdateIssueAsync(Issue issue);			
+	{
+		void AddIssue(Issue issue);
+		Task DeleteIssueAsync(int id);
+		//Task UpdateIssueAsync(Issue issue);
 		Task<Issue?> GetIssueByIdAsync(int id);
-		Task<Issue?> GetIssueForLoadAsync(int id);
-		Task <List<Issue>> GetIssuesByIdsAsync(List<int> ids);
+		//Task<Issue?> GetIssueForLoadAsync(int id);
+		Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids);
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
-		Task <List<PalletWithLocation>> GetPalletByIssueIdAsync(int id);			
+		Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id);
+		//Task<int> GetQuantityProductByIssueAsync(int issueId, int productId);
 	}
 }

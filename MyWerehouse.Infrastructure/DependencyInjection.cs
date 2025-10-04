@@ -21,6 +21,7 @@ namespace MyWerehouse.Infrastructure
 			services.AddTransient<IHistoryPickingRepo, HistoryPickingRepo>();
 			services.AddTransient<IInventoryRepo, InventoryRepo>();
 			services.AddTransient<IIssueRepo, IssueRepo>();
+			services.AddTransient<IIssueItemRepo, IssueItemRepo>();
 			services.AddTransient<ILocationRepo, LocationRepo>();
 			services.AddTransient<IPalletMovementRepo, PalletMovementRepo>();
 			services.AddTransient<IPalletRepo, PalletRepo>();

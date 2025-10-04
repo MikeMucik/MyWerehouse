@@ -150,7 +150,7 @@ namespace MyWerehouse.Application.Services
 			return palletDTO;
 		}
 
-		public async Task<VirtualPallet> AddPalletToPickingAsync(int issueId, int productId, DateOnly? bestBefore, string userId)
+		public async Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId)
 		{
 			var newPalletsToPicking = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
 			var newPallet = newPalletsToPicking.Where(a=>a.Status == PalletStatus.Available||
@@ -159,6 +159,23 @@ namespace MyWerehouse.Application.Services
 			await _palletRepo.ChangePalletStatusAsync(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
 			await _historyService.CreateMovementAsync(newPallet, newPallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.ToPicking, null);
 			return virtualPallet;
+		}
+
+		public async Task<List<Pallet>> GetAllAvailablePalletsAsync(int productId, DateOnly? bestBefore)
+		{
+			var tracked = _werehouseDbContext.ChangeTracker.Entries<Pallet>()
+			.Where(e => e.Entity.Status == PalletStatus.Available
+					 && e.Entity.ProductsOnPallet.Any(prod => prod.ProductId == productId
+															&& (bestBefore == null || prod.BestBefore == bestBefore)))
+			.Select(e => e.Entity)
+			.ToList();
+			var trackedIds = tracked.Select(p => p.Id).ToHashSet();
+
+			var fromDb = await _palletRepo.GetAvailablePallets(productId, bestBefore)
+				.Where(p => !trackedIds.Contains(p.Id))
+				.ToListAsync();
+			
+			return tracked.Concat(fromDb).ToList();
 		}
 	}
 }

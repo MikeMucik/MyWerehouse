@@ -82,13 +82,21 @@ namespace MyWerehouse.Application.Services
 					PalletId = p.Id,
 					LocationId = p.LocationId,
 				}).ToList();
-			
+
+			var items = issue.IssueItems.Select(p => new HistoryIssueItems
+			{
+				ProductId = p.ProductId,
+				Quantity = p.Quantity,
+				BestBefore = p.BestBefore,
+			}).ToList();
+
 			var history = new HistoryIssue
 			{
 				IssueId = issue.Id,				
 				StatusAfter = issue.IssueStatus,				
 				PerformedBy = issue.PerformedBy,
 				Details = details.ToList(),
+				Items = items,
 				DateTime = DateTime.UtcNow,
 			};
 			await _historyIssueRepo.AddHistoryIssueAsync(history);

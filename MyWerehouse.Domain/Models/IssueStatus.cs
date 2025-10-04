@@ -16,5 +16,6 @@ namespace MyWerehouse.Domain.Models
 		ConfirmedToLoad = 5,
 		ChangingPallet = 6,
 		NotComplete = 7,
+		Pending = 8,
 	}
 }

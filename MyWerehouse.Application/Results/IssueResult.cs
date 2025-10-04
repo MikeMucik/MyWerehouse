@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Exceptions;
+using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Results
 {
@@ -13,15 +14,14 @@ namespace MyWerehouse.Application.Results
 		public string Message { get; set; }
 		public int ProductId { get; set; }
 		public int QuantityRequest { get; set; }
-		public int QuantityOnStock { get; set; }
-		//public int MoreNeeded { get; set; }
+		public int QuantityOnStock { get; set; }		
+		//public IssueStatus Status { get; set; }
 
 		public IssueResult() { }
 
 		public static IssueResult Ok(
 			string message,
-			int product
-			)
+			int product)
 		{
 			return new IssueResult
 			{
@@ -34,8 +34,7 @@ namespace MyWerehouse.Application.Results
 			string message,
 			int productNotAdded,
 			int issueQuantity,
-			int onStock
-			)
+			int onStock)
 		{
 			return new IssueResult
 			{
@@ -44,6 +43,25 @@ namespace MyWerehouse.Application.Results
 				ProductId = productNotAdded,
 				QuantityRequest = issueQuantity,
 				QuantityOnStock = onStock
+			};
+		}
+		public static IssueResult Fail(
+			string message,
+			int productNotAdded)
+		{
+			return new IssueResult
+			{
+				Success = false,
+				Message = message,
+				ProductId = productNotAdded,
+			};
+		}
+		public static IssueResult Fail(string message)
+		{
+			return new IssueResult
+			{
+				Success = false,
+				Message = message				
 			};
 		}
 	}

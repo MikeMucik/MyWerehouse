@@ -13,9 +13,7 @@ namespace MyWerehouse.Application.Results
 		public string Message { get; set; }
 		public List<IssueOptions> IssueOptions { get; set; } = new List<IssueOptions>();
 		public string ProductInfo { get; set; }
-
 		public PickingResult() { }
-
 		public static PickingResult Ok(
 			string message ,
 			string productInfo = null,
@@ -29,7 +27,6 @@ namespace MyWerehouse.Application.Results
 				IssueOptions = issueOptions ?? new List<IssueOptions>()
 			};
 		}	
-
 		public static PickingResult RequiresOrder(
 			string productInfo,
 			List<IssueOptions> issueOptions,
@@ -44,7 +41,6 @@ namespace MyWerehouse.Application.Results
 				Message = message
 			};
 		}
-
 		public static PickingResult Fail(string message)
 		{
 			return new PickingResult

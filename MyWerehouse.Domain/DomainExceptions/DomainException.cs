@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.DomainExceptions
 {
-	public class DomainVirtualPalletException : Exception
+	public class DomainException : Exception
 	{
-		public string PalletId { get; set; }
-
-		public DomainVirtualPalletException(string message) : base(message) { }
+		public string Message { get; set; }
+		public DomainException(string message) { Message = message; }
 	}
 }

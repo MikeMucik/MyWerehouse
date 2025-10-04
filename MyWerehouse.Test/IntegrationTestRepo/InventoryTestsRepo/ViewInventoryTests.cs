@@ -39,5 +39,17 @@ namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 			Assert.Equal(2, result.Count());
 			Assert.Equal(10, result.FirstOrDefault(p=>p.ProductId == 10).Quantity);			
 		}
+		//[Fact]
+		//public void ReturnAmount_GetQuantityProductReservedForPickingAsync_GiveProperQuantity()
+		//{
+		//	//Arrange
+		//	var productId = 1;
+		//	var bestBefore = new DateOnly(2025, 12, 12);
+		//	//var
+		//	//Act
+		//	var result = _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId, bestBefore);
+		//	//Assert
+		//	Assert.NotNull(result);
+		//}
 	}
 }

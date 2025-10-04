@@ -125,10 +125,73 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 			//var totalFromPicking = await pickingQuery.SumAsync(pp => pp.RemainingQuantity);
 			var totalFromPicking = await pickingQuery
-				.Select(pp => pp.IssueInitialQuantity - (pp.Allocation.Sum(a =>(int?) a.Quantity) ?? 0))
+				.Select(pp => pp.IssueInitialQuantity - (pp.Allocations.Sum(a =>(int?) a.Quantity) ?? 0))
 				.SumAsync();
 
 			return totalFromFullPallets + totalFromPicking;
+		}
+
+		public async Task<int> GetQuantityForProductAsync(int productId, DateOnly? bestBefore)
+		{
+			var palletsWithProduct = _werehouseDbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.Where(p => p.Status != PalletStatus.OnHold &&
+				p.Status != PalletStatus.Archived &&
+				p.Status != PalletStatus.Damaged)
+				.AsQueryable();
+
+			if (bestBefore.HasValue)
+			{
+				palletsWithProduct = palletsWithProduct
+					.Where(p => p.ProductsOnPallet.Any(pop =>
+						pop.ProductId == productId && pop.BestBefore >= bestBefore));
+			}
+			var totalFromPallets = await palletsWithProduct
+				.SelectMany(p => p.ProductsOnPallet)
+				.Where(pop => pop.ProductId == productId)
+				.SumAsync(pop => pop.Quantity);
+			return totalFromPallets;
+		}
+
+		public async Task<int> GetQuantityProductReservedForIssueAsync(int productId, DateOnly? bestBefore)
+		{
+			var palletsWithProduct = _werehouseDbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.Where(p => p.Status == PalletStatus.ToIssue)
+				.AsQueryable();
+
+			if (bestBefore.HasValue)
+			{
+				palletsWithProduct = palletsWithProduct
+					.Where(p => p.ProductsOnPallet.Any(pop =>
+						pop.ProductId == productId && pop.BestBefore >= bestBefore));
+			}
+			var totalFromPallets = await palletsWithProduct
+				.SelectMany(p => p.ProductsOnPallet)
+				.Where(pop => pop.ProductId == productId)
+				.SumAsync(pop => pop.Quantity);
+			return totalFromPallets;
+		}
+
+		public async Task<int> GetQuantityProductReservedForPickingAsync(int productId, DateOnly? bestBefore)
+		{
+			var palletsWithProduct = _werehouseDbContext.VirtualPallets
+				.Include(p=>p.Pallet)
+				.Where(p=>p.Pallet.Status == PalletStatus.ToPicking &&
+				p.Pallet.ProductsOnPallet.Any(pop=>pop.ProductId == productId))					
+				.AsQueryable();
+
+			if (bestBefore.HasValue)
+			{
+				palletsWithProduct = palletsWithProduct
+					.Where(pp => pp.Pallet.ProductsOnPallet
+					.Any(pop => pop.ProductId == productId && pop.BestBefore >= bestBefore));
+			}
+			var totalAllocated = await palletsWithProduct
+			   .SelectMany(pp => pp.Allocations)
+			   .SumAsync(a => (int?)a.Quantity) ?? 0;
+
+			return totalAllocated;
 		}
 	}
 }

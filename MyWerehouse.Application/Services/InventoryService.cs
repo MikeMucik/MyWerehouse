@@ -51,6 +51,15 @@ namespace MyWerehouse.Application.Services
 			var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
 			return inventoryDTO;
 		}
+
+		public async Task<int> GetProductCountAsync(int productId, DateOnly? bestBefore)
+		{
+			var totalProductByDate =await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
+			var totalProductReservedToIssues = await _inventoryRepo.GetQuantityProductReservedForIssueAsync(productId, bestBefore);
+			var totalProductReservedToPicking =await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId, bestBefore);
+			return totalProductByDate-totalProductReservedToIssues-totalProductReservedToPicking;
+		}
+
 		public async Task UpdateProductQunatityAsync(int productId, int quantity)
 		{
 			await _inventoryRepo.UpdateInventoryAsync(productId, quantity);

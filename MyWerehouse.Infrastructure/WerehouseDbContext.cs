@@ -15,10 +15,11 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<HistoryIssue> HistoryIssues { get; set; }
 		public DbSet<HistoryIssueDetail> HistoryIssueDetails { get; set; }
 		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }//
-		//public DbSet<HistoryReceiptDetail> HistoryReceiptDetails { get; set; }//
+																
 		public DbSet<HistoryPicking> HistoryPickings { get; set; }//		
 		public DbSet<Inventory> Inventories { get; set; }
 		public DbSet<Issue> Issues { get; set; }
+		public DbSet<IssueItem> IssueItems { get; set; }
 		public DbSet<Location> Locations { get; set; }
 		public DbSet<Pallet> Pallets { get; set; }
 		public DbSet<PalletMovement> PalletMovements { get; set; }
@@ -67,12 +68,12 @@ namespace MyWerehouse.Infrastructure
 				.HasConversion<string>();
 
 				entity.HasOne(a => a.VirtualPallet)
-					.WithMany(p => p.Allocation)
+					.WithMany(p => p.Allocations)
 					.HasForeignKey(a => a.VirtualPalletId);
 
 				entity.HasOne(a => a.Issue)
-				 .WithMany()
-				 .HasForeignKey(a => a.IssueId);
+					 .WithMany(a=>a.Allocations)
+					 .HasForeignKey(a => a.IssueId);
 			});
 			modelBuilder.Entity<Category>(entity =>
 			{
@@ -137,12 +138,6 @@ namespace MyWerehouse.Infrastructure
 				entity.Property(r => r.StatusAfter)
 				.HasConversion<string>();
 			});
-			//modelBuilder.Entity<HistoryReceiptDetail>(entity =>
-			//{
-			//	entity.HasOne(h => h.HistoryReceipt)
-			//	.WithMany(hd => hd.Details)
-			//	.HasForeignKey(h => h.HistoryReceiptId);
-			//});
 			modelBuilder.Entity<HistoryPicking>(entity =>
 			{
 				entity.HasKey(e => e.Id);
@@ -160,7 +155,7 @@ namespace MyWerehouse.Infrastructure
 				 .OnDelete(DeleteBehavior.Restrict);
 
 				entity.HasOne(a => a.Issue)
-				  .WithMany()
+				  .WithMany(i=>i.HistoryPickings)
 				   .HasForeignKey(h => h.IssueId)
 				   .OnDelete(DeleteBehavior.Restrict);
 
@@ -185,7 +180,32 @@ namespace MyWerehouse.Infrastructure
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+			
+				//entity.HasOne(a => a.Issue)
+				//	.WithMany(i => i.Allocations)
+				//	.HasForeignKey(a => a.IssueId)
+				//	.OnDelete(DeleteBehavior.Restrict);
 
+			});
+			modelBuilder.Entity<IssueItem>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x=>x.Id).ValueGeneratedOnAdd();		
+				
+				entity.HasOne(e=>e.Issue)
+					.WithMany(a => a.IssueItems)
+					.HasForeignKey(a=>a.IssueId)
+					.OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasOne(e => e.Product)
+					.WithMany()
+					.HasForeignKey(e => e.ProductId)
+					.OnDelete(DeleteBehavior.Restrict);
+
+				//entity.HasOne(a => a.Issue)
+				//	.WithMany(i => i.HistoryPickings)
+				//	.HasForeignKey(h => h.IssueId)
+				//	.OnDelete(DeleteBehavior.Restrict);
 			});
 			modelBuilder.Entity<Location>(entity =>
 			{
@@ -196,17 +216,22 @@ namespace MyWerehouse.Infrastructure
 			{
 				entity.HasKey(p => p.Id);
 				entity.Property(p => p.Id)
-				.IsRequired()
-				.HasMaxLength(10);
+					.IsRequired()
+					.HasMaxLength(10);
 
 				entity.Property(p => p.Status)
 				.HasConversion<string>();
 
 				entity.HasMany(p => p.ProductsOnPallet)
-				.WithOne()
-				.HasForeignKey(pop => pop.PalletId)
-				.IsRequired()
-				.OnDelete(DeleteBehavior.Cascade);
+					.WithOne()
+					.HasForeignKey(pop => pop.PalletId)
+					.IsRequired()
+					.OnDelete(DeleteBehavior.Cascade);
+
+				entity.HasOne(p => p.Issue)
+					.WithMany(i => i.Pallets)
+					.HasForeignKey(p => p.IssueId)
+					.OnDelete(DeleteBehavior.Restrict);
 			});
 			modelBuilder.Entity<PalletMovement>(entity =>
 			{
@@ -234,20 +259,20 @@ namespace MyWerehouse.Infrastructure
 				entity.HasKey(e => e.Id);
 				entity.Property(entity => entity.Id).ValueGeneratedOnAdd();
 
-				entity.HasMany(p => p.Allocation)
-				.WithOne()
-				.HasForeignKey(p => p.VirtualPalletId)
-				.OnDelete(DeleteBehavior.Restrict);
+				entity.HasMany(p => p.Allocations)
+						.WithOne(a => a.VirtualPallet)//tu był błąd jendokierunkowy
+						.HasForeignKey(p => p.VirtualPalletId)
+						.OnDelete(DeleteBehavior.Restrict);
 
 				entity.HasOne(vp => vp.Location)
-					  .WithMany()
-					  .HasForeignKey(vp => vp.LocationId)
-					  .OnDelete(DeleteBehavior.Cascade);
+						.WithMany()
+						.HasForeignKey(vp => vp.LocationId)
+						.OnDelete(DeleteBehavior.Cascade);
 
 				entity.HasOne(vp => vp.Pallet)
-					  .WithMany()
-					  .HasForeignKey(vp => vp.PalletId)
-					  .OnDelete(DeleteBehavior.Restrict);
+						.WithMany()
+						.HasForeignKey(vp => vp.PalletId)
+						.OnDelete(DeleteBehavior.Restrict);
 
 			});
 			modelBuilder.Entity<Product>(entity =>

@@ -280,7 +280,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueInitialQuantity = 20,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocation = new List<Allocation>()
+				Allocations = new List<Allocation>()
 			};
 			var virtualPallet2 = new VirtualPallet
 			{
@@ -288,7 +288,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueInitialQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocation = new List<Allocation> { allocation2 }
+				Allocations = new List<Allocation> { allocation2 }
 			};
 			allocation2.VirtualPallet = virtualPallet2;
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2);
@@ -424,7 +424,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueInitialQuantity = 20,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocation = new List<Allocation>()
+				Allocations = new List<Allocation>()
 			};
 			var virtualPallet2 = new VirtualPallet
 			{
@@ -432,7 +432,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueInitialQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocation = new List<Allocation> { allocation2 }
+				Allocations = new List<Allocation> { allocation2 }
 			};
 			allocation2.VirtualPallet = virtualPallet2;
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2);
@@ -445,8 +445,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.False(result.Success);
 			Assert.Equal($"Zamówienie o numerze {issue.Id} nie zostało znalezione.", result.Message);
 		}
-
-
 
 
 		//PrepareManualPicking
@@ -566,7 +564,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueInitialQuantity = 20,
 				Location = newToPickPallet.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocation = new List<Allocation>()
+				Allocations = new List<Allocation>()
 			};
 			var virtualPallet = new VirtualPallet
 			{
@@ -574,7 +572,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueInitialQuantity = 100,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocation = new List<Allocation> {allocation1, allocation2 }
+				Allocations = new List<Allocation> {allocation1, allocation2 }
 			};
 			allocation1.VirtualPallet = virtualPallet;
 			allocation2.VirtualPallet = virtualPallet;

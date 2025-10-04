@@ -17,8 +17,8 @@ namespace MyWerehouse.Application.Interfaces
 		Task UpdatePalletAsync(UpdatePalletDTO updatingPallet);		
 		Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id);		
 		Task<ChangeLocationResults> ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId, bool force = false);
-		//zrobić też gdy lokalizacja zajęta
 		Task <List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter);
-		Task<VirtualPallet> AddPalletToPickingAsync(int issueId, int productId, DateOnly? bestBefore, string userId);
+		Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId);
+		Task<List<Pallet>> GetAllAvailablePalletsAsync(int productId, DateOnly? bestBefore);
 	}
 }

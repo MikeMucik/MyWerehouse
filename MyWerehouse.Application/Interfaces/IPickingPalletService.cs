@@ -20,5 +20,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task<PickingResult> DoPickingAsync(AllocationDTO allocationDTO, string userId);		
 		Task<PickingResult> PrepareManualPickingAsync(string palletId);
 		Task<PickingResult> ExecuteManualPickingAsync(string palletId, int issueId, string userId);
+		Task<PickingResult> ClosePickingPalletAsync(string palletId, int issueId);
 	}
 }

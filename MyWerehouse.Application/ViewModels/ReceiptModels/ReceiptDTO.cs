@@ -25,7 +25,7 @@ namespace MyWerehouse.Application.ViewModels.ReceiptModels
 				//.ForMember(dest => dest.Pallets, opt => opt.UseDestinationValue());
 				.ForMember(dest => dest.Pallets, opt => opt.Ignore());
 
-			profile.CreateMap<ReceiptDTO, Receipt>()
+			profile.CreateMap<Receipt, ReceiptDTO>()
 				.ForMember(dest => dest.Pallets, opt => opt.MapFrom(src => src.Pallets)); 
 		}
 	}

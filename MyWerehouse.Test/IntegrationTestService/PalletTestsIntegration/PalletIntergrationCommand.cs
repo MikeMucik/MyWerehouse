@@ -52,14 +52,14 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			_palletRepo = new PalletRepo(_context);
 
 			_locationRepo = new LocationRepo(_context);
-			_locationService = new LocationService(_locationRepo, _mapper, _context);
+			_locationService = new LocationService(_locationRepo, _mapper, _palletRepo, _context);
 
 			_palletMovementRepo = new PalletMovementRepo(_context);
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
 			_historyIssueRepo = new HistoryIssueRepo(_context);
 			_historyReceiptRepo = new HistoryReceiptRepo(_context);
 			_historyAllocationRepo = new HistoryPickingRepo(_context);
-			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo);
+			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo, _context, _palletRepo, _mapper, _locationRepo);
 			_pickingPalletRepo = new PickingPalletRepo(_context);
 			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
 			_palletService = new PalletService(_palletRepo,
@@ -67,6 +67,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 				_locationService,
 				_palletMovementRepo,				
 				_pickingPalletRepo,
+				_locationRepo,
 				_mapper,
 				_updatePalletValidator,
 				_context);

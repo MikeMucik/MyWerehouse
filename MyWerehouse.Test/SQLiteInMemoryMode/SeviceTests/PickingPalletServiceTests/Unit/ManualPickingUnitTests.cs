@@ -51,6 +51,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		{
 			// Arrange
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			var allocationRepoMock = new Mock<IAllocationRepo>();
 			var mockMapper = new Mock<IMapper>();
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
@@ -61,7 +62,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				//mockMapper.Object,
+				allocationRepoMock.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,
@@ -125,6 +126,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		{
 			// Arrange
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			var allocationRepoMock = new Mock<IAllocationRepo>();
 			var mockMapper = new Mock<IMapper>();
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
@@ -135,7 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				//mockMapper.Object,
+				allocationRepoMock.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,
@@ -216,6 +218,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				ProductsOnPallet = new List<ProductOnPallet> { new() { ProductId = 1, Quantity = 5 } }
 			};
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			var allocationRepoMock = new Mock<IAllocationRepo>();
 			var mockMapper = new Mock<IMapper>();
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
@@ -226,7 +229,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				//mockMapper.Object,
+				allocationRepoMock.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,
@@ -295,6 +298,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		{
 			// Arrange
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			var allocationRepoMock = new Mock<IAllocationRepo>();
 			var mockMapper = new Mock<IMapper>();
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
@@ -305,7 +309,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var service = new PickingPalletService(
 				pickingRepoMock.Object,
-				//mockMapper.Object,
+				allocationRepoMock.Object,
 				DbContext,
 				locationRepoMock.Object,
 				palletRepo.Object,
@@ -321,7 +325,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			palletRepo.Setup(r => r.GetPalletByIdAsync("P123")).ReturnsAsync(pallet);
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(1001)).ReturnsAsync(new Issue { Id = 1001 });
-			pickingRepoMock.Setup(r => r.GetAllocationsByIssueIdProductIdAsync(1001, 1))
+			allocationRepoMock.Setup(r => r.GetAllocationsByIssueIdProductIdAsync(1001, 1))
 				.ThrowsAsync(new Exception("DB Error"));
 
 			// Act

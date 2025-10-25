@@ -17,25 +17,20 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext = werehouseDbContext;
 		}
 				
-		public async Task AddCategoryAsync(Category category)
+		public void AddCategory(Category category)
 		{
-			await _werehouseDbContext.Categories.AddAsync(category);			
+			 _werehouseDbContext.Categories.Add(category);			
 		}		
-		public async Task DeleteCategoryAsync(int idCategory)
-		{
-			var category =await _werehouseDbContext.Categories.FindAsync(idCategory);
-			if (category != null)
-			{
-				_werehouseDbContext.Categories.Remove(category);			
-			}
+		public void DeleteCategory(Category category)
+		{			
+				_werehouseDbContext.Categories.Remove(category);				
 		}		
 		public async Task SwitchOffCategoryAsync(int idCategory)
 		{
 			var category = await _werehouseDbContext.Categories.FindAsync(idCategory);
 			if (category != null)
 			{
-				category.IsDeleted = true;
-				await _werehouseDbContext.SaveChangesAsync();
+				category.IsDeleted = true;				
 			}
 		}				
 		public async Task<Category?> GetCategoryByIdAsync(int id)

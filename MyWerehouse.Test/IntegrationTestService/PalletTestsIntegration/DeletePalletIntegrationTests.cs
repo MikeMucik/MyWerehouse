@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Exceptions;
 using MyWerehouse.Domain.Models;
 using Xunit.Sdk;
 
@@ -104,7 +105,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			_context.SaveChanges();
 			var palletId = "Q1000";
 			//Act&Assert
-			var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _palletService.DeletePalletAsync(palletId));
+			var ex = await Assert.ThrowsAsync<PalletNotFoundException>(() => _palletService.DeletePalletAsync(palletId));
 
 			Assert.Contains("Palety o numerze", ex.Message);
 		}		
@@ -114,7 +115,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			//Arrange
 			var palletId = "1000";
 			//Act&Assert
-			var ex = await Assert.ThrowsAsync<ArgumentException>(() => _palletService.DeletePalletAsync(palletId));
+			var ex = await Assert.ThrowsAsync<PalletNotFoundException>(() => _palletService.DeletePalletAsync(palletId));
 
 			Assert.Contains("Nie ma palety o numerze", ex.Message);
 		}

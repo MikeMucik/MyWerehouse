@@ -15,26 +15,65 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public AllocationRepo(WerehouseDbContext werehouseDbContext)
 		{
 			_werehouseDbContext = werehouseDbContext;
+		}		
+		public void AddAllocation(Allocation allocation)
+		{			
+			_werehouseDbContext.Allocations.Add(allocation);    			
 		}
-		//public async Task AddAllocationApartFromCreatingIssueAsync(int issueId, int productId, int quantity)
-		//{
-		//	var allocation = new Allocation
-		//	{
-		//		IssueId = issueId,
-		//		Quantity = quantity,
+		public void DeleteAllocation(Allocation allocation)
+		{			
+			_werehouseDbContext.Allocations.Remove(allocation);
+		}
+		public async Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate)
+		{
+			var allocation = await _werehouseDbContext.Allocations
+				.Include(a => a.VirtualPallet)
+					.ThenInclude(b => b.Pallet)
+						.ThenInclude(c => c.ProductsOnPallet)
+				.Include(i => i.Issue)
+				.Where(p =>
+					p.VirtualPalletId == palletPickingId &&
+					p.Issue.IssueDateTimeCreate > pickingDate.AddDays(-7) &&
+					(
+						p.Issue.IssueDateTimeSend == pickingDate.Date ||
+						p.Issue.IssueDateTimeSend == pickingDate.AddDays(1).Date
+					) &&
+					p.PickingStatus == PickingStatus.Allocated)
+				.ToListAsync();
+			return allocation;
+		}
+		public async Task<Allocation> GetAllocationAsync(int allocationId)
+		{
+			return await _werehouseDbContext.Allocations.FirstOrDefaultAsync(a => a.Id == allocationId);
+		}
+		public async Task<List<Allocation>> GetAllocationsByIssueIdProductIdAsync(int issueId, int productId)
+		{
+			var result = await _werehouseDbContext.Allocations
+				.Include(i => i.Issue)
+				.Where(a => a.IssueId == issueId && a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == productId)
+				.ToListAsync();
+			return result;
+		}
+		public async Task<List<Allocation>> GetAllocationsProductIdAsync(int productId, DateTime from, DateTime to)
+		{
+			var result = await _werehouseDbContext.Allocations
+				.Include(i => i.Issue)
+				.Where(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == productId &&
+				a.PickingStatus == PickingStatus.Allocated &&
+				a.Quantity > 0 &&
+				(a.Issue.IssueDateTimeSend > from && a.Issue.IssueDateTimeSend < to))
+				.ToListAsync();
+			return result;
+		}
+		public async Task<List<Allocation>> GetAllocationsByIssueIdAsync(int issueId)
+		{
+			var result = await _werehouseDbContext.Allocations
+				.Include(i => i.Issue)
+				.Where(a => a.IssueId == issueId)
+				.ToListAsync();
+			return result;
+		}
 
-		//	};
-		//	await _werehouseDbContext.Allocations.AddAsync(allocation);
-		//}
-
-		//public async Task ChangeStatusPalletToPicked(int allocationId)
-		//{
-		//	var allocation = await _werehouseDbContext.Allocations
-		//		.FirstOrDefaultAsync(a => a.Id == allocationId);
-		//	//if (allocation == null) { new InvalidDataException($"Brak alokacji o numerze{allocationId}"); }
-		//	allocation.PickingStatus = PickingStatus.Picked;
-		//	//await _werehouseDbContext.SaveChangesAsync();
-		//}
 
 		//public async Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate)
 		//{
@@ -54,11 +93,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		//		.ToListAsync();
 		//	return allocation;
 		//}
-		//public async Task<Allocation> GetAllocationAsync(int allocationId)
-		//{
-		//	return await _werehouseDbContext.Allocations.FirstOrDefaultAsync(a => a.Id == allocationId);
-		//}
-
 		
+
 	}
 }

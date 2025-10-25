@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
@@ -93,9 +94,9 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			//Arrange
 			var clientId = 9891;
 			//Act
-			var e =await Assert.ThrowsAsync<ArgumentException>(() => _clientService.DeleteClientAsync(clientId));
+			var e =await Assert.ThrowsAsync<DomainException>(() => _clientService.DeleteClientAsync(clientId));
 			//Assert
-			Assert.Equal("Nie ma klienta o tym numerze", e.Message);
+			Assert.Equal($"Klient o numerze {clientId} nie istnieje.", e.Message);
 		}
 	}
 }

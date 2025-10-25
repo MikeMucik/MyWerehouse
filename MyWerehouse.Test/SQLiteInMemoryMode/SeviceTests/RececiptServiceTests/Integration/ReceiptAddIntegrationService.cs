@@ -5,20 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Mapping;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Application.ViewModels.ReceiptModels;
 using MyWerehouse.Domain.Models;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
 	public class ReceiptAddIntegrationService : ReceiptIntegratioCommandService
 	{
+		//HappyPath
 		[Fact]
-		public async Task ProperDataOnePalletFullTest_AddPalletToReceiptAsync_AddedToBase()
+		public async Task AddPalletToReceiptAsync_ProperData__AddedToBase()
 		{
 			//Arrange
 			var address = new Address
@@ -33,23 +30,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialCLient = new Client
 			{
-				//Id = 1,
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
-			var initialReceipt = new Receipt
+			var initialCategory = new Category
 			{
-				//Id = 1,
-				ClientId = 1,
-				ReceiptStatus = ReceiptStatus.Planned,
-				PerformedBy = "U002"
+				Name = "name",
+				IsDeleted = false
 			};
 			var initialLocation = new Location
 			{
-				//Id = 1,
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
@@ -57,23 +50,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var product = new Product
 			{
-				//Id = 1,
 				Name = "Test",
 				SKU = "666666",
-				CategoryId = 1,
+				Category = initialCategory,
 				IsDeleted = false,
 			};
-			var initialCategory = new Category
+			var initialReceipt = new Receipt
 			{
-				//Id = 1,
-				Name = "name",
-				IsDeleted = false
-			};
+				Client = initialCLient,
+				ReceiptStatus = ReceiptStatus.Planned,
+				PerformedBy = "U002"
+			};			
+			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
+			DbContext.Locations.Add(initialLocation);
 			DbContext.Clients.Add(initialCLient);
 			DbContext.Receipts.Add(initialReceipt);
-			DbContext.Locations.Add(initialLocation);
+			
 			await DbContext.SaveChangesAsync();
 			//Act
 			var newPalletDto = new CreatePalletReceiptDTO
@@ -82,16 +76,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				UserId = "U001"
 			};
 
-			string newPallet = await _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto);
+			var newPallet = await _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto);
 			//Assert
 			Assert.NotNull(newPallet);
-			var palletFromDb = await DbContext.Pallets.FindAsync(newPallet);
+			var newPalletId = newPallet.PalletId;
+			var palletFromDb = await DbContext.Pallets.FindAsync(newPalletId);
 			Assert.NotNull(palletFromDb);
 			Assert.Equal(initialReceipt.Id, palletFromDb.ReceiptId);
 			Assert.Equal(PalletStatus.Receiving, palletFromDb.Status);
 
 			var productsOnPallet = DbContext.ProductOnPallet
-				.Where(x => x.PalletId == newPallet)
+				.Where(x => x.PalletId == palletFromDb.Id)
 				.ToList();
 
 			Assert.Single(productsOnPallet);
@@ -99,7 +94,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal(10, productsOnPallet[0].Quantity);
 
 			var movement = DbContext.PalletMovements
-				.FirstOrDefault(x => x.PalletId == newPallet);
+				.FirstOrDefault(x => x.PalletId == newPalletId);
 
 			Assert.NotNull(movement);
 			Assert.Equal("U001", movement.PerformedBy);
@@ -114,7 +109,88 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				.Include(x => x.Pallets)
 				.FirstOrDefaultAsync(x => x.Id == initialReceipt.Id);
 
-			Assert.Contains(receipt.Pallets, p => p.Id == newPallet);
+			Assert.Contains(receipt.Pallets, p => p.Id == newPalletId);
+		}
+
+		[Fact]
+		public async Task ProperData_CreateReceiptPlanAsync_AddToBase()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var initialCLient = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};
+			DbContext.Clients.Add(initialCLient);
+			DbContext.SaveChanges();
+			//Act
+			var newPalletDto = new CreateReceiptPlanDTO
+			{
+				ClientId = initialCLient.Id,
+				ReceiptDateTime = DateTime.UtcNow,
+				PerformedBy = "user",				
+			};
+			var result =
+				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
+			//Assert
+			Assert.NotNull(result);
+			var receipt = DbContext.Receipts.Find(result.ReceiptId);
+			Assert.NotNull(receipt);
+			Assert.Equal(ReceiptStatus.Planned, receipt.ReceiptStatus);
+			Assert.Equal("user", receipt.PerformedBy);			
+		}
+
+		//SadPath
+		[Fact]
+		public async Task CreateReceiptPlanAsync_NoProperData_AddToBase()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var initialCLient = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};
+			DbContext.Clients.Add(initialCLient);
+			DbContext.SaveChanges();
+			//Act
+			var newPalletDto = new CreateReceiptPlanDTO
+			{
+				ClientId = 2,
+				//initialCLient.Id,
+				ReceiptDateTime = DateTime.UtcNow,
+				PerformedBy = "user",
+			};
+			var result =
+				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Contains("Wystąpił nieoczekiwany błąd podczas operacji.", result.Message);
 		}
 		[Fact]
 		public async Task NotProperDataProductQunatityZero_AddPalletToReceiptAsync_ThrowValidateException()
@@ -132,7 +208,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialCLient = new Client
 			{
-				Id = 1,
+				
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -141,33 +217,30 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialReceipt = new Receipt
 			{
-				Id = 1,
-				ClientId = 1,
+				Client = initialCLient,
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002"
 			};
 			var initialLocation = new Location
 			{
-				Id = 1,
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
 				Position = 1
 			};
-			var product = new Product
-			{
-				Id = 1,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
 			var initialCategory = new Category
-			{
-				Id = 1,
+			{				
 				Name = "name",
 				IsDeleted = false
 			};
+			var product = new Product
+			{
+				Name = "Test",
+				SKU = "666666",
+				Category = initialCategory,
+				IsDeleted = false,
+			};
+			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
 			DbContext.Clients.Add(initialCLient);
@@ -201,8 +274,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				StreetNumber = "23/3"
 			};
 			var initialCLient = new Client
-			{
-				Id = 1,
+			{				
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -211,41 +283,37 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialReceipt = new Receipt
 			{
-				Id = 1,
-				ClientId = 1,
+				Client = initialCLient,
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002"
 			};
 			var initialLocation = new Location
 			{
-				Id = 1,
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
 				Position = 1
 			};
+			var initialCategory = new Category
+			{
+				Name = "name",
+				IsDeleted = false
+			};
 			var product = new Product
 			{
-				Id = 1,
 				Name = "Test",
 				SKU = "666666",
-				CategoryId = 1,
+				Category = initialCategory,
 				IsDeleted = false,
 			};
 			var product1 = new Product
 			{
-				Id = 2,
 				Name = "Test",
 				SKU = "666666",
-				CategoryId = 1,
+				Category = initialCategory,
 				IsDeleted = false,
 			};
-			var initialCategory = new Category
-			{
-				Id = 1,
-				Name = "name",
-				IsDeleted = false
-			};
+		
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(product, product1);
 			DbContext.Clients.Add(initialCLient);

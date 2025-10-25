@@ -10,7 +10,8 @@ namespace MyWerehouse.Domain.Models
 	{
 		public int Id { get; set; }
 		public string PalletId { get; set; }
-		public int LocationId { get; set; }		
+		public int LocationId { get; set; }
+		public string? LocationSnapShot { get; set; } //snapshot
 		public int HistoryIssueId { get; set; }
 		public virtual HistoryIssue HistoryIssue { get; set; }
 	}

@@ -18,7 +18,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 	public class ReceiptVerifyIntegrationService : ReceiptIntegratioCommandService
 	{
 		[Fact]
-		public async Task VerifyAndFinalizeReceiptAsync_UpdatesStatusAndInventory_WhenValid()
+		public async Task VerifyAndFinalizeReceiptAsync_WhenValid_UpdatesStatusAndInventory()
 		{
 			// Arrange
 			var address = new Address
@@ -33,7 +33,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var client = new Client
 			{
-				Id = 1,
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -42,13 +41,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var category = new Category
 			{
-				Id = 1,
 				Name = "Category A",
 				IsDeleted = false
 			};
 			var product = new Product
 			{
-				Id = 1,
 				Name = "Product A",
 				SKU = "123456",
 				CategoryId = 1,
@@ -56,7 +53,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var location = new Location
 			{
-				Id = 1,
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
@@ -65,22 +61,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var pallet = new Pallet
 			{
 				Id = "PAL001",
-				LocationId = 1,
+				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{new ProductOnPallet
-						{
-				Id = 1,
-				ProductId = 1,
+						{				
+				Product = product,
 				Quantity = 10,
 				DateAdded = DateTime.UtcNow
 						}
 				}
 			};
 			var receipt = new Receipt
-			{
-				Id = 1,
-				ClientId = 1,
+			{				
+				Client = client,
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				PerformedBy = "U001",
 				Pallets = [pallet]
@@ -93,9 +87,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 			// Act
-			await _receiptService.VerifyAndFinalizeReceiptAsync(receipt.Id, "U001");
+			var result = await _receiptService.VerifyAndFinalizeReceiptAsync(receipt.Id, "U001");
 
 			// Assert
+			Assert.NotNull(result);
+			Assert.True(result.Success);
+			Assert.Contains("Palety z przyjęcia zweryfikowano, gotowe do działania", result.Message);
+
 			var receiptVeryfying = await DbContext.Receipts.FindAsync(receipt.Id);
 			Assert.NotNull(receiptVeryfying);
 			receiptVeryfying.ReceiptStatus.Should().Be(ReceiptStatus.Verified);
@@ -112,6 +110,83 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var inventory = await DbContext.Inventories.FirstOrDefaultAsync(i => i.ProductId == product.Id);
 			inventory.Should().NotBeNull();
 			inventory.Quantity.Should().Be(10);
+		}
+		[Fact]
+		public async Task VerifyAndFinalizeReceiptAsync_WhenInValid_NoUpdatesStatusAndInventory()
+		{
+			// Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};
+			var category = new Category
+			{
+				Name = "Category A",
+				IsDeleted = false
+			};
+			var product = new Product
+			{
+				Name = "Product A",
+				SKU = "123456",
+				CategoryId = 1,
+				IsDeleted = false
+			};
+			var location = new Location
+			{
+				Aisle = 1,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
+			var pallet = new Pallet
+			{
+				Id = "PAL001",
+				Location = location,
+				Status = PalletStatus.Receiving,
+				ProductsOnPallet = new List<ProductOnPallet>
+				{new ProductOnPallet
+						{				
+				Product = product,
+				Quantity = 10,
+				DateAdded = DateTime.UtcNow
+						}
+				}
+			};
+			var receipt = new Receipt
+			{				
+				Client = client,
+				ReceiptStatus = ReceiptStatus.Verified,
+				PerformedBy = "U001",
+				Pallets = [pallet]
+			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.Pallets.Add(pallet);
+			DbContext.Receipts.Add(receipt);
+			await DbContext.SaveChangesAsync();
+			// Act
+			var result = await _receiptService.VerifyAndFinalizeReceiptAsync(receipt.Id, "U001");
+
+			// Assert
+			Assert.NotNull(result);
+			Assert.False(result.Success);
+			Assert.Contains("Nie można zweryfikować przyjęcia", result.Message);
 		}
 	}
 }

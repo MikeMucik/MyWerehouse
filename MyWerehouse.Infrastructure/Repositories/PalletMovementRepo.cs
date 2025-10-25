@@ -16,20 +16,18 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-		public async Task AddPalletMovementAsync(PalletMovement palletMovement)
+		public void AddPalletMovement(PalletMovement palletMovement)
 		{
-			await _werehouseDbContext.PalletMovements.AddAsync(palletMovement);			
+			_werehouseDbContext.PalletMovements.Add(palletMovement);			
 		}
-		public IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter)
+		public IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter, string id)
 		{
-			var result = _werehouseDbContext.PalletMovements
+			var result = _werehouseDbContext.PalletMovements				
 				.Include(md => md.PalletMovementDetails)
 					.ThenInclude(m => m.Product)
+				.Where(p=>p.PalletId == id)
 				.AsQueryable();
-			if (filter.PalletId != null)
-			{
-				result = result.Where(p => p.PalletId == filter.PalletId);
-			}
+
 			if (filter.ProductId > 0)
 			{
 				result = result

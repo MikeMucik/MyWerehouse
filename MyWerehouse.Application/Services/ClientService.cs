@@ -13,6 +13,7 @@ using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Application.ViewModels.ProductModels;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -79,38 +80,36 @@ namespace MyWerehouse.Application.Services
 				throw new ValidationException(validationResult.Errors);
 			}
 			var client = _mapper.Map<Client>(addClient);
-			var id = await _clientRepo.AddClientAsync(client);
+			var id = _clientRepo.AddClient(client);
 			await _werehouseDbContext.SaveChangesAsync();
 			return id;
-		}		
+		}
 		public async Task DeleteClientAsync(int id)
-		{
-			if (await _clientRepo.GetClientByIdAsync(id) != null)
+		{			
+			var filter = new IssueReceiptSearchFilter
 			{
-				var filter = new IssueReceiptSearchFilter
-				{
-					ClientId = id
-				};
-				var receipt = _receiptRepo.GetReceiptByFilter(filter);
-				if (!await receipt.AnyAsync())
-				{
-					await _clientRepo.DeleteClientByIdAsync(id);
-				}
-				else
-				{
-					await _clientRepo.SwitchOffClientAsync(id);
-				}
-				await _werehouseDbContext.SaveChangesAsync();
+				ClientId = id
+			};
+			var client = await _clientRepo.GetClientByIdAsync(id) ?? throw new DomainException($"Klient o numerze {id} nie istnieje.");
+			var receipt = _receiptRepo.GetReceiptByFilter(filter);
+			if (!await receipt.AnyAsync())
+			{
+				_clientRepo.DeleteClient(client);
 			}
-			else { throw new ArgumentException("Nie ma klienta o tym numerze"); }
-		}		
+			else
+			{
+				_clientRepo.SwitchOffClient(client);
+				//await _clientRepo.SwitchOffClientAsync(id);
+			}
+			await _werehouseDbContext.SaveChangesAsync();
+		}
 		public async Task<AddClientDTO> GetClientToEditAsync(int id)
 		{
 			var client = await _clientRepo.GetClientByIdAsync(id);
 			if (client == null) throw new ArgumentException($"Brak klienta o numerze {id}");
 			var clientDTO = _mapper.Map<AddClientDTO>(client);
 			return clientDTO;
-		}		
+		}
 		public async Task UpdateClientAsync(UpdateClientDTO updatedClient)
 		{
 			var existingClient = await _clientRepo.GetClientByIdAsync(updatedClient.Id);
@@ -118,7 +117,7 @@ namespace MyWerehouse.Application.Services
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
-			}			
+			}
 			_mapper.Map(updatedClient, existingClient);
 			CollectionSynchronizer.SynchronizeCollection(
 				 existingClient.Addresses,
@@ -127,9 +126,9 @@ namespace MyWerehouse.Application.Services
 				 a => a.Id, // Klucz dla AddressDTO
 				 dto => _mapper.Map<Address>(dto), // Jak dodać nowy
 				 (dto, entity) => _mapper.Map(dto, entity) // Jak aktualizować
-				 );			
+				 );
 			await _werehouseDbContext.SaveChangesAsync();
-		}				
+		}
 		public async Task<DetailsOfClientDTO> DetailsOfClientAsync(int id)
 		{
 			var client = await _clientRepo.GetClientByIdAsync(id);
@@ -142,7 +141,7 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new ArgumentException("Nie ma takiego klienta");
 			}
-		}		
+		}
 		public async Task<ListClientsDTO> GetClientsByFilterAsync(int pageSize, int pageNumber, ClientSearchFilter filter)
 		{
 			var products = _clientRepo.GetClients(filter)
@@ -160,7 +159,7 @@ namespace MyWerehouse.Application.Services
 				Count = await products.CountAsync()
 			};
 			return clientList;
-		}		
+		}
 		public async Task<ListClientsDTO> GetAllClientsAsync(int pageSize, int PageNumber)
 		{
 			var products = _clientRepo.GetAllClients()

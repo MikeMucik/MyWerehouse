@@ -9,11 +9,11 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IInventoryRepo
 	{		
-		Task AddInventoryAsync (int productId, int quantity);
-		Task IncreaseInventoryQuantityAsync(int productId, int quantity);		
-		Task DecreaseInventoryQuantityAsync(int productId, int quantity);		
+		void AddInventory (Inventory inventory);
+		//Task IncreaseInventoryQuantityAsync(int productId, int quantity);		
+		//Task DecreaseInventoryQuantityAsync(int productId, int quantity);		
 		Task<Inventory?> GetInventoryForProductAsync(int productId);			
-		Task UpdateInventoryAsync(int productId, int quantity);
+		//Task UpdateInventoryAsync(int productId, int quantity);
 		IQueryable<Inventory> GetAllInventory();		
 		Task <bool> HasStockAsync(int productId, int quantity);
 		Task<int> GetAvailableQuantityAsync(int productId, DateOnly? bestBefore);

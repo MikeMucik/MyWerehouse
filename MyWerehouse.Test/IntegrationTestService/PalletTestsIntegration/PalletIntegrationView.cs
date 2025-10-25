@@ -12,9 +12,9 @@ using MyWerehouse.Test.Common;
 namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 {
 	[Collection("QuerryCollection")]
-	public class PalletIntegrationView: CommandTestBase
+	public class PalletIntegrationView : CommandTestBase
 	{
-		public readonly PalletService _pallletService;
+		public readonly PalletService _palletService;
 		public readonly PalletRepo _palletRepo;
 		public readonly IMapper _mapper;
 		public PalletIntegrationView(QuerryTestFixture fixture)
@@ -26,7 +26,8 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			});
 			_mapper = mapperConfig.CreateMapper();
 			_palletRepo = new PalletRepo(_context);
-			_pallletService = new PalletService(_palletRepo, _mapper);
+
+			_palletService = new PalletService(_palletRepo, _mapper);
 		}
 	}
 }

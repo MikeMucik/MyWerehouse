@@ -38,11 +38,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="IntegrationTestRepo\HistoryReceiptRepo\" />
     <Folder Include="IntegrationTestService\InventoryTestIntegration\" />
     <Folder Include="IntegrationTestService\IssueTestsIntegration\" />
     <Folder Include="IntegrationTestService\LocationTestsIntegration\" />
-    <Folder Include="IntegrationTestService\ProductOnPalletIntegration\" />
-    <Folder Include="SQLiteInMemoryMode\SeviceTests\PalletServiceTests\Integration\" />
+    <Folder Include="IntegrationTestService\ProductOnPalletTestIntegration\" />
+    <Folder Include="SQLiteInMemoryMode\SeviceTests\NewFolder\" />
     <Folder Include="SQLiteInMemoryMode\SeviceTests\PalletServiceTests\Unit\" />
     <Folder Include="UnitTestService\" />
   </ItemGroup>

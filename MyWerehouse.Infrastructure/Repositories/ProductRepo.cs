@@ -15,33 +15,33 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public ProductRepo(WerehouseDbContext werehouseDbContext)
 		{
 			_werehouseDbContext = werehouseDbContext;
-		}		
-		public async Task<int> AddProductAsync(Product product)
+		}
+		public Product AddProduct(Product product)
 		{
-			await _werehouseDbContext.Products.AddAsync(product);			
-			return product.Id;
-		}		
-		public async Task DeleteProductByIdAsync(int id)
+			_werehouseDbContext.Products.Add(product);
+			return product;
+		}
+		public void DeleteProduct(Product product)
 		{
-			var result = await _werehouseDbContext.Products.FindAsync(id);
-			if (result != null)
-			{
-				_werehouseDbContext.Remove(result);				
-			}
-		}	
-		public async Task SwitchOffProductAsync(int id)
-		{
-			var product = await _werehouseDbContext.Products.FindAsync(id);
-			if (product != null)
-			{
-				product.IsDeleted = true;				
-			}
-		}				
+			_werehouseDbContext.Remove(product);
+		}
+		public void SwitchOffProduct(Product product)
+		{			
+				product.IsDeleted = true;			
+		}
+		//public async Task SwitchOffProductAsync(int id)
+		//{
+		//	var product = await _werehouseDbContext.Products.FindAsync(id);
+		//	if (product != null)
+		//	{
+		//		product.IsDeleted = true;
+		//	}
+		//}
 		public async Task<Product?> GetProductByIdAsync(int id)
 		{
 			if (id > 0)
 			{
-				var product = await _werehouseDbContext.Products					
+				var product = await _werehouseDbContext.Products
 					.FirstOrDefaultAsync(p => p.Id == id);
 				return product;
 			}
@@ -51,7 +51,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			if (id > 0)
 			{
-				var product = await _werehouseDbContext.Products					
+				var product = await _werehouseDbContext.Products
 					.Include(p => p.Details)
 					.FirstOrDefaultAsync(p => p.Id == id);
 				return product;
@@ -61,7 +61,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Product> GetAllProducts()
 		{
 			return _werehouseDbContext.Products.Where(p => p.IsDeleted == false);
-		}		
+		}
 		public IQueryable<Product> FindProducts(ProductSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Products
@@ -70,7 +70,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (!string.IsNullOrEmpty(filter.ProductName))
 			{
 				result = result.Where(p => p.Name != null && p.Name.StartsWith(filter.ProductName));
-				
+
 			}
 			if (!string.IsNullOrEmpty(filter.SKU))
 			{
@@ -78,7 +78,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			if (!string.IsNullOrEmpty(filter.Category))
 			{
-				result = result.Where(p => p.Category.Name != null && p.Category.Name.StartsWith(filter.Category));				
+				result = result.Where(p => p.Category.Name != null && p.Category.Name.StartsWith(filter.Category));
 			}
 			if (filter.CategoryId > 0)
 			{
@@ -101,6 +101,6 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(p => p.Details.Length == filter.Length);
 			}
 			return result;
-		}		
+		}
 	}
 }

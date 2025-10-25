@@ -28,8 +28,8 @@ namespace MyWerehouse.Application.Interfaces
 		Task<IssuePalletsWithLocationDTO> PalletsToTakeOffList(int issueId, string userId);
 		//TODO: całkowite wycofanie zamówienia:
 		// - usunięcie z palet z issue 
-		// - zmiana statusów pale
-		// - wycofanie alokacji jeśli są nie wykonane
+		// - zmiana statusów palet
+		// - wycofanie alokacji jeśli są nie wykonane - jeśli wykonane zadanie dekompletacyjne
 		// - anulacja palet kompletacyjnych -> łączenie po dacie i towarze z innymi - sugestia
 	}
 }

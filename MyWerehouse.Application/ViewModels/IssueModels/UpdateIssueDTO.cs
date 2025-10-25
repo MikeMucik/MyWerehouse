@@ -17,10 +17,12 @@ namespace MyWerehouse.Application.ViewModels.IssueModels
 		public string PerformedBy { get; set; }
 		public DateTime DateToSend { get; set; }
 		public List<IssueItemDTO> Items { get; set; } = new List<IssueItemDTO>();
-		public class UpdateIssueDTOValidion : AbstractValidator<UpdateIssueDTO>
+		public class UpdateIssueDTOValidation : AbstractValidator<UpdateIssueDTO>
 		{
-			public UpdateIssueDTOValidion(IValidator<IssueItemDTO> itemValidator)
+			public UpdateIssueDTOValidation(IValidator<IssueItemDTO> itemValidator)
 			{
+				RuleFor(x => x.Id).NotEmpty()
+					.WithMessage("Numer zamówienia wymagany");
 				RuleFor(x => x.ClientId)
 					.GreaterThan(0).WithMessage("Numer Klienta wymagany");
 				RuleFor(x => x.DateToSend)

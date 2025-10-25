@@ -9,8 +9,9 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IPalletMovementRepo
 	{		
-		Task AddPalletMovementAsync(PalletMovement palletMovement);
-		IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter);		
+		void AddPalletMovement(PalletMovement palletMovement);
+		IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter, string id);		
 		Task<bool> CanDeletePalletAsync(string id);		
+		//Task 
 	}
 }

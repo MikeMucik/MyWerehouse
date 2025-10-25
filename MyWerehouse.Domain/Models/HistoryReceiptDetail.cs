@@ -10,11 +10,9 @@ namespace MyWerehouse.Domain.Models
 	{
 		public int Id { get; set; }
 		public string PalletId { get; set; }
-		public int LocationId { get; set; } // tu będzie lokalizacja określająca na której rampie przyjęto
-		//public int ProductId { get; set; }
-		//public int Quantity { get; set; }
+		public int LocationId { get; set; } // tu będzie lokalizacja określająca na której rampie przyjęto	
+		public string? LocationSnapShot {  get; set; }
 		public int HistoryReceiptId { get; set; }
 		public virtual HistoryReceipt HistoryReceipt { get; set; }
-
 	}
 }

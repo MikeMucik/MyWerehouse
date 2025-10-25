@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.ViewModels.HistoryDTO;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
+using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services
 {
@@ -15,25 +21,33 @@ namespace MyWerehouse.Application.Services
 		private readonly IHistoryIssueRepo _historyIssueRepo;
 		private readonly IHistoryReceiptRepo _historyReceiptRepo;
 		private readonly IHistoryPickingRepo _historyPickingRepo;
+		private readonly WerehouseDbContext _werehouseDbContext;//
+
+		private readonly ILocationRepo _locationRepo;
+		private readonly IPalletRepo _palletRepo;
+		private readonly IMapper _mapper;
 
 		public HistoryService(
 			IPalletMovementRepo palletMovementRepo,
 			IHistoryIssueRepo historyIssueRepo,
 			IHistoryReceiptRepo historyReceiptRepo,
-			IHistoryPickingRepo historyPickingRepo)
+			IHistoryPickingRepo historyPickingRepo,
+			WerehouseDbContext werehouseDbContext//
+			, IPalletRepo palletRepo
+			, IMapper mapper
+			, ILocationRepo locationRepo)
 		{
 			_palletMovementRepo = palletMovementRepo;
 			_historyIssueRepo = historyIssueRepo;
 			_historyReceiptRepo = historyReceiptRepo;
 			_historyPickingRepo = historyPickingRepo;
+			_werehouseDbContext = werehouseDbContext;//
+			_palletRepo = palletRepo;
+			_mapper = mapper;
+			_locationRepo = locationRepo;
 		}
-
-		public async Task CreateHistoryPickingAsync(
-			VirtualPallet virtualPallet,
-			Allocation allocation, 
-			string performedBy, 
-			PickingStatus statusBefore, 
-			int quantityPicked)
+		//Create history
+		public void CreateHistoryPicking(VirtualPallet virtualPallet, Allocation allocation, string performedBy, PickingStatus statusBefore, int quantityPicked)
 		{
 			if (quantityPicked == 0)
 			{
@@ -47,10 +61,10 @@ namespace MyWerehouse.Application.Services
 			{
 				Allocation = allocation,
 				//AllocationId = allocation.Id,
-				//VirtualPallet = virtualPallet,
-				VirtualPalletId = virtualPallet.Id,
-				//Issue = allocation.Issue,
-				IssueId = allocation.IssueId,
+				VirtualPallet = virtualPallet,
+				//VirtualPalletId = virtualPallet.Id,
+				Issue = allocation.Issue,
+				//IssueId = allocation.IssueId,
 				ProductId = virtualPallet.Pallet.ProductsOnPallet.First().ProductId,
 				QuantityAllocated = allocation.Quantity,
 				QuantityPicked = quantityPicked,
@@ -59,15 +73,11 @@ namespace MyWerehouse.Application.Services
 				PerformedBy = performedBy,
 				DateTime = DateTime.UtcNow,
 			};
-			await _historyPickingRepo.AddHistoryPickingAsync(history);
+			_historyPickingRepo.AddHistoryPicking(history);
 		}
-		public async Task CreateHistoryPickingAsync(
-			VirtualPallet virtualPallet,
-			Allocation allocation,
-			string performedBy,
-			PickingStatus statusBefore)
+		public void CreateHistoryPicking(VirtualPallet virtualPallet, Allocation allocation, string performedBy, PickingStatus statusBefore)
 		{
-			await CreateHistoryPickingAsync(
+			CreateHistoryPicking(
 				virtualPallet,
 				allocation,
 				performedBy,
@@ -75,13 +85,16 @@ namespace MyWerehouse.Application.Services
 				allocation.PickingStatus == PickingStatus.Picked ? allocation.Quantity : 0
 			);
 		}
-		public async Task CreateHistoryIssueAsync(Issue issue)
-		{			
-			var	details = issue.Pallets.Select(p => new HistoryIssueDetail
+		public void CreateHistoryIssue(Issue issue)
+		{
+			var details = (issue.Pallets != null && issue.Pallets.Count > 0) ?
+
+				issue.Pallets.Select(p => new HistoryIssueDetail
 				{
 					PalletId = p.Id,
 					LocationId = p.LocationId,
-				}).ToList();
+					LocationSnapShot = $"{p.Location.Bay}-{p.Location.Aisle}-{p.Location.Position}-{p.Location.Height}"
+				}).ToList(): new List<HistoryIssueDetail>();
 
 			var items = issue.IssueItems.Select(p => new HistoryIssueItems
 			{
@@ -92,45 +105,57 @@ namespace MyWerehouse.Application.Services
 
 			var history = new HistoryIssue
 			{
-				IssueId = issue.Id,				
-				StatusAfter = issue.IssueStatus,				
+				Issue = issue,
+				StatusAfter = issue.IssueStatus,
 				PerformedBy = issue.PerformedBy,
 				Details = details.ToList(),
 				Items = items,
 				DateTime = DateTime.UtcNow,
 			};
-			await _historyIssueRepo.AddHistoryIssueAsync(history);
+			_historyIssueRepo.AddHistoryIssue(history);
 		}
-		
-		public async Task CreateHistoryReceiptAsync(Receipt receipt)
-		{			
+		public void CreateHistoryReceipt(Receipt receipt)
+		{
+			var details = (receipt.Pallets != null && receipt.Pallets.Count != 0)
+				? receipt.Pallets.Select(p => new HistoryReceiptDetail
+				{
+					PalletId = p.Id,
+					LocationId = p.LocationId,
+					LocationSnapShot = $"{p.Location.Bay}-{p.Location.Aisle}-{p.Location.Position}-{p.Location.Height}"
+				}).ToList(): new List<HistoryReceiptDetail>();
+			
 			var history = new HistoryReceipt
 			{
-				ReceiptId = receipt.Id,
+				Receipt = receipt,
 				ClientId = receipt.ClientId,
 				StatusAfter = receipt.ReceiptStatus,
-				PerformedBy =receipt.PerformedBy,				
+				PerformedBy = receipt.PerformedBy,
 				DateTime = DateTime.UtcNow,
+				Details = details,
 			};
-			await _historyReceiptRepo.AddHistoryReceiptAsync(history);
+			_historyReceiptRepo.AddHistoryReceipt(history);
 		}
-
-		public async Task CreateHistoryReceiptAsync(Receipt receipt, ReceiptStatus receiptStatus, string userId)
+		public void CreateHistoryReceipt(Receipt receipt, ReceiptStatus receiptStatus, string userId)
 		{
+			var details = (receipt.Pallets != null && receipt.Pallets.Count != 0)
+				? receipt.Pallets.Select(p => new HistoryReceiptDetail
+				{
+					PalletId = p.Id,
+					LocationId = p.LocationId,
+					LocationSnapShot = $"{p.Location.Bay}-{p.Location.Aisle}-{p.Location.Position}-{p.Location.Height}"
+				}).ToList() : new List<HistoryReceiptDetail>();
 			var history = new HistoryReceipt
 			{
-				ReceiptId = receipt.Id,
+				Receipt = receipt,
 				ClientId = receipt.ClientId,
 				StatusAfter = receiptStatus,
 				PerformedBy = userId,
 				DateTime = DateTime.UtcNow,
+				Details = details
 			};
-			await _historyReceiptRepo.AddHistoryReceiptAsync(history);
+			_historyReceiptRepo.AddHistoryReceipt(history);
 		}
-
-		public async Task CreateMovementAsync(Pallet pallet, int destinationLocationId,
-			ReasonMovement reasonMovement, string userId,
-			PalletStatus palletStatus, IEnumerable<PalletMovementDetail>? details)
+		public void CreateMovement(Pallet pallet, Location destinationLocation, ReasonMovement reasonMovement, string userId, PalletStatus palletStatus, IEnumerable<PalletMovementDetail>? details)
 		{
 			if (details == null)
 			{
@@ -145,25 +170,90 @@ namespace MyWerehouse.Application.Services
 				//PalletId = pallet.Id,
 				Pallet = pallet,
 				SourceLocationId = pallet.LocationId,
-				DestinationLocationId = destinationLocationId,
+				SourceLocationSnapShot = $"{pallet.Location.Bay}-{pallet.Location.Aisle}-{pallet.Location.Position}-{pallet.Location.Height}",
+				DestinationLocationId = destinationLocation.Id,
+				DestinationLocationSnapShot = $"{destinationLocation.Bay}-{destinationLocation.Aisle}-{destinationLocation.Position}-{destinationLocation.Height}",
 				Reason = reasonMovement,
 				PerformedBy = userId,
 				PalletMovementDetails = details.ToList(),
 				MovementDate = DateTime.UtcNow,
 				PalletStatus = palletStatus
 			};
-			await _palletMovementRepo.AddPalletMovementAsync(movement);
+			_palletMovementRepo.AddPalletMovement(movement);
+		}
+		public void CreateOperation(Pallet pallet, int destinationLocationId, ReasonMovement reasonMovement, string userId, PalletStatus palletStatus, IEnumerable<PalletMovementDetail>? details)
+		{
+			if (details == null)
+			{
+				details = pallet.ProductsOnPallet.Select(p => new PalletMovementDetail
+				{
+					ProductId = p.ProductId,
+					Quantity = p.Quantity,
+				}).ToList();
+			}
+			//if (pallet.Location == null)
+			//{
+			//	Location locationFull =await _locationRepo.GetLocationByIdAsync(destinationLocationId);
+
+			//	pallet.Location = locationFull;
+
+			//}
+			var movement = new PalletMovement
+			{
+				//PalletId = pallet.Id,
+				Pallet = pallet,
+				//SourceLocationId = pallet.LocationId,
+				DestinationLocationId = destinationLocationId,
+				DestinationLocationSnapShot = $"{pallet.Location.Bay}-{pallet.Location.Aisle}-{pallet.Location.Position}-{pallet.Location.Height}",
+				Reason = reasonMovement,
+				PerformedBy = userId,
+				PalletMovementDetails = details.ToList(),
+				MovementDate = DateTime.UtcNow,
+				PalletStatus = palletStatus
+			};
+			_palletMovementRepo.AddPalletMovement(movement);
+		}
+		public void CreateOperation(Pallet pallet, string userId, PalletStatus newStatus)
+		{
+			//return
+			CreateOperation(
+			pallet,
+			pallet.LocationId,
+			ReasonMovement.Picking,
+			userId,
+			newStatus,
+			null);
+		}
+		//Read history
+		public async Task<PalletHistoryDTO> GetHistoryPalletByIdAsync(string id)
+		{
+			var pallet = await _palletRepo.GetPalletByIdAsync(id);
+			var history = _mapper.Map<PalletHistoryDTO>(pallet);
+			var filter = new PalletMovementSearchFilter { };
+			var details = await _palletMovementRepo.GetDataByFilter(filter, id)
+				.OrderByDescending(a => a.MovementDate)
+			 .ProjectTo<PalletMovementDTO>(_mapper.ConfigurationProvider)
+			 .ToListAsync();
+			//.ToList();
+			foreach (var item in details)
+			{
+				history.PalletMovementsDTO.Add(item);
+			}
+			return history;
 		}
 
-		public Task CreateMovementAsync(Pallet pallet, string userId, PalletStatus newStatus)
+		public Task<ReceiptHistoryDTO> GetHistoryReceiptByIdAsync(string id)
 		{
-			return CreateMovementAsync(
-				pallet,
-				pallet.LocationId,
-				ReasonMovement.Picking,
-				userId,
-				newStatus,
-				null);
-		}		
+			throw new NotImplementedException();
+		}
+
+		Task<IssueHistoryDTO> IHistoryService.GetHistoryIssueByIdAsync(string id)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
+// TODO Do Get
+//var history = await _context.AllocationHistory
+//	.AsNoTracking()
+//	.ToListAsync();

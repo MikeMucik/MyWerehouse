@@ -10,13 +10,10 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IIssueRepo
 	{
 		void AddIssue(Issue issue);
-		Task DeleteIssueAsync(int id);
-		//Task UpdateIssueAsync(Issue issue);
-		Task<Issue?> GetIssueByIdAsync(int id);
-		//Task<Issue?> GetIssueForLoadAsync(int id);
+		void DeleteIssue(Issue issue);		
+		Task<Issue?> GetIssueByIdAsync(int id);		
 		Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids);
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
-		Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id);
-		//Task<int> GetQuantityProductByIssueAsync(int issueId, int productId);
+		Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id);		
 	}
 }

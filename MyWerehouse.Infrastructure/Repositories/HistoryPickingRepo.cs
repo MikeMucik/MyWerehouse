@@ -17,9 +17,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext = werehouseDbContext;
 		}
 
-		public async Task AddHistoryPickingAsync(HistoryPicking historyPicking)
+		public void AddHistoryPicking(HistoryPicking historyPicking)
 		{
-			await _werehouseDbContext.HistoryPickings.AddAsync(historyPicking);
+			_werehouseDbContext.HistoryPickings.Add(historyPicking);
 		}
 
 		public IQueryable<HistoryPicking> GetAllHistoryPickingAsync()

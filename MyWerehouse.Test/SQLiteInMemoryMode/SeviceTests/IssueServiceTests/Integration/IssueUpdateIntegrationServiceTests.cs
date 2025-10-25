@@ -89,7 +89,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow);
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -217,7 +217,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow);
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -382,7 +382,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow);
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i=>i.Id ==2);
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -534,7 +534,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow);
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 			
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.Id == 2);
 			issue.IssueStatus= IssueStatus.ConfirmedToLoad;
@@ -678,7 +678,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow);
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -725,7 +725,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Contains($"Produkt o numerze {product.Id} nie został dodany do zlecenia edytuj zlecenie!", result.First().Message);
 			Assert.Equal(product.Id, result.First().ProductId);
 		}
-
 		[Fact]
 		public async Task UpdateIssueAsync_WrongStatusPallet()
 		{
@@ -798,7 +797,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow);
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -831,7 +830,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Contains($"Produkt o numerze {product.Id} nie został dodany do zlecenia edytuj zlecenie!", result.First().Message);
 			Assert.Equal(product.Id, result.First().ProductId);
 		}
-
 		[Fact]
 		public async Task UpdateIssueAsync_NotIssue_ThrowsException()
 		{
@@ -904,7 +902,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow);
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -924,8 +922,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			// Assert & Act
 			var result = await Assert.ThrowsAsync<IssueNotFoundException>(() =>  _issueService.UpdateIssueAsync(updateDto));
-			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);
-			
+			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);			
 		}
 	}
 }

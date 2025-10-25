@@ -17,9 +17,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext = werehouseDbContext;
 		}
 
-		public async Task AddIssueItemAsync(IssueItem issueItem)
+		public void AddIssueItem(IssueItem issueItem)
 		{
-			await _werehouseDbContext.IssueItems.AddAsync(issueItem);
+			_werehouseDbContext.IssueItems.Add(issueItem);
 		}
 
 		public void DeleteIssueItem(IssueItem issue)
@@ -36,8 +36,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			var record = await _werehouseDbContext.IssueItems
 				.FirstOrDefaultAsync(a => a.Issue == issue && a.ProductId == productId);
-			return record != null ? record.Quantity : 0;
-			//throw new NotImplementedException();
+			return record != null ? record.Quantity : 0;			
 		}
 	}
 }

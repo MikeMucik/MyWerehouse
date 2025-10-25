@@ -11,12 +11,14 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Moq;
+using MyWerehouse.Application.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Application.ViewModels.ReceiptModels;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
@@ -74,7 +76,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
 			var mockHistoryService = new Mock<IHistoryService>();
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
-
+			var locationRepo = new Mock<ILocationRepo>();
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
 				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
@@ -87,10 +89,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
 			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
-			mockHistoryService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
+			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
 				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				.Returns(Task.CompletedTask);
+				;
 			var mockInventoryService = new Mock<IInventoryService>();
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
@@ -99,12 +101,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				DbContext, palletRepo,
 				mockHistoryService.Object,
 				mockInventoryService.Object,
+				locationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 				//,mockUpdateValidator.Object
 				);
 			//Act
-			string newPallet = await service.AddPalletToReceiptAsync(1, newPalletDto);
+			var newPallet = await service.AddPalletToReceiptAsync(1, newPalletDto);
 			//Assert
 			Assert.NotNull(newPallet);
 			Assert.Equal(1, await DbContext.Pallets.CountAsync());
@@ -114,7 +117,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var updatedReceipt = await DbContext.Receipts.FindAsync(1);
 			Assert.NotNull(updatedReceipt);
 			Assert.Equal(ReceiptStatus.InProgress, updatedReceipt.ReceiptStatus);
-			mockHistoryService.Verify(s => s.CreateMovementAsync(It.IsAny<Pallet>(), 1, ReasonMovement.Received, "U001", PalletStatus.Receiving, null), Times.Once);
+			mockHistoryService.Verify(s => s.CreateOperation(It.IsAny<Pallet>(), 1, ReasonMovement.Received, "U001", PalletStatus.Receiving, null), Times.Once);
 		}
 		[Fact]
 		//przeniesienie do kontrolera
@@ -166,6 +169,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var mockHistoryService = new Mock<IHistoryService>();
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var mockInventory = new Mock<IInventoryService>();
+			var locationRepo = new Mock<ILocationRepo>();
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
 				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
@@ -178,21 +182,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
 			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
-			mockHistoryService.Setup(s => s.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(),
+			mockHistoryService.Setup(s => s.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(),
 				It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				.ThrowsAsync(new Exception("Błąd zapisu ruchu - symulacja"));
+				.Throws(new Exception("Błąd zapisu ruchu - symulacja"))
+				;
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
 			var service = new ReceiptService(
 				receiptRepo, mockMapper.Object,
 				DbContext, palletRepo,
 				mockHistoryService.Object, mockInventory.Object,
+				locationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 				//,mockUpdateValidator.Object
 				);
 			//Act
-			await Assert.ThrowsAsync<Exception>(() => service.AddPalletToReceiptAsync(1, newPalletDto));
+			var result =await service.AddPalletToReceiptAsync(1, newPalletDto);
+			Assert.Contains("Wystąpił nieoczekiwany błąd podczas operacji.", result.Message);
+			//await Assert.ThrowsAsync<Exception>(() => service.AddPalletToReceiptAsync(1, newPalletDto));
 			Assert.Equal(0, await DbContext.Pallets.CountAsync());
 			using var arrangeContext = CreateNewContext();
 			var receiptAfterFail = await arrangeContext.Receipts.FindAsync(1);
@@ -316,6 +324,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var mockHistoryService = new Mock<IHistoryService>();
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var mockInventory = new Mock<IInventoryService>();
+			var locationRepo = new Mock<ILocationRepo>();
 			var updatingReceipt = new ReceiptDTO
 			{
 				Id = 1,
@@ -355,10 +364,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
 
-			mockHistoryService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
+			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
 				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				.Returns(Task.CompletedTask);
+				;
 
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
@@ -369,6 +378,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				palletRepo,
 				mockHistoryService.Object,
 				mockInventory.Object,
+				locationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 				//,mockUpdateValidator.Object
@@ -410,7 +420,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var initailCLient = new Client
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -419,71 +429,99 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var initailCLient1 = new Client
 			{
-				Id = 2,
+				//Id = 2,
 				Name = "222TestCompany",
 				Email = "222123@op.pl",
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = [address1]
 			};
-			var initialPallet = new Pallet
+			var initialProduct = new Product
 			{
-				Id = "Q1000",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				ReceiptId = 1,
+				//Id = 10,
+				Name = "Test",
+				SKU = "666666",
+				CategoryId = 1,
+				IsDeleted = false,
 			};
-			var initialProductOnPallet = new ProductOnPallet
+			var initialCategory = new Category
 			{
-				Id = 1,
-				PalletId = "Q1000",
-				ProductId = 10,
-				Quantity = 100,
-				DateAdded = DateTime.Now,
-				BestBefore = new DateOnly(2027, 3, 3)
-			};
-			var initialReceipt = new Receipt
-			{
-				Id = 1,
-				ClientId = 1,
-				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-				Pallets = [initialPallet]
+				//Id = 1,
+				Name = "name",
+				IsDeleted = false
 			};
 			var initailLocation = new Location
 			{
-				Id = 1,
+				//Id = 1,
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
 				Position = 1
 			};
-			var initialProduct = new Product
+			var initialReceipt = new Receipt
 			{
-				Id = 10,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};			
-			var initialCategory = new Category
+				//Id = 1,
+				Client = initailCLient,
+				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+				PerformedBy = "U002",
+				ReceiptDateTime = new DateTime(2025, 6, 6),
+				//Pallets = [initialPallet]
+			};
+			var initialReceipt1 = new Receipt
 			{
-				Id = 1,
-				Name = "name",
-				IsDeleted = false
+				//Id = 1,
+				Client = initailCLient1,
+				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+				PerformedBy = "U002",
+				ReceiptDateTime = new DateTime(2025, 6, 6),
+				//Pallets = [initialPallet]
+			};
+			var initialPallet = new Pallet
+			{
+				Id = "Q1000",
+				DateReceived = DateTime.Now,
+				Location = initailLocation,
+				Status = PalletStatus.Available,
+				Receipt = initialReceipt,
+			};
+			var initialProductOnPallet = new ProductOnPallet
+			{
+				//Id = 1,
+				PalletId = "Q1000",
+				Product = initialProduct,
+				Quantity = 100,
+				DateAdded = DateTime.Now,
+				BestBefore = new DateOnly(2027, 3, 3)
+			};
+			var pallet2 = new Pallet
+			{
+				Id = "Q3000",
+				Location = initailLocation,
+				Receipt = initialReceipt1, //WrongData
+				Status = PalletStatus.Receiving,
+				DateReceived = DateTime.Now,
+				ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet
+							{
+								//Id = initialProductOnPallet.Id,
+								//PalletId = initialPallet.Id,
+								Product = initialProduct,								
+								Quantity = 1,
+								DateAdded = DateTime.Now,
+								BestBefore = new DateOnly(2027, 3, 3)
+							}
+						}
 			};
 			DbContext.Categories.Add(initialCategory);
 			//DbContext.Products.AddRange(initialProduct, initialProduct1);
 			DbContext.Products.Add(initialProduct);
 			DbContext.ProductOnPallet.Add(initialProductOnPallet);
-			DbContext.Pallets.Add(initialPallet);
+			DbContext.Pallets.AddRange(initialPallet, pallet2);
 			DbContext.Clients.AddRange(initailCLient, initailCLient1);
 			DbContext.Receipts.Add(initialReceipt);
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
-
 			var MapperConfig = new MapperConfiguration(cfg =>
 			{
 				cfg.AddProfile<MappingProfile>();
@@ -494,6 +532,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var mockHistoryService = new Mock<IHistoryService>();
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var mockInventory = new Mock<IInventoryService>();
+			var locationRepo = new Mock<ILocationRepo>();
 			var updatingReceipt = new ReceiptDTO
 			{
 				Id = 1,
@@ -506,7 +545,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				{
 					new()
 					{
-						Id = initialPallet.Id,
+						Id = "Q3000",
 						LocationId = 1,
 						ReceiptId = 10, //WrongData
 						Status = PalletStatus.Receiving,
@@ -533,10 +572,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
 
-			mockHistoryService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
+			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				.Returns(Task.CompletedTask);
+				It.IsAny<string>(), It.IsAny<PalletStatus>(), null));
 
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
@@ -548,17 +586,244 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				palletRepo,
 				mockHistoryService.Object,
 				mockInventory.Object,
+				locationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 				//,mockUpdateValidator.Object
 				);
-			//Act&Assert		
-			var ex = await Assert.ThrowsAsync<InvalidDataException>(() => service.UpdateReceiptPalletsAsync(updatingReceipt, userId));
-			Assert.Contains("należy do innego przyjęcia o numerze", ex.Message);
+			//Act&Assert	
+			var result =await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			Assert.NotNull(result);
+			Assert.False(result.Success);
+			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia o numerze 10", result.Message);
 
 		}
+		//[Fact]
+		//public async Task ProperDataOneAddedOneRemoveOnePalletsAndClient_UpdatePalletToReceiptAsync_AddedToBase()
+		//{
+		//	//Arrange
+		//	var address = new Address
+		//	{
+		//		City = "Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		Phone = 4444444,
+		//		Region = "Mazowieckie",
+		//		StreetNumber = "23/3"
+		//	};
+		//	var address1 = new Address
+		//	{
+		//		City = "1111Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		Phone = 4444444,
+		//		Region = "Mazowieckie",
+		//		StreetNumber = "23/3"
+		//	};
+		//	var initailCLient = new Client
+		//	{				
+		//		Name = "TestCompany",
+		//		Email = "123@op.pl",
+		//		Description = "Description",
+		//		FullName = "FullNameCompany",
+		//		Addresses = [address]
+		//	};
+		//	var initailCLient1 = new Client
+		//	{
+		//		Name = "222TestCompany",
+		//		Email = "222123@op.pl",
+		//		Description = "Description",
+		//		FullName = "FullNameCompany",
+		//		Addresses = [address1]
+		//	};
+		//	var initialCategory = new Category
+		//	{
+		//		Name = "name",
+		//		IsDeleted = false
+		//	};
+		//	var initialProduct = new Product
+		//	{				
+		//		Name = "Test",
+		//		SKU = "666666",
+		//		Category = initialCategory,
+		//		IsDeleted = false,
+		//	};
+		//	var initialProduct1 = new Product
+		//	{				
+		//		Name = "Test",
+		//		SKU = "666666",
+		//		Category = initialCategory,
+		//		IsDeleted = false,
+		//	};			
+		//	var initailLocation = new Location
+		//	{
+		//		Aisle = 1,
+		//		Bay = 1,
+		//		Height = 1,
+		//		Position = 1
+		//	};
+		//	var initialReceipt = new Receipt
+		//	{
+		//		Client = initailCLient,
+		//		ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+		//		PerformedBy = "U002",
+		//		ReceiptDateTime = new DateTime(2025, 6, 6),				
+		//	};
+		//	var initialPallet = new Pallet
+		//	{
+		//		Id = "Q1000",
+		//		DateReceived = DateTime.Now,
+		//		Location = initailLocation,
+		//		Status = PalletStatus.Available,
+		//		Receipt = initialReceipt,
+		//	};
+		//	var initialProductOnPallet = new ProductOnPallet
+		//	{				
+		//		Pallet = initialPallet,
+		//		Product = initialProduct,
+		//		Quantity = 100,
+		//		DateAdded = DateTime.Now,
+		//		BestBefore = new DateOnly(2027, 3, 3)
+		//	};
+		//	var initialPallet1 = new Pallet
+		//	{
+		//		Id = "Q1001",
+		//		DateReceived = DateTime.Now,
+		//		Location = initailLocation,
+		//		Status = PalletStatus.Available,
+		//		Receipt = initialReceipt,
+		//	};
+		//	var initialProductOnPallet1 = new ProductOnPallet
+		//	{
+		//		Pallet = initialPallet1,
+		//		Product = initialProduct1,
+		//		Quantity = 100,
+		//		DateAdded = DateTime.Now,
+		//		BestBefore = new DateOnly(2027, 3, 3)
+		//	};
+
+		//	initialPallet.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet };
+		//	initialPallet1.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet1 };
+		//	initialReceipt.Pallets = new List<Pallet> { initialPallet, initialPallet1 };
+
+		//	initialProductOnPallet.PalletId = initialPallet.Id;
+		//	initialProductOnPallet.ProductId = initialProduct.Id;
+		//	initialProductOnPallet1.PalletId = initialPallet1.Id;
+		//	initialProductOnPallet1.ProductId = initialProduct.Id;
+		//	DbContext.Categories.Add(initialCategory);
+		//	DbContext.Products.AddRange(initialProduct, initialProduct1);
+		//	DbContext.Clients.AddRange(initailCLient, initailCLient1);
+		//	DbContext.Locations.Add(initailLocation);
+		//	DbContext.Receipts.Add(initialReceipt);
+		//	DbContext.Pallets.AddRange(initialPallet,initialPallet1);
+		//	DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
+						
+		//	await DbContext.SaveChangesAsync();
+
+		//	var MapperConfig = new MapperConfiguration(cfg =>
+		//	{
+		//		cfg.AddProfile<MappingProfile>();
+		//	});
+		//	var mapper = MapperConfig.CreateMapper();
+		//	var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
+		//	var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
+		//	var mockHistoryService = new Mock<IHistoryService>();
+		//	var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
+		//	var mockInventory = new Mock<IInventoryService>();
+		//	var mockLocationRepo = new Mock<ILocationRepo>();
+		//	var updatingReceipt = new ReceiptDTO
+		//	{
+		//		Id = initialReceipt.Id,
+		//		ClientId = initailCLient1.Id,
+		//		PerformedBy = "U002",
+		//		ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+		//		ReceiptDateTime = new DateTime(2025, 6, 6),
+		//		Pallets =
+		//		new List<UpdatePalletDTO>
+		//		{
+		//			new()
+		//			{
+		//				Id = "Q1001",
+		//				LocationId = initailLocation.Id,
+		//				ReceiptId = initialReceipt.Id,
+		//				Status = PalletStatus.Receiving,
+		//				DateReceived = DateTime.Now,
+		//				ProductsOnPallet = new List<ProductOnPalletDTO>
+		//				{
+		//					new()
+		//					{
+		//						Id = initialProductOnPallet1.Id,
+		//						ProductId = initialProduct1.Id,
+		//						Quantity = 1,
+		//						DateAdded = DateTime.Now,
+		//					}
+		//				}
+		//			}
+		//		}
+		//	};
+		//	var userId = "U100";
+
+		//	mockValidator.Setup(m => m.Validate(It.IsAny<CreatePalletReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
+		//	mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
+
+		//	mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
+		//		new FluentValidation.Results.ValidationResult());
+
+		//	mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
+		//		It.IsAny<int>(), It.IsAny<ReasonMovement>(),
+		//		It.IsAny<string>(), It.IsAny<PalletStatus>(), null));
+
+		//	var receiptRepo = new ReceiptRepo(DbContext);
+		//	var palletRepo = new PalletRepo(DbContext);
+
+		//	var service = new ReceiptService(
+		//		receiptRepo,
+		//		mapper,
+		//		DbContext,
+		//		palletRepo,
+		//		mockHistoryService.Object,
+		//		mockInventory.Object,
+		//		mockLocationRepo.Object,
+		//		mockValidator.Object,
+		//		mockReceiptValidator.Object				
+		//		);
+		//	//Act			
+		//	await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+
+		//	//Assert
+
+		//	//DbContext.ChangeTracker.Clear();
+		//	//await using var freshContext = CreateNewDbContext();
+		//	var result = DbContext.Receipts.Include(p=>p.Pallets).ThenInclude(pp=>pp.ProductsOnPallet).SingleOrDefault(x => x.Id == updatingReceipt.Id);
+		//	Assert.NotNull(result);
+		//	Assert.Equal(2, result.ClientId);
+		//	Assert.Single(result.Pallets); // powinien zostać tylko jeden
+		//	Assert.Equal("Q1001", result.Pallets.First().Id);
+		//	var newPallet = DbContext.Pallets
+		//		.Include(p=>p.ProductsOnPallet)
+		//		.FirstOrDefault(p => p.Id == "Q1001");
+		//	Assert.NotNull(newPallet);
+		//	Assert.Equal(PalletStatus.Receiving, newPallet.Status);
+		//	Assert.Equal(1, newPallet.LocationId);
+		//	Assert.Equal(1, newPallet.ReceiptId);
+		//	var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.Id == 2);
+		//	Assert.NotNull(product);
+		//	Assert.Equal("Q1001", product.PalletId);
+		//	Assert.Equal(1, product.Quantity);
+		//	Assert.Equal(1, product.ProductId);
+
+		//	mockHistoryService.Verify(p =>
+		//	p.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, PalletStatus.Receiving, null),
+		//	Times.AtLeastOnce);
+		//	mockHistoryService.Verify(p =>
+		//	p.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, It.IsAny<PalletStatus>(), null),
+		//	Times.AtLeastOnce);
+		//	//Sprawdzić co się dzieje z paletą wyrzuconą z przyjęcia			
+		//}
 		[Fact]
-		public async Task ProperDataOneAddedOneRemoveOnePalletsAndClient_UpdatePalletToReceiptAsync_AddedToBase()
+		public async Task ProperDataOneAddedOneRemoveOnePalletsAndClient_UpdatePalletToReceiptAsync_AddedToBase_MockedMapper()
 		{
 			//Arrange
 			var address = new Address
@@ -583,7 +848,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var initailCLient = new Client
 			{
-				Id = 1,
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -592,169 +856,188 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var initailCLient1 = new Client
 			{
-				Id = 2,
 				Name = "222TestCompany",
 				Email = "222123@op.pl",
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = [address1]
 			};
+			var initialCategory = new Category { Name = "name", IsDeleted = false };
+			var initialProduct = new Product
+			{
+				Name = "Test",
+				SKU = "666666",
+				Category = initialCategory,
+				IsDeleted = false
+			};
+			var initialProduct1 = new Product
+			{
+				Name = "Test",
+				SKU = "666666",
+				Category = initialCategory,
+				IsDeleted = false
+			};
+			var initailLocation = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var initialReceipt = new Receipt
+			{
+				Client = initailCLient,
+				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+				PerformedBy = "U002",
+				ReceiptDateTime = new DateTime(2025, 6, 6)
+			};
 			var initialPallet = new Pallet
 			{
 				Id = "Q1000",
 				DateReceived = DateTime.Now,
-				LocationId = 1,
+				Location = initailLocation,
 				Status = PalletStatus.Available,
-				ReceiptId = 1,
+				Receipt = initialReceipt
 			};
 			var initialProductOnPallet = new ProductOnPallet
 			{
-				Id = 1,
-				PalletId = "Q1000",
-				ProductId = 10,
+				Pallet = initialPallet,
+				Product = initialProduct,
 				Quantity = 100,
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
 			};
-			var initialReceipt = new Receipt
+			var initialPallet1 = new Pallet
 			{
-				Id = 1,
-				ClientId = 1,
-				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-				Pallets = [initialPallet]
+				Id = "Q1001",
+				DateReceived = DateTime.Now,
+				Location = initailLocation,
+				Status = PalletStatus.Available,
+				Receipt = initialReceipt
 			};
-			var initailLocation = new Location
+			var initialProductOnPallet1 = new ProductOnPallet
 			{
-				Id = 1,
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
+				Pallet = initialPallet1,
+				Product = initialProduct1,
+				Quantity = 100,
+				DateAdded = DateTime.Now,
+				BestBefore = new DateOnly(2027, 3, 3)
 			};
-			var initialProduct = new Product
-			{
-				Id = 10,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			var initialProduct1 = new Product
-			{
-				Id = 1,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			var initialCategory = new Category
-			{
-				Id = 1,
-				Name = "name",
-				IsDeleted = false
-			};
+
+			initialPallet.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet };
+			initialPallet1.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet1 };
+			initialReceipt.Pallets = new List<Pallet> { initialPallet, initialPallet1 };
+
+			initialProductOnPallet.PalletId = initialPallet.Id;
+			initialProductOnPallet.ProductId = initialProduct.Id;
+			initialProductOnPallet1.PalletId = initialPallet1.Id;
+			initialProductOnPallet1.ProductId = initialProduct.Id;
+
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			DbContext.ProductOnPallet.Add(initialProductOnPallet);
-			DbContext.Pallets.Add(initialPallet);
 			DbContext.Clients.AddRange(initailCLient, initailCLient1);
-			DbContext.Receipts.Add(initialReceipt);
 			DbContext.Locations.Add(initailLocation);
+			DbContext.Receipts.Add(initialReceipt);
+			DbContext.Pallets.AddRange(initialPallet, initialPallet1);
+			DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
+
 			await DbContext.SaveChangesAsync();
 
-			var MapperConfig = new MapperConfiguration(cfg =>
-			{
-				cfg.AddProfile<MappingProfile>();
-			});
-			var mapper = MapperConfig.CreateMapper();
+			// 🧩 Mockowany mapper – zwraca po prostu ten sam obiekt, nie zmienia właściwości
+			var mockMapper = new Mock<IMapper>();
+			mockMapper.Setup(m => m.Map<ReceiptDTO, Receipt>(It.IsAny<ReceiptDTO>(), It.IsAny<Receipt>()))
+					  .Returns((ReceiptDTO src, Receipt dest) => dest);
+
+			// Pozostałe mocki
 			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
 			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
 			var mockHistoryService = new Mock<IHistoryService>();
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var mockInventory = new Mock<IInventoryService>();
+			var mockLocationRepo = new Mock<ILocationRepo>();
+
 			var updatingReceipt = new ReceiptDTO
 			{
-				Id = 1,
-				ClientId = 2,
+				Id = initialReceipt.Id,
+				ClientId = initailCLient1.Id,
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				Pallets =
-				new List<UpdatePalletDTO>
-				{
+				[
+					new()
+			{
+				Id = "Q1001",
+				LocationId = initailLocation.Id,
+				ReceiptId = initialReceipt.Id,
+				Status = PalletStatus.Receiving,
+				DateReceived = DateTime.Now,
+				ProductsOnPallet =
+				[
 					new()
 					{
-						LocationId = 1,
-						ReceiptId = 1,
-						Status = PalletStatus.Receiving,
-						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
-						{
-							new()
-							{
-								ProductId = 1,
-								Quantity = 1,
-								DateAdded = DateTime.Now,
-							}
-						}
+						Id = initialProductOnPallet1.Id,
+						ProductId = initialProduct1.Id,
+						Quantity = 1,
+						DateAdded = DateTime.Now
 					}
-				}
+				]
+			}
+				]
 			};
+
 			var userId = "U100";
 
 			mockValidator.Setup(m => m.Validate(It.IsAny<CreatePalletReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
 			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
+			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
 
-			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
-				new FluentValidation.Results.ValidationResult());
-
-			mockHistoryService.Setup(a => a.CreateMovementAsync(It.IsAny<Pallet>(),
+			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
 				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				.Returns(Task.CompletedTask);
+				It.IsAny<string>(), It.IsAny<PalletStatus>(), null));
 
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
 
 			var service = new ReceiptService(
 				receiptRepo,
-				mapper,
+				mockMapper.Object, // 🔥 zamockowany mapper
 				DbContext,
 				palletRepo,
 				mockHistoryService.Object,
 				mockInventory.Object,
+				mockLocationRepo.Object,
 				mockValidator.Object,
-				mockReceiptValidator.Object				
-				);
-			//Act			
+				mockReceiptValidator.Object
+			);
+
+			//Act
 			await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
 
 			//Assert
-			var result = DbContext.Receipts.SingleOrDefault(x => x.Id == updatingReceipt.Id);
+			var result = DbContext.Receipts
+				.Include(p => p.Pallets)
+				.ThenInclude(pp => pp.ProductsOnPallet)
+				.SingleOrDefault(x => x.Id == updatingReceipt.Id);
+
 			Assert.NotNull(result);
-			Assert.Equal(2, result.ClientId);
-			Assert.Single(result.Pallets); // powinien zostać tylko jeden
+			Assert.Equal(initailCLient1.Id, result.ClientId);
+			Assert.Single(result.Pallets); // tylko jedna paleta
 			Assert.Equal("Q1001", result.Pallets.First().Id);
-			var newPallet = DbContext.Pallets.SingleOrDefault(p => p.Id == "Q1001");
+
+			var newPallet = DbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.FirstOrDefault(p => p.Id == "Q1001");
+
 			Assert.NotNull(newPallet);
 			Assert.Equal(PalletStatus.Receiving, newPallet.Status);
-			Assert.Equal(1, newPallet.LocationId);
-			Assert.Equal(1, newPallet.ReceiptId);
-			var product = DbContext.ProductOnPallet.SingleOrDefault(p => p.Id == 2);
+			Assert.Equal(initailLocation.Id, newPallet.LocationId);
+			Assert.Equal(initialReceipt.Id, newPallet.ReceiptId);
+
+			var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.PalletId == "Q1001");
 			Assert.NotNull(product);
 			Assert.Equal("Q1001", product.PalletId);
-			Assert.Equal(1, product.Quantity);
-			Assert.Equal(1, product.ProductId);
+			Assert.Equal(100, product.Quantity);
+			Assert.Equal(initialProduct1.Id, product.ProductId);
 
 			mockHistoryService.Verify(p =>
-			p.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, PalletStatus.Receiving, null),
-			Times.AtLeastOnce);
-			mockHistoryService.Verify(p =>
-			p.CreateMovementAsync(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, It.IsAny<PalletStatus>(), null),
-			Times.AtLeastOnce);
-			//Sprawdzić co się dzieje z paletą wyrzuconą z przyjęcia			
+				p.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, PalletStatus.Receiving, null),
+				Times.AtLeastOnce);
 		}
+
 	}
 }

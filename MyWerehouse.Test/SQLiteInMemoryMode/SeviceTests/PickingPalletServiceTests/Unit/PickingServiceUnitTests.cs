@@ -257,7 +257,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);			
+			var pickingPalletRepo = new PickingPalletRepo(DbContext);	
+			var allocationRepo = new AllocationRepo(DbContext);
 			var issueRepo = new IssueRepo(DbContext);
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
@@ -268,7 +269,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var palletService = new Mock<IPalletService>();
 
 			var service = new PickingPalletService(pickingPalletRepo,
-				//mapper.Object,
+					allocationRepo,
 				DbContext,
 				locationRepo.Object,
 				palletRepo.Object,
@@ -552,6 +553,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);
+			var allocationRepo = new AllocationRepo(DbContext);
 			var issueRepo = new IssueRepo(DbContext);
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
@@ -559,7 +561,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var historyService = new Mock<IHistoryService>();
 			var palletService = new Mock<IPalletService>();
 			var service = new PickingPalletService(pickingPalletRepo,
-				//mapper.Object,
+				allocationRepo,
 				DbContext,
 				locationRepo.Object,
 				palletRepo.Object,

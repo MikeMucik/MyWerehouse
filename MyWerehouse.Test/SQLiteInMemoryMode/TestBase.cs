@@ -27,12 +27,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			DbContext = new WerehouseDbContext(_contextOptions);
 			DbContext.Database.EnsureCreated();
 		}
-		protected WerehouseDbContext CreateNewContext() => new WerehouseDbContext(_contextOptions);
+		protected WerehouseDbContext CreateNewContext() => new(_contextOptions);
 		public void Dispose() 
 		{
 			_connection.Close();
 			_connection.Dispose();
 			DbContext.Dispose(); 
+			GC.SuppressFinalize(this);
 		}
 	}
 }

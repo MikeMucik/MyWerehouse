@@ -15,17 +15,17 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public ReceiptRepo(WerehouseDbContext werehouseDbContext)
 		{
 			_werehouseDbContext = werehouseDbContext;
-		}		
-		public async Task AddReceiptAsync(Receipt receipt)
+		}
+		public void AddReceipt(Receipt receipt)
 		{
-			await _werehouseDbContext.Receipts.AddAsync(receipt);		
-		}				
+			_werehouseDbContext.Receipts.Add(receipt);
+		}
 		public async Task<Receipt?> GetReceiptByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Receipts
 				.Include(r => r.Pallets)
 					.ThenInclude(pr => pr.ProductsOnPallet)
-				.SingleOrDefaultAsync(r => r.Id == id);
+				.FirstOrDefaultAsync(r => r.Id == id);
 		}
 		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)
 		{
@@ -67,12 +67,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}			
 	}
 }
-//public async Task DeleteReceiptAsync(int id)
+//public void DeleteReceiptAsync(Receipt receipt)
 //{
-//	var receipt =await _werehouseDbContext.Receipts.FindAsync(id);
-//	if (receipt != null)
-//	{
-//		_werehouseDbContext.Receipts.Remove(receipt);
-//		await _werehouseDbContext.SaveChangesAsync(true);
-//	}
+//		_werehouseDbContext.Receipts.Remove(receipt);//		
 //}		

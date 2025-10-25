@@ -13,7 +13,8 @@ namespace MyWerehouse.Infrastructure
 	public static class DependencyInjection
 	{
 		public static IServiceCollection AddInfrastructure(this IServiceCollection services)
-		{					
+		{	
+			services.AddTransient<IAllocationRepo, AllocationRepo>();
 			services.AddTransient<ICategoryRepo, CategoryRepo>();
 			services.AddTransient<IClientRepo, ClientRepo>();
 			services.AddTransient<IHistoryIssueRepo, HistoryIssueRepo>();
@@ -25,8 +26,7 @@ namespace MyWerehouse.Infrastructure
 			services.AddTransient<ILocationRepo, LocationRepo>();
 			services.AddTransient<IPalletMovementRepo, PalletMovementRepo>();
 			services.AddTransient<IPalletRepo, PalletRepo>();
-			services.AddTransient<IPickingPalletRepo, PickingPalletRepo>();
-			services.AddTransient<IProductOnPalletRepo, ProductOnPalletRepo>();
+			services.AddTransient<IPickingPalletRepo, PickingPalletRepo>();			
 			services.AddTransient<IProductRepo, ProductRepo>();
 			services.AddTransient<IReceiptRepo, ReceiptRepo>();					
 			return services;

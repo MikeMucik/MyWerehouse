@@ -13,8 +13,10 @@ namespace MyWerehouse.Domain.Models
 		public virtual Pallet Pallet { get; set; }
 		public int? SourceLocationId { get; set; }
 		public virtual Location SourceLocation { get; set; }
+		public string? SourceLocationSnapShot { get; set; }
 		public int? DestinationLocationId { get; set; }
-		public virtual Location DestinationLocation { get; set; }			  
+		public virtual Location DestinationLocation { get; set; }		
+		public string? DestinationLocationSnapShot { get; set; }
 		public ReasonMovement Reason { get; set; } // np. "Picking", "Correction", "Merge"
 		public string PerformedBy { get; set; } // opcjonalnie: user		
 		public virtual ICollection<PalletMovementDetail> PalletMovementDetails { get; set; } = new List<PalletMovementDetail>();

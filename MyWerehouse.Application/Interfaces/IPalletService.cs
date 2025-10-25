@@ -11,14 +11,15 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IPalletService
 	{				
-		//Task<string> CreatePickingPalletAsync(CreatePalletPickingDTO addPalletDTO);		
+		Task<string> CreatePalletAsync(PalletDTO addPalletDTO, string userId);		//dodanie palety niepowiązanej
 		Task DeletePalletAsync(string id);	
 		Task<UpdatePalletDTO> GetPalletToEditAsync(string id);		
-		Task UpdatePalletAsync(UpdatePalletDTO updatingPallet);		
-		Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id);		
+		Task UpdatePalletAsync(UpdatePalletDTO updatingPallet, string userId);		
+		//Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id);		
 		Task<ChangeLocationResults> ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId, bool force = false);
 		Task <List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter);
 		Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId);
 		Task<List<Pallet>> GetAllAvailablePalletsAsync(int productId, DateOnly? bestBefore);
+		//TODO: przestawienie 
 	}
 }

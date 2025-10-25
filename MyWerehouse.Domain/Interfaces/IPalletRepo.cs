@@ -9,15 +9,14 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IPalletRepo
 	{		
-		Task<string> AddPalletAsync(Pallet pallet);		
-		Task DeletePalletAsync(string palletId);		
+		string AddPallet(Pallet pallet);		
+		void DeletePallet(Pallet pallet);		
 		Task<Pallet> GetPalletByIdAsync(string palletId);
 		IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly? minBestBefore);
 		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);			
-		//Task ClearPalletFromListIssueAsync(string palletId);
 		void ClearPalletFromListIssue(Pallet pallet);
-		Task ChangePalletStatusAsync(string palletId, PalletStatus palletStatus);//może nie być potrzebne		
+		void ChangePalletStatus(string palletId, PalletStatus palletStatus);//być może przuda się do innych metod		
 		Task<string> GetNextPalletIdAsync();		
-		Task<Pallet> GetPalletByLocationAsync(int locationId); //numer lokacji	
+		Task<Pallet> CheckOccupancyAsync(int locationId); //numer lokacji			
 	}
 }

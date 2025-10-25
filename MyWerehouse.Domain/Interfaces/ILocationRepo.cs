@@ -9,11 +9,14 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface ILocationRepo
 	{		
-		Task<int> AddLocationAsync(Location location);				
-		Task DeleteLocationAsync(int locationId);		
-		Task<Location?> GetLocationByIdAsync(int locationId);
+		Location AddLocation(Location location);				
+		void DeleteLocation(Location location);		
+		Task<Location> GetLocationByIdAsync(int locationId);
 		IQueryable<Location> GetAllAvailableLocations();
-		Task AddManyLocationAsync(IEnumerable<Location> locations);//test
 		Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt);
+		IEnumerable<Location> CreateListLocationForBayRangeAisle(int Bay, int StartAisle, int EndAisle, int AmountPosition, int AmountHeigt);
+		//Task AddManyLocationAsync(IEnumerable<Location> locations);//test
+		
+		//Task<(int Bay, int Aisle, int Position, int Heigt)> FindIdLocationAsync(int Bay, int Aisle, int Position, int Heigt);
 	}
 }

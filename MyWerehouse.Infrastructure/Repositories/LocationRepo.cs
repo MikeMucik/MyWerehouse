@@ -16,43 +16,63 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-		
-		public async Task<int> AddLocationAsync(Location location)
+
+		public Location AddLocation(Location location)
 		{
-			await _werehouseDbContext.Locations.AddAsync(location);
-			return location.Id;
-		}		
-		public async Task DeleteLocationAsync(int locationId)
+			_werehouseDbContext.Locations.Add(location);
+			return location;
+		}
+		public void DeleteLocation(Location location)
 		{
-			var location = await _werehouseDbContext.Locations.FindAsync(locationId);
-			if (location != null)
-			{
-				_werehouseDbContext.Locations.Remove(location);
-				
-			}
-		}				
-		public async Task<Location?> GetLocationByIdAsync(int locationId)
+			_werehouseDbContext.Locations.Remove(location);
+		}
+		public async Task<Location> GetLocationByIdAsync(int locationId)
 		{
 			return await _werehouseDbContext.Locations.FindAsync(locationId);
 		}
 		public IQueryable<Location> GetAllAvailableLocations()
 		{
 			var locations = _werehouseDbContext.Locations
-				.Where(l => l.Pallets.Count() == 0);
+				.Where(l => l.Pallets.Count() == 0)
+				.OrderBy(l => l.Id);
 			return locations;
 		}
-		public async Task AddManyLocationAsync(IEnumerable<Location> locations)
+		public async Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Height)
 		{
-			await _werehouseDbContext.Locations.AddRangeAsync(locations);
-		}
-		public async Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt)
-		{
-			var location =await _werehouseDbContext.Locations
+			var location = await _werehouseDbContext.Locations
 				.FirstOrDefaultAsync(x => x.Bay == Bay &&
-								x.Aisle == Aisle && 
+								x.Aisle == Aisle &&
 								x.Position == Position &&
-								x.Height == Heigt);
+								x.Height == Height);
 			return location;
 		}
+		public IEnumerable<Location> CreateListLocationForBayRangeAisle(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
+		{
+			var locations = new List<Location>();
+
+			for (int i = startAisle; i <= endAisle; i++)
+			{
+				for (int j = 1; j <= amountPosition; j++)
+				{
+					for (int k = 1; k <= amountHeigt; k++)
+					{
+						locations.Add(new Location
+						{
+							Bay = bay,
+							Aisle = i,
+							Position = j,
+							Height = k
+						});
+					}
+				}
+			}
+			return locations;
+		}
+
+
+		//public async Task AddManyLocationAsync(IEnumerable<Location> locations)
+		//{
+		//	await _werehouseDbContext.Locations.AddRangeAsync(locations);
+		//}
 	}
 }

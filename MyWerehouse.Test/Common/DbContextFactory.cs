@@ -50,7 +50,7 @@ namespace MyWerehouse.Test.Common
 				context.Categories.AddRange(
 					new Category { Id = 1, Name = "TestCategory", IsDeleted = false },
 					new Category { Id = 2, Name = "TestCategory1" },
-					new Category { Id = 3, Name = "ToDeleted"}
+					new Category { Id = 3, Name = "ToDeleted" }
 				);
 			}
 
@@ -81,7 +81,7 @@ namespace MyWerehouse.Test.Common
 			{
 				context.ProductDetails.AddRange(
 					new ProductDetail
-					{						
+					{
 						ProductId = 10,
 						Length = 10,
 						Height = 20,
@@ -90,7 +90,7 @@ namespace MyWerehouse.Test.Common
 						Description = "TestDetails"
 					},
 					new ProductDetail
-					{						
+					{
 						ProductId = 11,
 						Length = 20,
 						Height = 40,
@@ -137,6 +137,13 @@ namespace MyWerehouse.Test.Common
 					PerformedBy = "U002",
 					IssueDateTimeCreate = new DateTime(2025, 5, 5),
 					IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
+					IssueItems = new List<IssueItem> { new IssueItem
+					{
+						ProductId = 10,
+						CreatedAt = DateTime.Today,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
+						Quantity = 20,
+					} }
 				});
 			}
 
@@ -294,7 +301,7 @@ namespace MyWerehouse.Test.Common
 					}
 				);
 			}
-			if(!context.PalletMovementDetails.Any())
+			if (!context.PalletMovementDetails.Any())
 			{
 				context.PalletMovementDetails.AddRange(
 					new PalletMovementDetail

@@ -17,27 +17,19 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}		
-		public async Task<int> AddClientAsync(Client client)
+		public int AddClient(Client client)
 		{
-			await _werehouseDbContext.Clients.AddAsync(client);			
+			_werehouseDbContext.Clients.Add(client);			
 			return client.Id;
 		}		
-		public async Task DeleteClientByIdAsync(int id)
+		public void DeleteClient(Client client)
+		{			
+				_werehouseDbContext.Remove(client);					
+		}
+		public void SwitchOffClient(Client client)
 		{
-			var client = await _werehouseDbContext.Clients.FindAsync(id);
-			if (client != null)
-			{
-				_werehouseDbContext.Remove(client);				
-			}
-		}		
-		public async Task SwitchOffClientAsync(int id)
-		{
-			var client = await _werehouseDbContext.Clients.FindAsync(id);
-			if (client != null)
-			{
-				client.IsDeleted = true;				
-			}
-		}		
+				client.IsDeleted = true;			
+		}			
 		public async Task<Client?> GetClientByIdAsync(int id)
 		{
 			if (id > 0)

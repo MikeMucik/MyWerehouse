@@ -22,22 +22,16 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext.Issues.Add(issue);			
 		}		
-		public async Task DeleteIssueAsync(int id)
-		{
-			var issue = await _werehouseDbContext.Issues.FindAsync(id);
-			if (issue != null)
-			{
-				_werehouseDbContext.Remove(issue);
-			}
-		}		
-			
+		public void DeleteIssue(Issue issue)
+		{			
+				_werehouseDbContext.Issues.Remove(issue);
+		}					
 		public async Task<Issue?> GetIssueByIdAsync(int id)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstOrDefaultAsync(i => i.Id == id);
-		}
-		
+		}		
 		public async Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids)
 		{
 			return await _werehouseDbContext.Issues

@@ -9,20 +9,21 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IPickingPalletRepo
 	{
-		Task<VirtualPallet> AddPalletToPickingAsync(string palletId);		
-		Task DeleteVirtualPickingAsync(int id);
-		void DeleteAllocation(Allocation allocation);// czy na pewno synchroniczna
-		Allocation AddAllocation(VirtualPallet pallet, Issue issue, int quantity);
+		VirtualPallet AddPalletToPicking(VirtualPallet virtualPallet);		
+		void DeleteVirtualPalletPicking(VirtualPallet virtualPallet);			
 		Task<List<VirtualPallet>> GetVirtualPalletsAsync(int productId);		
 		Task<List<VirtualPallet>> GetVirtualPalletsByTimeAsync(DateTime start, DateTime end);
-		Task<DateTime> TakeDateAddedToPickingAsync(int pickingPalletId);
-		Task<int> GetVirtualPalletIdFromPalletIdAsync(string palletId);		
-		Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate);
-		Task<Allocation> GetAllocationAsync(int allocationId);
-		Task<VirtualPallet> GetVirtualPalletByIdAsync(int palletId);
-		Task<List<Allocation>> GetAllocationsByIssueIdProductIdAsync(int issueId, int productId);
-		Task<List<Allocation>> GetAllocationsByIssueIdAsync(int issueId);
-		Task<List<Allocation>> GetAllocationsProductIdAsync(int productId, DateTime from, DateTime to);		
-		Task ClosePickingPalletAsync(string palletId, int issueId);
+		//Task<DateTime> TakeDateAddedToPickingAsync(int pickingPalletId);
+		Task<int> GetVirtualPalletIdFromPalletIdAsync(string palletId);			
+		Task<VirtualPallet> GetVirtualPalletByIdAsync(int palletId);			
+		void ClosePickingPallet(string palletId, int issueId);
+
+		//Allocation AddAllocation(VirtualPallet pallet, Issue issue, int quantity);
+		//void DeleteAllocation(Allocation allocation);
+		//Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate);
+		//Task<Allocation> GetAllocationAsync(int allocationId);
+		//Task<List<Allocation>> GetAllocationsByIssueIdProductIdAsync(int issueId, int productId);
+		//Task<List<Allocation>> GetAllocationsByIssueIdAsync(int issueId);
+		//Task<List<Allocation>> GetAllocationsProductIdAsync(int productId, DateTime from, DateTime to);
 	}
 }

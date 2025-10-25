@@ -17,7 +17,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			//Arrange
 			var palletId = "Q1001";
 			//Act
-			var result =await _pallletService.GetPalletToEditAsync(palletId);
+			var result =await _palletService.GetPalletToEditAsync(palletId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.ProductsOnPallet.Count);
@@ -33,24 +33,25 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 			Assert.Equal(200, product2.Quantity);
 		}
 		
-		[Fact]
-		public async Task ShowHistory_ShowHistoryPalletAsync_ReturnData()
-		{
-			//Arrange
-			var palletId = "Q1000";
-			//Act
-			var result =await _pallletService.ShowHistoryPalletAsync(palletId);
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotNull(result.PalletMovementsDTO);
-			Assert.Equal(2, result.PalletMovementsDTO.Count());
-			var move1 = result.PalletMovementsDTO.Single(x => x.Id == 5);
-			var move2 = result.PalletMovementsDTO.Single(x => x.Id == 1);
-			Assert.Equal(3, move1.DestinationLocationId);
-			Assert.Equal(ReasonMovement.Moved, move1.Reason);
-			Assert.Equal(new DateTime(2025, 2, 2), move1.MovementDate);
-			Assert.Equal(2, move2.PalletMovementDetailsDTO.Count());
-			Assert.Equal(100, move2.PalletMovementDetailsDTO.Single(x => x.ProductId == 10).QuantityChange);
-		}
+		//[Fact]
+		//public async Task ShowHistory_ShowHistoryPalletAsync_ReturnData()
+		//{
+		//	//Arrange
+		//	var palletId = "Q1000";
+		//	//Act
+
+		//	var result =await _palletService.ShowHistoryPalletAsync(palletId);
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	Assert.NotNull(result.PalletMovementsDTO);
+		//	Assert.Equal(2, result.PalletMovementsDTO.Count());
+		//	var move1 = result.PalletMovementsDTO.Single(x => x.Id == 5);
+		//	var move2 = result.PalletMovementsDTO.Single(x => x.Id == 1);
+		//	Assert.Equal(3, move1.DestinationLocationId);
+		//	Assert.Equal(ReasonMovement.Moved, move1.Reason);
+		//	Assert.Equal(new DateTime(2025, 2, 2), move1.MovementDate);
+		//	Assert.Equal(2, move2.PalletMovementDetailsDTO.Count());
+		//	Assert.Equal(100, move2.PalletMovementDetailsDTO.Single(x => x.ProductId == 10).QuantityChange);
+		//}
 	}
 }

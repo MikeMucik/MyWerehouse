@@ -21,7 +21,8 @@ namespace MyWerehouse.Application.ViewModels.ProductOnPalletModels
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<ProductOnPalletDTO, ProductOnPallet>()
-				.ReverseMap();
+				.ForMember(dest => dest.Id, opt => opt.Ignore());
+			profile.CreateMap<ProductOnPallet, ProductOnPalletDTO>();
 		}
 	}
 	public class ProductOnPalletDTOValidation : AbstractValidator<ProductOnPalletDTO>

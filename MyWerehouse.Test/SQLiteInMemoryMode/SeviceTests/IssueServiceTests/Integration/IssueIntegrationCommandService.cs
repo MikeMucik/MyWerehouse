@@ -23,10 +23,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 	{
 		protected readonly IssueService _issueService;
 		protected readonly IMapper _mapper;
+
 		protected readonly IIssueRepo _issueRepo;
+		protected readonly IIssueItemRepo _issueItemRepo;
+
 		protected readonly IPalletService _palletService;
 		protected readonly IPalletRepo _palletRepo;
 		protected readonly IProductRepo _productRepo;
+		protected readonly IAllocationRepo _allocationRepo;
 		protected readonly IPickingPalletRepo _pickingPalletRepo;
 		protected readonly IInventoryRepo _inventoryRepo;
 		protected readonly IInventoryService _inventoryService;
@@ -46,7 +50,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		protected readonly IValidator<UpdatePalletDTO> _updatePalletValidator;
 		protected readonly IValidator<UpdateIssueDTO> _updateIssueValidator;
 
-		protected readonly IIssueItemRepo _issueItemRepo;
+		
 		public IssueIntegrationCommandService()
 		{
 			var MapperConfig = new MapperConfiguration(cfg =>
@@ -59,33 +63,35 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			_createIssueValidator = new CreateIssueDTOValidion(_createItemValidator);
 
 			_locationRepo = new LocationRepo(DbContext);
-			_locationService = new LocationService(_locationRepo, _mapper, DbContext);
+			_locationService = new LocationService(_locationRepo, _mapper, _palletRepo, DbContext);
 
 			_palletMovementRepo = new PalletMovementRepo(DbContext);
 			_historyIssueRepo = new HistoryIssueRepo(DbContext);
 			_historyAllocationRepo = new HistoryPickingRepo(DbContext);
 			_historyReceiptRepo = new HistoryReceiptRepo(DbContext);
-			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo);
+			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo, DbContext, _palletRepo, _mapper, _locationRepo);
 			_issueRepo = new IssueRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
 			_productRepo = new ProductRepo(DbContext);
+			_allocationRepo = new AllocationRepo(DbContext);
 			_pickingPalletRepo = new PickingPalletRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
 			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
-			//_updateIssueValidator = new UpdateIssueDTOValidion();
+			_updateIssueValidator = new UpdateIssueDTOValidation(_createItemValidator);
 			_palletService = new PalletService(
 				_palletRepo,
 				_historyService,
 				_locationService,
 				_palletMovementRepo,
 				_pickingPalletRepo,
+				_locationRepo,
 				_mapper,
 				_updatePalletValidator
 				, DbContext);
 			_issueItemRepo = new IssueItemRepo(DbContext);
 			_inventoryRepo = new InventoryRepo(DbContext);
-			_inventoryService = new InventoryService(_inventoryRepo, _mapper);
+			_inventoryService = new InventoryService(_inventoryRepo, _mapper, DbContext);
 			_issueService = new IssueService(
 				_issueRepo,
 				_mapper,
@@ -94,6 +100,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				_inventoryService,
 				_palletRepo,
 				_productRepo,
+				_allocationRepo,
 				_pickingPalletRepo,
 				_palletService,
 				_issueItemRepo,

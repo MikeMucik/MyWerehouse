@@ -17,7 +17,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 	{
 		//Zmiana metody z delete na cancel
 		[Fact]
-		public async Task NotVerifiedReceipt_DeleteReceiptAsync_RemoveFromBase()
+		public async Task DeleteReceiptAsync_NotVerifiedReceipt_RemoveFromBase()
 		{
 			//Arrange
 			var address = new Address
@@ -120,11 +120,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(initialReceipt);
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
-
-
 			//Act
-			await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
+			var result = await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
 			//Assert	
+			Assert.NotNull(result);
+			Assert.Contains("Usunięto przyjęcie", result.Message);
 			var receipt = DbContext.Receipts.FirstOrDefault(receipt => receipt.Id == initialReceipt.Id);
 			Assert.NotNull(receipt);
 			Assert.Equal(ReceiptStatus.Cancelled, receipt.ReceiptStatus);
@@ -137,7 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal(1, DbContext.Clients.Count());
 		}
 		[Fact]
-		public async Task VerifiedReceipt_DeleteReceiptAsync_ThrowException()
+		public async Task DeleteReceiptAsync_VerifiedReceipt_ThrowInfo()
 		{
 			//Arrange
 			var address = new Address
@@ -152,59 +152,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initailCLient = new Client
 			{
-				Id = 1,
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
-			var initialPallet = new Pallet
+			var initialCategory = new Category
 			{
-				Id = "Q1000",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				ReceiptId = 1,
+				Name = "name",
+				IsDeleted = false
 			};
-			var initialPallet1 = new Pallet
+			var initialLocation = new Location
 			{
-				Id = "Q2000",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				ReceiptId = 1,
-			};
-			var initialProductOnPallet = new ProductOnPallet
-			{
-				Id = 1,
-				PalletId = "Q1000",
-				ProductId = 10,
-				Quantity = 100,
-				DateAdded = DateTime.Now,
-				BestBefore = new DateOnly(2027, 3, 3)
-			};
-			var initialProductOnPallet1 = new ProductOnPallet
-			{
-				Id = 2,
-				PalletId = "Q2000",
-				ProductId = 1,
-				Quantity = 200,
-				DateAdded = DateTime.Now,
-				BestBefore = new DateOnly(2027, 3, 3)
-			};
-			var initialReceipt = new Receipt
-			{
-				Id = 1,
-				ClientId = 1,
-				ReceiptStatus = ReceiptStatus.Verified,
-				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-				Pallets = [initialPallet]
-			};
-			var initailLocation = new Location
-			{
-				Id = 1,
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
@@ -212,7 +172,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialProduct = new Product
 			{
-				Id = 10,
+				//Id = 10,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
@@ -220,30 +180,66 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialProduct1 = new Product
 			{
-				Id = 1,
+				///Id = 1,
 				Name = "Test",
 				SKU = "666666",
-				CategoryId = 1,
+				Category = initialCategory,
 				IsDeleted = false,
 			};
-			var initialCategory = new Category
+			var initialReceipt = new Receipt
 			{
-				Id = 1,
-				Name = "name",
-				IsDeleted = false
+				//Id = 1,
+				Client = initailCLient,
+				ReceiptStatus = ReceiptStatus.Verified,
+				PerformedBy = "U002",
+				ReceiptDateTime = new DateTime(2025, 6, 6),
+				//Pallets = [initialPallet]
 			};
+			var initialPallet = new Pallet
+			{
+				Id = "Q1000",
+				DateReceived = DateTime.Now,
+				Location = initialLocation,
+				Status = PalletStatus.Available,
+				Receipt = initialReceipt,
+			};
+			var initialPallet1 = new Pallet
+			{
+				Id = "Q2000",
+				DateReceived = DateTime.Now,
+				Location = initialLocation,
+				Status = PalletStatus.Available,
+				Receipt = initialReceipt,
+			};
+			var initialProductOnPallet = new ProductOnPallet
+			{				
+				PalletId = "Q1000",
+				Product = initialProduct,
+				Quantity = 100,
+				DateAdded = DateTime.Now,
+				BestBefore = new DateOnly(2027, 3, 3)
+			};
+			var initialProductOnPallet1 = new ProductOnPallet
+			{				
+				PalletId = "Q2000",
+				Product = initialProduct1,
+				Quantity = 200,
+				DateAdded = DateTime.Now,
+				BestBefore = new DateOnly(2027, 3, 3)
+			};	
+			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);
 			DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
 			DbContext.Pallets.AddRange(initialPallet, initialPallet1);
 			DbContext.Clients.Add(initailCLient);
 			DbContext.Receipts.Add(initialReceipt);
-			DbContext.Locations.Add(initailLocation);
+			DbContext.Locations.Add(initialLocation);
 			await DbContext.SaveChangesAsync();
-
-			//Act&Assert			
-			var ex = await Assert.ThrowsAsync<InvalidDataException>(() => _receiptService.CancelReceiptAsync(initialReceipt.Id, "user"));
-			Assert.Contains("Nie można usunąć zweryfikowanego przyjęcia", ex.Message);
+			//Act&Assert		
+			var result = await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
+			Assert.NotNull(result);
+			Assert.Contains("Nie można usunąć zweryfikowanego przyjęcia", result.Message);		
 		}
 	}
 }

@@ -15,6 +15,6 @@ namespace MyWerehouse.Domain.Models
 		public ReceiptStatus StatusAfter { get; set; }
 		public string PerformedBy { get; set; }
 		public DateTime DateTime { get; set; }
-		//public virtual ICollection<HistoryReceiptDetail> Details { get; set; } = new List<HistoryReceiptDetail>();
+		public virtual ICollection<HistoryReceiptDetail> Details { get; set; } = new List<HistoryReceiptDetail>();
 	}
 }

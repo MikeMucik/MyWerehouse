@@ -9,6 +9,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -20,20 +21,20 @@ namespace MyWerehouse.Application.Services
 		private readonly ICategoryRepo _categoryRepo;
 		private readonly IProductRepo _productRepo;
 		private readonly IMapper _mapper;
-		private readonly IValidator<CategoryDTO> _validator;
+		private readonly IValidator<CategoryDTO> _validator;//
 		private readonly WerehouseDbContext _werehouseDbContext;
 		public CategoryService(
 			ICategoryRepo categoryRepo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IProductRepo? productRepo = null,
-			IValidator<CategoryDTO>? validator = null)
+			IValidator<CategoryDTO>? validator = null)//
 		{
 			_categoryRepo = categoryRepo;
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
 			_productRepo = productRepo;
-			_validator = validator;
+			_validator = validator;//
 		}
 		public CategoryService(
 			ICategoryRepo categoryRepo,
@@ -55,13 +56,14 @@ namespace MyWerehouse.Application.Services
 				throw new InvalidDataException("Kategoria o tej nazwie już istnieje.");
 			}
 			var category = _mapper.Map<Category>(categoryDTO);
-			await _categoryRepo.AddCategoryAsync(category);
+			_categoryRepo.AddCategory(category);
 			await _werehouseDbContext.SaveChangesAsync();
 		}
 		public async Task DeleteCategoryAsync(int id)
 		{
-			if (await _categoryRepo.GetCategoryByIdAsync(id) != null)
-			{
+			var category = await _categoryRepo.GetCategoryByIdAsync(id)
+					?? throw new DomainException($"Kategoria o ID {id} nie została znalezniona");
+
 				var filter = new ProductSearchFilter
 				{
 					CategoryId = id,
@@ -73,11 +75,9 @@ namespace MyWerehouse.Application.Services
 				}
 				else
 				{
-					await _categoryRepo.DeleteCategoryAsync(id);
+					 _categoryRepo.DeleteCategory(category);
 				}
 				await _werehouseDbContext.SaveChangesAsync();
-			}
-			else { throw new ArgumentException($"Kategoria o ID {id} nie została znalezniona", nameof(id)); }
 		}
 		public async Task UpdateCategoryAsync(CategoryDTO categoryDTO)
 		{

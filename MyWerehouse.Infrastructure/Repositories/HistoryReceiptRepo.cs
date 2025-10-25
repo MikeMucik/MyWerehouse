@@ -17,9 +17,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext = werehouseDbContext;
 		}
 
-		public async Task AddHistoryReceiptAsync(HistoryReceipt historyReceipt)
+		public void AddHistoryReceipt(HistoryReceipt historyReceipt)
 		{
-			await _werehouseDbContext.HistoryReceipts.AddAsync(historyReceipt);
+			 _werehouseDbContext.HistoryReceipts.Add(historyReceipt);
 		}
 
 		public IQueryable<HistoryReceipt> GetAllHistoryReceipt()

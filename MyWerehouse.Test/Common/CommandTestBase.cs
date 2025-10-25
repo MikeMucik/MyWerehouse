@@ -15,30 +15,7 @@ namespace MyWerehouse.Test.Common
 {
 	public class CommandTestBase : IDisposable
 	{
-		//protected readonly WerehouseDbContext _context;
-		//private readonly SqliteConnection _connection;
-		//public CommandTestBase()
-		//{
-
-		//	_connection = new SqliteConnection("DataSource=:memory:");
-		//	_connection.Open();
-
-		//	var options = new DbContextOptionsBuilder<WerehouseDbContext>()
-		//		.UseSqlite(_connection)
-		//		.Options;
-		//	_context = new WerehouseDbContext(options);
-		//	_context.Database.EnsureCreated();
-		//	DbContextFactory.SeedDatabase(_context);
-		//}
-		//public void Dispose()
-		//{
-
-		//	_context?.Dispose();
-
-		//	_connection?.Close();
-		//	_connection?.Dispose();
-		//}
-		//SQLitePCL.Batteries.Init();
+		
 		protected readonly WerehouseDbContext _context;
 
 		public CommandTestBase()

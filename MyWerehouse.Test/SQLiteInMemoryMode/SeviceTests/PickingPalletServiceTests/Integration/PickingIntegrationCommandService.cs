@@ -19,6 +19,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 	{
 		protected readonly PickingPalletService _pickingPalletService;
 		protected readonly IMapper _mapper;
+		protected readonly IAllocationRepo _allocationRepo;
 		protected readonly IPickingPalletRepo _pickingPalletRepo;
 		protected readonly ILocationRepo _locationRepo;
 		protected readonly IPalletRepo _palletRepo;
@@ -43,9 +44,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				cfg.AddProfile<MappingProfile>();
 			});
 			_mapper = MapperConfig.CreateMapper();
+			_palletRepo = new PalletRepo(DbContext);
 			_locationRepo = new LocationRepo(DbContext);			
 			_palletMovementRepo = new PalletMovementRepo(DbContext);			
-			_locationService = new LocationService(_locationRepo, _mapper, DbContext);
+			_locationService = new LocationService(_locationRepo, _mapper, _palletRepo, DbContext);
+			_allocationRepo = new AllocationRepo(DbContext);
 			_pickingPalletRepo = new PickingPalletRepo(DbContext);
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
 			_updatevalidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
@@ -54,14 +57,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			_historyPickingRepo = new HistoryPickingRepo(DbContext);
 			_historyReceiptRepo = new HistoryReceiptRepo(DbContext);
 
-			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyPickingRepo);
+			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyPickingRepo, DbContext, _palletRepo, _mapper, _locationRepo);
 			_issueRepo = new IssueRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
-			_palletService = new PalletService(_palletRepo, _historyService, _locationService, _palletMovementRepo, _pickingPalletRepo, _mapper, _updatevalidator, DbContext);
+			_palletService = new PalletService(_palletRepo, _historyService, _locationService, _palletMovementRepo, _pickingPalletRepo, _locationRepo, _mapper, _updatevalidator, DbContext);
 			
 			_pickingPalletRepo = new PickingPalletRepo(DbContext);
-			_palletRepo = new PalletRepo(DbContext);
-			_pickingPalletService = new PickingPalletService(_pickingPalletRepo, DbContext, _locationRepo,_palletRepo, _issueRepo, _historyService,_palletService);
+			
+			_pickingPalletService = new PickingPalletService(_pickingPalletRepo, _allocationRepo, DbContext, _locationRepo,_palletRepo, _issueRepo, _historyService,_palletService);
 		}
 	}
 }

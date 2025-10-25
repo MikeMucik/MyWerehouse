@@ -9,7 +9,7 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IHistoryPickingRepo
 	{
-		Task AddHistoryPickingAsync(HistoryPicking historyPicking);
+		void AddHistoryPicking(HistoryPicking historyPicking);
 		IQueryable<HistoryPicking> GetAllHistoryPickingAsync();
 	}
 }

@@ -17,9 +17,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext = werehouseDbContext;
 		}
 
-		public async Task AddHistoryIssueAsync(HistoryIssue issue)
+		public void AddHistoryIssue(HistoryIssue issue)
 		{
-			await _werehouseDbContext.HistoryIssues.AddAsync(issue);
+			_werehouseDbContext.HistoryIssues.Add(issue);
 		}
 
 		public IQueryable<HistoryIssue> GetAllHistoryIssues()

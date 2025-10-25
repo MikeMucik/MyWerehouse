@@ -9,7 +9,7 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IHistoryReceiptRepo
 	{
-		Task AddHistoryReceiptAsync(HistoryReceipt historyReceipt);
+		void AddHistoryReceipt(HistoryReceipt historyReceipt);
 		IQueryable<HistoryReceipt> GetAllHistoryReceipt();
 	}
 }

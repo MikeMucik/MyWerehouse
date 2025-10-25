@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
@@ -84,7 +85,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Arrange
 			var productId = 9891;
 			//Act&Assert
-			var e =await Assert.ThrowsAsync<InvalidDataException>(() => _productService.DeleteProductAsync(productId));
+			var e =await Assert.ThrowsAsync<DomainException>(() => _productService.DeleteProductAsync(productId));
 			Assert.NotNull(e);
 			Assert.Contains("Brak produktu o tym numerze", e.Message);
 		}

@@ -93,7 +93,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
-			await _palletService.UpdatePalletAsync(updatedPallet);
+			await _palletService.UpdatePalletAsync(updatedPallet, "user");
 			//Assert
 
 			var result = _context.Pallets
@@ -182,7 +182,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 					BestBefore = new DateOnly(2024, 5, 4) })
 					]
 			};
-			var ex =await Assert.ThrowsAsync<ValidationException>(() => _palletService.UpdatePalletAsync(updatedPallet));
+			var ex =await Assert.ThrowsAsync<ValidationException>(() => _palletService.UpdatePalletAsync(updatedPallet, "user"));
 			Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 			Assert.Contains("Data do spożycia musi być późniejsza niż data dzisiejsza", ex.Message);
@@ -263,7 +263,7 @@ namespace MyWerehouse.Test.IntegrationTestService.PalletTestsIntegration
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
-			var ex =await Assert.ThrowsAsync<ValidationException>(() => _palletService.UpdatePalletAsync(updatedPallet));
+			var ex =await Assert.ThrowsAsync<ValidationException>(() => _palletService.UpdatePalletAsync(updatedPallet, "user"));
 			Assert.Contains("Paleta musi mieć status", ex.Message);
 			Assert.Contains("Paleta musi mieć datę utworzenia", ex.Message);
 			Assert.Contains("Paleta musi mieć lokalizację", ex.Message);

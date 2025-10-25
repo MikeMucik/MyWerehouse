@@ -16,13 +16,12 @@ namespace MyWerehouse.Application
 		{			
 			services.AddTransient<ICategoryService, CategoryService>();
 			services.AddTransient<IClientService, ClientService>();
+			services.AddTransient<IHistoryService, HistoryService>();
 			services.AddTransient<IInventoryService, InventoryService>();
 			services.AddTransient<IIssueService, IssueService>();
-			services.AddTransient<ILocationService, LocationService>();
-			services.AddTransient<IHistoryService, HistoryService>();
+			services.AddTransient<ILocationService, LocationService>();			
 			services.AddTransient<IPalletService, PalletService>();
-			services.AddTransient<IPickingPalletService, PickingPalletService>();
-			services.AddTransient<IProductOnPalletService, ProductOnPalletService>();
+			services.AddTransient<IPickingPalletService, PickingPalletService>();			
 			services.AddTransient<IProductService, ProductService>();
 			services.AddTransient<IReceiptService, ReceiptService>();			
 			services.AddAutoMapper(Assembly.GetExecutingAssembly());

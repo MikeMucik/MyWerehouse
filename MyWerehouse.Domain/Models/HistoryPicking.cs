@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.Models
@@ -9,7 +10,8 @@ namespace MyWerehouse.Domain.Models
 	public class HistoryPicking
 	{
 		public int Id { get; set; }
-		public int AllocationId { get; set; }
+		public int? AllocationId { get; set; }// ? dla update
+		//[JsonIgnore] // Ignoruj przy serializacji
 		public Allocation Allocation { get; set; }
 		public int VirtualPalletId { get; set; }
 		public VirtualPallet VirtualPallet { get; set; }

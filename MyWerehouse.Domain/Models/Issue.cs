@@ -23,14 +23,14 @@ namespace MyWerehouse.Domain.Models
 		public virtual ICollection<IssueItem> IssueItems { get; set; } = new List<IssueItem>();//nowe powiązanie
 		public Issue() { }
 		public Issue(int clientId, 
-			List<IssueItem> items,
+			//List<IssueItem> items,
 			string performedBy, DateTime dateToSend)
 		{
-			//ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));  // Podstawowe
+			ClientId = clientId;// ?? throw new ArgumentNullException(nameof(clientId));  // Podstawowe
 			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
 
-			IssueItems = items ?? throw new ArgumentNullException(nameof(items));
-			if (!items.Any()) throw new DomainException("Issue musi mieć co najmniej jeden produkt");  // Biznes!
+			//IssueItems = items ?? throw new ArgumentNullException(nameof(items));
+			//if (!items.Any()) throw new DomainException("Issue musi mieć co najmniej jeden produkt");  // Biznes!
 
 			PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
 			IssueDateTimeSend = dateToSend;

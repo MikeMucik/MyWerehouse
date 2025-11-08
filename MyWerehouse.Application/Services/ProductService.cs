@@ -48,7 +48,6 @@ namespace MyWerehouse.Application.Services
 			_productRepo = repo;
 			_mapper = mapper;
 		}
-
 		public async Task<int> AddProductAsync(AddProductDTO productDTO)
 		{
 			var validationResult = _productValidator.Validate(productDTO);
@@ -119,7 +118,6 @@ namespace MyWerehouse.Application.Services
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
 			return productDTO;
 		}
-
 		public async Task<ListProductsDTO> GetProductsAsync(int pageSize, int PageNumber)
 		{
 			var products = _productRepo.GetAllProducts()
@@ -138,7 +136,6 @@ namespace MyWerehouse.Application.Services
 			};
 			return productList;
 		}
-
 		public async Task<ListProductsDTO> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter)
 		{
 			pageNumber = pageNumber <= 1 ? 1 : pageNumber;

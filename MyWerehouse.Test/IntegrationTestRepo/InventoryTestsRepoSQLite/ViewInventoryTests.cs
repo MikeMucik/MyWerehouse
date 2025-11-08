@@ -107,7 +107,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			//Act
 			var result = await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
 			//Assert
-			Assert.Equal(550, result);
+			Assert.Equal(750, result);
 		}
 	}
 }

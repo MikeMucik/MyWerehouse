@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Exceptions;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Domain.Models;
 using Xunit.Sdk;

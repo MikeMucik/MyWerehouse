@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using MyWerehouse.Application.Exceptions;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.InventoryModels;
 using MyWerehouse.Domain.Interfaces;

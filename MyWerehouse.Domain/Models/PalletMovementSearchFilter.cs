@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace MyWerehouse.Domain.Models
 {
 	public class PalletMovementSearchFilter
-	{
-		//public string? PalletId { get; set; }		
+	{			
 		public int? ProductId { get; set; }
 		public string? ProductName { get; set; }		
 		public int? SourceLocationId { get; set; }

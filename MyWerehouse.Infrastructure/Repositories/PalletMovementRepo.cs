@@ -78,6 +78,16 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Take(2)
 				.CountAsync();
 			return movementCount <= 1;
-		}		
+		}
+
+		public async Task AddPalletMovementAsync(PalletMovement palletMovement, CancellationToken cancellationToken)
+		{
+			await _werehouseDbContext.PalletMovements.AddAsync(palletMovement);
+		}
+
+		public async Task SaveChanges()
+		{
+			await _werehouseDbContext.SaveChangesAsync();
+		}
 	}
 }

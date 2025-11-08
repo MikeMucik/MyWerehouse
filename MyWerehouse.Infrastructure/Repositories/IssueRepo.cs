@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -91,16 +92,15 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.ToListAsync();
 			return list;		
 		}
-		
+
+		public async Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(int id, CancellationToken cancellationToken)
+		{
+			return await _werehouseDbContext.Issues				
+				.Include(i => i.Pallets)
+					.ThenInclude(il=>il.Location)
+				.Include(i=>i.IssueItems)
+					.ThenInclude(pp=>pp.Product)
+				.FirstOrDefaultAsync(i => i.Id == id);
+		}
 	}
 }
-//// TODO: Improve pallet selection logic.
-//// Current implementation selects full pallets using FIFO based on BestBefore date.
-//// Future improvements might include:
-//// - Handling partial pallet picks (splitting pallet content).
-//// - Considering pallet location priorities (e.g., pick from closest).
-//// - Avoiding reserved or blocked pallets.
-//// - Ensuring stock availability and over-issue prevention.
-//// - Tracking remaining quantities and multiple product batches.
-////
-//// Note: This logic is sufficient for MVP/basic release. Ensure test coverage.

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MyWerehouse.Application.Results;
 using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ReceiptModels;
+using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Interfaces
 {
@@ -18,5 +19,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task<ReceiptResult> UpdateReceiptPalletsAsync(ReceiptDTO updatingReceipt, string userId);
 		Task<ReceiptDTO> GetReceiptDTOAsync(int receiptId);
 		Task<ReceiptResult> CancelReceiptAsync(int receiptId, string userId);
+		Task<List<ReceiptDTO>> GetReceiptDTOsAsync(IssueReceiptSearchFilter filter);
 	}
 }

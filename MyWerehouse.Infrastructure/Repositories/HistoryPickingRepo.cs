@@ -22,11 +22,20 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext.HistoryPickings.Add(historyPicking);
 		}
 
+		public async Task AddHistoryPickingAsync(HistoryPicking historyPicking, CancellationToken cancellationToken)
+		{
+			await _werehouseDbContext.AddAsync(historyPicking, cancellationToken);
+		}
+
 		public IQueryable<HistoryPicking> GetAllHistoryPickingAsync()
 		{
 			return _werehouseDbContext.HistoryPickings
-				.AsQueryable();
-				
+				.AsQueryable();				
+		}
+
+		public async Task SaveChanges()
+		{
+			await _werehouseDbContext.SaveChangesAsync();
 		}
 	}
 }

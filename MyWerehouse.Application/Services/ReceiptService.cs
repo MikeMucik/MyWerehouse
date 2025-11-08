@@ -5,7 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
-using MyWerehouse.Application.Exceptions;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Commands.History.CreateHistoryReceipt;
+using MyWerehouse.Application.Commands.History.CreateOperation;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Results;
 using MyWerehouse.Application.Utils;
@@ -21,38 +25,43 @@ namespace MyWerehouse.Application.Services
 {
 	public class ReceiptService : IReceiptService
 	{
+		private readonly IMediator _mediator;
+
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IMapper _mapper;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IPalletRepo _palletRepo;
-		private readonly IHistoryService _historyService;
+		//private readonly IHistoryService _historyService;
 		private readonly IInventoryService _inventoryService;
-		private readonly ILocationRepo _locationRepo;
+		//private readonly ILocationRepo _locationRepo;
 		private readonly IValidator<CreatePalletReceiptDTO> _palletValidator;
 		private readonly IValidator<ReceiptDTO> _receiptValidator;
+		//private readonly 
 
 		public ReceiptService(
+			IMediator mediator,
 			IReceiptRepo receiptRepo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IPalletRepo palletRepo,
-			IHistoryService historyService,
+			//IHistoryService historyService,
 			IInventoryService inventoryService,
-			ILocationRepo locationRepo,
+			//ILocationRepo locationRepo,
 			IValidator<CreatePalletReceiptDTO>? palletValidator,
 			IValidator<ReceiptDTO>? receiptValidator
 			)
 		{
+			_mediator = mediator;
 			_receiptRepo = receiptRepo;
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
 			_palletRepo = palletRepo;
-			_historyService = historyService;
+			//_historyService = historyService;
 			_inventoryService = inventoryService;
-			_locationRepo = locationRepo;
+			//_locationRepo = locationRepo;
 			_palletValidator = palletValidator;
 			_receiptValidator = receiptValidator;
-		}		
+		}
 		public ReceiptService(
 			IReceiptRepo receiptRepo,
 			IMapper mapper)
@@ -67,17 +76,19 @@ namespace MyWerehouse.Application.Services
 				var receipt = _mapper.Map<Receipt>(createReceiptPlanDTO);
 				receipt.ReceiptDateTime = DateTime.UtcNow;
 				receipt.ReceiptStatus = ReceiptStatus.Planned;
-				_historyService.CreateHistoryReceipt(receipt);
+				//_historyService.CreateHistoryReceipt(receipt);
 				_receiptRepo.AddReceipt(receipt);
+				await _werehouseDbContext.SaveChangesAsync();
+				await _mediator.Publish(new CreateHistoryReceiptCommand(receipt.Id, receipt.ReceiptStatus, createReceiptPlanDTO.PerformedBy));
 				await _werehouseDbContext.SaveChangesAsync();
 				return ReceiptResult.Ok("Utworzono przyjęcie", receipt.Id);
 			}
 			catch (Exception ex)
-			{				
+			{
 				//_logger.LogError(ex, "Błąd podczas operacji na przyjęciu");
 				return ReceiptResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
 			}
-		}	
+		}
 		public async Task<ReceiptResult> AddPalletToReceiptAsync(int receiptId, CreatePalletReceiptDTO newPalletDto)
 		{
 			//var result = new ReceiptResult();
@@ -93,13 +104,15 @@ namespace MyWerehouse.Application.Services
 			}
 			using (var transaction = await _werehouseDbContext.Database.BeginTransactionAsync())
 			{
+				var startReceiving = false;
 				try
 				{
 					if (receipt.ReceiptStatus == ReceiptStatus.Planned)
 					{
 						receipt.ReceiptStatus = ReceiptStatus.InProgress;
 						receipt.ReceiptDateTime = DateTime.UtcNow;
-						_historyService.CreateHistoryReceipt(receipt);
+						startReceiving = true;
+						//_historyService.CreateHistoryReceipt(receipt);
 					}
 					var pallet = _mapper.Map<Pallet>(newPalletDto);
 					pallet.ReceiptId = receiptId;
@@ -108,9 +121,24 @@ namespace MyWerehouse.Application.Services
 					pallet.DateReceived = DateTime.UtcNow;
 					pallet.Status = PalletStatus.Receiving;
 					_palletRepo.AddPallet(pallet);
-					_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Received, newPalletDto.UserId, PalletStatus.Receiving, null);
+					//_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Received, newPalletDto.UserId, PalletStatus.Receiving, null);
 					await _werehouseDbContext.SaveChangesAsync();
 					await transaction.CommitAsync();
+
+					await _mediator.Publish(new CreatePalletOperationCommand(
+							pallet.Id,
+							pallet.LocationId,
+							ReasonMovement.Received,
+							newPalletDto.UserId,
+							PalletStatus.Receiving,
+							null
+						));
+
+					if (startReceiving)
+					{
+						await _mediator.Publish(new CreateHistoryReceiptCommand(receipt.Id, receipt.ReceiptStatus, newPalletDto.UserId));
+					}
+					await _werehouseDbContext.SaveChangesAsync();
 					return ReceiptResult.Ok($"Paleta {pallet.Id} została dodana do przyjęcia {receiptId}", pallet.Id);
 				}
 				catch (ReceiptNotFoundException erp)
@@ -141,7 +169,9 @@ namespace MyWerehouse.Application.Services
 					throw new ReceiptNotFoundException("Nie można zakończyć przyjęcia");
 				}
 				receipt.ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
-				_historyService.CreateHistoryReceipt(receipt);
+				//_historyService.CreateHistoryReceipt(receipt);
+				//await _werehouseDbContext.SaveChangesAsync();
+				await _mediator.Publish(new CreateHistoryReceiptCommand(receipt.Id, receipt.ReceiptStatus, userId));
 				await _werehouseDbContext.SaveChangesAsync();
 				return ReceiptResult.Ok("Zakończono fizyczne przyjęcie - gotowe do weryfikacji", receiptId);
 			}
@@ -169,17 +199,33 @@ namespace MyWerehouse.Application.Services
 					//logika zatwierdzenia dokumentów
 					receipt.ReceiptStatus = ReceiptStatus.Verified;
 					receipt.ReceiptDateTime = DateTime.UtcNow;
-					_historyService.CreateHistoryReceipt(receipt);
+					//_historyService.CreateHistoryReceipt(receipt);
 					foreach (var pallet in receipt.Pallets)
 					{
 						pallet.Status = PalletStatus.InStock;
-						_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Received, userId, PalletStatus.InStock, null);
+						//_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Received, userId, PalletStatus.InStock, null);
 						foreach (var product in pallet.ProductsOnPallet)
 						{
 							await _inventoryService.ChangeProductQuantityAsync(product.Id, product.Quantity);
 						}
 					}
+					//await _werehouseDbContext.SaveChangesAsync();
+
+					//await transaction.CommitAsync();
+					foreach (var pallet in receipt.Pallets)
+					{
+						await _mediator.Publish(new CreatePalletOperationCommand(
+								pallet.Id,
+								pallet.LocationId,
+								ReasonMovement.Received,
+								receipt.PerformedBy,
+								PalletStatus.InStock,
+								null
+							));
+					}
+					await _mediator.Publish(new CreateHistoryReceiptCommand(receipt.Id, receipt.ReceiptStatus, userId));
 					await _werehouseDbContext.SaveChangesAsync();
+
 					await transaction.CommitAsync();
 					return ReceiptResult.Ok("Palety z przyjęcia zweryfikowano, gotowe do działania", receiptId);
 				}
@@ -198,9 +244,17 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<ReceiptDTO> GetReceiptDTOAsync(int receiptId)
 		{
-			var receipt = await _receiptRepo.GetReceiptByIdAsync(receiptId);
-			var receiptDTO = _mapper.Map<ReceiptDTO>(receipt);
-			return receiptDTO;
+			try
+			{
+				var receipt = await _receiptRepo.GetReceiptByIdAsync(receiptId);
+				var receiptDTO = _mapper.Map<ReceiptDTO>(receipt);
+				return receiptDTO;
+			}
+			catch (Exception ex)
+			{
+				//_logger.LogError(ex, "Error fetching issues.");
+				return null;
+			}
 		}
 		public async Task<ReceiptResult> UpdateReceiptPalletsAsync(ReceiptDTO updatingReceipt, string userId)
 		{
@@ -259,24 +313,27 @@ namespace MyWerehouse.Application.Services
 				{
 					if (!existingReceipt.Pallets.Any(x => x.Id == pallet.Id))
 						existingReceipt.Pallets.Add(pallet);
-				}
-				_historyService.CreateHistoryReceipt(existingReceipt, ReceiptStatus.Correction, userId);
-				//tworzenie historii palety			
+				}				
+				//await _werehouseDbContext.SaveChangesAsync();
 				foreach (var pallet in palletsRaw)
 				{
-					if (pallet.Location == null && pallet.LocationId > 0)
-					{						
-						Location locationFull =await _locationRepo.GetLocationByIdAsync(pallet.LocationId);
-						pallet.Location = locationFull;
-					}
-					_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Correction, userId, PalletStatus.Receiving, null);
+					await _mediator.Publish(new CreatePalletOperationCommand(
+							pallet.Id,
+							pallet.LocationId,
+							ReasonMovement.Correction,
+							userId,
+							PalletStatus.Receiving,
+							null
+						));
 				}
+				await _mediator.Publish(new CreateHistoryReceiptCommand(existingReceipt.Id, existingReceipt.ReceiptStatus, userId));
+
 				await _werehouseDbContext.SaveChangesAsync();
 				await transaction.CommitAsync();
 				return ReceiptResult.Ok($"Przyjęcie o numerze {updatingReceipt.Id} zostało zaktualizowane", updatingReceipt.Id);
-				
+
 			}
-			catch(ReceiptNotFoundException exr)
+			catch (ReceiptNotFoundException exr)
 			{
 				await transaction.RollbackAsync();
 				return ReceiptResult.Fail(exr.Message);
@@ -294,7 +351,7 @@ namespace MyWerehouse.Application.Services
 				//_logger.LogError(ex, "Błąd podczas aktualizaowania przyjęcia");	
 				return ReceiptResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
 			}
-			
+
 		}
 		public async Task<ReceiptResult> CancelReceiptAsync(int receiptId, string userId)
 		{
@@ -321,7 +378,7 @@ namespace MyWerehouse.Application.Services
 					receipt.PerformedBy = userId;
 					receipt.ReceiptDateTime = DateTime.UtcNow;
 
-					_historyService.CreateHistoryReceipt(receipt, ReceiptStatus.Cancelled, userId);
+					//_historyService.CreateHistoryReceipt(receipt, ReceiptStatus.Cancelled, userId);
 					//usuwanie palet które jeszcze nie weszły w "życie" magazynu
 					foreach (var pallet in receipt.Pallets.ToList())
 					{
@@ -329,6 +386,11 @@ namespace MyWerehouse.Application.Services
 						_palletRepo.DeletePallet(pallet);
 					}
 					//usunięcie całkowite przyjęcia- zostawienie tylko snapshotów
+					//_receiptRepo.DeleteReceipt(receipt);
+					//await _werehouseDbContext.SaveChangesAsync();
+
+					await _mediator.Publish(new CreateHistoryReceiptCommand(receipt.Id, receipt.ReceiptStatus, userId));
+					//_receiptRepo.DeleteReceipt(receipt); !!!!!!!!!!!!!! problem chyba w DbContext
 					await _werehouseDbContext.SaveChangesAsync();
 					await transaction.CommitAsync();
 					return ReceiptResult.Ok("Usunięto przyjęcie", receiptId);
@@ -346,6 +408,19 @@ namespace MyWerehouse.Application.Services
 				}
 			}
 		}
+		public async Task<List<ReceiptDTO>> GetReceiptDTOsAsync(IssueReceiptSearchFilter filter)
+		{
+			try
+			{
+				var receipts = await _receiptRepo.GetReceiptByFilter(filter).ToListAsync();
+				return _mapper.Map<List<ReceiptDTO>>(receipts);
+			}
+			catch (Exception ex)
+			{
+				//_logger.LogError(ex, "Error fetching issues.");
+				return new List<ReceiptDTO>();
+			}
+		}
 		private void SynchronizeProducts(Pallet pallet, IEnumerable<ProductOnPalletDTO> productDto)
 		{
 			foreach (var dto in productDto)
@@ -355,7 +430,7 @@ namespace MyWerehouse.Application.Services
 
 				if (existing != null)
 				{
-					dto.Id = existing.Id; // przypisz faktyczne Id
+					dto.Id = existing.Id; // przypisz faktyczne Id, działa tylko tu bo to przyjęcie i jeden produkt na palecie
 				}
 			}
 			CollectionSynchronizer.SynchronizeCollection(

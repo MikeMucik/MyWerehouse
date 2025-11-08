@@ -22,10 +22,20 @@ namespace MyWerehouse.Infrastructure.Repositories
 			 _werehouseDbContext.HistoryReceipts.Add(historyReceipt);
 		}
 
+		public async Task AddHistoryReceiptAsync(HistoryReceipt historyReceipt, CancellationToken cancellationToken)
+		{
+			await _werehouseDbContext.AddAsync(historyReceipt, cancellationToken);
+		}
+
 		public IQueryable<HistoryReceipt> GetAllHistoryReceipt()
 		{
 			return _werehouseDbContext.HistoryReceipts				
 				.AsQueryable();
+		}
+
+		public async Task SaveChanges()
+		{
+			await _werehouseDbContext.SaveChangesAsync();
 		}
 	}
 }

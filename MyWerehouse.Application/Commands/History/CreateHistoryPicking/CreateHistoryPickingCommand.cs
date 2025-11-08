@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MediatR;
+using MyWerehouse.Domain.Models;
+
+namespace MyWerehouse.Application.Commands.History.CreateHistoryPicking
+{
+	public record CreateHistoryPickingCommand(
+		int VirtualPalletId,
+		int AllocationId,
+		string PerformedBy,
+		PickingStatus StatusBefore,
+		int QuantityPicked):INotification;
+	
+}

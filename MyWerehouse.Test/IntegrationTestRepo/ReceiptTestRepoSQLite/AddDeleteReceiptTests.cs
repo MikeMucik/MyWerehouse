@@ -121,6 +121,97 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 				Assert.Equal(receipt.Id, item.ReceiptId);
 			}
 		}
+		[Fact]
+		public void RemoveReceipt_DeleteReceipt_RemoveRecordFromList()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var initailClient = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = new List<Address> { address }
+			};
+			var location1 = new Location
+			{
+				Aisle = 1,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
+			var location2 = new Location
+			{
+				Aisle = 2,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
+			var initialCategory = new Category
+			{
+				Name = "name",
+				IsDeleted = false
+			};
+			var product = new Product
+			{
+				Name = "TestFull",
+				SKU = "123",
+				AddedItemAd = new DateTime(2024, 1, 1),
+				Category = initialCategory,
+				IsDeleted = false,
+				CartonsPerPallet = 10,
+			};
+			DbContext.Clients.Add(initailClient);
+			DbContext.Categories.Add(initialCategory);
+			DbContext.Products.Add(product);
+			DbContext.Locations.AddRange(location1, location2);
+			var pallet1 = new Pallet
+			{
+				Id = "Q3000",
+				DateReceived = DateTime.Now,
+				Location = location1,
+				Status = PalletStatus.Available,
+			};
+			var pallet2 = new Pallet
+			{
+				Id = "Q3001",
+				DateReceived = DateTime.Now,
+				Location = location2,
+				Status = PalletStatus.Available,
+			};
+			DbContext.Pallets.AddRange(pallet1, pallet2);
+			var receipt = new Receipt
+			{
+				ReceiptDateTime = DateTime.Now,
+				Client = initailClient,
+				Pallets = new List<Pallet>
+			{
+				pallet1,
+				pallet2
+			},
+				PerformedBy = "U005"
+			};
+			DbContext.Receipts.Add(receipt);
+			DbContext.SaveChanges();
+			var receiptRepo = new ReceiptRepo(DbContext);
+			//Act
+			receiptRepo.DeleteReceipt(receipt);
+			DbContext.SaveChanges();
+			//Assert
+			var receiptResult = DbContext.Receipts.Find(receipt.Id);
+			Assert.Null(receiptResult);
+		}
+		
 	}
 }
 //[Fact]

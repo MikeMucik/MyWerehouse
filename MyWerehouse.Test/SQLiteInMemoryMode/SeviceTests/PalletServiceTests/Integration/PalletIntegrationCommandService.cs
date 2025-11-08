@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
+using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
@@ -29,13 +30,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 		protected readonly ILocationRepo _locationRepo;
 		protected readonly ILocationService _locationService;
 
-		protected readonly IHistoryIssueRepo _historyIssueRepo;
-		protected readonly IHistoryService _historyService;
-		protected readonly IHistoryPickingRepo _historyAllocationRepo;
-		protected readonly IHistoryReceiptRepo _historyReceiptRepo;
-
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
 		protected readonly IValidator<UpdatePalletDTO> _updatePalletValidator;
+		protected readonly IEventCollector _eventCollector;
 		public PalletIntegrationCommandService()
 		{
 			var MapperConfig = new MapperConfiguration(cfg =>
@@ -50,24 +47,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			_locationRepo = new LocationRepo(DbContext);
 			_locationService = new LocationService(_locationRepo, _mapper, _palletRepo, DbContext);
 
-			_historyIssueRepo = new HistoryIssueRepo(DbContext);
-			_historyAllocationRepo = new HistoryPickingRepo(DbContext);
-			_historyReceiptRepo = new HistoryReceiptRepo(DbContext);
-			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo, DbContext, _palletRepo, _mapper, _locationRepo);
-
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
 			_updatePalletValidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
-
-			_palletService = new PalletService(
+			_eventCollector = new EventCollector();
+			_palletService = new PalletService(Mediator,
 				_palletRepo,
-				_historyService,
 				_locationService,
 				_palletMovementRepo,
 				_pickingPalletRepo,
 				_locationRepo,
 				_mapper,
 				_updatePalletValidator
-				, DbContext);
+				, DbContext
+				,_eventCollector);
 		}
 	}
 }

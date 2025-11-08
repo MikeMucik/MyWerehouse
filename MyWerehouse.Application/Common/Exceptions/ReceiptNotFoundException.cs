@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Models;
 
-namespace MyWerehouse.Application.Exceptions
+namespace MyWerehouse.Application.Common.Exceptions
 {
 	public class ReceiptNotFoundException : Exception
 	{

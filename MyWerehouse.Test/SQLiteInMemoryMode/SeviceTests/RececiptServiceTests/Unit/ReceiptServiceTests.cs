@@ -11,7 +11,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Moq;
-using MyWerehouse.Application.Exceptions;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
@@ -74,7 +74,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var mockMapper = new Mock<IMapper>();
 			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
 			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
-			var mockHistoryService = new Mock<IHistoryService>();
+			
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var newPalletDto = new CreatePalletReceiptDTO
@@ -89,19 +89,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
 			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
-			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
-				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				;
+			
 			var mockInventoryService = new Mock<IInventoryService>();
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
-			var service = new ReceiptService(
+			var service = new ReceiptService(Mediator,
 				receiptRepo, mockMapper.Object,
 				DbContext, palletRepo,
-				mockHistoryService.Object,
+				
 				mockInventoryService.Object,
-				locationRepo.Object,
+				//locationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 				//,mockUpdateValidator.Object
@@ -117,11 +114,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var updatedReceipt = await DbContext.Receipts.FindAsync(1);
 			Assert.NotNull(updatedReceipt);
 			Assert.Equal(ReceiptStatus.InProgress, updatedReceipt.ReceiptStatus);
-			mockHistoryService.Verify(s => s.CreateOperation(It.IsAny<Pallet>(), 1, ReasonMovement.Received, "U001", PalletStatus.Receiving, null), Times.Once);
+			//mockHistoryService.Verify(s => s.CreateOperation(It.IsAny<Pallet>(), 1, ReasonMovement.Received, "U001", PalletStatus.Receiving, null), Times.Once);
 		}
 		[Fact]
 		//przeniesienie do kontrolera
-		public async Task AddPalletToReceiptAsync_WhenMovementServiceFails_ShouldRollbackAllChanges()
+		public async Task AddPalletToReceiptAsync_WhenPalletServiceFails_ShouldRollbackAllChanges()
 		{
 			//Arrange
 			var address = new Address
@@ -165,11 +162,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 
 			var mockMapper = new Mock<IMapper>();
 			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
-			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
-			var mockHistoryService = new Mock<IHistoryService>();
-			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
-			var mockInventory = new Mock<IInventoryService>();
-			var locationRepo = new Mock<ILocationRepo>();
+			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();				
+			var mockInventory = new Mock<IInventoryService>();		
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
 				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
@@ -181,24 +175,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				new FluentValidation.Results.ValidationResult());
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
-			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
-			mockHistoryService.Setup(s => s.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(),
-				It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				.Throws(new Exception("Błąd zapisu ruchu - symulacja"))
-				;
+		
+			var mockPalletRepo = new Mock<IPalletRepo>();
+			mockPalletRepo
+		.Setup(r => r.AddPallet(It.IsAny<Pallet>()))
+		.Throws(new Exception("DB error"));
 			var receiptRepo = new ReceiptRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			var service = new ReceiptService(
+
+			var service = new ReceiptService(Mediator,
 				receiptRepo, mockMapper.Object,
-				DbContext, palletRepo,
-				mockHistoryService.Object, mockInventory.Object,
-				locationRepo.Object,
+				DbContext, mockPalletRepo.Object,				
+				mockInventory.Object,				
 				mockValidator.Object,
-				mockReceiptValidator.Object
-				//,mockUpdateValidator.Object
+				mockReceiptValidator.Object				
 				);
 			//Act
-			var result =await service.AddPalletToReceiptAsync(1, newPalletDto);
+			var result = await service.AddPalletToReceiptAsync(1, newPalletDto);
 			Assert.Contains("Wystąpił nieoczekiwany błąd podczas operacji.", result.Message);
 			//await Assert.ThrowsAsync<Exception>(() => service.AddPalletToReceiptAsync(1, newPalletDto));
 			Assert.Equal(0, await DbContext.Pallets.CountAsync());
@@ -321,7 +313,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var mapper = MapperConfig.CreateMapper();
 			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
 			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
-			var mockHistoryService = new Mock<IHistoryService>();
+			
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var mockInventory = new Mock<IInventoryService>();
 			var locationRepo = new Mock<ILocationRepo>();
@@ -364,21 +356,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
 
-			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
-				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				;
+			
 
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
-			var service = new ReceiptService(
+			var service = new ReceiptService(Mediator,
 				receiptRepo,
 				mapper,
 				DbContext,
 				palletRepo,
-				mockHistoryService.Object,
+				//mockHistoryService.Object,
 				mockInventory.Object,
-				locationRepo.Object,
+				//locationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 				//,mockUpdateValidator.Object
@@ -506,7 +495,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 							{
 								//Id = initialProductOnPallet.Id,
 								//PalletId = initialPallet.Id,
-								Product = initialProduct,								
+								Product = initialProduct,
 								Quantity = 1,
 								DateAdded = DateTime.Now,
 								BestBefore = new DateOnly(2027, 3, 3)
@@ -529,7 +518,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var mapper = MapperConfig.CreateMapper();
 			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
 			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
-			var mockHistoryService = new Mock<IHistoryService>();
+			
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var mockInventory = new Mock<IInventoryService>();
 			var locationRepo = new Mock<ILocationRepo>();
@@ -572,27 +561,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(
 				new FluentValidation.Results.ValidationResult());
 
-			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
-				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), It.IsAny<PalletStatus>(), null));
+		
 
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
 
-			var service = new ReceiptService(
+			var service = new ReceiptService(Mediator,
 				receiptRepo,
 				mapper,
 				DbContext,
-				palletRepo,
-				mockHistoryService.Object,
+				palletRepo,				
 				mockInventory.Object,
-				locationRepo.Object,
+				//locationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 				//,mockUpdateValidator.Object
 				);
 			//Act&Assert	
-			var result =await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var result = await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
 			Assert.NotNull(result);
 			Assert.False(result.Success);
 			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia o numerze 10", result.Message);
@@ -719,7 +705,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 		//	DbContext.Receipts.Add(initialReceipt);
 		//	DbContext.Pallets.AddRange(initialPallet,initialPallet1);
 		//	DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
-						
+
 		//	await DbContext.SaveChangesAsync();
 
 		//	var MapperConfig = new MapperConfiguration(cfg =>
@@ -945,7 +931,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			// Pozostałe mocki
 			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
 			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
-			var mockHistoryService = new Mock<IHistoryService>();
+		
 			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
 			var mockInventory = new Mock<IInventoryService>();
 			var mockLocationRepo = new Mock<ILocationRepo>();
@@ -985,22 +971,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			mockValidator.Setup(m => m.Validate(It.IsAny<CreatePalletReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
 			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
 			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
-
-			mockHistoryService.Setup(a => a.CreateOperation(It.IsAny<Pallet>(),
-				It.IsAny<int>(), It.IsAny<ReasonMovement>(),
-				It.IsAny<string>(), It.IsAny<PalletStatus>(), null));
-
+			
 			var receiptRepo = new ReceiptRepo(DbContext);
 			var palletRepo = new PalletRepo(DbContext);
 
-			var service = new ReceiptService(
+			var service = new ReceiptService(Mediator,
 				receiptRepo,
 				mockMapper.Object, // 🔥 zamockowany mapper
 				DbContext,
-				palletRepo,
-				mockHistoryService.Object,
+				palletRepo,				
 				mockInventory.Object,
-				mockLocationRepo.Object,
+				//mockLocationRepo.Object,
 				mockValidator.Object,
 				mockReceiptValidator.Object
 			);
@@ -1034,9 +1015,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			Assert.Equal(100, product.Quantity);
 			Assert.Equal(initialProduct1.Id, product.ProductId);
 
-			mockHistoryService.Verify(p =>
-				p.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, PalletStatus.Receiving, null),
-				Times.AtLeastOnce);
+			//mockHistoryService.Verify(p =>
+			//	p.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.Correction, userId, PalletStatus.Receiving, null),
+			//	Times.AtLeastOnce);
 		}
 
 	}

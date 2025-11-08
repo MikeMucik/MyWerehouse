@@ -62,16 +62,7 @@ namespace MyWerehouse.Application.Services
 			_clientRepo = clientRepo;
 			_mapper = mapper;
 		}
-		public ClientService(
-			IClientRepo clientRepo,
-			IMapper mapper,
-			IValidator<UpdateClientDTO> updateClientValidator)
-		{
-			_clientRepo = clientRepo;
-			_mapper = mapper;
-			_updateClientValidator = updateClientValidator;
-		}
-
+		
 		public async Task<int> AddClientAsync(AddClientDTO addClient)
 		{
 			var validationResult = await _addClientValidator.ValidateAsync(addClient);

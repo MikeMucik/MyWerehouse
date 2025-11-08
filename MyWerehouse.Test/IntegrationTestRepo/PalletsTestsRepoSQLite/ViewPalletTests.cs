@@ -235,8 +235,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			var result = _palletRepo.GetAvailablePallets(productId, date);
 			//Assert
 			Assert.NotNull(result);						
-			Assert.Equal(1, result.Count());
+			Assert.Equal(2, result.Count());
 			Assert.Contains(result, p => p.Id == "Q1002");						
+			Assert.Contains(result, p => p.Id == "Q1000");						
 		}
 		[Fact]
 		public async Task ReturnPallets_GetPalletByLocationAsync_ReturnList()

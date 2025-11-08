@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Exceptions;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.AllocationModels;
 using MyWerehouse.Application.ViewModels.LocationModels;

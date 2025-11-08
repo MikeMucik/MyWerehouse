@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Exceptions;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Results
@@ -28,6 +28,15 @@ namespace MyWerehouse.Application.Results
 				Success = true,
 				Message = message,
 				ProductId = product
+			};
+		}
+		public static IssueResult Ok(
+			string message)
+		{
+			return new IssueResult
+			{
+				Success = true,
+				Message = message,				
 			};
 		}
 		public static IssueResult Fail(

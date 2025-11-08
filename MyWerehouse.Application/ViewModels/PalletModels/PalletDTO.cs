@@ -27,7 +27,8 @@ namespace MyWerehouse.Application.ViewModels.PalletModels
 			profile.CreateMap<Pallet, PalletDTO>();
 			profile.CreateMap<PalletDTO, Pallet>()
 				.ForMember(dest => dest.PalletMovements, opt => opt.Ignore())
-				.ForMember(dest => dest.Id, opt => opt.Ignore());
+				//.ForMember(dest => dest.Id, opt => opt.Ignore())
+				;
 		}
 		public class PalletDTOValidation : AbstractValidator<PalletDTO>
 		{

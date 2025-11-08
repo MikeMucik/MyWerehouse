@@ -7,6 +7,7 @@ using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.PalletModels;
@@ -260,22 +261,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);	
 			var allocationRepo = new AllocationRepo(DbContext);
 			var issueRepo = new IssueRepo(DbContext);
-			var mapper = new Mock<IMapper>();
+			//var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
-			var historyService = new Mock<IHistoryService>();
+			//var historyService = new Mock<IHistoryService>();
 
 			
 			var palletService = new Mock<IPalletService>();
 
-			var service = new PickingPalletService(pickingPalletRepo,
+			var eventCollector = new Mock<IEventCollector>();
+
+			var service = new PickingPalletService(Mediator, pickingPalletRepo,
 					allocationRepo,
 				DbContext,
 				locationRepo.Object,
 				palletRepo.Object,
 				issueRepo, 
-				historyService.Object,
-				palletService.Object);
+				//historyService.Object,
+				palletService.Object
+				,eventCollector.Object);
 
 			// Act
 			var result = await service.GetListToPickingAsync(
@@ -558,16 +562,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();		
-			var historyService = new Mock<IHistoryService>();
+			//var historyService = new Mock<IHistoryService>();
 			var palletService = new Mock<IPalletService>();
-			var service = new PickingPalletService(pickingPalletRepo,
+			var eventCollector = new Mock<IEventCollector>();
+			var service = new PickingPalletService(Mediator, pickingPalletRepo,
 				allocationRepo,
 				DbContext,
 				locationRepo.Object,
 				palletRepo.Object,
 				issueRepo,
-				historyService.Object,
-				palletService.Object);
+				//historyService.Object,
+				palletService.Object
+				,eventCollector.Object);
 
 			// Act
 			var result = await service.GetListIssueToPickingAsync(

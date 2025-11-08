@@ -23,14 +23,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 		protected readonly IMapper _mapper;
 		protected readonly IReceiptRepo _receiptRepo;
 		protected readonly IPalletService _palletService;
-		protected readonly IPalletRepo _palletRepo;		
-		protected readonly IPalletMovementRepo _palletMovementRepo;
-
-		protected readonly IHistoryIssueRepo _historyIssueRepo;
-		protected readonly IHistoryPickingRepo _historyAllocationRepo;
-		protected readonly IHistoryReceiptRepo _historyReceiptRepo;
-		protected readonly IHistoryService _historyService;
-		protected readonly ILocationRepo _locationRepo;
+		protected readonly IPalletRepo _palletRepo;				
 
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
 		protected readonly IValidator<CreatePalletReceiptDTO> _palletValidator;
@@ -51,25 +44,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			_receiptValidator = new ReceiptDTOValidation(_updateValidator);
 			_palletValidator = new CreatePalletReceiptDTOValidation(_productOnPalletValidator);
 			_palletRepo = new PalletRepo(DbContext);
-			_palletMovementRepo = new PalletMovementRepo(DbContext);
-			_historyIssueRepo = new HistoryIssueRepo(DbContext);
-			_historyReceiptRepo = new HistoryReceiptRepo(DbContext);
-			_historyAllocationRepo = new HistoryPickingRepo(DbContext);
-			_locationRepo = new LocationRepo(DbContext);
-			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyAllocationRepo, DbContext, _palletRepo, _mapper, _locationRepo);
 			
 			_receiptRepo = new ReceiptRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
 			_inventoryRepo = new InventoryRepo(DbContext);
 			_inventoryService = new InventoryService(_inventoryRepo, _mapper, DbContext);
-			_receiptService = new ReceiptService(
+			_receiptService = new ReceiptService(Mediator,
 				_receiptRepo,
 				_mapper,
 				DbContext,
-				_palletRepo,
-				_historyService,
+				_palletRepo,				
 				_inventoryService,
-				_locationRepo,
 				_palletValidator,
 				_receiptValidator);
 		}

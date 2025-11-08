@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
+using MediatR;
+using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
@@ -18,6 +20,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 	public class PickingIntegrationCommandService : TestBase
 	{
 		protected readonly PickingPalletService _pickingPalletService;
+		//protected readonly IMediator _mediator;	
 		protected readonly IMapper _mapper;
 		protected readonly IAllocationRepo _allocationRepo;
 		protected readonly IPickingPalletRepo _pickingPalletRepo;
@@ -25,25 +28,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		protected readonly IPalletRepo _palletRepo;
 		protected readonly IIssueRepo _issueRepo;
 		protected readonly IPalletService _palletService;
-		protected readonly IHistoryService _historyService;
-
+	
 		protected readonly ILocationService _locationService;
 		protected readonly IPalletMovementRepo _movementRepo;
 		protected readonly IValidator<UpdatePalletDTO> _updatevalidator;
 
-		protected readonly IPalletMovementRepo _palletMovementRepo;
-		protected readonly IHistoryIssueRepo _historyIssueRepo;
-		protected readonly IHistoryReceiptRepo _historyReceiptRepo;
-		protected readonly IHistoryPickingRepo _historyPickingRepo;
+		protected readonly IPalletMovementRepo _palletMovementRepo;		
 
 		protected readonly IValidator<ProductOnPalletDTO> _productOnPalletValidator;
+
+		protected readonly IEventCollector _eventCollector;
+		
 		public PickingIntegrationCommandService()
 		{
 			var MapperConfig = new MapperConfiguration(cfg =>
 			{
 				cfg.AddProfile<MappingProfile>();
 			});
-			_mapper = MapperConfig.CreateMapper();
+			_mapper = MapperConfig.CreateMapper();			
 			_palletRepo = new PalletRepo(DbContext);
 			_locationRepo = new LocationRepo(DbContext);			
 			_palletMovementRepo = new PalletMovementRepo(DbContext);			
@@ -53,18 +55,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			_productOnPalletValidator = new ProductOnPalletDTOValidation();
 			_updatevalidator = new UpdatePalletDTOValidation(_productOnPalletValidator);
 			_palletMovementRepo = new PalletMovementRepo(DbContext);
-			_historyIssueRepo = new HistoryIssueRepo(DbContext);
-			_historyPickingRepo = new HistoryPickingRepo(DbContext);
-			_historyReceiptRepo = new HistoryReceiptRepo(DbContext);
-
-			_historyService = new HistoryService(_palletMovementRepo, _historyIssueRepo, _historyReceiptRepo, _historyPickingRepo, DbContext, _palletRepo, _mapper, _locationRepo);
 			_issueRepo = new IssueRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
-			_palletService = new PalletService(_palletRepo, _historyService, _locationService, _palletMovementRepo, _pickingPalletRepo, _locationRepo, _mapper, _updatevalidator, DbContext);
+			_eventCollector = new EventCollector();
+			_palletService = new PalletService(Mediator, _palletRepo				
+				, _locationService, _palletMovementRepo
+				, _pickingPalletRepo, _locationRepo, _mapper, _updatevalidator, DbContext
+				,_eventCollector);
 			
 			_pickingPalletRepo = new PickingPalletRepo(DbContext);
 			
-			_pickingPalletService = new PickingPalletService(_pickingPalletRepo, _allocationRepo, DbContext, _locationRepo,_palletRepo, _issueRepo, _historyService,_palletService);
+			_pickingPalletService = new PickingPalletService(Mediator, _pickingPalletRepo, _allocationRepo, DbContext, _locationRepo,_palletRepo, _issueRepo, _palletService, _eventCollector);
 		}
 	}
 }

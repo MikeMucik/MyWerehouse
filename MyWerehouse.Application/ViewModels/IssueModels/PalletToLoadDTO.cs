@@ -10,7 +10,7 @@ namespace MyWerehouse.Application.ViewModels.IssueModels
 	public class PalletToLoadDTO
 	{
 		public string PalletId { get; set;}
-		public string LocationName { get; set;}
+		public string LocationName { get; set;}//
 		public int LocationId { get; set;}
 		public PalletStatus PalletStatus { get; set;}
 		public List<ProductOnPalletIssueDTO> ProductOnPalletIssue { get; set;} = new List<ProductOnPalletIssueDTO>();

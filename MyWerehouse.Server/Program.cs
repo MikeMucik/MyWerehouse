@@ -5,7 +5,7 @@ using Microsoft.OpenApi.Models;
 using MyWerehouse.Application;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Infrastructure;
-
+//using MediatR.Licensing;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +23,11 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddValidatorsFromAssemblyContaining<AddressDTOValidation>();
+//builder.Services.AddSingleton<MediatR.Licensing.ILicense, MediatR.Licensing.OpenSourceLicense>();
+//builder.Services.AddMediatR(cfg =>
+//cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly));
 
+builder.Services.AddValidatorsFromAssemblyContaining<AddressDTOValidation>();
 //builder.Services.AddSwaggerGen();
 var app = builder.Build();
 

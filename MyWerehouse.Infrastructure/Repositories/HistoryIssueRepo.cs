@@ -22,11 +22,21 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext.HistoryIssues.Add(issue);
 		}
 
+		public async Task AddHistoryIssueAsync(HistoryIssue issue, CancellationToken cancellationToken)
+		{
+			await _werehouseDbContext.HistoryIssues.AddAsync(issue, cancellationToken);
+		}
+
 		public IQueryable<HistoryIssue> GetAllHistoryIssues()
 		{
 			return _werehouseDbContext.HistoryIssues
 				.Include(d=>d.Details)
 				.AsQueryable();
+		}
+
+		public async Task SaveChanges()
+		{
+			await _werehouseDbContext.SaveChangesAsync();
 		}
 	}
 }

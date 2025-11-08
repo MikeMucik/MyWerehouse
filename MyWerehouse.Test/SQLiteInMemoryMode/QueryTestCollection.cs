@@ -298,7 +298,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Quantity = 200,
 						BestBefore = new DateOnly(2025, 2, 2),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1001"
+						PalletId = "Q1000"
 					},
 					new ProductOnPallet
 					{

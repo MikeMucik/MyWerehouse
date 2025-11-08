@@ -15,39 +15,39 @@ namespace MyWerehouse.Application.Utils
 			Func<TSource, TKey> sourceKeySelector,
 			Func<TSource, TDestination> addMapper,
 			Action<TSource, TDestination> updateMapper,
-			Action<TDestination> removeMapper = null)
+			Action<TDestination>? removeMapper = null)
 			where TDestination : class
 		{
-			var existingMap = existingCollection.ToDictionary(destinationKeySelector);
-			var incomingMap = incomingCollection.ToDictionary(sourceKeySelector);
-
-			foreach (var incomingItem in incomingMap.Values)
+			var existingMap = existingCollection.ToDictionary(destinationKeySelector); // daje warning bo 
+			var incomingItems = incomingCollection.ToList();			
+			//update
+			foreach (var incomingItem in incomingItems.Where(i => !EqualityComparer<TKey>.Default.Equals(sourceKeySelector(i), default)))
 			{
-				if(existingMap.TryGetValue(sourceKeySelector(incomingItem),out var existingItem))
+				if (existingMap.TryGetValue(sourceKeySelector(incomingItem), out var existingItem))
 				{
 					updateMapper(incomingItem, existingItem);
-				}
-				else
-				{
-					existingCollection.Add(addMapper(incomingItem));
-				}
+				}				
 			}
-			if(removeMapper != null)
+			// potem dodania nowych (Id = default)
+			foreach (var incomingItem in incomingItems.Where(i => EqualityComparer<TKey>.Default.Equals(sourceKeySelector(i), default)))
 			{
-				var itemesToRemove = existingMap.Values
-					.Where(ei => !incomingMap.ContainsKey(destinationKeySelector(ei)))
+				existingCollection.Add(addMapper(incomingItem));
+			}
+			//usunięcie niepotrzebnych			
+			if (removeMapper != null)
+			{
+				var incomingKeys = incomingItems
+					.Where(i => !EqualityComparer<TKey>.Default.Equals(sourceKeySelector(i), default))
+					.Select(sourceKeySelector)
+					.ToHashSet();
+				var itemsToRemove = existingMap.Values
+					.Where(ei => !incomingKeys.Contains(destinationKeySelector(ei)))
 					.ToList();
-				foreach (var item in itemesToRemove)
+				foreach (var item in itemsToRemove)
 				{
 					removeMapper(item);
 				}
-			}
+			}			
 		}
 	}
 }
-
-			//foreach (var existingItem in existingMap.Values.Where(ei =>
-			//!incomingMap.ContainsKey(destinationKeySelector(ei))).ToList())
-			//{
-			//	existingCollection.Remove(existingItem);
-			//}

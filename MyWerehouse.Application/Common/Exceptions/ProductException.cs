@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Application.Exceptions
+namespace MyWerehouse.Application.Common.Exceptions
 {
 	public class ProductException : Exception
 	{

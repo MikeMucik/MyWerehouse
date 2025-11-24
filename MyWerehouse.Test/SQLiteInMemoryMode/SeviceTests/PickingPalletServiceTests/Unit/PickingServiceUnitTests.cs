@@ -261,23 +261,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingPalletRepo = new PickingPalletRepo(DbContext);	
 			var allocationRepo = new AllocationRepo(DbContext);
 			var issueRepo = new IssueRepo(DbContext);
-			//var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
-			//var historyService = new Mock<IHistoryService>();
-
-			
 			var palletService = new Mock<IPalletService>();
-
 			var eventCollector = new Mock<IEventCollector>();
-
 			var service = new PickingPalletService(Mediator, pickingPalletRepo,
 					allocationRepo,
 				DbContext,
 				locationRepo.Object,
 				palletRepo.Object,
 				issueRepo, 
-				//historyService.Object,
 				palletService.Object
 				,eventCollector.Object);
 
@@ -562,7 +555,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var mapper = new Mock<IMapper>();
 			var locationRepo = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();		
-			//var historyService = new Mock<IHistoryService>();
 			var palletService = new Mock<IPalletService>();
 			var eventCollector = new Mock<IEventCollector>();
 			var service = new PickingPalletService(Mediator, pickingPalletRepo,
@@ -571,7 +563,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				locationRepo.Object,
 				palletRepo.Object,
 				issueRepo,
-				//historyService.Object,
 				palletService.Object
 				,eventCollector.Object);
 
@@ -603,10 +594,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var secondIssue = firstClient.Issues.Skip(1).First();
 			Assert.Equal(client2.Id, secondIssue.IssueId);
 			Assert.Single(secondIssue.Products);
-
-			//// 6. W pierwszym zleceniu produkt 1 został zsumowany z 2 palet
-			//var product1 = firstIssue.Products.First(p => p.ProductId == expectedProduct1Id);
-			//Assert.Equal(expectedQuantityFromBothPallets, product1.Quantity);
 
 			// --- Klient 1 ---
 			var client1Result = result.Should().ContainSingle(r => r.ClientIdOut == client1.Id).Subject;

@@ -84,10 +84,5 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			await _werehouseDbContext.PalletMovements.AddAsync(palletMovement);
 		}
-
-		public async Task SaveChanges()
-		{
-			await _werehouseDbContext.SaveChangesAsync();
-		}
 	}
 }

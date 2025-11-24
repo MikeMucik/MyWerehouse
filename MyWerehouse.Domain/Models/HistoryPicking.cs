@@ -13,8 +13,8 @@ namespace MyWerehouse.Domain.Models
 		public int? AllocationId { get; set; }// ? dla update
 		//[JsonIgnore] // Ignoruj przy serializacji
 		public Allocation Allocation { get; set; }
-		public int VirtualPalletId { get; set; }
-		public VirtualPallet VirtualPallet { get; set; }
+		public string PalletId { get; set; }
+		public Pallet Pallet { get; set; }
 		public int IssueId { get; set; }
 		public Issue Issue { get; set; }
 		public int ProductId { get; set; }

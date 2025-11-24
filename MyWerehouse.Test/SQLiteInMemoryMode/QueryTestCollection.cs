@@ -12,7 +12,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 	[CollectionDefinition("QueryCollection")]
 	public class QueryTestCollection : ICollectionFixture<QueryTestFixture> { }
 
-	public class QueryTestFixture : TestBase  // Dziedziczy po Twoim TestBase (SQLite in-memory)
+	public class QueryTestFixture : TestBase  // Dziedziczy po TestBase (SQLite in-memory)
 	{
 		public QueryTestFixture()
 			: base()  // Wywołuje ctor TestBase (connection, options, EnsureCreated)

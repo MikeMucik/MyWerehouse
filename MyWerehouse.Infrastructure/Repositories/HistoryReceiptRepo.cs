@@ -32,10 +32,5 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return _werehouseDbContext.HistoryReceipts				
 				.AsQueryable();
 		}
-
-		public async Task SaveChanges()
-		{
-			await _werehouseDbContext.SaveChangesAsync();
-		}
 	}
 }

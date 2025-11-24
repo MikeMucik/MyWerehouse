@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ReceiptModels;
+using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
@@ -254,7 +254,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				UserId = "U001"
 			};
 
-			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+			_receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
 
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 			Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);

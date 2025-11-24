@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
-using MyWerehouse.Application.ViewModels.ReceiptModels;
+using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
 

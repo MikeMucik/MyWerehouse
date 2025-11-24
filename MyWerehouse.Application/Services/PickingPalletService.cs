@@ -1,21 +1,22 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Commands.History.CreateHistoryIssue;
-using MyWerehouse.Application.Commands.History.CreateHistoryPicking;
-using MyWerehouse.Application.Commands.History.CreateOperation;
+using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
+using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
+using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Results;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.AllocationModels;
-using MyWerehouse.Application.ViewModels.IssueModels;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.ViewModels.PickingPalletModels;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
 
 namespace MyWerehouse.Application.Services
 {
@@ -28,7 +29,6 @@ namespace MyWerehouse.Application.Services
 		private readonly ILocationRepo _locationRepo;
 		private readonly IPalletRepo _palletRepo;
 		private readonly IIssueRepo _issueRepo;
-		//private readonly IHistoryService _historyService;
 		private readonly IPalletService _palletService;
 		private readonly IEventCollector _eventCollector;
 
@@ -40,9 +40,8 @@ namespace MyWerehouse.Application.Services
 			ILocationRepo locationRepo,
 			IPalletRepo palletRepo,
 			IIssueRepo issueRepo,
-			//IHistoryService historyService,
-			IPalletService palletService
-			, IEventCollector eventCollector)
+			IPalletService palletService,
+			IEventCollector eventCollector)
 		{
 			_mediator = mediator;
 			_pickingPalletRepo = pickingPalletRepo;
@@ -51,7 +50,6 @@ namespace MyWerehouse.Application.Services
 			_locationRepo = locationRepo;
 			_palletRepo = palletRepo;
 			_issueRepo = issueRepo;
-			//_historyService = historyService;
 			_palletService = palletService;
 			_eventCollector = eventCollector;
 		}
@@ -65,7 +63,6 @@ namespace MyWerehouse.Application.Services
 			var palletPicking = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(dateMovedStart, dateMovedEnd);
 			foreach (var pallet in palletPicking)
 			{
-				//var palletInWarehosue = await _palletRepo.GetPalletByIdAsync(pallet.PalletId);
 				var locationName = await _locationRepo.GetLocationByIdAsync(pallet.LocationId);
 				if (locationName == null) throw new InvalidDataException($"Brak lokalizacji {pallet.LocationId} w magazynie");//It's shouldn't heppend
 																															  //var addedToPicking = await _pickingPalletRepo.TakeDateAddedToPickingAsync(pallet.Id);
@@ -210,16 +207,11 @@ namespace MyWerehouse.Application.Services
 		//faktyczne działanie pickingu - zmiany w bazie Do pick - arranging goods
 		public async Task<PickingResult> DoPickingAsync(AllocationDTO allocationDTO, string userId)
 		{
-
-			//var palletOps = new List<CreatePalletOperationCommand>();
-			//var pickingHistoryOps = new List<CreateHistoryPickingCommand>();
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
-			//var historyOperations = new List<HistoryOperation>();
+			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();			
 			try
 			{
 				var newVirtualPallet = new VirtualPallet();
 				var newAllocation = new Allocation();
-				//var newQuantityToAllocation = 0;
 				var allocationToChange = await _allocationRepo.GetAllocationAsync(allocationDTO.AllocationId);
 				var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(allocationToChange.VirtualPalletId);
 				var issueId = allocationToChange.IssueId;
@@ -230,8 +222,7 @@ namespace MyWerehouse.Application.Services
 				if (allocationDTO.RequestedQuantity == allocationDTO.PickedQuantity)
 				{
 					allocationToChange.PickingStatus = PickingStatus.Picked;
-					//_historyService.CreateHistoryPicking(virtualPallet, allocationToChange, userId, PickingStatus.Picked);
-					_eventCollector.Add(new CreateHistoryPickingCommand(
+					_eventCollector.Add(new CreateHistoryPickingNotification(
 							allocationToChange.VirtualPalletId,
 							allocationToChange.Id,
 							issue.PerformedBy,
@@ -241,16 +232,13 @@ namespace MyWerehouse.Application.Services
 				else if (allocationDTO.RequestedQuantity > allocationDTO.PickedQuantity)
 				{
 					var newQuantityToAllocation = allocationDTO.RequestedQuantity - allocationDTO.PickedQuantity;
-					 
-					newVirtualPallet = await _palletService.AddPalletToPickingAsync(issue, allocationDTO.ProductId, allocationDTO.BestBefore, userId);
-					//verify if exist VirtualPallet??	
-				
+					//var availablePallets = 
+					newVirtualPallet = //await _palletService.AddPalletToPickingAsync(issue, allocationDTO.ProductId, allocationDTO.BestBefore, userId);
+									   //verify if exist VirtualPallet??	
+									await	_mediator.Send(new AddPalletToPickingCommand(issue, allocationDTO.ProductId, allocationDTO.BestBefore, userId, [] ));
 					newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet, issue, newQuantityToAllocation);
 					_allocationRepo.AddAllocation(newAllocation);
-
-					//_historyService.CreateHistoryPicking(newVirtualPallet, newAllocation, userId, PickingStatus.Available);
-
-					_eventCollector.Add(new CreateHistoryPickingCommand(
+					_eventCollector.Add(new CreateHistoryPickingNotification(
 						newVirtualPallet.Id,
 						newAllocation.Id,
 						userId,
@@ -259,9 +247,7 @@ namespace MyWerehouse.Application.Services
 
 					//zablokowanie palety źródłowej bo się nie zgadza stan fizyczny/system
 					sourcePallet.Status = PalletStatus.OnHold;					
-					//_historyService.CreateOperation(sourcePallet, userId, PalletStatus.OnHold);
-
-					_eventCollector.Add(new CreatePalletOperationCommand(sourcePallet.Id,
+					_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,
 						sourcePallet.LocationId,
 						ReasonMovement.Correction,
 						userId,
@@ -270,11 +256,11 @@ namespace MyWerehouse.Application.Services
 				}
 				
 				if (issue.IssueStatus == IssueStatus.Pending) { issue.IssueStatus = IssueStatus.InProgress; }
-				
+				//czy to ma sens
 
 				if (allocationDTO.RequestedQuantity == allocationDTO.PickedQuantity)
 				{
-					await _mediator.Publish(new CreateHistoryPickingCommand(
+					await _mediator.Publish(new CreateHistoryPickingNotification(
 							virtualPallet.Id,
 							allocationToChange.Id,
 							issue.PerformedBy,
@@ -396,21 +382,14 @@ namespace MyWerehouse.Application.Services
 				_allocationRepo.AddAllocation(newAllocation);
 
 				newAllocation.PickingStatus = PickingStatus.Picked;
-				//_historyService.CreateHistoryPicking(virtualPallet, newAllocation, userId, PickingStatus.Allocated);
 				_eventCollector.AddDeferred(async () =>
-						new CreateHistoryPickingCommand(
+						new CreateHistoryPickingNotification(
 							newAllocation.VirtualPalletId,
 							newAllocation.Id,
-							issue.PerformedBy,
+							userId,
 							PickingStatus.Allocated,
 							0));
-				//_eventCollector.Add(new CreateHistoryPickingCommand(
-				//			newAllocation.VirtualPalletId,
-				//			newAllocation.Id,
-				//			issue.PerformedBy,
-				//			PickingStatus.Allocated,
-				//			0));
-
+				
 				await _werehouseDbContext.SaveChangesAsync();
 				foreach (var evn in _eventCollector.Events)
 				{
@@ -455,7 +434,7 @@ namespace MyWerehouse.Application.Services
 				_pickingPalletRepo.ClosePickingPallet(palletId, issueId);
 				await _werehouseDbContext.SaveChangesAsync();
 				await transaction.CommitAsync();
-				await _mediator.Publish(new CreatePalletOperationCommand(
+				await _mediator.Publish(new CreatePalletOperationNotification(
 							pallet.Id,
 							pallet.LocationId,
 							ReasonMovement.Picking,
@@ -463,7 +442,7 @@ namespace MyWerehouse.Application.Services
 							PalletStatus.ToIssue,
 							null
 						));
-				await _mediator.Publish(new CreateHistoryIssueCommand(issue.Id, issue.PerformedBy));
+				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, issue.PerformedBy));
 				return PickingResult.Ok("Zamknięto paletę");
 			}
 			catch (PalletNotFoundException exp)
@@ -519,8 +498,7 @@ namespace MyWerehouse.Application.Services
 						},
 				};
 				_palletRepo.AddPallet(pallet);
-				//_historyService.CreateOperation(pallet, userId, PalletStatus.Picking);
-				_eventCollector.Add(new CreatePalletOperationCommand(pallet.Id,
+				_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id,
 				pallet.LocationId,
 				ReasonMovement.Picking,
 				userId,
@@ -544,8 +522,7 @@ namespace MyWerehouse.Application.Services
 						DateAdded = DateTime.UtcNow,
 					});
 				}
-				//_historyService.CreateOperation(oldPallet, userId, PalletStatus.Picking);
-				_eventCollector.Add(new CreatePalletOperationCommand(oldPallet.Id,
+				_eventCollector.Add(new CreatePalletOperationNotification(oldPallet.Id,
 				oldPallet.LocationId,
 				ReasonMovement.Picking,
 				userId,
@@ -562,8 +539,7 @@ namespace MyWerehouse.Application.Services
 			if (productOnSourcePallet.Quantity == 0)
 			{
 				sourcePallet.Status = PalletStatus.Archived;
-				//_historyService.CreateOperation(sourcePallet, sourcePallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.Archived, null);
-				_eventCollector.Add(new CreatePalletOperationCommand(sourcePallet.Id,
+				_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,
 				sourcePallet.LocationId,
 				ReasonMovement.Picking,
 				issue.PerformedBy,
@@ -572,13 +548,12 @@ namespace MyWerehouse.Application.Services
 			}
 			else
 			{
-				_eventCollector.Add(new CreatePalletOperationCommand(sourcePallet.Id,
+				_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,
 				sourcePallet.LocationId,
 				ReasonMovement.Picking,
 				issue.PerformedBy,
 				PalletStatus.ToPicking,
 				null));
-				//_historyService.CreateOperation(sourcePallet, sourcePallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.ToPicking, null);
 			}
 		}
 		private async Task ReduceAllocationAsync(Issue issue, int productId, int quantity, VirtualPallet virtualPallet, string userId)
@@ -596,11 +571,10 @@ namespace MyWerehouse.Application.Services
 					{
 						allocation.Quantity -= quantity;
 						quantity = 0;
-						//_historyService.CreateHistoryPicking(virtualPallet, allocation, userId, PickingStatus.Correction);
-						_eventCollector.Add(new CreateHistoryPickingCommand(
+						_eventCollector.Add(new CreateHistoryPickingNotification(
 							allocation.VirtualPalletId,
 							allocation.Id,
-							issue.PerformedBy,
+							userId,
 							PickingStatus.Allocated,
 							0));
 					}
@@ -608,11 +582,10 @@ namespace MyWerehouse.Application.Services
 					{
 						quantity -= allocation.Quantity;
 						allocation.Quantity = 0;
-						//_historyService.CreateHistoryPicking(virtualPallet, allocation, userId, PickingStatus.Correction);
-						_eventCollector.Add(new CreateHistoryPickingCommand(
+						_eventCollector.Add(new CreateHistoryPickingNotification(
 							allocation.VirtualPalletId,
 							allocation.Id,
-							issue.PerformedBy,
+							userId,
 							PickingStatus.Allocated,
 							0));
 					}

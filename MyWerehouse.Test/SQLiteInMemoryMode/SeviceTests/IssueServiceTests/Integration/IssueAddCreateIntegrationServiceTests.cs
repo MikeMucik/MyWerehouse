@@ -7,14 +7,14 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
-using static MyWerehouse.Application.ViewModels.IssueModels.CreateIssueDTO;
+
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
@@ -99,7 +99,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Status = PalletStatus.Available,
 					ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product, Quantity = 9, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
 					}
 				},
 				new Pallet
@@ -118,7 +118,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			{
 				Client = initailClient,
 				IssueDateTimeCreate = DateTime.Now,
-				IssueStatus = IssueStatus.InProgress,
+				IssueStatus = IssueStatus.New,
 				IssueDateTimeSend = new DateTime(2025, 9, 9),
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
@@ -149,13 +149,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
 			// Picking pallet
-			var palletToPicking = DbContext.Pallets.FirstOrDefault(p => p.Id == "P3");
+			var palletToPicking = DbContext.Pallets.FirstOrDefault(p => p.Id == "P2");
 			var pickingPallet = DbContext.VirtualPallets.Include(pp => pp.Allocations).SingleOrDefault();
 			Assert.NotNull(palletToPicking);
 			Assert.NotNull(pickingPallet);
 			Assert.Equal(6, pickingPallet.Allocations.First().Quantity);
-			Assert.Equal(4, pickingPallet.RemainingQuantity);
-			Assert.Equal("P3", pickingPallet.PalletId);
+			Assert.Equal(3, pickingPallet.RemainingQuantity);
+			Assert.Equal("P2", pickingPallet.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking.Status);
 			Assert.Equal(issue.Id, pickingPallet.Allocations.First().IssueId);
 			// Movements
@@ -166,7 +166,205 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Contains(movements, m => m.PalletId == "P2");
 			Assert.Contains(movements, m => m.PalletId == "P3");
 		}
+		[Fact]
+		public async Task AddPalletsToIssueByProductAsync_AssignsFullAndRestPalletsAndAllocatesRestFromVirtualPallet_HappyPath()
+		{
+			// Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var initailClient = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = new List<Address> { address }
+			};
+			var location1 = new Location
+			{
+				Aisle = 1,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
+			var location2 = new Location
+			{
+				Aisle = 2,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
+			var location3 = new Location
+			{
+				Aisle = 3,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
+			var initialCategory = new Category
+			{
+				Name = "name",
+				IsDeleted = false
+			};
+			var product = new Product
+			{
+				Name = "TestFull",
+				SKU = "123",
+				AddedItemAd = new DateTime(2024, 1, 1),
+				Category = initialCategory,
+				IsDeleted = false,
+				CartonsPerPallet = 10,
+			};
+			var availablePallets = new List<Pallet>
+			{
+				new Pallet
+				{
+					Id = "P1",
+					DateReceived = new DateTime(2025, 3, 3),
+					Location = location1,
+					Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
+				{
+					new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+				}
+			},
+				new Pallet
+				{
+					Id = "P2",
+					DateReceived = new DateTime(2025, 3, 3),
+					Location = location2,
+					Status = PalletStatus.ToPicking,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { Product = product, Quantity = 2, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+					}
+				},
+				new Pallet
+				{
+					Id = "P3",
+					DateReceived = new DateTime(2025, 3, 3),
+					Location = location3,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+					}
+				},
+				new Pallet
+				{
+					Id = "P4",
+					DateReceived = new DateTime(2025, 3, 3),
+					Location = location3,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { Product = product, Quantity = 3, BestBefore = new DateOnly(2026,1,1) }
+					}
+				},
+				new Pallet
+				{
+					Id = "P5",
+					DateReceived = new DateTime(2025, 3, 3),
+					Location = location3,
+					Status = PalletStatus.Available,
+					ProductsOnPallet = new List<ProductOnPallet>
+					{
+						new ProductOnPallet { Product = product, Quantity = 2, BestBefore = new DateOnly(2026,1,1) }
+					}
+				}
+			};
+			var issue = new Issue
+			{
+				Client = initailClient,
+				IssueDateTimeCreate = DateTime.Now,
+				IssueStatus = IssueStatus.New,
+				IssueDateTimeSend = new DateTime(2025, 9, 9),
+				Pallets = new List<Pallet>(),
+				PerformedBy = "TestUser",
+			};
+			
+			DbContext.Addresses.Add(address);
+			DbContext.Clients.Add(initailClient);
+			DbContext.Categories.Add(initialCategory);
+			DbContext.Products.Add(product);
+			DbContext.Locations.AddRange(location1, location2, location3);
+			DbContext.Pallets.AddRange(availablePallets);
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+			var virtualPallet = new VirtualPallet
+			{
+				Allocations = [],
+				IssueInitialQuantity = 2,
+				PalletId = "P2",
+				DateMoved = DateTime.UtcNow.AddDays(-7),
+				Location = location2,
+			};
+			DbContext.VirtualPallets.Add(virtualPallet);
+			await DbContext.SaveChangesAsync();
 
+			// Act
+			var issueItem = new IssueItemDTO
+			{
+				ProductId = product.Id,
+				Quantity = 26, // 2 pełne palety + 5 do pickingu
+				BestBefore = new DateOnly(2025, 10, 10),
+			};
+			var result = await _issueService.AddPalletsToIssueByProductAsync(issue, issueItem);
+
+			// Assert
+			Assert.True(result.Success);
+			Assert.Contains("Towar dołączono do wydania", result.Message);
+			Assert.Equal(product.Id, result.ProductId);
+			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
+			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
+			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
+			//Picking pallet
+			var palletToPickingP2 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P2");
+			var pickingPalletP2 = DbContext.VirtualPallets.Include(pp => pp.Allocations).FirstOrDefault(x=>x.PalletId == "P2");
+			Assert.NotNull(palletToPickingP2);
+			Assert.NotNull(pickingPalletP2);
+			Assert.Equal(2, pickingPalletP2.Allocations.First().Quantity);
+			Assert.Equal(0, pickingPalletP2.RemainingQuantity);
+			Assert.Equal("P2", pickingPalletP2.PalletId);
+			Assert.Equal(PalletStatus.ToPicking, palletToPickingP2.Status);
+			Assert.Equal(issue.Id, pickingPalletP2.Allocations.First().IssueId);
+
+			var palletToPickingP4 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P4");
+			var pickingPalletP4 = DbContext.VirtualPallets.Include(pp => pp.Allocations).FirstOrDefault(x => x.PalletId == "P4");
+			Assert.NotNull(palletToPickingP4);
+			Assert.NotNull(pickingPalletP4);
+			Assert.Equal(3, pickingPalletP4.Allocations.First().Quantity);
+			Assert.Equal(0, pickingPalletP4.RemainingQuantity);
+			Assert.Equal("P4", pickingPalletP4.PalletId);
+			Assert.Equal(PalletStatus.ToPicking, palletToPickingP4.Status);
+			Assert.Equal(issue.Id, pickingPalletP4.Allocations.First().IssueId);
+
+			var palletToPickingP5 = DbContext.Pallets.FirstOrDefault(p => p.Id == "P5");
+			var pickingPalletP5 = DbContext.VirtualPallets.Include(pp => pp.Allocations).FirstOrDefault(x => x.PalletId == "P5");
+			Assert.NotNull(palletToPickingP5);
+			Assert.NotNull(pickingPalletP5);
+			Assert.Equal(1, pickingPalletP5.Allocations.First().Quantity);
+			Assert.Equal(1, pickingPalletP5.RemainingQuantity);
+			Assert.Equal("P5", pickingPalletP5.PalletId);
+			Assert.Equal(PalletStatus.ToPicking, palletToPickingP5.Status);
+			Assert.Equal(issue.Id, pickingPalletP5.Allocations.First().IssueId);
+			// Movements
+			var movements = DbContext.PalletMovements.ToList();
+			Assert.NotEmpty(movements);
+			Assert.Equal(4, movements.Count);
+			Assert.Contains(movements, m => m.PalletId == "P1");
+			Assert.Contains(movements, m => m.PalletId == "P5");
+			Assert.Contains(movements, m => m.PalletId == "P3");			
+			Assert.Contains(movements, m => m.PalletId == "P4");			
+		}
 		[Fact]
 		public async Task CreateNewIssueAsync_AssignsFullPalletsAndAllocatesRest_HappyPath()
 		{
@@ -721,7 +919,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			{
 				Client = initailClient,
 				IssueDateTimeCreate = DateTime.Now,
-				IssueStatus = IssueStatus.InProgress,
+				IssueStatus = IssueStatus.Pending,
 				IssueDateTimeSend = new DateTime(2025, 9, 9),
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
@@ -747,7 +945,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Assert
 			Assert.False(result.Success);
-			Assert.Contains("Produkt o numerze 1 nie został dodany do", result.Message);
+			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Quantity, result.QuantityRequest);
 
@@ -852,7 +1050,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			{
 				Client = initailClient,
 				IssueDateTimeCreate = DateTime.Now,
-				IssueStatus = IssueStatus.InProgress,
+				IssueStatus = IssueStatus.New,
 				IssueDateTimeSend = new DateTime(2025, 9, 9),
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
@@ -878,7 +1076,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Assert
 			Assert.False(result.Success);
-			Assert.Contains("Produkt o numerze 1 nie został dodany do", result.Message);
+			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Quantity, result.QuantityRequest);
 

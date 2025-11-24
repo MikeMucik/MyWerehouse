@@ -26,7 +26,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{			
 				_werehouseDbContext.Pallets.Remove(pallet);			
 		}
-		public async Task<Pallet> GetPalletByIdAsync(string palletId)
+		public async Task<Pallet?> GetPalletByIdAsync(string palletId)
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -166,6 +166,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var pallet = await _werehouseDbContext.Pallets.FirstOrDefaultAsync(p => p.LocationId == locationId);
 			return pallet;
 		}
+
 
 		//public async Task<bool> ExistsAsync(string palletId, int productId)
 		//{

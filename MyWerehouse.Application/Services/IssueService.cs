@@ -8,19 +8,24 @@ using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Commands.History.CreateHistoryIssue;
-using MyWerehouse.Application.Commands.History.CreateHistoryPicking;
-using MyWerehouse.Application.Commands.History.CreateOperation;
+using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
+using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
+using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
+using MyWerehouse.Application.Inventories.Queries.GetProductCount;
 using MyWerehouse.Application.Commands.Issue.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Results;
 using MyWerehouse.Application.Utils;
-using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
+using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
+using MyWerehouse.Application.Issues.Commands.UpdateIssue;
 
 namespace MyWerehouse.Application.Services
 {
@@ -31,18 +36,14 @@ namespace MyWerehouse.Application.Services
 		private readonly IIssueRepo _issueRepo;
 		private readonly IMapper _mapper;//
 		private readonly WerehouseDbContext _werehouseDbContext;
-		//private readonly IHistoryService _historyService;
-		private readonly IInventoryService _inventoryService;
 		private readonly IPalletRepo _palletRepo;
-		private readonly IProductRepo _productRepo;
+		//private readonly IProductRepo _productRepo;
 		private readonly IAllocationRepo _allocationRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
-		private readonly IPalletService _palletService;
+		//private readonly IPalletService _palletService;
 		private readonly IIssueItemRepo _issueItemRepo;
-		private readonly IValidator<CreateIssueDTO> _createIssueValidator;
-		//private readonly IValidator<UpdateIssueDTO> _updateIssueValidator;//
-		private readonly IEventCollector _eventCollector;
-		//private readonly List<INotification> _events = new();
+		//private readonly IValidator<CreateIssueDTO> _createIssueValidator;
+		//private readonly IEventCollector _eventCollector;
 
 		public IssueService(IMediator mediator)
 		{
@@ -53,33 +54,28 @@ namespace MyWerehouse.Application.Services
 			IIssueRepo issueRepo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
-			//IHistoryService historyService,
-			IInventoryService inventoryService,
 			IPalletRepo palletRepo,
-			IProductRepo productRepo,
+			//IProductRepo productRepo,
 			IAllocationRepo allocationRepo,
 			IPickingPalletRepo pickingPalletRepo,
-			IPalletService palletService,
-			IIssueItemRepo issueItemRepo,
-			IValidator<CreateIssueDTO> createIssueValidator,
-			IEventCollector eventCollector)
-			//,IValidator<UpdateIssueDTO> updateIssueValidator)
+			//IPalletService palletService,
+			IIssueItemRepo issueItemRepo
+			//,IValidator<CreateIssueDTO> createIssueValidator
+			//,IEventCollector eventCollector
+			)
 		{
 			_mediator = mediator;
 			_issueRepo = issueRepo;
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
-			//_historyService = historyService;
-			_inventoryService = inventoryService;
 			_palletRepo = palletRepo;
-			_productRepo = productRepo;
+			//_productRepo = productRepo;
 			_allocationRepo = allocationRepo;
 			_pickingPalletRepo = pickingPalletRepo;
-			_palletService = palletService;
+			//_palletService = palletService;
 			_issueItemRepo = issueItemRepo;
-			_createIssueValidator = createIssueValidator;
-			_eventCollector = eventCollector;
-			//_updateIssueValidator = updateIssueValidator;
+			//_createIssueValidator = createIssueValidator;
+			//_eventCollector = eventCollector;
 		}
 		public IssueService(
 			IIssueRepo issueRepo)
@@ -88,131 +84,130 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<List<IssueResult>> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, DateTime dateToSend)
 		{
-			var validationResult = _createIssueValidator.Validate(createIssueDTO);
-			if (!validationResult.IsValid)
-			{
-				throw new ValidationException(validationResult.Errors);
-			}
-			var issue = new Issue(createIssueDTO.ClientId, createIssueDTO.PerformedBy, dateToSend);
-			_issueRepo.AddIssue(issue);
-			issue.IssueItems = new List<IssueItem>();
-			var addedProducts = new List<IssueResult>();
-			foreach (var item in createIssueDTO.Items)
-			{
-				var notAddedProducts = await AddPalletsToIssueByProductAsync(issue, item);
-				addedProducts.Add(notAddedProducts);
-				var newItem = new IssueItem
-				{
-					ProductId = item.ProductId,
-					Quantity = item.Quantity,
-					BestBefore = item.BestBefore,
-				};
-				issue.IssueItems.Add(newItem);
-			}
-			if (addedProducts.Any(r => r.Success == false))
-			{
-				issue.IssueStatus = IssueStatus.NotComplete;
-			}
-			//_historyService.CreateHistoryIssue(issue);
-			await _werehouseDbContext.SaveChangesAsync();
-			await _mediator.Publish(new CreateHistoryIssueCommand(issue.Id, createIssueDTO.PerformedBy));//
-			return addedProducts;
+			return await _mediator.Send(new CreateNewIssueCommand(createIssueDTO, dateToSend));
+			//var validationResult = _createIssueValidator.Validate(createIssueDTO);
+			//if (!validationResult.IsValid)
+			//{
+			//	throw new ValidationException(validationResult.Errors);
+			//}
+			//var issue = new Issue(createIssueDTO.ClientId, createIssueDTO.PerformedBy, dateToSend);
+			//_issueRepo.AddIssue(issue);
+			//issue.IssueItems = new List<IssueItem>();
+			//var addedProducts = new List<IssueResult>();
+			//foreach (var item in createIssueDTO.Items)
+			//{
+			//	var notAddedProducts = await AddPalletsToIssueByProductAsync(issue, item);
+			//	addedProducts.Add(notAddedProducts);
+			//	var newItem = new IssueItem
+			//	{
+			//		ProductId = item.ProductId,
+			//		Quantity = item.Quantity,
+			//		BestBefore = item.BestBefore,
+			//	};
+			//	issue.IssueItems.Add(newItem);
+			//}
+			//if (addedProducts.Any(r => r.Success == false))
+			//{
+			//	issue.IssueStatus = IssueStatus.NotComplete;
+			//}
+			//await _werehouseDbContext.SaveChangesAsync();
+			//await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, createIssueDTO.PerformedBy));//
+			//return addedProducts;
 		}
 		public async Task<IssueResult> AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product)// dla jednego rodzaju produktu
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
-			var totalAvailable = 0;
-			try
-			{
-				var availablePalletsQuery = await _palletService.GetAllAvailablePalletsAsync(product.ProductId, product.BestBefore);
-				totalAvailable = await _inventoryService.GetProductCountAsync(product.ProductId, product.BestBefore);
-				if (product.Quantity > totalAvailable)
-				{
-					throw new ProductException(product.ProductId);
-				}
-				var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(product.ProductId);
-				//ilość kartonów pełnej palety powinno być, nie potrzebne zabezpieczenie
-				if (numberUnitOnPallet == null) { throw new ProductException($"Produkt {product.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt"); }
-				var number = numberUnitOnPallet.CartonsPerPallet;
-				var amountPallets = product.Quantity / number; //liczba palet
-				var rest = product.Quantity % number;           //liczba kartonów
-				issue.IssueStatus = IssueStatus.Pending;
-				// jeszcze warunek by wybierał najpierw pełne palety - first full pallets
-				var palletsToAsign = availablePalletsQuery
-					.OrderByDescending(p => p.ProductsOnPallet.First(po => po.Quantity > 0).Quantity)
-					.Take(amountPallets)
-					.ToList();
-				foreach (var pallet in palletsToAsign)// dodanie do zlecenia pełnych palet - adding full pallets
-				{
-					pallet.IssueId = issue.Id;
-					pallet.Status = PalletStatus.InTransit;
-				_eventCollector.Add(new CreatePalletOperationCommand(pallet.Id,
-				pallet.LocationId,
-				ReasonMovement.ToLoad,
-				issue.PerformedBy,
-				PalletStatus.InTransit,
-				null));
-					//_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.ToLoad, issue.PerformedBy, PalletStatus.InTransit, null);
-					issue.Pallets.Add(pallet);
-				}
-				List<Allocation> newAllocationFromRest = new List<Allocation>();
-				//stworzenie zadania picking dla resztówki jeśli rest < 0 -  making picking for rest
-				if (rest > 0)
-				{
-				newAllocationFromRest =	await AddAllocationToIssueAsync(issue, product.ProductId, rest, product.BestBefore, issue.PerformedBy);// palety do pickingu
-					await _werehouseDbContext.SaveChangesAsync();
-					foreach (var allocation in newAllocationFromRest)
-					{
-						_eventCollector.Add(new CreateHistoryPickingCommand(
-							allocation.VirtualPalletId,
-					allocation.Id,
-					issue.PerformedBy,
-					PickingStatus.Allocated,
-					0));
-					}
-				}
-				//await _werehouseDbContext.SaveChangesAsync();
-				foreach( var evn in _eventCollector.Events)
-				{
-					await _mediator.Publish(evn, CancellationToken.None);
-				}
-				await _werehouseDbContext.SaveChangesAsync();
-				await transaction.CommitAsync();
+			return await _mediator.Send(new AddPalletsToIssueByProductCommand(issue, product));
+			//using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
+			//var totalAvailable = 0;
+			//try
+			//{
+			//	var availablePalletsQuery = await _palletService.GetAllAvailablePalletsAsync(product.ProductId, product.BestBefore);
+			//	//totalAvailable = await _inventoryService.GetProductCountAsync(product.ProductId, product.BestBefore);
+			//	totalAvailable = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore));
 
-				_eventCollector.Clear();
-				
-				return IssueResult.Ok("Towar dołączono do wydania", product.ProductId);
-			}
-			catch (ProductException expr)
-			{
-				await transaction.RollbackAsync();
-				return IssueResult.Fail(
-					expr.Message,
-					product.ProductId,
-					product.Quantity,
-					totalAvailable);
-			}
-			catch (PalletNotFoundException expal)
-			{
-				await transaction.RollbackAsync();
-				return IssueResult.Fail(
-					expal.Message,
-					product.ProductId);
-			}
-			catch (Exception ex)
-			{
-				await transaction.RollbackAsync();
-				// Loguj ex dla developera!
-				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
-				throw new InvalidOperationException("Wystąpił błąd podczas przypisywania palet do zlecenia.", ex.InnerException);
-			}
+			//	if (product.Quantity > totalAvailable)
+			//	{
+			//		throw new ProductException($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia.");
+			//	}
+			//	var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(product.ProductId) 
+			//	?? throw new ProductException($"Produkt {product.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");
+			//	var number = numberUnitOnPallet.CartonsPerPallet;
+			//	var amountPallets = product.Quantity / number; 
+			//	var rest = product.Quantity % number;           
+			//	issue.IssueStatus = IssueStatus.Pending;
+			//	// jeszcze warunek by wybierał najpierw pełne palety - first full pallets
+			//	var palletsToAsign = availablePalletsQuery
+			//		.OrderByDescending(p => p.ProductsOnPallet.First(po => po.Quantity > 0).Quantity)
+			//		.Take(amountPallets)
+			//		.ToList();
+			//	foreach (var pallet in palletsToAsign)// dodanie do zlecenia pełnych palet - adding full pallets
+			//	{
+			//		pallet.IssueId = issue.Id;
+			//		pallet.Status = PalletStatus.InTransit;
+			//		_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id,
+			//		pallet.LocationId,
+			//		ReasonMovement.ToLoad,
+			//		issue.PerformedBy,
+			//		PalletStatus.InTransit,
+			//		null));
+			//		issue.Pallets.Add(pallet);
+			//	}
+			//	List<Allocation> newAllocationFromRest = new List<Allocation>();
+			//	//stworzenie zadania picking dla resztówki jeśli rest < 0 -  making picking for rest
+			//	if (rest > 0)
+			//	{
+			//		newAllocationFromRest = await AddAllocationToIssueAsync(issue, product.ProductId, rest, product.BestBefore, issue.PerformedBy);// palety do pickingu
+			//		await _werehouseDbContext.SaveChangesAsync();
+			//		foreach (var allocation in newAllocationFromRest)
+			//		{
+			//			_eventCollector.Add(new CreateHistoryPickingNotification(
+			//				allocation.VirtualPalletId,
+			//		allocation.Id,
+			//		issue.PerformedBy,
+			//		PickingStatus.Allocated,
+			//		0));
+			//		}
+			//	}
+			//	//await _werehouseDbContext.SaveChangesAsync();
+			//	foreach (var evn in _eventCollector.Events)
+			//	{
+			//		await _mediator.Publish(evn, CancellationToken.None);
+			//	}
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	await transaction.CommitAsync();
+
+			//	_eventCollector.Clear();
+
+			//	return IssueResult.Ok("Towar dołączono do wydania", product.ProductId);
+			//}
+			//catch (ProductException expr)
+			//{
+			//	await transaction.RollbackAsync();
+			//	return IssueResult.Fail(
+			//		expr.Message,
+			//		product.ProductId,
+			//		product.Quantity,
+			//		totalAvailable);
+			//}
+			//catch (PalletNotFoundException expal)
+			//{
+			//	await transaction.RollbackAsync();
+			//	return IssueResult.Fail(
+			//		expal.Message,
+			//		product.ProductId);
+			//}
+			//catch (Exception ex)
+			//{
+			//	await transaction.RollbackAsync();
+			//	// Loguj ex dla developera!
+			//	//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
+			//	throw new InvalidOperationException("Wystąpił błąd podczas przypisywania palet do zlecenia.", ex.InnerException);
+			//}
 		}
 		//pobranie zamówienia do aktualizacji 
 		public async Task<UpdateIssueDTO> GetIssueByIdAsync(int numberIssue)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(numberIssue);
-			if (issue == null) throw new IssueNotFoundException(numberIssue);
-
+			var issue = await _issueRepo.GetIssueByIdAsync(numberIssue) ?? throw new IssueNotFoundException(numberIssue);
 			return new UpdateIssueDTO
 			{
 				Id = issue.Id,
@@ -224,15 +219,13 @@ namespace MyWerehouse.Application.Services
 				 .ToList(),
 				DateToSend = issue.IssueDateTimeSend
 			};
-
 		}
 		//aktualizacja/poprawienie zamówienia
-		public async Task<List<IssueResult>> UpdateIssueAsync(UpdateIssueDTO issueDTO)
+		public async Task<List<IssueResult>> UpdateIssueAsync(UpdateIssueDTO issueDTO, DateTime dateToSend)
 		{
+			return await _mediator.Send(new UpdateIssueCommand(issueDTO, dateToSend));
 			var resultList = new List<IssueResult>();
-
-			var issue = await _issueRepo.GetIssueByIdAsync(issueDTO.Id); //pobranie wydania
-			if (issue == null) throw new IssueNotFoundException(issueDTO.Id);
+			var issue = await _issueRepo.GetIssueByIdAsync(issueDTO.Id) ?? throw new IssueNotFoundException(issueDTO.Id);
 			issue.PerformedBy = issueDTO.PerformedBy;             //1.2 Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking
 			if (issue.IssueStatus == IssueStatus.New ||
 				issue.IssueStatus == IssueStatus.Pending ||
@@ -244,7 +237,7 @@ namespace MyWerehouse.Application.Services
 					_palletRepo.ClearPalletFromListIssue(pallet);
 				}
 				issue.Pallets.Clear();
-
+				//Usuwanie alokacji
 				var allocations = await _allocationRepo.GetAllocationsByIssueIdAsync(issueDTO.Id);
 				foreach (var allocation in allocations)
 				{
@@ -256,34 +249,26 @@ namespace MyWerehouse.Application.Services
 					{
 						_pickingPalletRepo.DeleteVirtualPalletPicking(virtualPallet);
 						pallet.Status = PalletStatus.Available;
-					}
-					;
+					};
 				}
 				foreach (var item in issueDTO.Items)
 				{
 					var result = await AddPalletsToIssueByProductAsync(issue, item);
 					resultList.Add(result);
 				}
-				//_historyService.CreateHistoryIssue(issue);
-				await _mediator.Publish(new CreateHistoryIssueCommand(issue.Id, issue.PerformedBy));//
-				//await _mediator.Send(new CreateHistoryIssueCommand(issue.Id, issue.PerformedBy));
+				issue.IssueStatus = IssueStatus.ChangingPallet;
+				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, issue.PerformedBy));//
 				return resultList;
 			}
 			else if (issue.IssueStatus == IssueStatus.ConfirmedToLoad)
-			{
-				// 3. Dodanie dodatkowego zlecenia do załadunku - czyli dwa zlecenia na załadunek
-				// Logika: Oblicz różnicę (nowe - stare). Tylko dodatnie ilości -> nowe zlecenie.
-				// Ujemne/zerowe: Błąd (nie można zmniejszyć, bo w realizacji).
-				// Komunikat: "Dodatkowe zlecenie na ostatnią chwilę, bo stare jest w toku."
+			{				
 				var newQuantities = new List<IssueItemDTO>();
 				var hasNegativeDiff = false;
 				var errorMessage = new List<string>();
-
 				foreach (var product in issueDTO.Items)
 				{
 					var productId = product.ProductId;
 					var oldQuantity = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId);
-
 					var newQuantity = product.Quantity - oldQuantity;
 					if (newQuantity < 0)
 					{
@@ -309,7 +294,7 @@ namespace MyWerehouse.Application.Services
 						IssueResult.Fail(string.Join(";", errorMessage),0)
 					};
 				}
-				if (!newQuantities.Any())
+				if (newQuantities.Count == 0)
 				{
 					return new List<IssueResult> { IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.", 0) };
 				}
@@ -357,7 +342,7 @@ namespace MyWerehouse.Application.Services
 				issue.IssueStatus = IssueStatus.ConfirmedToLoad;
 				//_historyService.CreateHistoryIssue(issue);
 				await _werehouseDbContext.SaveChangesAsync();
-				await _mediator.Publish(new CreateHistoryIssueCommand(issueId, userId));//
+				await _mediator.Publish(new CreateHistoryIssueNotification(issueId, userId));//
 				return IssueResult.Ok("Wydanie zatwierdzono.", issueId);
 			}
 			catch (IssueNotFoundException ei)
@@ -371,7 +356,7 @@ namespace MyWerehouse.Application.Services
 		{
 			var issue = await _issueRepo.GetIssueByIdAsync(issueId)
 				?? throw new IssueNotFoundException(issueId);
-			//zebrać palety po wysyłki 							 
+			//zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
 			return new ListPalletsToLoadDTO
 			{
 				IssueId = issueId,
@@ -408,22 +393,20 @@ namespace MyWerehouse.Application.Services
 				pallet.Status == PalletStatus.InStock))
 			{ throw new PalletNotFoundException("Paleta nie ma statusu do załadowania"); }
 			pallet.Status = PalletStatus.Loaded;
-			//_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Loaded, sendedBy, PalletStatus.Loaded, null);
 			await _werehouseDbContext.SaveChangesAsync();
-
-			await _mediator.Publish(new CreatePalletOperationCommand(
+			await _mediator.Publish(new CreatePalletOperationNotification(
 					pallet.Id,
 					pallet.LocationId,
 					ReasonMovement.Loaded,
 					sendedBy,
 					PalletStatus.Loaded,
 					null));
+			await _werehouseDbContext.SaveChangesAsync();	
 		}
 		// zamyka biuro a nie magazyn w przypadku gdy np. załadunek sie nie mieści
 		public async Task FinishIssueNotCompleted(int issueId, string performedBy)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(issueId);
-			if (issue == null) throw new IssueNotFoundException(issueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueNotFoundException(issueId);
 			var palletsReturn = new List<Pallet>();
 			foreach (var pallet in issue.Pallets.ToList())
 			{
@@ -433,44 +416,39 @@ namespace MyWerehouse.Application.Services
 					pallet.IssueId = null;
 					issue.Pallets.Remove(pallet);
 					palletsReturn.Add(pallet);
-					//_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Correction, performedBy, PalletStatus.Available, null);
-				}
-				else
-				{
-					//_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Loaded, performedBy, PalletStatus.Loaded, null);
-					foreach (var product in pallet.ProductsOnPallet)
-					{
-						await _inventoryService.ChangeProductQuantityAsync(product.ProductId, -product.Quantity);
-					}
 				}
 			}
 			issue.IssueStatus = IssueStatus.IsShipped;
-
-			//_historyService.CreateHistoryIssue(issue);
+			issue.PerformedBy = performedBy;
 			await _werehouseDbContext.SaveChangesAsync();
 			foreach (var pallet in issue.Pallets)
 			{
-				await _mediator.Publish(new CreatePalletOperationCommand(
+				await _mediator.Publish(new CreatePalletOperationNotification(
 						pallet.Id,
 						pallet.LocationId,
 						ReasonMovement.ToLoad,
-						issue.PerformedBy,
+						performedBy,
 						PalletStatus.Loaded,
 						null
 					));
+				foreach (var product in pallet.ProductsOnPallet)
+				{
+					await _mediator.Publish(new ChangeQuantityCommand(product.ProductId, -product.Quantity));
+				}
 			}
 			foreach (var pallet in palletsReturn)
 			{
-				await _mediator.Publish(new CreatePalletOperationCommand(
+				await _mediator.Publish(new CreatePalletOperationNotification(
 						pallet.Id,
 						pallet.LocationId,
 						ReasonMovement.Correction,
-						issue.PerformedBy,
+						performedBy,
 						PalletStatus.Available,
 						null
 					));
 			}
-			await _mediator.Publish(new CreateHistoryIssueCommand(issueId, performedBy));
+			await _mediator.Publish(new CreateHistoryIssueNotification(issueId, performedBy));
+			await _werehouseDbContext.SaveChangesAsync();
 		}
 		//zatwierdzenie zakończenia załadunku przez magazyniera
 		public async Task CompletedIssueAsync(int issueId, string confirmedBy)
@@ -484,9 +462,8 @@ namespace MyWerehouse.Application.Services
 				}
 			}
 			issue.IssueStatus = IssueStatus.IsShipped;
-			//_historyService.CreateHistoryIssue(issue);
 			await _werehouseDbContext.SaveChangesAsync();
-			await _mediator.Publish(new CreateHistoryIssueCommand(issueId, confirmedBy));
+			await _mediator.Publish(new CreateHistoryIssueNotification(issueId, confirmedBy));
 		}
 		//sprawdzenie załadunku i przerzucenie palet załadowanych do archiwum, zmniejszenie zasobu magazynowego
 		public async Task<IssueResult> VerifyIssueAfterLoadingAsync(int issueId, string verifyBy)
@@ -501,22 +478,11 @@ namespace MyWerehouse.Application.Services
 				issue.PerformedBy = verifyBy;
 				if (issue.IssueStatus != IssueStatus.IsShipped) throw new IssueNotFoundException("Nie zakończono załadunku.");
 				issue.IssueStatus = IssueStatus.Archived;
+
 				foreach (var pallet in issue.Pallets)
 				{
 					pallet.Status = PalletStatus.Archived;
-					foreach (var product in pallet.ProductsOnPallet)
-					{
-						await _inventoryService.ChangeProductQuantityAsync(product.ProductId, -product.Quantity);
-
-					}
-					//_historyService.CreateOperation(pallet, pallet.LocationId, ReasonMovement.Loaded, verifyBy, PalletStatus.Archived, null);
-				}
-				//_historyService.CreateHistoryIssue(issue);
-				
-				
-				foreach (var pallet in issue.Pallets)
-				{
-					await _mediator.Publish(new CreatePalletOperationCommand(
+					await _mediator.Publish(new CreatePalletOperationNotification(
 							pallet.Id,
 							pallet.LocationId,
 							ReasonMovement.ToLoad,
@@ -524,8 +490,13 @@ namespace MyWerehouse.Application.Services
 							PalletStatus.Archived,
 							null
 						));
+
+					foreach (var product in pallet.ProductsOnPallet)
+					{
+						await _mediator.Publish(new ChangeQuantityCommand(product.ProductId, -product.Quantity));
+					}
 				}
-				await _mediator.Publish(new CreateHistoryIssueCommand(issueId, verifyBy));//
+				await _mediator.Publish(new CreateHistoryIssueNotification(issueId, verifyBy));//
 				await _werehouseDbContext.SaveChangesAsync();
 				await transaction.CommitAsync();
 				return IssueResult.Ok("Załadunek zatwierdzony, zasoby uaktulanione.");
@@ -585,13 +556,7 @@ namespace MyWerehouse.Application.Services
 				issue.Pallets.Remove(palletToRemoveFromIssue);
 				issue.IssueStatus = IssueStatus.ChangingPallet;
 				issue.PerformedBy = performedBy;
-				//_historyService.CreateHistoryIssue(issue);
-				//_historyService.CreateOperation(palletToRemoveFromIssue, palletToRemoveFromIssue.LocationId, ReasonMovement.Correction, performedBy, PalletStatus.Available, null);
-				//_historyService.CreateOperation(palletToAddingIssue, palletToAddingIssue.LocationId, ReasonMovement.ToLoad, performedBy, PalletStatus.InTransit, null);
-
-				
-
-				await _mediator.Publish(new CreatePalletOperationCommand(
+				await _mediator.Publish(new CreatePalletOperationNotification(
 						palletToRemoveFromIssue.Id,
 						palletToRemoveFromIssue.LocationId,
 						ReasonMovement.Correction,
@@ -599,7 +564,7 @@ namespace MyWerehouse.Application.Services
 						PalletStatus.Available,
 						null
 					));
-				await _mediator.Publish(new CreatePalletOperationCommand(
+				await _mediator.Publish(new CreatePalletOperationNotification(
 							palletToAddingIssue.Id,
 							palletToAddingIssue.LocationId,
 							ReasonMovement.ToLoad,
@@ -608,7 +573,7 @@ namespace MyWerehouse.Application.Services
 							null
 						));
 
-				await _mediator.Publish(new CreateHistoryIssueCommand(issueId, performedBy));
+				await _mediator.Publish(new CreateHistoryIssueNotification(issueId, performedBy));
 				await _werehouseDbContext.SaveChangesAsync();
 				return IssueResult.Ok("Podmieniono palety.", productOnOldPallet.Value);
 			}
@@ -654,37 +619,35 @@ namespace MyWerehouse.Application.Services
 			}
 		}
 		//Metody pomocnicze
-		private async Task<List<Allocation>> AddAllocationToIssueAsync(Issue issue, int productId, int quantity, DateOnly bestBefore, string userId)
-		{
-			
-			if (quantity <= 0) return new List<Allocation>();
-			var listOfAllocation = new List<Allocation>();
-			var virtualPallets = await _pickingPalletRepo.GetVirtualPalletsAsync(productId);
-			foreach (var virtualPallet in virtualPallets)
-			{
-				var alreadyAllocated = virtualPallet.Allocations.Sum(a => a.Quantity);
-				var availableOnThisPallet = virtualPallet.IssueInitialQuantity - alreadyAllocated;
-				if (availableOnThisPallet <= 0) continue;
-				var quantityToTake = Math.Min(quantity, availableOnThisPallet);
-				var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToTake);
-				_allocationRepo.AddAllocation(newAllocation);
-				listOfAllocation.Add(newAllocation);
-				//_historyService.CreateHistoryPicking(virtualPallet, newAllocation, userId, PickingStatus.Allocated);
-				issue.Allocations.Add(newAllocation);
-				quantity -= quantityToTake;
-				if (quantity <= 0) break;
-			}
-			while (quantity > 0)
-			{
-				var newVirtualPallet = await _palletService.AddPalletToPickingAsync(issue, productId, bestBefore, userId);
-				var quantityToTake = Math.Min(quantity, newVirtualPallet.IssueInitialQuantity);
-				var newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet, issue, quantityToTake);
-				_allocationRepo.AddAllocation(newAllocation);
-				listOfAllocation.Add(newAllocation);
-				//_historyService.CreateHistoryPicking(newVirtualPallet, newAllocation, userId, PickingStatus.Allocated);
-				quantity -= quantityToTake;				
-			}
-			return listOfAllocation;
-		}
+		//private async Task<List<Allocation>> AddAllocationToIssueAsync(Issue issue, int productId, int quantity, DateOnly bestBefore, string userId)
+		//{
+
+		//	if (quantity <= 0) return new List<Allocation>();
+		//	var listOfAllocation = new List<Allocation>();
+		//	var virtualPallets = await _pickingPalletRepo.GetVirtualPalletsAsync(productId);
+		//	foreach (var virtualPallet in virtualPallets)
+		//	{
+		//		var alreadyAllocated = virtualPallet.Allocations.Sum(a => a.Quantity);
+		//		var availableOnThisPallet = virtualPallet.IssueInitialQuantity - alreadyAllocated;
+		//		if (availableOnThisPallet <= 0) continue;
+		//		var quantityToTake = Math.Min(quantity, availableOnThisPallet);
+		//		var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToTake);
+		//		_allocationRepo.AddAllocation(newAllocation);
+		//		listOfAllocation.Add(newAllocation);
+		//		issue.Allocations.Add(newAllocation);
+		//		quantity -= quantityToTake;
+		//		if (quantity <= 0) break;
+		//	}
+		//	while (quantity > 0)
+		//	{
+		//		var newVirtualPallet = await _palletService.AddPalletToPickingAsync(issue, productId, bestBefore, userId);
+		//		var quantityToTake = Math.Min(quantity, newVirtualPallet.IssueInitialQuantity);
+		//		var newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet, issue, quantityToTake);
+		//		_allocationRepo.AddAllocation(newAllocation);
+		//		listOfAllocation.Add(newAllocation);
+		//		quantity -= quantityToTake;
+		//	}
+		//	return listOfAllocation;
+		//}
 	}
 }

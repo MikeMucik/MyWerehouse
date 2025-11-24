@@ -33,10 +33,5 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Include(d=>d.Details)
 				.AsQueryable();
 		}
-
-		public async Task SaveChanges()
-		{
-			await _werehouseDbContext.SaveChangesAsync();
-		}
 	}
 }

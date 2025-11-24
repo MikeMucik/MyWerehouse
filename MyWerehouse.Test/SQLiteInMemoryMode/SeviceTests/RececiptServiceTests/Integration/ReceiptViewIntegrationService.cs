@@ -4,8 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Receipts.Queries.GetReceipt;
+using MyWerehouse.Application.Receipts.Queries.GetReceipts;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
@@ -15,28 +19,33 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 	[Collection("QueryCollection")]
 	public class ReceiptViewIntegrationService
 	{
-		private readonly ReceiptService _receiptService;
+		//private readonly ReceiptService _receiptService;
 		private readonly IMapper _mapper;
-		private readonly ReceiptRepo _receiptRepo;
+		//private readonly ReceiptRepo _receiptRepo;
 		private readonly QueryTestFixture _fixture;
+		private readonly IMediator _mediator;
 
 		public ReceiptViewIntegrationService(QueryTestFixture fixture)
 		{
 			_fixture = fixture;
-			var mapperConfig = new MapperConfiguration(cfg =>
-					{
-						cfg.AddProfile<MappingProfile>();
-					});
-			_mapper = mapperConfig.CreateMapper();
-			
-			_receiptRepo = new ReceiptRepo(_fixture.DbContext);
-			_receiptService = new ReceiptService(_receiptRepo, _mapper);
+			//var mapperConfig = new MapperConfiguration(cfg =>
+			//		{
+			//			cfg.AddProfile<MappingProfile>();
+			//		});
+			//_mapper = mapperConfig.CreateMapper();
+
+			//_receiptRepo = new ReceiptRepo(_fixture.DbContext);
+			//_receiptService = new ReceiptService(_receiptRepo, _mapper);
+			_mediator = _fixture.Mediator;
+			_mapper = _fixture._provider.GetRequiredService<IMapper>();
 		}
 		[Fact]
 		public async Task GetReceiptDTOAsync_GetData_ReturnDTO()
 		{
-			//Arrange&Act			
-			var result = await _receiptService.GetReceiptDTOAsync(1);
+			//Arrange&Act
+			var query = new GetReceiptByIdQuery(1);
+						
+			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(1, result.Id);
@@ -63,7 +72,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 		public async Task GetReceiptDTOAsync_GetData_ReturnNull()
 		{
 			//Arrange&Act			
-			var result = await _receiptService.GetReceiptDTOAsync(999);
+			var query = new GetReceiptByIdQuery(999);
+
+			var result = await _mediator.Send(query);
 			//Assert
 			Assert.Null(result);
 		}
@@ -79,8 +90,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			params string[] expectedPalletIds)
 		{
 			// Arrange & Act
-			var result = await _receiptService.GetReceiptDTOAsync(receiptId);
-
+			var query = new GetReceiptByIdQuery(receiptId);
+						
+			var result = await _mediator.Send(query);
 			// Assert
 			Assert.NotNull(result);
 			Assert.Equal(receiptId, result.Id);
@@ -103,7 +115,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			{
 				ProductId = 10
 			};
-			var result = await _receiptService.GetReceiptDTOsAsync(filter);
+			//var result = await _receiptService.GetReceiptDTOsAsync(filter);
+			var query = new GetReceiptsQuery(filter);
+
+			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result); // should return some data
@@ -121,83 +136,89 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Assert.True(r.Id > 0);
 			});
 		}
-		[Theory]
-		[InlineData(10, new[] { 1, 2 })]   // Product 10 appears in Receipts 1 & 2
-		[InlineData(11, new[] { 1 })]      // Product 11 appears in Receipt 2
-		[InlineData(999, new int[0])]      // Product not existing -> expect empty list
-		public async Task GetReceiptsDTOAsync_ByProductId_ReturnsExpectedReceipts(
-			int productId,
-			int[] expectedReceiptIds)
-		{
-			// Arrange
-			var filter = new IssueReceiptSearchFilter
-			{
-				ProductId = productId
-			};
 
-			// Act
-			var result = await _receiptService.GetReceiptDTOsAsync(filter);
-
-			// Assert
-			Assert.NotNull(result);
-
-			if (expectedReceiptIds.Length == 0)
-			{
-				Assert.Empty(result);
-				return;
-			}
-
-			var actualReceiptIds = result.Select(r => r.Id).ToList();
-						
-			foreach (var expectedId in expectedReceiptIds)
-				Assert.Contains(expectedId, actualReceiptIds);
-
-			Assert.All(result, r =>
-			{
-				Assert.True(r.Id > 0);
-				Assert.True(r.ClientId > 0);
-				Assert.NotNull(r.Pallets);
-			});
-		}
 		//[Theory]
-		//[InlineData(10, 2, new[] { 1, 2 })] // ProductId=10 → receipts 1 and 2
-		//[InlineData(11, 1, new[] { 2 })]    // ProductId=11 → only receipt 2
-		//[InlineData(989, 0, new int[0])]    // ProductId=989 → no receipts
-		//public async Task GetReceiptsDTOAsync_FilterByProductId_ReturnsExpectedReceipts(
-	 //  int productId, int expectedCount, int[] expectedReceiptIds)
+		//[InlineData(10, new[] { 1, 2 })]   // Product 10 appears in Receipts 1 & 2
+		//[InlineData(11, new[] { 1 })]      // Product 11 appears in Receipt 2
+		//[InlineData(999, new int[0])]      // Product not existing -> expect empty list
+		//public async Task GetReceiptsDTOAsync_ByProductId_ReturnsExpectedReceipts(
+		//	int productId,
+		//	int[] expectedReceiptIds)
 		//{
 		//	// Arrange
-		//	var filter = new IssueReceiptSearchFilter { ProductId = productId };
+		//	var filter = new IssueReceiptSearchFilter
+		//	{
+		//		ProductId = productId
+		//	};
 
 		//	// Act
-		//	var result = await _receiptService.GetReceiptDTOsAsync(filter);
+		//	//var result = await _receiptService.GetReceiptDTOsAsync(filter);
+		//	var query = new GetReceiptsQuery(filter);
 
+		//	var result = await _mediator.Send(query);
 		//	// Assert
 		//	Assert.NotNull(result);
-		//	Assert.Equal(expectedCount, result.Count);
 
-		//	// Verify IDs if any expected
-		//	if (expectedReceiptIds.Any())
+		//	if (expectedReceiptIds.Length == 0)
 		//	{
-		//		var actualIds = result.Select(r => r.Id).OrderBy(x => x).ToList();
-		//		Assert.Equal(expectedReceiptIds.OrderBy(x => x).ToList(), actualIds);
-
-		//		// Check for each DTO basic correctness
-		//		foreach (var dto in result)
-		//		{
-		//			Assert.True(dto.ClientId > 0);
-		//			Assert.False(string.IsNullOrWhiteSpace(dto.PerformedBy));
-		//			Assert.NotEqual(default(DateTime), dto.ReceiptDateTime);
-
-		//			// Check at least one product on any pallet matches the searched ProductId
-		//			var anyMatch = dto.Pallets
-		//				.SelectMany(p => p.ProductsOnPallet)
-		//				.Any(prod => prod.ProductId == productId);
-
-		//			Assert.True(anyMatch,
-		//				$"Receipt {dto.Id} should contain product {productId}, but none found.");
-		//		}
+		//		Assert.Empty(result);
+		//		return;
 		//	}
+
+		//	var actualReceiptIds = result.Select(r => r.Id).ToList();
+
+		//	foreach (var expectedId in expectedReceiptIds)
+		//		Assert.Contains(expectedId, actualReceiptIds);
+
+		//	Assert.All(result, r =>
+		//	{
+		//		Assert.True(r.Id > 0);
+		//		Assert.True(r.ClientId > 0);
+		//		Assert.NotNull(r.Pallets);
+		//	});
 		//}
+
+		[Theory]
+		[InlineData(10, 2, new[] { 1, 2 })] // ProductId=10 → receipts 1 and 2
+		[InlineData(11, 2, new[] {1, 2 })]    // ProductId=11 → receipts 1 and 2
+		[InlineData(989, 0, new int[0])]    // ProductId=989 → no receipts
+		public async Task GetReceiptsDTOAsync_FilterByProductId_ReturnsExpectedReceipts(
+	   int productId, int expectedCount, int[] expectedReceiptIds)
+		{
+			// Arrange
+			var filter = new IssueReceiptSearchFilter { ProductId = productId };
+
+			// Act
+			//var result = await _receiptService.GetReceiptDTOsAsync(filter);
+			var query = new GetReceiptsQuery(filter);
+
+			var result = await _mediator.Send(query);
+			// Assert
+			Assert.NotNull(result);
+			Assert.Equal(expectedCount, result.Count);
+
+			// Verify IDs if any expected
+			if (expectedReceiptIds.Any())
+			{
+				var actualIds = result.Select(r => r.Id).OrderBy(x => x).ToList();
+				Assert.Equal(expectedReceiptIds.OrderBy(x => x).ToList(), actualIds);
+
+				// Check for each DTO basic correctness
+				foreach (var dto in result)
+				{
+					Assert.True(dto.ClientId > 0);
+					Assert.False(string.IsNullOrWhiteSpace(dto.PerformedBy));
+					Assert.NotEqual(default(DateTime), dto.ReceiptDateTime);
+
+					// Check at least one product on any pallet matches the searched ProductId
+					var anyMatch = dto.Pallets
+						.SelectMany(p => p.ProductsOnPallet)
+						.Any(prod => prod.ProductId == productId);
+
+					Assert.True(anyMatch,
+						$"Receipt {dto.Id} should contain product {productId}, but none found.");
+				}
+			}
 		}
+	}
 }

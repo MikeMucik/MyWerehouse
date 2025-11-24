@@ -9,7 +9,7 @@ using Moq;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.IssueModels;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -29,7 +29,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
 			var issueRepoMock = new Mock<IIssueRepo>();
-			///var historyServiceMock = new Mock<IHistoryService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var palletService = new Mock<IPalletService>();
 			var eventCollector = new Mock<IEventCollector>();
@@ -42,7 +41,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				locationRepoMock.Object,
 				palletRepo.Object,
 				issueRepoMock.Object,
-				//historyServiceMock.Object,
 				palletService.Object
 				,eventCollector.Object
 			);
@@ -65,7 +63,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
 			var issueRepoMock = new Mock<IIssueRepo>();
-			//var historyServiceMock = new Mock<IHistoryService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var palletService = new Mock<IPalletService>();
 			var eventCollector =new Mock<IEventCollector>();
@@ -77,7 +74,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				locationRepoMock.Object,
 				palletRepo.Object,
 				issueRepoMock.Object,
-				//historyServiceMock.Object,
 				palletService.Object
 				,eventCollector.Object
 			);
@@ -116,7 +112,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
 			var issueRepoMock = new Mock<IIssueRepo>();
-			//var historyServiceMock = new Mock<IHistoryService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var palletService = new Mock<IPalletService>();
 			var eventCollector = new Mock<IEventCollector>();
@@ -132,16 +127,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				palletService.Object
 				,eventCollector.Object
 			);
-			palletRepo.Setup(r => r.GetPalletByIdAsync("P123")).ReturnsAsync(pallet);
-			//var issueId =
-				issueRepoMock.Setup(r => r.GetIssueByIdAsync(1001)).ReturnsAsync((Issue)null);
-
-			//// Act + Assert
-			//await Assert.ThrowsAsync<ArgumentException>(() => service.DoManualPicking("P123", 1001, "user1"));
-
+			palletRepo.Setup(r => r.GetPalletByIdAsync("P123")).ReturnsAsync(pallet);		
+			issueRepoMock.Setup(r => r.GetIssueByIdAsync(1001)).ReturnsAsync((Issue)null);
 			// Act
 			var result = await service.ExecuteManualPickingAsync("P123", 1001, "userId");
-
 			// Assert
 			Assert.False(result.Success);
 			Assert.Contains("Zamówienie o numerze 1001 nie zostało znalezione.", result.Message);
@@ -156,7 +145,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var locationRepoMock = new Mock<ILocationRepo>();
 			var palletRepo = new Mock<IPalletRepo>();
 			var issueRepoMock = new Mock<IIssueRepo>();
-			//var historyServiceMock = new Mock<IHistoryService>();
 			var inventoryRepoMock = new Mock<IInventoryRepo>();
 			var palletService = new Mock<IPalletService>();
 			var eventCollector = new Mock<IEventCollector>();
@@ -168,7 +156,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				locationRepoMock.Object,
 				palletRepo.Object,
 				issueRepoMock.Object,
-				//historyServiceMock.Object,
 				palletService.Object
 				,eventCollector.Object
 			);

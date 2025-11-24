@@ -18,20 +18,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 	public abstract class TestBase : IDisposable
 	{
 		private readonly SqliteConnection _connection;
-		//private readonly DbContextOptions<WerehouseDbContext> _contextOptions;
-
-		private readonly ServiceProvider _provider;//
-
-		protected readonly WerehouseDbContext DbContext;
-		protected readonly IMediator Mediator;//
-		protected TestBase()
+		public readonly ServiceProvider _provider;
+		public readonly WerehouseDbContext DbContext;
+		public readonly IMediator Mediator;
+		public TestBase()
 		{
 			_connection = new SqliteConnection("DataSource=:memory:");
 			_connection.Open();
-
-			//_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
-			//	.UseSqlite(_connection)
-			//	.Options;
 
 			var services = new ServiceCollection();
 
@@ -40,33 +33,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			services.AddLogging(config => config.AddConsole());
 			services.AddApplication();
 			services.AddInfrastructure();
-			
 			_provider = services.BuildServiceProvider();
-			
 			DbContext = _provider.GetRequiredService<WerehouseDbContext>();
-			//DbContext = new WerehouseDbContext(_contextOptions);			
-
-			//rejestracja MediatR
-
 			Mediator = _provider.GetRequiredService<IMediator>();
-
 			DbContext.Database.EnsureCreated();
 		}
 		protected WerehouseDbContext CreateNewContext()
 		{
-		var scope = _provider.CreateScope();
-    return scope.ServiceProvider.GetRequiredService<WerehouseDbContext>();}
-			//=>
-			////new(_contextOptions);
-			//_provider.GetRequiredService<WerehouseDbContext>();
-		public void Dispose() 
+			var scope = _provider.CreateScope();
+			return scope.ServiceProvider.GetRequiredService<WerehouseDbContext>();
+		}
+
+		public void Dispose()
 		{
 			_provider?.Dispose();
 			_connection.Close();
 			_connection.Dispose();
-			//DbContext.Dispose(); 
 			GC.SuppressFinalize(this);
 		}
-		
 	}
 }

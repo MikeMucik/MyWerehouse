@@ -153,9 +153,9 @@ namespace MyWerehouse.Infrastructure
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 
-				entity.HasOne(a => a.VirtualPallet)
+				entity.HasOne(a => a.Pallet)
 					.WithMany()
-					.HasForeignKey(a => a.VirtualPalletId)
+					.HasForeignKey(a => a.PalletId)
 					.IsRequired()
 					.OnDelete(DeleteBehavior.Restrict);
 
@@ -245,6 +245,11 @@ namespace MyWerehouse.Infrastructure
 					.WithMany(i => i.Pallets)
 					.HasForeignKey(p => p.IssueId)
 					.OnDelete(DeleteBehavior.Restrict);
+
+				entity.Property(e => e.RowVersion)
+				  .IsRowVersion()  // To kluczowe! Oznacza pole jako Timestamp/RowVersion
+				  .HasColumnType("rowversion")  // Dla SQL Server; dla innych DB dostosuj
+				  .IsRequired(false);  // Opcjonalne, ale Timestamp jest zwykle nullable
 			});
 			modelBuilder.Entity<PalletMovement>(entity =>
 			{

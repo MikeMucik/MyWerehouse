@@ -9,16 +9,17 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Issues.DTOs;
+using MyWerehouse.Application.Issues.Validators;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
-using static MyWerehouse.Application.ViewModels.IssueModels.CreateIssueDTO;
-using static MyWerehouse.Application.ViewModels.IssueModels.UpdateIssueDTO;
+//using static MyWerehouse.Application.Issues.DTOs.CreateIssueDTO;
+//using static MyWerehouse.Application.Issues.DTOs.UpdateIssueDTO;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 {
@@ -112,6 +113,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				Name = "name",
 				IsDeleted = false
 			};
+			var inventory = new Inventory
+			{
+				Product = initialProduct,
+				LastUpdated = DateTime.Now.AddDays(-7),
+				Quantity = 100
+			};
+			var inventory1 = new Inventory
+			{
+				Product = initialProduct1,
+				LastUpdated = DateTime.Now.AddDays(-7),
+				Quantity = 100
+			};
+			DbContext.Inventories.AddRange(inventory, inventory1);
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);
 			DbContext.Locations.AddRange(initailLocation, initailLocation1);
@@ -123,33 +137,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issueId))
 						 .ReturnsAsync(issue);
-			var historyServiceMock = new Mock<IHistoryService>();
-			var inventoryServiceMock = new Mock<IInventoryService>();
-			var productRepoMock = new Mock<IProductRepo>();
+			
 			var palletRepo = new Mock<IPalletRepo>();
 			var allocationRepo = new Mock<IAllocationRepo>();
 			var pickingRepoMock = new Mock<IPickingPalletRepo>();
-			var palletService = new Mock<IPalletService>();
+			
 			var issueItem = new Mock<IIssueItemRepo>();
-			var validator = new Mock<IValidator<CreateIssueDTO>>();
-			var updateIssueValidator = new Mock<IValidator<UpdateIssueDTO>>();
-			var eventCollector = new Mock<IEventCollector>();
+			
 			var service = new IssueService(
 				Mediator,
 				issueRepoMock.Object,
 				mockMapper.Object,
-				DbContext,
-				//historyServiceMock.Object,
-				inventoryServiceMock.Object,
+				DbContext,				
 				palletRepo.Object,
-				productRepoMock.Object,
 				allocationRepo.Object,
 				pickingRepoMock.Object,
-				palletService.Object,
-				issueItem.Object,
-				validator.Object
-			, eventCollector.Object
-			);
+				issueItem.Object);
 
 			// Act
 			await service.FinishIssueNotCompleted(issueId, performedBy);
@@ -159,17 +162,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			Assert.Equal(PalletStatus.Available, notLoadedPallet.Status);
 			Assert.Null(notLoadedPallet.IssueId);
 
-			//historyServiceMock.Verify(x =>
-			//x.CreateOperation(notLoadedPallet, 20, ReasonMovement.Correction, performedBy, PalletStatus.Available, null), Times.Once);
-
-			//historyServiceMock.Verify(x =>
-			//x.CreateOperation(loadedPallet, 10, ReasonMovement.Loaded, performedBy, PalletStatus.Loaded, null), Times.Once);
-
-			inventoryServiceMock.Verify(x =>
-				x.ChangeProductQuantityAsync(101, -5), Times.Once);
-
-			//historyServiceMock.Verify(x =>
-			//	x.CreateHistoryIssue(issue));
 			var updatedIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstOrDefaultAsync(i => i.Id == issueId);
@@ -358,7 +350,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				//Id = 1,
 				ClientId = initailCLient.Id,
 				IssueDateTimeCreate = DateTime.Now,
-				IssueStatus = IssueStatus.InProgress,
+				//IssueStatus = IssueStatus.InProgress,
+				IssueStatus = IssueStatus.Pending,
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
 			};
@@ -369,66 +362,28 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-
-			// Mocky
-			var movementServiceMock = new Mock<IHistoryService>();
-			//var pickingRepoMock = new Mock<IPickingPalletRepo>();
+			// Mocky			
 			var allocationRepo = new AllocationRepo(DbContext);
 			var pickingRepo = new PickingPalletRepo(DbContext);
 			var issueRepoMock = new Mock<IIssueRepo>();
 			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id))
 						 .ReturnsAsync(issue);
-			var inventoryRepo = new InventoryRepo(DbContext);
-
+			
 			var mockMapper = new Mock<IMapper>();
 			//movementServiceMock
 			//	.Setup(r => r.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
 				//;
-			var inventoryService = new InventoryService(inventoryRepo, mockMapper.Object, DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			var productRepo = new ProductRepo(DbContext);
-			var locationRepo = new LocationRepo(DbContext);
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
-			//var historyIssueRepo = new HistoryIssueRepo(DbContext);
-			//var historyReceiptRepo = new HistoryReceiptRepo(DbContext);
-			//var historyAllocationRepo = new HistoryPickingRepo(DbContext);
-			//var historyService = new HistoryService(palletMovementRepo, historyIssueRepo, historyReceiptRepo, historyAllocationRepo, DbContext, palletRepo, mockMapper.Object, locationRepo);
-
-			var locationService = new Mock<ILocationService>();
-
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			var eventCollector = new EventCollector();
-			var palletService = new PalletService(Mediator, palletRepo,
-				//historyService,
-				locationService.Object,
-				palletMovementRepo,
-				pickingRepo,
-				locationRepo,
-				mockMapper.Object,
-				updatePalletValidator, DbContext
-				,eventCollector);
-			var itemIssue = new Mock<IIssueItemRepo>();
-			var validatorItem = new IssueItemDTOValidion();
-			var validator = new CreateIssueDTOValidion(validatorItem);
-			var validatorUpdate = new UpdateIssueDTOValidation(validatorItem);
-			
+			var palletRepo = new PalletRepo(DbContext);							
+			var itemIssue = new Mock<IIssueItemRepo>();			
 			var service = new IssueService(
 				Mediator,
 				issueRepoMock.Object,
 				mockMapper.Object,
-				DbContext,
-				//movementServiceMock.Object,
-				inventoryService,
-				palletRepo,
-				productRepo,
+				DbContext,				
+				palletRepo,				
 				allocationRepo,
-				pickingRepo,
-				palletService,
-				itemIssue.Object,
-				validator
-				,eventCollector
-				);
+				pickingRepo,				
+				itemIssue.Object);
 
 			// Act
 			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
@@ -437,16 +392,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			// Assert
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(2, issue.Pallets.Count);
-			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
-
-			//pickingRepoMock.Verify(r => r.AddAllocationAsync(It.IsAny<int>(), issue.Id, 5), Times.Once);
-			//movementServiceMock.Verify(r => r.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), ReasonMovement.ToLoad, It.IsAny<string>(), It.IsAny<PalletStatus>(), null), Times.Exactly(2));
-
-			//movementServiceMock.Verify(m => m.CreateOperation(
-			//	It.Is<Pallet>(p => p.Id == "P1"), 1, ReasonMovement.ToLoad, It.IsAny<string>(), PalletStatus.InTransit, null), Times.Once);
-
-			//pickingRepoMock.Verify(p => p.AddAllocationAsync(1, issue.Id, 5), Times.Once);
-
+			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));						
 		}
 		[Fact]
 		public async Task AddPalletsToIssueByProductAsync_AssignsFullPalletsAndAllocatesRest_FullIntegration()
@@ -523,7 +469,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			{
 				ClientId = initailClient.Id,
 				IssueDateTimeCreate = DateTime.Now,
-				IssueStatus = IssueStatus.InProgress,
+				//IssueStatus = IssueStatus.InProgress,
+				IssueStatus = IssueStatus.New,
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
 			};
@@ -543,46 +490,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			
 			var allocationRepo = new AllocationRepo(DbContext);
 			var pickingRepo = new PickingPalletRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			var productRepo = new ProductRepo(DbContext);
+			var palletRepo = new PalletRepo(DbContext);			
 			var issueRepoMock = new Mock<IIssueRepo>();
-			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);
-			var inventoryRepo = new InventoryRepo(DbContext);
-			var mockMapper = new Mock<IMapper>();
-			var inventoryService = new InventoryService(inventoryRepo, mockMapper.Object, DbContext);
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
-			var locationRepo = new LocationRepo(DbContext);
-			var productOnPalletValidator = new ProductOnPalletDTOValidation();
-			var updatePalletValidator = new UpdatePalletDTOValidation(productOnPalletValidator);
-			var locationService = new Mock<ILocationService>();
-			var eventCollector = new EventCollector();
-			var palletService = new PalletService(Mediator, palletRepo,				
-				locationService.Object,
-				palletMovementRepo,
-				pickingRepo,
-				locationRepo,
-				mockMapper.Object,
-				updatePalletValidator, DbContext
-				,eventCollector);
+			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
+			var mockMapper = new Mock<IMapper>();						
 			var itemIssue = new Mock<IIssueItemRepo>();
-			var validatorItem = new IssueItemDTOValidion();
-			var validator = new CreateIssueDTOValidion(validatorItem);
-			var validatorUpdate = new UpdateIssueDTOValidation(validatorItem);
-
 			var service = new IssueService(Mediator,
 				issueRepoMock.Object,
 				mockMapper.Object,
 				DbContext,				
-				inventoryService,
-				palletRepo,
-				productRepo,
+				palletRepo,			
 				allocationRepo,
 				pickingRepo,
-				palletService,
-				itemIssue.Object,
-				validator
-			,eventCollector
-			);
+				itemIssue.Object);
 
 			// Act
 			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
@@ -667,7 +587,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			{
 				ClientId = initailClient.Id,
 				IssueDateTimeCreate = DateTime.Now,
-				IssueStatus = IssueStatus.InProgress,
+				IssueStatus = IssueStatus.New,
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
 			};
@@ -685,46 +605,32 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			await DbContext.SaveChangesAsync();
 
 			// Mocki
-			var movementServiceMock = new Mock<IHistoryService>();			
+			
 			var allocationRepo = new AllocationRepo(DbContext);
 			var pickingRepo = new PickingPalletRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);
-			var productRepo = new ProductRepo(DbContext);
+			var palletRepo = new PalletRepo(DbContext);			
 			var issueRepoMock = new Mock<IIssueRepo>();
-			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);
-			var inventoryRepo = new InventoryRepo(DbContext);
-			var mockMapper = new Mock<IMapper>();
-			var inventory = new InventoryService(inventoryRepo, mockMapper.Object, DbContext);
-			var palletService = new Mock<IPalletService>();
-			var itemIssue = new Mock<IIssueItemRepo>();
-			var validator = new Mock<IValidator<CreateIssueDTO>>();
-			var validatorUpdate = new Mock<IValidator<UpdateIssueDTO>>();
-			var eventCollector = new EventCollector();
+			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
+			var mockMapper = new Mock<IMapper>();			
+			var itemIssue = new Mock<IIssueItemRepo>();		
 			var service = new IssueService(Mediator,
 				issueRepoMock.Object,
 				mockMapper.Object,
-				DbContext,
-				inventory,
-				palletRepo,
-				productRepo,
+				DbContext,				
+				palletRepo,				
 				allocationRepo,
 				pickingRepo,
-				palletService.Object,
-				itemIssue.Object,
-				validator.Object
-			, eventCollector
-			);
+				itemIssue.Object);
 
 			//Act
 			var result = await service.AddPalletsToIssueByProductAsync(issue, issueItem);
 			//Assert
 			Assert.False(result.Success);
-			Assert.Contains("Produkt o numerze 100 nie został dodany do", result.Message);
+			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {productId}. Asortyment nie został dodany do zlecenia.", result.Message);
 			Assert.Equal(productId, result.ProductId);
 			Assert.Equal(issueItem.Quantity, result.QuantityRequest);
 			var stock = 30;
 			Assert.Equal(stock, result.QuantityOnStock);
 		}
-
 	}
 }

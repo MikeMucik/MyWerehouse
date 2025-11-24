@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.ViewModels.IssueModels;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Models;
 using Xunit.Sdk;
 
@@ -107,7 +107,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto);
+			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -249,7 +249,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto);
+			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -400,7 +400,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto);
+			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -442,7 +442,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task UpdateIssueAsync_IssueConfirmedAndAllocatedProductOnPallet_MakeNewIssue()
 		{
-			// Arrange – setup initial data
+			// Arrange 
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -513,8 +513,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Allocations = new List<Allocation> { allocation }
 			};
 			//allocation.VirtualPallet = virtualPallet;
-			DbContext.Clients.Add(client);
-			DbContext.Categories.Add(category);
+			//DbContext.Clients.Add(client);
+			//DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.AddRange(pallet1, pallet2);
@@ -553,7 +553,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto);
+			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
 			var newIssueItems = DbContext.IssueItems.Where(i => i.IssueId == 3).ToList();
 			foreach (var it in newIssueItems) { Console.WriteLine($"Item: ProductId={it.ProductId}, Quantity={it.Quantity}, BestBefore={it.BestBefore}"); }
 			// Assert – sprawdź Issue
@@ -609,7 +609,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task UpdateIssueAsync_InsufficientStaff()
 		{
-			// Arrange – setup initial data
+			// Arrange 
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -704,13 +704,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Id = issue.Id,
 				PerformedBy = "User2",
 				DateToSend = DateTime.UtcNow.AddDays(1),
+				
 				Items = new List<IssueItemDTO>
 		{
 			new IssueItemDTO { ProductId = product.Id, Quantity = 22, BestBefore = new DateOnly(2026,1,1) }
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto);
+			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -722,7 +723,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.Single(result);
 			Assert.False(result.First().Success);
-			Assert.Contains($"Produkt o numerze {product.Id} nie został dodany do zlecenia edytuj zlecenie!", result.First().Message);
+			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}", result.First().Message);
 			Assert.Equal(product.Id, result.First().ProductId);
 		}
 		[Fact]
@@ -815,7 +816,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto);
+			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -827,7 +828,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.Single(result);
 			Assert.False(result.First().Success);
-			Assert.Contains($"Produkt o numerze {product.Id} nie został dodany do zlecenia edytuj zlecenie!", result.First().Message);
+			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.First().Message);
 			Assert.Equal(product.Id, result.First().ProductId);
 		}
 		[Fact]
@@ -921,7 +922,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 			// Assert & Act
-			var result = await Assert.ThrowsAsync<IssueNotFoundException>(() =>  _issueService.UpdateIssueAsync(updateDto));
+			var result = await Assert.ThrowsAsync<IssueNotFoundException>(() =>  _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7)));
 			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);			
 		}
 	}

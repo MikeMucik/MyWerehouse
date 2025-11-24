@@ -8,11 +8,13 @@ using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Commands.History.CreateMoveMent;
-using MyWerehouse.Application.Commands.History.CreateOperation;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Pallets.Commands.ReservedPallet;
+using MyWerehouse.Application.Pallets.Events.CreateMovement;
+using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
 using MyWerehouse.Application.Results;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.PalletModels;
@@ -84,7 +86,7 @@ namespace MyWerehouse.Application.Services
 			_palletRepo.AddPallet(pallet);
 			await _werehouseDbContext.SaveChangesAsync();
 			//_historyService.CreateOperation(pallet, userId, PalletStatus.Available);
-			await _mediator.Publish(new CreatePalletOperationCommand(
+			await _mediator.Publish(new CreatePalletOperationNotification(
 							pallet.Id,
 							pallet.LocationId,
 							ReasonMovement.Picking,
@@ -143,7 +145,7 @@ namespace MyWerehouse.Application.Services
 			//PalletMovement ?
 			//_historyService.CreateOperation(existingPallet, userId, existingPallet.Status);
 			await _werehouseDbContext.SaveChangesAsync();
-			await _mediator.Publish(new CreatePalletOperationCommand(
+			await _mediator.Publish(new CreatePalletOperationNotification(
 							existingPallet.Id,
 							existingPallet.LocationId,
 							ReasonMovement.Picking,
@@ -184,7 +186,7 @@ namespace MyWerehouse.Application.Services
 				}
 				var destinationLocation = await _locationRepo.GetLocationByIdAsync(destinationLocationId);
 				//_historyService.CreateMovement(pallet, destinationLocation, ReasonMovement.Moved, userId, pallet.Status, null);
-				await _mediator.Publish(new CreatePalletMovementCommand(
+				await _mediator.Publish(new CreatePalletMovementNotification(
 					pallet.Id,
 					pallet.LocationId,
 					destinationLocationId,
@@ -214,48 +216,57 @@ namespace MyWerehouse.Application.Services
 			var palletDTO = await pallet.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync();
 			return palletDTO;
 		}
-		public async Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId)
-		{
-			var newPalletsToPicking = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
-			var newPallet = newPalletsToPicking.Where(a => a.Status == PalletStatus.Available ||
-			a.Status == PalletStatus.InStock || a.Status == PalletStatus.Receiving).First() ?? throw new PalletNotFoundException("Brak palet do pickingu");
-			var newVirtualPicking = new VirtualPallet
-			{
-				Pallet = newPallet,
-				PalletId = newPallet.Id,
-				DateMoved = DateTime.UtcNow,
-				LocationId = newPallet.LocationId,
-				IssueInitialQuantity = newPallet.ProductsOnPallet.First(p => p.PalletId == newPallet.Id).Quantity,//zakładam że jest jeden towar
-				Allocations = new List<Allocation>()
-			};
-			var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);
-			_palletRepo.ChangePalletStatus(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
-			 //_historyService.CreateOperation(newPallet, newPallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.ToPicking, null);
-			_eventCollector.Add(new CreatePalletOperationCommand(newPallet.Id,
-				newPallet.LocationId,
-				ReasonMovement.ToLoad,
-				issue.PerformedBy,
-				PalletStatus.InTransit,
-				null));
-			return virtualPallet;
-		}
-		public async Task<List<Pallet>> GetAllAvailablePalletsAsync(int productId, DateOnly? bestBefore)
-		{
-			var tracked = _werehouseDbContext.ChangeTracker.Entries<Pallet>()
-			.Where(e => e.Entity.Status == PalletStatus.Available
-					&& e.Entity.ProductsOnPallet.Any(prod => prod.ProductId == productId
-					&& (bestBefore == null || prod.BestBefore == bestBefore)))
-			.Select(e => e.Entity)
-			.ToList();
-			var trackedIds = tracked.Select(p => p.Id).ToHashSet();
+		//public async Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId)
+		//{
 
-			var fromDb = await _palletRepo.GetAvailablePallets(productId, bestBefore)
-				.Where(p => !trackedIds.Contains(p.Id))
-				.ToListAsync();
+		//	var newPalletsToPicking = await _mediator.Send(new GetAvailablePalletsByProductQuery(productId, bestBefore));
+		//	//var newPalletToPicking = await _mediator.Send(new ReservedPalletCommand(productId, bestBefore));
 
-			return tracked.Concat(fromDb).ToList();
-		}
+		//	////var newPalletsToPicking = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
+		//	////var newPalletsToPicking = await GetAllAvailablePalletsAsync(productId, bestBefore);
 
-		
+		//	//var newPallet = newPalletToPicking;
+		//	//if (newPallet ==null) throw new PalletNotFoundException("Brak palet do pickingu");
+		//	var newPallet = newPalletsToPicking.Where(a => a.Status == PalletStatus.Available ||
+		//	a.Status == PalletStatus.InStock || a.Status == PalletStatus.Receiving).First() ?? throw new PalletNotFoundException("Brak palet do pickingu");
+		//	var newVirtualPicking = new VirtualPallet
+		//	{
+		//		Pallet = newPallet,
+		//		PalletId = newPallet.Id,
+		//		DateMoved = DateTime.UtcNow,
+		//		LocationId = newPallet.LocationId,
+		//		IssueInitialQuantity = newPallet.ProductsOnPallet.First(p => p.PalletId == newPallet.Id).Quantity,//zakładam że jest jeden towar
+		//		Allocations = new List<Allocation>()
+		//	};
+		//	var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);
+		//	_palletRepo.ChangePalletStatus(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
+		//	 //_historyService.CreateOperation(newPallet, newPallet.LocationId, ReasonMovement.Picking, userId, PalletStatus.ToPicking, null);
+		//	_eventCollector.Add(new CreatePalletOperationNotification(newPallet.Id,
+		//		newPallet.LocationId,
+		//		ReasonMovement.ToLoad,
+		//		issue.PerformedBy,
+		//		PalletStatus.InTransit,
+		//		null));
+		//	return virtualPallet;
+		//}
+		////do zmiany
+		////public async Task<List<Pallet>> GetAllAvailablePalletsAsync(int productId, DateOnly? bestBefore)
+		////{
+		////	var tracked = _werehouseDbContext.ChangeTracker.Entries<Pallet>()
+		////	.Where(e => e.Entity.Status == PalletStatus.Available
+		////			&& e.Entity.ProductsOnPallet.Any(prod => prod.ProductId == productId
+		////			&& (bestBefore == null || prod.BestBefore == bestBefore)))
+		////	.Select(e => e.Entity)
+		////	.ToList();
+		////	var trackedIds = tracked.Select(p => p.Id).ToHashSet();
+
+		////	var fromDb = await _palletRepo.GetAvailablePallets(productId, bestBefore)
+		////		.Where(p => !trackedIds.Contains(p.Id))
+		////		.ToListAsync();
+
+		////	return tracked.Concat(fromDb).ToList();
+		////}
+
+
 	}
 }

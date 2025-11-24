@@ -130,13 +130,25 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			return palletsWithProduct;
 		}
-		private async Task<int> SumQuantityAsync(IQueryable<Pallet> pallets, int productId)
+		private static async Task<int> SumQuantityAsync(IQueryable<Pallet> pallets, int productId)
 		{
 			var totalFromPallets = await pallets
 				.SelectMany(p => p.ProductsOnPallet)
 				.Where(pop => pop.ProductId == productId)
 				.SumAsync(pop => pop.Quantity);
 			return totalFromPallets;
+		}
+
+		//public async Task AddInventoryAsync(Inventory inventory)
+		//{
+		//	await _werehouseDbContext.Inventories.AddAsync(inventory);
+		//}
+
+		public async Task<List<Inventory>> GetInventoriesForProductsAsync(List<int> productIds)
+		{
+			return await _werehouseDbContext.Inventories
+				.Where(i=> productIds.Contains(i.ProductId))
+				.ToListAsync();
 		}
 	}
 }

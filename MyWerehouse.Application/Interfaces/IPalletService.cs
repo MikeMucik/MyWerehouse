@@ -18,8 +18,8 @@ namespace MyWerehouse.Application.Interfaces
 		//Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id);		
 		Task<ChangeLocationResults> ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId, bool force = false);
 		Task <List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter);
-		Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId);
-		Task<List<Pallet>> GetAllAvailablePalletsAsync(int productId, DateOnly? bestBefore);
+		//Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId);
+		//Task<List<Pallet>> GetAllAvailablePalletsAsync(int productId, DateOnly? bestBefore);
 		//TODO: przestawienie 
 	}
 }

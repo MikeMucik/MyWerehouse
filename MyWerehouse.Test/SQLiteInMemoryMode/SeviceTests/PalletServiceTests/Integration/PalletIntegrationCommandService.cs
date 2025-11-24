@@ -9,13 +9,11 @@ using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Application.ViewModels.PalletModels;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Repositories;
-using static MyWerehouse.Application.ViewModels.IssueModels.CreateIssueDTO;
-using static MyWerehouse.Application.ViewModels.IssueModels.UpdateIssueDTO;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {

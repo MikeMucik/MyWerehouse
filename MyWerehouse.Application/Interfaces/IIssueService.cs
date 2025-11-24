@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Results;
-using MyWerehouse.Application.ViewModels.IssueModels;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Interfaces
@@ -14,7 +14,7 @@ namespace MyWerehouse.Application.Interfaces
 		Task<List<IssueResult>> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, DateTime dateToSend);
 		//Task<IssueResult> AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product);		//nie kasuj
 		Task<UpdateIssueDTO> GetIssueByIdAsync(int numberIssue);		
-		Task<List<IssueResult>> UpdateIssueAsync(UpdateIssueDTO issueDTO);
+		Task<List<IssueResult>> UpdateIssueAsync(UpdateIssueDTO issueDTO, DateTime DateToSend);
 		Task DeleteIssueAsync(int issueId);//warunki				
 		Task<IssueResult> VerifyIssueToLoadAsync(int issueId, string userId);
 		Task<ListPalletsToLoadDTO> LoadingIssueListAsync(int issueId, string sendedBy);

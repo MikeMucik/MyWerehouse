@@ -9,6 +9,7 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Infrastructure.Repositories
 {
+
 	public class PickingPalletRepo : IPickingPalletRepo
 	{
 		private readonly WerehouseDbContext _werehouseDbContext;
@@ -62,6 +63,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var pallet = _werehouseDbContext.Pallets.Find(palletId);
 			pallet.Status = PalletStatus.ToIssue;
 			pallet.IssueId = issueId;
-		}		
+		}
+
+		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(int productId, DateOnly bestBefore)
+		{
+			return await _werehouseDbContext.VirtualPallets.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId).ToListAsync();
+		}
 	}
 }

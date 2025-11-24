@@ -16,5 +16,14 @@ namespace MyWerehouse.Domain.Models
 		public virtual ICollection<HistoryReceipt> HistoryReceipt { get; set; } = new List<HistoryReceipt>();
 		public string PerformedBy { get; set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; set; }
+		public Receipt() { }
+		public Receipt (int clientId, string performedBy)
+		{
+			ClientId = clientId;
+			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
+			PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
+			ReceiptDateTime = DateTime.UtcNow;
+			ReceiptStatus = ReceiptStatus.Planned;
+		}
 	}
 }

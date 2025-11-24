@@ -12,6 +12,5 @@ namespace MyWerehouse.Domain.Interfaces
 		void AddHistoryReceipt(HistoryReceipt historyReceipt);
 		Task AddHistoryReceiptAsync(HistoryReceipt historyReceipt, CancellationToken cancellationToken);
 		IQueryable<HistoryReceipt> GetAllHistoryReceipt();
-		Task SaveChanges();
 	}
 }

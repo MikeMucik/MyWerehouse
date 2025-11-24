@@ -22,31 +22,22 @@ namespace MyWerehouse.Domain.Models
 		public IssueStatus IssueStatus { get; set; } 	
 		public virtual ICollection<IssueItem> IssueItems { get; set; } = new List<IssueItem>();//nowe powiązanie
 		public Issue() { }
-		public Issue(int clientId, 
-			//List<IssueItem> items,
-			string performedBy, DateTime dateToSend)
+		public Issue(int clientId, string performedBy, DateTime dateToSend)
 		{
-			ClientId = clientId;// ?? throw new ArgumentNullException(nameof(clientId));  // Podstawowe
+			ClientId = clientId;
 			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
-
-			//IssueItems = items ?? throw new ArgumentNullException(nameof(items));
-			//if (!items.Any()) throw new DomainException("Issue musi mieć co najmniej jeden produkt");  // Biznes!
-
 			PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
 			IssueDateTimeSend = dateToSend;
-			if (dateToSend < DateTime.UtcNow) throw new DomainException("Data wysyłki nie może być w przeszłości");  // Biznes!
-
-			// Ustaw defaults
+			if (dateToSend < DateTime.UtcNow) throw new DomainException("Data wysyłki nie może być w przeszłości");  
 			IssueStatus = IssueStatus.New;
 			IssueDateTimeCreate = DateTime.UtcNow;
-		}
-
-		//// Fabryka dla Update (jeśli zmieniasz stan)
+		}	
+	}
+}
+//// Fabryka dla Update (jeśli zmieniasz stan)
 		//public void UpdateStatus(IssueStatus newStatus)
 		//{
 		//	if (newStatus == IssueStatus.ConfirmedToLoad && IssueDateTimeSend == default)
 		//		throw new DomainException("ConfirmedToLoad wymaga daty wysyłki");
 		//	IssueStatus = newStatus;
 		//}
-	}
-}

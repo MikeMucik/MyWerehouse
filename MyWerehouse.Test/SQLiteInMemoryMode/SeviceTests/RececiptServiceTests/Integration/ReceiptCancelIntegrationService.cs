@@ -7,7 +7,7 @@ using AutoMapper;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
-using MyWerehouse.Application.ViewModels.ReceiptModels;
+using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
 
@@ -129,8 +129,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.NotNull(receipt);
 			Assert.Equal(ReceiptStatus.Cancelled, receipt.ReceiptStatus);
 			//Assert.Empty(DbContext.Receipts);
-			Assert.Empty(DbContext.Pallets);
-			Assert.Empty(DbContext.ProductOnPallet);
+			Assert.NotNull(DbContext.Pallets);
+			var pallets = DbContext.Pallets.Where(p=>p.ReceiptId == initialReceipt.Id).ToList();
+			foreach (var palet in pallets)
+			{
+				Assert.Equal(PalletStatus.Cancelled, palet.Status);
+			}
+			Assert.NotNull(DbContext.ProductOnPallet);
 
 			Assert.Equal(2, DbContext.Products.Count());
 			Assert.Equal(1, DbContext.Categories.Count());

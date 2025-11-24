@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Application.ViewModels.ProductOnPalletModels;

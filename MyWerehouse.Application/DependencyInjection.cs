@@ -6,11 +6,12 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-//using MediatR.Licensing;
 using Microsoft.Extensions.DependencyInjection;
+using MyWerehouse.Application.Common.Behaviors;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
+using FluentValidation;
 
 namespace MyWerehouse.Application
 {
@@ -30,12 +31,14 @@ namespace MyWerehouse.Application
 			services.AddTransient<IReceiptService, ReceiptService>();			
 			services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-			//services.AddSingleton<global::MediatR.Licensing.ILicense, global::MediatR.Licensing.OpenSourceLicense>();
-			services.AddMediatR(cfg =>
-			cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly));
-			
-			services.AddScoped<IEventCollector, EventCollector>();
+			services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+			services.AddMediatR(cfg =>
+			{	cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
+				cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+			});
+			services.AddScoped<IEventCollector, EventCollector>();
+			services.AddTransient<ISynchronizerProductsConfig , SynchronizerProductsConfig>();
 			return services;
 		}
 	}

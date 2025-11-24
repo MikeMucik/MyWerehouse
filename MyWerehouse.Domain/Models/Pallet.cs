@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace MyWerehouse.Domain.Models
 		public int? ReceiptId {  get; set; }
 		public virtual Receipt Receipt { get; set; }
 		public int? IssueId { get; set; }
-		public virtual Issue? Issue { get; set; }	
+		public virtual Issue? Issue { get; set; }
+		[Timestamp]
+		public byte[] RowVersion { get; set; }
 	}
 }

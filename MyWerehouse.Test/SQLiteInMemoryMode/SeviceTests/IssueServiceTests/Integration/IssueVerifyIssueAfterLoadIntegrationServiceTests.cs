@@ -52,12 +52,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			{
 				Allocations = new List<Allocation>(),
 				Client = client,
-				IssueItems = new List<IssueItem> { new IssueItem
-			{
-				Product = product,
-				Quantity = 20,
-				BestBefore = new DateOnly(2026, 1, 1)
-			}},
+			//	IssueItems = new List<IssueItem> { new IssueItem
+			//{
+			//	Product = product,
+			//	Quantity = 20,
+			//	BestBefore = new DateOnly(2026, 1, 1)
+			//}},
 				IssueStatus = IssueStatus.IsShipped,
 				PerformedBy = "user1",
 				IssueDateTimeCreate = DateTime.Now.AddDays(-7),
@@ -218,113 +218,113 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal("Nie zakończono załadunku.", result.Message);
 		}
 
-		[Fact]
-		public async Task VerifyIssueAfterLoadingAsync_InventoryServiceThrowsException_ReturnFailAndRollback()
-		{
-			//Arrange
-			var address = new Address
-			{
-				City = "Warsaw",
-				Country = "Poland",
-				PostalCode = "00-999",
-				StreetName = "Wiejska",
-				Phone = 4444444,
-				Region = "Mazowieckie",
-				StreetNumber = "23/3"
-			};
-			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category { Name = "Cat" };
-			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var pallet = new Pallet
-			{
-				Id = "P1",
-				Location = location,
-				Status = PalletStatus.ToIssue,
-				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
-			};
-			var pallet1 = new Pallet
-			{
-				Id = "P2",
-				Location = location,
-				Status = PalletStatus.ToIssue,
-				ProductsOnPallet = new List<ProductOnPallet>{
-							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
-			};
-			var issue = new Issue
-			{
-				Allocations = new List<Allocation>(),
-				Client = client,
-				IssueItems = new List<IssueItem> { new IssueItem
-			{
-				Product = product,
-				Quantity = 20,
-				BestBefore = new DateOnly(2026, 1, 1)
-			}},
-				IssueStatus = IssueStatus.IsShipped,
-				PerformedBy = "user1",
-				IssueDateTimeCreate = DateTime.Now.AddDays(-7),
-				IssueDateTimeSend = DateTime.Now.AddDays(1),
-				Pallets = new List<Pallet> { pallet, pallet1 }
-			};
-			pallet.Issue = issue;
-			pallet1.Issue = issue;
-			pallet.IssueId = issue.Id;
-			pallet1.IssueId = issue.Id;
-			//Inventory
-			//dla dwóch produktów
-			var inventory = new Inventory
-			{
-				Product = product,
-				LastUpdated = DateTime.Now.AddDays(-7),
-				Quantity = 100
-			};
-			var inventory1 = new Inventory
-			{
-				Product = product1,
-				LastUpdated = DateTime.Now.AddDays(-7),
-				Quantity = 100
-			};
-			DbContext.AddRange(inventory, inventory1);
-			DbContext.Pallets.AddRange(pallet, pallet1);
-			DbContext.Issues.Add(issue);
-			await DbContext.SaveChangesAsync();
-			//Podmieniamy usługę inventory by rzucała wyjątek
-			var mockInventoryService = new Mock<IInventoryService>();
-			mockInventoryService
-				.Setup(x => x.ChangeProductQuantityAsync(It.IsAny<int>(), It.IsAny<int>()))
-				.ThrowsAsync(new Exception("Inventory update failed"));
+		//[Fact]
+		//public async Task VerifyIssueAfterLoadingAsync_InventoryServiceThrowsException_ReturnFailAndRollback()
+		//{
+		//	//Arrange
+		//	var address = new Address
+		//	{
+		//		City = "Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		Phone = 4444444,
+		//		Region = "Mazowieckie",
+		//		StreetNumber = "23/3"
+		//	};
+		//	var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
+		//	var category = new Category { Name = "Cat" };
+		//	var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+		//	var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+		//	var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+		//	var pallet = new Pallet
+		//	{
+		//		Id = "P1",
+		//		Location = location,
+		//		Status = PalletStatus.ToIssue,
+		//		ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+		//	};
+		//	var pallet1 = new Pallet
+		//	{
+		//		Id = "P2",
+		//		Location = location,
+		//		Status = PalletStatus.ToIssue,
+		//		ProductsOnPallet = new List<ProductOnPallet>{
+		//					new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+		//	};
+		//	var issue = new Issue
+		//	{
+		//		Allocations = new List<Allocation>(),
+		//		Client = client,
+		//		IssueItems = new List<IssueItem> { new IssueItem
+		//	{
+		//		Product = product,
+		//		Quantity = 20,
+		//		BestBefore = new DateOnly(2026, 1, 1)
+		//	}},
+		//		IssueStatus = IssueStatus.IsShipped,
+		//		PerformedBy = "user1",
+		//		IssueDateTimeCreate = DateTime.Now.AddDays(-7),
+		//		IssueDateTimeSend = DateTime.Now.AddDays(1),
+		//		Pallets = new List<Pallet> { pallet, pallet1 }
+		//	};
+		//	pallet.Issue = issue;
+		//	pallet1.Issue = issue;
+		//	pallet.IssueId = issue.Id;
+		//	pallet1.IssueId = issue.Id;
+		//	//Inventory
+		//	//dla dwóch produktów
+		//	var inventory = new Inventory
+		//	{
+		//		Product = product,
+		//		LastUpdated = DateTime.Now.AddDays(-7),
+		//		Quantity = 100
+		//	};
+		//	var inventory1 = new Inventory
+		//	{
+		//		Product = product1,
+		//		LastUpdated = DateTime.Now.AddDays(-7),
+		//		Quantity = 100
+		//	};
+		//	DbContext.AddRange(inventory, inventory1);
+		//	DbContext.Pallets.AddRange(pallet, pallet1);
+		//	DbContext.Issues.Add(issue);
+		//	await DbContext.SaveChangesAsync();
+		//	//Podmieniamy usługę inventory by rzucała wyjątek
+		//	var mockInventoryService = new Mock<IInventoryService>();
+		//	mockInventoryService
+		//		.Setup(x => x.ChangeProductQuantityAsync(It.IsAny<int>(), It.IsAny<int>()))
+		//		.ThrowsAsync(new Exception("Inventory update failed"));
 
-			var issueService = new IssueService(
-				Mediator,
-				_issueRepo,
-				_mapper,
-				DbContext,
-				//_historyService,
-				mockInventoryService.Object,
-				_palletRepo,
-				_productRepo,
-				_allocationRepo,
-				_pickingPalletRepo,
-				_palletService,
-				_issueItemRepo,
-				_createIssueValidator
-				,_eventCollector
-				);
-			//Act
-			var result = await issueService.VerifyIssueAfterLoadingAsync(issue.Id, "userX");
+		//	var issueService = new IssueService(
+		//		Mediator,
+		//		_issueRepo,
+		//		_mapper,
+		//		DbContext,
+		//		//_historyService,
+		//		mockInventoryService.Object,
+		//		_palletRepo,
+		//		_productRepo,
+		//		_allocationRepo,
+		//		_pickingPalletRepo,
+		//		_palletService,
+		//		_issueItemRepo,
+		//		_createIssueValidator
+		//		,_eventCollector
+		//		);
+		//	//Act
+		//	var result = await issueService.VerifyIssueAfterLoadingAsync(issue.Id, "userX");
 
-			//Assert
-			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Equal("Wystąpił nieoczenikawy błąd przy weryfikacji", result.Message);
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	Assert.False(result.Success);
+		//	Assert.Equal("Wystąpił nieoczenikawy błąd przy weryfikacji", result.Message);
 
-			await using var newContext = CreateNewContext();
-			//Rollback — status zlecenia i palet nie powinien się zmienić
-			var issueFromDb = await newContext.Issues.Include(i => i.Pallets).FirstAsync(i => i.Id == issue.Id);
-			Assert.Equal(IssueStatus.IsShipped, issueFromDb.IssueStatus);
-			Assert.All(issueFromDb.Pallets, p => Assert.Equal(PalletStatus.ToIssue, p.Status));
-		}
+		//	await using var newContext = CreateNewContext();
+		//	//Rollback — status zlecenia i palet nie powinien się zmienić
+		//	var issueFromDb = await newContext.Issues.Include(i => i.Pallets).FirstAsync(i => i.Id == issue.Id);
+		//	Assert.Equal(IssueStatus.IsShipped, issueFromDb.IssueStatus);
+		//	Assert.All(issueFromDb.Pallets, p => Assert.Equal(PalletStatus.ToIssue, p.Status));
+		//}
 	}
 }

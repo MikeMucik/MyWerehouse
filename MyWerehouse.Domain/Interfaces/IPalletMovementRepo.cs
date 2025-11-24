@@ -13,6 +13,5 @@ namespace MyWerehouse.Domain.Interfaces
 		Task AddPalletMovementAsync(PalletMovement palletMovement, CancellationToken cancellationToken);
 		IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter, string id);		
 		Task<bool> CanDeletePalletAsync(string id);
-		Task SaveChanges();
 	}
 }

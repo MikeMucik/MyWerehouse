@@ -12,6 +12,5 @@ namespace MyWerehouse.Domain.Interfaces
 		void AddHistoryPicking(HistoryPicking historyPicking);
 		Task AddHistoryPickingAsync(HistoryPicking historyPicking, CancellationToken cancellationToken);
 		IQueryable<HistoryPicking> GetAllHistoryPickingAsync();
-		Task SaveChanges();
 	}
 }

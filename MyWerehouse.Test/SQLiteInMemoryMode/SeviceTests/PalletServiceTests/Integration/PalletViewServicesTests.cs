@@ -49,9 +49,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.Equal(new DateTime(2020, 1, 1), result.DateReceived);
 			var product1 = result.ProductsOnPallet.Single(p => p.ProductId == 10);
 			Assert.Equal(100, product1.Quantity);
-			Assert.Equal(new DateOnly(2025, 2, 2), product1.BestBefore);
-			//var product2 = result.ProductsOnPallet.Single(p => p.ProductId == 11);
-			//Assert.Equal(200, product2.Quantity);
+			Assert.Equal(new DateOnly(2025, 2, 2), product1.BestBefore);			
 		}
 
 		[Fact]

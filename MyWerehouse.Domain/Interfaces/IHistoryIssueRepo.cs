@@ -11,7 +11,6 @@ namespace MyWerehouse.Domain.Interfaces
 	{
 		void AddHistoryIssue (HistoryIssue issue);
 		Task AddHistoryIssueAsync (HistoryIssue issue, CancellationToken cancellationToken);
-		IQueryable<HistoryIssue> GetAllHistoryIssues();
-		Task SaveChanges();
+		IQueryable<HistoryIssue> GetAllHistoryIssues();		
 	}
 }

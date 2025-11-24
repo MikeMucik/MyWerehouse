@@ -149,11 +149,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2);
 			await DbContext.SaveChangesAsync();
 			// Act
-
 			var result = await _pickingPalletService.ExecuteManualPickingAsync(newToPickPallet.Id, issue.Id, "user1");
-
-			// Assert
-		
+			// Assert		
 			Assert.True(result.Success);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
 
@@ -164,14 +161,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				.FirstAsync(p => p.Id == newToPickPallet.Id);
 
 			Assert.NotNull(updatedPallet);
-			Assert.Equal(PalletStatus.ToPicking, updatedPallet.Status);
-		
+			Assert.Equal(PalletStatus.ToPicking, updatedPallet.Status);		
 
 			// ✅ Produkt na palecie pozostał ten sam
 			var productOnPallet = updatedPallet.ProductsOnPallet.Single();
 			Assert.Equal(product2.Id, productOnPallet.ProductId);
 			Assert.Equal(10, productOnPallet.Quantity);
-
 		
 			// ✅ Sprawdzenie, że VirtualPallet powiązany jest z paletą
 			var virtualLinked = await DbContext.VirtualPallets
@@ -195,7 +190,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// ✅ Historia ruchu została zapisana (jeśli masz historię)
 			var history = await DbContext.HistoryPickings.ToListAsync();
 			Assert.NotEmpty(history);
-			//Assert.Contains(history, h => h.PerformedBy == "user1" && h.VirtualPalletId == virtualLinked.Id);
+			Assert.Contains(history, h => h.PerformedBy == "user1" && h.PalletId == sourcePallet1.Id);
 
 			// ✅ Walidacja, że kontekst nie trzyma niezatwierdzonych zmian
 			Assert.False(DbContext.ChangeTracker.HasChanges());

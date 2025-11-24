@@ -17,7 +17,9 @@ namespace MyWerehouse.Domain.Models
 		Archived = 6,
 		Receiving = 7,
 		InStock = 8,
-		InTransit = 9,
-		Picking = 10, //destination					  
+		InTransit = 9,//do zlecenia ale jeszcze nie zatwierdzona
+		Picking = 10, //destination	
+		Cancelled = 11, //anulowana				  
+		Reserved = 12,
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.ViewModels.IssueModels;
+using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.ViewModels.PickingPalletModels
 {

@@ -33,11 +33,4 @@
     <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Issues\Commands\CalculateAmountFullPalletAndRest\" />
-    <Folder Include="Issues\Queries\" />
-    <Folder Include="ViewModels\IssueModels\" />
-    <Folder Include="ViewModels\ReceiptModels\" />
-  </ItemGroup>
-
 </Project>

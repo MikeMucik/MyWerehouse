@@ -43,7 +43,7 @@
     <Folder Include="IntegrationTestService\IssueTestsIntegration\" />
     <Folder Include="IntegrationTestService\LocationTestsIntegration\" />
     <Folder Include="IntegrationTestService\PalletTestsIntegration\" />
-    <Folder Include="SQLiteInMemoryMode\SeviceTests\NewFolder\" />
+    <Folder Include="SQLiteInMemoryMode\SeviceTests\IssueServiceTests\MediatR\" />
     <Folder Include="SQLiteInMemoryMode\SeviceTests\PalletServiceTests\Unit\" />
     <Folder Include="UnitTestService\" />
   </ItemGroup>

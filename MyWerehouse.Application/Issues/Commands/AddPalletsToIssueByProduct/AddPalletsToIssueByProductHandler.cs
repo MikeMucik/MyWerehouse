@@ -12,10 +12,8 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Queries.GetProductCount;
 using MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
 using MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.PickingPallets.Qeuries.GetVirtualPallets;
 using MyWerehouse.Application.Products.Queries.GetNumberUnitOnPallet;
 using MyWerehouse.Application.Results;
@@ -30,17 +28,13 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IMediator _mediator;
 		private readonly IEventCollector _eventCollector;
-		private readonly IProductRepo _productRepo;
-
 		public AddPalletsToIssueByProductHandler(WerehouseDbContext werehouseDbContext,
 			IMediator mediator,
-			IEventCollector eventCollector,
-			IProductRepo productRepo)
+			IEventCollector eventCollector)
 		{
 			_werehouseDbContext = werehouseDbContext;
 			_mediator = mediator;
-			_eventCollector = eventCollector;
-			_productRepo = productRepo;
+			_eventCollector = eventCollector;			
 		}
 		public async Task<IssueResult> Handle(AddPalletsToIssueByProductCommand request, CancellationToken ct)
 		{
@@ -51,7 +45,7 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 				if (request.Issue.IssueStatus == IssueStatus.New)request.Issue.IssueStatus = IssueStatus.Pending;
 				if (request.Issue.IssueStatus != IssueStatus.Pending && request.Issue.IssueStatus != IssueStatus.New)
 				{
-					throw new IssueNotFoundException("Błąd statusu zlecenia");
+					throw new IssueException("Błąd statusu zlecenia");
 				}
 
 				//1 dostepność towaru - ile jest opakowań z datą dłuższą niż BestBefore
@@ -61,13 +55,13 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 					throw new ProductException($"Nie wystarczająca ilości produktu o numerze {request.Product.ProductId}. Asortyment nie został dodany do zlecenia.");
 				}
 				//2 Oblicz pełne palety i resztę - to można wyodrębnić 
-				var palletAmountFullResult = _mediator.Send(new GetNumberUnitOnPalletQuery(request.Product.ProductId, request.Product.Quantity), ct);
+				var palletAmountFullResult = _mediator.Send(new GetNumberPalletsAndRestQuery(request.Product.ProductId, request.Product.Quantity), ct);
 								
 				var amountPallets = palletAmountFullResult.Result.FullPallet;
 				var rest = palletAmountFullResult.Result.Rest;
 
 				//3. Pobierz dostępne palety
-				var availablePalletsQuery = await _mediator.Send(new GetAvailablePalletsByProductQuery(request.Product.ProductId, request.Product.BestBefore, amountPallets + 1, request.Product.Quantity), ct);
+				var availablePalletsQuery = await _mediator.Send(new GetAvailablePalletsByProductQuery(request.Product.ProductId, request.Product.BestBefore, amountPallets, request.Product.Quantity), ct);
 				//3.1 pobierz dostępne virtualPallet
 				var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(request.Product.ProductId, request.Product.BestBefore), ct);
 				//4. Przydziel pełne palety
@@ -107,18 +101,23 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 					request.Product.Quantity,
 					totalAvailable);
 			}
-			catch (PalletNotFoundException expal)
+			catch (PalletException expal)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(
 					expal.Message,
 					request.Product.ProductId);
 			}
-			catch (IssueNotFoundException ei)
+			catch (IssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(
 					ei.Message, request.Product.ProductId);
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				await transaction.RollbackAsync(ct);
+				return IssueResult.Fail("Inny użytkownik operuje ...");
 			}
 			catch (Exception ex)
 			{

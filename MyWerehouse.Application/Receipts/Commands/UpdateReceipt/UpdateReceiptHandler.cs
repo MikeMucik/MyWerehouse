@@ -46,7 +46,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			try
 			{
 				var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-					?? throw new ReceiptNotFoundException("Nie znaleziono przyjęcia");
+					?? throw new ReceiptException("Nie znaleziono przyjęcia");
 				existingReceipt.ClientId = request.Receipt.ClientId;
 				existingReceipt.ReceiptStatus = request.Receipt.ReceiptStatus;
 				existingReceipt.PerformedBy = request.UserId;
@@ -55,14 +55,14 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				{
 					if (!string.IsNullOrEmpty(item.Id) && item.ReceiptId != request.ReceiptId && item.ReceiptId != null)
 					{
-						throw new PalletNotFoundException($"Paleta o numerze {item.Id} należy do innego przyjęcia o numerze {item.ReceiptId}");
+						throw new PalletException($"Paleta o numerze {item.Id} należy do innego przyjęcia o numerze {item.ReceiptId}");
 					}
 				}
 				var palletsRaw = new List<Pallet>();
 				foreach (var item in request.Receipt.Pallets)
 				{
 					var pallet = await _palletRepo.GetPalletByIdAsync(item.Id)
-					?? throw new PalletNotFoundException($"Nie znaleziono palety o Id: {item.Id}");
+					?? throw new PalletException($"Nie znaleziono palety o Id: {item.Id}");
 					palletsRaw.Add(pallet);
 				}
 				//Usuwanie z bazy danych niepotrzebnych pallet
@@ -109,12 +109,12 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				await transaction.CommitAsync(cancellationToken);
 				return ReceiptResult.Ok($"Przyjęcie o numerze {request.ReceiptId} zostało zaktualizowane", request.ReceiptId);
 			}
-			catch (ReceiptNotFoundException exr)
+			catch (ReceiptException exr)
 			{
 				await transaction.RollbackAsync(cancellationToken);
 				return ReceiptResult.Fail(exr.Message);
 			}
-			catch (PalletNotFoundException expal)
+			catch (PalletException expal)
 			{
 				await transaction.RollbackAsync(cancellationToken);
 				return ReceiptResult.Fail(

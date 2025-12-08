@@ -86,13 +86,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Arrange
 			var productId = new PalletSearchFilter
 			{
-				BestBefore = new DateOnly(2026,1, 1)
+				BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
 			};
 			//Act
 			var result = _palletRepo.GetPalletsByFilter(productId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(6, result.Count());
+			Assert.Equal(7, result.Count());
 			Assert.Contains(result, p => p.Id == "Q1000");
 			Assert.Contains(result, p => p.Id == "Q1010");
 		}

@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ReservedPallet
 					return null;
 				}
 
-				pallet.Status = PalletStatus.Reserved;
+				pallet.Status = PalletStatus.InTransit;
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);

@@ -176,7 +176,7 @@ namespace MyWerehouse.Application.Services
 			//			pallet.Status = PalletStatus.InStock;
 			//			foreach (var product in pallet.ProductsOnPallet)
 			//			{							
-			//				await _mediator.Publish(new ChangeQuantityCommand(product.ProductId, product.Quantity));
+			//				await _mediator.Send(new ChangeQuantityCommand(product.ProductId, product.Quantity));
 			//			}
 			//		}
 			//		//await _werehouseDbContext.SaveChangesAsync();								

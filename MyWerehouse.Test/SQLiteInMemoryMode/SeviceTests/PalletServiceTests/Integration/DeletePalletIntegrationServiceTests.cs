@@ -130,7 +130,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.SaveChanges();
 			var palletId = "Q1000";
 			//Act&Assert
-			var ex = await Assert.ThrowsAsync<PalletNotFoundException>(() => _palletService.DeletePalletAsync(palletId));
+			var ex = await Assert.ThrowsAsync<PalletException>(() => _palletService.DeletePalletAsync(palletId));
 
 			Assert.Contains($"Palety o numerze {palletId} nie można usunąć", ex.Message);
 		}
@@ -140,7 +140,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Arrange
 			var palletId = "1000";
 			//Act&Assert
-			var ex = await Assert.ThrowsAsync<PalletNotFoundException>(() => _palletService.DeletePalletAsync(palletId));
+			var ex = await Assert.ThrowsAsync<PalletException>(() => _palletService.DeletePalletAsync(palletId));
 
 			Assert.Contains("Nie ma palety o numerze", ex.Message);
 		}

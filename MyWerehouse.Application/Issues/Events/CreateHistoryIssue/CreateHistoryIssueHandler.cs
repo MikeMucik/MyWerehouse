@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 		public async Task Handle(CreateHistoryIssueNotification request, CancellationToken cancellationToken)
 		{
 			var issue = await _issueRepo.GetIssueByIdWithPalletAndItemsAsync(request.IssueId, cancellationToken)
-				?? throw  new IssueNotFoundException(request.IssueId);
+				?? throw  new IssueException(request.IssueId);
 
 			var details = issue.Pallets != null && issue.Pallets.Count > 0 ?
 

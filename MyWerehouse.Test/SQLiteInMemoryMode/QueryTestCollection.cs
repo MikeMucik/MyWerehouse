@@ -139,8 +139,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						ProductId = 10,
 						CreatedAt = DateTime.Today,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
-						Quantity = 20,
-					} }
+						Quantity = 150,
+					}, new IssueItem
+					{
+						ProductId = 11,
+						CreatedAt = DateTime.Today,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
+						Quantity = 400,
+					}}
 				});
 			}
 
@@ -157,7 +163,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						LocationId = 1,
 						Status = PalletStatus.Available,
 						ReceiptId = 1,
-						IssueId = 2,
+						IssueId = 2,//
 					},
 					new Pallet
 					{
@@ -166,7 +172,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						LocationId = 1,
 						Status = PalletStatus.OnHold,
 						ReceiptId = 1,
-						IssueId = 2,
+						IssueId = 2,//
 					},
 					new Pallet
 					{
@@ -207,7 +213,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						LocationId = 3,
 						Status = PalletStatus.ToIssue,
 						ReceiptId = 2,
-						IssueId = 2,
+						IssueId = 2,//
 					},
 					new Pallet
 					{
@@ -278,7 +284,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 1,
 						ProductId = 10,
 						Quantity = 50,
-						BestBefore = new DateOnly(2026, 2, 2),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1000"
 					},
@@ -287,7 +293,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 2,
 						ProductId = 10,
 						Quantity = 100,
-						BestBefore = new DateOnly(2025, 2, 2),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1001"
 					},
@@ -296,7 +302,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 3,
 						ProductId = 11,
 						Quantity = 200,
-						BestBefore = new DateOnly(2025, 2, 2),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1000"
 					},
@@ -327,12 +333,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1100"
 					},
-					new ProductOnPallet
+					new ProductOnPallet//Issue
 					{
 						Id = 7,
 						ProductId = 11,
 						Quantity = 200,
-						BestBefore = new DateOnly(2026, 2, 2),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q2000"
 					},

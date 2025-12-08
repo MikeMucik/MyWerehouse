@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Application.Common.Exceptions
 {
-	public class IssueNotFoundException : Exception
+	public class IssueException : Exception
 	{
 		public int IssueId { get; }
 
-		public IssueNotFoundException(int issueId)
+		public IssueException(int issueId)
 			: base($"Zamówienie o numerze {issueId} nie zostało znalezione.")
 		{
 			IssueId = issueId;
 		}
-		public IssueNotFoundException(string message) : base(message) { }
+		public IssueException(string message) : base(message) { }
 
-		public IssueNotFoundException(string message, Exception inner) : base(message, inner) { }
+		public IssueException(string message, Exception inner) : base(message, inner) { }
 
 	}
 }

@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.Pallets.Events.CreateMovement
 		public async Task Handle(CreatePalletMovementNotification command, CancellationToken cancellationToken)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletId)
-				?? throw new PalletNotFoundException($"Pallet with ID {command.PalletId} not found.");
+				?? throw new PalletException($"Pallet with ID {command.PalletId} not found.");
 			var details = command.Details ?? pallet.ProductsOnPallet
 				.Select(p => new PalletMovementDetail
 				{

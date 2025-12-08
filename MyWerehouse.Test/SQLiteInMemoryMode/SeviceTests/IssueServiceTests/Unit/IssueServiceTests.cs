@@ -18,8 +18,6 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
-//using static MyWerehouse.Application.Issues.DTOs.CreateIssueDTO;
-//using static MyWerehouse.Application.Issues.DTOs.UpdateIssueDTO;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 {
@@ -133,26 +131,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 
-			var mockMapper = new Mock<IMapper>();
-			var issueRepoMock = new Mock<IIssueRepo>();
-			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issueId))
-						 .ReturnsAsync(issue);
-			
-			var palletRepo = new Mock<IPalletRepo>();
-			var allocationRepo = new Mock<IAllocationRepo>();
-			var pickingRepoMock = new Mock<IPickingPalletRepo>();
-			
-			var issueItem = new Mock<IIssueItemRepo>();
-			
+		//	var mockMapper = new Mock<IMapper>();
+		//	var issueRepoMock = new Mock<IIssueRepo>();
+		//	issueRepoMock.Setup(r => r.GetIssueByIdAsync(issueId))
+		//				 .ReturnsAsync(issue);			
+		//	var palletRepo = new Mock<IPalletRepo>();
+
+		//	var allocationRepo = new Mock<IAllocationRepo>();
+			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
+
+
 			var service = new IssueService(
-				Mediator,
-				issueRepoMock.Object,
-				mockMapper.Object,
-				DbContext,				
-				palletRepo.Object,
-				allocationRepo.Object,
-				pickingRepoMock.Object,
-				issueItem.Object);
+				Mediator
+				//,issueRepoMock.Object,
+				//mockMapper.Object,
+				//DbContext,				
+				//palletRepo.Object
+				//,allocationRepo.Object,
+				//pickingPalletRepo.Object
+				);
 
 			// Act
 			await service.FinishIssueNotCompleted(issueId, performedBy);
@@ -290,7 +287,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				Quantity = 25, // 2 pełne palety + 5 do pickingu
 				BestBefore = bestBefore,
 			};
-
 			var availablePallets = new List<Pallet>
 				{
 				new Pallet
@@ -350,7 +346,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				//Id = 1,
 				ClientId = initailCLient.Id,
 				IssueDateTimeCreate = DateTime.Now,
-				//IssueStatus = IssueStatus.InProgress,
 				IssueStatus = IssueStatus.Pending,
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
@@ -362,29 +357,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			// Mocky			
-			var allocationRepo = new AllocationRepo(DbContext);
-			var pickingRepo = new PickingPalletRepo(DbContext);
-			var issueRepoMock = new Mock<IIssueRepo>();
-			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id))
-						 .ReturnsAsync(issue);
-			
-			var mockMapper = new Mock<IMapper>();
-			//movementServiceMock
-			//	.Setup(r => r.CreateOperation(It.IsAny<Pallet>(), It.IsAny<int>(), It.IsAny<ReasonMovement>(), It.IsAny<string>(), It.IsAny<PalletStatus>(), null))
-				//;
-			var palletRepo = new PalletRepo(DbContext);							
-			var itemIssue = new Mock<IIssueItemRepo>();			
-			var service = new IssueService(
-				Mediator,
-				issueRepoMock.Object,
-				mockMapper.Object,
-				DbContext,				
-				palletRepo,				
-				allocationRepo,
-				pickingRepo,				
-				itemIssue.Object);
+			// Mocky		
+			//var issueRepoMock = new Mock<IIssueRepo>();
+			//issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id))
+			//			 .ReturnsAsync(issue);			
+			//var mockMapper = new Mock<IMapper>();
+			//var palletRepo = new PalletRepo(DbContext);
 
+			//var allocationRepo = new Mock<IAllocationRepo>();
+			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
+
+			var service = new IssueService(
+				Mediator
+				//,issueRepoMock.Object,
+				//mockMapper.Object,
+				//DbContext,				
+			//	palletRepo
+				//, allocationRepo.Object,
+				//pickingPalletRepo.Object
+				);
 			// Act
 			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
 			await DbContext.SaveChangesAsync();
@@ -398,7 +389,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 		public async Task AddPalletsToIssueByProductAsync_AssignsFullPalletsAndAllocatesRest_FullIntegration()
 		{
 			// Arrange
-
 			var productId = 100;
 			var bestBefore = new DateOnly(2025, 10, 10);
 			var cartonsPerPallet = 10;
@@ -443,7 +433,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 					}
 				}
 			};
-
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -454,7 +443,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-
 			var initailClient = new Client
 			{
 				Id = 1,
@@ -464,12 +452,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-
 			var issue = new Issue
 			{
 				ClientId = initailClient.Id,
 				IssueDateTimeCreate = DateTime.Now,
-				//IssueStatus = IssueStatus.InProgress,
 				IssueStatus = IssueStatus.New,
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
@@ -487,22 +473,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 
-			
-			var allocationRepo = new AllocationRepo(DbContext);
-			var pickingRepo = new PickingPalletRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);			
-			var issueRepoMock = new Mock<IIssueRepo>();
-			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
-			var mockMapper = new Mock<IMapper>();						
-			var itemIssue = new Mock<IIssueItemRepo>();
-			var service = new IssueService(Mediator,
-				issueRepoMock.Object,
-				mockMapper.Object,
-				DbContext,				
-				palletRepo,			
-				allocationRepo,
-				pickingRepo,
-				itemIssue.Object);
+			//var palletRepo = new PalletRepo(DbContext);			
+			//var issueRepoMock = new Mock<IIssueRepo>();
+			//issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
+			//var mockMapper = new Mock<IMapper>();
+
+			//var allocationRepo = new Mock<IAllocationRepo>();
+			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
+
+			var service = new IssueService(Mediator
+				//,
+				//issueRepoMock.Object,
+				//mockMapper.Object,
+				//DbContext,				
+				//palletRepo
+				//, allocationRepo.Object,
+				//pickingPalletRepo.Object
+				);
 
 			// Act
 			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
@@ -520,14 +507,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			var productId = 100;
 			var bestBefore = new DateOnly(2025, 10, 10);
 			var cartonsPerPallet = 10;
-
 			var issueItem = new IssueItemDTO
 			{
 				ProductId = productId,
 				Quantity = 100, // brakuje 70
 				BestBefore = bestBefore,
 			};
-
 			var availablePallets = new List<Pallet>
 			{
 				new Pallet
@@ -561,7 +546,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 					}
 				}
 			};
-
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -572,7 +556,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-
 			var initailClient = new Client
 			{
 				Id = 1,
@@ -582,7 +565,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-
 			var issue = new Issue
 			{
 				ClientId = initailClient.Id,
@@ -591,7 +573,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
 			};
-
 			// Dodanie do DbContext
 			DbContext.Clients.Add(initailClient);
 			DbContext.Locations.AddRange(
@@ -603,25 +584,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
+			// Mocki			
+			//var palletRepo = new PalletRepo(DbContext);			
+			//var issueRepoMock = new Mock<IIssueRepo>();
+			//issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
+			//var mockMapper = new Mock<IMapper>();
 
-			// Mocki
-			
-			var allocationRepo = new AllocationRepo(DbContext);
-			var pickingRepo = new PickingPalletRepo(DbContext);
-			var palletRepo = new PalletRepo(DbContext);			
-			var issueRepoMock = new Mock<IIssueRepo>();
-			issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
-			var mockMapper = new Mock<IMapper>();			
-			var itemIssue = new Mock<IIssueItemRepo>();		
-			var service = new IssueService(Mediator,
-				issueRepoMock.Object,
-				mockMapper.Object,
-				DbContext,				
-				palletRepo,				
-				allocationRepo,
-				pickingRepo,
-				itemIssue.Object);
+			//var allocationRepo = new Mock<IAllocationRepo>();
+			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
 
+			var service = new IssueService(Mediator
+				//,
+				//issueRepoMock.Object,
+				//mockMapper.Object,
+				//DbContext,				
+				//palletRepo, allocationRepo.Object,
+				//pickingPalletRepo.Object
+				);
 			//Act
 			var result = await service.AddPalletsToIssueByProductAsync(issue, issueItem);
 			//Assert

@@ -66,7 +66,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await _issueService.ChangePalletDuringLoadingAsync(issue.Id, "P1", "P2", "tester");
+			var result = await _issueService.ChangePalletInIssueAsync(issue.Id, "P1", "P2", "tester");
 
 			// Assert
 			Assert.True(result.Success);
@@ -80,14 +80,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Contains(updatedIssue.Pallets, p => p.Id == "P2");
 
 			Assert.Equal(PalletStatus.Available, p1.Status);
-			Assert.Equal(PalletStatus.InTransit, p2.Status);
+			Assert.Equal(PalletStatus.ToIssue, p2.Status);
 			Assert.Equal(IssueStatus.ChangingPallet, updatedIssue.IssueStatus);
 		}
 
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenSamePalletIds()
 		{
-			var result = await _issueService.ChangePalletDuringLoadingAsync(1, "P1", "P1", "tester");
+			var result = await _issueService.ChangePalletInIssueAsync(1, "P1", "P1", "tester");
 			Assert.False(result.Success);
 			Assert.Contains("tą samą", result.Message);
 		}
@@ -95,7 +95,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenIssueNotFound()
 		{
-			var result = await _issueService.ChangePalletDuringLoadingAsync(999, "P1", "P2", "tester");
+			var result = await _issueService.ChangePalletInIssueAsync(999, "P1", "P2", "tester");
 			Assert.False(result.Success);
 			Assert.Contains("Zamówienie o numerze 999 nie zostało znal", result.Message);
 		}
@@ -165,7 +165,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 
 			// Act
-			var result = await _issueService.ChangePalletDuringLoadingAsync(issue.Id, "P1", "P2", "tester");
+			var result = await _issueService.ChangePalletInIssueAsync(issue.Id, "P1", "P2", "tester");
 
 			// Assert
 			Assert.False(result.Success);
@@ -228,7 +228,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 
-			var result = await _issueService.ChangePalletDuringLoadingAsync(1, "P1", "P2", "tester");
+			var result = await _issueService.ChangePalletInIssueAsync(1, "P1", "P2", "tester");
 
 			Assert.False(result.Success);
 			Assert.Contains("błędny status", result.Message);

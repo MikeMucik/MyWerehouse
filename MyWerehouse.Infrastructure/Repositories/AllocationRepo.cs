@@ -74,6 +74,15 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return result;
 		}
 
+		public async Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId)
+		{
+			return await _werehouseDbContext.Allocations
+				.Where(x=>x.IssueId == issueId)
+				.Select(x=>x.VirtualPallet)
+				.Distinct()
+				.ToListAsync();
+		}
+
 
 		//public async Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate)
 		//{
@@ -93,7 +102,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		//		.ToListAsync();
 		//	return allocation;
 		//}
-		
+
 
 	}
 }

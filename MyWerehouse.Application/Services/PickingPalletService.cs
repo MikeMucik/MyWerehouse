@@ -215,9 +215,9 @@ namespace MyWerehouse.Application.Services
 				var allocationToChange = await _allocationRepo.GetAllocationAsync(allocationDTO.AllocationId);
 				var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(allocationToChange.VirtualPalletId);
 				var issueId = allocationToChange.IssueId;
-				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueNotFoundException(issueId);
+				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueException(issueId);
 				var sourcePallet = await _palletRepo.GetPalletByIdAsync(allocationDTO.SourcePalletId)
-					?? throw new PalletNotFoundException(allocationDTO.SourcePalletId);
+					?? throw new PalletException(allocationDTO.SourcePalletId);
 				await ProcessPickingActionAsync(sourcePallet, issue, allocationDTO.ProductId, allocationDTO.PickedQuantity, userId);
 				if (allocationDTO.RequestedQuantity == allocationDTO.PickedQuantity)
 				{
@@ -280,12 +280,12 @@ namespace MyWerehouse.Application.Services
 
 				return PickingResult.Ok("Towar dołączono do zlecenia");
 			}
-			catch (PalletNotFoundException pnfEx)
+			catch (PalletException pnfEx)
 			{
 				await transaction.RollbackAsync();
 				return PickingResult.Fail(pnfEx.Message);
 			}
-			catch (IssueNotFoundException onfEx)
+			catch (IssueException onfEx)
 			{
 				await transaction.RollbackAsync();
 				return PickingResult.Fail(onfEx.Message);
@@ -340,9 +340,9 @@ namespace MyWerehouse.Application.Services
 			try
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(palletId)
-					?? throw new PalletNotFoundException(palletId);
+					?? throw new PalletException(palletId);
 				var issue = await _issueRepo.GetIssueByIdAsync(issueId)
-					?? throw new IssueNotFoundException(issueId);
+					?? throw new IssueException(issueId);
 				var product = pallet.ProductsOnPallet.FirstOrDefault()
 					?? throw new InvalidOperationException($"Paleta {palletId} jest pusta.");
 
@@ -405,12 +405,12 @@ namespace MyWerehouse.Application.Services
 				_eventCollector.Clear();
 				return PickingResult.Ok("Towar dołączono do zlecenia");
 			}
-			catch (PalletNotFoundException pnfEx)
+			catch (PalletException pnfEx)
 			{
 				await transaction.RollbackAsync();
 				return PickingResult.Fail(pnfEx.Message);
 			}
-			catch (IssueNotFoundException onfEx)
+			catch (IssueException onfEx)
 			{
 				await transaction.RollbackAsync();
 				return PickingResult.Fail(onfEx.Message);
@@ -428,9 +428,9 @@ namespace MyWerehouse.Application.Services
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
 			try
 			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(palletId) ?? throw new PalletNotFoundException(palletId);
-				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueNotFoundException(palletId);
-				if (pallet.Status != PalletStatus.Picking) { throw new PalletNotFoundException($"Palety {pallet.Id} nie można zamknąć. "); }
+				var pallet = await _palletRepo.GetPalletByIdAsync(palletId) ?? throw new PalletException(palletId);
+				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueException(palletId);
+				if (pallet.Status != PalletStatus.Picking) { throw new PalletException($"Palety {pallet.Id} nie można zamknąć. "); }
 				_pickingPalletRepo.ClosePickingPallet(palletId, issueId);
 				await _werehouseDbContext.SaveChangesAsync();
 				await transaction.CommitAsync();
@@ -445,12 +445,12 @@ namespace MyWerehouse.Application.Services
 				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, issue.PerformedBy));
 				return PickingResult.Ok("Zamknięto paletę");
 			}
-			catch (PalletNotFoundException exp)
+			catch (PalletException exp)
 			{
 				await transaction.RollbackAsync();
 				return PickingResult.Fail(exp.Message);
 			}
-			catch (IssueNotFoundException exo)
+			catch (IssueException exo)
 			{
 				await transaction.RollbackAsync();
 				return PickingResult.Fail(exo.Message);
@@ -534,7 +534,7 @@ namespace MyWerehouse.Application.Services
 		{
 			await CreatePalletOrAddToPalletAsync(issue.Id, productId, quantityToPick, userId, sourcePallet);
 			var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId)
-				?? throw new PalletNotFoundException($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
+				?? throw new PalletException($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
 			productOnSourcePallet.Quantity -= quantityToPick;
 			if (productOnSourcePallet.Quantity == 0)
 			{

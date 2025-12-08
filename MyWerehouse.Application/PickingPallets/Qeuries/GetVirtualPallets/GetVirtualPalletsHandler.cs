@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 
@@ -18,7 +19,8 @@ namespace MyWerehouse.Application.PickingPallets.Qeuries.GetVirtualPallets
 		}
 		public async Task<List<VirtualPallet>> Handle(GetVirtualPalletsQuery query, CancellationToken ct)
 		{
-			var list = await _pickingPalletRepo.GetVirtualPalletsByBBAsync(query.ProductId, query.BestBefore);
+			var list = await _pickingPalletRepo.GetVirtualPalletsByBBAsync(query.ProductId, query.BestBefore)
+				?? throw new PalletException("Brak palety do pickingu - błąd virtual");
 			return list;
 		}
 

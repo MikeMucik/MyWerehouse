@@ -7,16 +7,16 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Common.Exceptions
 {
-	public class ReceiptNotFoundException : Exception
+	public class ReceiptException : Exception
 	{
 		public int ReceiptId { get; set; }
-		public ReceiptNotFoundException(int receiptId)
+		public ReceiptException(int receiptId)
 			: base($"Przyjęcie o numerze {receiptId} nie zostało znalezione.")
 		{
 			ReceiptId = receiptId;
 		}
-		public ReceiptNotFoundException(string message) : base(message) { }
+		public ReceiptException(string message) : base(message) { }
 
-		public ReceiptNotFoundException(string message, Exception inner) : base(message, inner) { }
+		public ReceiptException(string message, Exception inner) : base(message, inner) { }
 	}
 }

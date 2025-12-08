@@ -9,14 +9,14 @@ using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Products.Queries.GetNumberUnitOnPallet
 {
-	public class GetNumberUnitOnPalletCommand :IRequestHandler<GetNumberUnitOnPalletQuery, AssignPallestResult>
+	public class GetNumberPalletsAndRestCommand :IRequestHandler<GetNumberPalletsAndRestQuery, AssignPallestResult>
 	{
 		private readonly IProductRepo _productRepo;
-		public GetNumberUnitOnPalletCommand(IProductRepo productRepo)
+		public GetNumberPalletsAndRestCommand(IProductRepo productRepo)
 		{
 			_productRepo = productRepo;	
 		}
-		public async Task<AssignPallestResult> Handle (GetNumberUnitOnPalletQuery request, CancellationToken ct)
+		public async Task<AssignPallestResult> Handle (GetNumberPalletsAndRestQuery request, CancellationToken ct)
 		{
 			var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(request.ProductId)
 				?? throw new ProductException($"Produkt {request.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");

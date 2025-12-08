@@ -39,7 +39,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 				try
 				{
 					var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-					?? throw new ReceiptNotFoundException($"Brak przyjęcia o numerze{request.ReceiptId}");
+					?? throw new ReceiptException($"Brak przyjęcia o numerze{request.ReceiptId}");
 					if (receipt.ReceiptStatus == ReceiptStatus.Verified)
 					{
 						return ReceiptResult.Fail("Nie można usunąć zweryfikowanego przyjęcia");
@@ -78,7 +78,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 					await transaction.CommitAsync(cancellationToken);
 					return ReceiptResult.Ok("Usunięto przyjęcie wraz z paletami z bazy", request.ReceiptId);
 				}
-				catch (ReceiptNotFoundException erp)
+				catch (ReceiptException erp)
 				{
 					await transaction.RollbackAsync(cancellationToken);
 					return ReceiptResult.Fail(erp.Message);

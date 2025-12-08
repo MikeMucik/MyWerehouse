@@ -31,7 +31,20 @@ namespace MyWerehouse.Domain.Models
 			if (dateToSend < DateTime.UtcNow) throw new DomainException("Data wysyłki nie może być w przeszłości");  
 			IssueStatus = IssueStatus.New;
 			IssueDateTimeCreate = DateTime.UtcNow;
-		}	
+		}
+
+		public List<Pallet> RemoveNotLoadedPallets()
+		{
+			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
+			foreach (var pallet in toReturn)
+			{
+				pallet.Status = PalletStatus.Available;
+				pallet.IssueId = null;
+				Pallets.Remove(pallet);
+			}
+			return toReturn;
+		}
+
 	}
 }
 //// Fabryka dla Update (jeśli zmieniasz stan)

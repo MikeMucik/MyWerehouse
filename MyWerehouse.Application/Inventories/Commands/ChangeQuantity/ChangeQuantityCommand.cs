@@ -7,5 +7,5 @@ using MediatR;
 
 namespace MyWerehouse.Application.Inventories.Commands.ChangeQuantity
 {
-	public record ChangeQuantityCommand(int ProductId, int Quantity) :INotification;	
+	public record ChangeQuantityCommand(int ProductId, int Quantity) :IRequest;	
 }

@@ -106,7 +106,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			new IssueItemDTO { ProductId = product.Id, Quantity = 15, BestBefore = new DateOnly(2026,1,1) }
 		}
 			};
-
 			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
 
 			// Assert – sprawdź Issue
@@ -144,6 +143,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Single(result);
 			Assert.True(result.First().Success);
 			Assert.Equal(product.Id, result.First().ProductId);
+
+			// ACT UpdateIssueAsync
+
+			var p2After = DbContext.Pallets.AsNoTracking().First(p => p.Id == "P2");
+			// bezpieczeństwo — potwierdzamy faktyczną zmianę statusu
+			Assert.Equal(PalletStatus.ToPicking, p2After.Status);
 		}
 		[Fact]
 		public async Task UpdateIssueAsync_ReplacesOldAllocationsAndAssignsNewOnes()
@@ -267,12 +272,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
+
 			// Powinna być jedna alokacja (5 sztuk) powiązana z VirtualPallet dla "P2"
 			Assert.Single(allocationsForIssue);
 			var alloc = allocationsForIssue.Single();
 			Assert.Equal(5, alloc.Quantity);
 			Assert.NotNull(alloc.VirtualPallet);
 			Assert.Equal("P2", alloc.VirtualPallet.PalletId);
+
+			//kontrola zapisu historii
 
 			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == IssueInitialQuantity - allocation
 			var vp = DbContext.VirtualPallets
@@ -282,10 +290,30 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(5, vp.Allocations.First().Quantity);
 			Assert.Equal(vp.IssueInitialQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
 
+
+			
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.Single(result);
 			Assert.True(result.First().Success);
 			Assert.Equal(product.Id, result.First().ProductId);
+
+
+			// Assert – historia alokacji po aktualizacji
+			var history = DbContext.HistoryPickings
+				.Where(h => h.AllocationId == alloc.Id)
+				.OrderBy(h => h.Id)
+				.ToList();			
+
+			// Powinny być 2 wpisy: Create + Correction
+			Assert.Equal(2, history.Count);
+
+			// Ostatni wpis powinien być Correction
+			var lastHistory = history.Last();
+
+			Assert.Equal(PickingStatus.Correction, lastHistory.StatusAfter);
+			Assert.Equal("User2", lastHistory.PerformedBy);
+			Assert.Equal(alloc.Id, lastHistory.AllocationId);
+
 		}
 		[Fact]
 		public async Task UpdateIssueAsync_NoAllocationForFirstAttempAndAssignsNewOnesWithOlsAllocationInBaseVirtualoPallet()
@@ -384,7 +412,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
 
-			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i=>i.Id ==2);
+			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.Id == 2);
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
 
@@ -430,7 +458,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				.Include(v => v.Allocations)
 				.First(v => v.PalletId == "P2");
 
-			Assert.Equal(5, vp.Allocations.First(x=>x.IssueId == issue.Id).Quantity);
+			Assert.Equal(5, vp.Allocations.First(x => x.IssueId == issue.Id).Quantity);
 			Assert.Equal(vp.IssueInitialQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
 			Assert.Equal(1, vp.RemainingQuantity);
 
@@ -535,9 +563,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 
 			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
-			
+
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.Id == 2);
-			issue.IssueStatus= IssueStatus.ConfirmedToLoad;
+			issue.IssueStatus = IssueStatus.ConfirmedToLoad;
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
 
@@ -704,7 +732,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Id = issue.Id,
 				PerformedBy = "User2",
 				DateToSend = DateTime.UtcNow.AddDays(1),
-				
+
 				Items = new List<IssueItemDTO>
 		{
 			new IssueItemDTO { ProductId = product.Id, Quantity = 22, BestBefore = new DateOnly(2026,1,1) }
@@ -802,7 +830,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);		
+			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var updateDto = new UpdateIssueDTO
@@ -922,8 +950,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 			// Assert & Act
-			var result = await Assert.ThrowsAsync<IssueNotFoundException>(() =>  _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7)));
-			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);			
+			var result = await Assert.ThrowsAsync<IssueException>(() => _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7)));
+			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);
 		}
 	}
 }

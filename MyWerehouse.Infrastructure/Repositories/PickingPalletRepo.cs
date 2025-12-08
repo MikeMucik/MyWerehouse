@@ -69,5 +69,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			return await _werehouseDbContext.VirtualPallets.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId).ToListAsync();
 		}
+
+		//public async Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId)
+		//{
+		//var list = await _werehouseDbContext.VirtualPallets
+		//		.SelectMany(x=>x.Allocations.)
+		//}
 	}
 }

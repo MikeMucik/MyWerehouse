@@ -40,7 +40,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt
 				await _mediator.Publish(new CreateHistoryReceiptNotification(request.ReceiptId, receipt.ReceiptStatus, request.UserId), cancellationToken);				
 				return ReceiptResult.Ok("Zakończono fizyczne przyjęcie - gotowe do weryfikacji", request.ReceiptId);
 			}
-			catch (ReceiptNotFoundException erp)
+			catch (ReceiptException erp)
 			{
 				return ReceiptResult.Fail(erp.Message);
 			}

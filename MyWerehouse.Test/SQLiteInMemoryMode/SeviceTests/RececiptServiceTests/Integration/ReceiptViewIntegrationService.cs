@@ -7,6 +7,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
@@ -18,26 +19,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 {
 	[Collection("QueryCollection")]
 	public class ReceiptViewIntegrationService
-	{
-		//private readonly ReceiptService _receiptService;
-		private readonly IMapper _mapper;
-		//private readonly ReceiptRepo _receiptRepo;
+	{		
 		private readonly QueryTestFixture _fixture;
 		private readonly IMediator _mediator;
 
 		public ReceiptViewIntegrationService(QueryTestFixture fixture)
 		{
-			_fixture = fixture;
-			//var mapperConfig = new MapperConfiguration(cfg =>
-			//		{
-			//			cfg.AddProfile<MappingProfile>();
-			//		});
-			//_mapper = mapperConfig.CreateMapper();
-
-			//_receiptRepo = new ReceiptRepo(_fixture.DbContext);
-			//_receiptService = new ReceiptService(_receiptRepo, _mapper);
-			_mediator = _fixture.Mediator;
-			_mapper = _fixture._provider.GetRequiredService<IMapper>();
+			_fixture = fixture;			
+			_mediator = _fixture.Mediator;			
 		}
 		[Fact]
 		public async Task GetReceiptDTOAsync_GetData_ReturnDTO()
@@ -74,9 +63,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Arrange&Act			
 			var query = new GetReceiptByIdQuery(999);
 
-			var result = await _mediator.Send(query);
+			//var result = await _mediator.Send(query);
+			var rresult = await Assert.ThrowsAsync<ReceiptException>(async () => await _mediator.Send(query));
 			//Assert
-			Assert.Null(result);
+			//Assert.Null(result);
+			Assert.NotNull(rresult);
+			Assert.Contains("Przyjęcie o numerze 999 nie zostało znalezione.", rresult.Message);
 		}
 		//Testy multi
 		[Theory]

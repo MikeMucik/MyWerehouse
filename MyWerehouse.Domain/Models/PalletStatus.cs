@@ -20,6 +20,6 @@ namespace MyWerehouse.Domain.Models
 		InTransit = 9,//do zlecenia ale jeszcze nie zatwierdzona
 		Picking = 10, //destination	
 		Cancelled = 11, //anulowana				  
-		Reserved = 12,
+		ReversePicking = 12,//stworzona z pickingu
 	}
 }

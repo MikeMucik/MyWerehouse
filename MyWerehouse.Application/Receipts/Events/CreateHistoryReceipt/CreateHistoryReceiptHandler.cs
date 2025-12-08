@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 		public async Task Handle(CreateHistoryReceiptNotification request, CancellationToken cancellationToken)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-				?? throw new ReceiptNotFoundException(request.ReceiptId);
+				?? throw new ReceiptException(request.ReceiptId);
 			var details = receipt.Pallets != null && receipt.Pallets.Count != 0
 				? receipt.Pallets.Select(p => new HistoryReceiptDetail
 				{

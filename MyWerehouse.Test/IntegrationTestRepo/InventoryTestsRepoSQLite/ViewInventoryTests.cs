@@ -90,12 +90,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 11;
-			var bestBefore = new DateOnly(2025, 12, 12);
+			var bestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
 			//var
 			//Act
 			var result = await _inventoryRepo.GetAvailableQuantityAsync(productId, bestBefore);
 			//Assert
-			Assert.Equal(280, result);
+			Assert.Equal(480, result);
 		}
 		[Fact]
 		public async Task ReturnAmount_GetQuantityForProductAsync_GiveBackQuantity()

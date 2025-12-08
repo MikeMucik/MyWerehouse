@@ -17,5 +17,6 @@ namespace MyWerehouse.Domain.Models
 		ChangingPallet = 6,
 		NotComplete = 7,
 		Pending = 8,//gdy przetwarzane w trakcie tworzenia
+		Cancelled = 9,
 	}
 }

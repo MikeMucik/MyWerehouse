@@ -39,8 +39,8 @@ namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 				 newPallet = await _mediator.Send(new GetOneAvailablePalletByProductQuery(request.ProductId, request.BestBefore), ct);					
 			}
 			else newPallet = request.Pallets.FirstOrDefault();
-			if (newPallet == null) { throw new PalletNotFoundException("Brak palet do pickingu"); }
-			if (newPallet.ProductsOnPallet == null) { throw new PalletNotFoundException("Brak towaru na palecie do pickingu"); }
+			if (newPallet == null) { throw new PalletException("Brak palet do pickingu"); }
+			if (newPallet.ProductsOnPallet == null) { throw new PalletException("Brak towaru na palecie do pickingu"); }
 			var newVirtualPicking = new VirtualPallet
 			{
 				Pallet = newPallet,

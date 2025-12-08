@@ -12,14 +12,11 @@ using MyWerehouse.Infrastructure;
 namespace MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue
 {
 	public class AssignFullPalletToIssueHandler :IRequestHandler<AssignFullPalletToIssueCommand, List<Pallet>>
-	{
-		//private readonly WerehouseDbContext _werehouseDbContext;		
+	{			
 		private readonly IEventCollector _eventCollector;
-		public AssignFullPalletToIssueHandler(
-			//WerehouseDbContext werehouseDbContext,			
+		public AssignFullPalletToIssueHandler(		
 			IEventCollector eventCollector)
-		{
-			//_werehouseDbContext = werehouseDbContext;			
+		{			
 			_eventCollector = eventCollector;
 		}
 		public  Task<List<Pallet>> Handle(AssignFullPalletToIssueCommand request, CancellationToken ct)
@@ -31,7 +28,6 @@ namespace MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue
 			foreach (var pallet in palletsToAsign)// adding full pallets *
 			{
 				pallet.IssueId = request.Issue.Id;
-				//pallet.Status = PalletStatus.InTransit;
 
 				_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id,
 				pallet.LocationId,
@@ -41,7 +37,6 @@ namespace MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue
 				null));
 
 				request.Issue.Pallets.Add(pallet);
-				//Czy tu powinienem wywołać rezerwację palety wraz zapisem do bazy
 			}
 			return Task.FromResult(palletsToAsign);
 		}

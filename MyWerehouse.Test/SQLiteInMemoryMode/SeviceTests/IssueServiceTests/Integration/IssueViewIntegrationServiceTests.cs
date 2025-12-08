@@ -4,32 +4,65 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Mapping;
-using MyWerehouse.Application.Services;
+using MyWerehouse.Application.Issues.Queries.GetIssueById;
+using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
 using MyWerehouse.Domain.Models;
-using MyWerehouse.Infrastructure.Repositories;
-using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
 	[Collection("QueryCollection")]
-	public class IssueLoadingIssueIntegrationService
-	{
-		private readonly IssueService _issueService;
-		private readonly IssueRepo _issueRepo;
+	public class IssueViewIntegrationServiceTests
+	{		
 		private readonly QueryTestFixture _fixture;
-		public IssueLoadingIssueIntegrationService(QueryTestFixture fixture)
+		private readonly IMediator _mediator;
+		public IssueViewIntegrationServiceTests(QueryTestFixture fixture)
 		{
-			_fixture = fixture;			
-			_issueRepo = new IssueRepo(_fixture.DbContext);
-			_issueService = new IssueService(_issueRepo);
+			_fixture = fixture;
+			_mediator = _fixture.Mediator;			
+		}
+		[Fact]
+		public async Task GetIssueById_GetData_ReturnDTO()
+		{
+			//Arrange&Act
+			var query = new GetIssueByIdQuery(2);
+
+			var result = await _mediator.Send(query);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(11, result.ClientId);
+			Assert.Equal("U002", result.PerformedBy);
+			Assert.Equal(new DateTime(2025, 5, 6), result.IssueDateTimeSend);
+
+			Assert.NotNull(result.Pallets);
+			Assert.Equal(3, result.Pallets.Count);
+		}
+		[Fact]
+		public async Task GetIssueProductSummaryById_GetData_ReturnDTO()
+		{
+			//Arrange&Act
+			var query = new GetIssueProductSummaryByIdQuery(2);
+
+			var result = await _mediator.Send(query);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Equal(11, result.ClientId);
+			Assert.Equal(2, result.Items.Count);
+			Assert.Equal("U002", result.PerformedBy);
+			Assert.Equal(new DateTime(2025, 5, 6), result.DateToSend);
+
+			Assert.NotNull(result.Items);
+			Assert.Equal(400, result.Items.FirstOrDefault(x => x.ProductId == 11).Quantity);
+			Assert.Equal(150, result.Items.FirstOrDefault(x => x.ProductId == 10).Quantity);
 		}
 		[Fact]
 		public async Task LoadingIssueAsync_ProperData_ReturnList()
 		{
 			//Arrange&Act
-			var result = await _issueService.LoadingIssueListAsync(2, "user");
+			var query = new LoadingIssueListQuery(2, "user");
+			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<ListPalletsToLoadDTO>(result);
@@ -51,12 +84,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// produkt 10
 			var prod10_Q1000 = palletQ1000.ProductOnPalletIssue.First(p => p.ProductId == 10);
 			Assert.Equal(50, prod10_Q1000.Quantity);
-			Assert.Equal(new DateOnly(2026, 2, 2), prod10_Q1000.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddMonths(3)), prod10_Q1000.BestBefore);
 
 			// produkt 11
 			var prod11_Q1000 = palletQ1000.ProductOnPalletIssue.First(p => p.ProductId == 11);
 			Assert.Equal(200, prod11_Q1000.Quantity);
-			Assert.Equal(new DateOnly(2025, 2, 2), prod11_Q1000.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddMonths(3)), prod11_Q1000.BestBefore);
 
 			// --- Paleta Q2000 ---
 			var palletQ2000 = result.Pallets.First(p => p.PalletId == "Q2000");
@@ -71,7 +104,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var prod11_Q2000 = palletQ2000.ProductOnPalletIssue.First();
 			Assert.Equal(11, prod11_Q2000.ProductId);
 			Assert.Equal(200, prod11_Q2000.Quantity);
-			Assert.Equal(new DateOnly(2026, 2, 2), prod11_Q2000.BestBefore);			
+			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddMonths(3)), prod11_Q2000.BestBefore);
 		}
 	}
 }

@@ -11,7 +11,7 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Inventories.Commands.ChangeQuantity
 {
-	public class ChangeQuantityHandler(IInventoryRepo inventoryRepo, WerehouseDbContext werehouseDbContext) : INotificationHandler<ChangeQuantityCommand>
+	public class ChangeQuantityHandler(IInventoryRepo inventoryRepo, WerehouseDbContext werehouseDbContext) : IRequestHandler<ChangeQuantityCommand>
 	{
 		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;

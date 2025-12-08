@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.Pallets.Events.CreateOperation
 		public async Task Handle(CreatePalletOperationNotification request, CancellationToken cancellationToken)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId)??
-				throw new PalletNotFoundException($"Pallet with ID {request.PalletId} not found.");
+				throw new PalletException($"Pallet with ID {request.PalletId} not found.");
 			var details = request.Details??pallet.ProductsOnPallet
 				.Select(p=> new PalletMovementDetail
 				{

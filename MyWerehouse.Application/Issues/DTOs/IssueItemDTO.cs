@@ -15,10 +15,6 @@ namespace MyWerehouse.Application.Issues.DTOs
 		public int IssueId { get; set; }
 		public int ProductId { get; set; }
 		public int Quantity { get; set; }
-		public DateOnly BestBefore { get; set; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<IssueItemDTO, IssueItem>();
-		}
+		public DateOnly BestBefore { get; set; }		
 	}
 }

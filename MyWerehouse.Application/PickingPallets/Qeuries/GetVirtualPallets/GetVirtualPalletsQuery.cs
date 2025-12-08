@@ -8,6 +8,5 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Qeuries.GetVirtualPallets
 {
-	public record GetVirtualPalletsQuery(int ProductId, DateOnly BestBefore):IRequest<List<VirtualPallet>>;
-	
+	public record GetVirtualPalletsQuery(int ProductId, DateOnly BestBefore):IRequest<List<VirtualPallet>>;	
 }

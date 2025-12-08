@@ -5,27 +5,37 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Azure.Core;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
-using MyWerehouse.Application.Inventories.Queries.GetProductCount;
-using MyWerehouse.Application.Commands.Issue.VerifyIssueAfterLoading;
-using MyWerehouse.Application.Common.Events;
+using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
+using MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading;
+using MyWerehouse.Application.Issues.Commands.CompletedIssue;
+using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
+using MyWerehouse.Application.Issues.Commands.DeleteIssue;
+using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
+using MyWerehouse.Application.Issues.Commands.UpdateIssue;
+using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
 using MyWerehouse.Application.Issues.DTOs;
+using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
+using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
+using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Results;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
-using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
-using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
-using MyWerehouse.Application.Issues.Commands.UpdateIssue;
+using MyWerehouse.Application.Issues.Queries.GetIssueById;
+using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
+using MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList;
+using MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr;
+using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
+using MyWerehouse.Application.Issues.Commands.CancelIssue;
 
 namespace MyWerehouse.Application.Services
 {
@@ -33,55 +43,36 @@ namespace MyWerehouse.Application.Services
 	{
 		private readonly IMediator _mediator;
 
-		private readonly IIssueRepo _issueRepo;
-		private readonly IMapper _mapper;//
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IPalletRepo _palletRepo;
-		//private readonly IProductRepo _productRepo;
-		private readonly IAllocationRepo _allocationRepo;
-		private readonly IPickingPalletRepo _pickingPalletRepo;
-		//private readonly IPalletService _palletService;
-		private readonly IIssueItemRepo _issueItemRepo;
-		//private readonly IValidator<CreateIssueDTO> _createIssueValidator;
-		//private readonly IEventCollector _eventCollector;
+		//private readonly IIssueRepo _issueRepo;
+		//private readonly IMapper _mapper;//
+		//private readonly WerehouseDbContext _werehouseDbContext;
+		//private readonly IPalletRepo _palletRepo;
 
-		public IssueService(IMediator mediator)
-		{
-			_mediator = mediator;
-		}
+		//private readonly IAllocationRepo _allocationRepo;
+		//private readonly IPickingPalletRepo _pickingPalletRepo;
 		public IssueService(
-			IMediator mediator,
-			IIssueRepo issueRepo,
-			IMapper mapper,
-			WerehouseDbContext werehouseDbContext,
-			IPalletRepo palletRepo,
-			//IProductRepo productRepo,
-			IAllocationRepo allocationRepo,
-			IPickingPalletRepo pickingPalletRepo,
-			//IPalletService palletService,
-			IIssueItemRepo issueItemRepo
-			//,IValidator<CreateIssueDTO> createIssueValidator
-			//,IEventCollector eventCollector
+			IMediator mediator
+			//,			IIssueRepo issueRepo,
+		//	IMapper mapper,
+			//WerehouseDbContext werehouseDbContext,
+		//	IPalletRepo palletRepo,
+		//	IAllocationRepo allocationRepo
+		//	, IPickingPalletRepo pickingPalletRepo
 			)
 		{
 			_mediator = mediator;
-			_issueRepo = issueRepo;
-			_mapper = mapper;
-			_werehouseDbContext = werehouseDbContext;
-			_palletRepo = palletRepo;
-			//_productRepo = productRepo;
-			_allocationRepo = allocationRepo;
-			_pickingPalletRepo = pickingPalletRepo;
-			//_palletService = palletService;
-			_issueItemRepo = issueItemRepo;
-			//_createIssueValidator = createIssueValidator;
-			//_eventCollector = eventCollector;
+		//	_issueRepo = issueRepo;
+		//	_mapper = mapper;
+		//	_werehouseDbContext = werehouseDbContext;
+		//	_palletRepo = palletRepo;
+		//	_allocationRepo = allocationRepo;
+		//	_pickingPalletRepo = pickingPalletRepo;
 		}
-		public IssueService(
-			IIssueRepo issueRepo)
-		{
-			_issueRepo = issueRepo;
-		}
+		//public IssueService(
+		//	IIssueRepo issueRepo)
+		//{
+		//	_issueRepo = issueRepo;
+		//}
 		public async Task<List<IssueResult>> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, DateTime dateToSend)
 		{
 			return await _mediator.Send(new CreateNewIssueCommand(createIssueDTO, dateToSend));
@@ -205,419 +196,569 @@ namespace MyWerehouse.Application.Services
 			//}
 		}
 		//pobranie zamówienia do aktualizacji 
-		public async Task<UpdateIssueDTO> GetIssueByIdAsync(int numberIssue)
+
+		public async Task<UpdateIssueDTO> GetIssueByIdToUpdateAsync(int numberIssue)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(numberIssue) ?? throw new IssueNotFoundException(numberIssue);
-			return new UpdateIssueDTO
-			{
-				Id = issue.Id,
-				ClientId = issue.ClientId,
-				PerformedBy = issue.PerformedBy,
-				Items = issue.Pallets
-				 .SelectMany(p => p.ProductsOnPallet)
-				 .Select(prod => new IssueItemDTO { ProductId = prod.ProductId, Quantity = prod.Quantity })
-				 .ToList(),
-				DateToSend = issue.IssueDateTimeSend
-			};
+			return await _mediator.Send(new GetIssueProductSummaryByIdQuery(numberIssue));
+			//var issue = await _issueRepo.GetIssueByIdAsync(numberIssue) ?? throw new IssueException(numberIssue);
+			//return new UpdateIssueDTO
+			//{
+			//	Id = issue.Id,
+			//	ClientId = issue.ClientId,
+			//	PerformedBy = issue.PerformedBy,
+			//	Items = issue.Pallets
+			//	 .SelectMany(p => p.ProductsOnPallet)
+			//	 .Select(prod => new IssueItemDTO { ProductId = prod.ProductId, Quantity = prod.Quantity })
+			//	 .ToList(),
+			//	DateToSend = issue.IssueDateTimeSend
+			//};
+		}
+		public async Task<IssueDTO> GetIssueByIdAsync(int numberIssue)
+		{
+			return await _mediator.Send(new GetIssueByIdQuery(numberIssue));
 		}
 		//aktualizacja/poprawienie zamówienia
 		public async Task<List<IssueResult>> UpdateIssueAsync(UpdateIssueDTO issueDTO, DateTime dateToSend)
 		{
 			return await _mediator.Send(new UpdateIssueCommand(issueDTO, dateToSend));
-			var resultList = new List<IssueResult>();
-			var issue = await _issueRepo.GetIssueByIdAsync(issueDTO.Id) ?? throw new IssueNotFoundException(issueDTO.Id);
-			issue.PerformedBy = issueDTO.PerformedBy;             //1.2 Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking
-			if (issue.IssueStatus == IssueStatus.New ||
-				issue.IssueStatus == IssueStatus.Pending ||
-				issue.IssueStatus == IssueStatus.NotComplete)
-			{
-				//usuwanie palet z issue
-				foreach (var pallet in issue.Pallets.ToList())
-				{
-					_palletRepo.ClearPalletFromListIssue(pallet);
-				}
-				issue.Pallets.Clear();
-				//Usuwanie alokacji
-				var allocations = await _allocationRepo.GetAllocationsByIssueIdAsync(issueDTO.Id);
-				foreach (var allocation in allocations)
-				{
-					var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(allocation.VirtualPalletId);
-					var pallet = await _palletRepo.GetPalletByIdAsync(virtualPallet.PalletId);
-					_allocationRepo.DeleteAllocation(allocation);
+			//var resultList = new List<IssueResult>();
+			//var issue = await _issueRepo.GetIssueByIdAsync(issueDTO.Id) ?? throw new IssueNotFoundException(issueDTO.Id);
+			//issue.PerformedBy = issueDTO.PerformedBy;             //1.2 Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking
+			//if (issue.IssueStatus == IssueStatus.New ||
+			//	issue.IssueStatus == IssueStatus.Pending ||
+			//	issue.IssueStatus == IssueStatus.NotComplete)
+			//{
+			//	//usuwanie palet z issue
+			//	foreach (var pallet in issue.Pallets.ToList())
+			//	{
+			//		_palletRepo.ClearPalletFromListIssue(pallet);
+			//	}
+			//	issue.Pallets.Clear();
+			//	//Usuwanie alokacji
+			//	var allocations = await _allocationRepo.GetAllocationsByIssueIdAsync(issueDTO.Id);
+			//	foreach (var allocation in allocations)
+			//	{
+			//		var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(allocation.VirtualPalletId);
+			//		var pallet = await _palletRepo.GetPalletByIdAsync(virtualPallet.PalletId);
+			//		_allocationRepo.DeleteAllocation(allocation);
 
-					if (virtualPallet.Allocations.Count == 0)
-					{
-						_pickingPalletRepo.DeleteVirtualPalletPicking(virtualPallet);
-						pallet.Status = PalletStatus.Available;
-					};
-				}
-				foreach (var item in issueDTO.Items)
-				{
-					var result = await AddPalletsToIssueByProductAsync(issue, item);
-					resultList.Add(result);
-				}
-				issue.IssueStatus = IssueStatus.ChangingPallet;
-				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, issue.PerformedBy));//
-				return resultList;
-			}
-			else if (issue.IssueStatus == IssueStatus.ConfirmedToLoad)
-			{				
-				var newQuantities = new List<IssueItemDTO>();
-				var hasNegativeDiff = false;
-				var errorMessage = new List<string>();
-				foreach (var product in issueDTO.Items)
-				{
-					var productId = product.ProductId;
-					var oldQuantity = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId);
-					var newQuantity = product.Quantity - oldQuantity;
-					if (newQuantity < 0)
-					{
-						hasNegativeDiff = true;
-						errorMessage.Add($"Produkt {productId}: Nie można zmniejszyć z {oldQuantity} do {product.Quantity} (różnica : {newQuantity}). Zlecenie jest już zatwierdzone do załadunku");
-						continue;
-					}
-					if (newQuantity > 0)
-					{
-						var newItem = new IssueItemDTO
-						{
-							ProductId = productId,
-							Quantity = newQuantity,
-							BestBefore = product.BestBefore
-						};
-						newQuantities.Add(newItem);
-					}
-				}
-				if (hasNegativeDiff)
-				{
-					return new List<IssueResult>
-					{
-						IssueResult.Fail(string.Join(";", errorMessage),0)
-					};
-				}
-				if (newQuantities.Count == 0)
-				{
-					return new List<IssueResult> { IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.", 0) };
-				}
-				var dataForNewIssue = new CreateIssueDTO
-				{
-					ClientId = issue.ClientId,
-					Items = newQuantities,
-					PerformedBy = issueDTO.PerformedBy,
-				};
-				resultList = await CreateNewIssueAsync(dataForNewIssue, issueDTO.DateToSend);
-				foreach (var result in resultList)
-				{
-					if (result.Success)
-					{
-						result.Message += " (Dodatkowe zlecenie na ostatnią chwilę - stare jest w realizacji).";
-					}
-				}
-				return resultList;
-			}
-			else
-			{
-				resultList.Add(IssueResult.Fail(
-					$"Nie można zaktualizować zlecenia {issue.Id}, status: {issue.IssueStatus}"));
-				return resultList;
-			}
+			//		if (virtualPallet.Allocations.Count == 0)
+			//		{
+			//			_pickingPalletRepo.DeleteVirtualPalletPicking(virtualPallet);
+			//			pallet.Status = PalletStatus.Available;
+			//		};
+			//	}
+			//	foreach (var item in issueDTO.Items)
+			//	{
+			//		var result = await AddPalletsToIssueByProductAsync(issue, item);
+			//		resultList.Add(result);
+			//	}
+			//	issue.IssueStatus = IssueStatus.ChangingPallet;
+			//	await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, issue.PerformedBy));//
+			//	return resultList;
+			//}
+			//else if (issue.IssueStatus == IssueStatus.ConfirmedToLoad)
+			//{				
+			//	var newQuantities = new List<IssueItemDTO>();
+			//	var hasNegativeDiff = false;
+			//	var errorMessage = new List<string>();
+			//	foreach (var product in issueDTO.Items)
+			//	{
+			//		var productId = product.ProductId;
+			//		var oldQuantity = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId);
+			//		var newQuantity = product.Quantity - oldQuantity;
+			//		if (newQuantity < 0)
+			//		{
+			//			hasNegativeDiff = true;
+			//			errorMessage.Add($"Produkt {productId}: Nie można zmniejszyć z {oldQuantity} do {product.Quantity} (różnica : {newQuantity}). Zlecenie jest już zatwierdzone do załadunku");
+			//			continue;
+			//		}
+			//		if (newQuantity > 0)
+			//		{
+			//			var newItem = new IssueItemDTO
+			//			{
+			//				ProductId = productId,
+			//				Quantity = newQuantity,
+			//				BestBefore = product.BestBefore
+			//			};
+			//			newQuantities.Add(newItem);
+			//		}
+			//	}
+			//	if (hasNegativeDiff)
+			//	{
+			//		return new List<IssueResult>
+			//		{
+			//			IssueResult.Fail(string.Join(";", errorMessage),0)
+			//		};
+			//	}
+			//	if (newQuantities.Count == 0)
+			//	{
+			//		return new List<IssueResult> { IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.", 0) };
+			//	}
+			//	var dataForNewIssue = new CreateIssueDTO
+			//	{
+			//		ClientId = issue.ClientId,
+			//		Items = newQuantities,
+			//		PerformedBy = issueDTO.PerformedBy,
+			//	};
+			//	resultList = await CreateNewIssueAsync(dataForNewIssue, issueDTO.DateToSend);
+			//	foreach (var result in resultList)
+			//	{
+			//		if (result.Success)
+			//		{
+			//			result.Message += " (Dodatkowe zlecenie na ostatnią chwilę - stare jest w realizacji).";
+			//		}
+			//	}
+			//	return resultList;
+			//}
+			//else
+			//{
+			//	resultList.Add(IssueResult.Fail(
+			//		$"Nie można zaktualizować zlecenia {issue.Id}, status: {issue.IssueStatus}"));
+			//	return resultList;
+			//}
 		}
 		//dopracować
-		public async Task DeleteIssueAsync(int issueId)
+		public async Task<IssueResult> DeleteIssueAsync(int issueId, string userId)
 		{
-			var issueToDelete = await _issueRepo.GetIssueByIdAsync(issueId)
-			?? throw new IssueNotFoundException(issueId);
-			if (!(issueToDelete.IssueStatus == IssueStatus.New ||
-				issueToDelete.IssueStatus == IssueStatus.Pending ||
-				issueToDelete.IssueStatus == IssueStatus.NotComplete)) throw new IssueNotFoundException($"Nie można skasować zlecenia o numerze {issueId}");
-			_issueRepo.DeleteIssue(issueToDelete);
-			await _werehouseDbContext.SaveChangesAsync();
+			return await _mediator.Send(new DeleteIssueCommand(issueId, userId));
+			//await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
+			//try
+			//{
+			//	var issueToDelete = await _issueRepo.GetIssueByIdAsync(issueId)
+			//		?? throw new IssueNotFoundException(issueId);
+
+			//	List<INotification> palletList = [];
+			//	List<INotification> allocationList = [];
+			//	switch (issueToDelete.IssueStatus)
+			//	{
+			//		case IssueStatus.New:
+			//			_issueRepo.DeleteIssue(issueToDelete);
+			//			break;
+
+			//		case IssueStatus.Pending:
+			//		case IssueStatus.NotComplete:
+			//			issueToDelete.IssueStatus = IssueStatus.Cancelled;
+			//			foreach (var pallet in issueToDelete.Pallets)
+			//			{
+			//				pallet.IssueId = null;
+			//				pallet.Status = PalletStatus.Available;
+			//				palletList.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId, ReasonMovement.Correction, userId, PalletStatus.Available, null));
+			//			}
+			//			foreach (var allocation in issueToDelete.Allocations)
+			//			{
+			//				allocation.PickingStatus = PickingStatus.Cancelled;
+			//				allocation.Quantity = 0;
+			//				allocationList.Add(new CreateHistoryPickingNotification(allocation.VirtualPalletId, allocation.Id, userId, PickingStatus.Allocated, 0));
+			//			}
+			//			break;
+			//			default:
+			//			throw new IssueNotFoundException($"Zlecenia {issueToDelete.Id} nie można anulować.");
+			//	}				
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	await transaction.CommitAsync();
+			//	if(!(issueToDelete.IssueStatus == IssueStatus.New)) { 
+			//	await _mediator.Publish(new CreateHistoryIssueNotification(issueId, userId));}
+			//	foreach (var p in palletList)
+			//	{
+			//		await _mediator.Publish(p);
+			//	}
+			//	foreach (var a in allocationList)
+			//	{
+			//		await _mediator.Publish(a);
+			//	}
+			//	return IssueResult.Ok($"Usunięto zamówienie o numerze {issueToDelete.Id}.");
+			//}
+			//catch (IssueNotFoundException ei)
+			//{
+			//	await transaction.RollbackAsync();
+			//	return IssueResult.Fail(ei.Message);
+			//}
+			//catch (Exception ex)
+			//{
+			//	await transaction.RollbackAsync();
+			//	// Loguj ex dla developera!
+			//	//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
+			//	throw new InvalidOperationException("Wystąpił błąd podczas usuwania zlecenia.", ex);
+			//}
 		}
+		//TODO
+		public async Task<IssueResult> CancelIssueAsync(int issueId, string userId)
+		{
+			return await _mediator.Send(new CancelIssueCommand(issueId, userId));
+			//await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
+			//try
+			//{
+			//	var issue = await _issueRepo.GetIssueByIdAsync(issueId)
+			//			?? throw new IssueException(issueId);
+			//	var listPallet = new List<Pallet>();
+			//	//anulowanie zlecenia dla pełnych palet
+			//	foreach (var pallet in issue.Pallets)
+			//	{
+			//		if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko pełne palety z przyjęcia
+			//		{
+			//			pallet.Status = PalletStatus.Available;
+			//			pallet.IssueId = null;
+			//			pallet.LocationId = 1;//lokalizacja rampy
+			//			listPallet.Add(pallet);
+			//		}
+			//	}
+			//	//palety kompletacyjne i zadania pickingu
+			//	var restPallets = issue.Pallets.Except(listPallet).ToList();
+
+			//	foreach (var p in restPallets)
+			//	{
+			//		if (p.Status == PalletStatus.Picking)
+			//		{
+			//			//zadanie do reversePicking
+			//		}
+			//	}
+			//	//usuń alokacje jeśli nie zrobione
+			//	var allocations = await _allocationRepo.GetAllocationsByIssueIdAsync(issueId);
+			//	foreach (var allocation in allocations)
+			//	{
+			//		_allocationRepo.DeleteAllocation(allocation);
+			//	}
+			//	//usuń virtualPallet jeśli należy tylko do tego zlecenia
+			//	var virtualPallets = await _allocationRepo.GetVirtualPalletsByIssue(issueId);
+			//	foreach (var vp in virtualPallets)
+			//	{
+			//		if (vp.Allocations.Count == 0)
+			//		{
+			//			_pickingPalletRepo.DeleteVirtualPalletPicking(vp);
+			//		}
+			//	}
+			//	issue.IssueStatus = IssueStatus.Cancelled;
+			//	issue.PerformedBy = userId;
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	await transaction.CommitAsync();
+			//	await _mediator.Publish(new CreateHistoryIssueNotification(issueId, userId));
+			//	foreach (var p in listPallet)
+			//	{
+			//		await _mediator.Publish(new CreatePalletOperationNotification(p.Id, 1, ReasonMovement.CancelIssue, userId, PalletStatus.Available, null));
+			//	}
+			//	return IssueResult.Ok($"Anulowano zlecenie {issueId}.");
+			//}
+			//catch (IssueException ie)
+			//{
+			//	await transaction.RollbackAsync();
+			//	return IssueResult.Fail(ie.Message);
+			//}
+			//catch (Exception ex)
+			//{
+			//	await transaction.RollbackAsync();
+			//	// Loguj ex dla developera!
+			//	//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
+			//	throw new InvalidOperationException("Wystąpił błąd podczas usuwania zlecenia.", ex);
+			//}
+		}
+
 		//zweryfikować czy wszystkie produkty zostały zrobione na palety - nie wiem czy taka ręczna walidacja potrzebna
 		public async Task<IssueResult> VerifyIssueToLoadAsync(int issueId, string userId)
 		{
-			try
-			{
-				var issue = await _issueRepo.GetIssueByIdAsync(issueId)
-						?? throw new IssueNotFoundException(issueId);
-				issue.IssueStatus = IssueStatus.ConfirmedToLoad;
-				//_historyService.CreateHistoryIssue(issue);
-				await _werehouseDbContext.SaveChangesAsync();
-				await _mediator.Publish(new CreateHistoryIssueNotification(issueId, userId));//
-				return IssueResult.Ok("Wydanie zatwierdzono.", issueId);
-			}
-			catch (IssueNotFoundException ei)
-			{
-				return IssueResult.Fail(ei.Message);
-
-			}
+			return await _mediator.Send(new VerifyIssueToLoadCommand(issueId, userId));
+			//await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
+			//try
+			//{
+			//	var issue = await _issueRepo.GetIssueByIdAsync(issueId)
+			//			?? throw new IssueNotFoundException(issueId);
+			//	issue.IssueStatus = IssueStatus.ConfirmedToLoad;
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	await transaction.CommitAsync();
+			//	await _mediator.Publish(new CreateHistoryIssueNotification(issueId, userId));//
+			//	return IssueResult.Ok("Wydanie zatwierdzono.", issueId);
+			//}
+			//catch (IssueNotFoundException ei)
+			//{
+			//	await transaction.RollbackAsync();
+			//	return IssueResult.Fail(ei.Message);
+			//}
+			//catch (Exception ex)
+			//{
+			//	await transaction.RollbackAsync();
+			//	// Loguj ex dla developera!
+			//	//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
+			//	throw new InvalidOperationException("Wystąpił błąd podczas usuwania zlecenia.", ex);
+			//}
 		}
 		//To jest lista do załadunku dla magazyniera lub dla biura do podmian palet
-		public async Task<ListPalletsToLoadDTO> LoadingIssueListAsync(int issueId, string sendedBy)
+		public async Task<ListPalletsToLoadDTO> LoadingIssueListAsync(int issueId, string userId)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(issueId)
-				?? throw new IssueNotFoundException(issueId);
-			//zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
-			return new ListPalletsToLoadDTO
-			{
-				IssueId = issueId,
-				ClientId = issue.ClientId,
-				ClientName = issue.Client.Name,
-				Pallets = issue.Pallets
-				.Where(p => p.Status == PalletStatus.InTransit ||
-				p.Status == PalletStatus.InStock ||
-				p.Status == PalletStatus.Available ||
-				p.Status == PalletStatus.ToIssue)
-				.Select(p => new PalletToLoadDTO
-				{
-					PalletId = p.Id,
-					LocationName = (p.Location.Bay + " " + p.Location.Aisle + " " + p.Location.Position + " " + p.Location.Height).ToString(),
-					PalletStatus = p.Status,
-					LocationId = p.LocationId,
-					ProductOnPalletIssue = p.ProductsOnPallet.Select(pp => new ProductOnPalletIssueDTO
-					{
-						ProductId = pp.ProductId,
-						ProductName = pp.Product.Name,
-						SKU = pp.Product.SKU,
-						BestBefore = pp.BestBefore,
-						Quantity = pp.Quantity,
-					}).ToList()
-				}).OrderBy(p => p.LocationId)
-				.ToList()
-			};
+			return await _mediator.Send(new LoadingIssueListQuery(issueId, userId));
+			//var issue = await _issueRepo.GetIssueByIdAsync(issueId)
+			//	?? throw new IssueException(issueId);
+			////zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
+			//return new ListPalletsToLoadDTO
+			//{
+			//	IssueId = issueId,
+			//	ClientId = issue.ClientId,
+			//	ClientName = issue.Client.Name,
+			//	Pallets = issue.Pallets
+			//	.Where(p => p.Status == PalletStatus.InTransit ||
+			//	p.Status == PalletStatus.InStock ||
+			//	p.Status == PalletStatus.Available ||
+			//	p.Status == PalletStatus.ToIssue)
+			//	.Select(p => new PalletToLoadDTO
+			//	{
+			//		PalletId = p.Id,
+			//		LocationName = (p.Location.Bay + " " + p.Location.Aisle + " " + p.Location.Position + " " + p.Location.Height).ToString(),
+			//		PalletStatus = p.Status,
+			//		LocationId = p.LocationId,
+			//		ProductOnPalletIssue = p.ProductsOnPallet.Select(pp => new ProductOnPalletIssueDTO
+			//		{
+			//			ProductId = pp.ProductId,
+			//			ProductName = pp.Product.Name,
+			//			SKU = pp.Product.SKU,
+			//			BestBefore = pp.BestBefore,
+			//			Quantity = pp.Quantity,
+			//		}).ToList()
+			//	}).OrderBy(p => p.LocationId)
+			//	.ToList()
+			//};
 		}
 		//zatwierdzenie pojedynczej palety że jest już załadowana - status
-		public async Task MarkAsLoadedAsync(string palletId, string sendedBy)
+		public async Task<IssueResult> MarkAsLoadedAsync(string palletId, string sendedBy)
 		{
-			var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
-			if (!(pallet.Status == PalletStatus.ToIssue || pallet.Status == PalletStatus.InTransit || pallet.Status == PalletStatus.Available ||
-				pallet.Status == PalletStatus.InStock))
-			{ throw new PalletNotFoundException("Paleta nie ma statusu do załadowania"); }
-			pallet.Status = PalletStatus.Loaded;
-			await _werehouseDbContext.SaveChangesAsync();
-			await _mediator.Publish(new CreatePalletOperationNotification(
-					pallet.Id,
-					pallet.LocationId,
-					ReasonMovement.Loaded,
-					sendedBy,
-					PalletStatus.Loaded,
-					null));
-			await _werehouseDbContext.SaveChangesAsync();	
+			return await _mediator.Send(new MarkAsLoadedCommand(palletId, sendedBy));
+			//var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
+			//if (!(pallet.Status == PalletStatus.ToIssue || pallet.Status == PalletStatus.InTransit || pallet.Status == PalletStatus.Available ||
+			//	pallet.Status == PalletStatus.InStock))
+			//{ throw new PalletException("Paleta nie ma statusu do załadowania"); }
+			//pallet.Status = PalletStatus.Loaded;
+			//await _werehouseDbContext.SaveChangesAsync();
+			//await _mediator.Publish(new CreatePalletOperationNotification(
+			//		pallet.Id,
+			//		pallet.LocationId,
+			//		ReasonMovement.Loaded,
+			//		sendedBy,
+			//		PalletStatus.Loaded,
+			//		null));
+			////await _werehouseDbContext.SaveChangesAsync();
 		}
 		// zamyka biuro a nie magazyn w przypadku gdy np. załadunek sie nie mieści
-		public async Task FinishIssueNotCompleted(int issueId, string performedBy)
+		public async Task<IssueResult> FinishIssueNotCompleted(int issueId, string performedBy)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueNotFoundException(issueId);
-			var palletsReturn = new List<Pallet>();
-			foreach (var pallet in issue.Pallets.ToList())
-			{
-				if (pallet.Status != PalletStatus.Loaded)
-				{
-					pallet.Status = PalletStatus.Available;
-					pallet.IssueId = null;
-					issue.Pallets.Remove(pallet);
-					palletsReturn.Add(pallet);
-				}
-			}
-			issue.IssueStatus = IssueStatus.IsShipped;
-			issue.PerformedBy = performedBy;
-			await _werehouseDbContext.SaveChangesAsync();
-			foreach (var pallet in issue.Pallets)
-			{
-				await _mediator.Publish(new CreatePalletOperationNotification(
-						pallet.Id,
-						pallet.LocationId,
-						ReasonMovement.ToLoad,
-						performedBy,
-						PalletStatus.Loaded,
-						null
-					));
-				foreach (var product in pallet.ProductsOnPallet)
-				{
-					await _mediator.Publish(new ChangeQuantityCommand(product.ProductId, -product.Quantity));
-				}
-			}
-			foreach (var pallet in palletsReturn)
-			{
-				await _mediator.Publish(new CreatePalletOperationNotification(
-						pallet.Id,
-						pallet.LocationId,
-						ReasonMovement.Correction,
-						performedBy,
-						PalletStatus.Available,
-						null
-					));
-			}
-			await _mediator.Publish(new CreateHistoryIssueNotification(issueId, performedBy));
-			await _werehouseDbContext.SaveChangesAsync();
+			return await _mediator.Send(new FinishIssueNotCompletedCommand(issueId, performedBy));
+			//	var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueException(issueId);
+			//	var palletsReturn = new List<Pallet>();
+			//	foreach (var pallet in issue.Pallets.ToList())
+			//	{
+			//		if (pallet.Status != PalletStatus.Loaded)
+			//		{
+			//			pallet.Status = PalletStatus.Available;
+			//			pallet.IssueId = null;
+			//			issue.Pallets.Remove(pallet);
+			//			palletsReturn.Add(pallet);
+			//		}
+			//	}
+			//	issue.IssueStatus = IssueStatus.IsShipped;
+			//	issue.PerformedBy = performedBy;
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	foreach (var pallet in issue.Pallets)
+			//	{
+			//		await _mediator.Publish(new CreatePalletOperationNotification(
+			//				pallet.Id,
+			//				pallet.LocationId,
+			//				ReasonMovement.ToLoad,
+			//				performedBy,
+			//				PalletStatus.Loaded,
+			//				null
+			//			));
+			//		foreach (var product in pallet.ProductsOnPallet)
+			//		{
+			//			await _mediator.Send(new ChangeQuantityCommand(product.ProductId, -product.Quantity));
+			//		}
+			//	}
+			//	foreach (var pallet in palletsReturn)
+			//	{
+			//		await _mediator.Publish(new CreatePalletOperationNotification(
+			//				pallet.Id,
+			//				pallet.LocationId,
+			//				ReasonMovement.Correction,
+			//				performedBy,
+			//				PalletStatus.Available,
+			//				null
+			//			));
+			//	}
+			//	await _mediator.Publish(new CreateHistoryIssueNotification(issueId, performedBy));
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	return IssueResult.Ok($"Zamknięto wydanie {issueId}.");
 		}
 		//zatwierdzenie zakończenia załadunku przez magazyniera
-		public async Task CompletedIssueAsync(int issueId, string confirmedBy)
+		public async Task<IssueResult> CompletedIssueAsync(int issueId, string confirmedBy)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueNotFoundException(issueId);
-			foreach (var pallet in issue.Pallets)
-			{
-				if (pallet.Status != PalletStatus.Loaded)
-				{
-					throw new IssueNotFoundException("Nie załadowano wszystkich palet.");
-				}
-			}
-			issue.IssueStatus = IssueStatus.IsShipped;
-			await _werehouseDbContext.SaveChangesAsync();
-			await _mediator.Publish(new CreateHistoryIssueNotification(issueId, confirmedBy));
+			return await _mediator.Send(new CompletedIssueCommand(issueId, confirmedBy));
+			//var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueException(issueId);
+			//foreach (var pallet in issue.Pallets)
+			//{
+			//	if (pallet.Status != PalletStatus.Loaded)
+			//	{
+			//		throw new IssueException("Nie załadowano wszystkich palet.");
+			//	}
+			//}
+			//issue.IssueStatus = IssueStatus.IsShipped;
+			//await _werehouseDbContext.SaveChangesAsync();
+			//await _mediator.Publish(new CreateHistoryIssueNotification(issueId, confirmedBy));
+			//return IssueResult.Ok($"Zakończono załadunek {issueId}.");
 		}
 		//sprawdzenie załadunku i przerzucenie palet załadowanych do archiwum, zmniejszenie zasobu magazynowego
 		public async Task<IssueResult> VerifyIssueAfterLoadingAsync(int issueId, string verifyBy)
 		{
 			//if (_mediator != null)
-			//	return await _mediator.Send(new VerifyIssueAfterLoadingCommand(issueId, verifyBy));
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
-			try
-			{
-				var issue = await _issueRepo.GetIssueByIdAsync(issueId)
-						?? throw new IssueNotFoundException(issueId);
-				issue.PerformedBy = verifyBy;
-				if (issue.IssueStatus != IssueStatus.IsShipped) throw new IssueNotFoundException("Nie zakończono załadunku.");
-				issue.IssueStatus = IssueStatus.Archived;
+			return await _mediator.Send(new VerifyIssueAfterLoadingCommand(issueId, verifyBy));
+			//using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
+			//try
+			//{
+			//	var issue = await _issueRepo.GetIssueByIdAsync(issueId)
+			//			?? throw new IssueException(issueId);
+			//	issue.PerformedBy = verifyBy;
+			//	if (issue.IssueStatus != IssueStatus.IsShipped) throw new IssueException("Nie zakończono załadunku.");
+			//	issue.IssueStatus = IssueStatus.Archived;
 
-				foreach (var pallet in issue.Pallets)
-				{
-					pallet.Status = PalletStatus.Archived;
-					await _mediator.Publish(new CreatePalletOperationNotification(
-							pallet.Id,
-							pallet.LocationId,
-							ReasonMovement.ToLoad,
-							issue.PerformedBy,
-							PalletStatus.Archived,
-							null
-						));
+			//	foreach (var pallet in issue.Pallets)
+			//	{
+			//		pallet.Status = PalletStatus.Archived;
+			//		await _mediator.Publish(new CreatePalletOperationNotification(
+			//				pallet.Id,
+			//				pallet.LocationId,
+			//				ReasonMovement.ToLoad,
+			//				issue.PerformedBy,
+			//				PalletStatus.Archived,
+			//				null
+			//			));
 
-					foreach (var product in pallet.ProductsOnPallet)
-					{
-						await _mediator.Publish(new ChangeQuantityCommand(product.ProductId, -product.Quantity));
-					}
-				}
-				await _mediator.Publish(new CreateHistoryIssueNotification(issueId, verifyBy));//
-				await _werehouseDbContext.SaveChangesAsync();
-				await transaction.CommitAsync();
-				return IssueResult.Ok("Załadunek zatwierdzony, zasoby uaktulanione.");
-			}
-			catch (IssueNotFoundException ei)
-			{
-				await transaction.RollbackAsync();
-				return IssueResult.Fail(ei.Message);
-			}
-			catch (Exception ex)
-			{
-				await transaction.RollbackAsync();
-				// Loguj ex dla developera!
-				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
-				return IssueResult.Fail("Wystąpił nieoczenikawy błąd przy weryfikacji");
-			}
+			//		foreach (var product in pallet.ProductsOnPallet)
+			//		{
+			//			await _mediator.Send(new ChangeQuantityCommand(product.ProductId, -product.Quantity));
+			//		}
+			//	}
+			//	await _mediator.Publish(new CreateHistoryIssueNotification(issueId, verifyBy));//
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	await transaction.CommitAsync();
+			//	return IssueResult.Ok("Załadunek zatwierdzony, zasoby uaktulanione.");
+			//}
+			//catch (IssueException ei)
+			//{
+			//	await transaction.RollbackAsync();
+			//	return IssueResult.Fail(ei.Message);
+			//}
+			//catch (Exception ex)
+			//{
+			//	await transaction.RollbackAsync();
+			//	// Loguj ex dla developera!
+			//	//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
+			//	return IssueResult.Fail("Wystąpił nieoczenikawy błąd przy weryfikacji");
+			//}
 		}
 		//podmiana palety podczas załadunku
-		public async Task<IssueResult> ChangePalletDuringLoadingAsync(int issueId, string oldPalletId, string newPalletId, string performedBy)
+		public async Task<IssueResult> ChangePalletInIssueAsync(int issueId, string oldPalletId, string newPalletId, string performedBy)
 		{
-			try
-			{
-				if (oldPalletId == newPalletId)
-				{
-					throw new PalletNotFoundException("Nie można podmienić paletę na tą samą");
-				}
-				var issue = await _issueRepo.GetIssueByIdAsync(issueId);
-				if (issue == null) throw new IssueNotFoundException(issueId);
-				var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(oldPalletId);
-				var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(newPalletId);
-				if (palletToAddingIssue == null || palletToRemoveFromIssue == null)
-				{
-					throw new PalletNotFoundException("Jedna z podanych palet nie istnieje.");
-				}
-				if (palletToRemoveFromIssue.IssueId != issueId)
-				{
-					throw new PalletNotFoundException("Paleta do usunięcia nie należy do zlecenia.");
-				}
-				if (palletToAddingIssue.IssueId != null ||
-					(palletToAddingIssue.Status != PalletStatus.Available &&
-					palletToAddingIssue.Status != PalletStatus.InStock))
-				{
-					throw new PalletNotFoundException("Nowej palety nie można przypisać do zlecenia, błędny status.");
-				}
-				var productOnOldPallet = palletToRemoveFromIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
-				var productOnNewPallet = palletToAddingIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
-				if (productOnOldPallet != productOnNewPallet)
-				{
-					throw new PalletNotFoundException("Nie można podmienić palet z różnymi produktami.");
-				}
-				palletToAddingIssue.IssueId = issue.Id;
-				palletToAddingIssue.Status = PalletStatus.InTransit;
-				issue.Pallets.Add(palletToAddingIssue);
+			return await _mediator.Send(new ChangePalletInIssueCommand(issueId, oldPalletId, newPalletId, performedBy));
+			//try
+			//{
+			//	if (oldPalletId == newPalletId)
+			//	{
+			//		throw new PalletException("Nie można podmienić paletę na tą samą");
+			//	}
+			//	var issue = await _issueRepo.GetIssueByIdAsync(issueId);
+			//	if (issue == null) throw new IssueException(issueId);
+			//	var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(oldPalletId);
+			//	var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(newPalletId);
+			//	if (palletToAddingIssue == null || palletToRemoveFromIssue == null)
+			//	{
+			//		throw new PalletException("Jedna z podanych palet nie istnieje.");
+			//	}
+			//	if (palletToRemoveFromIssue.IssueId != issueId)
+			//	{
+			//		throw new PalletException("Paleta do usunięcia nie należy do zlecenia.");
+			//	}
+			//	if (palletToAddingIssue.IssueId != null ||
+			//		(palletToAddingIssue.Status != PalletStatus.Available &&
+			//		palletToAddingIssue.Status != PalletStatus.InStock))
+			//	{
+			//		throw new PalletException("Nowej palety nie można przypisać do zlecenia, błędny status.");
+			//	}
+			//	var productOnOldPallet = palletToRemoveFromIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
+			//	var productOnNewPallet = palletToAddingIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
+			//	if (productOnOldPallet != productOnNewPallet)
+			//	{
+			//		throw new PalletException("Nie można podmienić palet z różnymi produktami.");
+			//	}
+			//	palletToAddingIssue.IssueId = issue.Id;
+			//	palletToAddingIssue.Status = PalletStatus.InTransit;
+			//	issue.Pallets.Add(palletToAddingIssue);
 
-				palletToRemoveFromIssue.IssueId = null;
-				palletToRemoveFromIssue.Status = PalletStatus.Available;
-				issue.Pallets.Remove(palletToRemoveFromIssue);
-				issue.IssueStatus = IssueStatus.ChangingPallet;
-				issue.PerformedBy = performedBy;
-				await _mediator.Publish(new CreatePalletOperationNotification(
-						palletToRemoveFromIssue.Id,
-						palletToRemoveFromIssue.LocationId,
-						ReasonMovement.Correction,
-						issue.PerformedBy,
-						PalletStatus.Available,
-						null
-					));
-				await _mediator.Publish(new CreatePalletOperationNotification(
-							palletToAddingIssue.Id,
-							palletToAddingIssue.LocationId,
-							ReasonMovement.ToLoad,
-							issue.PerformedBy,
-							PalletStatus.ToIssue,
-							null
-						));
+			//	palletToRemoveFromIssue.IssueId = null;
+			//	palletToRemoveFromIssue.Status = PalletStatus.Available;
+			//	issue.Pallets.Remove(palletToRemoveFromIssue);
+			//	issue.IssueStatus = IssueStatus.ChangingPallet;
+			//	issue.PerformedBy = performedBy;
+			//	await _mediator.Publish(new CreatePalletOperationNotification(
+			//			palletToRemoveFromIssue.Id,
+			//			palletToRemoveFromIssue.LocationId,
+			//			ReasonMovement.Correction,
+			//			issue.PerformedBy,
+			//			PalletStatus.Available,
+			//			null
+			//		));
+			//	await _mediator.Publish(new CreatePalletOperationNotification(
+			//				palletToAddingIssue.Id,
+			//				palletToAddingIssue.LocationId,
+			//				ReasonMovement.ToLoad,
+			//				issue.PerformedBy,
+			//				PalletStatus.ToIssue,
+			//				null
+			//			));
 
-				await _mediator.Publish(new CreateHistoryIssueNotification(issueId, performedBy));
-				await _werehouseDbContext.SaveChangesAsync();
-				return IssueResult.Ok("Podmieniono palety.", productOnOldPallet.Value);
-			}
-			catch (PalletNotFoundException ep)
-			{
-				return IssueResult.Fail(ep.Message);
-			}
-			catch (IssueNotFoundException ei)
-			{
-				return IssueResult.Fail(ei.Message);
+			//	await _mediator.Publish(new CreateHistoryIssueNotification(issueId, performedBy));
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	return IssueResult.Ok("Podmieniono palety.", productOnOldPallet.Value);
+			//}
+			//catch (PalletException ep)
+			//{
+			//	return IssueResult.Fail(ep.Message);
+			//}
+			//catch (IssueException ei)
+			//{
+			//	return IssueResult.Fail(ei.Message);
 
-			}
-			catch (Exception ex)
-			{
-				// Loguj ex dla developera!
-				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
-				return IssueResult.Fail("Operacaja się nie powiodła.");
-			}
+			//}
+			//catch (Exception ex)
+			//{
+			//	// Loguj ex dla developera!
+			//	//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
+			//	return IssueResult.Fail("Operacaja się nie powiodła.");
+			//}
 		}
 		// To jest lista palet do zdjęcia dla wózkowego
-		public async Task<IssuePalletsWithLocationDTO> PalletsToTakeOffList(int issueId, string userId)
+		public async Task<IssuePalletsWithLocationDTO> PalletsToTakeOffListAsync(int issueId, string userId)
 		{
-			var list = await _issueRepo.GetPalletByIssueIdAsync(issueId);
-			//może tu jakieś potwierdzenie że zweryfikowano do załadunku
-			var listToShow = new IssuePalletsWithLocationDTO
-			{
-				IssueId = issueId,
-				PalletList = list
-			};
-			return listToShow;
+			return await _mediator.Send(new PalletsToTakeOffListQuery(issueId, userId));
+			//var list = await _issueRepo.GetPalletByIssueIdAsync(issueId);
+			////może tu jakieś potwierdzenie że zweryfikowano do załadunku
+			//var listToShow = new IssuePalletsWithLocationDTO
+			//{
+			//	IssueId = issueId,
+			//	PalletList = list
+			//};
+			//return listToShow;
 		}
 		public async Task<List<IssueDTO>> GetIssuesByFiltrAsync(IssueReceiptSearchFilter filter)
 		{
-			try
-			{
-				var issues = await _issueRepo.GetIssuesByFilter(filter).ToListAsync();
-				return _mapper.Map<List<IssueDTO>>(issues);
-			}
-			catch (Exception ex)
-			{
-				//_logger.LogError(ex, "Error fetching issues.");
-				return new List<IssueDTO>();
-			}
+			return await _mediator.Send(new GetIssuesByFiltrQuery(filter));
+			//try
+			//{
+			//	var issues = await _issueRepo.GetIssuesByFilter(filter).ToListAsync();
+			//	return _mapper.Map<List<IssueDTO>>(issues);
+			//}
+			//catch (Exception ex)
+			//{
+			//	//_logger.LogError(ex, "Error fetching issues.");
+			//	return new List<IssueDTO>();
+			//}
 		}
+
+
 		//Metody pomocnicze
 		//private async Task<List<Allocation>> AddAllocationToIssueAsync(Issue issue, int productId, int quantity, DateOnly bestBefore, string userId)
 		//{

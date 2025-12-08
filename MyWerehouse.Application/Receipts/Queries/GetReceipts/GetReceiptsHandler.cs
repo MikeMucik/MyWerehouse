@@ -12,18 +12,14 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceipts
 {
-	public class GetReceiptsHandler : IRequestHandler<GetReceiptsQuery, List<ReceiptDTO>>
+	public class GetReceiptsHandler(IMapper mapper, IReceiptRepo receiptRepo) : IRequestHandler<GetReceiptsQuery, List<ReceiptDTO>>
 	{
-		private readonly IMapper _mapper;
-		private readonly IReceiptRepo _receiptRepo;
-		public GetReceiptsHandler(IMapper mapper, IReceiptRepo receiptRepo)
+		private readonly IMapper _mapper = mapper;
+		private readonly IReceiptRepo _receiptRepo = receiptRepo;
+
+		public async Task<List<ReceiptDTO>> Handle(GetReceiptsQuery request, CancellationToken ct)
 		{
-			_mapper = mapper;
-			_receiptRepo = receiptRepo;
-		}
-		public async Task<List<ReceiptDTO>> Handle(GetReceiptsQuery request, CancellationToken cancellationToken)
-		{
-			var receipts = await _receiptRepo.GetReceiptByFilter(request.Filter).ToListAsync();
+			var receipts = await _receiptRepo.GetReceiptByFilter(request.Filter).ToListAsync(ct);
 			return _mapper.Map<List<ReceiptDTO>>(receipts);
 		}
 	}

@@ -16,6 +16,7 @@ namespace MyWerehouse.Domain.Models
 		Merge = 5,
 		ToLoad = 6,		
 		Loaded = 7,
+		CancelIssue = 8,
 		//InStock = 8,
 		//Archived= 9,
 	}

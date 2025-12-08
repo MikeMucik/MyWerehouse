@@ -33,7 +33,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueItemTestsRepo
 			var result = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId);
 			
 			//Assert			
-			Assert.Equal(20, result);
+			Assert.Equal(150, result);
 		}
 	}
 }

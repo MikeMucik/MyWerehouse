@@ -42,7 +42,8 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Issues
-				.Where(i=>i.IssueStatus != IssueStatus.Archived)				
+				.Where(i=>i.IssueStatus != IssueStatus.Archived)
+				//.AsQueryable();
 				;
 			if (filter.IssueId > 0)
 			{ 

@@ -117,9 +117,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var issue = new Issue
 			{
 				Client = initailClient,
-				IssueDateTimeCreate = DateTime.Now,
+				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueStatus = IssueStatus.New,
-				IssueDateTimeSend = new DateTime(2025, 9, 9),
+				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
 				Pallets = new List<Pallet>(),
 				PerformedBy = "TestUser",
 			};
@@ -460,7 +460,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{
-					new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+					new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 				}
 			},
 				new Pallet
@@ -471,7 +471,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Status = PalletStatus.Available,
 					ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 				},
 				new Pallet
@@ -482,7 +482,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Status = PalletStatus.Available,
 					ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 					}
 				},
 				new Pallet
@@ -493,7 +493,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 				},
 				new Pallet
@@ -504,7 +504,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Status = PalletStatus.Available,
 					ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 				},
 			};
@@ -673,7 +673,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 			};
 			var pallet2 = new Pallet
@@ -684,7 +684,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 			};
 			var pallet3 = new Pallet
@@ -695,7 +695,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Status = PalletStatus.ToPicking,//paleta jest już paletą źródłową pickingu
 				ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 			};
 			var pallet4 = new Pallet
@@ -706,7 +706,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 			};
 			var pallet5 = new Pallet
@@ -717,7 +717,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>
 					{
-						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+						new ProductOnPallet { Product = product2, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), DateAdded = new DateTime(2025,4,4) }
 					}
 			};
 			var oldIssue = new Issue

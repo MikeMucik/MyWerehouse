@@ -79,7 +79,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 					await _werehouseDbContext.SaveChangesAsync(cancellationToken);
 					return ReceiptResult.Ok($"Paleta {pallet.Id} została dodana do przyjęcia {request.ReceiptId}", pallet.Id);
 				}
-				catch (ReceiptNotFoundException erp)
+				catch (ReceiptException erp)
 				{
 					await transaction.RollbackAsync(cancellationToken);
 					return ReceiptResult.Fail(erp.Message);

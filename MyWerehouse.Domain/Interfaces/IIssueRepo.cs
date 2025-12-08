@@ -10,7 +10,7 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IIssueRepo
 	{
 		void AddIssue(Issue issue);
-		void DeleteIssue(Issue issue);		
+		void DeleteIssue(Issue issue);	
 		Task<Issue?> GetIssueByIdAsync(int id);		
 		Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids);
 		Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(int id, CancellationToken cancellationToken);

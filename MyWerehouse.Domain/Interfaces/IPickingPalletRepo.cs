@@ -18,7 +18,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<int> GetVirtualPalletIdFromPalletIdAsync(string palletId);			
 		Task<VirtualPallet> GetVirtualPalletByIdAsync(int palletId);			
 		void ClosePickingPallet(string palletId, int issueId);
-
+		//Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int  issueId);
 		//Allocation AddAllocation(VirtualPallet pallet, Issue issue, int quantity);
 		//void DeleteAllocation(Allocation allocation);
 		//Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate);

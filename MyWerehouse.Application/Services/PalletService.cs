@@ -100,10 +100,10 @@ namespace MyWerehouse.Application.Services
 		public async Task DeletePalletAsync(string id) //chyba tylko dla receipt ale tam na razie nie używam
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(id)
-				?? throw new PalletNotFoundException($"Nie ma palety o numerze {id}");
+				?? throw new PalletException($"Nie ma palety o numerze {id}");
 			var canDelete = await _palletMovementRepo.CanDeletePalletAsync(id);
 			if (!canDelete)
-				throw new PalletNotFoundException($"Palety o numerze {id} nie można usunąć");
+				throw new PalletException($"Palety o numerze {id} nie można usunąć");
 
 			_palletRepo.DeletePallet(pallet);
 			await _werehouseDbContext.SaveChangesAsync();
@@ -162,7 +162,7 @@ namespace MyWerehouse.Application.Services
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
 			try
 			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(palletId) ?? throw new PalletNotFoundException(palletId);
+				var pallet = await _palletRepo.GetPalletByIdAsync(palletId) ?? throw new PalletException(palletId);
 				//sprawdzenie czy lokalizacja jest zajęta
 				//tu front musi przy pomocy backanedu wyliczyć locationId
 				if (destinationLocationId <= 0)
@@ -212,7 +212,7 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter)
 		{
-			var pallet = _palletRepo.GetPalletsByFilter(filter) ?? throw new PalletNotFoundException("Brak palety/palet o zadanych parametrach");
+			var pallet = _palletRepo.GetPalletsByFilter(filter) ?? throw new PalletException("Brak palety/palet o zadanych parametrach");
 			var palletDTO = await pallet.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync();
 			return palletDTO;
 		}

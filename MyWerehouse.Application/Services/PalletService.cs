@@ -91,7 +91,7 @@ namespace MyWerehouse.Application.Services
 							pallet.LocationId,
 							ReasonMovement.Picking,
 							userId,
-							PalletStatus.ToIssue,
+							pallet.Status,
 							null
 						));
 			await _werehouseDbContext.SaveChangesAsync();

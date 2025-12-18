@@ -33,4 +33,13 @@
     <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ReversePickings\Command\CreateTaskToReversePicking\" />
+    <Folder Include="ReversePickings\Command\ExecutiveReversePicking\" />
+    <Folder Include="ReversePickings\Command\AddProductToSourcePallet\" />
+    <Folder Include="ReversePickings\Command\AddToExistingPallet\" />
+    <Folder Include="ReversePickings\Command\AddToNewPallet\" />
+    <Folder Include="ReversePickings\Queries\" />
+  </ItemGroup>
+
 </Project>

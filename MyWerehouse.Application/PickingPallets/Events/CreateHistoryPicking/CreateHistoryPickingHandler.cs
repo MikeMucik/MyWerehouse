@@ -16,19 +16,17 @@ namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 		private readonly IAllocationRepo _allocationRepo;
 		private readonly IHistoryPickingRepo _historyPickingRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IPalletRepo _palletRepo;
 		public CreateHistoryPickingHandler(
 			IPickingPalletRepo pickingPalletRepo,
 			IAllocationRepo allocationRepo,
 			IHistoryPickingRepo historyPickingRepo,
-			WerehouseDbContext werehouseDbContext,
-			IPalletRepo palletRepo)
+			WerehouseDbContext werehouseDbContext
+			)
 		{
 			_pickingPalletRepo = pickingPalletRepo;
 			_allocationRepo = allocationRepo;
 			_historyPickingRepo = historyPickingRepo;
 			_werehouseDbContext = werehouseDbContext;
-			_palletRepo = palletRepo;
 		}
 		public async Task Handle(CreateHistoryPickingNotification request, CancellationToken cancellationToken)
 		{
@@ -38,7 +36,7 @@ namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 			var allocation = await _allocationRepo.GetAllocationAsync(request.AllocationId)
 				?? throw new InvalidOperationException($"Brak alokacji {request.AllocationId}.");
 			var quantity = request.QuantityPicked;
-			if (request.QuantityPicked == 0)
+			if (request.QuantityPicked == 0) // Maybe Error
 			{
 				if (allocation.PickingStatus == PickingStatus.Picked)
 				{

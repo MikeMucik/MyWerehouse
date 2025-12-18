@@ -65,15 +65,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			DbContext.SaveChanges();
 			var pallletMovement = new PalletMovement
 			{
-				Pallet = pallet1,
-				SourceLocation = location1,
-				DestinationLocation = location2,
+				PalletId = pallet1.Id,
+				SourceLocationId = location1.Id,
+				DestinationLocationId = location2.Id,
 				PalletMovementDetails = new List<PalletMovementDetail>
 				{
 					new PalletMovementDetail
 					{
 						Quantity = -1,
-						Product =product,
+						ProductId =product.Id,
 					}
 				},
 				PalletStatus = PalletStatus.Available,
@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			DbContext.SaveChanges();
 			var historyIssue = new HistoryIssue
 			{
-				Issue = issue,
+				IssueId = issue.Id,
 				ClientId = issue.ClientId,
 				DateTime = DateTime.Now,
 				//Items
@@ -277,7 +277,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			//Act
 			var historyReceipt = new HistoryReceipt
 			{
-				Receipt = receipt,
+				ReceiptId = receipt.Id,
 				ClientId = receipt.ClientId,
 				StatusAfter = ReceiptStatus.Verified,
 				DateTime = DateTime.Now,
@@ -397,7 +397,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			DbContext.SaveChanges();
 			var historyPicking = new HistoryPicking
 			{
-				Allocation = virtualPallet.Allocations.First(),
+				AllocationId = virtualPallet.Allocations.First().Id,
 				QuantityAllocated = virtualPallet.Allocations.First().Quantity,
 				StatusAfter = PickingStatus.Picked,
 				DateTime = DateTime.Now,
@@ -405,8 +405,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				StatusBefore = PickingStatus.Allocated,
 				ProductId = virtualPallet.Allocations.First().VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
 				QuantityPicked = 1,
-				Issue = issue,
-				Pallet = pallet1,
+				IssueId = issue.Id,
+				PalletId = pallet1.Id,
 
 			};
 			var historyPickingRepo = new Infrastructure.Repositories.HistoryPickingRepo(DbContext);

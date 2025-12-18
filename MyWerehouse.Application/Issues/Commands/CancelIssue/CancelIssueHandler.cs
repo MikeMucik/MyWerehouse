@@ -64,7 +64,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 					if (p.Status == PalletStatus.Picking)
 					{
 						//zadanie do reversePicking - tu bedzie handler
-						await _reversePickingService.CreateTaskToReversePickingAsync(p.Id);
+						await _reversePickingService.CreateTaskToReversePickingAsync(p.Id, request.UserId);
 					}
 				}
 				//usuń alokacje jeśli nie zrobione

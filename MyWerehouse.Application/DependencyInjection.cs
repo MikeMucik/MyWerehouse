@@ -28,7 +28,8 @@ namespace MyWerehouse.Application
 			services.AddTransient<IPalletService, PalletService>();
 			services.AddTransient<IPickingPalletService, PickingPalletService>();			
 			services.AddTransient<IProductService, ProductService>();
-			services.AddTransient<IReceiptService, ReceiptService>();			
+			services.AddTransient<IReceiptService, ReceiptService>();	
+			services.AddTransient<IReversePickingService, ReversePickingService>();
 			services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 			services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

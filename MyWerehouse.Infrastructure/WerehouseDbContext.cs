@@ -17,6 +17,7 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }//																
 		public DbSet<HistoryReceiptDetail> HistoryReceiptDetails { get; set; }//																
 		public DbSet<HistoryPicking> HistoryPickings { get; set; }//		
+		public DbSet<HistoryReversePicking> HistoryReversePickings { get; set; }
 		public DbSet<Inventory> Inventories { get; set; }
 		public DbSet<Issue> Issues { get; set; }
 		public DbSet<IssueItem> IssueItems { get; set; }
@@ -28,6 +29,7 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<ProductDetail> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
 		public DbSet<Receipt> Receipts { get; set; }
+		public DbSet<ReversePicking> ReversePickings { get; set; }
 		public DbSet<VirtualPallet> VirtualPallets { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -111,13 +113,6 @@ namespace MyWerehouse.Infrastructure
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 
-				entity.HasOne(e => e.Issue)
-					//.WithMany(p => p.HistoryIssues)
-					.WithMany()
-					.HasForeignKey(e => e.IssueId)
-					.IsRequired()
-					.OnDelete(DeleteBehavior.Restrict);//
-
 				entity.Property(r => r.StatusAfter)
 				.HasConversion<string>();
 			});
@@ -131,13 +126,6 @@ namespace MyWerehouse.Infrastructure
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
-
-				entity.HasOne(e => e.Receipt)
-					//.WithMany(p => p.HistoryReceipt)
-					.WithMany()
-					.HasForeignKey(e => e.ReceiptId)
-					.IsRequired()
-					.OnDelete(DeleteBehavior.Restrict);//
 
 				entity.Property(r => r.StatusAfter)
 				.HasConversion<string>();
@@ -153,32 +141,28 @@ namespace MyWerehouse.Infrastructure
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 
-				entity.HasOne(a => a.Pallet)
-					.WithMany()
-					.HasForeignKey(a => a.PalletId)
-					.IsRequired()
-					.OnDelete(DeleteBehavior.Restrict);
-
-				entity.HasOne(a => a.Allocation)
-					.WithMany()
-					.HasForeignKey(h => h.AllocationId)
-					.OnDelete(DeleteBehavior.Restrict);
-
-				entity.HasOne(a => a.Issue)
-				  .WithMany(i=>i.HistoryPickings)
-				   .HasForeignKey(h => h.IssueId)
-				   .OnDelete(DeleteBehavior.Restrict);
-
 				entity.Property(a => a.StatusBefore)
 				.HasConversion<string>();
 
 				entity.Property(a => a.StatusAfter)
 				.HasConversion<string>();
 				//// Indeks dla szybkiego wyszukiwania
-				//entity.HasIndex(h => h.AllocationId);
-				//entity.HasIndex(h => h.DateTime);
+				entity.HasIndex(x => x.PalletId);
+				entity.HasIndex(x => x.AllocationId);
+				entity.HasIndex(x => x.IssueId);
+				entity.HasIndex(h => h.DateTime);
 			});
+			modelBuilder.Entity<HistoryReversePicking>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 
+				entity.Property(a => a.StatusBefore)
+				.HasConversion<string>();
+
+				entity.Property(a => a.StatusAfter)
+				.HasConversion<string>();
+			});
 			modelBuilder.Entity<Inventory>(entity =>
 			{
 				entity.HasKey(e => e.ProductId);
@@ -255,17 +239,10 @@ namespace MyWerehouse.Infrastructure
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
-
-				entity.HasOne(pm => pm.Pallet)
-					.WithMany()
-					.HasForeignKey(pm => pm.PalletId)
-					.IsRequired()
-					.OnDelete(DeleteBehavior.Restrict);
-				// ??Zrób cascade bo to tyczy się tylko jak przyjęcie jeszcze nie zweryfikowane
+				
 				entity.Property(m => m.Reason)
 				.HasConversion<string>();
 			});
-
 			modelBuilder.Entity<PalletMovementDetail>(entity =>
 			{
 				entity.HasOne(md => md.PalletMovement)
@@ -347,7 +324,6 @@ namespace MyWerehouse.Infrastructure
 					v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null))
 				.HasColumnType("date");
 			});
-
 			modelBuilder.Entity<Receipt>(entity =>
 			 {
 				 entity.HasKey(e => e.Id);
@@ -358,6 +334,13 @@ namespace MyWerehouse.Infrastructure
 				 .HasForeignKey(p => p.ReceiptId)
 				 .OnDelete(DeleteBehavior.Cascade);
 			 });
+			modelBuilder.Entity<ReversePicking>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+
+			});
 		}
 	}
 }

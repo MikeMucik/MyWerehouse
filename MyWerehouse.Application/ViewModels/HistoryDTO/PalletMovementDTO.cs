@@ -10,10 +10,10 @@ using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.ViewModels.HistoryDTO
 {
-	public class PalletMovementDTO :IMapFrom<PalletMovement>
+	public class PalletMovementDTO : IMapFrom<PalletMovement>
 	{
 		public int Id { get; set; }
-		public string PalletId { get; set; }		
+		public string PalletId { get; set; }
 		public int? SourceLocationId { get; set; }
 		public string LocationSnapShotSource { get; set; }//
 		public int? DestinationLocationId { get; set; }
@@ -24,17 +24,8 @@ namespace MyWerehouse.Application.ViewModels.HistoryDTO
 		public DateTime MovementDate { get; set; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<PalletMovement,PalletMovementDTO>()				
-				.ForMember(dest=>dest.PalletMovementDetailsDTO, opt=>opt.MapFrom(src=>src.PalletMovementDetails))
-				.ForMember(dest => dest.LocationSnapShotSource, opt => opt.MapFrom(src =>
-				src.SourceLocation == null ?
-				null
-				: $"{src.SourceLocation.Bay}-{src.SourceLocation.Aisle}-{src.SourceLocation.Position}-{src.SourceLocation.Height}"))
-				.ForMember(dest => dest.LocationSnapShotDestination, opt => opt.MapFrom(src =>
-				src.DestinationLocation == null ?
-				null
-				: $"{src.SourceLocation.Bay} - {src.SourceLocation.Aisle} - {src.SourceLocation.Position} - {src.SourceLocation.Height}"))
-			;
+			profile.CreateMap<PalletMovement, PalletMovementDTO>()
+				.ForMember(dest => dest.PalletMovementDetailsDTO, opt => opt.MapFrom(src => src.PalletMovementDetails));
 		}
 	}
 }

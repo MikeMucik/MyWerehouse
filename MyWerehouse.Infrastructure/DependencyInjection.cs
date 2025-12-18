@@ -17,9 +17,12 @@ namespace MyWerehouse.Infrastructure
 			services.AddTransient<IAllocationRepo, AllocationRepo>();
 			services.AddTransient<ICategoryRepo, CategoryRepo>();
 			services.AddTransient<IClientRepo, ClientRepo>();
+
 			services.AddTransient<IHistoryIssueRepo, HistoryIssueRepo>();
 			services.AddTransient<IHistoryReceiptRepo, HistoryReceiptRepo>();
 			services.AddTransient<IHistoryPickingRepo, HistoryPickingRepo>();
+			services.AddTransient<IHistoryReversePickingRepo, HistoryReversePickingRepo>();
+
 			services.AddTransient<IInventoryRepo, InventoryRepo>();
 			services.AddTransient<IIssueRepo, IssueRepo>();
 			services.AddTransient<IIssueItemRepo, IssueItemRepo>();
@@ -28,7 +31,8 @@ namespace MyWerehouse.Infrastructure
 			services.AddTransient<IPalletRepo, PalletRepo>();
 			services.AddTransient<IPickingPalletRepo, PickingPalletRepo>();			
 			services.AddTransient<IProductRepo, ProductRepo>();
-			services.AddTransient<IReceiptRepo, ReceiptRepo>();					
+			services.AddTransient<IReceiptRepo, ReceiptRepo>();		
+			services.AddTransient<IReversePickingRepo, ReversePickingRepo>();
 			return services;
 		}
 	}

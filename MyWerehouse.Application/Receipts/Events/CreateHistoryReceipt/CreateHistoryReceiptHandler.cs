@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 				}).ToList() : new List<HistoryReceiptDetail>();
 			var history = new HistoryReceipt
 			{
-				Receipt = receipt,
+				ReceiptId = receipt.Id,
 				ClientId = receipt.ClientId,
 				StatusAfter =request.ReceiptStatus,
 				PerformedBy = request.UserId,

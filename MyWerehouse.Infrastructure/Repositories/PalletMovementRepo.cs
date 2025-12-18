@@ -24,7 +24,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			var result = _werehouseDbContext.PalletMovements				
 				.Include(md => md.PalletMovementDetails)
-					.ThenInclude(m => m.Product)
+					//.ThenInclude(m => m.Product)
 				.Where(p=>p.PalletId == id)
 				.AsQueryable();
 
@@ -33,13 +33,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result
 					.Where(p => p.PalletMovementDetails.Any(md => md.ProductId == filter.ProductId));
 			}
-			if (!string.IsNullOrWhiteSpace(filter.ProductName))
-			{
-				result = result
-					.Where(p => p.PalletMovementDetails
-					.Any(md => md.Product.Name != null && md.Product.Name
-					.Contains(filter.ProductName, StringComparison.CurrentCultureIgnoreCase)));
-			}
+			//if (!string.IsNullOrWhiteSpace(filter.ProductName))
+			//{
+			//	result = result
+			//		.Where(p => p.PalletMovementDetails
+			//		.Any(md => md.Product.Name != null && md.Product.Name
+			//		.Contains(filter.ProductName, StringComparison.CurrentCultureIgnoreCase)));
+			//}
 			if (filter.SourceLocationId > 0)
 			{
 				result = result.Where(p => p.SourceLocationId == filter.SourceLocationId);

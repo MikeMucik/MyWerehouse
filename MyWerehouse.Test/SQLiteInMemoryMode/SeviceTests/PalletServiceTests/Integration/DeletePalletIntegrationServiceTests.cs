@@ -100,27 +100,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var movement = new PalletMovement
 			{				
-				DestinationLocation = location,
+				DestinationLocationId = location.Id,
 				MovementDate = DateTime.Now,
-				Pallet = pallet,				
+				PalletId = pallet.Id,				
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
 			var movement2 = new PalletMovement
 			{ 
-				SourceLocation = location,
-				DestinationLocation = location1,
+				SourceLocationId = location.Id,
+				DestinationLocationId = location1.Id,
 				MovementDate = DateTime.Now,
-				Pallet = pallet,				
+				PalletId = pallet.Id,				
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 				PalletMovementDetails = [new PalletMovementDetail
 			{
-				Product = product,
+				ProductId = product.Id,
 				Quantity = 1,
 			},new PalletMovementDetail
 			{
-				Product = product,
+				ProductId = product.Id,
 				Quantity = 1,
 			}]
 			};

@@ -22,10 +22,6 @@ using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
 using MyWerehouse.Application.Results;
-using MyWerehouse.Application.Utils;
-using MyWerehouse.Application.ViewModels.HistoryDTO;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 

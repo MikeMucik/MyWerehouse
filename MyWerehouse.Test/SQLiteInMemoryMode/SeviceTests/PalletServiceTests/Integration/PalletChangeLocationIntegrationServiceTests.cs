@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			{
 				DestinationLocationId = 1,
 				MovementDate = DateTime.Now.AddDays(-2),
-				Pallet = pallet,
+				PalletId = pallet.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
@@ -91,7 +91,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				SourceLocationId = 1,
 				DestinationLocationId = 2,
 				MovementDate = DateTime.Now.AddDays(-1),
-				Pallet = pallet,
+				PalletId = pallet.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
@@ -213,7 +213,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			{
 				DestinationLocationId = 1,
 				MovementDate = DateTime.Now.AddDays(-2),
-				Pallet = pallet1,
+				PalletId = pallet1.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
@@ -222,7 +222,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				SourceLocationId = 1,
 				DestinationLocationId = 2,
 				MovementDate = DateTime.Now.AddDays(-1),
-				Pallet = pallet1,
+				PalletId = pallet1.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
@@ -336,7 +336,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			{
 				DestinationLocationId = 1,
 				MovementDate = DateTime.Now.AddDays(-2),
-				Pallet = pallet1,
+				PalletId = pallet1.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
@@ -345,7 +345,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				SourceLocationId = 1,
 				DestinationLocationId = 2,
 				MovementDate = DateTime.Now.AddDays(-1),
-				Pallet = pallet1,
+				PalletId = pallet1.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};

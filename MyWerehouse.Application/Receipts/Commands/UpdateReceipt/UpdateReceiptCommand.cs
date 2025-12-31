@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.DTOs;
-using MyWerehouse.Application.Results;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
-	public record UpdateReceiptCommand(int ReceiptId, ReceiptDTO Receipt, string UserId): IRequest<ReceiptResult>;	
+	public record UpdateReceiptCommand(int ReceiptId, ReceiptDTO DTO, string UserId): IRequest<ReceiptResult>;	
 }

@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
-using MyWerehouse.Application.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 		}
 		public async Task<IssueResult> Handle(DeleteIssueCommand request, CancellationToken ct)
 		{
-			
+
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
@@ -59,7 +59,22 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 						{
 							allocation.PickingStatus = PickingStatus.Cancelled;
 							allocation.Quantity = 0;
-							allocationList.Add(new CreateHistoryPickingNotification(allocation.VirtualPalletId, allocation.Id, request.UserId, PickingStatus.Allocated, 0));
+							var historyPicking = new HistoryDataPicking
+							(
+								allocation.Id,
+								allocation.VirtualPallet.PalletId,
+								allocation.IssueId,
+									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.Quantity,
+									 0,
+									 PickingStatus.Allocated,
+									 PickingStatus.Cancelled,
+									 request.UserId,
+									 DateTime.UtcNow
+								);
+							allocationList.Add(new CreateHistoryPickingNotification(historyPicking));
+							//allocationList.Add(new CreateHistoryPickingNotification(allocation.VirtualPalletId, allocation.Id, request.UserId, PickingStatus.Allocated, 0));
+
 						}
 						break;
 					default:

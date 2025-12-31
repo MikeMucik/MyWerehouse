@@ -25,7 +25,6 @@ using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
-using MyWerehouse.Application.Results;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
@@ -36,43 +35,17 @@ using MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr;
 using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Services
 {
 	public class IssueService : IIssueService
 	{
 		private readonly IMediator _mediator;
-
-		//private readonly IIssueRepo _issueRepo;
-		//private readonly IMapper _mapper;//
-		//private readonly WerehouseDbContext _werehouseDbContext;
-		//private readonly IPalletRepo _palletRepo;
-
-		//private readonly IAllocationRepo _allocationRepo;
-		//private readonly IPickingPalletRepo _pickingPalletRepo;
-		public IssueService(
-			IMediator mediator
-			//,			IIssueRepo issueRepo,
-		//	IMapper mapper,
-			//WerehouseDbContext werehouseDbContext,
-		//	IPalletRepo palletRepo,
-		//	IAllocationRepo allocationRepo
-		//	, IPickingPalletRepo pickingPalletRepo
-			)
+		public IssueService(IMediator mediator)
 		{
-			_mediator = mediator;
-		//	_issueRepo = issueRepo;
-		//	_mapper = mapper;
-		//	_werehouseDbContext = werehouseDbContext;
-		//	_palletRepo = palletRepo;
-		//	_allocationRepo = allocationRepo;
-		//	_pickingPalletRepo = pickingPalletRepo;
-		}
-		//public IssueService(
-		//	IIssueRepo issueRepo)
-		//{
-		//	_issueRepo = issueRepo;
-		//}
+			_mediator = mediator;		
+		}		
 		public async Task<List<IssueResult>> CreateNewIssueAsync(CreateIssueDTO createIssueDTO, DateTime dateToSend)
 		{
 			return await _mediator.Send(new CreateNewIssueCommand(createIssueDTO, dateToSend));
@@ -220,7 +193,7 @@ namespace MyWerehouse.Application.Services
 		//aktualizacja/poprawienie zamówienia
 		public async Task<List<IssueResult>> UpdateIssueAsync(UpdateIssueDTO issueDTO, DateTime dateToSend)
 		{
-			return await _mediator.Send(new UpdateIssueCommand(issueDTO, dateToSend));
+			return await _mediator.Send(new UpdateIssueNewCommand(issueDTO, dateToSend));
 			//var resultList = new List<IssueResult>();
 			//var issue = await _issueRepo.GetIssueByIdAsync(issueDTO.Id) ?? throw new IssueNotFoundException(issueDTO.Id);
 			//issue.PerformedBy = issueDTO.PerformedBy;             //1.2 Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking

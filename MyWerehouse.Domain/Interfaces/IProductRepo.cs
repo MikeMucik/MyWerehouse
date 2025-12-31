@@ -18,5 +18,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<Product?> GetProductToEditAsync(int name);		
 		IQueryable<Product> GetAllProducts();		
 		IQueryable<Product> FindProducts(ProductSearchFilter filter);		
+		Task<bool> IsExistProduct(int productId);
 	}
 }

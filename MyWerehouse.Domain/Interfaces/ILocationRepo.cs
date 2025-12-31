@@ -15,8 +15,9 @@ namespace MyWerehouse.Domain.Interfaces
 		IQueryable<Location> GetAllAvailableLocations();
 		Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt);
 		IEnumerable<Location> CreateListLocationForBayRangeAisle(int Bay, int StartAisle, int EndAisle, int AmountPosition, int AmountHeigt);
+		Task<bool> ReceivingRampExistsAsync(int locationId);
 		//Task AddManyLocationAsync(IEnumerable<Location> locations);//test
-		
+
 		//Task<(int Bay, int Aisle, int Position, int Heigt)> FindIdLocationAsync(int Bay, int Aisle, int Position, int Heigt);
 	}
 }

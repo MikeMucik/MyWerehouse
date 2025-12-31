@@ -4,38 +4,55 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
-using MyWerehouse.Application.Results;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {
-	public class CreateReceiptPlanHandler : IRequestHandler<CreateReceiptPlanCommand, ReceiptResult>
+	public class CreateReceiptPlanHandler(WerehouseDbContext werehouseDbContext,
+		IReceiptRepo receiptRepo,
+		IMediator mediator,
+		IClientRepo clientRepo,
+		ILocationRepo locationRepo) : IRequestHandler<CreateReceiptPlanCommand, ReceiptResult>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IReceiptRepo _receiptRepo;
-		private readonly IMediator _mediator;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IReceiptRepo _receiptRepo = receiptRepo;
+		private readonly IMediator _mediator = mediator;
+		private readonly IClientRepo _clientRepo = clientRepo;
+		private readonly ILocationRepo _locationRepo = locationRepo;
 
-		public CreateReceiptPlanHandler(WerehouseDbContext werehouseDbContext,
-			IReceiptRepo receiptRepo,
-			IMediator mediator)
-		{
-			_werehouseDbContext = werehouseDbContext;
-			_receiptRepo = receiptRepo;
-			_mediator = mediator;
-		}
-		public async Task<ReceiptResult> Handle(CreateReceiptPlanCommand request, CancellationToken cancellationToken)
+		public async Task<ReceiptResult> Handle(CreateReceiptPlanCommand request, CancellationToken ct)
 		{
 			try
-			{				
-				var receipt = new Receipt(request.DTO.ClientId, request.DTO.PerformedBy);
+			{
+				if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
+					return ReceiptResult.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.");
+				if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
+					return ReceiptResult.Fail("Wybrana rampa nie istnieje.");
+				//var userID = _currentUser.Id; // np. z Claims
+
+				var receipt = new Receipt(request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
 				_receiptRepo.AddReceipt(receipt);
-				await _werehouseDbContext.SaveChangesAsync();
-				await _mediator.Publish(new CreateHistoryReceiptNotification(receipt.Id, receipt.ReceiptStatus, request.DTO.PerformedBy), cancellationToken);
-				await _werehouseDbContext.SaveChangesAsync(cancellationToken);
+				await _werehouseDbContext.SaveChangesAsync(ct);
+				await _mediator.Publish(new CreateHistoryReceiptNotification(receipt.Id, receipt.ReceiptStatus, request.DTO.PerformedBy), ct);
+				await _werehouseDbContext.SaveChangesAsync(ct);
 				return ReceiptResult.Ok("Utworzono przyjęcie", receipt.Id);
+			}
+			catch (InvalidClientException ei)
+			{
+				return ReceiptResult.Fail(ei.Message);
+			}
+			catch (InvalidUserIdException eu)
+			{
+				return ReceiptResult.Fail(eu.Message);
+			}
+			catch (InvalidRampException er)
+			{
+				return ReceiptResult.Fail(er.Message);
 			}
 			catch (Exception ex)
 			{

@@ -83,7 +83,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(3,result.Count);
+			Assert.Equal(5,result.Count);
 			Assert.All(result, a => Assert.Equal(issueId, a.IssueId));
 		}
 		[Fact]

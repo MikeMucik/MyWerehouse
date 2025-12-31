@@ -9,9 +9,9 @@ namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IReversePickingRepo
 	{
+		void AddReversePicking(ReversePicking reversePicking);
 		Task AddReversePickingAsync(ReversePicking reversePicking);
 		Task<ReversePicking> GetReversePickingAsync(int reversePickingId);
 		IQueryable<ReversePicking> GetReversePickings();
-
 	}
 }

@@ -13,6 +13,7 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeletePallet(Pallet pallet);		
 		Task<Pallet?> GetPalletByIdAsync(string palletId);
 		IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly? minBestBefore);
+		Task<Pallet?> GetPickingPalletByIssueId(int issueId);			
 		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);			
 		void ClearPalletFromListIssue(Pallet pallet);
 		void ChangePalletStatus(string palletId, PalletStatus palletStatus);//być może przuda się do innych metod		

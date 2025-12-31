@@ -28,15 +28,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public void SwitchOffProduct(Product product)
 		{			
 				product.IsDeleted = true;			
-		}
-		//public async Task SwitchOffProductAsync(int id)
-		//{
-		//	var product = await _werehouseDbContext.Products.FindAsync(id);
-		//	if (product != null)
-		//	{
-		//		product.IsDeleted = true;
-		//	}
-		//}
+		}		
 		public async Task<Product?> GetProductByIdAsync(int id)
 		{
 			if (id > 0)
@@ -101,6 +93,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(p => p.Details.Length == filter.Length);
 			}
 			return result;
+		}
+
+		public async Task<bool> IsExistProduct(int productId)
+		{
+			if (await _werehouseDbContext.Products.FindAsync(productId) != null) { return true; }
+			return false;
 		}
 	}
 }

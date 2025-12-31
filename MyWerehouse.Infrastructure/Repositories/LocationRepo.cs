@@ -69,6 +69,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return locations;
 		}
 
+		public async Task<bool> ReceivingRampExistsAsync(int locationId)
+		{
+			if (await _werehouseDbContext.Locations.FindAsync(locationId) != null) { return true; } return false;
+		}
+
 
 		//public async Task AddManyLocationAsync(IEnumerable<Location> locations)
 		//{

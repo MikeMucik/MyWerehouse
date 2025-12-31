@@ -167,10 +167,18 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return pallet;
 		}
 
+		public async Task<Pallet?> GetPickingPalletByIssueId(int issueId)
+		{
+		return	await _werehouseDbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.Where(p => p.IssueId == issueId && p.Status == PalletStatus.Picking)
+				.FirstOrDefaultAsync();
+		}
+
 
 		//public async Task<bool> ExistsAsync(string palletId, int productId)
 		//{
-		
+
 		//	return await _werehouseDbContext.ProductOnPallet
 		//		.AnyAsync(p => p.PalletId == palletId && p.ProductId == productId);
 		//}

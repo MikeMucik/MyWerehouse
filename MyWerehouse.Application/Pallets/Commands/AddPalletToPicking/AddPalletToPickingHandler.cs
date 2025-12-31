@@ -53,12 +53,8 @@ namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 			var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);
 			request.Pallets?.Remove(newPallet);
 			_palletRepo.ChangePalletStatus(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
-			_eventCollector.Add(new CreatePalletOperationNotification(newPallet.Id,
-				newPallet.LocationId,
-				ReasonMovement.Picking,
-				request.UserId,
-				PalletStatus.ToPicking,
-				null));
+			_eventCollector.Add(new CreatePalletOperationNotification(newPallet.Id,	newPallet.LocationId,
+				ReasonMovement.Picking,	request.UserId,	PalletStatus.ToPicking,	null));
 			return virtualPallet;
 		}
 	}

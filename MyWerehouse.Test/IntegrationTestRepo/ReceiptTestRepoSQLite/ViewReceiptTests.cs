@@ -7,7 +7,6 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
-//using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 {

@@ -11,8 +11,7 @@ using Moq;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AllocationModels;
-using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
@@ -364,7 +363,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						DateAdded = new DateTime(2025, 8, 8) }
 				}
 			};
-			var oldVirtualPallet = new Pallet
+			var oldPallet = new Pallet
 			{
 				Id = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
@@ -383,7 +382,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			{
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
-				//Pallets,
+				Pallets = [oldPallet],
 				IssueStatus = IssueStatus.New,
 				PerformedBy = "TestUser",
 			};
@@ -393,7 +392,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Clients.AddRange(client);
 			DbContext.Products.AddRange(product);
 			DbContext.Pallets.AddRange(sourcePallet1
-				, oldVirtualPallet
+				, oldPallet
 				);
 			DbContext.Issues.AddRange(issue);
 			var virtualPallet1 = new VirtualPallet
@@ -528,7 +527,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						DateAdded = new DateTime(2025, 8, 8) }
 				}
 			};
-			var oldVirtualPallet = new Pallet
+			var oldPallet = new Pallet
 			{
 				Id = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
@@ -547,7 +546,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			{
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
-				//Pallets,
+				Pallets = [oldPallet],
 				IssueStatus = IssueStatus.New,
 				PerformedBy = "TestUser",
 			};
@@ -557,7 +556,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Clients.AddRange(client);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Pallets.AddRange(sourcePallet1
-				, oldVirtualPallet
+				, oldPallet
 				);
 			DbContext.Issues.AddRange(issue);
 			var virtualPallet1 = new VirtualPallet
@@ -692,7 +691,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						DateAdded = new DateTime(2025, 8, 8) }
 				}
 			};
-			var oldVirtualPallet = new Pallet
+			var oldPallet = new Pallet
 			{
 				Id = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
@@ -711,7 +710,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			{
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
-				//Pallets,
+				Pallets = [oldPallet],
 				IssueStatus = IssueStatus.New,
 				PerformedBy = "TestUser",
 			};
@@ -720,7 +719,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Locations.AddRange(location1, locationPicking);
 			DbContext.Clients.AddRange(client);
 			DbContext.Products.AddRange(product1, product2);
-			DbContext.Pallets.AddRange(sourcePallet1, oldVirtualPallet);
+			DbContext.Pallets.AddRange(sourcePallet1, oldPallet);
 			DbContext.Issues.AddRange(issue);
 			var virtualPallet1 = new VirtualPallet
 			{

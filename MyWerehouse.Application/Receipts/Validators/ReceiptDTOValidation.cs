@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.DTOs;
-using MyWerehouse.Application.ViewModels.PalletModels;
 
 namespace MyWerehouse.Application.Receipts.Validators
 {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.ViewModels.PalletModels;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Models;
 
@@ -59,7 +59,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			{
 				Client = initialCLient,
 				ReceiptStatus = ReceiptStatus.Planned,
-				PerformedBy = "U002"
+				PerformedBy = "U002",
+				RampNumber = 1
 			};			
 			
 			DbContext.Categories.Add(initialCategory);
@@ -134,6 +135,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
+			var location = new Location
+			{
+				Id = 1,
+				Aisle = 1,
+				Bay = 2,
+				Height = 1,
+				Position = 1
+			};
+			DbContext.Locations.Add(location);
 			DbContext.Clients.Add(initialCLient);
 			DbContext.SaveChanges();
 			//Act
@@ -141,7 +151,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			{
 				ClientId = initialCLient.Id,
 				ReceiptDateTime = DateTime.UtcNow,
-				PerformedBy = "user",				
+				PerformedBy = "user",
+				RampNumber = 1
 			};
 			var result =
 				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
@@ -155,7 +166,53 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 
 		//SadPath
 		[Fact]
-		public async Task CreateReceiptPlanAsync_NoProperData_AddToBase()
+		public async Task CreateReceiptPlanAsync_NoUser_NotAddToBase()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var initialCLient = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			}; var location = new Location
+			{
+				Id = 1,
+				Aisle = 1,
+				Bay = 2,
+				Height = 1,
+				Position = 1
+			};
+			DbContext.Locations.Add(location);
+			DbContext.Clients.Add(initialCLient);
+			DbContext.SaveChanges();
+			//Act
+			var newPalletDto = new CreateReceiptPlanDTO
+			{
+				ClientId = initialCLient.Id,
+				ReceiptDateTime = DateTime.UtcNow,
+				//PerformedBy = "user",
+				RampNumber = 1
+			};
+			var result =
+				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
+			//Assert
+			Assert.NotNull(result);
+			Assert.Contains("Nieprawidłowy lub brak numeru użytkownika", result.Message);
+		}
+		[Fact]
+		public async Task CreateReceiptPlanAsync_NoProperData_NotAddToBase()
 		{
 			//Arrange
 			var address = new Address
@@ -182,84 +239,84 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var newPalletDto = new CreateReceiptPlanDTO
 			{
 				ClientId = 2,
-				//initialCLient.Id,
 				ReceiptDateTime = DateTime.UtcNow,
 				PerformedBy = "user",
+				RampNumber = 1
 			};
 			var result =
 				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Contains("Wystąpił nieoczekiwany błąd podczas operacji.", result.Message);
+			Assert.Contains("Klient o numerze 2 nie istnieje.", result.Message);
 		}
 		[Fact]
-		public async Task NotProperDataProductQunatityZero_AddPalletToReceiptAsync_ThrowValidateException()
-		{
-			//Arrange
-			var address = new Address
+			public async Task NotProperDataProductQunatityZero_AddPalletToReceiptAsync_ThrowValidateException()
 			{
-				City = "Warsaw",
-				Country = "Poland",
-				PostalCode = "00-999",
-				StreetName = "Wiejska",
-				Phone = 4444444,
-				Region = "Mazowieckie",
-				StreetNumber = "23/3"
-			};
-			var initialCLient = new Client
-			{
+				//Arrange
+				var address = new Address
+				{
+					City = "Warsaw",
+					Country = "Poland",
+					PostalCode = "00-999",
+					StreetName = "Wiejska",
+					Phone = 4444444,
+					Region = "Mazowieckie",
+					StreetNumber = "23/3"
+				};
+				var initialCLient = new Client
+				{
 				
-				Name = "TestCompany",
-				Email = "123@op.pl",
-				Description = "Description",
-				FullName = "FullNameCompany",
-				Addresses = [address]
-			};
-			var initialReceipt = new Receipt
-			{
-				Client = initialCLient,
-				ReceiptStatus = ReceiptStatus.Planned,
-				PerformedBy = "U002"
-			};
-			var initialLocation = new Location
-			{
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var initialCategory = new Category
-			{				
-				Name = "name",
-				IsDeleted = false
-			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = initialCategory,
-				IsDeleted = false,
-			};
+					Name = "TestCompany",
+					Email = "123@op.pl",
+					Description = "Description",
+					FullName = "FullNameCompany",
+					Addresses = [address]
+				};
+				var initialReceipt = new Receipt
+				{
+					Client = initialCLient,
+					ReceiptStatus = ReceiptStatus.Planned,
+					PerformedBy = "U002"
+				};
+				var initialLocation = new Location
+				{
+					Aisle = 1,
+					Bay = 1,
+					Height = 1,
+					Position = 1
+				};
+				var initialCategory = new Category
+				{				
+					Name = "name",
+					IsDeleted = false
+				};
+				var product = new Product
+				{
+					Name = "Test",
+					SKU = "666666",
+					Category = initialCategory,
+					IsDeleted = false,
+				};
 			
-			DbContext.Categories.Add(initialCategory);
-			DbContext.Products.Add(product);
-			DbContext.Clients.Add(initialCLient);
-			DbContext.Receipts.Add(initialReceipt);
-			DbContext.Locations.Add(initialLocation);
-			await DbContext.SaveChangesAsync();
-			//Act&Assert
-			var newPalletDto = new CreatePalletReceiptDTO
-			{
-				ProductsOnPallet = [new() { ProductId = 0, Quantity = 0, }],
-				UserId = "U001"
-			};
+				DbContext.Categories.Add(initialCategory);
+				DbContext.Products.Add(product);
+				DbContext.Clients.Add(initialCLient);
+				DbContext.Receipts.Add(initialReceipt);
+				DbContext.Locations.Add(initialLocation);
+				await DbContext.SaveChangesAsync();
+				//Act&Assert
+				var newPalletDto = new CreatePalletReceiptDTO
+				{
+					ProductsOnPallet = [new() { ProductId = 0, Quantity = 0, }],
+					UserId = "U001"
+				};
 
-			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-			_receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
+				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+				_receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
 
-			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
-			Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
-		}
+				Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
+				Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
+			}
 		[Fact]
 		public async Task NotProperDataTwoProduct_AddPalletToReceiptAsync_ThrowValidateException()
 		{

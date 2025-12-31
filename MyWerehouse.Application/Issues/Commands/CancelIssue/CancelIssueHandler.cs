@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Commands;
+using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Application.Results;
+using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
+using MyWerehouse.Application.ReversePickings.Command.CreateTaskToReversePicking;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -21,21 +25,25 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		private readonly IAllocationRepo _allocationRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
-		public readonly IMediator _mediator;
-		public readonly IReversePickingService _reversePickingService;
+		private readonly IMediator _mediator;
+		private readonly IEventCollector _eventCollector;
+		private readonly ICommandCollector _commandCollector;
 		public CancelIssueHandler(IIssueRepo issueRepo,
 			IAllocationRepo allocationRepo,
 			IPickingPalletRepo pickingPalletRepo,
 			WerehouseDbContext werehouseDbContext,
 			IMediator mediator,
-			IReversePickingService reversePickingService)
+			IEventCollector eventCollector
+			, ICommandCollector commandCollector
+			)
 		{
 			_issueRepo = issueRepo;
 			_allocationRepo = allocationRepo;
 			_pickingPalletRepo = pickingPalletRepo;
 			_werehouseDbContext = werehouseDbContext;
 			_mediator = mediator;
-			_reversePickingService = reversePickingService;
+			_eventCollector = eventCollector;
+			_commandCollector = commandCollector;
 		}
 		public async Task<IssueResult> Handle(CancelIssueCommand request, CancellationToken ct)
 		{
@@ -56,41 +64,65 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 						listPallet.Add(pallet);
 					}
 				}
-				//palety kompletacyjne i zadania pickingu
+				//palety kompletacyjne i zadania pickingu 
 				var restPallets = issue.Pallets.Except(listPallet).ToList();
-
 				foreach (var p in restPallets)
 				{
-					if (p.Status == PalletStatus.Picking)
-					{
-						//zadanie do reversePicking - tu bedzie handler
-						await _reversePickingService.CreateTaskToReversePickingAsync(p.Id, request.UserId);
-					}
+					_commandCollector.Add(new CreateTaskToReversePickingCommand(p.Id, request.UserId));
 				}
 				//usuń alokacje jeśli nie zrobione
-				var allocations = await _allocationRepo.GetAllocationsByIssueIdAsync(request.IssueId);
-				foreach (var allocation in allocations)
-				{
-					_allocationRepo.DeleteAllocation(allocation);
-				}
 				//usuń virtualPallet jeśli należy tylko do tego zlecenia
 				var virtualPallets = await _allocationRepo.GetVirtualPalletsByIssue(request.IssueId);
 				foreach (var vp in virtualPallets)
 				{
-					if (vp.Allocations.Count == 0)
+					var allocationToRemove = vp.Allocations
+						.Where(a => a.PickingStatus == PickingStatus.Allocated && a.IssueId == issue.Id)
+						.ToList();
+					foreach (var allocation in allocationToRemove)
 					{
-						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);
+						allocation.PickingStatus = PickingStatus.Cancelled;
+
+						_eventCollector.Add(new CreateHistoryPickingNotification(new HistoryDataPicking
+							(
+								allocation.Id,
+								allocation.VirtualPallet.PalletId,
+								allocation.IssueId,
+									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.Quantity,
+									 0,
+									 PickingStatus.Allocated,
+									 allocation.PickingStatus,
+									 request.UserId,
+									 DateTime.UtcNow
+								)));
+						vp.Allocations.Remove(allocation);
+						//_werehouseDbContext.Allocations.Remove(allocation);
+						_allocationRepo.DeleteAllocation(allocation);
+					}
+					if (vp.Allocations.Count == 0)//warunek bez sensu bo nie było zapisu
+					{
+						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);//zadanie po commit? czy w DBSet usuwa wszytko>
+						vp.Pallet.Status = PalletStatus.Available;
 					}
 				}
 				issue.IssueStatus = IssueStatus.Cancelled;
 				issue.PerformedBy = request.UserId;
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId),ct);
+				await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId), ct);
+				foreach (var req in _commandCollector.Requests)
+				{
+					await _mediator.Send(req, ct);
+				}
 				foreach (var p in listPallet)
 				{
 					await _mediator.Publish(new CreatePalletOperationNotification(p.Id, 1, ReasonMovement.CancelIssue, request.UserId, PalletStatus.Available, null), ct);
 				}
+				foreach (var evn in _eventCollector.Events)
+				{
+					await _mediator.Publish(evn, ct);
+				}
+				//_eventCollector.Clear();
 				return IssueResult.Ok($"Anulowano zlecenie {request.IssueId}.");
 			}
 			catch (IssueException ie)
@@ -105,6 +137,22 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
 				throw new InvalidOperationException("Wystąpił błąd podczas usuwania zlecenia.", ex);
 			}
+			finally
+			{
+				_eventCollector.Clear();
+			}
 		}
 	}
 }
+//var allocations = await _allocationRepo.GetAllocationsByIssueIdAsync(request.IssueId);
+//var allocationsNotDone = allocations.Where(a=>a.PickingStatus == PickingStatus.Allocated).ToList();
+//foreach (var allocation in allocationsNotDone)
+//{
+//	allocation.PickingStatus = PickingStatus.Cancelled;
+//	_eventCollector.Add(new CreateHistoryPickingNotification(allocation.VirtualPalletId,
+//		allocation.Id,
+//		request.UserId,
+//		PickingStatus.Allocated,
+//		allocation.Quantity));
+//	_allocationRepo.DeleteAllocation(allocation);//czy wszystkie
+//}

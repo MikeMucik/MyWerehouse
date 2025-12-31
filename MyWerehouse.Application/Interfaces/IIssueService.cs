@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Results;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Interfaces

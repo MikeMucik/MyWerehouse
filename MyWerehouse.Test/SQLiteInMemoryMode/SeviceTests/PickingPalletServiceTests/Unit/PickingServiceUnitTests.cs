@@ -10,9 +10,8 @@ using Moq;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.PickingPalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
+using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
@@ -258,21 +257,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);	
-			var allocationRepo = new AllocationRepo(DbContext);
-			var issueRepo = new IssueRepo(DbContext);
-			var locationRepo = new Mock<ILocationRepo>();
-			var palletRepo = new Mock<IPalletRepo>();
-			var palletService = new Mock<IPalletService>();
-			var eventCollector = new Mock<IEventCollector>();
-			var service = new PickingPalletService(Mediator, pickingPalletRepo,
-					allocationRepo,
-				DbContext,
-				locationRepo.Object,
-				palletRepo.Object,
-				issueRepo, 
-				palletService.Object
-				,eventCollector.Object);
+			//var pickingPalletRepo = new PickingPalletRepo(DbContext);	
+			//var allocationRepo = new AllocationRepo(DbContext);
+			//var issueRepo = new IssueRepo(DbContext);
+			//var locationRepo = new Mock<ILocationRepo>();
+			//var palletRepo = new Mock<IPalletRepo>();
+			//var palletService = new Mock<IPalletService>();
+			//var eventCollector = new Mock<IEventCollector>();
+			var service = new PickingPalletService(Mediator
+				//, pickingPalletRepo,
+				//	allocationRepo,
+				//DbContext,
+				//locationRepo.Object,
+				//palletRepo.Object,
+				//issueRepo, 
+				//palletService.Object
+				//,eventCollector.Object
+				);
 
 			// Act
 			var result = await service.GetListToPickingAsync(
@@ -549,22 +550,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Allocations.AddRange(a11, a12, a21, a22, a31, a41);
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
-			var allocationRepo = new AllocationRepo(DbContext);
-			var issueRepo = new IssueRepo(DbContext);
-			var mapper = new Mock<IMapper>();
-			var locationRepo = new Mock<ILocationRepo>();
-			var palletRepo = new Mock<IPalletRepo>();		
-			var palletService = new Mock<IPalletService>();
-			var eventCollector = new Mock<IEventCollector>();
-			var service = new PickingPalletService(Mediator, pickingPalletRepo,
-				allocationRepo,
-				DbContext,
-				locationRepo.Object,
-				palletRepo.Object,
-				issueRepo,
-				palletService.Object
-				,eventCollector.Object);
+			//var pickingPalletRepo = new PickingPalletRepo(DbContext);
+			//var allocationRepo = new AllocationRepo(DbContext);
+			//var issueRepo = new IssueRepo(DbContext);
+			//var mapper = new Mock<IMapper>();
+			//var locationRepo = new Mock<ILocationRepo>();
+			//var palletRepo = new Mock<IPalletRepo>();		
+			//var palletService = new Mock<IPalletService>();
+			//var eventCollector = new Mock<IEventCollector>();
+			var service = new PickingPalletService(Mediator
+				//, pickingPalletRepo,
+				//allocationRepo,
+				//DbContext,
+				//locationRepo.Object,
+				//palletRepo.Object,
+				//issueRepo,
+				//palletService.Object
+				//,eventCollector.Object
+				);
 
 			// Act
 			var result = await service.GetListIssueToPickingAsync(

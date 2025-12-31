@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using MyWerehouse.Application.Mapping;
-using MyWerehouse.Application.ViewModels.PalletModels;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Receipts.DTOs
@@ -19,6 +19,7 @@ namespace MyWerehouse.Application.Receipts.DTOs
 		public ICollection<UpdatePalletDTO> Pallets { get; set; } = new List<UpdatePalletDTO>();
 		public string PerformedBy { get; set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; set; }
+		public int RampNumber { get; set; }
 		public void Mapping(Profile profile)
 		{
 			//profile.CreateMap<ReceiptDTO, Receipt>()

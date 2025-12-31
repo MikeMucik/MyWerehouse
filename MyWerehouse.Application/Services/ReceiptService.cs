@@ -21,16 +21,15 @@ using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
-using MyWerehouse.Application.Results;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Services
 {
 	public class ReceiptService : IReceiptService
 	{
-		private readonly IMediator _mediator;		
-		
+		private readonly IMediator _mediator;			
 		public ReceiptService(IMediator mediator)			
 		{
 			_mediator = mediator;					
@@ -208,8 +207,7 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<ReceiptDTO> GetReceiptDTOAsync(int receiptId)
 		{
-			var a = await _mediator.Send(new GetReceiptByIdQuery(receiptId));
-			return a;
+			return await _mediator.Send(new GetReceiptByIdQuery(receiptId));
 			//try
 			//{
 			//var receipt = await _receiptRepo.GetReceiptByIdAsync(receiptId);

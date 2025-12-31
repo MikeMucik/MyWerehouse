@@ -115,5 +115,10 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			return _werehouseDbContext.Clients.Where(p => p.IsDeleted == false);
 		}
+
+		public async Task< bool> IsClientExistAsync(int clientId)
+		{
+			if (await _werehouseDbContext.Clients.FindAsync(clientId) != null) { return true; } return false;
+		}
 	}
 }

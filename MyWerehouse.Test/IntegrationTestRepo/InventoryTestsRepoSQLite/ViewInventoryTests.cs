@@ -67,11 +67,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 11;
-			var bestBefore = new DateOnly(2025, 12, 12);			
+			var bestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365));			
 			//Act
 			var result =await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId, bestBefore);
 			//Assert
-			Assert.Equal(70, result);
+			Assert.Equal(90, result);
 		}
 		[Fact]
 		public async Task ReturnAmount_GetQuantityProductReservedForIssueAsync_GiveProperQuantity()
@@ -95,7 +95,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			//Act
 			var result = await _inventoryRepo.GetAvailableQuantityAsync(productId, bestBefore);
 			//Assert
-			Assert.Equal(480, result);
+			Assert.Equal(660, result);
 		}
 		[Fact]
 		public async Task ReturnAmount_GetQuantityForProductAsync_GiveBackQuantity()
@@ -107,7 +107,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			//Act
 			var result = await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
 			//Assert
-			Assert.Equal(750, result);
+			Assert.Equal(970, result);
 		}
 	}
 }

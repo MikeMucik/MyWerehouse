@@ -51,10 +51,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.SaveChanges();
 			var palletId = "Q1010";
 			//Act
-			await _palletService.DeletePalletAsync(palletId);
+			var result = await _palletService.DeletePalletAsync(palletId, "UserD");
 			//Assert
-			var result = await _palletRepo.GetPalletByIdAsync(palletId);
-			Assert.Null(result);
+			Assert.NotNull(result);
+			Assert.Contains("Paleta została usunięta", result.Message);
+			var palletDeleted = await DbContext.Pallets.FindAsync(palletId);
+			Assert.Null(palletDeleted);
 		}
 		[Fact]
 		public async Task PalletWithHistory_DeletePalletAsync_ThrowException()
@@ -83,7 +85,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var location1 = new Location
 			{
 				Aisle = 0,
-				Bay =1,
+				Bay = 1,
 				Height = 0,
 				Position = 0
 			};
@@ -99,19 +101,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				}]
 			};
 			var movement = new PalletMovement
-			{				
+			{
 				DestinationLocationId = location.Id,
 				MovementDate = DateTime.Now,
-				PalletId = pallet.Id,				
+				PalletId = pallet.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
 			var movement2 = new PalletMovement
-			{ 
+			{
 				SourceLocationId = location.Id,
 				DestinationLocationId = location1.Id,
 				MovementDate = DateTime.Now,
-				PalletId = pallet.Id,				
+				PalletId = pallet.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 				PalletMovementDetails = [new PalletMovementDetail
@@ -129,20 +131,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.PalletMovements.AddRange(movement, movement2);
 			DbContext.SaveChanges();
 			var palletId = "Q1000";
-			//Act&Assert
-			var ex = await Assert.ThrowsAsync<PalletException>(() => _palletService.DeletePalletAsync(palletId));
-
-			Assert.Contains($"Palety o numerze {palletId} nie można usunąć", ex.Message);
+			//Act
+			var result = _palletService.DeletePalletAsync(palletId, "UserD");
+			//Assert
+			Assert.Contains($"Palety o numerze {palletId} nie można usunąć", result.Result.Message);
 		}
 		[Fact]
-		public async Task IncorrectID_DeletePalletAsync_ThrowException()
+		public async Task IncorrectID_DeletePalletAsync_ThrowInfo()
 		{
 			//Arrange
 			var palletId = "1000";
-			//Act&Assert
-			var ex = await Assert.ThrowsAsync<PalletException>(() => _palletService.DeletePalletAsync(palletId));
-
-			Assert.Contains("Nie ma palety o numerze", ex.Message);
+			//Act
+			var result = _palletService.DeletePalletAsync(palletId, "UserD");
+			//Assert
+			Assert.Contains("Nie ma palety o numerze", result.Result.Message);
 		}
 	}
 }

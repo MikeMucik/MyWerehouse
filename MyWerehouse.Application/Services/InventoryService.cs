@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.ViewModels.InventoryModels;
+using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
+using MyWerehouse.Application.Inventories.DTOs;
+using MyWerehouse.Application.Inventories.Queries.GetInventory;
+using MyWerehouse.Application.Inventories.Queries.GetProductCount;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -14,89 +18,73 @@ using MyWerehouse.Infrastructure;
 namespace MyWerehouse.Application.Services
 {
 	public class InventoryService : IInventoryService
-	{
-		private readonly IInventoryRepo _inventoryRepo;
-		private readonly IMapper _mapper;
-		private readonly WerehouseDbContext _werehouseDbContext;
+	{		
+		private readonly IMediator _mediator;
 
-		public InventoryService(
-			IInventoryRepo inventoryRepo,
-			IMapper mapper,
-			WerehouseDbContext werehouseDbContext
-			)
-		{
-			_inventoryRepo = inventoryRepo;
-			_mapper = mapper;
-			_werehouseDbContext = werehouseDbContext;
+		public InventoryService(			
+			IMediator mediator)
+		{			
+			_mediator = mediator;
 		}
 
 		public async Task ChangeProductQuantityAsync(int productId, int quantity)
 		{
-			if(quantity == 0) {return; }
-			var absQuantity = Math.Abs(quantity);
-			var isIncrease = quantity > 0;
-			var inventory = await _inventoryRepo.GetInventoryForProductAsync(productId);
+			await _mediator.Send(new ChangeQuantityCommand(productId, quantity));
+			return;
+			//if(quantity == 0) {return; }
+			//var absQuantity = Math.Abs(quantity);
+			//var isIncrease = quantity > 0;
+			//var inventory = await _inventoryRepo.GetInventoryForProductAsync(productId);
 
-			if (isIncrease)
-			{
-				if (inventory == null)
-				{
-					 inventory = new Inventory
-					{
-						ProductId = productId,
-						Quantity = absQuantity,
-						LastUpdated = DateTime.UtcNow,
-					};
-					_inventoryRepo.AddInventory(inventory);
-				}
-				else
-				{
-							inventory.Quantity += absQuantity;
-							inventory.LastUpdated = DateTime.UtcNow;
-				}
-			}
-			else
-			{
-				if (inventory == null)
-				{
-					throw new InventoryException($"Brak inventory dla produktu {productId}. Nie można zmniejszyć stanu."); //tekst do zmiany
-				}
+			//if (isIncrease)
+			//{
+			//	if (inventory == null)
+			//	{
+			//		 inventory = new Inventory
+			//		{
+			//			ProductId = productId,
+			//			Quantity = absQuantity,
+			//			LastUpdated = DateTime.UtcNow,
+			//		};
+			//		_inventoryRepo.AddInventory(inventory);
+			//	}
+			//	else
+			//	{
+			//				inventory.Quantity += absQuantity;
+			//				inventory.LastUpdated = DateTime.UtcNow;
+			//	}
+			//}
+			//else
+			//{
+			//	if (inventory == null)
+			//	{
+			//		throw new InventoryException($"Brak inventory dla produktu {productId}. Nie można zmniejszyć stanu."); //tekst do zmiany
+			//	}
 
-				if (inventory.Quantity < absQuantity)
-				{
-					throw new InventoryException($"Niewystarczająca ilość w magazynie dla produktu o ID: {productId}. Dostępne: {inventory.Quantity}, żądane: {absQuantity}.");
-				}
-				inventory.Quantity -= absQuantity;
-				inventory.LastUpdated = DateTime.UtcNow;
-			}
-			await _werehouseDbContext.SaveChangesAsync();
+			//	if (inventory.Quantity < absQuantity)
+			//	{
+			//		throw new InventoryException($"Niewystarczająca ilość w magazynie dla produktu o ID: {productId}. Dostępne: {inventory.Quantity}, żądane: {absQuantity}.");
+			//	}
+			//	inventory.Quantity -= absQuantity;
+			//	inventory.LastUpdated = DateTime.UtcNow;
+			//}
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
+
 		public async Task<InventoryDTO> GetInventoryAsync(int productId)
 		{
-			var inventory = await _inventoryRepo.GetInventoryForProductAsync(productId);
-			var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
-			return inventoryDTO;
+			return await _mediator.Send(new GetInventoryQuery(productId));
+			//var inventory = await _inventoryRepo.GetInventoryForProductAsync(productId);
+			//var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
+			//return inventoryDTO;
 		}
 		public async Task<int> GetProductCountAsync(int productId, DateOnly? bestBefore)
 		{
-			var totalProductByDate = await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
-			var totalProductReservedToIssues = await _inventoryRepo.GetQuantityProductReservedForIssueAsync(productId, bestBefore);
-			var totalProductReservedToPicking = await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId, bestBefore);
-			return totalProductByDate - totalProductReservedToIssues - totalProductReservedToPicking;
-		}
-		public async Task UpdateProductQuantityAsync(int productId, int quantity)
-		{
-			if (quantity < 0)
-			{
-				throw new InventoryException($"Ilość nie może być ujemna dla produktu o ID: {productId}.");
-			}
-
-			var inventory = await _inventoryRepo.GetInventoryForProductAsync(productId)
-				?? throw new InventoryException($"Brak inventory dla produktu o ID: {productId}.");
-
-			inventory.Quantity = quantity;
-			inventory.LastUpdated = DateTime.UtcNow;
-			await _werehouseDbContext.SaveChangesAsync();
-		}
+			return	await _mediator.Send(new GetProductCountQuery(productId, bestBefore));
+			//var totalProductByDate = await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
+			//var totalProductReservedToIssues = await _inventoryRepo.GetQuantityProductReservedForIssueAsync(productId, bestBefore);
+			//var totalProductReservedToPicking = await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId, bestBefore);
+			//return totalProductByDate - totalProductReservedToIssues - totalProductReservedToPicking;
+		}		
 	}
 }

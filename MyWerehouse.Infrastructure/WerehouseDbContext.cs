@@ -225,6 +225,11 @@ namespace MyWerehouse.Infrastructure
 					.IsRequired()
 					.OnDelete(DeleteBehavior.Cascade);
 
+				entity.HasMany(p => p.PalletMovements)
+					.WithOne()
+					.HasForeignKey(h => h.PalletId)
+					.OnDelete(DeleteBehavior.Cascade);
+
 				entity.HasOne(p => p.Issue)
 					.WithMany(i => i.Pallets)
 					.HasForeignKey(p => p.IssueId)
@@ -333,6 +338,7 @@ namespace MyWerehouse.Infrastructure
 				 .WithOne(p => p.Receipt)
 				 .HasForeignKey(p => p.ReceiptId)
 				 .OnDelete(DeleteBehavior.Cascade);
+
 			 });
 			modelBuilder.Entity<ReversePicking>(entity =>
 			{

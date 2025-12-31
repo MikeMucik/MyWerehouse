@@ -9,10 +9,10 @@ using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
-using MyWerehouse.Application.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 {

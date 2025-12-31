@@ -12,6 +12,7 @@ using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using FluentValidation;
+using MyWerehouse.Application.Common.Commands;
 
 namespace MyWerehouse.Application
 {
@@ -39,6 +40,7 @@ namespace MyWerehouse.Application
 				cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 			});
 			services.AddScoped<IEventCollector, EventCollector>();
+			services.AddScoped<ICommandCollector, CommandCollector>();
 			services.AddTransient<ISynchronizerProductsConfig , SynchronizerProductsConfig>();
 			return services;
 		}

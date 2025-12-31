@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Utils;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Services

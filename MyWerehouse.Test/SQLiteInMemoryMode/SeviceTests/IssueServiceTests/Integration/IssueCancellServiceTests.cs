@@ -1,0 +1,465 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Issues.DTOs;
+using MyWerehouse.Application.Services;
+using MyWerehouse.Domain.Models;
+
+namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
+{
+	public class IssueCancellServiceTests : IssueIntegrationCommandService
+	{
+		[Fact]
+		public async Task CancelIssueAsync_FullPalletAsignment_ShouldRestorePalletAvailability()
+		{
+			// Arrange – setup initial data
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = new List<Address> { address }
+			};
+			var category = new Category { Name = "Cat" };
+			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var product = new Product
+			{
+				Name = "Prod1",
+				SKU = "SKU1",
+				Category = category,
+				CartonsPerPallet = 10
+			};
+			var pallets = new List<Pallet>
+				{
+					new Pallet
+					{
+						Id = "P1",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					},
+					new Pallet
+					{
+						Id = "P2",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					}
+				};
+			var recipt = new Receipt
+			{
+				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
+				ReceiptStatus = ReceiptStatus.Verified,
+				PerformedBy = "UserMakae",
+				Client = client,
+				Pallets = pallets,
+			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.Pallets.AddRange(pallets);
+			DbContext.Receipts.Add(recipt);
+			await DbContext.SaveChangesAsync();
+
+			// Act 1 – create issue with 1 pallet (10 szt.)
+			var createIssueDto = new CreateIssueDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "User1",
+				Items = new List<IssueItemDTO>
+				{
+					new IssueItemDTO { ProductId = product.Id, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+				}
+			};
+
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+
+			var issue = DbContext.Issues.Include(i => i.Pallets).First();
+			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			// Act 2 - cancel issue
+			var issueToCancelId = issue.Id;
+			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			//Assert
+			Assert.NotNull(result);
+			var pallet = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
+
+			Assert.Equal(PalletStatus.Available, pallet.Status);
+		}
+		[Fact]
+		public async Task CancelIssueAsync_FullPalletsAsignment_ShouldRestorePalletsAvailability()
+		{
+			// Arrange – setup initial data
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = new List<Address> { address }
+			};
+			var category = new Category { Name = "Cat" };
+			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var product = new Product
+			{
+				Name = "Prod1",
+				SKU = "SKU1",
+				Category = category,
+				CartonsPerPallet = 10
+			};
+			var pallets = new List<Pallet>
+				{
+					new Pallet
+					{
+						Id = "P1",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					},
+					new Pallet
+					{
+						Id = "P2",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					}
+				};
+			var recipt = new Receipt
+			{
+				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
+				ReceiptStatus = ReceiptStatus.Verified,
+				PerformedBy = "UserMakae",
+				Client = client,
+				Pallets = pallets,
+			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.Pallets.AddRange(pallets);
+			DbContext.Receipts.Add(recipt);
+			await DbContext.SaveChangesAsync();
+
+			// Act 1 – create issue with 1 pallet (10 szt.)
+			var createIssueDto = new CreateIssueDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "User1",
+				Items = new List<IssueItemDTO>
+				{
+					new IssueItemDTO { ProductId = product.Id, Quantity = 20, BestBefore = new DateOnly(2026,1,1) }
+				}
+			};
+
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+
+			var issue = DbContext.Issues.Include(i => i.Pallets).First();
+			//Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			// Act 2 - cancel issue
+			var issueToCancelId = issue.Id;
+			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			//Assert
+			Assert.NotNull(result);
+			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "P1");
+			var pallet1 = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "P2");
+
+			Assert.Equal(PalletStatus.Available, pallet.Status);
+			Assert.Equal(PalletStatus.Available, pallet1.Status);
+		}
+		[Fact]
+		public async Task CancelIssueAsync_PalletsAsignmentAndAllocation_ShouldRestorePalletsAvailability()
+		{
+			// Arrange – setup initial data
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = new List<Address> { address }
+			};
+			var category = new Category { Name = "Cat" };
+			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var product = new Product
+			{
+				Name = "Prod1",
+				SKU = "SKU1",
+				Category = category,
+				CartonsPerPallet = 10
+			};
+			var pallets = new List<Pallet>
+				{
+					new Pallet
+					{
+						Id = "P1",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					},
+					new Pallet
+					{
+						Id = "P2",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					}
+				};
+			var recipt = new Receipt
+			{
+				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
+				ReceiptStatus = ReceiptStatus.Verified,
+				PerformedBy = "UserMakae",
+				Client = client,
+				Pallets = pallets,
+			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.Pallets.AddRange(pallets);
+			DbContext.Receipts.Add(recipt);
+			await DbContext.SaveChangesAsync();
+
+			// Act 1 – create issue with 1 pallet (10 szt.)
+			var createIssueDto = new CreateIssueDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "User1",
+				Items = new List<IssueItemDTO>
+				{
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = new DateOnly(2026,1,1) }
+				}
+			};
+
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+
+			var issue = DbContext.Issues.Include(i => i.Pallets).First();
+			//Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			// Act 2 - cancel issue
+			var issueToCancelId = issue.Id;
+			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			//Assert
+			var cancelledIssue = await DbContext.Issues
+				.Include(i => i.Pallets)
+				.FirstAsync(i => i.Id == issue.Id);
+
+			Assert.Equal(IssueStatus.Cancelled, cancelledIssue.IssueStatus);
+			Assert.Equal("UserC", cancelledIssue.PerformedBy);
+
+			// Assert – Pallets restored
+			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
+			Assert.Equal(PalletStatus.Available, palletP1.Status);
+			Assert.Null(palletP1.IssueId);
+			Assert.Equal(1, palletP1.LocationId);
+
+			var palletP2 = await DbContext.Pallets.FirstAsync(p => p.Id == "P2");
+			Assert.Equal(PalletStatus.Available, palletP2.Status);
+			Assert.Null(palletP2.IssueId);
+			Assert.Equal(1, palletP2.LocationId);
+
+			// Assert – No allocations left
+			var allocations = await DbContext.Allocations
+				.Where(a => a.IssueId == issue.Id)
+				.ToListAsync();
+
+			Assert.Empty(allocations);
+
+			// Assert – Result
+			Assert.True(result.Success);
+			Assert.Contains("Anulowano zlecenie", result.Message);
+
+		}
+		[Fact]
+		public async Task CancelIssueAsync_PalletsAsignmentAndAllocationDone_ShouldRestorePalletsAvailabilityAndAddReversePicking()
+		{
+			// Arrange – setup initial data
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = new List<Address> { address }
+			};
+			var category = new Category { Name = "Cat" };
+			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var product = new Product
+			{
+				Name = "Prod1",
+				SKU = "SKU1",
+				Category = category,
+				CartonsPerPallet = 10
+			};
+			var pallets = new List<Pallet>
+				{
+					new Pallet
+					{
+						Id = "P1",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					},
+					new Pallet
+					{
+						Id = "P2",
+						Location = location,
+						Status = PalletStatus.Available,
+						//ReceiptId = 1,
+						ProductsOnPallet = new List<ProductOnPallet>
+						{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+						}
+					}
+				};
+			var recipt = new Receipt
+			{
+				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
+				ReceiptStatus = ReceiptStatus.Verified,
+				PerformedBy = "UserMakae",
+				Client = client,
+				Pallets = pallets,
+			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.Pallets.AddRange(pallets);
+			DbContext.Receipts.Add(recipt);
+			await DbContext.SaveChangesAsync();
+
+			// Act 1 – create issue with 1 pallet (10 szt.)
+			var createIssueDto = new CreateIssueDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "User1",
+				Items = new List<IssueItemDTO>
+				{
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = new DateOnly(2026,1,1) }
+				}
+			};
+
+			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			//wykonanie pickingu
+			//var _pickingPallet  = new PickingPalletService
+
+			var issue = DbContext.Issues.Include(i => i.Pallets).First();
+			//Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			// Act 2 - cancel issue
+			var issueToCancelId = issue.Id;
+			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			//Assert
+			var cancelledIssue = await DbContext.Issues
+				.Include(i => i.Pallets)
+				.FirstAsync(i => i.Id == issue.Id);
+
+			Assert.Equal(IssueStatus.Cancelled, cancelledIssue.IssueStatus);
+			Assert.Equal("UserC", cancelledIssue.PerformedBy);
+
+			// Assert – Pallets restored
+			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
+			Assert.Equal(PalletStatus.Available, palletP1.Status);
+			Assert.Null(palletP1.IssueId);
+			Assert.Equal(1, palletP1.LocationId);
+
+			// Assert – No allocations left
+			var allocations = await DbContext.Allocations
+				.Where(a => a.IssueId == issue.Id)
+				.ToListAsync();
+
+			Assert.Empty(allocations);
+
+			// Assert – Result
+			Assert.True(result.Success);
+			Assert.Contains("Anulowano zlecenie", result.Message);
+
+
+			//var reverseTasks = await DbContext.ReversePickings
+			//	.Where(rp => rp.SourcePalletId == "P2")
+			//	.ToListAsync();
+
+			//Assert.Single(reverseTasks);
+
+			//var task = reverseTasks.First();
+			////Assert.Equal(pickingPallet.Id, task.PickingPalletId);
+			//Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			//Assert.Equal("UserC", task.UserId);
+
+		}
+	}
+}

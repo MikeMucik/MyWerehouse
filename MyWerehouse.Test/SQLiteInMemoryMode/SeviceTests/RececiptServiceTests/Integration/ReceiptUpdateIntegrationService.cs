@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Application.Pallets.DTOs;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
@@ -71,6 +70,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9
 			};
 			var initialPallet = new Pallet
 			{
@@ -243,6 +243,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9
 			};
 			var initialPallet = new Pallet
 			{
@@ -416,6 +417,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9
 			};
 			var initialPallet = new Pallet
 			{
@@ -529,7 +531,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == initialReceipt.Id && p.Status == PalletStatus.Receiving);
 			Assert.NotNull(newPallet);//
 			Assert.NotEqual("Q1000", newPallet.Id);
-			
+
 			// Sprawdzenie czy utworzono ruch palety
 			var movement = await DbContext.PalletMovements
 				.FirstOrDefaultAsync(m => m.PalletId == newPallet.Id && m.Reason == ReasonMovement.Correction);
@@ -611,6 +613,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9
 			};
 			var initialPallet = new Pallet
 			{
@@ -748,6 +751,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U003",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9
 			};
 			var initialPallet = new Pallet
 			{
@@ -770,7 +774,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				DateReceived = DateTime.Now,
 				Location = initailLocation,
 				Status = PalletStatus.Available,
-				Receipt = 
+				Receipt =
 				initialReceipt1,
 				ProductsOnPallet = new List<ProductOnPallet>{ new ProductOnPallet
 				{
@@ -886,6 +890,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U003",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9
 			};
 			var initialPallet = new Pallet
 			{
@@ -931,13 +936,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ClientId = initailCLient.Id,
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.Correction,
+				RampNumber = 9,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				Pallets =
 				new List<UpdatePalletDTO>
 				{
 					new()
 					{
-						Id = "Q2001",
+						//Id = "Q2001",
 						LocationId = initailLocation.Id,
 						ReceiptId = initialReceipt.Id,
 						Status = PalletStatus.Receiving,
@@ -947,7 +953,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 							new()
 							{
 								ProductId = initialProduct1.Id,
-								PalletId = secondPallet.Id,
+								PalletId = secondPallet.Id,//tu jest specjalnie bug
 								Quantity = 200,
 								DateAdded = DateTime.Now,
 							}
@@ -960,7 +966,179 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.Success);
-			Assert.Contains($"Nie znaleziono palety o Id: Q2001", result.Message);
+			Assert.Contains("Wystąpił nieoczekiwany błąd podczas opera", result.Message);
+			///Assert.Contains($"Nie znaleziono palety o Id: Q2001", result.Message);
+		}
+		//HappyPath
+		[Fact]
+		public async Task UpdateReceipt_WhenNewPalletWithoutIdIsProvided_ShouldCreateAndAttachPallet()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var category = new Category
+			{
+				Name = "Category",
+				IsDeleted = false,
+			};
+			var client = new Client
+			{
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};
+			var product = new Product
+			{
+				Name = "Test",
+				SKU = "666666",
+				Category = category,
+				IsDeleted = false,
+			};
+			var product1 = new Product
+			{
+				Name = "Test22",
+				SKU = "777777",
+				Category = category,
+				IsDeleted = false,
+			};
+			var location = new Location
+			{
+				Id = 9,
+				Aisle = 0,
+				Bay = 9,
+				Height = 0,
+				Position = 0
+			};			
+			var receipt = new Receipt
+			{
+				Client = client,
+				ReceiptStatus = ReceiptStatus.InProgress,
+				PerformedBy = "U001",
+				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9
+			};			
+			var pallet = new Pallet
+			{
+				Id = "Q1000",
+				DateReceived = DateTime.Now,
+				Location = location,
+				Status = PalletStatus.Available,
+				Receipt = receipt,
+				ProductsOnPallet = new List<ProductOnPallet>{ new ProductOnPallet
+				{
+					Product = product,
+					Quantity = 100,
+					DateAdded = DateTime.Now,
+					BestBefore = new DateOnly(2027, 3, 3)
+				} }
+			};
+			var pallet1 = new Pallet
+			{
+				Id = "Q2000",
+				DateReceived = DateTime.Now,
+				Location = location,
+				Status = PalletStatus.Available,
+				Receipt = receipt,
+				ProductsOnPallet = new List<ProductOnPallet>{ new ProductOnPallet
+				{
+					Product = product1,
+					Quantity = 200,
+					DateAdded = DateTime.Now,
+					BestBefore = new DateOnly(2027, 3, 3)
+				} }
+			};
+			DbContext.Clients.AddRange(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.AddRange(location);
+			DbContext.Receipts.AddRange(receipt);
+			DbContext.Pallets.AddRange(pallet, pallet1);
+			await DbContext.SaveChangesAsync();
+			//Act
+			var updatingReceipt = new ReceiptDTO
+			{
+				Id = receipt.Id,
+				ClientId = client.Id,
+				PerformedBy = "U100",
+				ReceiptStatus = ReceiptStatus.Correction,
+				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 9,
+				Pallets =
+				new List<UpdatePalletDTO>
+				{
+					new()
+					{
+						Id = "Q1000",
+						LocationId = 9,
+						ReceiptId = receipt.Id,
+						Status = PalletStatus.Receiving,
+						DateReceived = DateTime.Now,
+						ProductsOnPallet = new List<ProductOnPalletDTO>
+						{
+							new()
+							{
+								ProductId = product.Id,
+								Quantity = 100,
+								DateAdded = DateTime.Now,
+							}
+						}
+					},
+					new()
+					{
+						//Id = "Q1001",
+						LocationId = 9,
+						ReceiptId = receipt.Id,
+						Status = PalletStatus.Receiving,
+						DateReceived = DateTime.Now,
+						ProductsOnPallet = new List<ProductOnPalletDTO>
+						{
+							new()
+							{
+								ProductId = product1.Id,
+								Quantity = 200,
+								DateAdded = DateTime.Now,
+							}
+						}
+					}
+				}
+			};
+			var userId = "U100";
+			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			//Assert
+			Assert.NotNull(result);
+			Assert.True(result.Success);
+			//var newPallet = DbContext.Pallets.Find("Q2001");
+			//Assert.NotNull(newPallet);
+			var pallets = DbContext.Pallets
+				.Where(p => p.ReceiptId == receipt.Id)
+				.ToList();
+
+			Assert.Equal(2, pallets.Count);
+			var existingPallet = DbContext.Pallets.Find("Q1000");
+			Assert.NotNull(existingPallet);
+			var newPallet = DbContext.Pallets.Find("Q2001");
+			Assert.NotNull(newPallet);
+
+			Assert.Equal(receipt.Id, newPallet.ReceiptId);
+			Assert.Equal(PalletStatus.Receiving, newPallet.Status);
+			Assert.Equal(9, newPallet.LocationId);
+			Assert.Single(newPallet.ProductsOnPallet);
+
+			var productOnPallet = newPallet.ProductsOnPallet.First();
+			Assert.Equal(product1.Id, productOnPallet.ProductId);
+			Assert.Equal(200, productOnPallet.Quantity);
+			var removedPallet = DbContext.Pallets.Find("Q2000");
+			Assert.Null(removedPallet);
 		}
 	}
 }

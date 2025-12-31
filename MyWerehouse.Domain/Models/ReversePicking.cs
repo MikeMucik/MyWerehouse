@@ -18,5 +18,6 @@ namespace MyWerehouse.Domain.Models
 		public ReversePickingStatus Status { get; set; }
 		public int AllocationId { get; set; }
 		public Allocation Allocation {  get; set; }
+		public string UserId { get; set; }
 	}
 }

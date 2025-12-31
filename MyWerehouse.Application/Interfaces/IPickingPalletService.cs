@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Results;
+using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Application.ViewModels.AllocationModels;
-using MyWerehouse.Application.ViewModels.PickingPalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Models;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Interfaces
 {
@@ -20,6 +20,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task<PickingResult> DoPickingAsync(AllocationDTO allocationDTO, string userId);		
 		Task<PickingResult> PrepareManualPickingAsync(string palletId);
 		Task<PickingResult> ExecuteManualPickingAsync(string palletId, int issueId, string userId);
-		Task<PickingResult> ClosePickingPalletAsync(string palletId, int issueId);
+		Task<PickingResult> ClosePickingPalletAsync(string palletId, int issueId, string userId);
 	}
 }

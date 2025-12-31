@@ -10,14 +10,20 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet;
+using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
+using MyWerehouse.Application.Pallets.Commands.DeletePallet;
 using MyWerehouse.Application.Pallets.Commands.ReservedPallet;
+using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Pallets.Events.CreateMovement;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
 using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
-using MyWerehouse.Application.Results;
+using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
 using MyWerehouse.Application.Utils;
-using MyWerehouse.Application.ViewModels.PalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -28,193 +34,157 @@ namespace MyWerehouse.Application.Services
 	public class PalletService : IPalletService
 	{
 		private readonly IMediator _mediator;
-		private readonly ILocationService _locationService;
-
-		private readonly IPalletRepo _palletRepo;
-		private readonly IPalletMovementRepo _palletMovementRepo;
-		private readonly IPickingPalletRepo _pickingPalletRepo;
-
-		private readonly ILocationRepo _locationRepo;
-
-		private readonly IMapper _mapper;
-
-		private readonly IValidator<UpdatePalletDTO> _updateValidator;
-
-		private readonly WerehouseDbContext _werehouseDbContext;
-
-		private readonly IEventCollector _eventCollector;
 		public PalletService(
-			IMediator mediator,
-			IPalletRepo palletRepo,
-			ILocationService locationService,
-			IPalletMovementRepo palletMovementRepo,
-			IPickingPalletRepo pickingPalletRepo,
-			ILocationRepo locationRepo,
-			IMapper mapper,
-			IValidator<UpdatePalletDTO> updateValidator,
-			WerehouseDbContext werehouseDbContext,
-			IEventCollector eventCollector)
+			IMediator mediator)
 		{
 			_mediator = mediator;
-			_palletRepo = palletRepo;
-			_locationService = locationService;
-			_palletMovementRepo = palletMovementRepo;
-			_pickingPalletRepo = pickingPalletRepo;
-			_locationRepo = locationRepo;
-			_mapper = mapper;
-			_updateValidator = updateValidator;
-			_werehouseDbContext = werehouseDbContext;
-			_eventCollector = eventCollector;
 		}
-		public PalletService(
-			IPalletRepo palletRepo,
-			IMapper mapper)
+		public async Task<PalletResult> CreatePalletAsync(PalletDTO addPalletDTO, string userId)
 		{
-			_palletRepo = palletRepo;
-			_mapper = mapper;
-		}
-		public async Task<string> CreatePalletAsync(PalletDTO addPalletDTO, string userId)
-		{
-			var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
-			
-			var pallet = _mapper.Map<Pallet>(addPalletDTO);
+			return await _mediator.Send(new CreateNewPalletCommand(addPalletDTO, userId));
+			//var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
+
+			//var pallet = _mapper.Map<Pallet>(addPalletDTO);
+			//pallet.Id = newIdForPallet;
+			//pallet.LocationId = 1;
 			//pallet.Status = PalletStatus.InStock;
-			pallet.Id = newIdForPallet;
-			pallet.LocationId = 1;
-			pallet.Status = PalletStatus.InStock;
 
-			_palletRepo.AddPallet(pallet);
-			await _werehouseDbContext.SaveChangesAsync();
-			//_historyService.CreateOperation(pallet, userId, PalletStatus.Available);
-			await _mediator.Publish(new CreatePalletOperationNotification(
-							pallet.Id,
-							pallet.LocationId,
-							ReasonMovement.Picking,
-							userId,
-							pallet.Status,
-							null
-						));
-			await _werehouseDbContext.SaveChangesAsync();
-			return pallet.Id;			
+			//_palletRepo.AddPallet(pallet);
+			//await _werehouseDbContext.SaveChangesAsync();
+			//await _mediator.Publish(new CreatePalletOperationNotification(
+			//				pallet.Id,
+			//				pallet.LocationId,
+			//				ReasonMovement.Picking,
+			//				userId,
+			//				pallet.Status,
+			//				null
+			//			));
+			//await _werehouseDbContext.SaveChangesAsync();
+			//return pallet.Id;			
 		}
-		public async Task DeletePalletAsync(string id) //chyba tylko dla receipt ale tam na razie nie używam
+		public async Task<PalletResult> DeletePalletAsync(string id, string userId) //chyba tylko dla receipt ale tam na razie nie używam
 		{
-			var pallet = await _palletRepo.GetPalletByIdAsync(id)
-				?? throw new PalletException($"Nie ma palety o numerze {id}");
-			var canDelete = await _palletMovementRepo.CanDeletePalletAsync(id);
-			if (!canDelete)
-				throw new PalletException($"Palety o numerze {id} nie można usunąć");
+			return await _mediator.Send(new DeletePalletCommand(id, userId));
+			//var pallet = await _palletRepo.GetPalletByIdAsync(id)
+			//	?? throw new PalletException($"Nie ma palety o numerze {id}");
+			//var canDelete = await _palletMovementRepo.CanDeletePalletAsync(id);
+			//if (!canDelete)
+			//	throw new PalletException($"Palety o numerze {id} nie można usunąć");
 
-			_palletRepo.DeletePallet(pallet);
-			await _werehouseDbContext.SaveChangesAsync();
+			//_palletRepo.DeletePallet(pallet);
+			////history
+			////inventory
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
 		public async Task<UpdatePalletDTO> GetPalletToEditAsync(string id)
 		{
-			var pallet = await _palletRepo.GetPalletByIdAsync(id);
-			var palletDTO = _mapper.Map<UpdatePalletDTO>(pallet);
-			return palletDTO;
+			return await _mediator.Send(new GetPalletToEditQuery(id));
+			//var pallet = await _palletRepo.GetPalletByIdAsync(id);
+			//var palletDTO = _mapper.Map<UpdatePalletDTO>(pallet);
+			//return palletDTO;
 		}
-		public async Task UpdatePalletAsync(UpdatePalletDTO updatingPallet, string userId)
+		public async Task<PalletResult> UpdatePalletAsync(UpdatePalletDTO updatingPallet, string userId)
 		{
-			var existingPallet = await _palletRepo.GetPalletByIdAsync(updatingPallet.Id);
-			var validationResult = await _updateValidator.ValidateAsync(updatingPallet);
-			if (!validationResult.IsValid)
-			{
-				throw new ValidationException(validationResult.Errors);
-			}
-			_mapper.Map(updatingPallet, existingPallet);
+			return await _mediator.Send(new UpdatePalletCommand(updatingPallet, userId));
+			//var existingPallet = await _palletRepo.GetPalletByIdAsync(updatingPallet.Id);
+			//var validationResult = await _updateValidator.ValidateAsync(updatingPallet);
+			//if (!validationResult.IsValid)
+			//{
+			//	throw new ValidationException(validationResult.Errors);
+			//}
+			//_mapper.Map(updatingPallet, existingPallet);
 
-			CollectionSynchronizer.SynchronizeCollection(
-				existingPallet.ProductsOnPallet,
-				updatingPallet.ProductsOnPallet,
-				a => a.Id,
-				a => a.Id,
-				dto =>
-				{
-					var newProduct = _mapper.Map<ProductOnPallet>(dto);
-					newProduct.PalletId = existingPallet.Id;
-					return newProduct;
-				},
-				(dto, entity) => //_mapper.Map(dto, entity));
-				{
-					var originalPalletId = entity.PalletId;  // Zapisz oryginalne FK przed mapowaniem
-					_mapper.Map(dto, entity);  // Mapuj resztę
-					entity.PalletId = originalPalletId;
-				});
+			//CollectionSynchronizer.SynchronizeCollection(
+			//	existingPallet.ProductsOnPallet,
+			//	updatingPallet.ProductsOnPallet,
+			//	a => a.Id,
+			//	a => a.Id,
+			//	dto =>
+			//	{
+			//		var newProduct = _mapper.Map<ProductOnPallet>(dto);
+			//		newProduct.PalletId = existingPallet.Id;
+			//		return newProduct;
+			//	},
+			//	(dto, entity) => //_mapper.Map(dto, entity));
+			//	{
+			//		var originalPalletId = entity.PalletId;  // Zapisz oryginalne FK przed mapowaniem
+			//		_mapper.Map(dto, entity);  // Mapuj resztę
+			//		entity.PalletId = originalPalletId;
+			//	});
 
-			//PalletMovement ?
-			//_historyService.CreateOperation(existingPallet, userId, existingPallet.Status);
-			await _werehouseDbContext.SaveChangesAsync();
-			await _mediator.Publish(new CreatePalletOperationNotification(
-							existingPallet.Id,
-							existingPallet.LocationId,
-							ReasonMovement.Picking,
-							userId,
-							PalletStatus.ToIssue,
-							null
-						));
-			//Inventory?
-			await _werehouseDbContext.SaveChangesAsync();
+			//await _werehouseDbContext.SaveChangesAsync();
+			//await _mediator.Publish(new CreatePalletOperationNotification(
+			//				existingPallet.Id,
+			//				existingPallet.LocationId,
+			//				ReasonMovement.Picking,
+			//				userId,
+			//				PalletStatus.ToIssue,
+			//				null
+			//			));
+			////Inventory?
+			//await _werehouseDbContext.SaveChangesAsync();
 		}
-		
+
 		public async Task<ChangeLocationResults> ChangeLocationPalletAsync(string palletId, int destinationLocationId, string userId, bool force = false)
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
-			try
-			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(palletId) ?? throw new PalletException(palletId);
-				//sprawdzenie czy lokalizacja jest zajęta
-				//tu front musi przy pomocy backanedu wyliczyć locationId
-				if (destinationLocationId <= 0)
-					return new ChangeLocationResults
-					{
-						Success = false,
-						Message = "niprawidłowa lokalizacja."
-					};
-				var existingPalletInDestination = await _palletRepo.CheckOccupancyAsync(destinationLocationId); // Nowa metoda repo
-				var locationDTO = await _locationService.GetLocationServiceAsync(destinationLocationId);
-				var fullNameLocation = $" Bay = {locationDTO.Bay} Aisle = {locationDTO.Aisle} Position = {locationDTO.Position} Height ={locationDTO.Height}";
-				if (existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id && !force) // Jeśli lokalizacja jest zajęta przez inną paletę
-				{
-					return new ChangeLocationResults
-					{
-						Success = false,
-						RequiresConfirmation = true,
-						Message = $"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}."
-						//OccupiedByPalletId = existingPalletInDestination.Id // Opcjonalnie: Dodaj pole do Results (frontend pokaże)
-					};
-				}
-				var destinationLocation = await _locationRepo.GetLocationByIdAsync(destinationLocationId);
-				//_historyService.CreateMovement(pallet, destinationLocation, ReasonMovement.Moved, userId, pallet.Status, null);
-				await _mediator.Publish(new CreatePalletMovementNotification(
-					pallet.Id,
-					pallet.LocationId,
-					destinationLocationId,
-					ReasonMovement.Moved,
-					userId,
-					pallet.Status,
-					null));
-				pallet.LocationId = destinationLocationId;
-				await _werehouseDbContext.SaveChangesAsync();
-				await transaction.CommitAsync();
-				return new ChangeLocationResults
-				{
-					Success = true,
-					RequiresConfirmation = false,
-					Message = $"Paleta {pallet.Id} została umieszczona w lokalizacji. "
-				};
-			}
-			catch (Exception)
-			{
-				await transaction.RollbackAsync();
-				throw;
-			}
+			return await _mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocationId, userId, force));
+			//using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
+			//try
+			//{
+			//	var pallet = await _palletRepo.GetPalletByIdAsync(palletId) ?? throw new PalletException(palletId);
+			//	//sprawdzenie czy lokalizacja jest zajęta
+			//	//tu front musi przy pomocy backanedu wyliczyć locationId
+			//	if (destinationLocationId <= 0)
+			//		return new ChangeLocationResults
+			//		{
+			//			Success = false,
+			//			Message = "niprawidłowa lokalizacja."
+			//		};
+			//	var existingPalletInDestination = await _palletRepo.CheckOccupancyAsync(destinationLocationId); // Nowa metoda repo
+			//	var locationDTO = await _locationService.GetLocationServiceAsync(destinationLocationId);
+			//	var fullNameLocation = $" Bay = {locationDTO.Bay} Aisle = {locationDTO.Aisle} Position = {locationDTO.Position} Height ={locationDTO.Height}";
+			//	if (existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id && !force) // Jeśli lokalizacja jest zajęta przez inną paletę
+			//	{
+			//		return new ChangeLocationResults
+			//		{
+			//			Success = false,
+			//			RequiresConfirmation = true,
+			//			Message = $"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}."
+			//			//OccupiedByPalletId = existingPalletInDestination.Id // Opcjonalnie: Dodaj pole do Results (frontend pokaże)
+			//		};
+			//	}
+			//	var destinationLocation = await _locationRepo.GetLocationByIdAsync(destinationLocationId);
+			//	//_historyService.CreateMovement(pallet, destinationLocation, ReasonMovement.Moved, userId, pallet.Status, null);
+			//	await _mediator.Publish(new CreatePalletMovementNotification(
+			//		pallet.Id,
+			//		pallet.LocationId,
+			//		destinationLocationId,
+			//		ReasonMovement.Moved,
+			//		userId,
+			//		pallet.Status,
+			//		null));
+			//	pallet.LocationId = destinationLocationId;
+			//	await _werehouseDbContext.SaveChangesAsync();
+			//	await transaction.CommitAsync();
+			//	return new ChangeLocationResults
+			//	{
+			//		Success = true,
+			//		RequiresConfirmation = false,
+			//		Message = $"Paleta {pallet.Id} została umieszczona w lokalizacji. "
+			//	};
+			//}
+			//catch (Exception)
+			//{
+			//	await transaction.RollbackAsync();
+			//	throw;
+			//}
 		}
 		public async Task<List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter)
 		{
-			var pallet = _palletRepo.GetPalletsByFilter(filter) ?? throw new PalletException("Brak palety/palet o zadanych parametrach");
-			var palletDTO = await pallet.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync();
-			return palletDTO;
+			return await _mediator.Send(new FindPalletsByFiltrQuery(filter));
+			//var pallet = _palletRepo.GetPalletsByFilter(filter) ?? throw new PalletException("Brak palety/palet o zadanych parametrach");
+			//var palletDTO = await pallet.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync();
+			//return palletDTO;
 		}
 		//public async Task<VirtualPallet> AddPalletToPickingAsync(Issue issue, int productId, DateOnly? bestBefore, string userId)
 		//{

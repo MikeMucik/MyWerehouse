@@ -60,7 +60,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			var result = _palletRepo.GetPalletsByFilter(productId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Count());
+			Assert.Equal(4, result.Count());
 			Assert.Contains(result, p => p.Id == "Q1000");
 		}
 
@@ -92,7 +92,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			var result = _palletRepo.GetPalletsByFilter(productId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(7, result.Count());
+			Assert.Equal(9, result.Count());
 			Assert.Contains(result, p => p.Id == "Q1000");
 			Assert.Contains(result, p => p.Id == "Q1010");
 		}

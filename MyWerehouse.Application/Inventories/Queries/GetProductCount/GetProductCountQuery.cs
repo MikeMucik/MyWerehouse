@@ -7,5 +7,5 @@ using MediatR;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetProductCount
 {
-	public record GetProductCountQuery(int ProductId, DateOnly BestBefore): IRequest<int>;	
+	public record GetProductCountQuery(int ProductId, DateOnly? BestBefore): IRequest<int>;	
 }

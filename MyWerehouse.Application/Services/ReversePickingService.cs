@@ -13,14 +13,13 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Application.Results;
+using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking;
-using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
-using MyWerehouse.Application.ViewModels.ReversePickingModels;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Services
 {
@@ -56,6 +55,7 @@ namespace MyWerehouse.Application.Services
 
 		public async Task<List<ReversePicking>> CreateTaskToReversePickingAsync(string palletId, string userId)//paleta kompletacyjna różne asortymenty
 		{
+
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
 			var listTasks = new List<ReversePicking>();
 			var pallet = await _palletRepo.GetPalletByIdAsync(palletId)
@@ -76,11 +76,12 @@ namespace MyWerehouse.Application.Services
 						BestBefore = residue.BestBefore,
 						Status = ReversePickingStatus.Pending,
 						AllocationId = allocation.Id,
+						UserId = userId,
 					});
 				}
 				foreach (var task in listTasks)
 				{
-					await _reversePickingRepo.AddReversePickingAsync(task);
+					 _reversePickingRepo.AddReversePicking(task);
 				}
 				await _werehouseDbContext.SaveChangesAsync();
 				await transaction.CommitAsync();
@@ -181,6 +182,7 @@ namespace MyWerehouse.Application.Services
 				{
 					await _mediator.Publish(await factory());
 				}
+				//_eventCollector.Clear();
 				return result;
 			}
 			catch (IssueException ie)
@@ -204,6 +206,10 @@ namespace MyWerehouse.Application.Services
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
 				throw new InvalidOperationException("Wystąpił błąd podczas usuwania zlecenia.", ex);
+			}
+			finally
+			{
+				_eventCollector.Clear();
 			}
 		}
 

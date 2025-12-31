@@ -5,36 +5,29 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
-using MyWerehouse.Application.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 {
-	public class DeleteReceiptHandler : IRequestHandler<DeleteReceiptCommand, ReceiptResult>
+	public class DeleteReceiptHandler(WerehouseDbContext werehouseDbContext,
+		IReceiptRepo receiptRepo,
+		IPalletMovementRepo palletMovementRepo,
+		IPalletRepo palletRepo,
+		IPublisher mediator) : IRequestHandler<DeleteReceiptCommand, ReceiptResult>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IReceiptRepo _receiptRepo;
-		private readonly IPalletMovementRepo _palletMovementRepo;
-		private readonly IPalletRepo _palletRepo;
-		private readonly IPublisher _mediator;
-		public DeleteReceiptHandler(WerehouseDbContext werehouseDbContext,
-			IReceiptRepo receiptRepo,
-			IPalletMovementRepo palletMovementRepo,
-			IPalletRepo palletRepo,
-			IPublisher mediator)
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IReceiptRepo _receiptRepo = receiptRepo;
+		private readonly IPalletMovementRepo _palletMovementRepo = palletMovementRepo;
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IPublisher _mediator = mediator;
+
+		public async Task<ReceiptResult> Handle(DeleteReceiptCommand request, CancellationToken ct)
 		{
-			_werehouseDbContext = werehouseDbContext;
-			_receiptRepo = receiptRepo;
-			_palletMovementRepo = palletMovementRepo;
-			_palletRepo = palletRepo;
-			_mediator = mediator;
-		}
-		public async Task<ReceiptResult> Handle(DeleteReceiptCommand request, CancellationToken cancellationToken)
-		{
-			using (var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(cancellationToken))
+			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			{
 				try
 				{
@@ -50,42 +43,50 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 					{
 						return ReceiptResult.Fail("Nieprawidłowy status przyjęcia");
 					}
-					receipt.ReceiptStatus = ReceiptStatus.Cancelled;
-					receipt.PerformedBy = request.UserId;
-					receipt.ReceiptDateTime = DateTime.UtcNow;
 
-					var restPallet = new List<string>();
-					//usuwanie palet które jeszcze nie weszły w "życie" magazynu					
-					foreach (var pallet in receipt.Pallets.ToList())
+					if (receipt.ReceiptStatus == ReceiptStatus.Planned)
 					{
-						//dodaj sprawdzenie czy można usunąć paletę??
-						//bool canDelete = await _palletMovementRepo.CanDeletePalletAsync(pallet.Id);
-						if (!await _palletMovementRepo.CanDeletePalletAsync(pallet.Id))
-							restPallet.Add(pallet.Id);
-						else pallet.Status = PalletStatus.Cancelled;
+						_werehouseDbContext.Receipts.Remove(receipt);
+						return ReceiptResult.Ok("Usunięto zlecenie", receipt.Id);
 					}
-					if (restPallet.Count > 0)
+					else
 					{
-						await _werehouseDbContext.SaveChangesAsync(cancellationToken);
-						await transaction.CommitAsync(cancellationToken);
-						return ReceiptResult.Fail($"Nie można usunąć wszystkich palet z przyjęcia. Przyjęcie ma teraz status anulowane. Lista nieksasowanych palet : {string.Join(",", restPallet)}");
-					}						
-					
-					await _mediator.Publish(new CreateHistoryReceiptNotification(receipt.Id, ReceiptStatus.Cancelled, request.UserId), cancellationToken);
-					
-					receipt.ReceiptStatus = ReceiptStatus.Cancelled;
-					await _werehouseDbContext.SaveChangesAsync(cancellationToken);
-					await transaction.CommitAsync(cancellationToken);
-					return ReceiptResult.Ok("Usunięto przyjęcie wraz z paletami z bazy", request.ReceiptId);
+						receipt.ReceiptStatus = ReceiptStatus.Cancelled;
+						receipt.PerformedBy = request.UserId;
+						receipt.ReceiptDateTime = DateTime.UtcNow;
+
+						var restPallet = new List<string>();
+						//usuwanie palet które jeszcze nie weszły w "życie" magazynu					
+						foreach (var pallet in receipt.Pallets.ToList())
+						{
+							if (!await _palletMovementRepo.CanDeletePalletAsync(pallet.Id))
+								restPallet.Add(pallet.Id);
+							else pallet.Status = PalletStatus.Cancelled;
+						}
+						if (restPallet.Count > 0)
+						{
+							await _werehouseDbContext.SaveChangesAsync(ct);
+							await transaction.CommitAsync(ct);
+							return ReceiptResult.Fail($"Nie można usunąć wszystkich palet z przyjęcia. Przyjęcie ma teraz status anulowane. Lista nie skasowanych palet : {string.Join(",", restPallet)}");
+						}
+
+						receipt.ReceiptStatus = ReceiptStatus.Cancelled;
+					}
+					;
+					await _werehouseDbContext.SaveChangesAsync(ct);
+					await transaction.CommitAsync(ct);
+					await _mediator.Publish(new CreateHistoryReceiptNotification(receipt.Id, ReceiptStatus.Cancelled,
+						request.UserId), ct);
+					return ReceiptResult.Ok("Anulowano przyjęcie wraz z paletami z bazy", request.ReceiptId);
 				}
 				catch (ReceiptException erp)
 				{
-					await transaction.RollbackAsync(cancellationToken);
+					await transaction.RollbackAsync(ct);
 					return ReceiptResult.Fail(erp.Message);
 				}
 				catch (Exception ex)
 				{
-					await transaction.RollbackAsync(cancellationToken);
+					await transaction.RollbackAsync(ct);
 					//_logger.LogError(ex, "Błąd podczas operacji na przyjęciu");
 					return ReceiptResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
 				}

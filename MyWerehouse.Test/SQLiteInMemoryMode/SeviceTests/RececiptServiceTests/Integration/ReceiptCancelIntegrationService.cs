@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
@@ -17,7 +16,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 	{
 		//Zmiana metody z delete na cancel
 		[Fact]
-		public async Task DeleteReceiptAsync_NotVerifiedReceipt_RemoveFromBase()
+		public async Task DeleteReceiptAsync_NotVerifiedReceipt_CancelledInBase()
 		{
 			//Arrange
 			var address = new Address
@@ -124,7 +123,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
 			//Assert	
 			Assert.NotNull(result);
-			Assert.Contains("Usunięto przyjęcie", result.Message);
+			Assert.Contains("Anulowano przyjęcie wraz z paletami z bazy", result.Message);
 			var receipt = DbContext.Receipts.FirstOrDefault(receipt => receipt.Id == initialReceipt.Id);
 			Assert.NotNull(receipt);
 			Assert.Equal(ReceiptStatus.Cancelled, receipt.ReceiptStatus);
@@ -142,6 +141,44 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal(1, DbContext.Clients.Count());
 		}
 		[Fact]
+		public async Task DeleteReceiptAsync_NotVerifiedReceipt_RemovedBase()
+		{
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{				
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};			
+			var initialReceipt = new Receipt
+			{
+				Client = client,
+				ReceiptStatus = ReceiptStatus.Planned,
+				PerformedBy = "U002",
+				ReceiptDateTime = new DateTime(2025, 6, 6),
+			};			
+			DbContext.Clients.Add(client);
+			DbContext.Receipts.Add(initialReceipt);		
+			await DbContext.SaveChangesAsync();
+			//Act
+			var result = await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
+			//Assert	
+			Assert.NotNull(result);
+			Assert.Contains("Usunięto zlecenie", result.Message);
+		}
+			[Fact]
 		public async Task DeleteReceiptAsync_VerifiedReceipt_ThrowInfo()
 		{
 			//Arrange
@@ -177,7 +214,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialProduct = new Product
 			{
-				//Id = 10,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
@@ -185,7 +221,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialProduct1 = new Product
 			{
-				///Id = 1,
 				Name = "Test",
 				SKU = "666666",
 				Category = initialCategory,
@@ -193,12 +228,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialReceipt = new Receipt
 			{
-				//Id = 1,
 				Client = initailCLient,
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-				//Pallets = [initialPallet]
+				ReceiptDateTime = new DateTime(2025, 6, 6),				
 			};
 			var initialPallet = new Pallet
 			{

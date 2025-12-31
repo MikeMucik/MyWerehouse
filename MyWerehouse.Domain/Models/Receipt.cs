@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.DomainExceptions;
 
 namespace MyWerehouse.Domain.Models
 {
@@ -16,14 +17,19 @@ namespace MyWerehouse.Domain.Models
 		public virtual ICollection<HistoryReceipt> HistoryReceipt { get; set; } = new List<HistoryReceipt>();
 		public string PerformedBy { get; set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; set; }
+		public int RampNumber { get; set; }
 		public Receipt() { }
-		public Receipt (int clientId, string performedBy)
+		public Receipt (int clientId, string performedBy, int rampNumber)
 		{
+			if (clientId <= 0) throw new InvalidClientException(clientId);
+			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
+			if (rampNumber <= 0 || rampNumber > 100) throw new InvalidRampException(rampNumber);
 			ClientId = clientId;
-			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
-			PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
+			PerformedBy = performedBy;
 			ReceiptDateTime = DateTime.UtcNow;
 			ReceiptStatus = ReceiptStatus.Planned;
+			RampNumber = rampNumber;
+			
 		}
 	}
 }

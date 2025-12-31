@@ -29,14 +29,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(2, result.Count); // powinny być dwie palety: Q1100 i Q1101
+			Assert.Equal(2, result.Count); // powinny być dwie palety: Q1100 i Q1101 
 
 			// Paleta Q1100
 			var pallet1 = result.FirstOrDefault(vp => vp.PalletId == "Q1100");
 			Assert.NotNull(pallet1);
 			Assert.Equal(200, pallet1.IssueInitialQuantity);
 			Assert.Equal(3, pallet1.LocationId);
-			Assert.Single(pallet1.Allocations);
+			Assert.Equal(2, pallet1.Allocations.Count);
 			Assert.Equal(20, pallet1.Allocations.First().Quantity);
 			Assert.Equal(PickingStatus.Allocated, pallet1.Allocations.First().PickingStatus);
 

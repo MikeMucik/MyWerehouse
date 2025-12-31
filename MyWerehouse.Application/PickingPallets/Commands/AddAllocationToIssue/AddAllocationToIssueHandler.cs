@@ -13,49 +13,100 @@ using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 {
-	public class AddAllocationToIssueHandler : IRequestHandler<AddAllocationToIssueCommand, List<Allocation>>
+	public class AddAllocationToIssueHandler(
+		IAllocationRepo allocationRepo,
+		IEventCollector eventCollector,
+		IMediator mediator,
+		IProductRepo productRepo) : IRequestHandler<AddAllocationToIssueCommand, List<Allocation>>
 	{
-		private readonly IAllocationRepo _allocationRepo;
-		private readonly IEventCollector _eventCollector;
-		private readonly IMediator _mediator;
-		public AddAllocationToIssueHandler(
-			IAllocationRepo allocationRepo,
-			IEventCollector eventCollector,
-			IMediator mediator)
-		{
-			_allocationRepo = allocationRepo;
-			_eventCollector = eventCollector;
-			_mediator = mediator;
-		}
+		private readonly IAllocationRepo _allocationRepo = allocationRepo;
+		private readonly IEventCollector _eventCollector = eventCollector;
+		private readonly IMediator _mediator = mediator;
+		private readonly IProductRepo _productRepo = productRepo;
+
 		public async Task<List<Allocation>> Handle(AddAllocationToIssueCommand request, CancellationToken ct)
 		{
 			var issue = request.Issue;
+			var targetQuantity = request.Rest;
 			var quantity = request.Rest;
-			if (quantity <= 0) return [];
+			//if (quantity <= 0) return [];
 			var listOfAllocation = new List<Allocation>();
 			var virtualPallets = request.VirtualPallets;
-			var xxxx = issue.Allocations.Where(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == request.ProductId).ToList();
-			if (issue.Id > 0 && xxxx.Count > 0)
+			var existingAllocations = issue.Allocations.Where(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == request.ProductId).ToList();
+			if (targetQuantity == 0)
 			{
-				var oldAllocations = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issue.Id, request.ProductId);
-				foreach (var oldAllocation in oldAllocations)
+				if (existingAllocations.Count > 0)
+				{
+					foreach (var alloc in existingAllocations)
+					{
+						// Usuwamy z bazy i z listy issue
+						_allocationRepo.DeleteAllocation(alloc); // Zakładam że masz taką metodę lub Remove
+						issue.Allocations.Remove(alloc);
+
+						// Event Cancelled
+						_eventCollector.AddDeferred(async () =>
+							new CreateHistoryPickingNotification(
+								new HistoryDataPicking
+							(
+								alloc.Id,
+								alloc.VirtualPallet.PalletId,
+								alloc.IssueId,
+									 alloc.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 alloc.Quantity,
+									 0,
+									 PickingStatus.Allocated,
+									 alloc.PickingStatus,
+									 request.PerfomedBy,
+									 DateTime.UtcNow
+
+								)));
+					}
+				}
+				return new List<Allocation>(); // Zwracamy pustą listę
+			}
+			if (existingAllocations.Count > 0)
+			{
+				foreach (var oldAllocation in existingAllocations)
 				{
 					if (oldAllocation.VirtualPallet.RemainingQuantity >= quantity)
 					{
 						oldAllocation.Quantity += quantity;
 						listOfAllocation.Add(oldAllocation);
 						oldAllocation.PickingStatus = PickingStatus.Correction;
+
+					}
+					else
+					{
+						var allocation = new Allocation
+						{
+							VirtualPallet = oldAllocation.VirtualPallet,
+							Quantity = quantity,
+							Issue = oldAllocation.Issue,
+							PickingStatus = PickingStatus.Allocated
+						};
+						_allocationRepo.AddAllocation(allocation);
+						listOfAllocation.Add(allocation);
 					}
 				}
 				foreach (var allocation in listOfAllocation)
 				{
+
 					_eventCollector.AddDeferred(async () =>
 							new CreateHistoryPickingNotification(
-								allocation.VirtualPalletId,
+								new HistoryDataPicking
+							(
 								allocation.Id,
-								request.PerfomedBy,
-								PickingStatus.Allocated,
-								0));
+								allocation.VirtualPallet.PalletId,
+								allocation.IssueId,
+									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.Quantity,
+									 0,
+									 PickingStatus.Available,
+									 allocation.PickingStatus,
+									 request.PerfomedBy,
+									 DateTime.UtcNow
+
+								)));
 				}
 				return listOfAllocation;
 			}
@@ -69,7 +120,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 					var quantityToTake = Math.Min(quantity, availableOnThisPallet);
 					var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToTake);
 					_allocationRepo.AddAllocation(newAllocation);
-					//czy tu dopisać do issue ?
 					listOfAllocation.Add(newAllocation);
 					issue.Allocations.Add(newAllocation);
 					quantity -= quantityToTake;
@@ -86,13 +136,35 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 				}
 				foreach (var allocation in listOfAllocation)
 				{
+					var historyPicking = new HistoryDataPicking
+							(
+								allocation.Id,
+								allocation.VirtualPallet.PalletId,
+								allocation.IssueId,
+									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.Quantity,
+									 0,
+									 PickingStatus.Allocated,
+									 allocation.PickingStatus,
+									 request.PerfomedBy,
+									 DateTime.UtcNow
+								);
 					_eventCollector.AddDeferred(async () =>
 							new CreateHistoryPickingNotification(
-								allocation.VirtualPalletId,
+								new HistoryDataPicking
+							(
 								allocation.Id,
-								request.PerfomedBy,
-								PickingStatus.Available,
-								0));
+								allocation.VirtualPallet.PalletId,
+								allocation.IssueId,
+									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.Quantity,
+									 0,
+									 PickingStatus.Allocated,
+									 allocation.PickingStatus,
+									 request.PerfomedBy,
+									 DateTime.UtcNow
+								)
+								));
 				}
 				return listOfAllocation;
 			}

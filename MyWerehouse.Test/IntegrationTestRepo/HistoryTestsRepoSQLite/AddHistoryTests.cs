@@ -409,7 +409,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				PalletId = pallet1.Id,
 
 			};
-			var historyPickingRepo = new Infrastructure.Repositories.HistoryPickingRepo(DbContext);
+			var historyPickingRepo = new HistoryPickingRepo(DbContext);
 			//Act
 			historyPickingRepo.AddHistoryPicking(historyPicking);
 			DbContext.SaveChanges();
@@ -419,6 +419,18 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			Assert.NotNull(result);
 			Assert.Equal(PickingStatus.Picked, result.StatusAfter);
 			Assert.Equal("A", result.PerformedBy);
+		}
+		[Fact]
+		public async Task AddRecord_AddHistoryReversePicking_AddToList()
+		{
+			//Arrange
+			var historyReversePicking = new HistoryReversePicking
+			{
+
+			};
+			var historyReversePickingRepo = new HistoryReversePickingRepo(DbContext);
+			//Act
+		//await	historyReversePickingRepo.AddHistoryReversePickingAsync(historyReversePicking, cancellationToken);
 		}
 	}
 }

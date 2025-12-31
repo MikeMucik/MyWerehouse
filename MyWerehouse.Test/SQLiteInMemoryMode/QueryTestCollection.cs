@@ -222,8 +222,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
 						ReceiptId = 2,
+					},
+					//PickingPallet
+					new Pallet
+					{
+						Id = "Q5000",
+						DateReceived = new DateTime(2025, 2, 1),
+						LocationId = 3,
+						Status = PalletStatus.ToPicking,
 					}
-
 				);
 			}
 			if (!context.VirtualPallets.Any())
@@ -231,50 +238,94 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.VirtualPallets.AddRange(
 					new VirtualPallet
 					{
+						Id = 1,
 						PalletId = "Q1100",
 						IssueInitialQuantity = 200,
 						LocationId = 3,
 						DateMoved = new DateTime(2025, 5, 5),
-						Allocations = new List<Allocation> {new Allocation
-							{
-								PickingStatus = PickingStatus.Allocated,
-								IssueId=2,
-								Quantity = 20
-							}
-						}
+						//Allocations = new List<Allocation> {new Allocation
+						//	{
+						//		PickingStatus = PickingStatus.Allocated,
+						//		IssueId = 2,
+						//		Quantity = 20
+						//	}
+						//}
 					},
 					new VirtualPallet
 					{
+						Id = 2,
 						PalletId = "Q1101",
 						IssueInitialQuantity = 150,
 						LocationId = 3,
 						DateMoved = new DateTime(2024, 6, 6),
-						Allocations = new List<Allocation>
-							{
-								new Allocation
-								{
-									PickingStatus = PickingStatus.Allocated,
-									IssueId = 2,
-									Quantity = 50
-								}
-							}
+						//Allocations = new List<Allocation>
+						//	{
+						//		new Allocation
+						//		{
+						//			PickingStatus = PickingStatus.Allocated,
+						//			IssueId = 2,
+						//			Quantity = 50
+						//		}
+						//	}
 					},
 					new VirtualPallet
 					{
+						Id = 3,
 						PalletId = "Q1200",
 						IssueInitialQuantity = 300,
 						LocationId = 3,
 						DateMoved = new DateTime(2025, 5, 7),
-						Allocations = new List<Allocation>
-						{
-							new Allocation
-							{
-								PickingStatus = PickingStatus.Allocated,
-								IssueId = 2,
-								Quantity = 100
-							}
-						}
+						//Allocations = new List<Allocation>
+						//{
+						//	new Allocation
+						//	{
+						//		PickingStatus = PickingStatus.Allocated,
+						//		IssueId = 2,
+						//		Quantity = 100
+						//	}
+						//}
 					});
+			}
+			if (!context.Allocations.Any())
+			{
+				context.Allocations.AddRange(
+					new Allocation
+					{
+						Id = 1,
+						VirtualPalletId = 1,
+						PickingStatus = PickingStatus.Allocated,
+						IssueId = 2,
+						Quantity = 20
+					}, new Allocation
+					{
+						Id = 2,
+						VirtualPalletId = 1,
+						PickingStatus = PickingStatus.Picked,
+						IssueId = 2,
+						Quantity = 20
+					}, new Allocation
+					{
+						Id = 3,
+						VirtualPalletId = 2,
+						PickingStatus = PickingStatus.Allocated,
+						IssueId = 2,
+						Quantity = 50
+					}, new Allocation
+					{
+						Id = 4,
+						VirtualPalletId = 3,
+						PickingStatus = PickingStatus.Allocated,
+						IssueId = 2,
+						Quantity = 100
+					}, new Allocation
+					{
+						Id = 5,
+						VirtualPalletId = 3,
+						PickingStatus = PickingStatus.Picked,
+						IssueId = 2,
+						Quantity = 10
+					}
+					);
 			}
 			if (!context.ProductOnPallet.Any())
 			{
@@ -284,7 +335,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 1,
 						ProductId = 10,
 						Quantity = 50,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1000"
 					},
@@ -293,7 +344,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 2,
 						ProductId = 10,
 						Quantity = 100,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1001"
 					},
@@ -302,7 +353,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 3,
 						ProductId = 11,
 						Quantity = 200,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1000"
 					},
@@ -311,7 +362,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 4,
 						ProductId = 11,
 						Quantity = 200,
-						BestBefore = new DateOnly(2026, 2, 2),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1010"
 					},
@@ -320,7 +371,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 5,
 						ProductId = 11,
 						Quantity = 200,
-						BestBefore = new DateOnly(2025, 2, 2),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1002"
 					},
@@ -329,7 +380,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 6,
 						ProductId = 11,
 						Quantity = 200,
-						BestBefore = new DateOnly(2026, 2, 2),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q1100"
 					},
@@ -338,7 +389,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 7,
 						ProductId = 11,
 						Quantity = 200,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
 						PalletId = "Q2000"
 					},
@@ -347,7 +398,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 8,
 						ProductId = 11,
 						Quantity = 150,
-						BestBefore = new DateOnly(2026, 6, 1),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 3, 3),
 						PalletId = "Q1101"
 					},
@@ -356,9 +407,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 9,
 						ProductId = 10, // inny produkt
 						Quantity = 300,
-						BestBefore = new DateOnly(2027, 1, 1),
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 4, 4),
 						PalletId = "Q1200"
+					},
+					new ProductOnPallet
+					{
+						Id = 10,
+						ProductId = 10,
+						Quantity = 10,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						DateAdded = new DateTime(2024, 4, 4),
+						PalletId = "Q5000"
+					},
+					new ProductOnPallet
+					{
+						Id = 11,
+						ProductId = 11,
+						Quantity = 20,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						DateAdded = new DateTime(2024, 4, 4),
+						PalletId = "Q5000"
 					}
 				);
 			}
@@ -487,6 +556,32 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Quantity = 0,
 						LastUpdated = new DateTime(2025, 5, 6)
 					});
+			}
+			if (!context.ReversePickings.Any())
+			{
+				context.ReversePickings.AddRange(
+					new ReversePicking
+					{
+						AllocationId = 2,
+						ProductId = 10,
+						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
+						PickingPalletId = "Q5000",
+						Quantity = 10,
+						Status = ReversePickingStatus.Pending,
+						UserId = "UserR"
+
+					},
+					new ReversePicking
+					{
+						AllocationId = 5,
+						ProductId = 20,
+						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
+						PickingPalletId = "Q5000",
+						Quantity = 20,
+						Status = ReversePickingStatus.Pending,
+						UserId = "UserR"
+					}
+				);
 			}
 			context.SaveChanges();
 		}

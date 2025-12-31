@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Results;
-using MyWerehouse.Application.ViewModels.PalletModels;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Interfaces
 {
 	public interface IPalletService
 	{				
-		Task<string> CreatePalletAsync(PalletDTO addPalletDTO, string userId);		//dodanie palety niepowiązanej
-		Task DeletePalletAsync(string id);	
+		Task<PalletResult> CreatePalletAsync(PalletDTO addPalletDTO, string userId);		//dodanie palety niepowiązanej
+		Task<PalletResult> DeletePalletAsync(string id, string UserId);	
 		Task<UpdatePalletDTO> GetPalletToEditAsync(string id);		
-		Task UpdatePalletAsync(UpdatePalletDTO updatingPallet, string userId);		
+		Task<PalletResult> UpdatePalletAsync(UpdatePalletDTO updatingPallet, string userId);		
 		//Task<PalletHistoryDTO> ShowHistoryPalletAsync(string id);		
 		Task<ChangeLocationResults> ChangeLocationPalletAsync(string palletId, int destinationLocation, string userId, bool force = false);
 		Task <List<PalletDTO>> FindPalletsByFiltrAsync(PalletSearchFilter filter);

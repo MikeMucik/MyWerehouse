@@ -16,8 +16,6 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
@@ -25,6 +23,7 @@ using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Application.Receipts.Validators;
 using SQLitePCL;
 using static MyWerehouse.Application.Receipts.DTOs.CreateReceiptPlanDTO;
+using MyWerehouse.Application.Pallets.DTOs;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Unit
 {
@@ -112,78 +111,78 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 		//	Assert.NotNull(updatedReceipt);
 		//	Assert.Equal(ReceiptStatus.InProgress, updatedReceipt.ReceiptStatus);
 		//}
-		[Fact]
-		//przeniesienie do kontrolera
-		public async Task AddPalletToReceiptAsync_WhenPalletServiceFails_ShouldRollbackAllChanges()
-		{
-			//Arrange
-			var address = new Address
-			{
-				City = "Warsaw",
-				Country = "Poland",
-				PostalCode = "00-999",
-				StreetName = "Wiejska",
-				Phone = 4444444,
-				Region = "Mazowieckie",
-				StreetNumber = "23/3"
-			};
-			var initailCLient = new Client
-			{
-				Id = 1,
-				Name = "TestCompany",
-				Email = "123@op.pl",
-				Description = "Description",
-				FullName = "FullNameCompany",
-				Addresses = [address]
-			};
-			var initialReceipt = new Receipt
-			{
-				Id = 1,
-				ClientId = 1,
-				ReceiptStatus = ReceiptStatus.Planned,
-				PerformedBy = "U002"
-			};
-			var initailLocation = new Location
-			{
-				Id = 1,
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			DbContext.Clients.Add(initailCLient);
-			DbContext.Receipts.Add(initialReceipt);
-			DbContext.Locations.Add(initailLocation);
-			await DbContext.SaveChangesAsync();
+		//[Fact]
+		////przeniesienie do kontrolera
+		//public async Task AddPalletToReceiptAsync_WhenPalletServiceFails_ShouldRollbackAllChanges()
+		//{
+		//	//Arrange
+		//	var address = new Address
+		//	{
+		//		City = "Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		Phone = 4444444,
+		//		Region = "Mazowieckie",
+		//		StreetNumber = "23/3"
+		//	};
+		//	var initailCLient = new Client
+		//	{
+		//		Id = 1,
+		//		Name = "TestCompany",
+		//		Email = "123@op.pl",
+		//		Description = "Description",
+		//		FullName = "FullNameCompany",
+		//		Addresses = [address]
+		//	};
+		//	var initialReceipt = new Receipt
+		//	{
+		//		Id = 1,
+		//		ClientId = 1,
+		//		ReceiptStatus = ReceiptStatus.Planned,
+		//		PerformedBy = "U002"
+		//	};
+		//	var initailLocation = new Location
+		//	{
+		//		Id = 1,
+		//		Aisle = 1,
+		//		Bay = 1,
+		//		Height = 1,
+		//		Position = 1
+		//	};
+		//	DbContext.Clients.Add(initailCLient);
+		//	DbContext.Receipts.Add(initialReceipt);
+		//	DbContext.Locations.Add(initailLocation);
+		//	await DbContext.SaveChangesAsync();
 
-			//var mockMapper = new Mock<IMapper>();
-			var newPalletDto = new CreatePalletReceiptDTO
-			{
-				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
-				UserId = "U001"
-			};
-			var pallet = new Pallet { Id = "Q1000" };
-			//mockMapper.Setup(m => m.Map<Pallet>(newPalletDto)).Returns(pallet);
+		//	//var mockMapper = new Mock<IMapper>();
+		//	var newPalletDto = new CreatePalletReceiptDTO
+		//	{
+		//		ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
+		//		UserId = "U001"
+		//	};
+		//	var pallet = new Pallet { Id = "Q1000" };
+		//	//mockMapper.Setup(m => m.Map<Pallet>(newPalletDto)).Returns(pallet);
 
-			//var mockPalletRepo = new Mock<IPalletRepo>();
-			//mockPalletRepo
-			//	.Setup(r => r.AddPallet(It.IsAny<Pallet>()))
-			//	.Throws(new Exception("DB error"));
-			//var receiptRepo = new ReceiptRepo(DbContext);
+		//	//var mockPalletRepo = new Mock<IPalletRepo>();
+		//	//mockPalletRepo
+		//	//	.Setup(r => r.AddPallet(It.IsAny<Pallet>()))
+		//	//	.Throws(new Exception("DB error"));
+		//	//var receiptRepo = new ReceiptRepo(DbContext);
 
-			var service = new ReceiptService(Mediator
-				//,
-			//	receiptRepo, mockMapper.Object,
-			//	DbContext, mockPalletRepo.Object
-				);
-			//Act
-			var result = await service.AddPalletToReceiptAsync(1, newPalletDto);
-			Assert.Contains("Wystąpił nieoczekiwany błąd podczas operacji.", result.Message);
-			Assert.Equal(0, await DbContext.Pallets.CountAsync());
-			using var arrangeContext = CreateNewContext();
-			var receiptAfterFail = await arrangeContext.Receipts.FindAsync(1);
-			Assert.Equal(ReceiptStatus.Planned, receiptAfterFail.ReceiptStatus);
-		}
+		//	var service = new ReceiptService(Mediator
+		//		//,
+		//	//	receiptRepo, mockMapper.Object,
+		//	//	DbContext, mockPalletRepo.Object
+		//		);
+		//	//Act
+		//	var result = await service.AddPalletToReceiptAsync(1, newPalletDto);
+		//	Assert.Contains("Wystąpił nieoczekiwany błąd podczas operacji.", result.Message);
+		//	Assert.Equal(0, await DbContext.Pallets.CountAsync());
+		//	using var arrangeContext = CreateNewContext();
+		//	var receiptAfterFail = await arrangeContext.Receipts.FindAsync(1);
+		//	Assert.Equal(ReceiptStatus.Planned, receiptAfterFail.ReceiptStatus);
+		//}
 
 		[Fact]
 		public async Task ProperDataOnlyUpdatePallet_UpdatePalletToReceiptAsync_AddedToBase()

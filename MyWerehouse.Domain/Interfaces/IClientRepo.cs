@@ -15,5 +15,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<Client?> GetClientByIdAsync (int id); 				
 		IQueryable<Client> GetAllClients();
 		IQueryable<Client> GetClients (ClientSearchFilter clientFilter);
+		Task<bool> IsClientExistAsync(int clientId);
 	}
 }

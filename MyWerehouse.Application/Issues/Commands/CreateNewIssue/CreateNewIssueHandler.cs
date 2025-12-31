@@ -7,10 +7,10 @@ using MediatR;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 {

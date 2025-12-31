@@ -15,17 +15,8 @@ namespace MyWerehouse.Application.Receipts.DTOs
 		public int Id { get; set; }
 		public int ClientId { get; set; }		
 		public DateTime ReceiptDateTime { get; set; }		
-		public string PerformedBy { get; set; } // opcjonalnie: user
+		public string PerformedBy { get; set; } 
 		public ReceiptStatus ReceiptStatus { get; set; }		
-		//public class CreateReceiptPlanDTOValidation : AbstractValidator<CreateReceiptPlanDTO>
-		//{
-		//	public CreateReceiptPlanDTOValidation()
-		//	{
-		//		RuleFor(x => x.ClientId)
-		//			.GreaterThan(0).WithMessage("Numer klienta wymagany");
-		//		RuleFor(x => x.PerformedBy)
-		//			.NotEmpty().WithMessage("Użytkownik wymagany");
-		//	}
-		//}
+		public int RampNumber { get; set; }		
 	}
 }

@@ -6,8 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Utils;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.ViewModels.PalletModels;
-using MyWerehouse.Application.ViewModels.ProductOnPalletModels;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
@@ -53,7 +52,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var location = new Location
 			{
-
 				Aisle = 0,
 				Bay = 0,
 				Height = 0,
@@ -103,15 +101,77 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 3, 4) })				
 					]
 			};
-			await _palletService.UpdatePalletAsync(updatedPallet, "user");
+			var resultHandler =await _palletService.UpdatePalletAsync(updatedPallet, "user");
 			//Assert
-
+			Assert.NotNull(resultHandler);
+			Assert.True(resultHandler.Success);
+			Assert.Equal("Q1010", resultHandler.PalletId);
+			
+			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Single(x => x.Id == pallet.Id);
+			Assert.Equal("Q1010", result.Id);
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
+			Assert.Equal(updatedPallet.Status, result.Status);
+			Assert.Equal(updatedPallet.DateReceived, result.DateReceived);
+			Assert.Equal(updatedPallet.LocationId, result.LocationId);
+
 			Assert.Equal(updatedPallet.ProductsOnPallet.Count, result.ProductsOnPallet.Count);
+			foreach (var dto in updatedPallet.ProductsOnPallet)
+			{
+				Assert.Contains(
+					result.ProductsOnPallet,
+					p => p.ProductId == dto.ProductId
+				);
+			}
+			foreach (var dto in updatedPallet.ProductsOnPallet)
+			{
+				var entity = result.ProductsOnPallet
+					.Single(p => p.ProductId == dto.ProductId);
+
+				Assert.Equal(dto.Quantity, entity.Quantity);
+				Assert.Equal(dto.BestBefore, entity.BestBefore);
+			}
+			Assert.All(
+			result.ProductsOnPallet,
+			pop => Assert.Equal(result.Id, pop.PalletId)
+			);
+			Assert.DoesNotContain(
+			result.ProductsOnPallet,
+			p => p.ProductId == product2.Id || p.ProductId == product3.Id
+			);
+			Assert.Equal(PalletStatus.ToPicking, result.Status);
+
+			var inventoryItems = DbContext.Inventories
+			.Where(i => i.ProductId == product.Id || i.ProductId == product1.Id)
+			.ToList();
+
+			var inventoryProduct = inventoryItems.Single(i => i.ProductId == product.Id);
+			var inventoryProduct1 = inventoryItems.Single(i => i.ProductId == product1.Id);
+
+			Assert.Equal(
+				updatedPallet.ProductsOnPallet.First(p => p.ProductId == product.Id).Quantity,
+				inventoryProduct.Quantity
+			);
+
+			Assert.Equal(
+				updatedPallet.ProductsOnPallet.First(p => p.ProductId == product1.Id).Quantity,
+				inventoryProduct1.Quantity
+			);
+
+			var history = DbContext.PalletMovements
+			.Where(h => h.PalletId == pallet.Id)
+			.ToList();
+
+			Assert.NotEmpty(history);
+			Assert.Contains(history, h =>
+				h.Reason == ReasonMovement.Picking &&
+				h.PalletStatus == PalletStatus.ToIssue &&
+				h.PerformedBy == "user"
+			);
+
 			//var numberProductDto = updatedPallet.ProductsOnPallet.FirstOrDefault(x=>x.ProductId == product.Id); 
 			//var numberProductResult = result.ProductsOnPallet.FirstOrDefault(x=>x.ProductId == product.Id); 
 			var updatedQty = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
@@ -221,8 +281,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
-			await _palletService.UpdatePalletAsync(updatedPallet, "user");
+			var resultHandler = await _palletService.UpdatePalletAsync(updatedPallet, "user");
 			//Assert
+			Assert.NotNull(resultHandler);
+			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
 
 			var result = DbContext.Pallets				
 				.Include(p => p.ProductsOnPallet)

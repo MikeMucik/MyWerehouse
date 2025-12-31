@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Queries.GetProductCount;
 using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
 using MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue;
@@ -16,9 +17,8 @@ using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
 using MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue;
-using MyWerehouse.Application.PickingPallets.Qeuries.GetVirtualPallets;
-using MyWerehouse.Application.Products.Queries.GetNumberUnitOnPallet;
-using MyWerehouse.Application.Results;
+using MyWerehouse.Application.PickingPallets.Queries.GetVirtualPallets;
+using MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Models;
@@ -31,26 +31,17 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 	{
 		private readonly IIssueItemRepo _issueItemRepo;
 		private readonly IIssueRepo _issueRepo;
-		//private readonly IPalletRepo _palletRepo;
-		//private readonly IAllocationRepo _allocationRepo;
-		//private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly IMediator _mediator;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IEventCollector _eventCollector;
 		public UpdateIssueHandler(IIssueItemRepo issueItemRepo
 			, IIssueRepo issueRepo,
-				//IPalletRepo palletRepo,
-				//IAllocationRepo allocationRepo,
-				//IPickingPalletRepo pickingPalletRepo,
 				IMediator mediator,
 				WerehouseDbContext werehouseDbContext,
 				IEventCollector eventCollector)
 		{
 			_issueItemRepo = issueItemRepo;
 			_issueRepo = issueRepo;
-			//_palletRepo = palletRepo;
-			//_allocationRepo = allocationRepo;
-			//_pickingPalletRepo = pickingPalletRepo;
 			_mediator = mediator;
 			_werehouseDbContext = werehouseDbContext;
 			_eventCollector = eventCollector;
@@ -59,123 +50,153 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 		{
 			var resultList = new List<IssueResult>();
 			var issue = await _issueRepo.GetIssueByIdAsync(request.DTO.Id) ?? throw new IssueException(request.DTO.Id);
-			issue.PerformedBy = request.DTO.PerformedBy;             // Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking
+			// Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking
 			if (issue.IssueStatus == IssueStatus.New ||
 				issue.IssueStatus == IssueStatus.Pending ||
 				issue.IssueStatus == IssueStatus.NotComplete)
 			{
+
+				var oldListPallets = issue.Pallets;
+				var oldListAllocations = issue.Allocations;
+				//chyba muszę mieć synchronizer: palet, alokacji(co z virtualPallet)
+				var listOfAllocation = new List<Allocation>();//
+				var palletAssigned = new List<Pallet>();
+				var anyFailure = false; // Flaga, czy wystąpił jakikolwiek błąd
+				var anySuccess = false; // Flaga, czy cokolwiek się udało
+				foreach (var product in request.DTO.Items) //bo dla każdego osobno i memo na koniec
 				{
-					//var issueItemsAdded = new List<IssueItem>();
-					var oldListPallets = issue.Pallets;
-					var oldListAllocations = issue.Allocations;
-					//chyba muszę mieć synchronizer: palet, alokacji(co z virtualPallet)
-					var listOfAllocation = new List<Allocation>();
-					var palletAssigned = new List<Pallet>();
-					foreach (var product in request.DTO.Items) //bo dla każdego osobno i memo na koniec
+					await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+					var totalAvailable = 0;
+					try
 					{
-						await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-						var totalAvailable = 0;
-						try
-						{
-							var existingIssueItem = issue.IssueItems
-								.FirstOrDefault(x => x.ProductId == product.ProductId);
-							var newAmountOfProduct = product.Quantity;
-							var oldAmountOfProduct = existingIssueItem?.Quantity ?? 0;
-							if (newAmountOfProduct < oldAmountOfProduct) throw new ProductException($"Nowa ilość produktu {product.ProductId} nie może być mniejsza od starej");
-							var addedNewCartoonsForProduct = newAmountOfProduct - oldAmountOfProduct;
-							if (addedNewCartoonsForProduct == 0) continue;
-							//1 dostępność towaru
-							totalAvailable = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore), ct);
-							if (product.Quantity > totalAvailable)//
-							{
-								throw new ProductException($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia.");
-							}
-							//2 Oblicz pełne palety i resztę - to można wyodrębnić
-							var palletAmountFullResult = await _mediator.Send(new GetNumberPalletsAndRestQuery(product.ProductId, addedNewCartoonsForProduct), ct);
-							var amountPallets = palletAmountFullResult.FullPallet;
-							var rest = palletAmountFullResult.Rest;
-							//3. Pobierz dostępne palety - tu trzeba dodać blokadę 
-							var availablePallets = await _mediator.Send(new GetAvailablePalletsByProductQuery(product.ProductId, product.BestBefore, amountPallets + 1, addedNewCartoonsForProduct), ct);
-							//3.1 pobierz dostępne virtualPallet
-							var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(product.ProductId, product.BestBefore), ct);
-							//4. Przydziel pełne palety
-							palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(issue, availablePallets, amountPallets), ct);
-							var restPallet = availablePallets.Except(palletAssigned).ToList();
-							//5. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
-							if (rest > 0)
-							{
-								var newAllocationFromRest = await _mediator.Send(
-									new AddAllocationToIssueCommand(restPallet, availableVirtualPalletsQuery, issue,
-									product.ProductId,
-									rest, product.BestBefore,
-									request.DTO.PerformedBy
-									), ct);
-							}
-							await _werehouseDbContext.SaveChangesAsync(ct);
-							issue.IssueStatus = IssueStatus.ChangingPallet;
-							foreach (var evn in _eventCollector.Events)
-							{
-								await _mediator.Publish(evn, CancellationToken.None);
-							}
-							foreach (var factory in _eventCollector.DeferredEvents)
-							{
-								await _mediator.Publish(await factory(), ct);
-							}
-							await transaction.CommitAsync(ct);
+						var existingIssueItem = issue.IssueItems
+							.FirstOrDefault(x => x.ProductId == product.ProductId);
+						var newAmountOfProduct = product.Quantity;
+						var oldAmountOfProduct = existingIssueItem?.Quantity ?? 0;
+						//if (newAmountOfProduct < oldAmountOfProduct) throw new ProductException($"Nowa ilość produktu {product.ProductId} nie może być mniejsza od starej");
+						// czy to potrzebne
+						var addedNewCartoonsForProduct = newAmountOfProduct - oldAmountOfProduct;
+						if (addedNewCartoonsForProduct == 0) continue;
+						var allocationsToRemove = issue.Allocations
+							.Where(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.ProductId)
+								.ToList();
 
-							_eventCollector.Clear();
+						var freedQuantity = allocationsToRemove.Sum(a => a.Quantity);
 
-							resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
+						//1 dostępność towaru
+						var	totalAvailableInDb = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore), ct);
+						totalAvailable = totalAvailableInDb + freedQuantity;
+						if (product.Quantity > totalAvailable)//
+						{
+							throw new ProductException($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia.");
+						}
+						//2 Oblicz pełne palety i resztę - to można wyodrębnić
+						var palletAmountFullResult = await _mediator.Send(new GetNumberPalletsAndRestQuery(product.ProductId, addedNewCartoonsForProduct), ct);
+						var amountPallets = palletAmountFullResult.FullPallet;
+						var rest = palletAmountFullResult.Rest;
+						//3. Pobierz dostępne palety - tu trzeba dodać blokadę 
+						var availablePallets = await _mediator.Send(new GetAvailablePalletsByProductQuery(product.ProductId, product.BestBefore, amountPallets + 1, addedNewCartoonsForProduct), ct);
+						//3.1 pobierz dostępne virtualPallet
+						var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(product.ProductId, product.BestBefore), ct);
+						//4. Przydziel pełne palety
+						palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(issue, availablePallets, amountPallets), ct);
+						var restPallet = availablePallets.Except(palletAssigned).ToList();
+						//5. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
+						if (rest > 0)
+						{
+							var newAllocationFromRest = await _mediator.Send(
+								new AddAllocationToIssueCommand(restPallet, availableVirtualPalletsQuery, issue,
+								product.ProductId,
+								rest, product.BestBefore,
+								request.DTO.PerformedBy
+								), ct);
+						}
+						var freshPallets = oldListPallets.Concat(palletAssigned).ToList();
+						//var freshPallets = palletAssigned;
+						CollectionSynchronizer.SynchronizeCollection(
+							oldListPallets,
+							freshPallets,
+							x => x.Id,
+							x => x.Id,
+							addMapper: p => p,
+							updateMapper: (src, dst) => { },
+							removeMapper: p => { p.IssueId = null; p.Status = PalletStatus.Available; });
+						await _werehouseDbContext.SaveChangesAsync(ct);
+						issue.IssueStatus = IssueStatus.ChangingPallet;
+						foreach (var evn in _eventCollector.Events)
+						{
+							await _mediator.Publish(evn, CancellationToken.None);
+						}
+						foreach (var factory in _eventCollector.DeferredEvents)
+						{
+							await _mediator.Publish(await factory(), ct);
+						}
+						await transaction.CommitAsync(ct);
+						resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
+						anySuccess = true;
+					}
+					
+					catch (Exception ex) // Łapiemy wszystko tutaj, żeby obsłużyć logikę czyszczenia
+					{
+						await transaction.RollbackAsync(ct);
 
-							await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, issue.PerformedBy), ct);//
-						}
-						catch (ProductException expr)//
+						// === KLUCZOWA POPRAWKA ===
+						// Musimy wycofać zmiany z pamięci RAM (z obiektu issue), 
+						// bo inaczej przy następnej iteracji spróbujemy zapisać te błędy ponownie.
+
+						// Opcja 1: Przeładowanie całego obiektu issue z bazy
+						await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
+						// Przeładowanie kolekcji Pallets, żeby wyrzucić z listy te dodane w tej nieudanej próbie
+						await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
+
+						anyFailure = true;
+
+						// Obsługa konkretnych wyjątków do wyniku
+						if (ex is ProductException pEx)
 						{
-							await transaction.RollbackAsync(ct);
-							resultList.Add(
-							IssueResult.Fail(
-							   expr.Message,
-							   product.ProductId,
-							   product.Quantity,
-							   totalAvailable));
+							resultList.Add(IssueResult.Fail(pEx.Message, product.ProductId));
 						}
-						catch (PalletException expal)
+						else if (ex is PalletException palEx)
 						{
-							await transaction.RollbackAsync(ct);
-							resultList.Add(IssueResult.Fail(
-								expal.Message,
-								product.ProductId));
+							resultList.Add(IssueResult.Fail(palEx.Message, product.ProductId));
 						}
-						catch (IssueException ei)
+						else if (ex is IssueException ei)						
 						{
-							await transaction.RollbackAsync(ct);
-							resultList.Add(IssueResult.Fail(
-								ei.Message, product.ProductId));
+							resultList.Add(IssueResult.Fail(ei.Message, product.ProductId));
 						}
-						catch (DbUpdateConcurrencyException)
+						else if (ex is DbUpdateConcurrencyException)
 						{
-							await transaction.RollbackAsync(ct);
 							resultList.Add(IssueResult.Fail("Inny użytkownik operuje ..."));
 						}
-						catch (Exception ex)
+						else
 						{
-							await transaction.RollbackAsync(ct);
-							// Loguj ex dla developera!
-							//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
-							throw new InvalidOperationException("Wystąpił błąd podczas przypisywania palet do zlecenia.", ex.InnerException);
+							// Logowanie krytyczne
+							// _logger.LogError(ex, ...)
+							resultList.Add(IssueResult.Fail("Wystąpił nieoczekiwany błąd", product.ProductId));
+							// Tutaj DECYZJA: Czy throw? Jeśli rzucisz throw, przerwiesz pętlę dla kolejnych produktów.
+							// Jeśli chcesz kontynuować dla innych produktów, nie rób throw.
 						}
 					}
-					var freshPallets = oldListPallets.Concat(palletAssigned).ToList();
-					CollectionSynchronizer.SynchronizeCollection(
-						oldListPallets,
-						freshPallets,
-						x => x.Id,
-						x => x.Id,
-						addMapper: p => p,
-						updateMapper: (src, dst) => { },
-						removeMapper: p => { p.IssueId = null; p.Status = PalletStatus.Available; });
-				}			
-				return resultList;			
+					finally
+					{
+						_eventCollector.Clear();
+					}
+				}
+
+				if (anySuccess)
+				{
+					issue.PerformedBy = request.DTO.PerformedBy;
+					issue.IssueStatus = IssueStatus.Pending;
+					await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//
+					
+				}
+				if (anyFailure)
+				{				
+					issue.IssueStatus = IssueStatus.NotComplete;					
+				}
+				await _werehouseDbContext.SaveChangesAsync(ct);
+				return resultList;
+
 			}
 			else if (issue.IssueStatus == IssueStatus.ConfirmedToLoad)
 			{
@@ -222,7 +243,6 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					PerformedBy = request.DTO.PerformedBy,
 				};
 				resultList = await _mediator.Send(new CreateNewIssueCommand(dataForNewIssue, request.DateToSend), ct);
-
 				foreach (var result in resultList)
 				{
 					if (result.Success)
@@ -241,3 +261,14 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 		}
 	}
 }
+
+
+//var freshPallets = oldListPallets.Concat(palletAssigned).ToList();
+//CollectionSynchronizer.SynchronizeCollection(
+//	oldListPallets,
+//	freshPallets,
+//	x => x.Id,
+//	x => x.Id,
+//	addMapper: p => p,
+//	updateMapper: (src, dst) => { },
+//	removeMapper: p => { p.IssueId = null; p.Status = PalletStatus.Available; });

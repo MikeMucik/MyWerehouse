@@ -16,7 +16,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-		
+		public void AddReversePicking(ReversePicking reversePicking)
+		{
+			 _werehouseDbContext.Add(reversePicking);
+		}
+
 		public async Task AddReversePickingAsync(ReversePicking reversePicking)
 		{
 			await _werehouseDbContext.AddAsync(reversePicking);			

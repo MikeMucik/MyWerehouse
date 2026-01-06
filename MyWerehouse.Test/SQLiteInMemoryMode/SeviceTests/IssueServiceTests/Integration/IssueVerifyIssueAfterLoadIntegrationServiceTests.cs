@@ -7,8 +7,15 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {

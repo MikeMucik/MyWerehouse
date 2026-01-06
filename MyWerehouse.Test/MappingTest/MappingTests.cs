@@ -4,24 +4,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Mapping;
-using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
+using System.Reflection;
 
 namespace MyWerehouse.Test.MappingTest
 {
 	public class MappingTests
 	{
 		private readonly IMapper _mapper;
+		
+		//}
 		public MappingTests()
-		{
-			var mappingConfig = new MapperConfiguration(cfg =>
+		{			
+			var services = new ServiceCollection();
+			services.AddLogging();
+			
+			services.AddAutoMapper(cfg =>
 			{
-				cfg.AddProfile<MappingProfile>();
+				cfg.AddProfile<MappingProfile>();				
 			});
-			_mapper = mappingConfig.CreateMapper();
+			var serviceProvider = services.BuildServiceProvider();
+			_mapper = serviceProvider.GetRequiredService<IMapper>();
 		}
 		[Fact]
 		public void ShouldMap_AddProductDTO_To_Product()
@@ -87,7 +96,7 @@ namespace MyWerehouse.Test.MappingTest
 		//		LocationId = 1,
 		//		ReceiptId = 1,
 		//		Status = PalletStatus.Available,
-				
+
 		////		ProductsOnPallet = new List<ProductOnPalletDTO>
 		////{
 		////	new ProductOnPalletDTO
@@ -119,13 +128,13 @@ namespace MyWerehouse.Test.MappingTest
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				ReceiptId = 1,
-				Status = PalletStatus.Available,				
+				Status = PalletStatus.Available,
 			};
 
 			var entity = _mapper.Map<Pallet>(dto);
 
 			Assert.NotNull(entity);
-			Assert.Equal(dto.Id, entity.Id);			
+			Assert.Equal(dto.Id, entity.Id);
 		}
 		//[Fact]
 		//public void Should_Map_AddPalletPickingDTO_To_Pallet()

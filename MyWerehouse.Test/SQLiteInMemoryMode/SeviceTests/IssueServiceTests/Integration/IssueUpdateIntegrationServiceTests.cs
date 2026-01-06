@@ -4,9 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 using Xunit.Sdk;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
@@ -1624,7 +1630,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 			// Assert & Act
-			var result = await Assert.ThrowsAsync<IssueException>(() => _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7)));
+			var result = await Assert.ThrowsAsync<NotFoundIssueException>(() => _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7)));
 			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);
 		}
 		//[Fact]

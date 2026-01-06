@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 {
@@ -18,7 +19,7 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 		public async Task<ListPalletsToLoadDTO> Handle (LoadingIssueListQuery request, CancellationToken ct)
 		{
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-				?? throw new IssueException(request.IssueId);
+				?? throw new NotFoundIssueException(request.IssueId);
 			//zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
 			return new ListPalletsToLoadDTO
 			{

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Histories.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Histories.Models;
 
 namespace MyWerehouse.Application.Interfaces
 {

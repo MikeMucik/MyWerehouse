@@ -11,8 +11,12 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Domain.Receviving.Filters;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Products.Filters;
 
 namespace MyWerehouse.Application.Services
 {

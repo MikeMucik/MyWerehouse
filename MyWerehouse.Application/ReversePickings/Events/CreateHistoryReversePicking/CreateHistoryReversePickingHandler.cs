@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking

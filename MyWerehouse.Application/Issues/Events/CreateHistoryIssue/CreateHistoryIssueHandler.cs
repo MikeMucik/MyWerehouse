@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
@@ -29,7 +30,7 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 		public async Task Handle(CreateHistoryIssueNotification request, CancellationToken cancellationToken)
 		{
 			var issue = await _issueRepo.GetIssueByIdWithPalletAndItemsAsync(request.IssueId, cancellationToken)
-				?? throw  new IssueException(request.IssueId);
+				?? throw  new NotFoundIssueException(request.IssueId);
 
 			var details = issue.Pallets != null && issue.Pallets.Count > 0 ?
 

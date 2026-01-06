@@ -18,15 +18,15 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 	public class CategoryIntegrationCommand : CommandTestBase
 	{
 		protected readonly CategoryService _categoryService;
-		protected readonly IMapper _mapper;
+		//protected readonly IMapper _mapper;
 		protected readonly IValidator<CategoryDTO> _validator;
 		public CategoryIntegrationCommand() : base()
 		{
-			var MapperConfig = new MapperConfiguration(cfg =>
-			{
-				cfg.AddProfile<MappingProfile>();
-			});
-			_mapper = MapperConfig.CreateMapper();
+			//var MapperConfig = new MapperConfiguration(cfg =>
+			//{
+			//	cfg.AddProfile<MappingProfile>();
+			//});
+			//_mapper = MapperConfig.CreateMapper();
 			var _categoryRepo = new CategoryRepo(_context);
 			var _productRepo = new ProductRepo(_context);
 			_validator = new CategoryDTOValidation();

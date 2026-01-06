@@ -10,7 +10,7 @@ using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 {

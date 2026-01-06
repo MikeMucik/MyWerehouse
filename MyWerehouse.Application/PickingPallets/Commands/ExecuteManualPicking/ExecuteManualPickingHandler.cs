@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.Commands.ProcessPickingAction;
 using MyWerehouse.Application.PickingPallets.Commands.ReduceAllocation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 
@@ -51,7 +52,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId)
 					?? throw new PalletException(request.PalletId);
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-					?? throw new IssueException(request.IssueId);
+					?? throw new NotFoundIssueException(request.IssueId);
 				var product = pallet.ProductsOnPallet.FirstOrDefault()
 					?? throw new InvalidOperationException($"Paleta {request.PalletId} jest pusta.");
 
@@ -140,7 +141,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(pnfEx.Message);
 			}
-			catch (IssueException onfEx)
+			catch (NotFoundIssueException onfEx)
 			{
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(onfEx.Message);

@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
@@ -34,24 +35,14 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 			try
 			{
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-						?? throw new IssueException(request.IssueId);
+						?? throw new NotFoundIssueException(request.IssueId);
 				var palletsReturn =	issue.RemoveNotLoadedPallets();
-				//var palletsReturn = new List<Pallet>();
-
-				//var toReturn = issue.Pallets
-				//	.Where(p => p.Status != PalletStatus.Loaded)
-				//	.ToList();
-				//foreach (var pallet in toReturn)
-				//{					
-				//		pallet.Status = PalletStatus.Available;
-				//		pallet.IssueId = null;
-				//		issue.Pallets.Remove(pallet);
-				//		palletsReturn.Add(pallet);					
-				//}
+				
 				issue.IssueStatus = IssueStatus.IsShipped;
 				issue.PerformedBy = request.UserId;
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
+
 				foreach (var pallet in issue.Pallets)
 				{
 					await _mediator.Publish(new CreatePalletOperationNotification(
@@ -60,11 +51,7 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 							ReasonMovement.ToLoad,
 							request.UserId,
 							PalletStatus.Loaded,
-							null), ct);
-					foreach (var product in pallet.ProductsOnPallet)
-					{
-						await _mediator.Send(new ChangeQuantityCommand(product.ProductId, -product.Quantity), ct);
-					}
+							null), ct);					
 				}
 				foreach (var pallet in palletsReturn)
 				{
@@ -81,7 +68,7 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 				
 				return IssueResult.Ok($"Zamknięto wydanie {request.IssueId}.");
 			}
-			catch (IssueException ei)
+			catch (NotFoundIssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ei.Message);

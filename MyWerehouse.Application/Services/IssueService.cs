@@ -27,15 +27,15 @@ using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
 using MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr;
-using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Receviving.Filters;
 
 namespace MyWerehouse.Application.Services
 {

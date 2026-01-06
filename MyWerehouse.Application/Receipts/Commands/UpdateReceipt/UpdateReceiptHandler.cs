@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Domain.DomainExceptions;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 
@@ -117,7 +119,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 						var product = item.ProductsOnPallet.Single();//założenie systemowe - paleta przyjmowana jeden produkt - poniżej jakby było inne
 
 						if (!await _productRepo.IsExistProduct(product.ProductId))
-							throw new InvalidProductException(product.ProductId);
+							throw new NotFoundProductException(product.ProductId);
 
 						palletToDo.ProductsOnPallet.Add(new ProductOnPallet
 						{
@@ -164,7 +166,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				await transaction.RollbackAsync(ct);
 				return ReceiptResult.Fail(expal.Message);
 			}
-			catch(InvalidProductException epr)
+			catch(NotFoundProductException epr)
 			{
 				await transaction.RollbackAsync(ct);
 				return ReceiptResult.Fail(epr.Message);

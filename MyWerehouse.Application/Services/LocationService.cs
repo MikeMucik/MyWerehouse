@@ -10,7 +10,7 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.AllocationModels;
 using MyWerehouse.Application.ViewModels.LocationModels;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.ViewModels.LocationModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Application.Interfaces
 {

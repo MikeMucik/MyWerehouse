@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using Moq;
-using MyWerehouse.Infrastructure;
 using Microsoft.EntityFrameworkCore.Sqlite;
-using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using MyWerehouse.Application.Mapping;
+using MyWerehouse.Infrastructure;
 
 
 namespace MyWerehouse.Test.Common
@@ -17,12 +21,17 @@ namespace MyWerehouse.Test.Common
 	{
 		
 		protected readonly WerehouseDbContext _context;
-
+		protected readonly IMapper _mapper;
 		public CommandTestBase()
 		{
 			var options = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase(Guid.NewGuid().ToString())
 				.Options;
+			var services = new ServiceCollection();
+			services.AddLogging();
+			services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+			var serviceProvider = services.BuildServiceProvider();
+			_mapper = serviceProvider.GetRequiredService<IMapper>();
 
 			_context = new WerehouseDbContext(options);
 

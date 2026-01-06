@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {
@@ -137,6 +139,59 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//var result = await _palletService.CreatePalletAsync(newPallet, "user");
 			//Assert
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
+		}
+		[Fact]
+		public async Task PalletWithNoHistory_CreatePalletAsync_ThrowDomainExcpetation()
+		{
+			//Arrange
+			var category = new Category
+			{
+				Name = "name",
+				IsDeleted = false
+			};
+			var product = new Product
+			{
+				Name = "Test",
+				SKU = "666666",
+				Category = category,
+				IsDeleted = false,
+			};
+			var location = new Location
+			{
+
+				Aisle = 0,
+				Bay = 0,
+				Height = 0,
+				Position = 0
+			};
+			var inventory = new Inventory
+			{
+				Product = product,
+				Quantity = 10,
+				LastUpdated = DateTime.UtcNow.AddDays(-1)
+			};
+
+			DbContext.Locations.Add(location);
+			DbContext.Products.Add(product);
+			DbContext.Inventories.Add(inventory);
+			DbContext.SaveChanges();
+			var newPallet = new PalletDTO
+			{
+				ProductsOnPallet = new HashSet<ProductOnPalletDTO>{
+					new ProductOnPalletDTO
+						{
+							ProductId = 2,
+							Quantity = 10,
+						}
+				},
+			};
+			//Act
+			var result = await _palletService.CreatePalletAsync(newPallet, "user");
+			
+			//var result = await _palletService.CreatePalletAsync(newPallet, "user");
+			//Assert
+			Assert.NotNull(result);
+			Assert.Contains("Produkt o numerze 2 nie istnieje.", result.Message);
 		}
 	}
 }

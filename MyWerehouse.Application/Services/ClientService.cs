@@ -13,11 +13,14 @@ using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Application.ViewModels.ProductModels;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Receviving.Filters;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Domain.Clients.Filters;
 
 namespace MyWerehouse.Application.Services
 {

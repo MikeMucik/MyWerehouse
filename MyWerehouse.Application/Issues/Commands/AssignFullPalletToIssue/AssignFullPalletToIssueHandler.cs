@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue

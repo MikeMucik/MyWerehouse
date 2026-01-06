@@ -4,7 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 

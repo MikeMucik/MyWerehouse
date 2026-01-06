@@ -4,8 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace MyWerehouse.Test.Common
 {
@@ -16,9 +19,15 @@ namespace MyWerehouse.Test.Common
 		public QuerryTestFixture()
 		{
 			Context = DbContextFactory.Create().Object;
-			var configurationProvider =
-				new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
-			Mapper = configurationProvider.CreateMapper();
+			//var configurationProvider =
+			//	new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
+			//Mapper = configurationProvider.CreateMapper();
+
+			var services = new ServiceCollection();
+			services.AddLogging();
+			services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
+			var serviceProvider = services.BuildServiceProvider();
+			Mapper = serviceProvider.GetRequiredService<IMapper>();
 		}
 		public void Dispose()
 		{

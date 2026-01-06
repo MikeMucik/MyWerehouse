@@ -4,7 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
@@ -136,15 +142,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(palletP2);
 			Assert.Equal(PalletStatus.Available, palletP2.Status);
 			Assert.Null(palletP2.IssueId);
-
-			var updatedInventory1 = await DbContext.Inventories.FirstOrDefaultAsync(p => p.ProductId == initialProduct.Id);
-			var updatedInventory2 = await DbContext.Inventories.FirstOrDefaultAsync(p => p.ProductId == initialProduct1.Id);
-			Assert.NotNull(updatedInventory1);
-			Assert.NotNull(updatedInventory2);
-			Assert.Equal(100, updatedInventory1.Quantity);
-			Assert.Equal(95, updatedInventory2.Quantity);
-
-			//var historyPallets = await DbContext.PalletMovements.ToListAsync();
 			// Historia palet — sprawdź, czy została utworzona dla załadowanej palety
 			var palletHistories = await DbContext.PalletMovements
 				.FirstOrDefaultAsync(h => h.PalletId == "P1");

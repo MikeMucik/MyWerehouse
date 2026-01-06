@@ -8,7 +8,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceipts
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.ViewModels.ClientModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration

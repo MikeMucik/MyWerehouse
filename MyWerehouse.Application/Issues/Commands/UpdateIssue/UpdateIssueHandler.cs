@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Queries.GetProductCount;
 using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
@@ -21,7 +22,9 @@ using MyWerehouse.Application.PickingPallets.Queries.GetVirtualPallets;
 using MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 
@@ -49,7 +52,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 		public async Task<List<IssueResult>> Handle(UpdateIssueCommand request, CancellationToken ct)
 		{
 			var resultList = new List<IssueResult>();
-			var issue = await _issueRepo.GetIssueByIdAsync(request.DTO.Id) ?? throw new IssueException(request.DTO.Id);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.DTO.Id) ?? throw new NotFoundIssueException(request.DTO.Id);
 			// Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking
 			if (issue.IssueStatus == IssueStatus.New ||
 				issue.IssueStatus == IssueStatus.Pending ||
@@ -160,7 +163,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						{
 							resultList.Add(IssueResult.Fail(palEx.Message, product.ProductId));
 						}
-						else if (ex is IssueException ei)						
+						else if (ex is NotFoundIssueException ei)						
 						{
 							resultList.Add(IssueResult.Fail(ei.Message, product.ProductId));
 						}

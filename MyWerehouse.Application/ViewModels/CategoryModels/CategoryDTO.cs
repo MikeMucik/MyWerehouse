@@ -7,7 +7,7 @@ using AutoMapper;
 using FluentValidation;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.ViewModels.ClientModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.ViewModels.CategoryModels
 {

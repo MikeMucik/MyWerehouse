@@ -8,8 +8,10 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Application.Common.Exceptions.BuisnessRuleException;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {
@@ -42,7 +44,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				return ReceiptResult.Ok("Utworzono przyjęcie", receipt.Id);
 			}
-			catch (InvalidClientException ei)
+			catch (ClientNotFoundException ei)
 			{
 				return ReceiptResult.Fail(ei.Message);
 			}
@@ -50,7 +52,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 			{
 				return ReceiptResult.Fail(eu.Message);
 			}
-			catch (InvalidRampException er)
+			catch (RampNotFoundException er)
 			{
 				return ReceiptResult.Fail(er.Message);
 			}

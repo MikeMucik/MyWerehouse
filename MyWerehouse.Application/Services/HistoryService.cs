@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -9,9 +8,8 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Histories.DTOs;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Domain.Histories.Filters;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
-using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services
 {
@@ -46,6 +44,11 @@ namespace MyWerehouse.Application.Services
 				history.PalletMovementsDTO.Add(item);
 			}
 			return history;
+		}
+
+		public Task<PickingPalletHistoryDTO> GetHistoryPickingPalletByIdAsync(string id)
+		{
+			throw new NotImplementedException();
 		}
 
 		public Task<ReceiptHistoryDTO> GetHistoryReceiptByIdAsync(string id)

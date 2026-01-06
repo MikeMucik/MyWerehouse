@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
@@ -32,7 +34,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 			try
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ?? throw new PalletException(request.PalletId);
-				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId) ?? throw new IssueException(request.PalletId);
+				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId) ?? throw new NotFoundIssueException(request.PalletId);
 				if (pallet.Status != PalletStatus.Picking) { throw new PalletException($"Palety {pallet.Id} nie można zamknąć. "); }
 				_pickingPalletRepo.ClosePickingPallet(request.PalletId, request.IssueId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
@@ -53,7 +55,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(exp.Message);
 			}
-			catch (IssueException exo)
+			catch (NotFoundIssueException exo)
 			{
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(exo.Message);

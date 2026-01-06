@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Mapping;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {

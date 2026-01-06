@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
@@ -14,8 +15,11 @@ using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.AllocationModels;
 using MyWerehouse.Application.ViewModels.LocationModels;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
@@ -55,7 +59,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
 				var allocationToChange = await _allocationRepo.GetAllocationAsync( request.AllocationDTO.AllocationId);
 				var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(allocationToChange.VirtualPalletId);
 				var issueId = allocationToChange.IssueId;
-				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueException(issueId);
+				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new NotFoundIssueException(issueId);
 				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.AllocationDTO.SourcePalletId)
 					?? throw new PalletException(request.AllocationDTO.SourcePalletId);
 				await _mediator.Send(new ProcessPickingActionCommand(sourcePallet, issue, request.AllocationDTO.ProductId, request.AllocationDTO.PickedQuantity, request.UserId), ct);
@@ -150,7 +154,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(pnfEx.Message);
 			}
-			catch (IssueException onfEx)
+			catch (NotFoundIssueException onfEx)
 			{
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(onfEx.Message);

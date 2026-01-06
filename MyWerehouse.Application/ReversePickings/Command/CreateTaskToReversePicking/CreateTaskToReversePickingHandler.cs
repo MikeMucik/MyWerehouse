@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Commands;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.ReversePickings.Command.CreateTaskToReversePicking
@@ -37,9 +38,9 @@ namespace MyWerehouse.Application.ReversePickings.Command.CreateTaskToReversePic
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			var listTasks = new List<ReversePicking>();
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId)
-				?? throw new PalletException(request.PalletId);
+				?? throw new NotFoundPalletException(request.PalletId);
 			var issue = pallet.Issue
-				?? throw new IssueException("Brak zlecenia wydania.");
+				?? throw new NotFoundIssueException(pallet.Issue.Id);
 			foreach (var residue in pallet.ProductsOnPallet)
 			{
 				var allocations = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issue.Id, residue.ProductId);

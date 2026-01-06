@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 {
@@ -24,7 +24,7 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 		}
 		public async Task<UpdateIssueDTO> Handle(GetIssueProductSummaryByIdQuery query, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(query.IssueId) ?? throw new IssueException(query.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(query.IssueId) ?? throw new NotFoundIssueException(query.IssueId);
 			
 			return new UpdateIssueDTO
 			{

@@ -20,7 +20,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 	{
 		//public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		protected readonly ProductService _productService;
-		protected readonly IMapper _mapper;
+		//protected readonly IMapper _mapper;
 		protected readonly IValidator<AddProductDTO> _productValidator;
 		protected readonly IInventoryRepo _inventoryRepo;
 		protected readonly IProductRepo _productRepo;
@@ -28,11 +28,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		public ProductIntegrationCommand() : base()
 		{	
 
-			var MapperConfig = new MapperConfiguration(cfg =>
-			{ 
-				cfg.AddProfile<MappingProfile>();
-			});
-			_mapper = MapperConfig.CreateMapper();
+			//var MapperConfig = new MapperConfiguration(cfg =>
+			//{ 
+			//	cfg.AddProfile<MappingProfile>();
+			//});
+			//_mapper = MapperConfig.CreateMapper();
 			_productRepo = new ProductRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_productValidator = new AddProductDTOValidation();	

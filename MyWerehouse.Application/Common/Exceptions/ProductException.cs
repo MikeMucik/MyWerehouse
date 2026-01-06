@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Common.Exceptions.BuisnessRuleException;
 
 namespace MyWerehouse.Application.Common.Exceptions
 {
-	public class ProductException : Exception
+	public class ProductException : BusinessRuleException
 	{
 		public int? ProductId { get; set; }
 
@@ -17,6 +18,6 @@ namespace MyWerehouse.Application.Common.Exceptions
 		}
 		public ProductException(string message) : base(message) { }
 
-		public ProductException(string message, Exception inner) : base(message, inner) { }
+		//public ProductException(string message, Exception inner) : base(message, inner) { }
 	}
 }

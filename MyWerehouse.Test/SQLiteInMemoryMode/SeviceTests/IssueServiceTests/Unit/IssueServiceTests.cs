@@ -14,9 +14,15 @@ using MyWerehouse.Application.Issues.Validators;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 {

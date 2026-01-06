@@ -9,7 +9,8 @@ using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Filters;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration

@@ -7,8 +7,13 @@ using AutoMapper;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.DTOs;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {

@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
@@ -33,7 +35,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 			try
 			{
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-						?? throw new IssueException(request.IssueId);
+						?? throw new NotFoundIssueException(request.IssueId);
 				List<INotification> notificationList = [];
 				issue.IssueStatus = IssueStatus.ConfirmedToLoad;
 				foreach (var pallet in issue.Pallets)
@@ -50,7 +52,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 				}
 				return IssueResult.Ok("Wydanie zatwierdzono.", request.IssueId);
 			}
-			catch (IssueException ei)
+			catch (NotFoundIssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ei.Message);

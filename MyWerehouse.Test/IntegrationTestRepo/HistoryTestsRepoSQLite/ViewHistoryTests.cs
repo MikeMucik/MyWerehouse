@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Histories.Filters;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 
-namespace MyWerehouse.Test.UnitTestRepo.PalletMovementTestsRepo
+namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 {
 	[Collection("QuerryCollection")]
 	public class ViewHistoryTests : CommandTestBase

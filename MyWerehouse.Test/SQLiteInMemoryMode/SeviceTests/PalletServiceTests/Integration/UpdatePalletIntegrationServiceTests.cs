@@ -7,7 +7,11 @@ using System.Threading.Tasks;
 using MyWerehouse.Application.Utils;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Invetories.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {
@@ -72,6 +76,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
 			}]
 			};
+			var inventoryP = new Inventory
+			{
+				Product = product,
+				Quantity = 10
+			};
+			var inventoryP1 = new Inventory
+			{
+				Product = product1,
+				Quantity = 200
+			};
+
+			DbContext.Inventories.AddRange(inventoryP, inventoryP1);
 			DbContext.Products.AddRange(product, product1, product2, product3);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);

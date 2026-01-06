@@ -9,10 +9,12 @@ using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.DomainExceptions;
+using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 
 namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 {
@@ -58,7 +60,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 					pallet.DateReceived = DateTime.UtcNow;
 					pallet.Status = PalletStatus.Receiving;
 					if (!await _productRepo.IsExistProduct(request.DTO.ProductsOnPallet.First().ProductId))
-						throw new InvalidProductException(request.DTO.ProductsOnPallet.First().ProductId);
+						throw new NotFoundProductException(request.DTO.ProductsOnPallet.First().ProductId);
 					_palletRepo.AddPallet(pallet);
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);
@@ -71,7 +73,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 					}					
 					return ReceiptResult.Ok($"Paleta {pallet.Id} została dodana do przyjęcia {request.ReceiptId}", pallet.Id);
 				}
-				catch(InvalidProductException epr)
+				catch(NotFoundProductException epr)
 				{
 					await transaction.RollbackAsync(ct);
 					return ReceiptResult.Fail(epr.Message);

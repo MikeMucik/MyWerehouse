@@ -8,7 +8,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt;
@@ -21,9 +20,9 @@ using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Receviving.Filters;
 
 namespace MyWerehouse.Application.Services
 {

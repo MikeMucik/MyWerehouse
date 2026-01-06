@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 {
-	public record CreateHistoryIssueNotification(int IssueId, string PerformedBy): INotification;
-	
+	public record CreateHistoryIssueNotification(int IssueId, string PerformedBy): INotification;	
 }

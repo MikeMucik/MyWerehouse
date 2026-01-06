@@ -5,9 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.CategoryModels;
-using MyWerehouse.Domain.Models;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 {

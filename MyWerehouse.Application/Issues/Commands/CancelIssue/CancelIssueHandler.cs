@@ -6,15 +6,18 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Commands;
 using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.ReversePickings.Command.CreateTaskToReversePicking;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.CancelIssue
@@ -51,7 +54,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			try
 			{
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-						?? throw new IssueException(request.IssueId);
+						?? throw new NotFoundIssueException(request.IssueId);
 				var listPallet = new List<Pallet>();
 				//anulowanie zlecenia dla pełnych palet
 				foreach (var pallet in issue.Pallets)
@@ -125,7 +128,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				//_eventCollector.Clear();
 				return IssueResult.Ok($"Anulowano zlecenie {request.IssueId}.");
 			}
-			catch (IssueException ie)
+			catch (NotFoundIssueException ie)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ie.Message);

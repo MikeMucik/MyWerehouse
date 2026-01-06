@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.PrepareManualPicking

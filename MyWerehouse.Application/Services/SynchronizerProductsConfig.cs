@@ -7,7 +7,7 @@ using AutoMapper;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Utils;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Services
 {

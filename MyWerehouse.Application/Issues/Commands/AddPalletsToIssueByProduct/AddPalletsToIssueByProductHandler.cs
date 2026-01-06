@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Queries.GetProductCount;
@@ -18,7 +19,8 @@ using MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue;
 using MyWerehouse.Application.PickingPallets.Queries.GetVirtualPallets;
 using MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
@@ -42,7 +44,7 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 				if (request.Issue.IssueStatus == IssueStatus.New) request.Issue.IssueStatus = IssueStatus.Pending;
 				if (request.Issue.IssueStatus != IssueStatus.Pending && request.Issue.IssueStatus != IssueStatus.New)
 				{
-					throw new IssueException("Błąd statusu zlecenia");
+					throw new NotFoundIssueException("Błąd statusu zlecenia");
 				}
 				if( await _productRepo.IsExistProduct(request.Product.ProductId)==false)  throw new ProductException($"Brak produktu o numerze{request.Product.ProductId} nie istnieje.");
 				//1 dostepność towaru - ile jest opakowań z datą dłuższą niż BestBefore
@@ -102,7 +104,7 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 					expal.Message,
 					request.Product.ProductId);
 			}
-			catch (IssueException ei)
+			catch (NotFoundIssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(

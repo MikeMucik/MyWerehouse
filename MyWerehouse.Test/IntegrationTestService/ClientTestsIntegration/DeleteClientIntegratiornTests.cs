@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.DomainExceptions;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
-using MyWerehouse.Infrastructure.Repositories;
-using Xunit.Sdk;
+using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {

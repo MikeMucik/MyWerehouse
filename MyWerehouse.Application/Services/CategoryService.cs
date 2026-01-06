@@ -11,7 +11,8 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Products.Filters;
+using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services

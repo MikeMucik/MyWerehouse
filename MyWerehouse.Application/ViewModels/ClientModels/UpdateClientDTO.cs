@@ -7,7 +7,7 @@ using AutoMapper;
 using FluentValidation;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.ViewModels.AddressModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
 
 namespace MyWerehouse.Application.ViewModels.ClientModels
 {

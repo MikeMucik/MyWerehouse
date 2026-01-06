@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {

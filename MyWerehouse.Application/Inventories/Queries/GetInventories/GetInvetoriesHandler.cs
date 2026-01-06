@@ -8,9 +8,11 @@ using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Inventories.DTOs;
+using MyWerehouse.Application.Inventories.Queries.GetInventories;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Invetories.Models;
 
-namespace MyWerehouse.Application.Inventories.Queries.GetInventories
+namespace MyWerehouse.Application.Inventories.Queries.GetProductCount
 {
 	public class GetInvetoriesHandler(IInventoryRepo inventoryRepo,
 		IMapper mapper) : IRequestHandler<GetInvetoriesQuery, ListOfInventoryDTO>
@@ -29,7 +31,7 @@ namespace MyWerehouse.Application.Inventories.Queries.GetInventories
 				.ToListAsync(ct);
 			return new ListOfInventoryDTO()
 			{
-				inventoryDTOs = inventoriesToShow,
+				InventoryDTOs = inventoriesToShow,
 				PageSize = request.PageSize,
 				PageNumber = request.PageNumber,
 				Count =await invetories.CountAsync(ct)

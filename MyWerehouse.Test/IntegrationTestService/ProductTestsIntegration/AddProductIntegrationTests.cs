@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {

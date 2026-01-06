@@ -7,23 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Clients\Models\" />
-    <Folder Include="Clients\Filters\" />
-    <Folder Include="Common\ValueObject\" />
-    <Folder Include="Inventory\Filters\" />
-    <Folder Include="Inventory\Models\" />
-    <Folder Include="Issuing\Filters\" />
-    <Folder Include="Issuing\Models\" />
-    <Folder Include="Pallets\Filters\" />
-    <Folder Include="Pallets\Models\" />
-    <Folder Include="Pallets\Movements\" />
     <Folder Include="Picking\Filters\" />
-    <Folder Include="Picking\Models\" />
-    <Folder Include="Products\Models\" />
-    <Folder Include="Products\Filters\" />
-    <Folder Include="Receviving\Filters\" />
-    <Folder Include="Receviving\Models\" />
-    <Folder Include="Warehouse\Models\" />
   </ItemGroup>
 
+ 
 </Project>

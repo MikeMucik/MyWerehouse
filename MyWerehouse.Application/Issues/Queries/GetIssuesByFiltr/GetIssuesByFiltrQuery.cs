@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Receviving.Filters;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr
 {

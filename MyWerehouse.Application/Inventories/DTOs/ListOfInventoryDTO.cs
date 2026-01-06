@@ -8,7 +8,7 @@ namespace MyWerehouse.Application.Inventories.DTOs
 {
 	public class ListOfInventoryDTO
 	{		
-		public required List<InventoryDTO> inventoryDTOs { get; set; }
+		public required List<InventoryDTO> InventoryDTOs { get; set; }
 		public int PageNumber { get; set; }
 		public int PageSize { get; set; }
 		public int Count { get; set; }

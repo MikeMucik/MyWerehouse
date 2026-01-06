@@ -8,11 +8,16 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
 using MyWerehouse.Test.SQLiteInMemoryMode;
+using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 {

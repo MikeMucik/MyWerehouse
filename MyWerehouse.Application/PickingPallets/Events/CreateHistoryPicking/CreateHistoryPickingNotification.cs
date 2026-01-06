@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 {

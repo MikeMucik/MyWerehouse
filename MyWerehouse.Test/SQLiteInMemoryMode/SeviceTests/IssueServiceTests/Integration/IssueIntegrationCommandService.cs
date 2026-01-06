@@ -23,39 +23,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 {
 	public class IssueIntegrationCommandService : TestBase
 	{		
-		protected readonly IssueService _issueService;
-		//protected readonly IMapper _mapper;
-		//protected readonly IIssueRepo _issueRepo;
-		//protected readonly IPalletRepo _palletRepo;
-
-		//private readonly IAllocationRepo _allocationRepo;
-		//private readonly IPickingPalletRepo _pickingPalletRepo;
-
+		protected readonly IssueService _issueService;		
 		public IssueIntegrationCommandService()
 		{
-			//var MapperConfig = new MapperConfiguration(cfg =>
-			//{
-			//	cfg.AddProfile<MappingProfile>();
-			//});
-			//_mapper = MapperConfig.CreateMapper();			
-			
-			//_palletRepo = new PalletRepo(DbContext);
-			//_issueRepo = new IssueRepo(DbContext);
-						
-			//_allocationRepo = new AllocationRepo(DbContext);
-			//_pickingPalletRepo = new PickingPalletRepo(DbContext);
-
-			_issueService = new IssueService(
-				Mediator
-				//,
-				//_issueRepo,
-				//_mapper,
-				//DbContext,			
-				//_palletRepo
-				//,_allocationRepo,
-				//_pickingPalletRepo
-				
-				);
+			_issueService = new IssueService(Mediator);
 		}
 	}
 }

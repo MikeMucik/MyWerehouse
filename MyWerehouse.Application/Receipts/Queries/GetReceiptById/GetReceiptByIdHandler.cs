@@ -8,8 +8,6 @@ using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
-using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceipt
 {

@@ -5,10 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Pallets.Events.CreateOperation
 {

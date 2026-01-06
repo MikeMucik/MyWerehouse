@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Common.Results
 {
@@ -14,8 +13,7 @@ namespace MyWerehouse.Application.Common.Results
 		public string Message { get; set; }
 		public int ProductId { get; set; }
 		public int QuantityRequest { get; set; }
-		public int QuantityOnStock { get; set; }		
-		//public IssueStatus Status { get; set; }
+		public int QuantityOnStock { get; set; }	
 
 		public IssueResult() { }
 

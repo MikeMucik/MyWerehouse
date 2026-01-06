@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Test.ValidationTest
 {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ReversePickings.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Interfaces
 {

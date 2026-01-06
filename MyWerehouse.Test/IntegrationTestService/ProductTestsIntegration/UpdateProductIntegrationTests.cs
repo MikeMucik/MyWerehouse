@@ -5,11 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.Models;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
@@ -57,23 +54,18 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				Width = 10,
 				Length = 10,
 				Description = "TestOk",
-
-			};
-		
-				await _productService.UpdateProductAsync(updatedProduct);
-			
+			};		
+				await _productService.UpdateProductAsync(updatedProduct);			
 			//Assert			
 				var result = _context.Products
 					.Include(d => d.Details)
 					.FirstOrDefault(x => x.Id == updatingProduct.Id);
-
 				Assert.NotNull(result);
 				Assert.Equal(updatedProduct.Name, result.Name);
 				Assert.Equal(updatedProduct.SKU, result.SKU);
 				Assert.Equal(updatedProduct.CategoryId, result.CategoryId);
 				Assert.Equal(updatedProduct.Length, result.Details.Length);
-				Assert.Equal(updatedProduct.Height, result.Details.Height);
-			
+				Assert.Equal(updatedProduct.Height, result.Details.Height);			
 		}
 		[Fact]
 		public async Task NotProperDataName_UpdateProductAsync_ThrowsException()
@@ -166,7 +158,6 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				//Length = 10,
 				Description = "TestOk",
 			};
-
 			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(updatedProduct));
 
 			Assert.Contains("Uzupełnij dane - długość", e.Message);

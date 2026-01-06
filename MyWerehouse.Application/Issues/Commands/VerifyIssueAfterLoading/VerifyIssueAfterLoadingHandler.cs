@@ -4,28 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Inventories.Events.ChangeStock;
+using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
+using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading
 {
 	public class VerifyIssueAfterLoadingHandler(IMediator mediator,
 		WerehouseDbContext dbContext,
-		IIssueRepo issueRepo,
-		IInventoryService inventoryService
-		) : IRequestHandler<VerifyIssueAfterLoadingCommand, IssueResult>
+		IIssueRepo issueRepo) : IRequestHandler<VerifyIssueAfterLoadingCommand, IssueResult>
 	{
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _dbContext = dbContext;
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly IInventoryService _inventoryService = inventoryService;
 
 		public async Task<IssueResult> Handle(VerifyIssueAfterLoadingCommand request, CancellationToken ct)
 		{
@@ -33,33 +35,55 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading
 			try
 			{
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-						?? throw new IssueException(request.IssueId);
+						?? throw new NotFoundIssueException(request.IssueId);
 				if (issue.Pallets.Any(p => p.Status != PalletStatus.Loaded))
-					throw new IssueException("Nie wszystkie palety mają status Loaded.");
+					throw new NotFoundIssueException("Nie wszystkie palety mają status Loaded.");
 
-				if (issue.IssueStatus != IssueStatus.IsShipped) throw new IssueException("Nie zakończono załadunku.");
+				if (issue.IssueStatus != IssueStatus.IsShipped) throw new NotFoundIssueException("Nie zakończono załadunku.");
 				issue.IssueStatus = IssueStatus.Archived;
 				issue.PerformedBy = request.VerifiedBy;
-				List<INotification> notificationList = [];
+				
+				var stockChanges = issue.Pallets
+					.SelectMany(p => p.ProductsOnPallet)
+					.GroupBy(p => p.ProductId)
+					.Select(g => new StockItemChange(g.Key, g.Sum(x => x.Quantity)))
+					.ToList();
+				var notifications = new List<INotification>();
+
 				foreach (var pallet in issue.Pallets)
 				{
 					pallet.Status = PalletStatus.Archived;
-					foreach (var product in pallet.ProductsOnPallet)
-					{
-						await _inventoryService.ChangeProductQuantityAsync(product.ProductId, -product.Quantity);
-					}
-					notificationList.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId, ReasonMovement.Loaded, request.VerifiedBy, PalletStatus.Archived, null));
+					notifications.Add(
+						new CreatePalletOperationNotification(
+							pallet.Id,
+							pallet.LocationId,
+							ReasonMovement.Loaded,
+							request.VerifiedBy,
+							PalletStatus.Archived,
+							null
+						)
+					);
+				}
+				if (stockChanges.Count != 0)
+				{
+					notifications.Add(
+						new ChangeStockNotification(
+							StockChangeType.Decrease,
+							stockChanges
+						)
+					);
 				}
 				await _dbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.VerifiedBy), ct);
-				foreach (var p in notificationList)
+				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.VerifiedBy), ct);				
+				foreach (var notification in notifications)
 				{
-					await _mediator.Publish(p, ct);
+					await _mediator.Publish(notification, ct);
 				}
+
 				return IssueResult.Ok("Załadunek zatwierdzony, zasoby uaktulanione.");
 			}
-			catch (IssueException ei)
+			catch (NotFoundIssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ei.Message);

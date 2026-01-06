@@ -7,13 +7,13 @@ using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Inventories.Commands.ChangeQuantity;
 using MyWerehouse.Application.Inventories.DTOs;
 using MyWerehouse.Application.Inventories.Queries.GetInventory;
 using MyWerehouse.Application.Inventories.Queries.GetProductCount;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Inventories.Events.ChangeStock;
 
 namespace MyWerehouse.Application.Services
 {
@@ -29,8 +29,9 @@ namespace MyWerehouse.Application.Services
 
 		public async Task ChangeProductQuantityAsync(int productId, int quantity)
 		{
-			await _mediator.Send(new ChangeQuantityCommand(productId, quantity));
-			return;
+			//return _mediator.Publish(new ChangeStockNotification()
+			//await _mediator.Send(new ChangeQuantityCommand(productId, quantity));
+			//return;
 			//if(quantity == 0) {return; }
 			//var absQuantity = Math.Abs(quantity);
 			//var isIncrease = quantity > 0;

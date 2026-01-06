@@ -21,7 +21,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 	{
 		public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		public readonly ClientService _clientService;
-		public readonly IMapper _mapper;
+		//public readonly IMapper _mapper;
 		public readonly IClientRepo _clientRepo;
 		public readonly IReceiptRepo _receiptRepo;
 		protected readonly IValidator<AddressDTO> _addressValidator; // Zadeklaruj
@@ -32,11 +32,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase("SharedTestDatabase")
 				.Options;
-			var MapperConfig = new MapperConfiguration(cfg =>
-			{
-				cfg.AddProfile<MappingProfile>();
-			});
-			_mapper = MapperConfig.CreateMapper();
+			//var MapperConfig = new MapperConfiguration(cfg =>
+			//{
+			//	cfg.AddProfile<MappingProfile>();
+			//});
+			//_mapper = MapperConfig.CreateMapper();
 			_clientRepo = new ClientRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_addressValidator = new AddressDTOValidation();

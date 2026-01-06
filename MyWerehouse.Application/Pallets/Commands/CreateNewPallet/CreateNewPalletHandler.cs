@@ -5,65 +5,64 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Domain.DomainExceptions;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
-	public class CreateNewPalletHandler : IRequestHandler<CreateNewPalletCommand, PalletResult>
+	public class CreateNewPalletHandler(WerehouseDbContext werehouseDbContext,
+		IPalletRepo palletRepo,
+		IMapper mapper,
+		IMediator mediator,
+		IProductRepo productRepo) : IRequestHandler<CreateNewPalletCommand, PalletResult>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IPalletRepo _palletRepo;
-		private readonly IMapper _mapper;
-		private readonly IMediator _mediator;
-		private readonly IProductRepo _productRepo;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IMapper _mapper = mapper;
+		private readonly IMediator _mediator = mediator;
+		private readonly IProductRepo _productRepo = productRepo;
 
-		public CreateNewPalletHandler(WerehouseDbContext werehouseDbContext,
-			IPalletRepo palletRepo,
-			IMapper mapper,
-			IMediator mediator,
-			IProductRepo productRepo)
-		{
-			_werehouseDbContext = werehouseDbContext;
-			_palletRepo = palletRepo;
-			_mapper = mapper;
-			_mediator = mediator;
-			_productRepo = productRepo;
-		}
 		public async Task<PalletResult> Handle(CreateNewPalletCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
-			{				
+			{
+				foreach (var product in request.DTO.ProductsOnPallet)
+				{
+					if (!await _productRepo.IsExistProduct(product.ProductId))
+						throw new NotFoundProductException(product.ProductId);
+				}
 				var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
 				var pallet = _mapper.Map<Pallet>(request.DTO);
 				pallet.Id = newIdForPallet;
 				pallet.LocationId = 1;
 				pallet.Status = PalletStatus.InStock;
-				if (!await _productRepo.IsExistProduct(pallet.ProductsOnPallet.First().ProductId))
-					throw new InvalidProductException(pallet.ProductsOnPallet.First().ProductId);
-				pallet.ProductsOnPallet = [new ProductOnPallet {
-				ProductId = request.DTO.ProductsOnPallet.First().ProductId,
-
-				Quantity = request.DTO.ProductsOnPallet.First().Quantity,
-			}];
 				_palletRepo.AddPallet(pallet);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				await _mediator.Publish(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId,
 								ReasonMovement.New, request.UserId, PalletStatus.InStock, null), ct);
 				//inventory
-				var item = pallet.ProductsOnPallet.FirstOrDefault();
-				await _mediator.Publish(new ChangeStockNotification(StockChangeType.Increase, [new StockItemChange(item.ProductId, item.Quantity)]), ct);
+				var stockChanges = pallet.ProductsOnPallet
+					.GroupBy(p => p.ProductId)
+					.Select(g => new StockItemChange(g.Key,	g.Sum(x => x.Quantity)))
+					.ToList();
+				if (stockChanges.Count != 0)
+				{
+					await _mediator.Publish(new ChangeStockNotification(
+						StockChangeType.Increase, stockChanges), ct);
+				}
 				return PalletResult.Ok($"Dodano paletę {newIdForPallet} do stanu magazynowego, uaktualniono stan magazynowy.", newIdForPallet);
 			}
-			catch (InvalidProductException epe)
+			catch (NotFoundProductException epe)
 			{
 				await transaction.RollbackAsync(ct);
 				return PalletResult.Fail(epe.Message);
@@ -73,7 +72,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 				await transaction.RollbackAsync(ct);
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas aktualizaowania przyjęcia");	
-				return PalletResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
+				return PalletResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.", ex.Message);
 			}
 		}
 	}

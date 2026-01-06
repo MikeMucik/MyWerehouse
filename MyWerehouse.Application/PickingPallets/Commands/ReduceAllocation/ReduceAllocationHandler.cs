@@ -7,7 +7,7 @@ using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ReduceAllocation
 {

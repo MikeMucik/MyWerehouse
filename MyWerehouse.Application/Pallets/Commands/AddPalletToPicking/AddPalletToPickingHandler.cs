@@ -9,8 +9,10 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
 using MyWerehouse.Application.Pallets.Queries.GetOneAvailablePalletByProduct;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking

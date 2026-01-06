@@ -25,7 +25,7 @@ using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 

@@ -6,10 +6,9 @@ using System.Net;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions.Execution;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Infrastructure.Repositories;
-using MyWerehouse.Test.Common;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite

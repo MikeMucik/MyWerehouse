@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
@@ -34,7 +37,7 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 					throw new PalletException("Nie można podmienić paletę na tą samą");
 				}
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-					?? throw new IssueException(request.IssueId);
+					?? throw new NotFoundIssueException(request.IssueId);
 				var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(request.OldPalletId);
 				var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(request.NewPalletId);
 				if (palletToAddingIssue == null || palletToRemoveFromIssue == null)
@@ -98,7 +101,7 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ep.Message);
 			}
-			catch (IssueException ei)
+			catch (NotFoundIssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ei.Message);

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetProductCount
 {

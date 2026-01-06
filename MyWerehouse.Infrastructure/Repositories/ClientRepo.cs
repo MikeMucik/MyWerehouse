@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Domain.Clients.Filters;
+using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 
 namespace MyWerehouse.Infrastructure.Repositories
 {

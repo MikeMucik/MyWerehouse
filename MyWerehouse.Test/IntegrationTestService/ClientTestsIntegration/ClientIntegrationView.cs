@@ -18,15 +18,15 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 	{
 		public readonly ClientService _clientService;
 		public readonly ClientRepo _clientRepo;
-		public readonly IMapper _mapper;
+		//public readonly IMapper _mapper;
 		public ClientIntegrationView(QuerryTestFixture fixture)
 		{
 			var _context = fixture.Context;
-			var mapperConfig = new MapperConfiguration(cfg =>
-			{
-				cfg.AddProfile<MappingProfile>();
-			});
-			_mapper = mapperConfig.CreateMapper();
+			//var mapperConfig = new MapperConfiguration(cfg =>
+			//{
+			//	cfg.AddProfile<MappingProfile>();
+			//});
+			//_mapper = mapperConfig.CreateMapper();
 			_clientRepo = new ClientRepo(_context);			
 			_clientService = new ClientService(_clientRepo, _mapper);
 		}

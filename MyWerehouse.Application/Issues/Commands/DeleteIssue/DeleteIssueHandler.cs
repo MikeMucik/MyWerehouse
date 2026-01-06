@@ -4,14 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
@@ -36,7 +39,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 			try
 			{
 				var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-					?? throw new IssueException(request.IssueId);
+					?? throw new NotFoundIssueException(request.IssueId);
 
 				List<INotification> palletList = [];
 				List<INotification> allocationList = [];
@@ -78,7 +81,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 						}
 						break;
 					default:
-						throw new IssueException($"Zlecenia {issueToDelete.Id} nie można anulować.");
+						throw new NotFoundIssueException($"Zlecenia {issueToDelete.Id} nie można anulować.");
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
@@ -96,7 +99,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				}
 				return IssueResult.Ok($"Usunięto zamówienie o numerze {issueToDelete.Id}.");
 			}
-			catch (IssueException ei)
+			catch (NotFoundIssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ei.Message);

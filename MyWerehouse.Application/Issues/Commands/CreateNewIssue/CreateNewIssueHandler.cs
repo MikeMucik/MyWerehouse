@@ -8,9 +8,9 @@ using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 {

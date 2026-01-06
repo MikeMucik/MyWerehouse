@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using MyWerehouse.Application.Mapping;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Application.Receipts.DTOs
 {

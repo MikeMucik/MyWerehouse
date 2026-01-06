@@ -5,8 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Application.ViewModels.AllocationModels;
-using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Interfaces

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Invetories.Models;
 
 namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 {

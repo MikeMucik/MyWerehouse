@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Mapping;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.ViewModels.ProductModels
 {
-	public class DetailsOfProductDTO : IMapFrom<Domain.Models.Product>
+	public class DetailsOfProductDTO : IMapFrom<Product>
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
@@ -31,6 +31,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 				.ForMember(dest => dest.Weight, opt => opt.MapFrom(src => src.Details.Weight))
 				.ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
 				.ForMember(dest => dest.Description, opt=>opt.MapFrom(src=>src.Details.Description))
+				.ReverseMap()
 				;
 		}
 	}

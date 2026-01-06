@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Filters;
+using MyWerehouse.Domain.Clients.Models;
 
 namespace MyWerehouse.Domain.Interfaces
 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 {

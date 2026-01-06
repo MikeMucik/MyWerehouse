@@ -7,7 +7,7 @@ using AutoMapper;
 using FluentValidation;
 using MyWerehouse.Application.Histories.DTOs;
 using MyWerehouse.Application.Mapping;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.DTOs
 {

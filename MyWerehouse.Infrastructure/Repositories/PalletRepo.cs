@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Pallets.Filters;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Infrastructure.Repositories
 {

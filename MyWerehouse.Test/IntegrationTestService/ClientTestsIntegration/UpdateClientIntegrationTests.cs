@@ -5,13 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {

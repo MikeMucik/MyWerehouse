@@ -26,9 +26,10 @@ using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.AllocationModels;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Services
 {

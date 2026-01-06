@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
@@ -11,7 +12,6 @@ namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
 {
 	public class AddClientTests : TestBase
 	{
-
 		[Fact]
 		public void AddProperData_AddClient_ShouldAddToCollection()
 		{

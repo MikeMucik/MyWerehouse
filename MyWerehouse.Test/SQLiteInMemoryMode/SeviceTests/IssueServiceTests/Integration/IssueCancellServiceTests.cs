@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {

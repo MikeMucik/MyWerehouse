@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Products.Filters;
 
 namespace MyWerehouse.Application.Interfaces
 {

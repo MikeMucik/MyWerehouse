@@ -16,15 +16,15 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 	{
 		public readonly ProductService _productService;
 		public readonly ProductRepo _productRepo;
-		public readonly IMapper _mapper;
+		//public readonly IMapper _mapper;
 		public ProductIntegrationView(QuerryTestFixture fixture)
 		{
 			var _context = fixture.Context;
-			var mapperConfig = new MapperConfiguration(cfg =>
-			{
-				cfg.AddProfile<MappingProfile>();
-			});
-			_mapper = mapperConfig.CreateMapper();
+			//var mapperConfig = new MapperConfiguration(cfg =>
+			//{
+			//	cfg.AddProfile<MappingProfile>();
+			//});
+			//_mapper = mapperConfig.CreateMapper();
 			_productRepo = new ProductRepo(_context);			
 			_productService = new ProductService(_productRepo, _mapper);
 		}

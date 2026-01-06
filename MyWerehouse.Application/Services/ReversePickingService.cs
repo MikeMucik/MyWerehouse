@@ -17,9 +17,13 @@ using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.Filters;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 
 namespace MyWerehouse.Application.Services
 {
@@ -61,7 +65,7 @@ namespace MyWerehouse.Application.Services
 			var pallet = await _palletRepo.GetPalletByIdAsync(palletId)
 				?? throw new PalletException(palletId);
 			var issue = pallet.Issue
-				?? throw new IssueException("Brak zlecenia wydania.");
+				?? throw new NotFoundIssueException("Brak zlecenia wydania.");
 			foreach (var residue in pallet.ProductsOnPallet)
 			{
 				var allocations = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issue.Id, residue.ProductId);
@@ -146,7 +150,7 @@ namespace MyWerehouse.Application.Services
 				string? destinationPalletId = null;
 				var issueId = reversePicking.Allocation.IssueId;
 				if (issueId == 0)
-					throw new IssueException(reversePicking.Allocation.IssueId);
+					throw new NotFoundIssueException(reversePicking.Allocation.IssueId);
 				switch (strategy)
 				{
 					case ReversePickingStrategy.ReturnToSource:
@@ -185,7 +189,7 @@ namespace MyWerehouse.Application.Services
 				//_eventCollector.Clear();
 				return result;
 			}
-			catch (IssueException ie)
+			catch (NotFoundIssueException ie)
 			{
 				await transaction.RollbackAsync();
 				return ReversePickingResult.Fail(ie.Message);

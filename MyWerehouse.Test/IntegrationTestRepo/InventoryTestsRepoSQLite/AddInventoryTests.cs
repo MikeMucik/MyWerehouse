@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
-//using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 {

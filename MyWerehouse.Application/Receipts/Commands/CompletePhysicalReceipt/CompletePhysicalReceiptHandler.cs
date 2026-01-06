@@ -8,7 +8,7 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt

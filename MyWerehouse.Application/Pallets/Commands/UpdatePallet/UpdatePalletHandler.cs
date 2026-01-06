@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Utils;
-using MyWerehouse.Domain.DomainExceptions;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
@@ -47,19 +47,56 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			try
 			{
 				var existingPallet = await _palletRepo.GetPalletByIdAsync(request.UpdatingPallet.Id)
-						?? throw new PalletException($"Nie ma palety o numerze {request.UpdatingPallet.Id}");
+						?? throw new NotFoundPalletException (request.UpdatingPallet.Id);
 				foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
 				{
 					if (!await _productRepo.IsExistProduct(pop.ProductId))
-						throw new InvalidProductException(pop.ProductId);
+						throw new NotFoundProductException(pop.ProductId);
 				}
-				foreach (var pop in existingPallet.ProductsOnPallet)
+				var oldProducts = existingPallet.ProductsOnPallet
+					.GroupBy(p=>p.ProductId)
+					.ToDictionary(g=>g.Key, g=>g.Sum(x=>x.Quantity));
+				var newProducts = request.UpdatingPallet.ProductsOnPallet
+					.GroupBy(p => p.ProductId)
+					.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
+				var stockChangesI = new List<StockItemChange>();
+				var stockChangesD = new List<StockItemChange>();
+				var allProductIds = oldProducts.Keys.Union(newProducts.Keys);
+				foreach ( var productId in allProductIds)
+				{
+					oldProducts.TryGetValue(productId, out var oldQty);
+					newProducts.TryGetValue(productId, out var newQty);
+					var delta = newQty - oldQty;
+					if(delta > 0)
+					{
+						stockChangesI.Add(new StockItemChange(productId, Math.Abs(delta)));						
+					}
+					if (delta < 0)
+					{
+						stockChangesD.Add(new StockItemChange(productId, Math.Abs(delta)));						
+					}
+				}
+				if (stockChangesI.Count > 0)
 				{
 					_eventCollector.Add(new ChangeStockNotification(
-						StockChangeType.Decrease, // cofamy wpływ palety
-						[new StockItemChange(pop.ProductId, pop.Quantity)]
-					));
+								StockChangeType.Increase,
+								stockChangesI
+							));
 				}
+				if (stockChangesD.Count > 0)
+				{
+					_eventCollector.Add(new ChangeStockNotification(
+								StockChangeType.Decrease,
+								stockChangesD
+							));
+				}
+				//foreach (var pop in existingPallet.ProductsOnPallet)
+				//{
+				//	_eventCollector.Add(new ChangeStockNotification(
+				//		StockChangeType.Decrease, // cofamy wpływ palety
+				//		[new StockItemChange(pop.ProductId, pop.Quantity)]
+				//	));
+				//}
 				_mapper.Map(request.UpdatingPallet, existingPallet);
 				CollectionSynchronizer.SynchronizeCollection(
 					existingPallet.ProductsOnPallet,
@@ -79,13 +116,13 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 						entity.PalletId = originalPalletId;
 					});							
 				
-				foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
-				{
-					_eventCollector.Add(new ChangeStockNotification(
-						StockChangeType.Increase, // wpływ na inventory
-						[new StockItemChange(pop.ProductId, pop.Quantity)]
-					));
-				}
+				//foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
+				//{
+				//	_eventCollector.Add(new ChangeStockNotification(
+				//		StockChangeType.Increase, // wpływ na inventory
+				//		[new StockItemChange(pop.ProductId, pop.Quantity)]
+				//	));
+				//}
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await _mediator.Publish(new CreatePalletOperationNotification(existingPallet.Id, existingPallet.LocationId,
 								ReasonMovement.Picking, request.UserId, PalletStatus.ToIssue, null), ct);
@@ -93,16 +130,20 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 				{
 					await _mediator.Publish(rv, ct);
 				}
-				//_eventCollector.Clear();
 				await transaction.CommitAsync(ct);
 				return PalletResult.Ok($"Paleta {request.UpdatingPallet.Id} została zaktualizowana.", request.UpdatingPallet.Id);
 			}
-			catch (InvalidProductException epe)
+			catch (NotFoundProductException epe)
 			{
 				await transaction.RollbackAsync(ct);
 				return PalletResult.Fail(epe.Message);
 			}
-			catch (PalletException epr)
+			//catch (PalletException epr)
+			//{
+			//	await transaction.RollbackAsync(ct);
+			//	return PalletResult.Fail(epr.Message);
+			//}
+			catch(NotFoundPalletException epr)
 			{
 				await transaction.RollbackAsync(ct);
 				return PalletResult.Fail(epr.Message);

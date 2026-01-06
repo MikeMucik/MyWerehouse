@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Domain.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 

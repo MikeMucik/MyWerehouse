@@ -65,7 +65,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			{
 				Pallet = pallet,
 				LocationId = pallet.LocationId,
-				IssueInitialQuantity = pallet.ProductsOnPallet.First().Quantity,
+				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
 				Allocations = new List<Allocation>()
 
@@ -90,7 +90,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.Equal(pallet.LocationId, createdVirtualPallet.LocationId);
 
 			// Sprawdź ilości
-			Assert.Equal(10, createdVirtualPallet.IssueInitialQuantity);
+			Assert.Equal(10, createdVirtualPallet.InitialPalletQuantity);
 			Assert.Empty(createdVirtualPallet.Allocations);
 
 			// Sprawdź powiązany produkt
@@ -149,7 +149,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			{
 				Pallet = pallet,
 				LocationId = pallet.LocationId,
-				IssueInitialQuantity = pallet.ProductsOnPallet.First().Quantity,
+				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
 				Allocations = new List<Allocation>()
 

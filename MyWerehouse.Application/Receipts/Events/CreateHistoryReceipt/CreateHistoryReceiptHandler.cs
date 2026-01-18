@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
@@ -27,7 +28,7 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 		public async Task Handle(CreateHistoryReceiptNotification request, CancellationToken cancellationToken)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-				?? throw new ReceiptException(request.ReceiptId);
+				?? throw new NotFoundReceiptException(request.ReceiptId);
 			var details = receipt.Pallets != null && receipt.Pallets.Count != 0
 				? receipt.Pallets.Select(p => new HistoryReceiptDetail
 				{

@@ -36,7 +36,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		public async Task<ReceiptResult> Handle(AddPalletToReceiptCommand request, CancellationToken ct)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-			??	throw new ReceiptException(request.ReceiptId);
+			??	throw new NotFoundReceiptException(request.ReceiptId);
 			var rampNumber = receipt.RampNumber;
 			if (receipt == null || (receipt.ReceiptStatus != ReceiptStatus.Planned && receipt.ReceiptStatus != ReceiptStatus.InProgress))
 			{
@@ -78,7 +78,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 					await transaction.RollbackAsync(ct);
 					return ReceiptResult.Fail(epr.Message);
 				}
-				catch (ReceiptException erp)
+				catch (NotFoundReceiptException erp)
 				{
 					await transaction.RollbackAsync(ct);
 					return ReceiptResult.Fail(erp.Message);

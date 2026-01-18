@@ -81,26 +81,29 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						var addedNewCartoonsForProduct = newAmountOfProduct - oldAmountOfProduct;
 						if (addedNewCartoonsForProduct == 0) continue;
 						var allocationsToRemove = issue.Allocations
-							.Where(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.ProductId)
+							.Where(a => a.ProductId == product.ProductId)
 								.ToList();
 
 						var freedQuantity = allocationsToRemove.Sum(a => a.Quantity);
 
 						//1 dostępność towaru
-						var	totalAvailableInDb = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore), ct);
+						var totalAvailableInDb = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore), ct);
 						totalAvailable = totalAvailableInDb + freedQuantity;
 						if (product.Quantity > totalAvailable)//
 						{
-							throw new ProductException($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia.");
+							resultList.Add(IssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia."));
+							//throw new ProductException($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia.");
 						}
 						//2 Oblicz pełne palety i resztę - to można wyodrębnić
 						var palletAmountFullResult = await _mediator.Send(new GetNumberPalletsAndRestQuery(product.ProductId, addedNewCartoonsForProduct), ct);
+						if (palletAmountFullResult.Success is false) resultList.Add(IssueResult.Fail(palletAmountFullResult.Message));
 						var amountPallets = palletAmountFullResult.FullPallet;
 						var rest = palletAmountFullResult.Rest;
 						//3. Pobierz dostępne palety - tu trzeba dodać blokadę 
 						var availablePallets = await _mediator.Send(new GetAvailablePalletsByProductQuery(product.ProductId, product.BestBefore, amountPallets + 1, addedNewCartoonsForProduct), ct);
 						//3.1 pobierz dostępne virtualPallet
 						var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(product.ProductId, product.BestBefore), ct);
+						if (availableVirtualPalletsQuery is null) resultList.Add(IssueResult.Fail("Brak palety do pickingu - błąd virtual"));
 						//4. Przydziel pełne palety
 						palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(issue, availablePallets, amountPallets), ct);
 						var restPallet = availablePallets.Except(palletAssigned).ToList();
@@ -138,7 +141,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
 						anySuccess = true;
 					}
-					
+
 					catch (Exception ex) // Łapiemy wszystko tutaj, żeby obsłużyć logikę czyszczenia
 					{
 						await transaction.RollbackAsync(ct);
@@ -155,15 +158,15 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						anyFailure = true;
 
 						// Obsługa konkretnych wyjątków do wyniku
-						if (ex is ProductException pEx)
+						if (ex is NotFoundProductException pEx)
 						{
 							resultList.Add(IssueResult.Fail(pEx.Message, product.ProductId));
 						}
-						else if (ex is PalletException palEx)
+						else if (ex is NotFoundPalletException palEx)
 						{
 							resultList.Add(IssueResult.Fail(palEx.Message, product.ProductId));
 						}
-						else if (ex is NotFoundIssueException ei)						
+						else if (ex is NotFoundIssueException ei)
 						{
 							resultList.Add(IssueResult.Fail(ei.Message, product.ProductId));
 						}
@@ -191,11 +194,11 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					issue.PerformedBy = request.DTO.PerformedBy;
 					issue.IssueStatus = IssueStatus.Pending;
 					await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//
-					
+
 				}
 				if (anyFailure)
-				{				
-					issue.IssueStatus = IssueStatus.NotComplete;					
+				{
+					issue.IssueStatus = IssueStatus.NotComplete;
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				return resultList;

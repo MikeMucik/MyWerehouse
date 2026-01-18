@@ -10,7 +10,6 @@ using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Domain.Receviving.Models;
-using MyWerehouse.Application.Common.Exceptions.BuisnessRuleException;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
@@ -52,10 +51,10 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 			{
 				return ReceiptResult.Fail(eu.Message);
 			}
-			catch (RampNotFoundException er)
-			{
-				return ReceiptResult.Fail(er.Message);
-			}
+			//catch (RampNotFoundException er)
+			//{
+			//	return ReceiptResult.Fail(er.Message);
+			//}
 			catch (Exception ex)
 			{
 				//_logger.LogError(ex, "Błąd podczas operacji na przyjęciu");

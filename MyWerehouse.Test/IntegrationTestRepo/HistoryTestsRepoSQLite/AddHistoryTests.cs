@@ -384,7 +384,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			{
 				Location = location1,
 				Pallet = pallet1,
-				IssueInitialQuantity = 100,
+				InitialPalletQuantity = 100,
 				DateMoved = DateTime.Now,
 				Allocations = new List<Allocation> {new Allocation
 					{
@@ -411,7 +411,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				DateTime = DateTime.Now,
 				PerformedBy = "A",
 				StatusBefore = PickingStatus.Allocated,
-				ProductId = virtualPallet.Allocations.First().VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+				ProductId = virtualPallet.Allocations.First().ProductId,
 				QuantityPicked = 1,
 				IssueId = issue.Id,
 				PalletId = pallet1.Id,

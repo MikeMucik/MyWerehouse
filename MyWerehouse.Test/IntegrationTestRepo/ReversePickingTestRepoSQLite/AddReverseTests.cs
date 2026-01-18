@@ -121,7 +121,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var virtualPallet = new VirtualPallet
 			{
 				PalletId = pallet2.Id,
-				IssueInitialQuantity = 20,
+				InitialPalletQuantity = 20,
 				LocationId = location1.Id,
 				DateMoved = DateTime.UtcNow.AddDays(-7),			
 			};
@@ -130,7 +130,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				Issue = issue,
 				PickingStatus = PickingStatus.Picked,
 				Quantity = 10,
-				VirtualPallet = virtualPallet
+				VirtualPallet = virtualPallet,
+				ProductId = product.Id,
+				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12))
 			};
 
 			virtualPallet.Allocations = [allocation];
@@ -209,7 +211,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 
 			// BestBefore musi dotyczyć tego samego produktu
 			Assert.Equal(
-				allocation.VirtualPallet.Pallet.ProductsOnPallet.First().BestBefore,
+				allocation.BestBefore,
 				result.BestBefore
 			);
 

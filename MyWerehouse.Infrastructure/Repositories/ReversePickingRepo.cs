@@ -26,6 +26,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 			await _werehouseDbContext.AddAsync(reversePicking);			
 		}
 
+		public async Task<bool> ExistsForPickingPalletAsync(string palletId)
+		{
+			 if(await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r=>r.SourcePalletId == palletId) != null) return true ; return false;
+		}
+
 		public async Task<ReversePicking> GetReversePickingAsync(int reversePickingId)
 		{
 			return await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r => r.Id == reversePickingId);

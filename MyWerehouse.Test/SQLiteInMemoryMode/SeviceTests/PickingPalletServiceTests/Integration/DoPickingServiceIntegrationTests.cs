@@ -25,10 +25,10 @@ using MyWerehouse.Domain.Histories.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
-	public class PickingServicePickerIntegrationTests : PickingIntegrationCommandService
+	public class DoPickingServiceIntegrationTests : PickingIntegrationCommandService
 	{
 		[Fact]
-		public async Task DoPickingAsync_HappyPath_CreatesNewVirtualPallet()
+		public async Task DoPickingAsync_HappyPath_AddToBasePickingDone()
 		{
 			// Arrange
 			var category = new Category
@@ -100,6 +100,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueDateTimeCreate = DateTime.UtcNow,				
 				IssueStatus = IssueStatus.New,
 				PerformedBy = "TestUser",
+				Pallets = [sourcePallet]
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -111,7 +112,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet = new VirtualPallet
 			{
 				Pallet = sourcePallet,
-				IssueInitialQuantity = 40,
+				InitialPalletQuantity = 40,
 				Location = sourcePallet.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -152,6 +153,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						
 			// Assert Allocation
 			Assert.NotNull(updatedAllocation);
+			Assert.Equal(newPallet.Id, updatedAllocation.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedAllocation.PickingStatus);
 			// Assert Source Pallet (powinno zostać 10)
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
@@ -165,7 +167,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		}
 		//Cała paleta jest pobierana bo to końcówka palety
 		[Fact]
-		public async Task DoPickingAsync_HappyPathTakeWholePallet_CreatesNewVirtualPallet()
+		public async Task DoPickingAsync_HappyPathTakeWholePallet_AddToBasePickingDone()
 		{
 			// Arrange
 			var category = new Category
@@ -235,8 +237,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			{
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
-				//Pallets,
-				IssueStatus = IssueStatus.New,
+				Pallets = [sourcePallet],
+				IssueStatus = IssueStatus.Pending,
 				PerformedBy = "TestUser",
 			};
 			DbContext.Addresses.Add(address);
@@ -249,7 +251,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet = new VirtualPallet
 			{
 				Pallet = sourcePallet,
-				IssueInitialQuantity = 40,
+				InitialPalletQuantity = 40,
 				Location = sourcePallet.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -291,6 +293,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert Allocation
 			Assert.NotNull(updatedAllocation);
+			Assert.Equal(newPallet.Id, updatedAllocation.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedAllocation.PickingStatus);
 			// Assert Source Pallet (powinno zostać 0)
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
@@ -304,7 +307,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(PalletStatus.Picking, newPallet.Status);
 		}
 		[Fact]
-		public async Task DoPickingAsync_HappyPathAddTheSameProductToExistPickingPallet_AddToVirrtualPallet()
+		public async Task DoPickingAsync_HappyPathAddTheSameProductToExistPickingPallet_AddToBasePickingDone()
 		{
 			// Arrange
 			var category = new Category
@@ -392,6 +395,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Pallets = [oldPallet],
 				IssueStatus = IssueStatus.New,
 				PerformedBy = "TestUser",
+
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -405,7 +409,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = sourcePallet1,
-				IssueInitialQuantity = 10,
+				InitialPalletQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -447,6 +451,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert Allocation
 			Assert.NotNull(updatedAllocation);
+			Assert.Equal(newPallet.Id, updatedAllocation.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedAllocation.PickingStatus);
 			
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
@@ -459,7 +464,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(PalletStatus.Picking, newPallet.Status);
 		}
 		[Fact]
-		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPallet_AddToVirtualPallet()
+		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPallet_AddToBasePickingDone()
 		{
 			// Arrange
 			var category = new Category
@@ -569,7 +574,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = sourcePallet1,
-				IssueInitialQuantity = 10,
+				InitialPalletQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -611,6 +616,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert Allocation
 			Assert.NotNull(updatedAllocation);
+			Assert.Equal(newPallet.Id, updatedAllocation.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedAllocation.PickingStatus);
 			// Assert Source Pallet (powinno zostać 90)
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
@@ -623,7 +629,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(PalletStatus.Picking, newPallet.Status);
 		}
 		[Fact]
-		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPalletWithHistory_AddToVirtualPallet()
+		public async Task DoPickingAsync_HappyPathAddTheAnotherProductToExistPickingPalletWithHistory_AddToBasePickingDone()
 		{
 			// Arrange
 			var category = new Category
@@ -731,7 +737,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = sourcePallet1,
-				IssueInitialQuantity = 10,
+				InitialPalletQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -773,6 +779,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert Allocation
 			Assert.NotNull(updatedAllocation);
+			Assert.Equal(newPallet.Id, updatedAllocation.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedAllocation.PickingStatus);
 			// Assert Source Pallet (powinno zostać 90)
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
@@ -803,7 +810,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.NotNull(newPalletMovement);
 			Assert.Equal(ReasonMovement.Picking, newPalletMovement.Reason);
 			Assert.Equal(PalletStatus.Picking, newPalletMovement.PalletStatus);
-
 		}
 	}
 }

@@ -13,5 +13,6 @@ namespace MyWerehouse.Domain.Picking.Models
 		Picked = 2,
 		Correction = 3,
 		Cancelled = 4,
+		PickedPartially = 5,
 	}
 }

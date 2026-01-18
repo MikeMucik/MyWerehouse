@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.Common.Exceptions.BuisnessRuleException;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Domain.DomainExceptions;
 
 namespace MyWerehouse.Server.Middleware
 {
@@ -23,7 +23,7 @@ namespace MyWerehouse.Server.Middleware
 				context.Response.StatusCode = StatusCodes.Status404NotFound;
 				await context.Response.WriteAsJsonAsync(ex.Message);
 			}
-			catch (BusinessRuleException ex)
+			catch (DomainException ex)
 			{
 				context.Response.StatusCode = StatusCodes.Status400BadRequest;
 				await context.Response.WriteAsJsonAsync(ex.Message);

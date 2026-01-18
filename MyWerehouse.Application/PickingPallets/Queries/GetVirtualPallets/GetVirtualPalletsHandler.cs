@@ -19,8 +19,8 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetVirtualPallets
 		}
 		public async Task<List<VirtualPallet>> Handle(GetVirtualPalletsQuery query, CancellationToken ct)
 		{
-			var list = await _pickingPalletRepo.GetVirtualPalletsByBBAsync(query.ProductId, query.BestBefore)
-				?? throw new PalletException("Brak palety do pickingu - błąd virtual");
+			var list = await _pickingPalletRepo.GetVirtualPalletsByBBAsync(query.ProductId, query.BestBefore);
+				
 			return list;
 		}
 	}

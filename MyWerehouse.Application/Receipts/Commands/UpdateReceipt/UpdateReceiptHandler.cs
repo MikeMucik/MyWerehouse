@@ -12,6 +12,7 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Application.Services;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -29,6 +30,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		private readonly IPalletRepo _palletRepo;
 		private readonly IProductRepo _productRepo;
 		private readonly IClientRepo _clientRepo;
+		private readonly ILocationRepo _locationRepo;
 		private readonly ISynchronizerProductsConfig _synchronizerProductsConfig;
 		public UpdateReceiptHandler(WerehouseDbContext werehouseDbContext,
 			IReceiptRepo receiptRepo,			
@@ -36,6 +38,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			IPalletRepo palletRepo,
 			IProductRepo productRepo,
 			IClientRepo clientRepo,
+			ILocationRepo locationRepo,
 			ISynchronizerProductsConfig synchronizerProductsConfig)
 		{
 			_werehouseDbContext = werehouseDbContext;
@@ -44,6 +47,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			_palletRepo = palletRepo;
 			_productRepo = productRepo;
 			_clientRepo = clientRepo;
+			_locationRepo = locationRepo;
 			_synchronizerProductsConfig = synchronizerProductsConfig;
 		}
 		public async Task<ReceiptResult> Handle(UpdateReceiptCommand request, CancellationToken ct)
@@ -53,7 +57,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			{
 				// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
 				var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-					?? throw new ReceiptException("Nie znaleziono przyjęcia");
+					?? throw new NotFoundReceiptException(request.ReceiptId);
 				if (existingReceipt.ReceiptStatus == ReceiptStatus.Verified)
 				{
 					return ReceiptResult.Fail("Zatwierdzone przyjęcie nie może być modyfikowane.");
@@ -62,6 +66,8 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				{
 					return ReceiptResult.Fail("Wybrany klient nie istnieje.");
 				}
+				if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
+					return ReceiptResult.Fail("Wybrana rampa nie istnieje.");
 				existingReceipt.ClientId = request.DTO.ClientId;
 				existingReceipt.ReceiptStatus = request.DTO.ReceiptStatus;
 				existingReceipt.PerformedBy = request.UserId;
@@ -69,7 +75,8 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				{
 					if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
 					{
-						throw new PalletException($"Paleta o numerze {item.Id} należy do innego przyjęcia o numerze {item.ReceiptId}");
+						return ReceiptResult.Fail($"Paleta o numerze {item.Id} należy do innego przyjęcia.");
+						//throw new PalletException($"Paleta o numerze {item.Id} należy do innego przyjęcia o numerze {item.ReceiptId}");
 					}
 				}
 				//Usuwanie z bazy danych niepotrzebnych pallet
@@ -96,27 +103,24 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 					_synchronizerProductsConfig.SynchronizeProducts(pallet, dto.ProductsOnPallet);
 				}
 				//Dodanie nowych palet
-				foreach (var item in request.DTO.Pallets)
-				{
-					var pallet = await _palletRepo.GetPalletByIdAsync(item.Id);
-					if (pallet == null)
-					{
-						var palletToDo = new Pallet();
-						if (item.Id is null)
-						{
-							palletToDo.Id = await _palletRepo.GetNextPalletIdAsync();
-						}
-						else palletToDo.Id = item.Id;
+				var palletsAdded = request.DTO.Pallets
+					.Where(p=>p.Id == null)
+					.ToList();
+				foreach (var palletToAdd in palletsAdded)
+				{					
+						var palletToDo = new Pallet();						
+							palletToDo.Id = await _palletRepo.GetNextPalletIdAsync();						
 						palletToDo.ReceiptId = request.ReceiptId;
-						palletToDo.LocationId = request.DTO.RampNumber;//lokalizacja początkowa
+						palletToDo.LocationId = request.DTO.RampNumber;//lokalizacja początkowa rampy
 						palletToDo.DateReceived = DateTime.UtcNow;
 						palletToDo.Status = PalletStatus.Receiving;
 						//Sprawdź czy item.ProductsOnPallet ma elementy
-						if (item.ProductsOnPallet == null || item.ProductsOnPallet.Count == 0)
+						if (palletToAdd.ProductsOnPallet == null || palletToAdd.ProductsOnPallet.Count == 0)
 						{
-							throw new PalletException("Nowa paleta musi mieć co najmniej jeden produkt");
+							//throw new PalletException("Nowa paleta musi mieć co najmniej jeden produkt");							
+							throw new DomainPalletException(palletToDo.Id);
 						}
-						var product = item.ProductsOnPallet.Single();//założenie systemowe - paleta przyjmowana jeden produkt - poniżej jakby było inne
+						var product = palletToAdd.ProductsOnPallet.Single();//założenie systemowe - paleta przyjmowana jeden produkt - poniżej jakby było inne
 
 						if (!await _productRepo.IsExistProduct(product.ProductId))
 							throw new NotFoundProductException(product.ProductId);
@@ -129,6 +133,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 							BestBefore = product.BestBefore,
 							DateAdded = DateTime.UtcNow,
 						});
+						//For Pallet with many products
 						//foreach (var product in item.ProductsOnPallet)
 						//{
 						//	if (!await _productRepo.IsExistProduct(product.ProductId))
@@ -143,8 +148,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 						//	};
 						//	palletToDo.ProductsOnPallet.Add(productToPallet);
 						//}
-						existingReceipt.Pallets.Add(palletToDo);
-					}
+						existingReceipt.Pallets.Add(palletToDo);					
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
@@ -156,12 +160,12 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				await _mediator.Publish(new CreateHistoryReceiptNotification(existingReceipt.Id, existingReceipt.ReceiptStatus, request.UserId), ct);				
 				return ReceiptResult.Ok($"Przyjęcie o numerze {request.ReceiptId} zostało zaktualizowane", request.ReceiptId);
 			}
-			catch (ReceiptException exr)
+			catch (NotFoundReceiptException exr)
 			{
 				await transaction.RollbackAsync(ct);
 				return ReceiptResult.Fail(exr.Message);
 			}
-			catch (PalletException expal)
+			catch (NotFoundPalletException expal)
 			{
 				await transaction.RollbackAsync(ct);
 				return ReceiptResult.Fail(expal.Message);

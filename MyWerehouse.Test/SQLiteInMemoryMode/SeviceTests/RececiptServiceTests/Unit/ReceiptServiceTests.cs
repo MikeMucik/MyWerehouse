@@ -255,6 +255,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				PerformedBy = "U002",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 1,
 				Pallets = [initialPallet]
 			};
 			var initailLocation = new Location
@@ -308,6 +309,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber =1,
 				Pallets =
 				new List<UpdatePalletDTO>
 				{
@@ -493,6 +495,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber = 1,
 				Pallets =
 				new List<UpdatePalletDTO>
 				{
@@ -524,7 +527,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var result = await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
 			Assert.NotNull(result);
 			Assert.False(result.Success);
-			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia o numerze 10", result.Message);
+			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia.", result.Message);
 
 		}
 		[Fact]
@@ -657,6 +660,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
+				RampNumber =1,
 				Pallets =
 				new List<UpdatePalletDTO>
 				{

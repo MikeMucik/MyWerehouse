@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest
@@ -18,13 +20,13 @@ namespace MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest
 		}
 		public async Task<AssignPallestResult> Handle(GetNumberPalletsAndRestQuery request, CancellationToken ct)
 		{
-			var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(request.ProductId) ?? throw new ProductException($"Brak produktu o numerze {request.ProductId}.");
+			var numberUnitOnPallet = await _productRepo.GetProductByIdAsync(request.ProductId) ?? throw new NotFoundIssueException(request.ProductId);
 			if (numberUnitOnPallet.CartonsPerPallet == 0)
-				throw new ProductException($"Produkt {request.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");
+				return AssignPallestResult.Fail($"Produkt {request.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");				
 			var number = numberUnitOnPallet.CartonsPerPallet;
 			var amountPallets = request.AmountUnits / number;
 			var rest = request.AmountUnits % number;
-			return new AssignPallestResult(amountPallets, rest);
+			return AssignPallestResult.Ok(amountPallets, rest);
 		}
 	}
 }

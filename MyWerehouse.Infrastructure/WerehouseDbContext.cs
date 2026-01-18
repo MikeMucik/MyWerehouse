@@ -85,6 +85,12 @@ namespace MyWerehouse.Infrastructure
 				entity.HasOne(a => a.Issue)
 					 .WithMany(a=>a.Allocations)
 					 .HasForeignKey(a => a.IssueId);
+
+				entity.HasOne(a => a.PickingPallet)
+				.WithMany()
+				.HasForeignKey(a => a.PickingPalletId)
+				.IsRequired(false)
+				.OnDelete(DeleteBehavior.Restrict);
 			});
 			modelBuilder.Entity<Category>(entity =>
 			{

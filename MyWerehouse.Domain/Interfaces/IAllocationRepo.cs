@@ -14,6 +14,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<List<Allocation>> GetAllocationListAsync(int palletPickingId, DateTime pickingDate);
 		Task<Allocation> GetAllocationAsync(int allocationId);
 		Task<List<Allocation>> GetAllocationsByIssueIdProductIdAsync(int issueId, int productId);
+		Task<List<Allocation>> GetAllocationsByPickingPalletIdAsync(string pickingPalletId);
 		Task<List<Allocation>> GetAllocationsByIssueIdAsync(int issueId);
 		Task<List<Allocation>> GetAllocationsProductIdAsync(int productId, DateTime from, DateTime to);
 		Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId);

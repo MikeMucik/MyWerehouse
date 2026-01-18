@@ -73,11 +73,5 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			if (await _werehouseDbContext.Locations.FindAsync(locationId) != null) { return true; } return false;
 		}
-
-
-		//public async Task AddManyLocationAsync(IEnumerable<Location> locations)
-		//{
-		//	await _werehouseDbContext.Locations.AddRangeAsync(locations);
-		//}
 	}
 }

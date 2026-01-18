@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
 using MyWerehouse.Application.Pallets.Queries.GetOneAvailablePalletByProduct;
@@ -17,7 +18,7 @@ using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 {
-	public class AddPalletToPickingHandler : IRequestHandler<AddPalletToPickingCommand, VirtualPallet>
+	public class AddPalletToPickingHandler : IRequestHandler<AddPalletToPickingCommand, AddPalletToPickingResult>
 	{
 		private readonly IMediator _mediator;
 		private readonly IPalletRepo _palletRepo;
@@ -33,23 +34,24 @@ namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 			_eventCollector = eventCollector;
 			_pickingPalletRepo = pickingPalletRepo;
 		}
-		public async Task<VirtualPallet> Handle(AddPalletToPickingCommand request, CancellationToken ct)
+		public async Task<AddPalletToPickingResult> Handle(AddPalletToPickingCommand request, CancellationToken ct)
 		{
 			var newPallet = new Pallet();
+			var selectedPallet = new List<Pallet>();
 			if (request.Pallets == null)
 			{
 				 newPallet = await _mediator.Send(new GetOneAvailablePalletByProductQuery(request.ProductId, request.BestBefore), ct);					
-			}
+			}			
 			else newPallet = request.Pallets.FirstOrDefault();
-			if (newPallet == null) { throw new PalletException("Brak palet do pickingu"); }
-			if (newPallet.ProductsOnPallet == null) { throw new PalletException("Brak towaru na palecie do pickingu"); }
+			if (newPallet == null) return AddPalletToPickingResult.Fail("Brak palet do pickingu");
+			if (newPallet.ProductsOnPallet == null) return AddPalletToPickingResult.Fail("Brak towaru na palecie do pickingu");
 			var newVirtualPicking = new VirtualPallet
 			{
 				Pallet = newPallet,
 				PalletId = newPallet.Id,
 				DateMoved = DateTime.UtcNow,
 				LocationId = newPallet.LocationId,				
-				IssueInitialQuantity = newPallet.ProductsOnPallet.FirstOrDefault(p => p.PalletId == newPallet.Id).Quantity ,//zakładam że jest jeden towar
+				InitialPalletQuantity = newPallet.ProductsOnPallet.FirstOrDefault(p => p.PalletId == newPallet.Id).Quantity ,//zakładam że jest jeden towar
 				Allocations = new List<Allocation>()
 			};
 			var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);
@@ -57,7 +59,7 @@ namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 			_palletRepo.ChangePalletStatus(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
 			_eventCollector.Add(new CreatePalletOperationNotification(newPallet.Id,	newPallet.LocationId,
 				ReasonMovement.Picking,	request.UserId,	PalletStatus.ToPicking,	null));
-			return virtualPallet;
+			return AddPalletToPickingResult.Ok(virtualPallet );				
 		}
 	}
 }

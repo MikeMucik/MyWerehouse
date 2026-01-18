@@ -307,7 +307,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var virtualPallet = new VirtualPallet
 			{
 				Allocations = [],
-				IssueInitialQuantity = 2,
+				InitialPalletQuantity = 2,
 				PalletId = "P2",
 				DateMoved = DateTime.UtcNow.AddDays(-7),
 				Location = location2,
@@ -738,7 +738,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Pallet = pallet3,
 				Location = pallet3.Location,
 				DateMoved = new DateTime(2025, 9, 1),
-				IssueInitialQuantity = 10
+				InitialPalletQuantity = 10
 			};
 			var allocation = new Allocation
 			{

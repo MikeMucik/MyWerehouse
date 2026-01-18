@@ -205,7 +205,7 @@ namespace MyWerehouse.Application.Services
 		//		PalletId = newPallet.Id,
 		//		DateMoved = DateTime.UtcNow,
 		//		LocationId = newPallet.LocationId,
-		//		IssueInitialQuantity = newPallet.ProductsOnPallet.First(p => p.PalletId == newPallet.Id).Quantity,//zakładam że jest jeden towar
+		//		InitialPalletQuantity = newPallet.ProductsOnPallet.First(p => p.PalletId == newPallet.Id).Quantity,//zakładam że jest jeden towar
 		//		Allocations = new List<Allocation>()
 		//	};
 		//	var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);

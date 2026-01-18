@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
@@ -66,11 +67,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var query = new GetReceiptByIdQuery(999);
 
 			//var result = await _mediator.Send(query);
-			var rresult = await Assert.ThrowsAsync<ReceiptException>(async () => await _mediator.Send(query));
+			var rresult = await Assert.ThrowsAsync<NotFoundReceiptException>(async () => await _mediator.Send(query));
 			//Assert
 			//Assert.Null(result);
 			Assert.NotNull(rresult);
-			Assert.Contains("Przyjęcie o numerze 999 nie zostało znalezione.", rresult.Message);
+			Assert.Contains($"Przyjęcie o numerze 999 nie zostało znalezione.", rresult.Message);
 		}
 		//Testy multi
 		[Theory]

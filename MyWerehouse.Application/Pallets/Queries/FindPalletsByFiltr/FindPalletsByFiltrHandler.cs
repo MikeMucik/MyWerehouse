@@ -27,7 +27,8 @@ namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
 		}
 		public async Task<List<PalletDTO>> Handle (FindPalletsByFiltrQuery request, CancellationToken ct)
 		{
-			var pallets = _palletRepo.GetPalletsByFilter(request.Filter) ?? throw new PalletException("Brak palety/palet o zadanych parametrach");
+			var pallets = _palletRepo.GetPalletsByFilter(request.Filter);
+			//?? throw new PalletException("Brak palety/palet o zadanych parametrach");
 			var palletDTO = await pallets.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync();
 			return palletDTO;
 		}

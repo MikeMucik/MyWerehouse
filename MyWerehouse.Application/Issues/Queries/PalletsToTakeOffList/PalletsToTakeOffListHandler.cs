@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.Common.Exceptions.BuisnessRuleException;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
@@ -22,7 +21,7 @@ namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 				??	throw new NotFoundIssueException(request.IssueId);
 			if (issue.IssueStatus != IssueStatus.ConfirmedToLoad)
-				throw new IssueException($"Zlecenie {request.IssueId} nie zatwierdzone do wydania.");
+				throw new NotFoundIssueException(request.IssueId);
 			var listToShow = new IssuePalletsWithLocationDTO
 			{
 				IssueId = request.IssueId,

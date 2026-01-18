@@ -32,7 +32,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo
 				ProductId = allocation.VirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
 				PickingStatus = allocation.PickingStatus,
 				RequestedQuantity = allocation.Quantity,
-				BestBefore = allocation.VirtualPallet.Pallet.ProductsOnPallet.First().BestBefore
+				BestBefore = allocation.BestBefore
 			}).ToList();
 		}
 	}

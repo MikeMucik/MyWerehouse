@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
@@ -43,9 +44,10 @@ namespace MyWerehouse.Application.Pallets.Commands.DeletePallet
 			try
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId)
-						?? throw new PalletException($"Nie ma palety o numerze {request.PalletId}");
+						?? throw new NotFoundPalletException(request.PalletId);
 				if (!await _palletMovementRepo.CanDeletePalletAsync(pallet.Id))
-					throw new PalletException($"Palety o numerze {request.PalletId} nie można usunąć");
+					return PalletResult.Fail($"Palety o numerze {request.PalletId} nie można usunąć");
+					//throw new PalletException($"Palety o numerze {request.PalletId} nie można usunąć");
 
 				foreach (var pop in pallet.ProductsOnPallet)
 				{
@@ -61,13 +63,12 @@ namespace MyWerehouse.Application.Pallets.Commands.DeletePallet
 				{
 					await _mediator.Publish(ev, ct);
 				}
-				//_eventCollector.Clear();
 				_palletRepo.DeletePallet(pallet);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return PalletResult.Ok("Paleta została usunięta");
 			}
-			catch (PalletException epr)
+			catch (NotFoundPalletException epr)
 			{
 				await transaction.RollbackAsync(ct);
 				return PalletResult.Fail(epr.Message);

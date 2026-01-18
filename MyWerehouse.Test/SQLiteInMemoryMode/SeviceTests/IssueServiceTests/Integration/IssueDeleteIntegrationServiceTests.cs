@@ -132,7 +132,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					VirtualPallet = new VirtualPallet
 					{
 						Pallet = pallets[1],
-						IssueInitialQuantity = qty,
+						InitialPalletQuantity = qty,
 						Location = location,
 					}
 				});

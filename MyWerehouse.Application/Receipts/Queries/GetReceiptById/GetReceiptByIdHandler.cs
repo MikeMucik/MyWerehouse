@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Interfaces;
 
@@ -19,7 +20,7 @@ namespace MyWerehouse.Application.Receipts.Queries.GetReceipt
 		public async Task<ReceiptDTO> Handle(GetReceiptByIdQuery request, CancellationToken cancellationToken)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)??
-				throw new ReceiptException(request.ReceiptId);			
+				throw new NotFoundReceiptException(request.ReceiptId);			
 			var receiptDTO = _mapper.Map<ReceiptDTO>(receipt);
 			return receiptDTO;
 		}

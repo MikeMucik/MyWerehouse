@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
@@ -33,9 +34,10 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 			try
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ??
-				throw new PalletException($"Paleta {request.PalletId} nie istnieje");
+				throw new NotFoundPalletException(request.PalletId);
 				if (pallet.Status == PalletStatus.Loaded)
-					throw new PalletException($"Paleta {request.PalletId} jest już załadowana.");
+					return IssueResult.Fail($"Paleta {request.PalletId} jest już załadowana.");
+				//throw new PalletException($"Paleta {request.PalletId} jest już załadowana.");
 
 				//if (!(pallet.Status == PalletStatus.ToIssue || pallet.Status == PalletStatus.InTransit || pallet.Status == PalletStatus.Available ||
 				//	pallet.Status == PalletStatus.InStock)) throw new PalletException("Paleta nie ma statusu do załadowania");
@@ -47,7 +49,8 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 					PalletStatus.InStock
 				};
 				if (!allowedStatuses.Contains(pallet.Status))
-					throw new PalletException("Paleta nie ma statusu do załadowania");
+					return IssueResult.Fail("Paleta nie ma statusu do załadowania");
+				//throw new PalletException("Paleta nie ma statusu do załadowania");
 
 				pallet.Status = PalletStatus.Loaded;
 				
@@ -57,7 +60,7 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 				await transaction.CommitAsync(ct);
 				return IssueResult.Ok($"Paleta {request.PalletId} została załadowana.");
 			}
-			catch(PalletException ep)
+			catch(NotFoundPalletException ep)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ep.Message);

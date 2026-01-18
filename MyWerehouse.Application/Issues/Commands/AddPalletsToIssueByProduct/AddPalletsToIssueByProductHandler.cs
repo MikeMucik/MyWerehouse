@@ -21,6 +21,7 @@ using MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
@@ -46,16 +47,19 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 				{
 					throw new NotFoundIssueException("Błąd statusu zlecenia");
 				}
-				if( await _productRepo.IsExistProduct(request.Product.ProductId)==false)  throw new ProductException($"Brak produktu o numerze{request.Product.ProductId} nie istnieje.");
+				if( await _productRepo.IsExistProduct(request.Product.ProductId)==false)  throw new NotFoundProductException(request.Product.ProductId);
 				//1 dostepność towaru - ile jest opakowań z datą dłuższą niż BestBefore
 				totalAvailable = await _mediator.Send(new GetProductCountQuery(request.Product.ProductId, request.Product.BestBefore), ct);
 				if (request.Product.Quantity > totalAvailable)
 				{
-					throw new ProductException($"Nie wystarczająca ilości produktu o numerze {request.Product.ProductId}. Asortyment nie został dodany do zlecenia.");
+					return IssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {request.Product.ProductId}. Asortyment nie został dodany do zlecenia.",
+						request.Product.ProductId,
+					request.Product.Quantity,
+					totalAvailable);
 				}
-				//2 Oblicz pełne palety i resztę - to można wyodrębnić 
+				//2 Oblicz pełne palety i resztę  
 				var palletAmountFullResult = await _mediator.Send(new GetNumberPalletsAndRestQuery(request.Product.ProductId, request.Product.Quantity), ct);
-
+				if (palletAmountFullResult.Success is false) return IssueResult.Fail(palletAmountFullResult.Message);
 				var amountPallets = palletAmountFullResult.FullPallet;
 				var rest = palletAmountFullResult.Rest;
 
@@ -63,18 +67,24 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 				var availablePalletsQuery = await _mediator.Send(new GetAvailablePalletsByProductQuery(request.Product.ProductId, request.Product.BestBefore, amountPallets, request.Product.Quantity), ct);
 				//3.1 pobierz dostępne virtualPallet
 				var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(request.Product.ProductId, request.Product.BestBefore), ct);
+				if (availableVirtualPalletsQuery is null) return IssueResult.Fail("Brak palety do pickingu - błąd virtual");
 				//4. Przydziel pełne palety
 				var palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(request.Issue, availablePalletsQuery, amountPallets), ct);
 				List<Pallet> restPallet = availablePalletsQuery.Except(palletAssigned).ToList();
 				//5. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 				if (rest > 0)
 				{
-					var newAllocationFromRest = await _mediator.Send(
-						new AddAllocationToIssueCommand(restPallet, availableVirtualPalletsQuery, request.Issue,
+					var newAllocationFromRest = 
+						await _mediator.Send(
+						new AddAllocationToIssueNewCommand(restPallet, availableVirtualPalletsQuery, request.Issue,
 						request.Product.ProductId,
 						rest, request.Product.BestBefore,
 						request.Issue.PerformedBy
 						), ct);// palety do pickingu
+					if (newAllocationFromRest.Success is false)
+					{
+						return IssueResult.Fail("Nie dodano zadań pickingu do zlecenia.");
+					}
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				foreach (var evn in _eventCollector.Events)
@@ -88,7 +98,7 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 				await transaction.CommitAsync(ct);
 				return IssueResult.Ok("Towar dołączono do wydania", request.Product.ProductId);
 			}
-			catch (ProductException expr)//
+			catch (NotFoundProductException expr)//
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(
@@ -97,7 +107,7 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 					request.Product.Quantity,
 					totalAvailable);
 			}
-			catch (PalletException expal)
+			catch (NotFoundPalletException expal)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(

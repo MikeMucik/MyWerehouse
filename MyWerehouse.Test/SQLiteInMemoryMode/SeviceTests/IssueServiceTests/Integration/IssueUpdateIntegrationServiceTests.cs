@@ -137,13 +137,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(alloc.VirtualPallet);
 			Assert.Equal("P2", alloc.VirtualPallet.PalletId);
 
-			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == IssueInitialQuantity - allocation
+			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == InitialPalletQuantity - allocation
 			var vp = DbContext.VirtualPallets
 				.Include(v => v.Allocations)
 				.First(v => v.PalletId == "P2");
 
 			Assert.Equal(5, vp.Allocations.First().Quantity);
-			Assert.Equal(vp.IssueInitialQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
+			Assert.Equal(vp.InitialPalletQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.Single(result);
@@ -288,13 +288,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			//kontrola zapisu historii
 
-			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == IssueInitialQuantity - allocation
+			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == InitialPalletQuantity - allocation
 			var vp = DbContext.VirtualPallets
 				.Include(v => v.Allocations)
 				.First(v => v.PalletId == "P2");
 
 			Assert.Equal(5, vp.Allocations.First().Quantity);
-			Assert.Equal(vp.IssueInitialQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
+			Assert.Equal(vp.InitialPalletQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
 
 
 
@@ -394,7 +394,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			{
 				Pallet = pallet2,
 				Location = pallet2.Location,
-				IssueInitialQuantity = pallet2.ProductsOnPallet.First().Quantity,
+				InitialPalletQuantity = pallet2.ProductsOnPallet.First().Quantity,
 				Allocations = new List<Allocation> { allocation }
 			};
 			//allocation.VirtualPallet = virtualPallet;
@@ -462,13 +462,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(alloc.VirtualPallet);
 			Assert.Equal("P2", alloc.VirtualPallet.PalletId);
 
-			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == IssueInitialQuantity - allocation
+			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == InitialPalletQuantity - allocation
 			var vp = DbContext.VirtualPallets
 				.Include(v => v.Allocations)
 				.First(v => v.PalletId == "P2");
 
 			Assert.Equal(5, vp.Allocations.First(x => x.IssueId == issue.Id).Quantity);
-			Assert.Equal(vp.IssueInitialQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
+			Assert.Equal(vp.InitialPalletQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
 			Assert.Equal(1, vp.RemainingQuantity);
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
@@ -546,7 +546,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			{
 				Pallet = pallet2,
 				Location = pallet2.Location,
-				IssueInitialQuantity = pallet2.ProductsOnPallet.First().Quantity,
+				InitialPalletQuantity = pallet2.ProductsOnPallet.First().Quantity,
 				Allocations = new List<Allocation> { allocation }
 			};
 			//allocation.VirtualPallet = virtualPallet;
@@ -626,13 +626,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(alloc.VirtualPallet);
 			Assert.Equal("P2", alloc.VirtualPallet.PalletId);
 
-			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == IssueInitialQuantity - allocation
+			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == InitialPalletQuantity - allocation
 			var vp = DbContext.VirtualPallets
 				.Include(v => v.Allocations)
 				.First(v => v.PalletId == "P2");
 
 			Assert.Equal(5, vp.Allocations.First(x => x.IssueId == updatedIssue.Id).Quantity);
-			Assert.Equal(vp.IssueInitialQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
+			Assert.Equal(vp.InitialPalletQuantity - vp.Allocations.Sum(a => a.Quantity), vp.RemainingQuantity);
 			Assert.Equal(1, vp.RemainingQuantity);
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
@@ -957,7 +957,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			
 			Assert.Equal(2, palletsProd1.Count); // Powinny być 2 palety (np. P1 i P4)
 
-			var allocProd1 = updatedIssue1.Allocations.FirstOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.Id);
+			var allocProd1 = updatedIssue1.Allocations.FirstOrDefault(a => a.ProductId == product.Id);
 			//var allocProd2 = updatedIssue1.Allocations.LastOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.Id);
 			Assert.NotNull(allocProd1);
 			//Assert.NotNull(allocProd2);
@@ -972,7 +972,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Empty(palletsProd2); // 8 sztuk nie tworzy pełnej palety
 
 			var allocProd3 = updatedIssue1.Allocations
-				.FirstOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product1.Id);
+				.FirstOrDefault(a => a.ProductId == product1.Id);
 			Assert.NotNull(allocProd3);
 			Assert.Equal(8, allocProd3.Quantity);
 		}
@@ -1147,7 +1147,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			Assert.Equal(1, palletsProd1.Count); // Powinny być 1 palety (np. P1 )
 
-			var allocProd1 = updatedIssue1.Allocations.FirstOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.Id);
+			var allocProd1 = updatedIssue1.Allocations.FirstOrDefault(a => a.ProductId == product.Id);
 			//var allocProd2 = updatedIssue1.Allocations.LastOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.Id);
 			Assert.NotNull(allocProd1);
 			//Assert.NotNull(allocProd2);
@@ -1162,7 +1162,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Empty(palletsProd2); // 8 sztuk nie tworzy pełnej palety
 
 			var allocProd3 = updatedIssue1.Allocations
-				.FirstOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product1.Id);
+				.FirstOrDefault(a => a.ProductId == product1.Id);
 			Assert.NotNull(allocProd3);
 			Assert.Equal(8, allocProd3.Quantity);
 		}

@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Common.Events;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
+using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
@@ -16,13 +17,11 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 	public class AddAllocationToIssueHandler(
 		IAllocationRepo allocationRepo,
 		IEventCollector eventCollector,
-		IMediator mediator,
-		IProductRepo productRepo) : IRequestHandler<AddAllocationToIssueCommand, List<Allocation>>
+		IMediator mediator) : IRequestHandler<AddAllocationToIssueCommand, List<Allocation>>
 	{
 		private readonly IAllocationRepo _allocationRepo = allocationRepo;
 		private readonly IEventCollector _eventCollector = eventCollector;
-		private readonly IMediator _mediator = mediator;
-		private readonly IProductRepo _productRepo = productRepo;
+		private readonly IMediator _mediator = mediator;		
 
 		public async Task<List<Allocation>> Handle(AddAllocationToIssueCommand request, CancellationToken ct)
 		{
@@ -32,7 +31,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 			//if (quantity <= 0) return [];
 			var listOfAllocation = new List<Allocation>();
 			var virtualPallets = request.VirtualPallets;
-			var existingAllocations = issue.Allocations.Where(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == request.ProductId).ToList();
+			var existingAllocations = issue.Allocations.Where(a => a.ProductId == request.ProductId).ToList();
 			if (targetQuantity == 0)
 			{
 				if (existingAllocations.Count > 0)
@@ -51,7 +50,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 								alloc.Id,
 								alloc.VirtualPallet.PalletId,
 								alloc.IssueId,
-									 alloc.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 alloc.ProductId,
 									 alloc.Quantity,
 									 0,
 									 PickingStatus.Allocated,
@@ -98,7 +97,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 								allocation.Id,
 								allocation.VirtualPallet.PalletId,
 								allocation.IssueId,
-									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.ProductId,
 									 allocation.Quantity,
 									 0,
 									 PickingStatus.Available,
@@ -115,7 +114,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 				foreach (var virtualPallet in virtualPallets)
 				{
 					var alreadyAllocated = virtualPallet.Allocations.Sum(a => a.Quantity);
-					var availableOnThisPallet = virtualPallet.IssueInitialQuantity - alreadyAllocated;
+					var availableOnThisPallet = virtualPallet.InitialPalletQuantity - alreadyAllocated;
 					if (availableOnThisPallet <= 0) continue;
 					var quantityToTake = Math.Min(quantity, availableOnThisPallet);
 					var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToTake);
@@ -128,8 +127,9 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 				while (quantity > 0)
 				{
 					var newVirtualPallet = await _mediator.Send(new AddPalletToPickingCommand(issue, request.ProductId, request.BestBefore, request.PerfomedBy, request.Pallets), ct);
-					var quantityToTake = Math.Min(quantity, newVirtualPallet.IssueInitialQuantity);
-					var newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet, issue, quantityToTake);
+					//if (newVirtualPallet.Success == false) return PickingResult.Fail(newVirtualPallet.Message);
+					var quantityToTake = Math.Min(quantity, newVirtualPallet.VirtualPallet.InitialPalletQuantity);
+					var newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet.VirtualPallet, issue, quantityToTake);
 					_allocationRepo.AddAllocation(newAllocation);
 					listOfAllocation.Add(newAllocation);
 					quantity -= quantityToTake;
@@ -141,7 +141,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 								allocation.Id,
 								allocation.VirtualPallet.PalletId,
 								allocation.IssueId,
-									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.ProductId,
 									 allocation.Quantity,
 									 0,
 									 PickingStatus.Allocated,
@@ -156,7 +156,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 								allocation.Id,
 								allocation.VirtualPallet.PalletId,
 								allocation.IssueId,
-									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 allocation.ProductId,
 									 allocation.Quantity,
 									 0,
 									 PickingStatus.Allocated,

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
@@ -33,7 +34,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 				try
 				{
 					var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-					?? throw new ReceiptException($"Brak przyjęcia o numerze{request.ReceiptId}");
+					?? throw new NotFoundReceiptException(request.ReceiptId);
 					if (receipt.ReceiptStatus == ReceiptStatus.Verified)
 					{
 						return ReceiptResult.Fail("Nie można usunąć zweryfikowanego przyjęcia");
@@ -80,7 +81,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 						request.UserId), ct);
 					return ReceiptResult.Ok("Anulowano przyjęcie wraz z paletami z bazy", request.ReceiptId);
 				}
-				catch (ReceiptException erp)
+				catch (NotFoundReceiptException erp)
 				{
 					await transaction.RollbackAsync(ct);
 					return ReceiptResult.Fail(erp.Message);

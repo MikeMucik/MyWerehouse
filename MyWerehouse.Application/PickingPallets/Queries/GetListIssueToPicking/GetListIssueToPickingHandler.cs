@@ -38,7 +38,8 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 				{
 					IssueId = a.IssueId,
 					Quantity = a.Quantity,
-					ProductId = p.Pallet.ProductsOnPallet.First().ProductId,
+					ProductId = a.ProductId,
+					//ProductId = p.Pallet.ProductsOnPallet.First().ProductId,
 					ClientIdOut = issueDictionary[a.IssueId].ClientId
 				}))
 				.GroupBy(x => x.ClientIdOut)

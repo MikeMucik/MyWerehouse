@@ -33,9 +33,11 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ?? throw new PalletException(request.PalletId);
+				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ?? throw new NotFoundPalletException(request.PalletId);
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId) ?? throw new NotFoundIssueException(request.PalletId);
-				if (pallet.Status != PalletStatus.Picking) { throw new PalletException($"Palety {pallet.Id} nie można zamknąć. "); }
+				if (pallet.Status != PalletStatus.Picking)
+					return PickingResult.Fail($"Palety {pallet.Id} nie można zamknąć. "); 
+				//{ throw new PalletException($"Palety {pallet.Id} nie można zamknąć. "); }
 				_pickingPalletRepo.ClosePickingPallet(request.PalletId, request.IssueId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
@@ -50,7 +52,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.UserId),ct);
 				return PickingResult.Ok("Zamknięto paletę");
 			}
-			catch (PalletException exp)
+			catch (NotFoundPalletException exp)
 			{
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(exp.Message);

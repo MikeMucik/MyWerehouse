@@ -249,7 +249,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = 1,
 						PalletId = "Q1100",
-						IssueInitialQuantity = 200,
+						InitialPalletQuantity = 200,
 						LocationId = 3,
 						DateMoved = new DateTime(2025, 5, 5),
 						//Allocations = new List<Allocation> {new Allocation
@@ -264,7 +264,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = 2,
 						PalletId = "Q1101",
-						IssueInitialQuantity = 150,
+						InitialPalletQuantity = 150,
 						LocationId = 3,
 						DateMoved = new DateTime(2024, 6, 6),
 						//Allocations = new List<Allocation>
@@ -281,7 +281,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = 3,
 						PalletId = "Q1200",
-						IssueInitialQuantity = 300,
+						InitialPalletQuantity = 300,
 						LocationId = 3,
 						DateMoved = new DateTime(2025, 5, 7),
 						//Allocations = new List<Allocation>
@@ -304,35 +304,46 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						VirtualPalletId = 1,
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = 2,
-						Quantity = 20
+						Quantity = 20,
+						ProductId = 11,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
+
 					}, new Allocation
 					{
 						Id = 2,
 						VirtualPalletId = 1,
 						PickingStatus = PickingStatus.Picked,
 						IssueId = 2,
-						Quantity = 20
+						Quantity = 20,
+						ProductId = 11,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
 					}, new Allocation
 					{
 						Id = 3,
 						VirtualPalletId = 2,
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = 2,
-						Quantity = 50
+						Quantity = 50,
+						ProductId = 11,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
 					}, new Allocation
 					{
 						Id = 4,
 						VirtualPalletId = 3,
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = 2,
-						Quantity = 100
+						Quantity = 100,
+						ProductId = 10,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
 					}, new Allocation
 					{
 						Id = 5,
 						VirtualPalletId = 3,
 						PickingStatus = PickingStatus.Picked,
 						IssueId = 2,
-						Quantity = 10
+						Quantity = 10,
+						ProductId = 10,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
 					}
 					);
 			}

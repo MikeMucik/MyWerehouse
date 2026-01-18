@@ -32,9 +32,12 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
+				if(_palletRepo.GetPalletByIdAsync(request.NewPalletId) is null) throw new NotFoundPalletException(request.NewPalletId);
+				if(_palletRepo.GetPalletByIdAsync(request.OldPalletId) is null) throw new NotFoundPalletException(request.OldPalletId);
 				if (request.OldPalletId == request.NewPalletId)
 				{
-					throw new PalletException("Nie można podmienić paletę na tą samą");
+					return IssueResult.Fail("Nie można podmienić paletę na tą samą");
+					//throw new PalletException("Nie można podmienić paletę na tą samą");
 				}
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 					?? throw new NotFoundIssueException(request.IssueId);
@@ -42,28 +45,35 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(request.NewPalletId);
 				if (palletToAddingIssue == null || palletToRemoveFromIssue == null)
 				{
-					throw new PalletException("Jedna z podanych palet nie istnieje.");
+					return IssueResult.Fail("Jedna z podanych palet nie istnieje.");
+					//throw new PalletException("Jedna z podanych palet nie istnieje.");
 				}
 				if (palletToRemoveFromIssue.IssueId != request.IssueId)
 				{
-					throw new PalletException("Paleta do usunięcia nie należy do zlecenia.");
+					return IssueResult.Fail("Paleta do usunięcia nie należy do zlecenia.");
+					//throw new PalletException("Paleta do usunięcia nie należy do zlecenia.");
 				}
 				if (palletToAddingIssue.IssueId != null ||
 					(palletToAddingIssue.Status != PalletStatus.Available &&
 					palletToAddingIssue.Status != PalletStatus.InStock))
 				{
-					throw new PalletException("Nowej palety nie można przypisać do zlecenia, błędny status.");
+					return IssueResult.Fail("Nowej palety nie można przypisać do zlecenia, błędny status.");
+					//throw new PalletException("Nowej palety nie można przypisać do zlecenia, błędny status.");
 				}
 				var productOnOldPallet = palletToRemoveFromIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
 				var productOnNewPallet = palletToAddingIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
 				if (productOnOldPallet is null)
-					throw new PalletException("Paleta usuwana nie zawiera produktów.");
+					return IssueResult.Fail("Paleta usuwana nie zawiera produktów.");
+				//throw new PalletException("Paleta usuwana nie zawiera produktów.");
 
 				if (productOnNewPallet is null)
-					throw new PalletException("Nowa paleta nie zawiera produktów.");
+					return IssueResult.Fail("Nowa paleta nie zawiera produktów.");
+				//throw new PalletException("Nowa paleta nie zawiera produktów.");
 
 				if (productOnOldPallet != productOnNewPallet)
-					throw new PalletException("Nie można podmienić palet z różnymi produktami.");				
+					return IssueResult.Fail("Nie można podmienić palet z różnymi produktami.");
+				//throw new PalletException("Nie można podmienić palet z różnymi produktami.");		
+				if (_issueRepo.GetIssueByIdAsync(request.IssueId) is null) throw new NotFoundIssueException(request.IssueId);
 				palletToAddingIssue.IssueId = issue.Id;
 				palletToAddingIssue.Status = PalletStatus.ToIssue;
 				issue.Pallets.Add(palletToAddingIssue);
@@ -96,7 +106,7 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 
 				return IssueResult.Ok("Podmieniono palety.", productOnOldPallet.Value);
 			}
-			catch (PalletException ep)
+			catch (NotFoundPalletException ep)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ep.Message);

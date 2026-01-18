@@ -216,7 +216,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = pallet1,
-				IssueInitialQuantity = 40,
+				InitialPalletQuantity = 40,
 				Location = pallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -228,7 +228,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet2 = new VirtualPallet
 			{
 				Pallet = pallet2,
-				IssueInitialQuantity = 50,
+				InitialPalletQuantity = 50,
 				Location = pallet2.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -240,7 +240,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet3 = new VirtualPallet
 			{
 				Pallet = pallet3,
-				IssueInitialQuantity = 50,
+				InitialPalletQuantity = 50,
 				Location = pallet3.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -251,7 +251,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet4 = new VirtualPallet
 			{
 				Pallet = pallet4,
-				IssueInitialQuantity = 40,
+				InitialPalletQuantity = 40,
 				Location = pallet4.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
@@ -263,23 +263,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 
-			//var pickingPalletRepo = new PickingPalletRepo(DbContext);	
-			//var allocationRepo = new AllocationRepo(DbContext);
-			//var issueRepo = new IssueRepo(DbContext);
-			//var locationRepo = new Mock<ILocationRepo>();
-			//var palletRepo = new Mock<IPalletRepo>();
-			//var palletService = new Mock<IPalletService>();
-			//var eventCollector = new Mock<IEventCollector>();
-			var service = new PickingPalletService(Mediator
-				//, pickingPalletRepo,
-				//	allocationRepo,
-				//DbContext,
-				//locationRepo.Object,
-				//palletRepo.Object,
-				//issueRepo, 
-				//palletService.Object
-				//,eventCollector.Object
-				);
+			var service = new PickingPalletService(Mediator);
 
 			// Act
 			var result = await service.GetListToPickingAsync(
@@ -505,75 +489,59 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Clients.AddRange(client1, client2);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
-			DbContext.Issues.AddRange(issue1, issue2, issue3);			
-
+			DbContext.Issues.AddRange(issue1, issue2, issue3);
+			await DbContext.SaveChangesAsync();
 			var virtualPallet1 = new VirtualPallet
 			{
 				Pallet = pallet1,
-				IssueInitialQuantity = 40,
+				InitialPalletQuantity = 40,
 				Location = pallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a11 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1 };
-			var a12 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1 };
+			var a11 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1, ProductId = product1.Id };
+			var a12 = new Allocation { Issue = issue2, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1, ProductId = product1.Id };
 			virtualPallet1.Allocations = new List<Allocation> { a11, a12 };
 
 			var virtualPallet2 = new VirtualPallet
 			{
 				Pallet = pallet2,
-				IssueInitialQuantity = 50,
+				InitialPalletQuantity = 50,
 				Location = pallet2.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a21 = new Allocation { Issue = issue1, Quantity = 20, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2 };
-			var a22 = new Allocation { Issue = issue3, Quantity = 25, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2 };
+			var a21 = new Allocation { Issue = issue1, Quantity = 20, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2, ProductId = product1.Id };
+			var a22 = new Allocation { Issue = issue3, Quantity = 25, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2, ProductId = product1.Id };
 			virtualPallet2.Allocations = new List<Allocation> { a21, a22 };
 
 			var virtualPallet3 = new VirtualPallet
 			{
 				Pallet = pallet3,
-				IssueInitialQuantity = 50,
+				InitialPalletQuantity = 50,
 				Location = pallet3.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a31 = new Allocation { Issue = issue3, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet3 };
+			var a31 = new Allocation { Issue = issue3, Quantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet3, ProductId = product2.Id };
 			virtualPallet3.Allocations = new List<Allocation> { a31 };
 
 			var virtualPallet4 = new VirtualPallet
 			{
 				Pallet = pallet4,
-				IssueInitialQuantity = 40,
+				InitialPalletQuantity = 40,
 				Location = pallet4.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a41 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet4 };
+			var a41 = new Allocation { Issue = issue1, Quantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet4, ProductId = product2.Id };
 			virtualPallet4.Allocations = new List<Allocation> { a41 };
 
 			DbContext.Allocations.AddRange(a11, a12, a21, a22, a31, a41);
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
-			//var pickingPalletRepo = new PickingPalletRepo(DbContext);
-			//var allocationRepo = new AllocationRepo(DbContext);
-			//var issueRepo = new IssueRepo(DbContext);
-			//var mapper = new Mock<IMapper>();
-			//var locationRepo = new Mock<ILocationRepo>();
-			//var palletRepo = new Mock<IPalletRepo>();		
-			//var palletService = new Mock<IPalletService>();
-			//var eventCollector = new Mock<IEventCollector>();
-			var service = new PickingPalletService(Mediator
-				//, pickingPalletRepo,
-				//allocationRepo,
-				//DbContext,
-				//locationRepo.Object,
-				//palletRepo.Object,
-				//issueRepo,
-				//palletService.Object
-				//,eventCollector.Object
-				);
+			
+			var service = new PickingPalletService(Mediator);
 
 			// Act
 			var result = await service.GetListIssueToPickingAsync(

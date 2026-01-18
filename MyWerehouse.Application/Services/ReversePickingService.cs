@@ -10,20 +10,21 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking;
-using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Pallets.Filters;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services
 {
@@ -57,55 +58,56 @@ namespace MyWerehouse.Application.Services
 			_eventCollector = eventCollector;
 		}
 
-		public async Task<List<ReversePicking>> CreateTaskToReversePickingAsync(string palletId, string userId)//paleta kompletacyjna różne asortymenty
+		public async Task<List<ReversePickingResult>> CreateTaskToReversePickingAsync(string palletId, string userId)//paleta kompletacyjna różne asortymenty
 		{
+			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId))
+				throw new InvalidOperationException("Zadania dekompletacji są już utworzone.");
 
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();
 			var listTasks = new List<ReversePicking>();
+			var listResult = new List<ReversePickingResult>();
 			var pallet = await _palletRepo.GetPalletByIdAsync(palletId)
-				?? throw new PalletException(palletId);
+				?? throw new NotFoundPalletException(palletId);
 			var issue = pallet.Issue
 				?? throw new NotFoundIssueException("Brak zlecenia wydania.");
-			foreach (var residue in pallet.ProductsOnPallet)
+			var allocationsOfPickingPallet = await _allocationRepo.GetAllocationsByPickingPalletIdAsync(palletId);
+			if (allocationsOfPickingPallet.Count == 0) throw new NotFoundAlloactionException("Brak alokacji dla palety. Paleta nie do dekompletacji.");
+			foreach (var allocationToReverse in allocationsOfPickingPallet)
 			{
-				var allocations = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issue.Id, residue.ProductId);
-				foreach (var allocation in allocations)
-				//Dla każdej wykonanej alokacji stwórz zadanie odwrotne
+				listTasks.Add(new ReversePicking
 				{
-					listTasks.Add(new ReversePicking
-					{
-						PickingPalletId = palletId,
-						Quantity = allocation.Quantity,
-						ProductId = residue.ProductId,
-						BestBefore = residue.BestBefore,
-						Status = ReversePickingStatus.Pending,
-						AllocationId = allocation.Id,
-						UserId = userId,
-					});
-				}
-				foreach (var task in listTasks)
-				{
-					 _reversePickingRepo.AddReversePicking(task);
-				}
-				await _werehouseDbContext.SaveChangesAsync();
-				await transaction.CommitAsync();
-				foreach (var task in listTasks)
-				{
-					var itemHistory = new HistoryReversePickingItem
-					(
-						task.Id,
-						task.SourcePalletId,
-						task.DestinationPalletId,
-						issue.Id,
-						task.ProductId,
-						task.Quantity,
-						null,
-						task.Status
-					);
-					await _mediator.Publish(new CreateHistoryReversePickingNotification(itemHistory, userId));
-				}
+					PickingPalletId = palletId,
+					Quantity = allocationToReverse.Quantity,
+					ProductId = allocationToReverse.ProductId,
+					BestBefore = allocationToReverse.BestBefore,
+					Status = ReversePickingStatus.Pending,
+					AllocationId = allocationToReverse.Id,
+					UserId = userId,
+				});
+				listResult.Add(ReversePickingResult.Ok("Utworzono zadanie dekompletadcji", allocationToReverse.ProductId, palletId));
+			}			
+			foreach (var task in listTasks)
+			{
+				_reversePickingRepo.AddReversePicking(task);
 			}
-			return listTasks;
+			await _werehouseDbContext.SaveChangesAsync();
+			await transaction.CommitAsync();
+			foreach (var task in listTasks)
+			{
+				var itemHistory = new HistoryReversePickingItem
+				(
+					task.Id,
+					task.SourcePalletId,
+					task.DestinationPalletId,
+					issue.Id,
+					task.ProductId,
+					task.Quantity,
+					null,
+					task.Status
+				);
+				await _mediator.Publish(new CreateHistoryReversePickingNotification(itemHistory, userId));
+			}
+			return listResult;			
 		}
 		public async Task<ReversePickingResult> ExecutiveReversePickingAsync(int taskReverseId, ReversePickingStrategy strategy, string userId)
 		{
@@ -113,9 +115,13 @@ namespace MyWerehouse.Application.Services
 			try
 			{
 				var result = new ReversePickingResult();
-				var reversePicking = await _reversePickingRepo.GetReversePickingAsync(taskReverseId) ??
-					throw new ReversePickingException(taskReverseId);
-				if (strategy == ReversePickingStrategy.AddToExistingPallet) 
+				var reversePicking = await _reversePickingRepo.GetReversePickingAsync(taskReverseId);
+				if (reversePicking is null)
+				{
+					return ReversePickingResult.Fail("Brak zadania do dekompletacji");
+				}
+				//??	throw new ReversePickingException(taskReverseId);
+				if (strategy == ReversePickingStrategy.AddToExistingPallet)
 				{
 					var filter = new PalletSearchFilter
 					{
@@ -131,7 +137,10 @@ namespace MyWerehouse.Application.Services
 					if (palletToAdded != null)
 					{
 						var product = await _productRepo.GetProductByIdAsync(reversePicking.ProductId)
-							?? throw new ProductException($"Produkt {reversePicking.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");
+							?? throw new NotFoundProductException(reversePicking.ProductId);
+						if (product.CartonsPerPallet == 0)
+							return ReversePickingResult.Fail($"Produkt {reversePicking.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");
+						//?? throw new ProductException($"Produkt {reversePicking.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");
 						var numberOfCartoons = product.CartonsPerPallet;
 						if ((palletToAdded.ProductsOnPallet.First().Quantity + reversePicking.Quantity) > numberOfCartoons)
 						{
@@ -142,9 +151,9 @@ namespace MyWerehouse.Application.Services
 							reversePicking.DestinationPalletId = palletToAdded.Id;
 						}
 					}
-					else throw new PalletException("Brak palety do której można dodać.");
+					else throw new NotFoundPalletException(palletToAdded.Id);
 				}
-				
+
 				reversePicking.Status = ReversePickingStatus.InProgress;
 				string? sourcePalletId = null;
 				string? destinationPalletId = null;
@@ -155,7 +164,7 @@ namespace MyWerehouse.Application.Services
 				{
 					case ReversePickingStrategy.ReturnToSource:
 						sourcePalletId = reversePicking.SourcePalletId;
-						if (sourcePalletId == null) throw new PalletException("Brak palety do której można dodać.");//problem bo id string
+						if (sourcePalletId == null) throw new NotFoundPalletException(sourcePalletId);//problem bo id string
 						result = AddProductsToSourcePallet(reversePicking, userId);
 						break;
 					case ReversePickingStrategy.AddToExistingPallet:
@@ -194,12 +203,12 @@ namespace MyWerehouse.Application.Services
 				await transaction.RollbackAsync();
 				return ReversePickingResult.Fail(ie.Message);
 			}
-			catch (PalletException pe)
+			catch (NotFoundPalletException pe)
 			{
 				await transaction.RollbackAsync();
 				return ReversePickingResult.Fail(pe.Message);
 			}
-			catch (ProductException proe)
+			catch (NotFoundProductException proe)
 			{
 				await transaction.RollbackAsync();
 				return ReversePickingResult.Fail(proe.Message);
@@ -240,7 +249,7 @@ namespace MyWerehouse.Application.Services
 			{
 				palletToAdd.ProductsOnPallet.First().Quantity += task.Quantity;
 			}
-			else throw new PalletException("Brak palety do dodania");
+			else throw new NotFoundPalletException("Brak palety do dodania");
 			_eventCollector.Add(new CreatePalletOperationNotification(
 				palletToAdd.Id,
 				palletToAdd.LocationId,
@@ -279,8 +288,12 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<ReversePickingDetails> GetReversePickingAsync(int reversePickingId)
 		{
-			var reversePicking = await _reversePickingRepo.GetReversePickingAsync(reversePickingId) ??
-				throw new ReversePickingException(reversePickingId);
+			var reversePicking = await _reversePickingRepo.GetReversePickingAsync(reversePickingId);
+			//??	throw new ReversePickingException(reversePickingId);
+			//if (reversePicking is null)
+			//{
+			//	return ReversePickingResult.Fail("Brak zadania do dekompletacji");
+			//}
 			var reversePickingDTO = _mapper.Map<ReversePickingDTO>(reversePicking);
 			var sourcePallet = reversePicking?.Allocation.VirtualPallet.Pallet;
 			var exsitingPickingPallet = false;
@@ -299,7 +312,9 @@ namespace MyWerehouse.Application.Services
 			};
 			var addingPallets = _palletRepo.GetPalletsByFilter(filter);
 			var product = await _productRepo.GetProductByIdAsync(reversePicking.ProductId)
-			?? throw new ProductException($"Produkt {reversePicking.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");
+				?? throw new NotFoundProductException(reversePicking.ProductId);
+			//if(product.CartonsPerPallet == 0)
+			//return ReversePickingResult.Fail($"Produkt {reversePicking.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt");
 			var numberOfCartoons = product.CartonsPerPallet;
 			var palletToAdded = await addingPallets
 				.Where(p => p.ReceiptId != null && p.Status == PalletStatus.Available

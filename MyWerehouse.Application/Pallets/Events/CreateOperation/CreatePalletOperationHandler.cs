@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
@@ -27,7 +28,7 @@ namespace MyWerehouse.Application.Pallets.Events.CreateOperation
 		public async Task Handle(CreatePalletOperationNotification request, CancellationToken cancellationToken)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId)??
-				throw new PalletException($"Pallet with ID {request.PalletId} not found.");
+				throw new NotFoundPalletException(request.PalletId);
 			var details = request.Details??pallet.ProductsOnPallet
 				.Select(p=> new PalletMovementDetail
 				{

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
@@ -33,14 +34,14 @@ namespace MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt
 				var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
 				if (receipt == null || receipt.ReceiptStatus != ReceiptStatus.InProgress)
 				{
-					return ReceiptResult.Fail("Nie można zakończyć przyjęcia");
+					return ReceiptResult.Fail("Nie można zakończyć przyjęcia - błędny status zlecenia");
 				}
 				receipt.ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
 				await _werehouseDbContext.SaveChangesAsync(cancellationToken);
 				await _mediator.Publish(new CreateHistoryReceiptNotification(request.ReceiptId, receipt.ReceiptStatus, request.UserId), cancellationToken);				
 				return ReceiptResult.Ok("Zakończono fizyczne przyjęcie - gotowe do weryfikacji", request.ReceiptId);
 			}
-			catch (ReceiptException erp)
+			catch (NotFoundReceiptException erp)
 			{
 				return ReceiptResult.Fail(erp.Message);
 			}

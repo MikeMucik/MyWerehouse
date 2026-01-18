@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
@@ -31,7 +32,7 @@ namespace MyWerehouse.Application.Pallets.Events.CreateMovement
 		public async Task Handle(CreatePalletMovementNotification command, CancellationToken cancellationToken)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletId)
-				?? throw new PalletException($"Pallet with ID {command.PalletId} not found.");
+				?? throw new NotFoundPalletException(command.PalletId);
 			var details = command.Details ?? pallet.ProductsOnPallet
 				.Select(p => new PalletMovementDetail
 				{

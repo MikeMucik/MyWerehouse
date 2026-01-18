@@ -317,6 +317,7 @@ namespace MyWerehouse.Application.Services
 			//	return PickingResult.Fail("Wystąpił nieoczekiwany błąd. Zmiany zostały cofnięte.");
 			//}
 		}
+
 		public async Task<PickingResult> PrepareManualPickingAsync(string palletId)
 		{
 			return await _mediator.Send(new PrepareManualPickingCommand(palletId));
@@ -387,7 +388,7 @@ namespace MyWerehouse.Application.Services
 			//			PalletId = pallet.Id,
 			//			DateMoved = DateTime.UtcNow,
 			//			LocationId = pallet.LocationId,
-			//			IssueInitialQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
+			//			InitialPalletQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
 			//			Allocations = new List<Allocation>()
 			//			// Dodaj inne wymagane pola (np. Status, CreatedAt = DateTime.UtcNow)
 			//		};
@@ -508,156 +509,156 @@ namespace MyWerehouse.Application.Services
 		}
 
 		// metoda pomocnicza dla Picking - picking helper
-		private async Task CreatePalletOrAddToPalletAsync(int issueId, int productId, int quantity, string userId, DateOnly? bestBefore)
-		{
-			 await _mediator.Send(new CreatePalletOrAddToPalletCommand(issueId, productId, quantity, userId, bestBefore));
-			//var filter = new PalletSearchFilter
-			//{
-			//	IssueId = issueId,
-			//	PalletStatus = PalletStatus.Picking,
-			//};
-			//var oldPallet = await _palletRepo.GetPalletsByFilter(filter).FirstOrDefaultAsync();
-			//if (oldPallet == null)
-			//{
-			//	//pokaż komunikat weź nową paletę
-			//	var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
-			//	//var sourcePalletBB = sourcePallet.ProductsOnPallet.Single().BestBefore;
-			//	var sourcePalletBB = bestBefore;
-			//	var pallet = new Pallet
-			//	{
-			//		Id = newIdPallet,
-			//		Status = PalletStatus.Picking,
-			//		IssueId = issueId,
-			//		LocationId = 100100,//lokalizacja że polu pickingu
-			//		DateReceived = DateTime.UtcNow,
-			//		ProductsOnPallet = new List<ProductOnPallet>
-			//			{
-			//				new ProductOnPallet
-			//				{
-			//					PalletId = newIdPallet,
-			//					ProductId = productId,
-			//					Quantity = quantity,
-			//					DateAdded = DateTime.UtcNow,
-			//					BestBefore = sourcePalletBB
-			//				}
-			//			},
-			//	};
-			//	_palletRepo.AddPallet(pallet);
-			//	_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id,
-			//	pallet.LocationId,
-			//	ReasonMovement.Picking,
-			//	userId,
-			//	PalletStatus.Picking,
-			//	null));
-			//}
-			//else
-			//{
-			//	var pickingPallet = oldPallet;
-			//	var existingProduct = pickingPallet.ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId);
-			//	if (existingProduct != null)
-			//	{
-			//		existingProduct.Quantity += quantity;
-			//	}
-			//	else
-			//	{
-			//		pickingPallet.ProductsOnPallet.Add(new ProductOnPallet
-			//		{
-			//			ProductId = productId,
-			//			Quantity = quantity,
-			//			DateAdded = DateTime.UtcNow,
-			//		});
-			//	}
-			//	_eventCollector.Add(new CreatePalletOperationNotification(oldPallet.Id,
-			//	oldPallet.LocationId,
-			//	ReasonMovement.Picking,
-			//	userId,
-			//	PalletStatus.Picking,
-			//	null));
-			//}
-		}
-		private async Task ProcessPickingActionAsync(Pallet sourcePallet, Issue issue, int productId, int quantityToPick, string userId)
-		{
-			await _mediator.Send(new ProcessPickingActionCommand(sourcePallet, issue, productId, quantityToPick, userId));
-			//var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId)
-			//	?? throw new PalletException($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
-			//var bestBefore = productOnSourcePallet.BestBefore;
-			//await CreatePalletOrAddToPalletAsync(issue.Id, productId, quantityToPick, userId, bestBefore);
-			//productOnSourcePallet.Quantity -= quantityToPick;
-			//if (productOnSourcePallet.Quantity == 0)
-			//{
-			//	sourcePallet.Status = PalletStatus.Archived;
-			//	_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,
-			//	sourcePallet.LocationId,
-			//	ReasonMovement.Picking,
-			//	issue.PerformedBy,
-			//	PalletStatus.Archived,
-			//	null));
-			//}
-			//else
-			//{
-			//	_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,
-			//	sourcePallet.LocationId,
-			//	ReasonMovement.Picking,
-			//	issue.PerformedBy,
-			//	PalletStatus.ToPicking,
-			//	null));
-			//}
-		}
-		private async Task ReduceAllocationAsync(Issue issue, int productId, int quantity, string userId)
-		{
-			await _mediator.Send(new ReduceAllocationCommand(issue, productId, quantity, userId));
-			//var allocations = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issue.Id, productId);
-			//if (allocations == null) throw new Exception("DB Error");//TODO
+		//private async Task CreatePalletOrAddToPalletAsync(int issueId, int productId, int quantity, string userId, DateOnly? bestBefore)
+		//{
+		//	 await _mediator.Send(new CreatePalletOrAddToPalletCommand(issueId, productId, quantity, userId, bestBefore));
+		//	//var filter = new PalletSearchFilter
+		//	//{
+		//	//	IssueId = issueId,
+		//	//	PalletStatus = PalletStatus.Picking,
+		//	//};
+		//	//var oldPallet = await _palletRepo.GetPalletsByFilter(filter).FirstOrDefaultAsync();
+		//	//if (oldPallet == null)
+		//	//{
+		//	//	//pokaż komunikat weź nową paletę
+		//	//	var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
+		//	//	//var sourcePalletBB = sourcePallet.ProductsOnPallet.Single().BestBefore;
+		//	//	var sourcePalletBB = bestBefore;
+		//	//	var pallet = new Pallet
+		//	//	{
+		//	//		Id = newIdPallet,
+		//	//		Status = PalletStatus.Picking,
+		//	//		IssueId = issueId,
+		//	//		LocationId = 100100,//lokalizacja że polu pickingu
+		//	//		DateReceived = DateTime.UtcNow,
+		//	//		ProductsOnPallet = new List<ProductOnPallet>
+		//	//			{
+		//	//				new ProductOnPallet
+		//	//				{
+		//	//					PalletId = newIdPallet,
+		//	//					ProductId = productId,
+		//	//					Quantity = quantity,
+		//	//					DateAdded = DateTime.UtcNow,
+		//	//					BestBefore = sourcePalletBB
+		//	//				}
+		//	//			},
+		//	//	};
+		//	//	_palletRepo.AddPallet(pallet);
+		//	//	_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id,
+		//	//	pallet.LocationId,
+		//	//	ReasonMovement.Picking,
+		//	//	userId,
+		//	//	PalletStatus.Picking,
+		//	//	null));
+		//	//}
+		//	//else
+		//	//{
+		//	//	var pickingPallet = oldPallet;
+		//	//	var existingProduct = pickingPallet.ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId);
+		//	//	if (existingProduct != null)
+		//	//	{
+		//	//		existingProduct.Quantity += quantity;
+		//	//	}
+		//	//	else
+		//	//	{
+		//	//		pickingPallet.ProductsOnPallet.Add(new ProductOnPallet
+		//	//		{
+		//	//			ProductId = productId,
+		//	//			Quantity = quantity,
+		//	//			DateAdded = DateTime.UtcNow,
+		//	//		});
+		//	//	}
+		//	//	_eventCollector.Add(new CreatePalletOperationNotification(oldPallet.Id,
+		//	//	oldPallet.LocationId,
+		//	//	ReasonMovement.Picking,
+		//	//	userId,
+		//	//	PalletStatus.Picking,
+		//	//	null));
+		//	//}
+		//}
+		//private async Task ProcessPickingActionAsync(Pallet sourcePallet, Issue issue, int productId, int quantityToPick, string userId)
+		//{
+		//	await _mediator.Send(new ProcessPickingActionCommand(sourcePallet, issue, productId, quantityToPick, userId));
+		//	//var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId)
+		//	//	?? throw new PalletException($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
+		//	//var bestBefore = productOnSourcePallet.BestBefore;
+		//	//await CreatePalletOrAddToPalletAsync(issue.Id, productId, quantityToPick, userId, bestBefore);
+		//	//productOnSourcePallet.Quantity -= quantityToPick;
+		//	//if (productOnSourcePallet.Quantity == 0)
+		//	//{
+		//	//	sourcePallet.Status = PalletStatus.Archived;
+		//	//	_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,
+		//	//	sourcePallet.LocationId,
+		//	//	ReasonMovement.Picking,
+		//	//	issue.PerformedBy,
+		//	//	PalletStatus.Archived,
+		//	//	null));
+		//	//}
+		//	//else
+		//	//{
+		//	//	_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,
+		//	//	sourcePallet.LocationId,
+		//	//	ReasonMovement.Picking,
+		//	//	issue.PerformedBy,
+		//	//	PalletStatus.ToPicking,
+		//	//	null));
+		//	//}
+		//}
+		//private async Task ReduceAllocationAsync(Issue issue, int productId, int quantity, string userId)
+		//{
+		//	await _mediator.Send(new ReduceAllocationCommand(issue, productId, quantity, userId));
+		//	//var allocations = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issue.Id, productId);
+		//	//if (allocations == null) throw new Exception("DB Error");//TODO
 
-			//foreach (var allocation in allocations)
-			//{
-			//	if (quantity <= 0) break;
+		//	//foreach (var allocation in allocations)
+		//	//{
+		//	//	if (quantity <= 0) break;
 
-			//	if (quantity > 0)
-			//	{
-			//		if (allocation.Quantity > quantity)
-			//		{
-			//			allocation.Quantity -= quantity;
-			//			quantity = 0;
-			//			var historyPicking = new HistoryDataPicking
-			//				(
-			//					allocation.Id,
-			//					allocation.VirtualPallet.PalletId,
-			//					allocation.IssueId,
-			//						 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-			//						 allocation.Quantity,
-			//						 0,
-			//						 PickingStatus.Correction,
-			//						 allocation.PickingStatus,
-			//						 userId,
-			//						 DateTime.UtcNow
-			//					);
-			//			_eventCollector.Add(new CreateHistoryPickingNotification(
-			//				historyPicking));
-			//		}
-			//		else
-			//		{
-			//			quantity -= allocation.Quantity;
-			//			allocation.Quantity = 0;
-			//			var historyPicking = new HistoryDataPicking
-			//				(
-			//					allocation.Id,
-			//					allocation.VirtualPallet.PalletId,
-			//					allocation.IssueId,
-			//						 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-			//						 allocation.Quantity,
-			//						 0,
-			//						 PickingStatus.Correction,
-			//						 allocation.PickingStatus,
-			//						 userId,
-			//						 DateTime.UtcNow
-			//					);
-			//			_eventCollector.Add(new CreateHistoryPickingNotification(
-			//				historyPicking));
-			//		}
-			//	}
-			//}
-		}
+		//	//	if (quantity > 0)
+		//	//	{
+		//	//		if (allocation.Quantity > quantity)
+		//	//		{
+		//	//			allocation.Quantity -= quantity;
+		//	//			quantity = 0;
+		//	//			var historyPicking = new HistoryDataPicking
+		//	//				(
+		//	//					allocation.Id,
+		//	//					allocation.VirtualPallet.PalletId,
+		//	//					allocation.IssueId,
+		//	//						 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+		//	//						 allocation.Quantity,
+		//	//						 0,
+		//	//						 PickingStatus.Correction,
+		//	//						 allocation.PickingStatus,
+		//	//						 userId,
+		//	//						 DateTime.UtcNow
+		//	//					);
+		//	//			_eventCollector.Add(new CreateHistoryPickingNotification(
+		//	//				historyPicking));
+		//	//		}
+		//	//		else
+		//	//		{
+		//	//			quantity -= allocation.Quantity;
+		//	//			allocation.Quantity = 0;
+		//	//			var historyPicking = new HistoryDataPicking
+		//	//				(
+		//	//					allocation.Id,
+		//	//					allocation.VirtualPallet.PalletId,
+		//	//					allocation.IssueId,
+		//	//						 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+		//	//						 allocation.Quantity,
+		//	//						 0,
+		//	//						 PickingStatus.Correction,
+		//	//						 allocation.PickingStatus,
+		//	//						 userId,
+		//	//						 DateTime.UtcNow
+		//	//					);
+		//	//			_eventCollector.Add(new CreateHistoryPickingNotification(
+		//	//				historyPicking));
+		//	//		}
+		//	//	}
+		//	//}
+		//}
 	}
 }
 

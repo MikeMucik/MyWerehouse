@@ -88,11 +88,11 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ei.Message);
 			}
-			catch (InventoryException einv)
-			{
-				await transaction.RollbackAsync(ct);
-				return IssueResult.Fail(einv.Message);
-			}
+			//catch (InventoryException einv)
+			//{
+			//	await transaction.RollbackAsync(ct);
+			//	return IssueResult.Fail(einv.Message);
+			//}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

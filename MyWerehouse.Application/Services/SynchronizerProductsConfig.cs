@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Services
 {
-	public class SynchronizerProductsConfig  : ISynchronizerProductsConfig
+	public class SynchronizerProductsConfig : ISynchronizerProductsConfig
 	{
 		private readonly IMapper _mapper;
 		public SynchronizerProductsConfig(IMapper mapper)
@@ -37,7 +37,8 @@ namespace MyWerehouse.Application.Services
 				product => product.Id,
 				dto => dto.Id,
 				dto => _mapper.Map<ProductOnPallet>(dto),
-			(dto, entity) => _mapper.Map(dto, entity)
+				(dto, entity) => _mapper.Map(dto, entity),
+				entity => pallet.ProductsOnPallet.Remove(entity)
 				);
 		}
 	}

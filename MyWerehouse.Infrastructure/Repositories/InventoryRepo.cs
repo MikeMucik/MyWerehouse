@@ -77,7 +77,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 			//var totalFromPicking = await pickingQuery.SumAsync(pp => pp.RemainingQuantity);
 			var totalFromPicking = await pickingQuery
-				.Select(pp => pp.IssueInitialQuantity - (pp.Allocations.Sum(a =>(int?) a.Quantity) ?? 0))
+				.Select(pp => pp.InitialPalletQuantity - (pp.Allocations.Sum(a =>(int?) a.Quantity) ?? 0))
 				.SumAsync();
 
 			return totalFromFullPallets + totalFromPicking;

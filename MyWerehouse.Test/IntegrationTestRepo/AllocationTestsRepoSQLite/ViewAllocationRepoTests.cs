@@ -72,7 +72,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			Assert.NotEmpty(result);
 
 			Assert.All(result, a=> Assert.Equal(issueId, a.IssueId));
-			Assert.All(result, a=> Assert.Equal(productId, a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId));
+			Assert.All(result, a=> Assert.Equal(productId, a.ProductId));
 		}
 		[Fact]
 		public async Task ByIssue_GetAllocationsByIssueIdAsync_ReturnList()
@@ -98,7 +98,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
 			Assert.Equal(2, result.Count);
-			Assert.All(result, a => Assert.Equal(productId, a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId));
+			Assert.All(result, a => Assert.Equal(productId, a.ProductId));
 
 		}
 	}

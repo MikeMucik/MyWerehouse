@@ -67,14 +67,13 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 								allocation.Id,
 								allocation.VirtualPallet.PalletId,
 								allocation.IssueId,
-									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-									 allocation.Quantity,
-									 0,
-									 PickingStatus.Allocated,
-									 PickingStatus.Cancelled,
-									 request.UserId,
-									 DateTime.UtcNow
-								);
+								allocation.ProductId,
+								allocation.Quantity,
+								0,
+								PickingStatus.Allocated,
+								PickingStatus.Cancelled,
+								request.UserId,
+								DateTime.UtcNow);
 							allocationList.Add(new CreateHistoryPickingNotification(historyPicking));
 							//allocationList.Add(new CreateHistoryPickingNotification(allocation.VirtualPalletId, allocation.Id, request.UserId, PickingStatus.Allocated, 0));
 

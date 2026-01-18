@@ -147,7 +147,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Act
 			var result = _palletService.DeletePalletAsync(palletId, "UserD");
 			//Assert
-			Assert.Contains("Nie ma palety o numerze", result.Result.Message);
+			Assert.Contains("Paleta o numerze 1000 nie istnieje.", result.Result.Message);
 		}
 	}
 }

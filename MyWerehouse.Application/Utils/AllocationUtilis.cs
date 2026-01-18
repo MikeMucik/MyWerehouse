@@ -24,6 +24,8 @@ namespace MyWerehouse.Application.Utils
 				VirtualPallet = pallet,
 				Quantity = quantity,
 				PickingStatus = PickingStatus.Allocated,
+				ProductId = pallet.Pallet.ProductsOnPallet.First().ProductId,
+				BestBefore = pallet.Pallet.ProductsOnPallet.First().BestBefore
 			};
 			return allocation;
 		}

@@ -45,14 +45,3 @@ namespace MyWerehouse.Test.Common
 		}
 	}
 }
-//protected readonly Mock<WerehouseDbContext> _contextMock;	
-		//public CommandTestBase()
-		//{
-		//	_contextMock = DbContextFactory.Create();
-		//	_context = _contextMock.Object;
-		//}
-
-//public void Dispose()
-		//{
-		//	DbContextFactory.Destroy(_context);
-		//}

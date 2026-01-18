@@ -34,7 +34,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			// Paleta Q1100
 			var pallet1 = result.FirstOrDefault(vp => vp.PalletId == "Q1100");
 			Assert.NotNull(pallet1);
-			Assert.Equal(200, pallet1.IssueInitialQuantity);
+			Assert.Equal(200, pallet1.InitialPalletQuantity);
 			Assert.Equal(3, pallet1.LocationId);
 			Assert.Equal(2, pallet1.Allocations.Count);
 			Assert.Equal(20, pallet1.Allocations.First().Quantity);
@@ -43,7 +43,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			// Paleta Q1101
 			var pallet2 = result.FirstOrDefault(vp => vp.PalletId == "Q1101");
 			Assert.NotNull(pallet2);
-			Assert.Equal(150, pallet2.IssueInitialQuantity);
+			Assert.Equal(150, pallet2.InitialPalletQuantity);
 			Assert.Equal(3, pallet2.LocationId);
 			Assert.Single(pallet2.Allocations);
 			Assert.Equal(50, pallet2.Allocations.First().Quantity);

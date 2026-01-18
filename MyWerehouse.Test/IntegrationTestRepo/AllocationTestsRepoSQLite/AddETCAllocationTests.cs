@@ -81,7 +81,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			{
 				Pallet = pallet,
 				LocationId = pallet.LocationId,
-				IssueInitialQuantity = pallet.ProductsOnPallet.First().Quantity,
+				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
 				Allocations = new List<Allocation>()
 
@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			{
 				Pallet = pallet,
 				LocationId = pallet.LocationId,
-				IssueInitialQuantity = pallet.ProductsOnPallet.First().Quantity,
+				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
 				Allocations = new List<Allocation>()
 

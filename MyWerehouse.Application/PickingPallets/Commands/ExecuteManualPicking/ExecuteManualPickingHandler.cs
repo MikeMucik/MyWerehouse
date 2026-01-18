@@ -50,7 +50,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 			try
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId)
-					?? throw new PalletException(request.PalletId);
+					?? throw new NotFoundPalletException(request.PalletId);
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 					?? throw new NotFoundIssueException(request.IssueId);
 				var product = pallet.ProductsOnPallet.FirstOrDefault()
@@ -76,7 +76,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 						PalletId = pallet.Id,
 						DateMoved = DateTime.UtcNow,
 						LocationId = pallet.LocationId,
-						IssueInitialQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
+						InitialPalletQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
 						Allocations = new List<Allocation>()
 						// Dodaj inne wymagane pola (np. Status, CreatedAt = DateTime.UtcNow)
 					};
@@ -84,20 +84,18 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 					_pickingPalletRepo.AddPalletToPicking(virtualPallet);  // Dodaj do repo
 				}
 				//await ReduceAllocationAsync(issue, product.ProductId, quantityToPick, userId);
-				await _mediator.Send(new ReduceAllocationCommand(issue, product.ProductId, quantityToPick, request.UserId), ct);
+				var allocationList = await _mediator.Send(new ReduceAllocationCommand(issue, product.ProductId, quantityToPick, request.UserId), ct);
 				//await ProcessPickingActionAsync(pallet, issue, product.ProductId, quantityToPick, userId);
-				await _mediator.Send(new ProcessPickingActionCommand(pallet, issue, product.ProductId, quantityToPick, request.UserId), ct);
+				await _mediator.Send(new ProcessPickingActionCommand(pallet, issue, product.ProductId, quantityToPick, request.UserId, allocationList.First(), PickingCompletion.Full), ct);
 				// Ta logika jest specyficzna dla manuala (tworzenie nowej alokacji)
 				var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToPick);
 				_allocationRepo.AddAllocation(newAllocation);
 
-				newAllocation.PickingStatus = PickingStatus.Picked;
-				var historyPicking = new HistoryDataPicking
-							(
-								newAllocation.Id,
+				//newAllocation.PickingStatus = PickingStatus.Picked;
+				var historyPicking = new HistoryDataPicking(newAllocation.Id,
 								newAllocation.VirtualPallet.PalletId,
 								newAllocation.IssueId,
-									 newAllocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 newAllocation.ProductId,
 									 newAllocation.Quantity,
 									 0,
 									 PickingStatus.Available,
@@ -112,7 +110,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 								newAllocation.Id,
 								newAllocation.VirtualPallet.PalletId,
 								newAllocation.IssueId,
-									 newAllocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+									 newAllocation.ProductId,
 									 newAllocation.Quantity,
 									 0,
 									 PickingStatus.Available,
@@ -136,7 +134,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 
 				return PickingResult.Ok("Towar dołączono do zlecenia");
 			}
-			catch (PalletException pnfEx)
+			catch (NotFoundPalletException pnfEx)
 			{
 				await transaction.RollbackAsync(ct);
 				return PickingResult.Fail(pnfEx.Message);

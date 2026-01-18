@@ -13,5 +13,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task AddReversePickingAsync(ReversePicking reversePicking);
 		Task<ReversePicking> GetReversePickingAsync(int reversePickingId);
 		IQueryable<ReversePicking> GetReversePickings();
+		Task<bool> ExistsForPickingPalletAsync(string palletId);
 	}
 }

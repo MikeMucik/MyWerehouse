@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
+using MyWerehouse.Application.Pallets.Queries.GetOneAvailablePalletByProduct;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Interfaces;
@@ -16,21 +18,21 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 {
 	public class AddAllocationToIssueNewHandler(IAllocationRepo allocationRepo,
 		IEventCollector eventCollector,
-		IMediator mediator) :IRequestHandler<AddAllocationToIssueNewCommand, Unit>
+		IMediator mediator) : IRequestHandler<AddAllocationToIssueNewCommand, AddAllocationToIssueResult>
 	{
 		private readonly IAllocationRepo _allocationRepo = allocationRepo;
 		private readonly IEventCollector _eventCollector = eventCollector;
 		private readonly IMediator _mediator = mediator;
-		public async Task<Unit> Handle(AddAllocationToIssueNewCommand command, CancellationToken ct)
+		public async Task<AddAllocationToIssueResult> Handle(AddAllocationToIssueNewCommand command, CancellationToken ct)
 		{
-			var issue = command.Issue;			
+			var issue = command.Issue;
 			var quantity = command.Rest;
 			var listOfAllocation = new List<Allocation>();
 			var virtualPallets = command.VirtualPallets;
 			foreach (var virtualPallet in virtualPallets)
 			{
 				var alreadyAllocated = virtualPallet.Allocations.Sum(a => a.Quantity);
-				var availableOnThisPallet = virtualPallet.IssueInitialQuantity - alreadyAllocated;
+				var availableOnThisPallet = virtualPallet.InitialPalletQuantity - alreadyAllocated;
 				if (availableOnThisPallet <= 0) continue;
 				var quantityToTake = Math.Min(quantity, availableOnThisPallet);
 				var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToTake);
@@ -40,11 +42,17 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 				quantity -= quantityToTake;
 				if (quantity <= 0) break;
 			}
+			var palletsAvailableToPicking = await _mediator.Send(new GetOneAvailablePalletByProductQuery(command.ProductId, command.BestBefore), ct);
 			while (quantity > 0)
 			{
+				
 				var newVirtualPallet = await _mediator.Send(new AddPalletToPickingCommand(issue, command.ProductId, command.BestBefore, command.PerfomedBy, command.Pallets), ct);
-				var quantityToTake = Math.Min(quantity, newVirtualPallet.IssueInitialQuantity);
-				var newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet, issue, quantityToTake);
+				if (newVirtualPallet.Success == false)
+				{					
+					return AddAllocationToIssueResult.Fail(newVirtualPallet.Message); 
+				}
+				var quantityToTake = Math.Min(quantity, newVirtualPallet.VirtualPallet.InitialPalletQuantity);
+				var newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet.VirtualPallet, issue, quantityToTake);
 				_allocationRepo.AddAllocation(newAllocation);
 				listOfAllocation.Add(newAllocation);
 				quantity -= quantityToTake;
@@ -56,7 +64,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 							allocation.Id,
 							allocation.VirtualPallet.PalletId,
 							allocation.IssueId,
-								 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+								 allocation.ProductId,
 								 allocation.Quantity,
 								 0,
 								 PickingStatus.Allocated,
@@ -71,7 +79,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 							allocation.Id,
 							allocation.VirtualPallet.PalletId,
 							allocation.IssueId,
-								 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+								 allocation.ProductId,
 								 allocation.Quantity,
 								 0,
 								 PickingStatus.Allocated,
@@ -81,7 +89,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue
 							)
 							));
 			}
-			return Unit.Value;
+			return AddAllocationToIssueResult.Ok();
 		}
 	}
 }

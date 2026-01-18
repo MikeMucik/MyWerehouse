@@ -35,7 +35,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 					.Include(p => p.Pallet)
 						.ThenInclude(pp => pp.ProductsOnPallet)
 					.Where(p => p.Pallet.ProductsOnPallet.Any(p => p.ProductId == productId) && p.Pallet.Status == PalletStatus.ToPicking)
-					.OrderBy(p => p.IssueInitialQuantity - p.Allocations.Sum(a => a.Quantity))
+					.OrderBy(p => p.InitialPalletQuantity - p.Allocations.Sum(a => a.Quantity))
 					.ToListAsync();
 			return list;
 		}

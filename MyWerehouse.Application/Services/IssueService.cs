@@ -742,7 +742,7 @@ namespace MyWerehouse.Application.Services
 		//	foreach (var virtualPallet in virtualPallets)
 		//	{
 		//		var alreadyAllocated = virtualPallet.Allocations.Sum(a => a.Quantity);
-		//		var availableOnThisPallet = virtualPallet.IssueInitialQuantity - alreadyAllocated;
+		//		var availableOnThisPallet = virtualPallet.InitialPalletQuantity - alreadyAllocated;
 		//		if (availableOnThisPallet <= 0) continue;
 		//		var quantityToTake = Math.Min(quantity, availableOnThisPallet);
 		//		var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToTake);
@@ -755,7 +755,7 @@ namespace MyWerehouse.Application.Services
 		//	while (quantity > 0)
 		//	{
 		//		var newVirtualPallet = await _palletService.AddPalletToPickingAsync(issue, productId, bestBefore, userId);
-		//		var quantityToTake = Math.Min(quantity, newVirtualPallet.IssueInitialQuantity);
+		//		var quantityToTake = Math.Min(quantity, newVirtualPallet.InitialPalletQuantity);
 		//		var newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet, issue, quantityToTake);
 		//		_allocationRepo.AddAllocation(newAllocation);
 		//		listOfAllocation.Add(newAllocation);

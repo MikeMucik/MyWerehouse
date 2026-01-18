@@ -249,8 +249,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var destinationLocation = 2;
 			var userId = "U001";
 			var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId);
-			//var ex =await Assert.ThrowsAsync<InvalidOperationException>(() => _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId));
-			//Assert.Contains($"Lokalizacja {destinationLocation} jest już zajęta przez paletę {pallet1.Id}.", ex.Message);
+			
 			//Assert
 			Assert.False(result.Success);
 			Assert.True(result.RequiresConfirmation);

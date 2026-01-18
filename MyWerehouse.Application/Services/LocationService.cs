@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.AllocationModels;
 using MyWerehouse.Application.ViewModels.LocationModels;
@@ -40,21 +42,23 @@ namespace MyWerehouse.Application.Services
 			await _werehouseDbContext.SaveChangesAsync();
 			return result.Id;
 		}
-		public async Task DeleteLocationServiceAsync(int id)
+		public async Task<LocationResult> DeleteLocationServiceAsync(int id)
 		{
 			//TODO warunek czy jest puste
 			var isEmpty = _palletRepo.CheckOccupancyAsync(id);
 			if (isEmpty != null)
 			{
-				throw new LocationException("Miejsce paletowe nie jest pustn nie można skasować");
+				return LocationResult.Fail("Miejsce paletowe nie jest pustn nie można skasować", id);
+				// throw new LocationException("Miejsce paletowe nie jest pustn nie można skasować");
 			}
 			var location = await _locationRepo.GetLocationByIdAsync(id);
 			if (location == null)
 			{
-				throw new LocationException(id);
+				throw new NotFoundLocationException(id);
 			}
 			_locationRepo.DeleteLocation(location);
 			await _werehouseDbContext.SaveChangesAsync();
+			return LocationResult.Ok("Operacja zakończyła się sukcesem", id);
 		}
 		public async Task<LocationDTO> GetLocationServiceAsync(int id)
 		{
@@ -65,7 +69,8 @@ namespace MyWerehouse.Application.Services
 		public async Task<Location> FindLocationAsync(int bay, int aisle, int position, int height)
 		{
 			var location = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
-			return location ?? throw new LocationException($"Nie ma lokalizacji o zadanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}");
+			//return location ?? throw new LocationException($"Nie ma lokalizacji o zadanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}");
+			return location ?? throw new NotFoundLocationException(location.Id);
 		}
 		public List<LocationDTO> PrepareLocationsAsync(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{

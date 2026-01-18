@@ -8,6 +8,5 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.Queries.GetOneAvailablePalletByProduct
 {
-	public record GetOneAvailablePalletByProductQuery(int ProductId, DateOnly? BestBefore): IRequest<Pallet>;
-	
+	public record GetOneAvailablePalletByProductQuery(int ProductId, DateOnly? BestBefore): IRequest<Pallet>;	
 }

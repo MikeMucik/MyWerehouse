@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.Pallets.Queries.GetOneAvailablePalletByProduct
 		public async Task<Pallet> Handle (GetOneAvailablePalletByProductQuery request, CancellationToken ct)
 		{
 			var pallets = _palletRepo.GetAvailablePallets(request.ProductId, request.BestBefore);
-			var pallet = await pallets.FirstOrDefaultAsync(cancellationToken: ct) ?? throw new PalletException("Brak palet do pickingu");			
+			var pallet = await pallets.FirstOrDefaultAsync(cancellationToken: ct);						
 			return pallet;				
 		}
 	}

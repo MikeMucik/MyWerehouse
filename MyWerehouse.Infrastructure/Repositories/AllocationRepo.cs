@@ -50,7 +50,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			var result = await _werehouseDbContext.Allocations
 				.Include(i => i.Issue)
-				.Where(a => a.IssueId == issueId && a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == productId)
+				.Where(a => a.IssueId == issueId && a.ProductId == productId)
 				.ToListAsync();
 			return result;
 		}
@@ -58,7 +58,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			var result = await _werehouseDbContext.Allocations
 				.Include(i => i.Issue)
-				.Where(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == productId &&
+				.Where(a => a.ProductId == productId &&
 				a.PickingStatus == PickingStatus.Allocated &&
 				a.Quantity > 0 &&
 				(a.Issue.IssueDateTimeSend > from && a.Issue.IssueDateTimeSend < to))
@@ -80,6 +80,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Where(x=>x.IssueId == issueId)
 				.Select(x=>x.VirtualPallet)
 				.Distinct()
+				.ToListAsync();
+		}
+
+		public async Task<List<Allocation>> GetAllocationsByPickingPalletIdAsync(string pickingPalletId)
+		{
+			return await _werehouseDbContext.Allocations
+				.Where(x=>x.PickingPalletId == pickingPalletId)
 				.ToListAsync();
 		}
 

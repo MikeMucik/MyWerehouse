@@ -90,14 +90,13 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 								allocation.Id,
 								allocation.VirtualPallet.PalletId,
 								allocation.IssueId,
-									 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-									 allocation.Quantity,
-									 0,
-									 PickingStatus.Allocated,
-									 allocation.PickingStatus,
-									 request.UserId,
-									 DateTime.UtcNow
-								)));
+								allocation.ProductId,
+								allocation.Quantity,
+								0,
+								PickingStatus.Allocated,
+								allocation.PickingStatus,
+								request.UserId,
+								DateTime.UtcNow	)));
 						vp.Allocations.Remove(allocation);
 						//_werehouseDbContext.Allocations.Remove(allocation);
 						_allocationRepo.DeleteAllocation(allocation);

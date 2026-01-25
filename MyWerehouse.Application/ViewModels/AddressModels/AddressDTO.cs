@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Domain.Common.ValueObject;
 
 namespace MyWerehouse.Application.ViewModels.AddressModels

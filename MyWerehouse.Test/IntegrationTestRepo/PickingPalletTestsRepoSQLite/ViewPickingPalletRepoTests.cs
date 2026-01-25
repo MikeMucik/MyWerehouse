@@ -36,18 +36,18 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.NotNull(pallet1);
 			Assert.Equal(200, pallet1.InitialPalletQuantity);
 			Assert.Equal(3, pallet1.LocationId);
-			Assert.Equal(2, pallet1.Allocations.Count);
-			Assert.Equal(20, pallet1.Allocations.First().Quantity);
-			Assert.Equal(PickingStatus.Allocated, pallet1.Allocations.First().PickingStatus);
+			Assert.Equal(2, pallet1.PickingTasks.Count);
+			Assert.Equal(20, pallet1.PickingTasks.First().Quantity);
+			Assert.Equal(PickingStatus.Allocated, pallet1.PickingTasks.First().PickingStatus);
 
 			// Paleta Q1101
 			var pallet2 = result.FirstOrDefault(vp => vp.PalletId == "Q1101");
 			Assert.NotNull(pallet2);
 			Assert.Equal(150, pallet2.InitialPalletQuantity);
 			Assert.Equal(3, pallet2.LocationId);
-			Assert.Single(pallet2.Allocations);
-			Assert.Equal(50, pallet2.Allocations.First().Quantity);
-			Assert.Equal(PickingStatus.Allocated, pallet2.Allocations.First().PickingStatus);
+			Assert.Single(pallet2.PickingTasks);
+			Assert.Equal(50, pallet2.PickingTasks.First().Quantity);
+			Assert.Equal(PickingStatus.Allocated, pallet2.PickingTasks.First().PickingStatus);
 
 			// Upewnij się, że nie zwrócono palety z innym produktem
 			Assert.DoesNotContain(result, vp => vp.PalletId == "Q1200");

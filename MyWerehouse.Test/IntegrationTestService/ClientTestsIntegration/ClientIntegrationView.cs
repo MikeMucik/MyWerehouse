@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Infrastructure.Repositories;
@@ -18,15 +18,9 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 	{
 		public readonly ClientService _clientService;
 		public readonly ClientRepo _clientRepo;
-		//public readonly IMapper _mapper;
 		public ClientIntegrationView(QuerryTestFixture fixture)
 		{
 			var _context = fixture.Context;
-			//var mapperConfig = new MapperConfiguration(cfg =>
-			//{
-			//	cfg.AddProfile<MappingProfile>();
-			//});
-			//_mapper = mapperConfig.CreateMapper();
 			_clientRepo = new ClientRepo(_context);			
 			_clientService = new ClientService(_clientRepo, _mapper);
 		}

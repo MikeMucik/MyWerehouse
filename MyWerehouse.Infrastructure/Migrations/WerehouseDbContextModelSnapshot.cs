@@ -415,9 +415,6 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AllocationId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
@@ -431,6 +428,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<string>("PerformedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PickingTaskId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -454,13 +454,13 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AllocationId");
-
                     b.HasIndex("DateTime");
 
                     b.HasIndex("IssueId");
 
                     b.HasIndex("PalletId");
+
+                    b.HasIndex("PickingTaskId");
 
                     b.HasIndex("VirtualPalletId");
 
@@ -797,7 +797,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.ToTable("ProductOnPallet");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.Allocation", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.PickingTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -805,12 +805,24 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateOnly?>("BestBefore")
+                        .HasColumnType("date");
+
                     b.Property<int>("IssueId")
                         .HasColumnType("int");
+
+                    b.Property<int>("PickedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PickingPalletId")
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("PickingStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -822,9 +834,11 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("IssueId");
 
+                    b.HasIndex("PickingPalletId");
+
                     b.HasIndex("VirtualPalletId");
 
-                    b.ToTable("Allocations");
+                    b.ToTable("PickingTasks");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.ReversePicking", b =>
@@ -835,9 +849,6 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AllocationId")
-                        .HasColumnType("int");
-
                     b.Property<DateOnly?>("BestBefore")
                         .HasColumnType("date");
 
@@ -847,6 +858,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<string>("PickingPalletId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PickingTaskId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -866,7 +880,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AllocationId");
+                    b.HasIndex("PickingTaskId");
 
                     b.ToTable("ReversePickings");
                 });
@@ -882,7 +896,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("DateMoved")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IssueInitialQuantity")
+                    b.Property<int>("InitialPalletQuantity")
                         .HasColumnType("int");
 
                     b.Property<int>("LocationId")
@@ -1284,34 +1298,41 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.Allocation", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.PickingTask", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Issuing.Models.Issue", "Issue")
-                        .WithMany("Allocations")
+                        .WithMany("PickingTasks")
                         .HasForeignKey("IssueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MyWerehouse.Domain.Pallets.Models.Pallet", "PickingPallet")
+                        .WithMany()
+                        .HasForeignKey("PickingPalletId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("MyWerehouse.Domain.Picking.Models.VirtualPallet", "VirtualPallet")
-                        .WithMany("Allocations")
+                        .WithMany("PickingTasks")
                         .HasForeignKey("VirtualPalletId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Issue");
 
+                    b.Navigation("PickingPallet");
+
                     b.Navigation("VirtualPallet");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.ReversePicking", b =>
                 {
-                    b.HasOne("MyWerehouse.Domain.Picking.Models.Allocation", "Allocation")
+                    b.HasOne("MyWerehouse.Domain.Picking.Models.PickingTask", "PickingTask")
                         .WithMany()
-                        .HasForeignKey("AllocationId")
+                        .HasForeignKey("PickingTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Allocation");
+                    b.Navigation("PickingTask");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.VirtualPallet", b =>
@@ -1398,8 +1419,6 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Issuing.Models.Issue", b =>
                 {
-                    b.Navigation("Allocations");
-
                     b.Navigation("HistoryIssues");
 
                     b.Navigation("HistoryPickings");
@@ -1407,6 +1426,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("IssueItems");
 
                     b.Navigation("Pallets");
+
+                    b.Navigation("PickingTasks");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Pallets.Models.Pallet", b =>
@@ -1418,9 +1439,9 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.VirtualPallet", b =>
                 {
-                    b.Navigation("Allocations");
-
                     b.Navigation("HistoryPicking");
+
+                    b.Navigation("PickingTasks");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Products.Models.Category", b =>

@@ -12,10 +12,10 @@ using MyWerehouse.Infrastructure.Repositories;
 namespace MyWerehouse.Application.PickingPallets.Commands.PrepareManualPicking
 {
 	public class PrepareManualPickingHandler(IPalletRepo palletRepo,
-		IAllocationRepo allocationRepo) : IRequestHandler<PrepareManualPickingCommand, PickingResult>
+		IPickingTaskRepo pickingTaskRepo) : IRequestHandler<PrepareManualPickingCommand, PickingResult>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IAllocationRepo _allocationRepo = allocationRepo;
+		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 
 		public async Task<PickingResult> Handle(PrepareManualPickingCommand request, CancellationToken ct)
 		{
@@ -39,8 +39,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.PrepareManualPicking
 			// Logika wyszukiwania pasujących zleceń			
 			var timeFrom = DateTime.UtcNow.AddDays(-1);
 			var timeTo = DateTime.UtcNow;
-			var allocations = await _allocationRepo.GetAllocationsProductIdAsync(product.ProductId, timeFrom, timeTo);
-			var grouped = allocations
+			var pickingTasks = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);
+			var grouped = pickingTasks
 				.GroupBy(a => a.IssueId)
 				.Select(g => new IssueOptions
 				{

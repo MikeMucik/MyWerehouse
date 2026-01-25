@@ -27,7 +27,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var result = await _reversePickingRepo.GetReversePickingAsync(id);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.AllocationId);
+			Assert.Equal(2, result.PickingTaskId);
 			Assert.Equal("Q5000", result.PickingPalletId);
 			Assert.Equal(10, result.ProductId);
 			Assert.Equal(10, result.Quantity);
@@ -42,7 +42,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 		//	var result = await _reversePickingRepo.GetReversePickingAsync(id);
 		//	//Assert
 		//	Assert.NotNull(result);
-		//	Assert.Equal(2, result.AllocationId);
+		//	Assert.Equal(2, result.PickingTaskId);
 		//	Assert.Equal("Q5000", result.PickingPalletId);
 		//	Assert.Equal(10, result.ProductId);
 		//	Assert.Equal(10, result.Quantity);

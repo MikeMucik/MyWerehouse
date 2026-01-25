@@ -2,34 +2,18 @@
 using Azure.Core;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.Pallets.Commands.AddPalletToPicking;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet;
-using MyWerehouse.Application.PickingPallets.Commands.CreatePalletOrAddToPallet;
 using MyWerehouse.Application.PickingPallets.Commands.DoPicking;
 using MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking;
 using MyWerehouse.Application.PickingPallets.Commands.PrepareManualPicking;
-using MyWerehouse.Application.PickingPallets.Commands.ProcessPickingAction;
-using MyWerehouse.Application.PickingPallets.Commands.ReduceAllocation;
 using MyWerehouse.Application.PickingPallets.DTOs;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
 using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
 using MyWerehouse.Application.PickingPallets.Queries.GetListToPicking;
 using MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo;
-using MyWerehouse.Application.Utils;
-using MyWerehouse.Application.ViewModels.AllocationModels;
-using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.ViewModels.PickingTaskModels;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Services
 {
@@ -76,7 +60,7 @@ namespace MyWerehouse.Application.Services
 			//	return new List<PickingGuideLineDTO>();
 			//}
 			//var allNededIssuesIds = pickingPallets
-			//	.SelectMany(p => p.Allocations)
+			//	.SelectMany(p => p.PickingTasks)
 			//	.Select(i => i.IssueId)
 			//	.Distinct()
 			//	.ToList();
@@ -84,7 +68,7 @@ namespace MyWerehouse.Application.Services
 			//var allIssues = await _issueRepo.GetIssuesByIdsAsync(allNededIssuesIds);
 			//var issueDictionary = allIssues.ToDictionary(i => i.Id);
 			//return [.. pickingPallets
-			//	.SelectMany(p => p.Allocations.Select(a => new
+			//	.SelectMany(p => p.PickingTasks.Select(a => new
 			//	{
 			//		IssueId = a.IssueId,
 			//		Quantity = a.Quantity,
@@ -113,7 +97,7 @@ namespace MyWerehouse.Application.Services
 			//	})
 			//	.OrderBy(c => c.ClientIdOut)];
 		}
-		//Lista ile danego towaru dla danej alokacji Product's list by allocations
+		//Lista ile danego towaru dla danej alokacji Product's list by pickingTasks
 		public async Task<List<ProductToIssueDTO>> GetListToPickingAsync(DateTime dateIssueStart, DateTime dateIssueEnd)
 		//wytyczne- lista ile jakiego produktu do konkretnego zlecenia - zlecenia na daną chwilę, bierzemy zlecenia z danego okresu/dnia
 		// pojedyncze rekordy dla każdej alokacji
@@ -125,7 +109,7 @@ namespace MyWerehouse.Application.Services
 			//	return new List<ProductToIssueDTO>();
 			//}
 			//var allNededIssuesIds = pickingPallets
-			//	.SelectMany(p => p.Allocations)
+			//	.SelectMany(p => p.PickingTasks)
 			//	.Select(i => i.IssueId)
 			//	.Distinct()
 			//	.ToList();
@@ -143,27 +127,27 @@ namespace MyWerehouse.Application.Services
 			//	if (productOnPallet == null) continue;
 			//	var productId = productOnPallet.ProductId;
 
-			//	var allocations = pallet.Allocations;
-			//	foreach (var allocation in allocations)
+			//	var pickingTasks = pallet.PickingTasks;
+			//	foreach (var pickingTask in pickingTasks)
 			//	{
-			//		if (!issueDictionary.TryGetValue(allocation.IssueId, out var issue))
+			//		if (!issueDictionary.TryGetValue(pickingTask.IssueId, out var issue))
 			//		{
 			//			continue;
 			//		}
 			//		var clientId = issue.ClientId;
-			//		var key = (clientId, allocation.IssueId, productId);
+			//		var key = (clientId, pickingTask.IssueId, productId);
 			//		if (aggregationDictionary.TryGetValue(key, out var existingRecord))
 			//		{
-			//			existingRecord.Quantity += allocation.Quantity;
+			//			existingRecord.Quantity += pickingTask.Quantity;
 			//		}
 			//		else
 			//		{
 			//			var productIssue = new ProductToIssueDTO
 			//			{
 			//				ClientIdOut = clientId,
-			//				IssueId = allocation.IssueId,
+			//				IssueId = pickingTask.IssueId,
 			//				ProductId = productId,
-			//				Quantity = allocation.Quantity,
+			//				Quantity = pickingTask.Quantity,
 			//			};
 			//			aggregationDictionary.Add(key, productIssue);
 			//		}
@@ -178,53 +162,53 @@ namespace MyWerehouse.Application.Services
 		}
 
 		//Part to write&read
-		//pokaż alokacje dla palety Show allocations to do - scan pallet
-		public async Task<List<AllocationDTO>> ShowTaskToDoAsync(string palletSourceScanned, DateTime pickingDate)
+		//pokaż alokacje dla palety Show pickingTasks to do - scan pallet
+		public async Task<List<PickingTaskDTO>> ShowTaskToDoAsync(string palletSourceScanned, DateTime pickingDate)
 		{
 			return await _mediator.Send(new ShowTaskToDoQuery(palletSourceScanned, pickingDate));
 			//var palletPickingId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletSourceScanned);
-			//var allocations = await _allocationRepo.GetAllocationListAsync(palletPickingId, pickingDate);
+			//var pickingTasks = await _pickingTaskRepo.GetPickingTaskListAsync(palletPickingId, pickingDate);
 			////mapper??
-			//return allocations.Select(allocation => new AllocationDTO
+			//return pickingTasks.Select(pickingTask => new PickingTaskDTO
 			//{
-			//	AllocationId = allocation.Id,
-			//	IssueId = allocation.IssueId,
-			//	SourcePalletId = allocation.VirtualPallet.Pallet.Id,
-			//	ProductId = allocation.VirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
-			//	PickingStatus = allocation.PickingStatus,
-			//	RequestedQuantity = allocation.Quantity,
-			//	BestBefore = allocation.VirtualPallet.Pallet.ProductsOnPallet.First().BestBefore
+			//	PickingTaskId = pickingTask.Id,
+			//	IssueId = pickingTask.IssueId,
+			//	SourcePalletId = pickingTask.VirtualPallet.Pallet.Id,
+			//	ProductId = pickingTask.VirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
+			//	PickingStatus = pickingTask.PickingStatus,
+			//	RequestedQuantity = pickingTask.Quantity,
+			//	BestBefore = pickingTask.VirtualPallet.Pallet.ProductsOnPallet.First().BestBefore
 			//}).ToList();
 		}
 		//faktyczne działanie pickingu - zmiany w bazie Do pick - arranging goods
-		public async Task<PickingResult> DoPickingAsync(AllocationDTO allocationDTO, string userId)
+		public async Task<PickingResult> DoPickingAsync(PickingTaskDTO pickingTaskDTO, string userId)
 		{
-			return await _mediator.Send(new DoPickingCommand(allocationDTO, userId));
+			return await _mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, userId));
 			//using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync();			
 			//try
 			//{
 			//	var newVirtualPallet = new VirtualPallet();
-			//	var newAllocation = new Allocation();
-			//	var allocationToChange = await _allocationRepo.GetAllocationAsync(allocationDTO.AllocationId);
-			//	var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(allocationToChange.VirtualPalletId);
-			//	var issueId = allocationToChange.IssueId;
+			//	var newPickingTask = new PickingTask();
+			//	var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(pickingTaskDTO.PickingTaskId);
+			//	var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(pickingTaskToChange.VirtualPalletId);
+			//	var issueId = pickingTaskToChange.IssueId;
 			//	var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new IssueException(issueId);
-			//	var sourcePallet = await _palletRepo.GetPalletByIdAsync(allocationDTO.SourcePalletId)
-			//		?? throw new PalletException(allocationDTO.SourcePalletId);
-			//	await ProcessPickingActionAsync(sourcePallet, issue, allocationDTO.ProductId, allocationDTO.PickedQuantity, userId);
-			//	if (allocationDTO.RequestedQuantity == allocationDTO.PickedQuantity)
+			//	var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTaskDTO.SourcePalletId)
+			//		?? throw new PalletException(pickingTaskDTO.SourcePalletId);
+			//	await ProcessPickingActionAsync(sourcePallet, issue, pickingTaskDTO.ProductId, pickingTaskDTO.PickedQuantity, userId);
+			//	if (pickingTaskDTO.RequestedQuantity == pickingTaskDTO.PickedQuantity)
 			//	{
-			//		allocationToChange.PickingStatus = PickingStatus.Picked;
+			//		pickingTaskToChange.PickingStatus = PickingStatus.Picked;
 			//		var historyPicking = new HistoryDataPicking
 			//				(
-			//					allocationToChange.Id,
-			//					allocationToChange.VirtualPallet.PalletId,
-			//					allocationToChange.IssueId,
-			//						 allocationToChange.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-			//						 allocationToChange.Quantity,
+			//					pickingTaskToChange.Id,
+			//					pickingTaskToChange.VirtualPallet.PalletId,
+			//					pickingTaskToChange.IssueId,
+			//						 pickingTaskToChange.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+			//						 pickingTaskToChange.Quantity,
 			//						 0,
 			//						 PickingStatus.Allocated,
-			//						 allocationToChange.PickingStatus,
+			//						 pickingTaskToChange.PickingStatus,
 			//						 userId,
 			//						 DateTime.UtcNow
 			//					);
@@ -232,23 +216,23 @@ namespace MyWerehouse.Application.Services
 			//				historyPicking
 			//				));
 			//	}
-			//	else if (allocationDTO.RequestedQuantity > allocationDTO.PickedQuantity)
+			//	else if (pickingTaskDTO.RequestedQuantity > pickingTaskDTO.PickedQuantity)
 			//	{
-			//		var newQuantityToAllocation = allocationDTO.RequestedQuantity - allocationDTO.PickedQuantity;
+			//		var newQuantityToPickingTask = pickingTaskDTO.RequestedQuantity - pickingTaskDTO.PickedQuantity;
 					
-			//		newVirtualPallet = 	await _mediator.Send(new AddPalletToPickingCommand(issue, allocationDTO.ProductId, allocationDTO.BestBefore, userId, [] ));
-			//		newAllocation = AllocationUtilis.CreateAllocation(newVirtualPallet, issue, newQuantityToAllocation);
-			//		_allocationRepo.AddAllocation(newAllocation);
+			//		newVirtualPallet = 	await _mediator.Send(new AddPalletToPickingCommand(issue, pickingTaskDTO.ProductId, pickingTaskDTO.BestBefore, userId, [] ));
+			//		newPickingTask = PickingTaskUtilis.CreatePickingTask(newVirtualPallet, issue, newQuantityToPickingTask);
+			//		_pickingTaskRepo.AddPickingTask(newPickingTask);
 			//		var historyPicking = new HistoryDataPicking
 			//				(
-			//					newAllocation.Id,
-			//					newAllocation.VirtualPallet.PalletId,
-			//					newAllocation.IssueId,
-			//						 newAllocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-			//						 newAllocation.Quantity,
+			//					newPickingTask.Id,
+			//					newPickingTask.VirtualPallet.PalletId,
+			//					newPickingTask.IssueId,
+			//						 newPickingTask.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+			//						 newPickingTask.Quantity,
 			//						 0,
 			//						 PickingStatus.Allocated,
-			//						 newAllocation.PickingStatus,
+			//						 newPickingTask.PickingStatus,
 			//						userId,
 			//						 DateTime.UtcNow
 			//					);
@@ -268,18 +252,18 @@ namespace MyWerehouse.Application.Services
 			//	if (issue.IssueStatus == IssueStatus.Pending) { issue.IssueStatus = IssueStatus.InProgress; }
 			//	//czy to ma sens
 
-			//	if (allocationDTO.RequestedQuantity == allocationDTO.PickedQuantity)
+			//	if (pickingTaskDTO.RequestedQuantity == pickingTaskDTO.PickedQuantity)
 			//	{
 			//		var historyPicking = new HistoryDataPicking
 			//				(
-			//					allocationToChange.Id,
-			//					allocationToChange.VirtualPallet.PalletId,
-			//					allocationToChange.IssueId,
-			//						 allocationToChange.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-			//						 allocationToChange.Quantity,
-			//						 allocationToChange.Quantity,
+			//					pickingTaskToChange.Id,
+			//					pickingTaskToChange.VirtualPallet.PalletId,
+			//					pickingTaskToChange.IssueId,
+			//						 pickingTaskToChange.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+			//						 pickingTaskToChange.Quantity,
+			//						 pickingTaskToChange.Quantity,
 			//						 PickingStatus.Allocated,
-			//						 allocationToChange.PickingStatus,
+			//						 pickingTaskToChange.PickingStatus,
 			//						 userId,
 			//						 DateTime.UtcNow
 			//					);
@@ -341,8 +325,8 @@ namespace MyWerehouse.Application.Services
 			//// Logika wyszukiwania pasujących zleceń			
 			//var timeFrom = DateTime.UtcNow.AddDays(-1);
 			//var timeTo = DateTime.UtcNow;
-			//var allocations = await _allocationRepo.GetAllocationsProductIdAsync(product.ProductId, timeFrom, timeTo);
-			//var grouped = allocations
+			//var pickingTasks = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);
+			//var grouped = pickingTasks
 			//	.GroupBy(a => a.IssueId)
 			//	.Select(g => new IssueOptions
 			//	{
@@ -369,8 +353,8 @@ namespace MyWerehouse.Application.Services
 			//		?? throw new InvalidOperationException($"Paleta {palletId} jest pusta.");
 
 			//	// Oblicz, ile faktycznie można/trzeba skompletować
-			//	var allocationsForIssue = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issueId, product.ProductId);
-			//	var neededQuantity = allocationsForIssue.Where(a => a.PickingStatus == PickingStatus.Allocated).Sum(a => a.Quantity);
+			//	var pickingTasksForIssue = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, product.ProductId);
+			//	var neededQuantity = pickingTasksForIssue.Where(a => a.PickingStatus == PickingStatus.Allocated).Sum(a => a.Quantity);
 			//	var quantityToPick = Math.Min(neededQuantity, product.Quantity);
 
 			//	if (quantityToPick <= 0)
@@ -389,31 +373,31 @@ namespace MyWerehouse.Application.Services
 			//			DateMoved = DateTime.UtcNow,
 			//			LocationId = pallet.LocationId,
 			//			InitialPalletQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
-			//			Allocations = new List<Allocation>()
+			//			PickingTasks = new List<PickingTask>()
 			//			// Dodaj inne wymagane pola (np. Status, CreatedAt = DateTime.UtcNow)
 			//		};
 
 			//		_pickingPalletRepo.AddPalletToPicking(virtualPallet);  // Dodaj do repo
 			//	}
-			//	await ReduceAllocationAsync(issue, product.ProductId, quantityToPick, userId);
+			//	await ReducePickingTaskAsync(issue, product.ProductId, quantityToPick, userId);
 
 			//	await ProcessPickingActionAsync(pallet, issue, product.ProductId, quantityToPick, userId);
 
 			//	// Ta logika jest specyficzna dla manuala (tworzenie nowej alokacji)
-			//	var newAllocation = AllocationUtilis.CreateAllocation(virtualPallet, issue, quantityToPick);
-			//	_allocationRepo.AddAllocation(newAllocation);
+			//	var newPickingTask = PickingTaskUtilis.CreatePickingTask(virtualPallet, issue, quantityToPick);
+			//	_pickingTaskRepo.AddPickingTask(newPickingTask);
 
-			//	newAllocation.PickingStatus = PickingStatus.Picked;
+			//	newPickingTask.PickingStatus = PickingStatus.Picked;
 			//	var historyPicking = new HistoryDataPicking
 			//				(
-			//					newAllocation.Id,
-			//					newAllocation.VirtualPallet.PalletId,
-			//					newAllocation.IssueId,
-			//						 newAllocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-			//						 newAllocation.Quantity,
+			//					newPickingTask.Id,
+			//					newPickingTask.VirtualPallet.PalletId,
+			//					newPickingTask.IssueId,
+			//						 newPickingTask.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+			//						 newPickingTask.Quantity,
 			//						 0,
 			//						 PickingStatus.Available,
-			//						 newAllocation.PickingStatus,
+			//						 newPickingTask.PickingStatus,
 			//						 userId,
 			//						 DateTime.UtcNow
 			//					);
@@ -421,14 +405,14 @@ namespace MyWerehouse.Application.Services
 			//			new CreateHistoryPickingNotification(
 			//				new HistoryDataPicking
 			//				(
-			//					newAllocation.Id,
-			//					newAllocation.VirtualPallet.PalletId,
-			//					newAllocation.IssueId,
-			//						 newAllocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-			//						 newAllocation.Quantity,
+			//					newPickingTask.Id,
+			//					newPickingTask.VirtualPallet.PalletId,
+			//					newPickingTask.IssueId,
+			//						 newPickingTask.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+			//						 newPickingTask.Quantity,
 			//						 0,
 			//						 PickingStatus.Available,
-			//						 newAllocation.PickingStatus,
+			//						 newPickingTask.PickingStatus,
 			//						 userId,
 			//						 DateTime.UtcNow
 			//					)));
@@ -604,32 +588,32 @@ namespace MyWerehouse.Application.Services
 		//	//	null));
 		//	//}
 		//}
-		//private async Task ReduceAllocationAsync(Issue issue, int productId, int quantity, string userId)
+		//private async Task ReducePickingTaskAsync(Issue issue, int productId, int quantity, string userId)
 		//{
-		//	await _mediator.Send(new ReduceAllocationCommand(issue, productId, quantity, userId));
-		//	//var allocations = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issue.Id, productId);
-		//	//if (allocations == null) throw new Exception("DB Error");//TODO
+		//	await _mediator.Send(new ReducePickingTaskCommand(issue, productId, quantity, userId));
+		//	//var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId);
+		//	//if (pickingTasks == null) throw new Exception("DB Error");//TODO
 
-		//	//foreach (var allocation in allocations)
+		//	//foreach (var pickingTask in pickingTasks)
 		//	//{
 		//	//	if (quantity <= 0) break;
 
 		//	//	if (quantity > 0)
 		//	//	{
-		//	//		if (allocation.Quantity > quantity)
+		//	//		if (pickingTask.Quantity > quantity)
 		//	//		{
-		//	//			allocation.Quantity -= quantity;
+		//	//			pickingTask.Quantity -= quantity;
 		//	//			quantity = 0;
 		//	//			var historyPicking = new HistoryDataPicking
 		//	//				(
-		//	//					allocation.Id,
-		//	//					allocation.VirtualPallet.PalletId,
-		//	//					allocation.IssueId,
-		//	//						 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-		//	//						 allocation.Quantity,
+		//	//					pickingTask.Id,
+		//	//					pickingTask.VirtualPallet.PalletId,
+		//	//					pickingTask.IssueId,
+		//	//						 pickingTask.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+		//	//						 pickingTask.Quantity,
 		//	//						 0,
 		//	//						 PickingStatus.Correction,
-		//	//						 allocation.PickingStatus,
+		//	//						 pickingTask.PickingStatus,
 		//	//						 userId,
 		//	//						 DateTime.UtcNow
 		//	//					);
@@ -638,18 +622,18 @@ namespace MyWerehouse.Application.Services
 		//	//		}
 		//	//		else
 		//	//		{
-		//	//			quantity -= allocation.Quantity;
-		//	//			allocation.Quantity = 0;
+		//	//			quantity -= pickingTask.Quantity;
+		//	//			pickingTask.Quantity = 0;
 		//	//			var historyPicking = new HistoryDataPicking
 		//	//				(
-		//	//					allocation.Id,
-		//	//					allocation.VirtualPallet.PalletId,
-		//	//					allocation.IssueId,
-		//	//						 allocation.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
-		//	//						 allocation.Quantity,
+		//	//					pickingTask.Id,
+		//	//					pickingTask.VirtualPallet.PalletId,
+		//	//					pickingTask.IssueId,
+		//	//						 pickingTask.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId,
+		//	//						 pickingTask.Quantity,
 		//	//						 0,
 		//	//						 PickingStatus.Correction,
-		//	//						 allocation.PickingStatus,
+		//	//						 pickingTask.PickingStatus,
 		//	//						 userId,
 		//	//						 DateTime.UtcNow
 		//	//					);

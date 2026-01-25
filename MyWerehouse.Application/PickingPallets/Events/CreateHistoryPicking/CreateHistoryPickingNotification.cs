@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Picking.Models;
 namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 {
 	public record HistoryDataPicking(
-		int? AllocationId,
+		int? PickingTaskId,
 		string PalletId,
 		int IssueId,
 		int ProductId,

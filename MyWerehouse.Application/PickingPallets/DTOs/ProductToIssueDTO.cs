@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace MyWerehouse.Application.PickingPallets.DTOs
 {
 	public class ProductToIssueDTO
-		//model dla listy task - allocation 
+		//model dla listy task - pickingTask 
 	{
 		public int Id { get; set; }
 		public int ClientIdOut { get; set; }

@@ -18,9 +18,10 @@ namespace MyWerehouse.Infrastructure
 	{
 		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options) : base(options) { }
 		public DbSet<Address> Addresses { get; set; }
-		public DbSet<Allocation> Allocations { get; set; }
+		public DbSet<PickingTask> PickingTasks { get; set; }
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Client> Clients { get; set; }
+		public DbSet<HandPickingTask> HandPickingTasks { get; set; }
 		public DbSet<HistoryIssue> HistoryIssues { get; set; }
 		public DbSet<HistoryIssueDetail> HistoryIssueDetails { get; set; }
 		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }//																
@@ -70,7 +71,7 @@ namespace MyWerehouse.Infrastructure
 					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
 				}
 			});
-			modelBuilder.Entity<Allocation>(entity =>
+			modelBuilder.Entity<PickingTask>(entity =>
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(e => e.Id).ValueGeneratedOnAdd();
@@ -79,11 +80,11 @@ namespace MyWerehouse.Infrastructure
 				.HasConversion<string>();
 
 				entity.HasOne(a => a.VirtualPallet)
-					.WithMany(p => p.Allocations)
+					.WithMany(p => p.PickingTasks)
 					.HasForeignKey(a => a.VirtualPalletId);
 
 				entity.HasOne(a => a.Issue)
-					 .WithMany(a=>a.Allocations)
+					 .WithMany(a=>a.PickingTasks)
 					 .HasForeignKey(a => a.IssueId);
 
 				entity.HasOne(a => a.PickingPallet)
@@ -122,6 +123,14 @@ namespace MyWerehouse.Infrastructure
 					.HasMaxLength(20)
 					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
 				}
+			});
+			modelBuilder.Entity<HandPickingTask>(entity =>
+			{
+				entity.HasKey(e => e.Id);
+				entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+				entity.Property(a => a.PickingStatus)
+				.HasConversion<string>();
 			});
 			modelBuilder.Entity<HistoryIssue>(entity =>
 			{
@@ -163,7 +172,7 @@ namespace MyWerehouse.Infrastructure
 				.HasConversion<string>();
 				//// Indeks dla szybkiego wyszukiwania
 				entity.HasIndex(x => x.PalletId);
-				entity.HasIndex(x => x.AllocationId);
+				entity.HasIndex(x => x.PickingTaskId);
 				entity.HasIndex(x => x.IssueId);
 				entity.HasIndex(h => h.DateTime);
 			});
@@ -194,7 +203,7 @@ namespace MyWerehouse.Infrastructure
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
 			
 				//entity.HasOne(a => a.Issue)
-				//	.WithMany(i => i.Allocations)
+				//	.WithMany(i => i.PickingTasks)
 				//	.HasForeignKey(a => a.IssueId)
 				//	.OnDelete(DeleteBehavior.Restrict);
 
@@ -274,7 +283,7 @@ namespace MyWerehouse.Infrastructure
 				entity.HasKey(e => e.Id);
 				entity.Property(entity => entity.Id).ValueGeneratedOnAdd();
 
-				entity.HasMany(p => p.Allocations)
+				entity.HasMany(p => p.PickingTasks)
 						.WithOne(a => a.VirtualPallet)//tu był błąd jendokierunkowy
 						.HasForeignKey(p => p.VirtualPalletId)
 						.OnDelete(DeleteBehavior.Restrict);

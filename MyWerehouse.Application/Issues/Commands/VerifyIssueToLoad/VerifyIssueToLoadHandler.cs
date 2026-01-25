@@ -37,6 +37,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 						?? throw new NotFoundIssueException(request.IssueId);
 				List<INotification> notificationList = [];
+				//TODO check requested amount = prepered amount
 				issue.IssueStatus = IssueStatus.ConfirmedToLoad;
 				foreach (var pallet in issue.Pallets)
 				{

@@ -24,6 +24,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext.VirtualPallets.Add(newVirtualPicking);
 			return newVirtualPicking;
 		}
+		public async Task<VirtualPallet> AddPalletToPickingAsync(VirtualPallet newVirtualPicking)
+		{
+			await _werehouseDbContext.VirtualPallets.AddAsync(newVirtualPicking);
+			return newVirtualPicking;
+		}
 		public void DeleteVirtualPalletPicking(VirtualPallet virtualPallet)
 		{
 			_werehouseDbContext.VirtualPallets.Remove(virtualPallet);
@@ -31,18 +36,18 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(int productId)
 		{
 			var list = await _werehouseDbContext.VirtualPallets
-					.Include(a => a.Allocations)
+					.Include(a => a.PickingTasks)
 					.Include(p => p.Pallet)
 						.ThenInclude(pp => pp.ProductsOnPallet)
 					.Where(p => p.Pallet.ProductsOnPallet.Any(p => p.ProductId == productId) && p.Pallet.Status == PalletStatus.ToPicking)
-					.OrderBy(p => p.InitialPalletQuantity - p.Allocations.Sum(a => a.Quantity))
+					.OrderBy(p => p.InitialPalletQuantity - p.PickingTasks.Sum(a => a.Quantity))
 					.ToListAsync();
 			return list;
 		}
 		public async Task<List<VirtualPallet>> GetVirtualPalletsByTimeAsync(DateTime start, DateTime end)
 		{
 			var list = await _werehouseDbContext.VirtualPallets
-				.Include(a => a.Allocations)
+				.Include(a => a.PickingTasks)
 				.Include(p => p.Pallet)
 					.ThenInclude(pp => pp.ProductsOnPallet)
 				.Where(p => p.DateMoved >= start && p.DateMoved <= end)
@@ -74,7 +79,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		//public async Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId)
 		//{
 		//var list = await _werehouseDbContext.VirtualPallets
-		//		.SelectMany(x=>x.Allocations.)
+		//		.SelectMany(x=>x.PickingTasks.)
 		//}
 	}
 }

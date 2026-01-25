@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 	public class PickingPalletHistoryDTO : IMapFrom<HistoryPicking>
 	{
 		public int Id { get; set; }
-		public int? AllocationId { get; set; }									  //[JsonIgnore] // Ignoruj przy serializacji
+		public int? PickingTaskId { get; set; }									  //[JsonIgnore] // Ignoruj przy serializacji
 		public string PalletId { get; set; }
 		public int IssueId { get; set; }
 		public int ProductId { get; set; }

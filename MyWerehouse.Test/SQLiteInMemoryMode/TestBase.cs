@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MyWerehouse.Application;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode

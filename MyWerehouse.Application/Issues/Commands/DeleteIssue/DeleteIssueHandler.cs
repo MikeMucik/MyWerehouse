@@ -42,7 +42,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 					?? throw new NotFoundIssueException(request.IssueId);
 
 				List<INotification> palletList = [];
-				List<INotification> allocationList = [];
+				List<INotification> pickingTaskList = [];
 				switch (issueToDelete.IssueStatus)
 				{
 					case IssueStatus.New:
@@ -58,24 +58,24 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 							pallet.Status = PalletStatus.Available;
 							palletList.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId, ReasonMovement.Correction, request.UserId, PalletStatus.Available, null));
 						}
-						foreach (var allocation in issueToDelete.Allocations)
+						foreach (var pickingTask in issueToDelete.PickingTasks)
 						{
-							allocation.PickingStatus = PickingStatus.Cancelled;
-							allocation.Quantity = 0;
+							pickingTask.PickingStatus = PickingStatus.Cancelled;
+							pickingTask.Quantity = 0;
 							var historyPicking = new HistoryDataPicking
 							(
-								allocation.Id,
-								allocation.VirtualPallet.PalletId,
-								allocation.IssueId,
-								allocation.ProductId,
-								allocation.Quantity,
+								pickingTask.Id,
+								pickingTask.VirtualPallet.PalletId,
+								pickingTask.IssueId,
+								pickingTask.ProductId,
+								pickingTask.Quantity,
 								0,
 								PickingStatus.Allocated,
 								PickingStatus.Cancelled,
 								request.UserId,
 								DateTime.UtcNow);
-							allocationList.Add(new CreateHistoryPickingNotification(historyPicking));
-							//allocationList.Add(new CreateHistoryPickingNotification(allocation.VirtualPalletId, allocation.Id, request.UserId, PickingStatus.Allocated, 0));
+							pickingTaskList.Add(new CreateHistoryPickingNotification(historyPicking));
+							//pickingTaskList.Add(new CreateHistoryPickingNotification(pickingTask.VirtualPalletId, pickingTask.Id, request.UserId, PickingStatus.Allocated, 0));
 
 						}
 						break;
@@ -92,7 +92,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				{
 					await _mediator.Publish(p, ct);
 				}
-				foreach (var a in allocationList)
+				foreach (var a in pickingTaskList)
 				{
 					await _mediator.Publish(a, ct);
 				}

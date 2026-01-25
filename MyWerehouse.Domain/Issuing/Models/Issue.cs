@@ -21,7 +21,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public virtual ICollection<Pallet> Pallets { get; set; } = new List<Pallet>();
 		public virtual ICollection<HistoryIssue> HistoryIssues { get; set; } = new List<HistoryIssue>();
 		public virtual ICollection<HistoryPicking> HistoryPickings { get; set; } = new List<HistoryPicking>();
-		public virtual ICollection<Allocation> Allocations { get; set; } = new List<Allocation>();
+		public virtual ICollection<PickingTask> PickingTasks { get; set; } = new List<PickingTask>();
 		public string PerformedBy { get; set; } 
 		public IssueStatus IssueStatus { get; set; } 	
 		public virtual ICollection<IssueItem> IssueItems { get; set; } = new List<IssueItem>();//nowe powiązanie

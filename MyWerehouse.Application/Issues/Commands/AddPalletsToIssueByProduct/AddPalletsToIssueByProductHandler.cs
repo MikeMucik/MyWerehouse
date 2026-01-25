@@ -15,8 +15,8 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Queries.GetProductCount;
 using MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue;
 using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
-using MyWerehouse.Application.PickingPallets.Commands.AddAllocationToIssue;
 using MyWerehouse.Application.PickingPallets.Queries.GetVirtualPallets;
+using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
@@ -29,12 +29,14 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 	public class AddPalletsToIssueByProductHandler(WerehouseDbContext werehouseDbContext,
 		IMediator mediator,
 		IEventCollector eventCollector,
-		IProductRepo productRepo) : IRequestHandler<AddPalletsToIssueByProductCommand, IssueResult>
+		IProductRepo productRepo,
+		IAddPickingTaskToIssueService addPickingTaskToIssueService) : IRequestHandler<AddPalletsToIssueByProductCommand, IssueResult>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IMediator _mediator = mediator;
 		private readonly IEventCollector _eventCollector = eventCollector;
 		private readonly IProductRepo _productRepo = productRepo;
+		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 
 		public async Task<IssueResult> Handle(AddPalletsToIssueByProductCommand request, CancellationToken ct)
 		{
@@ -70,20 +72,19 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 				if (availableVirtualPalletsQuery is null) return IssueResult.Fail("Brak palety do pickingu - błąd virtual");
 				//4. Przydziel pełne palety
 				var palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(request.Issue, availablePalletsQuery, amountPallets), ct);
-				List<Pallet> restPallet = availablePalletsQuery.Except(palletAssigned).ToList();
 				//5. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 				if (rest > 0)
 				{
-					var newAllocationFromRest = 
-						await _mediator.Send(
-						new AddAllocationToIssueNewCommand(restPallet, availableVirtualPalletsQuery, request.Issue,
+					var newPickingTaskFromRest =
+						await _addPickingTaskToIssueService.AddPickingTaskToIssue(palletAssigned,
+						availableVirtualPalletsQuery, request.Issue,
 						request.Product.ProductId,
 						rest, request.Product.BestBefore,
 						request.Issue.PerformedBy
-						), ct);// palety do pickingu
-					if (newAllocationFromRest.Success is false)
+						);					
+					if (newPickingTaskFromRest.Success is false)
 					{
-						return IssueResult.Fail("Nie dodano zadań pickingu do zlecenia.");
+						return IssueResult.Fail(newPickingTaskFromRest.Message);
 					}
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);
@@ -93,7 +94,7 @@ namespace MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct
 				}
 				foreach (var factory in _eventCollector.DeferredEvents)
 				{
-					await _mediator.Publish(await factory(), ct);
+					await _mediator.Publish( factory(), ct);
 				}
 				await transaction.CommitAsync(ct);
 				return IssueResult.Ok("Towar dołączono do wydania", request.Product.ProductId);

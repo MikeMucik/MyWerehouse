@@ -14,7 +14,7 @@ namespace MyWerehouse.Infrastructure
 	{
 		public static IServiceCollection AddInfrastructure(this IServiceCollection services)
 		{	
-			services.AddTransient<IAllocationRepo, AllocationRepo>();
+			services.AddTransient<IPickingTaskRepo, PickingTaskRepo>();
 			services.AddTransient<ICategoryRepo, CategoryRepo>();
 			services.AddTransient<IClientRepo, ClientRepo>();
 

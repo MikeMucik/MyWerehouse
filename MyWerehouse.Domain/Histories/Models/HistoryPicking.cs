@@ -11,7 +11,7 @@ namespace MyWerehouse.Domain.Histories.Models
 	public class HistoryPicking
 	{
 		public int Id { get; set; }
-		public int? AllocationId { get; set; }// ? dla update
+		public int? PickingTaskId { get; set; }// ? dla update
 		//[JsonIgnore] // Ignoruj przy serializacji
 		public string PalletId { get; set; }
 		public int IssueId { get; set; }

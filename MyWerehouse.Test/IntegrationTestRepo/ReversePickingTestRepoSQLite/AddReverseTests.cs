@@ -109,7 +109,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
 				//Pallets = [pallet1, pickingPallet],
 				PerformedBy = "UserS",
-				//Allocations = [allocation],
+				//PickingTasks = [pickingTask],
 				IssueStatus = IssueStatus.ConfirmedToLoad,
 				IssueItems = [new IssueItem {
 					CreatedAt = DateTime.UtcNow.AddDays(-7),
@@ -125,7 +125,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				LocationId = location1.Id,
 				DateMoved = DateTime.UtcNow.AddDays(-7),			
 			};
-			var allocation = new Allocation
+			var pickingTask = new PickingTask
 			{
 				Issue = issue,
 				PickingStatus = PickingStatus.Picked,
@@ -135,7 +135,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12))
 			};
 
-			virtualPallet.Allocations = [allocation];
+			virtualPallet.PickingTasks = [pickingTask];
 
 			var pickingPallet = new Pallet
 			{
@@ -152,9 +152,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				}]
 			};
 			issue.Pallets = [pallet1, pickingPallet];
-			issue.Allocations = [allocation];
+			issue.PickingTasks = [pickingTask];
 			DbContext.VirtualPallets.Add(virtualPallet);
-			DbContext.Allocations.Add(allocation);
+			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.Pallets.Add(pickingPallet);
 			DbContext.Issues.Add(issue);
 			DbContext.SaveChanges();
@@ -163,7 +163,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var reversePicking = new ReversePicking
 			{
 				PickingPalletId = pickingPallet.Id,
-				AllocationId = allocation.Id,
+				PickingTaskId = pickingTask.Id,
 				ProductId = product.Id,
 				BestBefore = pickingPallet.ProductsOnPallet.FirstOrDefault().BestBefore,
 				Quantity = pickingPallet.ProductsOnPallet.FirstOrDefault().Quantity,
@@ -175,7 +175,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			
 			// Assert
 			var result = DbContext.ReversePickings
-				.Include(rp => rp.Allocation)
+				.Include(rp => rp.PickingTask)
 				.SingleOrDefault();
 
 			Assert.NotNull(result);
@@ -184,7 +184,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			Assert.True(result.Id > 0);
 
 			Assert.Equal(pickingPallet.Id, result.PickingPalletId);
-			Assert.Equal(allocation.Id, result.AllocationId);
+			Assert.Equal(pickingTask.Id, result.PickingTaskId);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal("UserR", result.UserId);
 
@@ -203,15 +203,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			Assert.Null(result.DestinationPalletId);
 
 			// --- relacja ---
-			Assert.NotNull(result.Allocation);
-			Assert.Equal(allocation.Id, result.Allocation.Id);
+			Assert.NotNull(result.PickingTask);
+			Assert.Equal(pickingTask.Id, result.PickingTask.Id);
 
 			// ilość reverse picking nie może przekraczać alokacji
-			Assert.True(result.Quantity <= allocation.Quantity);
+			Assert.True(result.Quantity <= pickingTask.Quantity);
 
 			// BestBefore musi dotyczyć tego samego produktu
 			Assert.Equal(
-				allocation.BestBefore,
+				pickingTask.BestBefore,
 				result.BestBefore
 			);
 

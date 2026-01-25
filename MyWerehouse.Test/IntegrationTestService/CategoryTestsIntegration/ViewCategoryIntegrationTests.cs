@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.Common;
@@ -16,15 +16,9 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 	{
 		private readonly CategoryService _categoryService;
 		private readonly CategoryRepo _categoryRepo;
-		//private readonly IMapper _mapper;
 		public ViewCategoryIntegrationTests(QuerryTestFixture fixture)
 		{
 			var _context = fixture.Context;
-			//var mapperConfig = new MapperConfiguration(cfg =>
-			//{
-			//	cfg.AddProfile<MappingProfile>();
-			//});
-			//_mapper = mapperConfig.CreateMapper();
 			_categoryRepo = new CategoryRepo(_context);
 			var _productRepo = new ProductRepo(_context);
 			_categoryService = new CategoryService(_categoryRepo, _mapper);

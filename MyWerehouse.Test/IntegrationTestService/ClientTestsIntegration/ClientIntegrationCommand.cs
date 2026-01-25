@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
@@ -21,7 +21,6 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 	{
 		public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		public readonly ClientService _clientService;
-		//public readonly IMapper _mapper;
 		public readonly IClientRepo _clientRepo;
 		public readonly IReceiptRepo _receiptRepo;
 		protected readonly IValidator<AddressDTO> _addressValidator; // Zadeklaruj
@@ -32,11 +31,6 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase("SharedTestDatabase")
 				.Options;
-			//var MapperConfig = new MapperConfiguration(cfg =>
-			//{
-			//	cfg.AddProfile<MappingProfile>();
-			//});
-			//_mapper = MapperConfig.CreateMapper();
 			_clientRepo = new ClientRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_addressValidator = new AddressDTOValidation();

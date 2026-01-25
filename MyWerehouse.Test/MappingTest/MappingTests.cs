@@ -5,21 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using MyWerehouse.Application.Mapping;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using System.Reflection;
+using MyWerehouse.Application.Common.Mapping;
 
 namespace MyWerehouse.Test.MappingTest
 {
 	public class MappingTests
 	{
-		private readonly IMapper _mapper;
+		private readonly IMapper _mapper;	
 		
-		//}
 		public MappingTests()
 		{			
 			var services = new ServiceCollection();

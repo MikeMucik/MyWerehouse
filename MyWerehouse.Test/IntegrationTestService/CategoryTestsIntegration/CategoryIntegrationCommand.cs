@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Infrastructure;
@@ -18,15 +18,9 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 	public class CategoryIntegrationCommand : CommandTestBase
 	{
 		protected readonly CategoryService _categoryService;
-		//protected readonly IMapper _mapper;
 		protected readonly IValidator<CategoryDTO> _validator;
 		public CategoryIntegrationCommand() : base()
 		{
-			//var MapperConfig = new MapperConfiguration(cfg =>
-			//{
-			//	cfg.AddProfile<MappingProfile>();
-			//});
-			//_mapper = MapperConfig.CreateMapper();
 			var _categoryRepo = new CategoryRepo(_context);
 			var _productRepo = new ProductRepo(_context);
 			_validator = new CategoryDTOValidation();

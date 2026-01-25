@@ -9,7 +9,7 @@ using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
-{//Lista ile danego towaru dla danej alokacji Product's list by allocations
+{//Lista ile danego towaru dla danej alokacji Product's list by pickingTasks
 	public class GetListToPickingHandler(IPickingPalletRepo pickingPalletRepo,
 		IIssueRepo issueRepo) : IRequestHandler<GetListToPickingQuery, List<ProductToIssueDTO>>
 	{
@@ -24,7 +24,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 				return new List<ProductToIssueDTO>();
 			}
 			var allNededIssuesIds = pickingPallets
-				.SelectMany(p => p.Allocations)
+				.SelectMany(p => p.PickingTasks)
 				.Select(i => i.IssueId)
 				.Distinct()
 				.ToList();
@@ -42,27 +42,27 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 				if (productOnPallet == null) continue;
 				var productId = productOnPallet.ProductId;
 
-				var allocations = pallet.Allocations;
-				foreach (var allocation in allocations)
+				var pickingTasks = pallet.PickingTasks;
+				foreach (var pickingTask in pickingTasks)
 				{
-					if (!issueDictionary.TryGetValue(allocation.IssueId, out var issue))
+					if (!issueDictionary.TryGetValue(pickingTask.IssueId, out var issue))
 					{
 						continue;
 					}
 					var clientId = issue.ClientId;
-					var key = (clientId, allocation.IssueId, productId);
+					var key = (clientId, pickingTask.IssueId, productId);
 					if (aggregationDictionary.TryGetValue(key, out var existingRecord))
 					{
-						existingRecord.Quantity += allocation.Quantity;
+						existingRecord.Quantity += pickingTask.Quantity;
 					}
 					else
 					{
 						var productIssue = new ProductToIssueDTO
 						{
 							ClientIdOut = clientId,
-							IssueId = allocation.IssueId,
+							IssueId = pickingTask.IssueId,
 							ProductId = productId,
-							Quantity = allocation.Quantity,
+							Quantity = pickingTask.Quantity,
 						};
 						aggregationDictionary.Add(key, productIssue);
 					}

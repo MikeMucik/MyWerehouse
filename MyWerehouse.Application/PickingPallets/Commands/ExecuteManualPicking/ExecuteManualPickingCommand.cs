@@ -8,6 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking
 {
-	public record ExecuteManualPickingCommand(string PalletId, int IssueId, string UserId):IRequest<PickingResult>;
-	
+	public record ExecuteManualPickingCommand(string PalletId, int IssueId, string UserId):IRequest<PickingResult>;	
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
@@ -18,21 +18,13 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	public class ProductIntegrationCommand : CommandTestBase
 	{
-		//public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		protected readonly ProductService _productService;
-		//protected readonly IMapper _mapper;
 		protected readonly IValidator<AddProductDTO> _productValidator;
 		protected readonly IInventoryRepo _inventoryRepo;
 		protected readonly IProductRepo _productRepo;
 		protected readonly IReceiptRepo _receiptRepo;
 		public ProductIntegrationCommand() : base()
 		{	
-
-			//var MapperConfig = new MapperConfiguration(cfg =>
-			//{ 
-			//	cfg.AddProfile<MappingProfile>();
-			//});
-			//_mapper = MapperConfig.CreateMapper();
 			_productRepo = new ProductRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_productValidator = new AddProductDTOValidation();	

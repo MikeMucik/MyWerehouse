@@ -21,9 +21,9 @@ namespace MyWerehouse.Domain.Picking.Models
 		public int LocationId { get; set; }
 		public Location Location { get; set; }
 		public DateTime DateMoved { get; set; }
-		public virtual ICollection<Allocation> Allocations { get; set; } //= new List<Allocation>();
+		public virtual ICollection<PickingTask> PickingTasks { get; set; } //= new List<PickingTask>();
 		public virtual ICollection<HistoryPicking> HistoryPicking { get; set; } = new List<HistoryPicking>();
 		[NotMapped]
-		public int RemainingQuantity => InitialPalletQuantity - (Allocations?.Sum(a=>a.Quantity) ?? 0);		
+		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a=>a.Quantity) ?? 0);		
 	}
 }

@@ -142,7 +142,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 		//				 .ReturnsAsync(issue);			
 		//	var palletRepo = new Mock<IPalletRepo>();
 
-		//	var allocationRepo = new Mock<IAllocationRepo>();
+		//	var pickingTaskRepo = new Mock<IPickingTaskRepo>();
 			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
 
 
@@ -152,7 +152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				//mockMapper.Object,
 				//DbContext,				
 				//palletRepo.Object
-				//,allocationRepo.Object,
+				//,pickingTaskRepo.Object,
 				//pickingPalletRepo.Object
 				);
 
@@ -369,7 +369,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			//var mockMapper = new Mock<IMapper>();
 			//var palletRepo = new PalletRepo(DbContext);
 
-			//var allocationRepo = new Mock<IAllocationRepo>();
+			//var pickingTaskRepo = new Mock<IPickingTaskRepo>();
 			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
 
 			var service = new IssueService(
@@ -378,7 +378,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				//mockMapper.Object,
 				//DbContext,				
 			//	palletRepo
-				//, allocationRepo.Object,
+				//, pickingTaskRepo.Object,
 				//pickingPalletRepo.Object
 				);
 			// Act
@@ -483,7 +483,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			//issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
 			//var mockMapper = new Mock<IMapper>();
 
-			//var allocationRepo = new Mock<IAllocationRepo>();
+			//var pickingTaskRepo = new Mock<IPickingTaskRepo>();
 			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
 
 			var service = new IssueService(Mediator
@@ -492,7 +492,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				//mockMapper.Object,
 				//DbContext,				
 				//palletRepo
-				//, allocationRepo.Object,
+				//, pickingTaskRepo.Object,
 				//pickingPalletRepo.Object
 				);
 
@@ -595,7 +595,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 			//issueRepoMock.Setup(r => r.GetIssueByIdAsync(issue.Id)).ReturnsAsync(issue);			
 			//var mockMapper = new Mock<IMapper>();
 
-			//var allocationRepo = new Mock<IAllocationRepo>();
+			//var pickingTaskRepo = new Mock<IPickingTaskRepo>();
 			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
 
 			var service = new IssueService(Mediator
@@ -603,7 +603,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 				//issueRepoMock.Object,
 				//mockMapper.Object,
 				//DbContext,				
-				//palletRepo, allocationRepo.Object,
+				//palletRepo, pickingTaskRepo.Object,
 				//pickingPalletRepo.Object
 				);
 			//Act

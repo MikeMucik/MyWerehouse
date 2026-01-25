@@ -36,15 +36,7 @@ namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 		}
 		public async Task<AddPalletToPickingResult> Handle(AddPalletToPickingCommand request, CancellationToken ct)
 		{
-			var newPallet = new Pallet();
-			var selectedPallet = new List<Pallet>();
-			if (request.Pallets == null)
-			{
-				 newPallet = await _mediator.Send(new GetOneAvailablePalletByProductQuery(request.ProductId, request.BestBefore), ct);					
-			}			
-			else newPallet = request.Pallets.FirstOrDefault();
-			if (newPallet == null) return AddPalletToPickingResult.Fail("Brak palet do pickingu");
-			if (newPallet.ProductsOnPallet == null) return AddPalletToPickingResult.Fail("Brak towaru na palecie do pickingu");
+			var newPallet = request.Pallet;
 			var newVirtualPicking = new VirtualPallet
 			{
 				Pallet = newPallet,
@@ -52,10 +44,9 @@ namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 				DateMoved = DateTime.UtcNow,
 				LocationId = newPallet.LocationId,				
 				InitialPalletQuantity = newPallet.ProductsOnPallet.FirstOrDefault(p => p.PalletId == newPallet.Id).Quantity ,//zakładam że jest jeden towar
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 			};
-			var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);
-			request.Pallets?.Remove(newPallet);
+			var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);			
 			_palletRepo.ChangePalletStatus(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety
 			_eventCollector.Add(new CreatePalletOperationNotification(newPallet.Id,	newPallet.LocationId,
 				ReasonMovement.Picking,	request.UserId,	PalletStatus.ToPicking,	null));

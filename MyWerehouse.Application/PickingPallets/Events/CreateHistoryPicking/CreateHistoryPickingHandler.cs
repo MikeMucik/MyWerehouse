@@ -20,7 +20,7 @@ namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 		{			
 			var history = new HistoryPicking
 			{
-				AllocationId = request.DataPicking.AllocationId,
+				PickingTaskId = request.DataPicking.PickingTaskId,
 				PalletId = request.DataPicking.PalletId,
 				IssueId = request.DataPicking.IssueId,
 				ProductId = request.DataPicking.ProductId,

@@ -215,7 +215,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(PalletStatus.Available, pallet1.Status);
 		}
 		[Fact]
-		public async Task CancelIssueAsync_PalletsAsignmentAndAllocation_ShouldRestorePalletsAvailability()
+		public async Task CancelIssueAsync_PalletsAsignmentAndPickingTask_ShouldRestorePalletsAvailability()
 		{
 			// Arrange – setup initial data
 			var address = new Address
@@ -324,12 +324,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Null(palletP2.IssueId);
 			Assert.Equal(1, palletP2.LocationId);
 
-			// Assert – No allocations left
-			var allocations = await DbContext.Allocations
+			// Assert – No pickingTasks left
+			var pickingTasks = await DbContext.PickingTasks
 				.Where(a => a.IssueId == issue.Id)
 				.ToListAsync();
 
-			Assert.Empty(allocations);
+			Assert.Empty(pickingTasks);
 
 			// Assert – Result
 			Assert.True(result.Success);
@@ -337,7 +337,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 		}
 		[Fact]
-		public async Task CancelIssueAsync_PalletsAsignmentAndAllocationDone_ShouldRestorePalletsAvailabilityAndAddReversePicking()
+		public async Task CancelIssueAsync_PalletsAsignmentAndPickingTaskDone_ShouldRestorePalletsAvailabilityAndAddReversePicking()
 		{
 			// Arrange – setup initial data
 			var address = new Address
@@ -443,12 +443,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Null(palletP1.IssueId);
 			Assert.Equal(1, palletP1.LocationId);
 
-			// Assert – No allocations left
-			var allocations = await DbContext.Allocations
+			// Assert – No pickingTasks left
+			var pickingTasks = await DbContext.PickingTasks
 				.Where(a => a.IssueId == issue.Id)
 				.ToListAsync();
 
-			Assert.Empty(allocations);
+			Assert.Empty(pickingTasks);
 
 			// Assert – Result
 			Assert.True(result.Success);

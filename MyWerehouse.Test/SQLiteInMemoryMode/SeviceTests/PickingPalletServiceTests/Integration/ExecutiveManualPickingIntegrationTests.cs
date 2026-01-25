@@ -130,7 +130,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, newToPickPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var allocation2 = new Allocation
+			var pickingTask2 = new PickingTask
 			{
 				Issue = issue,
 				Quantity = 10,
@@ -145,7 +145,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				InitialPalletQuantity = 20,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 			};
 			var virtualPallet2 = new VirtualPallet
 			{
@@ -153,9 +153,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				InitialPalletQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocations = new List<Allocation> { allocation2 }
+				PickingTasks = new List<PickingTask> { pickingTask2 }
 			};
-			allocation2.VirtualPallet = virtualPallet2;
+			pickingTask2.VirtualPallet = virtualPallet2;
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2);
 			await DbContext.SaveChangesAsync();
 			// Act
@@ -181,21 +181,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// ✅ Sprawdzenie, że VirtualPallet powiązany jest z paletą
 			var virtualLinked = await DbContext.VirtualPallets
 				.Include(v => v.Pallet)
-				.Include(v => v.Allocations)
+				.Include(v => v.PickingTasks)
 				.FirstOrDefaultAsync(v => v.Pallet.Id == newToPickPallet.Id);
 
 			Assert.NotNull(virtualLinked);
 			Assert.Equal(newToPickPallet.Id, virtualLinked.Pallet.Id);
 
 			// ✅ Alokacje nie zostały utracone
-			var allocationAfter = await DbContext.Allocations
+			var pickingTaskAfter = await DbContext.PickingTasks
 				.Include(a => a.Issue)
 				.Include(a => a.VirtualPallet)
-				.FirstAsync(a => a.Id == allocation2.Id);
+				.FirstAsync(a => a.Id == pickingTask2.Id);
 
-			Assert.Equal(issue.Id, allocationAfter.Issue.Id);
-			Assert.NotNull(allocationAfter.VirtualPallet);
-			//Assert.Equal(PickingStatus.Allocated, allocationAfter.PickingStatus);
+			Assert.Equal(issue.Id, pickingTaskAfter.Issue.Id);
+			Assert.NotNull(pickingTaskAfter.VirtualPallet);
+			//Assert.Equal(PickingStatus.Allocated, pickingTaskAfter.PickingStatus);
 
 			// ✅ Historia ruchu została zapisana (jeśli masz historię)
 			var history = await DbContext.HistoryPickings.ToListAsync();
@@ -327,7 +327,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, newToPickPallet, oldPalletPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var allocation2 = new Allocation
+			var pickingTask2 = new PickingTask
 			{
 				Issue = issue,
 				Quantity = 10,
@@ -342,7 +342,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				InitialPalletQuantity = 20,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 			};
 			var virtualPallet2 = new VirtualPallet
 			{
@@ -350,9 +350,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				InitialPalletQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocations = new List<Allocation> { allocation2 }
+				PickingTasks = new List<PickingTask> { pickingTask2 }
 			};
-			allocation2.VirtualPallet = virtualPallet2;
+			pickingTask2.VirtualPallet = virtualPallet2;
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2);
 			await DbContext.SaveChangesAsync();
 			// Act
@@ -387,23 +387,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// ✅ Sprawdzenie, że VirtualPallet powiązany jest z paletą
 			var virtualLinked = await DbContext.VirtualPallets
 				.Include(v => v.Pallet)
-				.Include(v => v.Allocations)
+				.Include(v => v.PickingTasks)
 				.FirstOrDefaultAsync(v => v.Pallet.Id == newToPickPallet.Id);
 
 			Assert.NotNull(virtualLinked);
 			Assert.Equal(newToPickPallet.Id, virtualLinked.Pallet.Id);
 
 			// ✅ Alokacje nie zostały utracone
-			var allocationAfter = await DbContext.Allocations
+			var pickingTaskAfter = await DbContext.PickingTasks
 				.Include(a => a.Issue)
 				.Include(a => a.VirtualPallet)
-				.FirstAsync(a => a.Id == allocation2.Id);
+				.FirstAsync(a => a.Id == pickingTask2.Id);
 
-			Assert.Equal(issue.Id, allocationAfter.Issue.Id);
-			Assert.NotNull(allocationAfter.VirtualPallet);
-			//Assert.Equal(PickingStatus.Allocated, allocationAfter.PickingStatus);
+			Assert.Equal(issue.Id, pickingTaskAfter.Issue.Id);
+			Assert.NotNull(pickingTaskAfter.VirtualPallet);
+			//Assert.Equal(PickingStatus.Allocated, pickingTaskAfter.PickingStatus);
 
-			//var allocationNew = await DbContext.Allocations
+			//var pickingTaskNew = await DbContext.PickingTasks
 			//	.Include(a => a.Issue)
 			//	.Include(a => a.VirtualPallet)
 			//	.LastAsync();
@@ -522,7 +522,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Pallets.AddRange(sourcePallet1, newToPickPallet);
 			//DbContext.Issues.AddRange(issue);
-			var allocation2 = new Allocation
+			var pickingTask2 = new PickingTask
 			{
 				Issue = issue,
 				Quantity = 10,
@@ -534,7 +534,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				InitialPalletQuantity = 20,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 			};
 			var virtualPallet2 = new VirtualPallet
 			{
@@ -542,9 +542,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				InitialPalletQuantity = 10,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocations = new List<Allocation> { allocation2 }
+				PickingTasks = new List<PickingTask> { pickingTask2 }
 			};
-			allocation2.VirtualPallet = virtualPallet2;
+			pickingTask2.VirtualPallet = virtualPallet2;
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2);
 			DbContext.Issues.Remove(issue);
 			await DbContext.SaveChangesAsync();
@@ -656,7 +656,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, newToPickPallet);
 			DbContext.Issues.AddRange(issue, issue1);
 			await DbContext.SaveChangesAsync();
-			var allocation1 = new Allocation
+			var pickingTask1 = new PickingTask
 			{
 				Issue = issue,
 				Quantity = 5,
@@ -665,7 +665,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12))
 
 			};
-			var allocation2 = new Allocation
+			var pickingTask2 = new PickingTask
 			{
 				Issue = issue1,
 				Quantity = 10,
@@ -680,7 +680,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//	InitialPalletQuantity = 20,
 			//	Location = newToPickPallet.Location,
 			//	DateMoved = new DateTime(2025, 8, 12),
-			//	Allocations = new List<Allocation>()
+			//	PickingTasks = new List<PickingTask>()
 			//};
 			var virtualPallet = new VirtualPallet
 			{
@@ -688,10 +688,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				InitialPalletQuantity = 100,
 				Location = sourcePallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
-				Allocations = new List<Allocation> {allocation1, allocation2 }
+				PickingTasks = new List<PickingTask> {pickingTask1, pickingTask2 }
 			};
-			allocation1.VirtualPallet = virtualPallet;
-			allocation2.VirtualPallet = virtualPallet;
+			pickingTask1.VirtualPallet = virtualPallet;
+			pickingTask2.VirtualPallet = virtualPallet;
 			DbContext.VirtualPallets.AddRange(virtualPallet);
 			await DbContext.SaveChangesAsync();
 			// Act

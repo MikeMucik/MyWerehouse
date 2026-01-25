@@ -7,7 +7,7 @@ using AutoMapper;
 using FluentValidation;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;

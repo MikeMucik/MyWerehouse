@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
+
+namespace MyWerehouse.Application.PickingPallets.Services
+{
+	public interface IAddPickingTaskToIssueService
+	{
+		Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets,
+			List<VirtualPallet> virtualPallets, Issue issue, int productId,
+			int rest, DateOnly? bestBefore, string UserId);
+	}
+}

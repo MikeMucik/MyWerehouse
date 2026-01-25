@@ -11,7 +11,8 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IReversePickingService
 	{
-		Task<List<ReversePickingResult>> CreateTaskToReversePickingAsync(string palletId, string userId);
+		Task CreateTaskToReversePickingAsync(string palletId, string userId);
+		//<List<ReversePickingResult>>
 		Task<ReversePickingResult> ExecutiveReversePickingAsync(int taskReverseId, ReversePickingStrategy strategy, string userId);
 		Task<ReversePickingDetails> GetReversePickingAsync(int reversePickingId);
 		Task<ListReversePickingDTO> GetListReversePickingToDo(int pageSize, int pageNumber);

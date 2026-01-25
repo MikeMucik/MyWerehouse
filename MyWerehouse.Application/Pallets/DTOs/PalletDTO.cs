@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Histories.DTOs;
-using MyWerehouse.Application.Mapping;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.DTOs

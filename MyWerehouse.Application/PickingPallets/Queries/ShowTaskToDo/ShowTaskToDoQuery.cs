@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.ViewModels.AllocationModels;
+using MyWerehouse.Application.ViewModels.PickingTaskModels;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo
 {
-	public record ShowTaskToDoQuery(string PalletSourceScannedId, DateTime PickingDate):IRequest<List<AllocationDTO>>;	
+	public record ShowTaskToDoQuery(string PalletSourceScannedId, DateTime PickingDate):IRequest<List<PickingTaskDTO>>;	
 }

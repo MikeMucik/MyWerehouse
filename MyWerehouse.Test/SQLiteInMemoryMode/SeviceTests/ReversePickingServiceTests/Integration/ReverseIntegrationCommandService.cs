@@ -17,7 +17,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 	{
 		protected readonly ReversePickingService _reversePickingService;
 		protected readonly IReversePickingRepo _reversePickingRepo;
-		protected readonly IAllocationRepo _allocationRepo;
+		protected readonly IPickingTaskRepo _pickingTaskRepo;
 		protected readonly IPalletRepo _palletRepo;
 		protected readonly IProductRepo _productRepo;		
 		//protected readonly IMapper _mapper;
@@ -29,14 +29,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			//{
 			//	cfg.AddProfile<MappingProfile>();
 			//});
-			_allocationRepo = new AllocationRepo(DbContext);
+			_pickingTaskRepo = new PickingTaskRepo(DbContext);
 			_reversePickingRepo = new ReversePickingRepo(DbContext);
 			_palletRepo = new PalletRepo(DbContext);
 			_productRepo = new ProductRepo(DbContext);
 			_eventCollector = new EventCollector();
 
 
-			_reversePickingService = new ReversePickingService(_allocationRepo, DbContext, _palletRepo, _productRepo, Mediator, _reversePickingRepo, _mapper, _eventCollector);
+			_reversePickingService = new ReversePickingService(_pickingTaskRepo, DbContext, _palletRepo, _productRepo, Mediator, _reversePickingRepo, _mapper, _eventCollector);
 		}
 	}
 }

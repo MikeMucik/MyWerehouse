@@ -45,7 +45,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Client = client,
 					PerformedBy = "UserInit",
 					Pallets = new List<Pallet>(),
-					Allocations = new List<Allocation>()
+					PickingTasks = new List<PickingTask>()
 				};
 				db.Clients.Add(client);
 				db.Issues.Add(issue);
@@ -117,14 +117,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
 					PerformedBy = "User1",
 					Pallets = pallets,
-					Allocations = new List<Allocation>()
+					PickingTasks = new List<PickingTask>()
 				};
 
 				foreach (var p in pallets)
 					p.Issue = issue;
 
 				// Dodaj przykładową alokację
-				issue.Allocations.Add(new Allocation
+				issue.PickingTasks.Add(new PickingTask
 				{
 					Issue = issue,
 					Quantity = qty,
@@ -162,12 +162,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Brak palet lub alokacji związanych z tym issue
 			Assert.Empty(DbContext.Pallets.Where(p => p.IssueId == issueId));
-			Assert.Empty(DbContext.Allocations.Where(a => a.IssueId == issueId));
+			Assert.Empty(DbContext.PickingTasks.Where(a => a.IssueId == issueId));
 		}
 		[Theory]
 		[InlineData(IssueStatus.Pending)]
 		[InlineData(IssueStatus.NotComplete)]
-		public async Task DeleteIssueAsync_StatusPendingOrNotComplete_CancelsIssueAndResetsPalletsAndAllocations(IssueStatus status)
+		public async Task DeleteIssueAsync_StatusPendingOrNotComplete_CancelsIssueAndResetsPalletsAndPickingTasks(IssueStatus status)
 		{
 			// Arrange
 			var setup = await TestHelper.SetupBasicIssue(
@@ -185,7 +185,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues
 				.Include(i => i.Pallets)
-				.Include(i => i.Allocations)
+				.Include(i => i.PickingTasks)
 				.First(i => i.Id == issueId);
 
 			Assert.Equal(IssueStatus.Cancelled, issue.IssueStatus);
@@ -198,7 +198,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			}
 
 			// Alokacje wyzerowane i anulowane
-			foreach (var a in issue.Allocations)
+			foreach (var a in issue.PickingTasks)
 			{
 				Assert.Equal(0, a.Quantity);
 				Assert.Equal(PickingStatus.Cancelled, a.PickingStatus);
@@ -206,7 +206,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Historia powinna się dodać (jeśli masz tabelę HistoryPicking)
 			var history = DbContext.HistoryPickings
-				.Where(h => h.AllocationId == issue.Allocations.First().Id)
+				.Where(h => h.PickingTaskId == issue.PickingTasks.First().Id)
 				.ToList();
 
 			Assert.NotEmpty(history);

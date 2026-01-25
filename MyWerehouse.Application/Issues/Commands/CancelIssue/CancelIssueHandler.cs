@@ -25,14 +25,14 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 	public class CancelIssueHandler : IRequestHandler<CancelIssueCommand, IssueResult>
 	{
 		private readonly IIssueRepo _issueRepo;
-		private readonly IAllocationRepo _allocationRepo;
+		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IMediator _mediator;
 		private readonly IEventCollector _eventCollector;
 		private readonly ICommandCollector _commandCollector;
 		public CancelIssueHandler(IIssueRepo issueRepo,
-			IAllocationRepo allocationRepo,
+			IPickingTaskRepo pickingTaskRepo,
 			IPickingPalletRepo pickingPalletRepo,
 			WerehouseDbContext werehouseDbContext,
 			IMediator mediator,
@@ -41,7 +41,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			)
 		{
 			_issueRepo = issueRepo;
-			_allocationRepo = allocationRepo;
+			_pickingTaskRepo = pickingTaskRepo;
 			_pickingPalletRepo = pickingPalletRepo;
 			_werehouseDbContext = werehouseDbContext;
 			_mediator = mediator;
@@ -75,33 +75,33 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				}
 				//usuń alokacje jeśli nie zrobione
 				//usuń virtualPallet jeśli należy tylko do tego zlecenia
-				var virtualPallets = await _allocationRepo.GetVirtualPalletsByIssue(request.IssueId);
+				var virtualPallets = await _pickingTaskRepo.GetVirtualPalletsByIssue(request.IssueId);
 				foreach (var vp in virtualPallets)
 				{
-					var allocationToRemove = vp.Allocations
+					var pickingTaskToRemove = vp.PickingTasks
 						.Where(a => a.PickingStatus == PickingStatus.Allocated && a.IssueId == issue.Id)
 						.ToList();
-					foreach (var allocation in allocationToRemove)
+					foreach (var pickingTask in pickingTaskToRemove)
 					{
-						allocation.PickingStatus = PickingStatus.Cancelled;
+						pickingTask.PickingStatus = PickingStatus.Cancelled;
 
 						_eventCollector.Add(new CreateHistoryPickingNotification(new HistoryDataPicking
 							(
-								allocation.Id,
-								allocation.VirtualPallet.PalletId,
-								allocation.IssueId,
-								allocation.ProductId,
-								allocation.Quantity,
+								pickingTask.Id,
+								pickingTask.VirtualPallet.PalletId,
+								pickingTask.IssueId,
+								pickingTask.ProductId,
+								pickingTask.Quantity,
 								0,
 								PickingStatus.Allocated,
-								allocation.PickingStatus,
+								pickingTask.PickingStatus,
 								request.UserId,
 								DateTime.UtcNow	)));
-						vp.Allocations.Remove(allocation);
-						//_werehouseDbContext.Allocations.Remove(allocation);
-						_allocationRepo.DeleteAllocation(allocation);
+						vp.PickingTasks.Remove(pickingTask);
+						//_werehouseDbContext.PickingTasks.Remove(pickingTask);
+						_pickingTaskRepo.DeletePickingTask(pickingTask);
 					}
-					if (vp.Allocations.Count == 0)//warunek bez sensu bo nie było zapisu
+					if (vp.PickingTasks.Count == 0)//warunek bez sensu bo nie było zapisu
 					{
 						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);//zadanie po commit? czy w DBSet usuwa wszytko>
 						vp.Pallet.Status = PalletStatus.Available;
@@ -146,15 +146,15 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		}
 	}
 }
-//var allocations = await _allocationRepo.GetAllocationsByIssueIdAsync(request.IssueId);
-//var allocationsNotDone = allocations.Where(a=>a.PickingStatus == PickingStatus.Allocated).ToList();
-//foreach (var allocation in allocationsNotDone)
+//var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(request.IssueId);
+//var pickingTasksNotDone = pickingTasks.Where(a=>a.PickingStatus == PickingStatus.Allocated).ToList();
+//foreach (var pickingTask in pickingTasksNotDone)
 //{
-//	allocation.PickingStatus = PickingStatus.Cancelled;
-//	_eventCollector.Add(new CreateHistoryPickingNotification(allocation.VirtualPalletId,
-//		allocation.Id,
+//	pickingTask.PickingStatus = PickingStatus.Cancelled;
+//	_eventCollector.Add(new CreateHistoryPickingNotification(pickingTask.VirtualPalletId,
+//		pickingTask.Id,
 //		request.UserId,
 //		PickingStatus.Allocated,
-//		allocation.Quantity));
-//	_allocationRepo.DeleteAllocation(allocation);//czy wszystkie
+//		pickingTask.Quantity));
+//	_pickingTaskRepo.DeletePickingTask(pickingTask);//czy wszystkie
 //}

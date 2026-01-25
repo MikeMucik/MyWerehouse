@@ -13,12 +13,12 @@ using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
-namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
+namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 {
-	public class AddETCAllocationTests :TestBase
+	public class AddETCPickingTaskTests :TestBase
 	{
 		[Fact]
-		public void AddNewRecord_AddAllocation_AddToCollection()
+		public void AddNewRecord_AddPickingTask_AddToCollection()
 		{
 			//Arrange
 			var address = new Address
@@ -83,7 +83,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 				LocationId = pallet.LocationId,
 				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 
 			};
 			var issue = new Issue
@@ -97,26 +97,26 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			DbContext.Issues.Add(issue);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.SaveChanges();
-			var allocation = new Allocation
+			var pickingTask = new PickingTask
 			{
 				Issue = issue,
 				VirtualPallet = virtualPallet,
 				Quantity = 10,
 				PickingStatus = PickingStatus.Allocated,
 			};
-			var allocationRepo = new AllocationRepo(DbContext);
+			var pickingTaskRepo = new PickingTaskRepo(DbContext);
 			//Act
-			allocationRepo.AddAllocation(allocation);
+			pickingTaskRepo.AddPickingTask(pickingTask);
 			DbContext.SaveChanges();
 			//Assert
-			var result = DbContext.Allocations.Find(allocation.Id);
+			var result = DbContext.PickingTasks.Find(pickingTask.Id);
 			Assert.NotNull(result);
-			Assert.Equal(allocation.Issue, result.Issue);
-			Assert.Equal(allocation.VirtualPallet, result.VirtualPallet);
-			Assert.Equal(allocation.Quantity, result.Quantity);
+			Assert.Equal(pickingTask.Issue, result.Issue);
+			Assert.Equal(pickingTask.VirtualPallet, result.VirtualPallet);
+			Assert.Equal(pickingTask.Quantity, result.Quantity);
 		}
 		[Fact]
-		public void DeleteRecord_DeleteAllocation_ReomveFromCollection()
+		public void DeleteRecord_DeletePickingTask_ReomveFromCollection()
 		{
 			//Arrange
 			var address = new Address
@@ -181,7 +181,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 				LocationId = pallet.LocationId,
 				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 
 			};
 			var issue = new Issue
@@ -195,21 +195,21 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			DbContext.Issues.Add(issue);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			
-			var allocation = new Allocation
+			var pickingTask = new PickingTask
 			{
 				Issue = issue,
 				VirtualPallet = virtualPallet,
 				Quantity = 10,
 				PickingStatus = PickingStatus.Allocated,
 			};
-			var allocationRepo = new AllocationRepo(DbContext);
-			DbContext.Allocations.Add(allocation);
+			var pickingTaskRepo = new PickingTaskRepo(DbContext);
+			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.SaveChanges();
 			//Act
-			allocationRepo.DeleteAllocation(allocation);
+			pickingTaskRepo.DeletePickingTask(pickingTask);
 			DbContext.SaveChanges();
 			//Assert
-			var result = DbContext.Allocations.Find(allocation.Id);
+			var result = DbContext.PickingTasks.Find(pickingTask.Id);
 			Assert.Null(result);
 			
 		}

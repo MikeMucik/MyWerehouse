@@ -57,7 +57,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
-				Allocations = new List<Allocation>(),
+				PickingTasks = new List<PickingTask>(),
 				Client = client,
 			//	IssueItems = new List<IssueItem> { new IssueItem
 			//{
@@ -180,7 +180,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
-				Allocations = new List<Allocation>(),
+				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
 			{
@@ -260,7 +260,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
-				Allocations = new List<Allocation>(),
+				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
 			{
@@ -340,7 +340,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
-				Allocations = new List<Allocation>(),
+				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
 			{
@@ -435,7 +435,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		//	};
 		//	var issue = new Issue
 		//	{
-		//		Allocations = new List<Allocation>(),
+		//		PickingTasks = new List<PickingTask>(),
 		//		Client = client,
 		//		IssueItems = new List<IssueItem> { new IssueItem
 		//	{
@@ -486,7 +486,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		//		mockInventoryService.Object,
 		//		_palletRepo,
 		//		_productRepo,
-		//		_allocationRepo,
+		//		_pickingTaskRepo,
 		//		_pickingPalletRepo,
 		//		_palletService,
 		//		_issueItemRepo,

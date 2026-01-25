@@ -8,11 +8,11 @@ namespace MyWerehouse.Application.Common.Exceptions.NotFoundException
 {
 	public class NotFoundAlloactionException : NotFoundException
 	{
-		public int AllocationId { get; }
-		public NotFoundAlloactionException(int allocationId)
-			: base($"Alokacja o numerze {allocationId} nie istnieje")
+		public int PickingTaskId { get; }
+		public NotFoundAlloactionException(int pickingTaskId)
+			: base($"Alokacja o numerze {pickingTaskId} nie istnieje")
 		{
-			AllocationId = allocationId;
+			PickingTaskId = pickingTaskId;
 		}
 		public NotFoundAlloactionException(string message): base(message) {	}
 	}

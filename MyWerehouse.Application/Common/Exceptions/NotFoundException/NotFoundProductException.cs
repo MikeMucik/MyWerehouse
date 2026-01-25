@@ -9,7 +9,12 @@ namespace MyWerehouse.Application.Common.Exceptions.NotFoundException
 {
 	public class NotFoundProductException : NotFoundException
 	{
+		public int ProductId {  get; set; }
 		public NotFoundProductException(int productId)
-		: base ($"Produkt o numerze {productId} nie istnieje."){}
+		: base ($"Produkt o numerze {productId} nie istnieje.")
+		{
+			ProductId = productId;
+		}
+		public NotFoundProductException(string message) : base(message) { }
 	}
 }

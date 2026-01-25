@@ -44,6 +44,11 @@ if (app.Environment.IsDevelopment())
 	//{
 	//	c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
 	//	c.RoutePrefix = "swagger";
+	//});
+	//app.UseSwaggerUI(c =>
+	//{
+	//	c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
+	//	c.RoutePrefix = "swagger";
 	//	c.HeadContent = "<!-- Swagger UI clean -->";
 	//	//c.EnableTryItOutByDefault();
 	//	//c.ConfigObject = new Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIOptions

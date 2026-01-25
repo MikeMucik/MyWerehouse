@@ -206,7 +206,7 @@ namespace MyWerehouse.Application.Services
 		//		DateMoved = DateTime.UtcNow,
 		//		LocationId = newPallet.LocationId,
 		//		InitialPalletQuantity = newPallet.ProductsOnPallet.First(p => p.PalletId == newPallet.Id).Quantity,//zakładam że jest jeden towar
-		//		Allocations = new List<Allocation>()
+		//		PickingTasks = new List<PickingTask>()
 		//	};
 		//	var virtualPallet = _pickingPalletRepo.AddPalletToPicking(newVirtualPicking);
 		//	_palletRepo.ChangePalletStatus(newPallet.Id, PalletStatus.ToPicking); //zmiana statusu dla palety

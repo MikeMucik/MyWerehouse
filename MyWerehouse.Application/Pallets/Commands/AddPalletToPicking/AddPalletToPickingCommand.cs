@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Pallets.Commands.AddPalletToPicking
 {
-	public record AddPalletToPickingCommand(Issue Issue, int ProductId, DateOnly? BestBefore, string UserId, List<Pallet>? Pallets) 
+	public record AddPalletToPickingCommand(Issue Issue, int ProductId, DateOnly? BestBefore, string UserId, Pallet Pallet) 
 		: IRequest<AddPalletToPickingResult>;
 }
 //IReadOnly

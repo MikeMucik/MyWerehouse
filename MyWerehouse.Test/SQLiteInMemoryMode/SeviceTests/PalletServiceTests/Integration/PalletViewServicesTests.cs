@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using MyWerehouse.Application.Mapping;
+using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
 using MyWerehouse.Application.Services;

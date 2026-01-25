@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Picking.Models;
 
-namespace MyWerehouse.Application.ViewModels.AllocationModels
+namespace MyWerehouse.Application.ViewModels.PickingTaskModels
 {
-	public class AllocationDTO
+	public class PickingTaskDTO
 	{
-		public int AllocationId { get; set; }
+		public int PickingTaskId { get; set; }
 		public int IssueId { get; set; }
 		public required string SourcePalletId { get; set; }		
 		public int ProductId { get; set; }

@@ -13,6 +13,7 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using FluentValidation;
 using MyWerehouse.Application.Common.Commands;
+using MyWerehouse.Application.PickingPallets.Services;
 
 namespace MyWerehouse.Application
 {
@@ -45,6 +46,10 @@ namespace MyWerehouse.Application
 			services.AddScoped<IEventCollector, EventCollector>();
 			services.AddScoped<ICommandCollector, CommandCollector>();
 			services.AddTransient<ISynchronizerProductsConfig, SynchronizerProductsConfig>();
+			//new services
+			services.AddTransient<IAddPickingTaskToIssueService, AddPickingTaskToIssueService>();
+			services.AddTransient<ICreatePalletOrAddToPalletService, CreatePalletOrAddToPalletService>();
+			services.AddTransient<IProcessPickingActionService, ProcessPickingActionService>();
 			return services;
 		}
 	}

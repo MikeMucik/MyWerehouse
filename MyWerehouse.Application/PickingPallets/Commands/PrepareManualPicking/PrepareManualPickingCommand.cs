@@ -8,6 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.PrepareManualPicking
 {
-	public record PrepareManualPickingCommand(string PalletId):IRequest<PickingResult>;
-	
+	public record PrepareManualPickingCommand(string PalletId):IRequest<PickingResult>;	
 }

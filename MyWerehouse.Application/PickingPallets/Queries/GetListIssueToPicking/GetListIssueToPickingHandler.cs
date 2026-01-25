@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 				return new List<PickingGuideLineDTO>();
 			}
 			var allNededIssuesIds = pickingPallets
-				.SelectMany(p => p.Allocations)
+				.SelectMany(p => p.PickingTasks)
 				.Select(i => i.IssueId)
 				.Distinct()
 				.ToList();
@@ -34,7 +34,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 			var allIssues = await _issueRepo.GetIssuesByIdsAsync(allNededIssuesIds);
 			var issueDictionary = allIssues.ToDictionary(i => i.Id);
 			return [.. pickingPallets
-				.SelectMany(p => p.Allocations.Select(a => new
+				.SelectMany(p => p.PickingTasks.Select(a => new
 				{
 					IssueId = a.IssueId,
 					Quantity = a.Quantity,

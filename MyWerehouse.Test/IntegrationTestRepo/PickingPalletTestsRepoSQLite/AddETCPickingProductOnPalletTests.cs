@@ -67,7 +67,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 				LocationId = pallet.LocationId,
 				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 
 			};
 			DbContext.SaveChanges();
@@ -91,7 +91,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 
 			// Sprawdź ilości
 			Assert.Equal(10, createdVirtualPallet.InitialPalletQuantity);
-			Assert.Empty(createdVirtualPallet.Allocations);
+			Assert.Empty(createdVirtualPallet.PickingTasks);
 
 			// Sprawdź powiązany produkt
 			var productOnPallet = createdVirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault();
@@ -151,7 +151,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 				LocationId = pallet.LocationId,
 				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
 				DateMoved = DateTime.Now,
-				Allocations = new List<Allocation>()
+				PickingTasks = new List<PickingTask>()
 
 			};
 			DbContext.VirtualPallets.Add(virtualPallet);

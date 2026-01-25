@@ -252,7 +252,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						InitialPalletQuantity = 200,
 						LocationId = 3,
 						DateMoved = new DateTime(2025, 5, 5),
-						//Allocations = new List<Allocation> {new Allocation
+						//PickingTasks = new List<PickingTask> {new PickingTask
 						//	{
 						//		PickingStatus = PickingStatus.Allocated,
 						//		IssueId = 2,
@@ -267,9 +267,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						InitialPalletQuantity = 150,
 						LocationId = 3,
 						DateMoved = new DateTime(2024, 6, 6),
-						//Allocations = new List<Allocation>
+						//PickingTasks = new List<PickingTask>
 						//	{
-						//		new Allocation
+						//		new PickingTask
 						//		{
 						//			PickingStatus = PickingStatus.Allocated,
 						//			IssueId = 2,
@@ -284,9 +284,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						InitialPalletQuantity = 300,
 						LocationId = 3,
 						DateMoved = new DateTime(2025, 5, 7),
-						//Allocations = new List<Allocation>
+						//PickingTasks = new List<PickingTask>
 						//{
-						//	new Allocation
+						//	new PickingTask
 						//	{
 						//		PickingStatus = PickingStatus.Allocated,
 						//		IssueId = 2,
@@ -295,10 +295,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						//}
 					});
 			}
-			if (!context.Allocations.Any())
+			if (!context.PickingTasks.Any())
 			{
-				context.Allocations.AddRange(
-					new Allocation
+				context.PickingTasks.AddRange(
+					new PickingTask
 					{
 						Id = 1,
 						VirtualPalletId = 1,
@@ -308,7 +308,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						ProductId = 11,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
 
-					}, new Allocation
+					}, new PickingTask
 					{
 						Id = 2,
 						VirtualPalletId = 1,
@@ -317,7 +317,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Quantity = 20,
 						ProductId = 11,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
-					}, new Allocation
+					}, new PickingTask
 					{
 						Id = 3,
 						VirtualPalletId = 2,
@@ -326,7 +326,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Quantity = 50,
 						ProductId = 11,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
-					}, new Allocation
+					}, new PickingTask
 					{
 						Id = 4,
 						VirtualPalletId = 3,
@@ -335,7 +335,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Quantity = 100,
 						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
-					}, new Allocation
+					}, new PickingTask
 					{
 						Id = 5,
 						VirtualPalletId = 3,
@@ -582,7 +582,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.ReversePickings.AddRange(
 					new ReversePicking
 					{
-						AllocationId = 2,
+						PickingTaskId = 2,
 						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
 						PickingPalletId = "Q5000",
@@ -593,7 +593,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new ReversePicking
 					{
-						AllocationId = 5,
+						PickingTaskId = 5,
 						ProductId = 20,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
 						PickingPalletId = "Q5000",

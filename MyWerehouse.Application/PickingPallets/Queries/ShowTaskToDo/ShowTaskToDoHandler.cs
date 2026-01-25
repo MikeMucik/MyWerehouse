@@ -4,35 +4,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.ViewModels.AllocationModels;
+using MyWerehouse.Application.ViewModels.PickingTaskModels;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo
 {
-	public class ShowTaskToDoHandler:IRequestHandler<ShowTaskToDoQuery, List<AllocationDTO>>
+	public class ShowTaskToDoHandler:IRequestHandler<ShowTaskToDoQuery, List<PickingTaskDTO>>
 	{
 		private readonly IPickingPalletRepo _pickingPalletRepo;
-		private readonly IAllocationRepo _allocationRepo;
+		private readonly IPickingTaskRepo _pickingTaskRepo;
 		public ShowTaskToDoHandler(IPickingPalletRepo pickingPalletRepo,
-			IAllocationRepo allocationRepo)
+			IPickingTaskRepo pickingTaskRepo)
 		{
 			_pickingPalletRepo = pickingPalletRepo;
-			_allocationRepo = allocationRepo;
+			_pickingTaskRepo = pickingTaskRepo;
 		}
-		public async Task<List<AllocationDTO>> Handle (ShowTaskToDoQuery request, CancellationToken ct)
+		public async Task<List<PickingTaskDTO>> Handle (ShowTaskToDoQuery request, CancellationToken ct)
 		{
 			var palletVirtualId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(request.PalletSourceScannedId);
-			var allocations = await _allocationRepo.GetAllocationListAsync(palletVirtualId, request.PickingDate);
+			var pickingTasks = await _pickingTaskRepo.GetPickingTaskListAsync(palletVirtualId, request.PickingDate);
 			//mapper??
-			return allocations.Select(allocation => new AllocationDTO
+			return pickingTasks.Select(pickingTask => new PickingTaskDTO
 			{
-				AllocationId = allocation.Id,
-				IssueId = allocation.IssueId,
-				SourcePalletId = allocation.VirtualPallet.Pallet.Id,
-				ProductId = allocation.VirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
-				PickingStatus = allocation.PickingStatus,
-				RequestedQuantity = allocation.Quantity,
-				BestBefore = allocation.BestBefore
+				PickingTaskId = pickingTask.Id,
+				IssueId = pickingTask.IssueId,
+				SourcePalletId = pickingTask.VirtualPallet.Pallet.Id,
+				ProductId = pickingTask.VirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault()?.ProductId ?? 0,
+				PickingStatus = pickingTask.PickingStatus,
+				RequestedQuantity = pickingTask.Quantity,
+				BestBefore = pickingTask.BestBefore
 			}).ToList();
 		}
 	}

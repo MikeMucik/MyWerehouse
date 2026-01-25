@@ -8,25 +8,25 @@ using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
-namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
+namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 {
 	[Collection("QueryCollection")]
-	public class ViewAllocationRepoTests
+	public class ViewPickingTaskRepoTests
 	{
-		private readonly AllocationRepo _allocationRepo;
+		private readonly PickingTaskRepo _pickingTaskRepo;
 		private readonly QueryTestFixture _fixture;
-		public ViewAllocationRepoTests(QueryTestFixture fixture)
+		public ViewPickingTaskRepoTests(QueryTestFixture fixture)
 		{
 			_fixture = fixture;
-			_allocationRepo = new AllocationRepo(_fixture.DbContext);
+			_pickingTaskRepo = new PickingTaskRepo(_fixture.DbContext);
 		}
 		[Fact]
-		public async Task TakeAllocationById_GetAllocationAsync_ReturnProperData()
+		public async Task TakePickingTaskById_GetPickingTaskAsync_ReturnProperData()
 		{
 			//Arrange
-			var allocationId = 1;
+			var pickingTaskId = 1;
 			//Act
-			var result = await _allocationRepo.GetAllocationAsync(allocationId);
+			var result = await _pickingTaskRepo.GetPickingTaskAsync(pickingTaskId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.IssueId);
@@ -34,14 +34,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			Assert.Equal(3, result.VirtualPallet.LocationId);
 		}
 		[Fact]
-		public async Task ByVirtualPalletAndDatePicking_GetAllocationListAsync_ReturnList()
+		public async Task ByVirtualPalletAndDatePicking_GetPickingTaskListAsync_ReturnList()
 		{
 			//Arrange
 			var virtualPalletId = 1;
 			var date = new DateTime(2025, 5, 5);
-			//var checkId = await _allocationRepo.GetAllocationAsync(1);
+			//var checkId = await _pickingTaskRepo.GetPickingTaskAsync(1);
 			//Act
-			var result = await _allocationRepo.GetAllocationListAsync(virtualPalletId, date);
+			var result = await _pickingTaskRepo.GetPickingTaskListAsync(virtualPalletId, date);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result); // coś zostało znalezione
@@ -60,13 +60,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			});
 		}
 		[Fact]
-		public async Task ByIssueAndProductId_GetAllocationsByIssueIdProductIdAsync_ReturnList()
+		public async Task ByIssueAndProductId_GetPickingTasksByIssueIdProductIdAsync_ReturnList()
 		{
 			//Arrange
 			var issueId = 2;
 			var productId = 11;
 			//Act
-			var result = await _allocationRepo.GetAllocationsByIssueIdProductIdAsync(issueId, productId);
+			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -75,11 +75,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			Assert.All(result, a=> Assert.Equal(productId, a.ProductId));
 		}
 		[Fact]
-		public async Task ByIssue_GetAllocationsByIssueIdAsync_ReturnList()
+		public async Task ByIssue_GetPickingTasksByIssueIdAsync_ReturnList()
 		{
 			var issueId = 2;			
 			//Act
-			var result = await _allocationRepo.GetAllocationsByIssueIdAsync(issueId);
+			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issueId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -87,13 +87,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.AllocationTestsRepoSQLite
 			Assert.All(result, a => Assert.Equal(issueId, a.IssueId));
 		}
 		[Fact]
-		public async Task ByProductIdAndDates_GetAllocationsProductIdAsync_ReturnList()
+		public async Task ByProductIdAndDates_GetPickingTasksProductIdAsync_ReturnList()
 		{
 			var productId = 11;
 			var dateStart = new DateTime(2025, 4,6);
 			var dateEnd = new DateTime(2025, 5, 7);
 			//Act
-			var result = await _allocationRepo.GetAllocationsProductIdAsync(productId, dateStart, dateEnd);
+			var result = await _pickingTaskRepo.GetPickingTasksProductIdAsync(productId, dateStart, dateEnd);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);

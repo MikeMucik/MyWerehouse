@@ -77,7 +77,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 			//var totalFromPicking = await pickingQuery.SumAsync(pp => pp.RemainingQuantity);
 			var totalFromPicking = await pickingQuery
-				.Select(pp => pp.InitialPalletQuantity - (pp.Allocations.Sum(a =>(int?) a.Quantity) ?? 0))
+				.Select(pp => pp.InitialPalletQuantity - (pp.PickingTasks.Sum(a =>(int?) a.Quantity) ?? 0))
 				.SumAsync();
 
 			return totalFromFullPallets + totalFromPicking;
@@ -113,7 +113,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 					.Any(pop => pop.ProductId == productId && pop.BestBefore >= bestBefore));
 			}
 			var totalAllocated = await palletsWithProduct
-			   .SelectMany(pp => pp.Allocations)
+			   .SelectMany(pp => pp.PickingTasks)
 			   .SumAsync(a => (int?)a.Quantity) ?? 0;
 			return totalAllocated;
 		}

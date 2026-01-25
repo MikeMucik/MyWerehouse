@@ -386,7 +386,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				Pallet = pallet1,
 				InitialPalletQuantity = 100,
 				DateMoved = DateTime.Now,
-				Allocations = new List<Allocation> {new Allocation
+				PickingTasks = new List<PickingTask> {new PickingTask
 					{
 						Issue = issue,
 						PickingStatus = PickingStatus.Allocated,
@@ -405,13 +405,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			DbContext.SaveChanges();
 			var historyPicking = new HistoryPicking
 			{
-				AllocationId = virtualPallet.Allocations.First().Id,
-				QuantityAllocated = virtualPallet.Allocations.First().Quantity,
+				PickingTaskId = virtualPallet.PickingTasks.First().Id,
+				QuantityAllocated = virtualPallet.PickingTasks.First().Quantity,
 				StatusAfter = PickingStatus.Picked,
 				DateTime = DateTime.Now,
 				PerformedBy = "A",
 				StatusBefore = PickingStatus.Allocated,
-				ProductId = virtualPallet.Allocations.First().ProductId,
+				ProductId = virtualPallet.PickingTasks.First().ProductId,
 				QuantityPicked = 1,
 				IssueId = issue.Id,
 				PalletId = pallet1.Id,

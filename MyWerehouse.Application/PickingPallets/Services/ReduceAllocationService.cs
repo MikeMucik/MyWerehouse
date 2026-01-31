@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
@@ -23,27 +24,54 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			_pickingTaskRepo = pickingTaskRepo;
 			_eventCollector = eventCollector;
 		}
-		public async Task ReduceAllocation(Issue issue, int productId, string userId)
-		{
-			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId);
-			foreach (var item in pickingTasks)
+		public async Task ReduceAllocation(Issue issue, int productId,int quantity, string userId)
+		{			
+			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId) ?? throw new NotFoundAlloactionException("Brak alokacji do redukcji");
+			foreach (var pickingTask in pickingTasks)
 			{
-				item.PickingStatus = PickingStatus.Cancelled;
-				_eventCollector.Add(new CreateHistoryPickingNotification(new HistoryDataPicking
-				(
-								item.Id,
-								item.VirtualPallet.PalletId,
-								item.IssueId,
-								item.ProductId,
-								item.Quantity,
+				if (quantity <= 0) break;
+
+				if (quantity > 0)
+				{
+					if (pickingTask.RequestedQuantity > quantity)
+					{
+						pickingTask.RequestedQuantity -= quantity;
+						quantity = 0;
+						var historyPicking = new HistoryDataPicking
+							(
+								pickingTask.Id,
+								pickingTask.VirtualPallet.PalletId,
+								pickingTask.IssueId,
+								pickingTask.ProductId,
+								pickingTask.RequestedQuantity,
 								0,
-								PickingStatus.Allocated,
-								item.PickingStatus,
+								PickingStatus.Correction,
+								pickingTask.PickingStatus,
 								userId,
-								DateTime.UtcNow
-				)));
-			}
-			throw new NotImplementedException();
+								DateTime.UtcNow);
+						_eventCollector.Add(new CreateHistoryPickingNotification(historyPicking));
+					}
+					else
+					{
+						quantity -= pickingTask.RequestedQuantity;
+						pickingTask.PickingStatus = PickingStatus.Cancelled;
+						pickingTask.RequestedQuantity = 0;
+						var historyPicking = new HistoryDataPicking
+							(
+								pickingTask.Id,
+								pickingTask.VirtualPallet.PalletId,
+								pickingTask.IssueId,
+								pickingTask.ProductId,
+								pickingTask.RequestedQuantity,
+								0,
+								PickingStatus.Correction,
+								pickingTask.PickingStatus,
+								userId,
+								DateTime.UtcNow);
+						_eventCollector.Add(new CreateHistoryPickingNotification(historyPicking));
+					}
+				}				
+			}			
 		}
 	}
 }

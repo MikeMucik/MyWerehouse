@@ -9,7 +9,6 @@ using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Utils;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Application.ViewModels.ProductModels;
@@ -21,6 +20,7 @@ using MyWerehouse.Domain.Receviving.Filters;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Domain.Clients.Filters;
+using MyWerehouse.Application.Common.Utils;
 
 namespace MyWerehouse.Application.Services
 {

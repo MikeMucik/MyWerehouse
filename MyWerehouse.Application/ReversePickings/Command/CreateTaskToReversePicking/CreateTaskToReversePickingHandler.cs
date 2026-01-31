@@ -54,7 +54,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.CreateTaskToReversePic
 				listTasks.Add(new ReversePicking
 				{
 					PickingPalletId = request.PalletId,
-					Quantity = pickingTaskToReverse.Quantity,
+					Quantity = pickingTaskToReverse.RequestedQuantity,
 					ProductId = pickingTaskToReverse.ProductId,
 					BestBefore = pickingTaskToReverse.BestBefore,
 					Status = ReversePickingStatus.Pending,

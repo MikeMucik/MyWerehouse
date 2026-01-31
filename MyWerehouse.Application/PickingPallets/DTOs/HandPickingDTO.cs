@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 	public class HandPickingDTO : IMapFrom<HandPickingTask>
 	{
 		public int Id { get; set; }
-		public int IssuedId { get; set; }
+		public int IssueId { get; set; }
 		public int ProductId { get; set; }
 		public int Quantity { get; set; }
 		public PickingStatus PickingStatus { get; set; }

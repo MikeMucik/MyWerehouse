@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using MyWerehouse.Application.Common.Utils;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Application.Utils;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Services

@@ -390,7 +390,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 					{
 						Issue = issue,
 						PickingStatus = PickingStatus.Allocated,
-						Quantity = 10,
+						RequestedQuantity = 10,
 					}
 				}
 			};
@@ -406,7 +406,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			var historyPicking = new HistoryPicking
 			{
 				PickingTaskId = virtualPallet.PickingTasks.First().Id,
-				QuantityAllocated = virtualPallet.PickingTasks.First().Quantity,
+				QuantityAllocated = virtualPallet.PickingTasks.First().RequestedQuantity,
 				StatusAfter = PickingStatus.Picked,
 				DateTime = DateTime.Now,
 				PerformedBy = "A",

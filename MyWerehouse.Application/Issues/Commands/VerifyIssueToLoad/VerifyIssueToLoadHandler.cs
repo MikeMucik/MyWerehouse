@@ -16,7 +16,7 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 {
-	public class VerifyIssueToLoadHandler :IRequestHandler<VerifyIssueToLoadCommand, IssueResult>
+	public class VerifyIssueToLoadHandler : IRequestHandler<VerifyIssueToLoadCommand, IssueResult>
 	{
 		private readonly IIssueRepo _issueRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 		{
 			_issueRepo = issueRepo;
 			_werehouseDbContext = werehouseDbContext;
-			_mediator = mediator;	
+			_mediator = mediator;
 		}
 		public async Task<IssueResult> Handle(VerifyIssueToLoadCommand request, CancellationToken ct)
 		{
@@ -41,9 +41,14 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 				issue.IssueStatus = IssueStatus.ConfirmedToLoad;
 				foreach (var pallet in issue.Pallets)
 				{
-					pallet.Status = PalletStatus.ToIssue;
-					notificationList.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId, ReasonMovement.ToLoad, request.UserId, PalletStatus.ToIssue, null));
+					if (pallet.Status != PalletStatus.ToIssue)
+					{
+						pallet.Status = PalletStatus.ToIssue;
+					}
+					notificationList.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId,
+						ReasonMovement.ToLoad, request.UserId, PalletStatus.ToIssue, null));
 				}
+
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId), ct);//

@@ -132,7 +132,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PerformedBy = "U002",
 						ReceiptDateTime = new DateTime(2023, 4, 4)
 					}
-					);
+										);
 			}
 			if (!context.Issues.Any())
 			{
@@ -141,8 +141,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					Id = 2,
 					ClientId = 11,
 					PerformedBy = "U002",
-					IssueDateTimeCreate = new DateTime(2025, 5, 5),
-					IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
+					IssueDateTimeCreate = DateTime.UtcNow.AddDays(-5),
+					//IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
+					IssueDateTimeSend = DateTime.UtcNow.AddHours(23),//zmiana 
 					IssueItems = new List<IssueItem> { new IssueItem
 					{
 						ProductId = 10,
@@ -251,14 +252,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PalletId = "Q1100",
 						InitialPalletQuantity = 200,
 						LocationId = 3,
-						DateMoved = new DateTime(2025, 5, 5),
-						//PickingTasks = new List<PickingTask> {new PickingTask
-						//	{
-						//		PickingStatus = PickingStatus.Allocated,
-						//		IssueId = 2,
-						//		Quantity = 20
-						//	}
-						//}
+						DateMoved = DateTime.UtcNow.AddDays(-1)						
 					},
 					new VirtualPallet
 					{
@@ -266,16 +260,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PalletId = "Q1101",
 						InitialPalletQuantity = 150,
 						LocationId = 3,
-						DateMoved = new DateTime(2024, 6, 6),
-						//PickingTasks = new List<PickingTask>
-						//	{
-						//		new PickingTask
-						//		{
-						//			PickingStatus = PickingStatus.Allocated,
-						//			IssueId = 2,
-						//			Quantity = 50
-						//		}
-						//	}
+						DateMoved = new DateTime(2024, 6, 6),						
 					},
 					new VirtualPallet
 					{
@@ -283,16 +268,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PalletId = "Q1200",
 						InitialPalletQuantity = 300,
 						LocationId = 3,
-						DateMoved = new DateTime(2025, 5, 7),
-						//PickingTasks = new List<PickingTask>
-						//{
-						//	new PickingTask
-						//	{
-						//		PickingStatus = PickingStatus.Allocated,
-						//		IssueId = 2,
-						//		Quantity = 100
-						//	}
-						//}
+						DateMoved = DateTime.UtcNow.AddDays(-1)						
 					});
 			}
 			if (!context.PickingTasks.Any())
@@ -304,46 +280,62 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						VirtualPalletId = 1,
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = 2,
-						Quantity = 20,
+						RequestedQuantity = 20,
 						ProductId = 11,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
-
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
+						
 					}, new PickingTask
 					{
 						Id = 2,
 						VirtualPalletId = 1,
 						PickingStatus = PickingStatus.Picked,
 						IssueId = 2,
-						Quantity = 20,
+						RequestedQuantity = 20,
 						ProductId = 11,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
 					{
 						Id = 3,
 						VirtualPalletId = 2,
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = 2,
-						Quantity = 50,
+						RequestedQuantity = 50,
 						ProductId = 11,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
 					{
 						Id = 4,
 						VirtualPalletId = 3,
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = 2,
-						Quantity = 100,
+						RequestedQuantity = 100,
 						ProductId = 10,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
 					{
 						Id = 5,
 						VirtualPalletId = 3,
 						PickingStatus = PickingStatus.Picked,
 						IssueId = 2,
-						Quantity = 10,
+						RequestedQuantity = 10,
 						ProductId = 10,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366))
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
+					},
+					new PickingTask
+					{
+						Id = 6,
+						VirtualPalletId = 1,
+						PickingStatus = PickingStatus.Allocated,
+						IssueId = 2,
+						RequestedQuantity = 20,
+						ProductId = 11,
+						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
+						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}
 					);
 			}

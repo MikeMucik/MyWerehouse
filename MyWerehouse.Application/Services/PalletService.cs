@@ -15,19 +15,11 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet;
 using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.Commands.DeletePallet;
-using MyWerehouse.Application.Pallets.Commands.ReservedPallet;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Application.Pallets.Events.CreateMovement;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
-using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
-using MyWerehouse.Application.Utils;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Filters;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Services
 {

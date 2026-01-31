@@ -14,14 +14,12 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public class AddPickingTaskToIssueService : IAddPickingTaskToIssueService
 	{
-		private readonly IPickingTaskRepo _pickingTaskRepo;
-		
+		private readonly IPickingTaskRepo _pickingTaskRepo;		
 		private readonly IProductRepo _productRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly IPalletRepo _palletRepo;
@@ -91,27 +89,44 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			}
 			foreach (var pickingTask in pickingTasks)
 			{
-				_pickingTaskRepo.AddPickingTask(pickingTask);
+				//_pickingTaskRepo.AddPickingTask(pickingTask);
 				//history to remove in future
 				_eventCollector.AddDeferred(() => new CreateHistoryPickingNotification(
 					new HistoryDataPicking(
 						pickingTask.Id, pickingTask.VirtualPallet.PalletId, pickingTask.IssueId,
-						pickingTask.ProductId, pickingTask.Quantity, 0, PickingStatus.Allocated,
+						pickingTask.ProductId, pickingTask.RequestedQuantity, 0, PickingStatus.Allocated,
 						pickingTask.PickingStatus, userId, DateTime.UtcNow)));
 			}
 			return AddPickingTaskToIssueResult.Ok(pickingTasks);
+		}	
+
+		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, int productId, int quantity, DateOnly? bestBefore, string userId)
+		{
+			_ = await _productRepo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException(productId);
+			var pickingTask = CreatePickingTask(issue, quantity, virtualPallet, productId, bestBefore);
+			pickingTask.VirtualPallet = virtualPallet;
+			//_pickingTaskRepo.AddPickingTask(pickingTask);
+			 virtualPallet.PickingTasks.Add(pickingTask);
+			//history to remove in future
+			_eventCollector.AddDeferred(() => new CreateHistoryPickingNotification(
+				new HistoryDataPicking(
+					pickingTask.Id, pickingTask.VirtualPallet.PalletId, pickingTask.IssueId,
+					pickingTask.ProductId, pickingTask.RequestedQuantity, 0, PickingStatus.Allocated,
+					pickingTask.PickingStatus,  userId, DateTime.UtcNow)));
+			return AddPickingTaskToIssueResult.Ok(pickingTask);			
 		}
-		private static PickingTask CreatePickingTask(Issue issue, int quantity,
+	private static PickingTask CreatePickingTask(Issue issue, int quantity,
 			VirtualPallet vp, int productId, DateOnly? bestBefore)
 		{
 			return new()
 			{
 				Issue = issue,
-				Quantity = quantity,
+				RequestedQuantity = quantity,
 				PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = vp,
 				ProductId = productId,
-				BestBefore = bestBefore
+				BestBefore = bestBefore,
+				PickingDay =DateOnly.FromDateTime( issue.IssueDateTimeSend.AddDays(-2)) //added new field
 			};
 		}
 	}

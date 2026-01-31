@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 
-namespace MyWerehouse.Application.PickingPallets.Commands.PrepareManualPicking
+namespace MyWerehouse.Application.PickingPallets.Queries.PrepareCorrectedPicking
 {
-	public record PrepareManualPickingCommand(string PalletId):IRequest<PickingResult>;	
+	public record PrepareCorrectedPickingQuery(string PalletId):IRequest<PrepareCorrectedPickingResult>;	
 }

@@ -14,17 +14,21 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
+using MyWerehouse.Application.Inventories.Services;
 
 namespace MyWerehouse.Application.Services
 {
 	public class InventoryService : IInventoryService
 	{		
 		private readonly IMediator _mediator;
+		private readonly IGetProductCountService _getProductCountService;
 
 		public InventoryService(			
-			IMediator mediator)
+			IMediator mediator,
+			IGetProductCountService getProductCountService)
 		{			
 			_mediator = mediator;
+			_getProductCountService = getProductCountService;
 		}
 
 		public async Task ChangeProductQuantityAsync(int productId, int quantity)
@@ -81,7 +85,8 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<int> GetProductCountAsync(int productId, DateOnly? bestBefore)
 		{
-			return	await _mediator.Send(new GetProductCountQuery(productId, bestBefore));
+			//return	await _mediator.Send(new GetProductCountQuery(productId, bestBefore));
+			return	await _getProductCountService.GetProductCountAsync( productId, bestBefore);
 			//var totalProductByDate = await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
 			//var totalProductReservedToIssues = await _inventoryRepo.GetQuantityProductReservedForIssueAsync(productId, bestBefore);
 			//var totalProductReservedToPicking = await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId, bestBefore);

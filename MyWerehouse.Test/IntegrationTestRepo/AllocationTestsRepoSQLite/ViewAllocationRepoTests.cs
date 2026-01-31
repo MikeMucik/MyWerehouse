@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.IssueId);
-			Assert.Equal(20, result.Quantity);
+			Assert.Equal(20, result.RequestedQuantity);
 			Assert.Equal(3, result.VirtualPallet.LocationId);
 		}
 		[Fact]
@@ -38,8 +38,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		{
 			//Arrange
 			var virtualPalletId = 1;
-			var date = new DateTime(2025, 5, 5);
-			//var checkId = await _pickingTaskRepo.GetPickingTaskAsync(1);
+			var date = DateTime.UtcNow;
 			//Act
 			var result = await _pickingTaskRepo.GetPickingTaskListAsync(virtualPalletId, date);
 			//Assert
@@ -83,21 +82,21 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(5,result.Count);
+			Assert.Equal(6,result.Count);
 			Assert.All(result, a => Assert.Equal(issueId, a.IssueId));
 		}
 		[Fact]
 		public async Task ByProductIdAndDates_GetPickingTasksProductIdAsync_ReturnList()
 		{
-			var productId = 11;
-			var dateStart = new DateTime(2025, 4,6);
-			var dateEnd = new DateTime(2025, 5, 7);
+			var productId = 11;			
+			var dateStart = DateTime.UtcNow;
+			var dateEnd = DateTime.UtcNow.AddDays(1);
 			//Act
 			var result = await _pickingTaskRepo.GetPickingTasksProductIdAsync(productId, dateStart, dateEnd);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(2, result.Count);
+			Assert.Equal(3, result.Count);
 			Assert.All(result, a => Assert.Equal(productId, a.ProductId));
 
 		}

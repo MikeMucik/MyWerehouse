@@ -8,5 +8,5 @@ using MyWerehouse.Application.PickingPallets.DTOs;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 {
-	public record GetListToPickingQuery(DateTime DateIssueStart, DateTime DateIssueEnd):IRequest<List<ProductToIssueDTO>>;	
+	public record GetListToPickingQuery(DateOnly DateIssueStart, DateOnly DateIssueEnd):IRequest<List<ProductToIssueDTO>>;	
 }

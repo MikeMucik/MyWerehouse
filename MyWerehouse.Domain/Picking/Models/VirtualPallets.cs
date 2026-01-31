@@ -24,6 +24,6 @@ namespace MyWerehouse.Domain.Picking.Models
 		public virtual ICollection<PickingTask> PickingTasks { get; set; } //= new List<PickingTask>();
 		public virtual ICollection<HistoryPicking> HistoryPicking { get; set; } = new List<HistoryPicking>();
 		[NotMapped]
-		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a=>a.Quantity) ?? 0);		
+		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a=>a.RequestedQuantity) ?? 0);		
 	}
 }

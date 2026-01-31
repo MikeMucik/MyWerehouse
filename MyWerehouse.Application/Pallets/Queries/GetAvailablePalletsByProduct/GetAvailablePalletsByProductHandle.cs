@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct
 						.Select(x => x.BestBefore)
 						.FirstOrDefault()
 				})
-				.OrderByDescending(x => x.BestBefore);
+				.OrderBy(x => x.BestBefore);
 
 			var palletList = await palletsQuery.ToListAsync(ct);
 

@@ -96,7 +96,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var pickingTask1 = new PickingTask
 			{
 				Issue = issue,
-				Quantity = 5,
+				RequestedQuantity = 5,
 				PickingStatus = PickingStatus.Picked,
 				ProductId = product.Id,
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),

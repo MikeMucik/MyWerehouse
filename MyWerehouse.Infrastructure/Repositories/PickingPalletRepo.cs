@@ -40,7 +40,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 					.Include(p => p.Pallet)
 						.ThenInclude(pp => pp.ProductsOnPallet)
 					.Where(p => p.Pallet.ProductsOnPallet.Any(p => p.ProductId == productId) && p.Pallet.Status == PalletStatus.ToPicking)
-					.OrderBy(p => p.InitialPalletQuantity - p.PickingTasks.Sum(a => a.Quantity))
+					.OrderBy(p => p.InitialPalletQuantity - p.PickingTasks.Sum(a => a.RequestedQuantity))
 					.ToListAsync();
 			return list;
 		}
@@ -53,11 +53,24 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Where(p => p.DateMoved >= start && p.DateMoved <= end)
 				.ToListAsync();
 			return list;
-		}		
+		}
+		public async Task<List<VirtualPallet>> GetVirtualPalletsByTimePickingTaskAsync(DateOnly start, DateOnly end)
+		{
+			var list = await _werehouseDbContext.VirtualPallets
+				.Include(a => a.PickingTasks)
+				.Include(p => p.Pallet)
+					.ThenInclude(pp => pp.ProductsOnPallet)
+				.Where(vp=> 
+				vp.PickingTasks.Any(pt=> 
+				pt.PickingDay <= end && pt.PickingDay >= start && pt.PickingStatus == PickingStatus.Allocated))
+				.ToListAsync();
+			return list;
+		}
 		public async Task<int> GetVirtualPalletIdFromPalletIdAsync(string palletId)
 		{
 			var palletPicking = await _werehouseDbContext.VirtualPallets
 				.FirstOrDefaultAsync(p => p.PalletId == palletId);
+			if (palletPicking == null) { return 0; }
 			return palletPicking.Id;
 		}
 		public async Task<VirtualPallet> GetVirtualPalletByIdAsync(int palletId)
@@ -75,11 +88,5 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			return await _werehouseDbContext.VirtualPallets.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId).ToListAsync();
 		}
-
-		//public async Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId)
-		//{
-		//var list = await _werehouseDbContext.VirtualPallets
-		//		.SelectMany(x=>x.PickingTasks.)
-		//}
 	}
 }

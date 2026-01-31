@@ -61,14 +61,14 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 						foreach (var pickingTask in issueToDelete.PickingTasks)
 						{
 							pickingTask.PickingStatus = PickingStatus.Cancelled;
-							pickingTask.Quantity = 0;
+							pickingTask.RequestedQuantity = 0;
 							var historyPicking = new HistoryDataPicking
 							(
 								pickingTask.Id,
 								pickingTask.VirtualPallet.PalletId,
 								pickingTask.IssueId,
 								pickingTask.ProductId,
-								pickingTask.Quantity,
+								pickingTask.RequestedQuantity,
 								0,
 								PickingStatus.Allocated,
 								PickingStatus.Cancelled,

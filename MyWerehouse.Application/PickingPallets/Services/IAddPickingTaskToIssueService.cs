@@ -14,6 +14,9 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	{
 		Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets,
 			List<VirtualPallet> virtualPallets, Issue issue, int productId,
-			int rest, DateOnly? bestBefore, string UserId);
+			int rest, DateOnly? bestBefore, string userId);
+		Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(
+			VirtualPallet virtualPallet, Issue issue, int productId,
+			int quantity, DateOnly? bestBefore, string userId);
 	}
 }

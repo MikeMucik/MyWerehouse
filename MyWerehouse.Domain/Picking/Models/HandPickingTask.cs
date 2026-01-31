@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Domain.Picking.Models
 {
@@ -10,7 +12,9 @@ namespace MyWerehouse.Domain.Picking.Models
 	{
 		public int Id { get; set; }
 		public int IssueId { get; set; }
+		public Issue Issue { get; set; }
 		public int ProductId { get; set; }
+		public Product Product { get; set; }
 		public int Quantity { get; set; }
 		public PickingStatus PickingStatus { get; set; }
 		public DateOnly? BestBefore { get; set; }

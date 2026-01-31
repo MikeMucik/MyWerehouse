@@ -8,6 +8,6 @@ using MyWerehouse.Application.PickingPallets.DTOs;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet
 {
-	public record GetListPickingPalletQuery(DateTime DateMovedStart, DateTime DateMovedEnd): IRequest<List<PickingPalletWithLocationDTO>>;
+	public record GetListPickingPalletQuery(DateOnly DateMovedStart, DateOnly DateMovedEnd): IRequest<List<PickingPalletWithLocationDTO>>;
 	
 }

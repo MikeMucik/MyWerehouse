@@ -56,7 +56,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
 			try
 			{				
 				var newPickingTask = new PickingTask();
-				var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.PickingTaskId);
+				var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.Id);
 				var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(pickingTaskToChange.VirtualPalletId);
 				var issueId = pickingTaskToChange.IssueId;
 				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new NotFoundIssueException(issueId);
@@ -79,7 +79,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
 				await _processPickingActionService.ProcessPicking(sourcePallet, issue, request.PickingTaskDTO.ProductId,
 						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion);
 				var historyPicking = new HistoryDataPicking(pickingTaskToChange.Id, pickingTaskToChange.VirtualPallet.PalletId,
-							pickingTaskToChange.IssueId, pickingTaskToChange.ProductId, pickingTaskToChange.Quantity,
+							pickingTaskToChange.IssueId, pickingTaskToChange.ProductId, pickingTaskToChange.RequestedQuantity,
 							request.PickingTaskDTO.PickedQuantity, PickingStatus.Allocated, pickingTaskToChange.PickingStatus,
 							request.UserId, DateTime.UtcNow);
 				_eventCollector.Add(new CreateHistoryPickingNotification(historyPicking));

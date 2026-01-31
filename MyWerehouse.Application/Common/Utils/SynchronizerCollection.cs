@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Application.Utils
+namespace MyWerehouse.Application.Common.Utils
 {
 	public static class CollectionSynchronizer
 	{

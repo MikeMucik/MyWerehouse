@@ -4,7 +4,6 @@ using FluentValidation;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Utils;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Products.Models;

@@ -4,16 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Inventories.Queries.GetProductCount;
-using MyWerehouse.Application.Issues.Commands.AssignFullPalletToIssue;
+using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.Pallets.Queries.GetAvailablePalletsByProduct;
+using MyWerehouse.Application.Issues.IssuesServices;
+using MyWerehouse.Application.Pallets.Services;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
-using MyWerehouse.Application.PickingPallets.Queries.GetVirtualPallets;
 using MyWerehouse.Application.PickingPallets.Services;
-using MyWerehouse.Application.Products.Queries.GetNumberPalletsAndRest;
+using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
@@ -22,30 +21,30 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 {
-	public class UpdateIssueNewHandler : IRequestHandler<UpdateIssueNewCommand, List<IssueResult>>
+	public class UpdateIssueNewHandler(IIssueItemRepo issueItemRepo,
+		IIssueRepo issueRepo,
+		IMediator mediator,
+		WerehouseDbContext werehouseDbContext,
+		IEventCollector eventCollector,
+		IProductRepo productRepo, IAddPickingTaskToIssueService addPickingTaskToIssueService,
+		IGetVirtualPalletsService getVirtualPalletsService,
+		IGetProductCountService getProductCount,
+		IGetNumberPalletsAndRestService getNumberPalletsAndRestService,
+		IGetAvailablePalletsByProductService getAvailablePalletsByProductService,
+		IAssignFullPalletToIssueService assignFullPalletToIssueService) : IRequestHandler<UpdateIssueNewCommand, List<IssueResult>>
 	{
-		private readonly IIssueItemRepo _issueItemRepo;
-		private readonly IIssueRepo _issueRepo;
-		private readonly IMediator _mediator;
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IEventCollector _eventCollector;
-		private readonly IProductRepo _productRepo;
-		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService;
-		public UpdateIssueNewHandler(IIssueItemRepo issueItemRepo
-			, IIssueRepo issueRepo,
-				IMediator mediator,
-				WerehouseDbContext werehouseDbContext,
-				IEventCollector eventCollector,
-				IProductRepo productRepo,IAddPickingTaskToIssueService addPickingTaskToIssueService)
-		{
-			_issueItemRepo = issueItemRepo;
-			_issueRepo = issueRepo;
-			_mediator = mediator;
-			_werehouseDbContext = werehouseDbContext;
-			_eventCollector = eventCollector;
-			_productRepo = productRepo;
-			_addPickingTaskToIssueService = addPickingTaskToIssueService;
-		}
+		private readonly IIssueItemRepo _issueItemRepo = issueItemRepo;
+		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly IMediator _mediator = mediator;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IEventCollector _eventCollector = eventCollector;
+		private readonly IProductRepo _productRepo = productRepo;
+		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
+		private readonly IGetVirtualPalletsService _getVirtualPalletsService = getVirtualPalletsService;
+		private readonly IGetProductCountService _getProductCount = getProductCount;
+		private readonly IGetNumberPalletsAndRestService _getNumberPalletsAndRest = getNumberPalletsAndRestService;
+		private readonly IGetAvailablePalletsByProductService _getAvailable = getAvailablePalletsByProductService;
+		private readonly IAssignFullPalletToIssueService _assignFullPalletToIssueService = assignFullPalletToIssueService;
 		public async Task<List<IssueResult>> Handle(UpdateIssueNewCommand request, CancellationToken ct)
 		{
 			var resultList = new List<IssueResult>();
@@ -76,7 +75,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 							pickingTask.VirtualPallet.PalletId,
 							pickingTask.IssueId,
 							pickingTask.ProductId,
-							pickingTask.Quantity,
+							pickingTask.RequestedQuantity,
 							0,
 							pickingTask.PickingStatus,
 							PickingStatus.Cancelled,
@@ -99,8 +98,9 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 							var existingIssueItem = issue.IssueItems
 								.FirstOrDefault(x => x.ProductId == product.ProductId);
 							var oldProperPallets = oldListPallets.Where(p => p.ProductsOnPallet.First().ProductId == product.ProductId);
-							//1 dostępność towaru							
-							var totalAvailable = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore), ct);
+							var oldCount = oldProperPallets.Count();
+							//1 dostępność towaru	//var totalAvailable = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore), ct);
+							var totalAvailable = await _getProductCount.GetProductCountAsync(product.ProductId, product.BestBefore);
 							if (product.Quantity > totalAvailable)//
 							{
 								resultList.Add(IssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia."
@@ -108,24 +108,27 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 								anyFailure = true;
 								continue;
 							}
-							//2 Oblicz pełne palety i resztę 
-							var palletAmountFullResult = await _mediator.Send(new GetNumberPalletsAndRestQuery(product.ProductId, product.Quantity), ct);
+							//2 Oblicz pełne palety i resztę //var palletAmountFullResult = await _mediator.Send(new GetNumberPalletsAndRestQuery(product.ProductId, product.Quantity), ct);
+							var palletAmountFullResult = await _getNumberPalletsAndRest.GetNumbers(product.ProductId, product.Quantity);
 							if (palletAmountFullResult.Success is false)
 							{
 								resultList.Add(IssueResult.Fail(palletAmountFullResult.Message));
 								anyFailure = true;
 								continue;
 							}
-							var amountPallets = palletAmountFullResult.FullPallet;
+							var amountPallets = palletAmountFullResult.FullPallet - oldCount;
 							var rest = palletAmountFullResult.Rest;
-							//3. Pobierz dostępne palety 
-							var availablePallets = await _mediator.Send(new GetAvailablePalletsByProductQuery(product.ProductId, product.BestBefore, amountPallets + 1, product.Quantity), ct);
+							//3. Pobierz dostępne palety
+							var availablePallets = await _getAvailable.GetPallets(product.ProductId, product.BestBefore, amountPallets);
+							
 							var allAvailablePallets = oldProperPallets
 								.Concat(availablePallets)
 								.DistinctBy(p => p.Id)
+								.Take(palletAmountFullResult.FullPallet)//reduction
 								.ToList();
 							//3.1 pobierz dostępne virtualPallet
-							var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(product.ProductId, product.BestBefore), ct);
+							//var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(product.ProductId, product.BestBefore), ct);
+							var availableVirtualPalletsQuery = await _getVirtualPalletsService.GetVirtualPalletsAsync(product.ProductId, product.BestBefore);
 							if (availableVirtualPalletsQuery is null)
 							{
 								resultList.Add(IssueResult.Fail("Brak palety do pickingu - błąd virtual"));
@@ -133,7 +136,11 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 								continue;
 							}
 							//4. Przydziel pełne palety
-							palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(issue, allAvailablePallets, amountPallets), ct);
+							
+							palletAssigned = allAvailablePallets;
+							
+							//palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(issue, allAvailablePallets, amountPallets), ct);
+							await _assignFullPalletToIssueService.AddPallets(issue, allAvailablePallets);
 							//5. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 							if (rest > 0)
 							{
@@ -160,7 +167,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 							}
 							foreach (var factory in _eventCollector.DeferredEvents)
 							{
-								await _mediator.Publish( factory(), ct);
+								await _mediator.Publish(factory(), ct);
 							}
 							resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
 							anySuccess = true;

@@ -20,7 +20,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 
 		public async Task<List<PickingGuideLineDTO>> Handle(GetListIssueToPickingQuery request, CancellationToken ct)
 		{
-			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(request.DateIssueStart, request.DateIssueEnd);
+			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
 			if (pickingPallets.Count == 0)
 			{
 				return new List<PickingGuideLineDTO>();
@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 				.SelectMany(p => p.PickingTasks.Select(a => new
 				{
 					IssueId = a.IssueId,
-					Quantity = a.Quantity,
+					Quantity = a.RequestedQuantity,
 					ProductId = a.ProductId,
 					//ProductId = p.Pallet.ProductsOnPallet.First().ProductId,
 					ClientIdOut = issueDictionary[a.IssueId].ClientId

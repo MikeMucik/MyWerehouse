@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 
 		public async Task<List<ProductToIssueDTO>> Handle (GetListToPickingQuery request, CancellationToken ct)
 		{
-			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(request.DateIssueStart, request.DateIssueEnd);
+			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
 			if (pickingPallets.Count == 0)
 			{
 				return new List<ProductToIssueDTO>();
@@ -53,7 +53,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 					var key = (clientId, pickingTask.IssueId, productId);
 					if (aggregationDictionary.TryGetValue(key, out var existingRecord))
 					{
-						existingRecord.Quantity += pickingTask.Quantity;
+						existingRecord.Quantity += pickingTask.RequestedQuantity;
 					}
 					else
 					{
@@ -62,7 +62,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 							ClientIdOut = clientId,
 							IssueId = pickingTask.IssueId,
 							ProductId = productId,
-							Quantity = pickingTask.Quantity,
+							Quantity = pickingTask.RequestedQuantity,
 						};
 						aggregationDictionary.Add(key, productIssue);
 					}

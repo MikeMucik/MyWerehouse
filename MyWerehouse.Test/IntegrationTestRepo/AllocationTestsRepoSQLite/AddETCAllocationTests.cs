@@ -101,7 +101,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			{
 				Issue = issue,
 				VirtualPallet = virtualPallet,
-				Quantity = 10,
+				RequestedQuantity = 10,
 				PickingStatus = PickingStatus.Allocated,
 			};
 			var pickingTaskRepo = new PickingTaskRepo(DbContext);
@@ -113,7 +113,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			Assert.NotNull(result);
 			Assert.Equal(pickingTask.Issue, result.Issue);
 			Assert.Equal(pickingTask.VirtualPallet, result.VirtualPallet);
-			Assert.Equal(pickingTask.Quantity, result.Quantity);
+			Assert.Equal(pickingTask.RequestedQuantity, result.RequestedQuantity);
 		}
 		[Fact]
 		public void DeleteRecord_DeletePickingTask_ReomveFromCollection()
@@ -199,7 +199,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			{
 				Issue = issue,
 				VirtualPallet = virtualPallet,
-				Quantity = 10,
+				RequestedQuantity = 10,
 				PickingStatus = PickingStatus.Allocated,
 			};
 			var pickingTaskRepo = new PickingTaskRepo(DbContext);

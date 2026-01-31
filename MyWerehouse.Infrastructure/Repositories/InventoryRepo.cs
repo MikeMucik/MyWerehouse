@@ -77,7 +77,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 
 			//var totalFromPicking = await pickingQuery.SumAsync(pp => pp.RemainingQuantity);
 			var totalFromPicking = await pickingQuery
-				.Select(pp => pp.InitialPalletQuantity - (pp.PickingTasks.Sum(a =>(int?) a.Quantity) ?? 0))
+				.Select(pp => pp.InitialPalletQuantity - (pp.PickingTasks.Sum(a =>(int?) a.RequestedQuantity) ?? 0))
 				.SumAsync();
 
 			return totalFromFullPallets + totalFromPicking;
@@ -94,7 +94,8 @@ namespace MyWerehouse.Infrastructure.Repositories
 		public async Task<int> GetQuantityProductReservedForIssueAsync(int productId, DateOnly? bestBefore)
 		{
 			var query = GetPalletsQuery(productId, bestBefore)
-				.Where(p => p.Status == PalletStatus.ToIssue);			
+				.Where(p => p.Status == PalletStatus.ToIssue );
+			//|| p.IssueId != 0
 			return await SumQuantityAsync(query, productId);
 		}
 		public async Task<int> GetQuantityProductReservedForPickingAsync(int productId, DateOnly? bestBefore)
@@ -114,7 +115,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			}
 			var totalAllocated = await palletsWithProduct
 			   .SelectMany(pp => pp.PickingTasks)
-			   .SumAsync(a => (int?)a.Quantity) ?? 0;
+			   .SumAsync(a => (int?)a.RequestedQuantity) ?? 0;
 			return totalAllocated;
 		}
 		private IQueryable<Pallet> GetPalletsQuery(int productId, DateOnly? bestBefore)

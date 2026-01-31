@@ -15,7 +15,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public VirtualPallet VirtualPallet { get; set; }
 		public int IssueId { get; set; }
 		public Issue Issue { get; set; }
-		public int Quantity { get; set; }
+		public int RequestedQuantity { get; set; }
 		public PickingStatus PickingStatus { get; set; }
 
 
@@ -23,6 +23,8 @@ namespace MyWerehouse.Domain.Picking.Models
 		public DateOnly? BestBefore {  get; set; }
 		public string? PickingPalletId { get; set; }
 		public Pallet? PickingPallet { get; set; }
+
+		public DateOnly PickingDay { get; set; }
 		public int PickedQuantity { get; set; }
 		public void MarkPicked(string pickingPalletId)
 		{
@@ -31,7 +33,7 @@ namespace MyWerehouse.Domain.Picking.Models
 
 			if (string.IsNullOrWhiteSpace(pickingPalletId))
 				throw new ArgumentException("Picking pallet id is required.");
-			PickedQuantity = Quantity;
+			PickedQuantity = RequestedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.Picked;
 		}

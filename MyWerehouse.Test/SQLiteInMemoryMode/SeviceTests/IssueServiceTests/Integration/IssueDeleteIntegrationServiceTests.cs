@@ -127,7 +127,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				issue.PickingTasks.Add(new PickingTask
 				{
 					Issue = issue,
-					Quantity = qty,
+					RequestedQuantity = qty,
 					PickingStatus = PickingStatus.Allocated,
 					VirtualPallet = new VirtualPallet
 					{
@@ -200,7 +200,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Alokacje wyzerowane i anulowane
 			foreach (var a in issue.PickingTasks)
 			{
-				Assert.Equal(0, a.Quantity);
+				Assert.Equal(0, a.RequestedQuantity);
 				Assert.Equal(PickingStatus.Cancelled, a.PickingStatus);
 			}
 

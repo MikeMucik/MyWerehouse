@@ -25,6 +25,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public string PerformedBy { get; set; } 
 		public IssueStatus IssueStatus { get; set; } 	
 		public virtual ICollection<IssueItem> IssueItems { get; set; } = new List<IssueItem>();//nowe powiązanie
+		public virtual ICollection<HandPickingTask> HandPickings { get; set; } = new List<HandPickingTask>();
 		public Issue() { }
 		public Issue(int clientId, string performedBy, DateTime dateToSend)
 		{

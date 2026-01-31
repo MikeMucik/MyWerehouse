@@ -36,8 +36,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.NotNull(pallet1);
 			Assert.Equal(200, pallet1.InitialPalletQuantity);
 			Assert.Equal(3, pallet1.LocationId);
-			Assert.Equal(2, pallet1.PickingTasks.Count);
-			Assert.Equal(20, pallet1.PickingTasks.First().Quantity);
+			Assert.Equal(3, pallet1.PickingTasks.Count);
+			Assert.Equal(20, pallet1.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(PickingStatus.Allocated, pallet1.PickingTasks.First().PickingStatus);
 
 			// Paleta Q1101
@@ -46,7 +46,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.Equal(150, pallet2.InitialPalletQuantity);
 			Assert.Equal(3, pallet2.LocationId);
 			Assert.Single(pallet2.PickingTasks);
-			Assert.Equal(50, pallet2.PickingTasks.First().Quantity);
+			Assert.Equal(50, pallet2.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(PickingStatus.Allocated, pallet2.PickingTasks.First().PickingStatus);
 
 			// Upewnij się, że nie zwrócono palety z innym produktem
@@ -56,8 +56,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 		public async Task TakeVirtualPalletsByDates_GetVirtualPalletsAsync_ReturnList()
 		{
 			//Arrange
-			var startDate = new DateTime(2025, 5, 5);
-			var endDate = new DateTime(2025, 10, 10);
+			//var startDate = new DateTime(2025, 5, 5);
+			//var endDate = new DateTime(2025, 10, 10);
+			var startDate = DateTime.UtcNow.AddDays(-2);
+			var endDate = DateTime.UtcNow.AddDays(1);
 			//Act
 			var result = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(startDate, endDate);
 			//Assert
@@ -76,6 +78,35 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.All(result, v =>
 				Assert.InRange(v.DateMoved, startDate, endDate));
 		}
+		[Fact]
+		public async Task TakeVirtualPalletsByPickingDates_GetVirtualPalletsAsync_ReturnList()
+		{
+			//Arrange
+			//var startDate = new DateTime(2025, 5, 5);
+			//var endDate = new DateTime(2025, 10, 10);
+			var startDate =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(-2));
+			var endDate =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(1));
+			//Act
+			var result = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(startDate, endDate);
+			//Assert
+			Assert.NotNull(result);
+			Assert.NotEmpty(result);
+			//Assert.Equal(2, result.Count);
+			//// upewniamy się, że to właściwe palety
+			//var palletIds = result.Select(v => v.PalletId).ToList();
+			//Assert.Contains("Q1100", palletIds);
+			//Assert.Contains("Q1200", palletIds);
+
+			//// żadna inna spoza zakresu
+			//Assert.DoesNotContain("Q1101", palletIds);
+
+			//// opcjonalnie: sprawdzamy daty, że rzeczywiście są w zakresie
+			//Assert.All(result, v =>
+			//	Assert.InRange(v.DateMoved, startDate, endDate));
+		}
+		//Task<List<VirtualPallet>> GetVirtualPalletsByTimePickingTaskAsync(DateOnly start, DateOnly end);
+
+
 		[Fact]
 		public async Task ReturnInt_GetVirtualPalletIdFromPalletIdAsync_ReturnVirtualPalletId()
 		{

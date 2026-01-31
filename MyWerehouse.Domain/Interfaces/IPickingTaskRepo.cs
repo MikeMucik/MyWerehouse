@@ -10,6 +10,7 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IPickingTaskRepo
 	{
 		void AddPickingTask(PickingTask pickingTask);
+		Task AddPickingTaskAsync(PickingTask pickingTask);
 		void DeletePickingTask(PickingTask pickingTask);
 		Task<List<PickingTask>> GetPickingTaskListAsync(int palletPickingId, DateTime pickingDate);
 		Task<PickingTask> GetPickingTaskAsync(int pickingTaskId);
@@ -17,12 +18,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(string pickingPalletId);
 		Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(int issueId);
 		Task<List<PickingTask>> GetPickingTasksProductIdAsync(int productId, DateTime from, DateTime to);
-		Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId);
-		//Task AddPickingTaskApartFromCreatingIssueAsync(int issueId, int productId, int quantity);
-		//dodanie dodatkowej alokacji gdy jest problem stanfizyczny/system
-		//tworzone przez biuro tzw. "BRAKI"
-		//Task ChangeStatusPalletToPicked(int pickingTaskId);
-		//Task <List<PickingTask>> GetPickingTaskListAsync(int palletPickingId, DateTime pickingDate);
-		//Task <PickingTask> GetPickingTaskAsync(int pickingTaskId);
+		Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId);		
 	}
 }

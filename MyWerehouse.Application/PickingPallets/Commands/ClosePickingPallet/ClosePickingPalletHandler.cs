@@ -36,8 +36,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ?? throw new NotFoundPalletException(request.PalletId);
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId) ?? throw new NotFoundIssueException(request.PalletId);
 				if (pallet.Status != PalletStatus.Picking)
-					return PickingResult.Fail($"Palety {pallet.Id} nie można zamknąć. "); 
-				//{ throw new PalletException($"Palety {pallet.Id} nie można zamknąć. "); }
+					return PickingResult.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet"); 
+				//to powyżej można rozszerzyć na konkretne przypaski
 				_pickingPalletRepo.ClosePickingPallet(request.PalletId, request.IssueId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
@@ -50,7 +50,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 							null
 						), ct);
 				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.UserId),ct);
-				return PickingResult.Ok("Zamknięto paletę");
+				return PickingResult.Ok($"Zamknięto paletę, dołączono do zlecenia {issue.Id}.");
 			}
 			catch (NotFoundPalletException exp)
 			{

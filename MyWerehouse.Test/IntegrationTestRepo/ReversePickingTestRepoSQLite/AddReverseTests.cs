@@ -129,7 +129,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			{
 				Issue = issue,
 				PickingStatus = PickingStatus.Picked,
-				Quantity = 10,
+				RequestedQuantity = 10,
 				VirtualPallet = virtualPallet,
 				ProductId = product.Id,
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12))
@@ -207,7 +207,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			Assert.Equal(pickingTask.Id, result.PickingTask.Id);
 
 			// ilość reverse picking nie może przekraczać alokacji
-			Assert.True(result.Quantity <= pickingTask.Quantity);
+			Assert.True(result.Quantity <= pickingTask.RequestedQuantity);
 
 			// BestBefore musi dotyczyć tego samego produktu
 			Assert.Equal(

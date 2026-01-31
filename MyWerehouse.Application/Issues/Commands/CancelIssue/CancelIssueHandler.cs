@@ -91,7 +91,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 								pickingTask.VirtualPallet.PalletId,
 								pickingTask.IssueId,
 								pickingTask.ProductId,
-								pickingTask.Quantity,
+								pickingTask.RequestedQuantity,
 								0,
 								PickingStatus.Allocated,
 								pickingTask.PickingStatus,

@@ -8,11 +8,10 @@ using MyWerehouse.Application.Common.Commands;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
-using MyWerehouse.Application.ReversePickings.Command.CreateTaskToReversePicking;
+using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
@@ -29,15 +28,15 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IMediator _mediator;
-		private readonly IEventCollector _eventCollector;
-		private readonly ICommandCollector _commandCollector;
+		private readonly IEventCollector _eventCollector;		
+		private readonly ICreateReversePickingService _createReversePickingService;
 		public CancelIssueHandler(IIssueRepo issueRepo,
 			IPickingTaskRepo pickingTaskRepo,
 			IPickingPalletRepo pickingPalletRepo,
 			WerehouseDbContext werehouseDbContext,
 			IMediator mediator,
-			IEventCollector eventCollector
-			, ICommandCollector commandCollector
+			IEventCollector eventCollector,			
+			ICreateReversePickingService createReversePickingService
 			)
 		{
 			_issueRepo = issueRepo;
@@ -45,8 +44,8 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			_pickingPalletRepo = pickingPalletRepo;
 			_werehouseDbContext = werehouseDbContext;
 			_mediator = mediator;
-			_eventCollector = eventCollector;
-			_commandCollector = commandCollector;
+			_eventCollector = eventCollector;			
+			_createReversePickingService = createReversePickingService;
 		}
 		public async Task<IssueResult> Handle(CancelIssueCommand request, CancellationToken ct)
 		{
@@ -59,11 +58,10 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				//anulowanie zlecenia dla pełnych palet
 				foreach (var pallet in issue.Pallets)
 				{
-					if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko pełne palety z przyjęcia
+					if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko  palety z przyjęcia
 					{
 						pallet.Status = PalletStatus.Available;
 						pallet.IssueId = null;
-						pallet.LocationId = 1;//lokalizacja rampy
 						listPallet.Add(pallet);
 					}
 				}
@@ -71,10 +69,9 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				var restPallets = issue.Pallets.Except(listPallet).ToList();
 				foreach (var p in restPallets)
 				{
-					_commandCollector.Add(new CreateTaskToReversePickingCommand(p.Id, request.UserId));
+					await _createReversePickingService.CreateReversePicking(p.Id, request.UserId); ;
 				}
-				//usuń alokacje jeśli nie zrobione
-				//usuń virtualPallet jeśli należy tylko do tego zlecenia
+				//usuń alokacje/pickingTask jeśli nie zrobione				
 				var virtualPallets = await _pickingTaskRepo.GetVirtualPalletsByIssue(request.IssueId);
 				foreach (var vp in virtualPallets)
 				{
@@ -96,14 +93,14 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 								PickingStatus.Allocated,
 								pickingTask.PickingStatus,
 								request.UserId,
-								DateTime.UtcNow	)));
+								DateTime.UtcNow)));
 						vp.PickingTasks.Remove(pickingTask);
-						//_werehouseDbContext.PickingTasks.Remove(pickingTask);
 						_pickingTaskRepo.DeletePickingTask(pickingTask);
 					}
-					if (vp.PickingTasks.Count == 0)//warunek bez sensu bo nie było zapisu
+					//usuń virtualPallet jeśli należy tylko do tego zlecenia
+					if (vp.PickingTasks.Count == 0)
 					{
-						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);//zadanie po commit? czy w DBSet usuwa wszytko>
+						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);
 						vp.Pallet.Status = PalletStatus.Available;
 					}
 				}
@@ -112,10 +109,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId), ct);
-				foreach (var req in _commandCollector.Requests)
-				{
-					await _mediator.Send(req, ct);
-				}
+
 				foreach (var p in listPallet)
 				{
 					await _mediator.Publish(new CreatePalletOperationNotification(p.Id, 1, ReasonMovement.CancelIssue, request.UserId, PalletStatus.Available, null), ct);
@@ -123,8 +117,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				foreach (var evn in _eventCollector.Events)
 				{
 					await _mediator.Publish(evn, ct);
-				}
-				//_eventCollector.Clear();
+				}				
 				return IssueResult.Ok($"Anulowano zlecenie {request.IssueId}.");
 			}
 			catch (NotFoundIssueException ie)

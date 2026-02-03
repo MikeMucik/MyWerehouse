@@ -17,17 +17,14 @@ namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public class ProcessPickingActionService : IProcessPickingActionService
 	{
-		private readonly ICreatePalletOrAddToPalletService _createPalletOrAddToPalletService;
-		private readonly IPalletRepo _palletRepo;
+		private readonly ICreatePalletOrAddToPalletService _createPalletOrAddToPalletService;		
 		private readonly IEventCollector _eventCollector;
 
 		public ProcessPickingActionService(
-			ICreatePalletOrAddToPalletService createPalletOrAddToPalletService,
-			IPalletRepo palletRepo,
+			ICreatePalletOrAddToPalletService createPalletOrAddToPalletService,			
 			IEventCollector eventCollector)
 		{
-			_createPalletOrAddToPalletService = createPalletOrAddToPalletService; 
-			_palletRepo = palletRepo;
+			_createPalletOrAddToPalletService = createPalletOrAddToPalletService; 			
 			_eventCollector = eventCollector;
 		}
 		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, int productId, int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion)
@@ -35,10 +32,9 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId);
 			if (productOnSourcePallet is null)
 				return ProcessPickingActionResult.Fail($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
-			var bestBofore = productOnSourcePallet.BestBefore;
-
+			var bestBefore = pickingTask.BestBefore;
 			await _createPalletOrAddToPalletService.CreatePalletOrAddToPallet(issue.Id, productId,
-				quantityToPick, userId, bestBofore, pickingTask, pickingCompletion);
+				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion);
 			productOnSourcePallet.Quantity -= quantityToPick;
 			if (productOnSourcePallet.Quantity == 0)
 			{

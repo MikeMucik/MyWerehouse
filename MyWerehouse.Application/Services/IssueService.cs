@@ -11,7 +11,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Issues.Commands.AddPalletsToIssueByProduct;
 using MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading;
 using MyWerehouse.Application.Issues.Commands.CompletedIssue;
 using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
@@ -27,7 +26,6 @@ using MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Receviving.Filters;
 
 namespace MyWerehouse.Application.Services
@@ -43,10 +41,10 @@ namespace MyWerehouse.Application.Services
 		{
 			return await _mediator.Send(new CreateNewIssueCommand(createIssueDTO, dateToSend));			
 		}
-		public async Task<IssueResult> AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product)// dla jednego rodzaju produktu
-		{
-			return await _mediator.Send(new AddPalletsToIssueByProductCommand(issue, product));			
-		}
+		//public async Task<IssueResult> AddPalletsToIssueByProductAsync(Issue issue, IssueItemDTO product)// dla jednego rodzaju produktu
+		//{
+		//	return await _mediator.Send(new AddPalletsToIssueByProductCommand(issue, product));			
+		//}
 		//pobranie zamówienia do aktualizacji 
 
 		public async Task<UpdateIssueDTO> GetIssueByIdToUpdateAsync(int numberIssue)

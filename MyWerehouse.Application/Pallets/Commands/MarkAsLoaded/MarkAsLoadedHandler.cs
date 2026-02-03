@@ -37,10 +37,6 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 				throw new NotFoundPalletException(request.PalletId);
 				if (pallet.Status == PalletStatus.Loaded)
 					return IssueResult.Fail($"Paleta {request.PalletId} jest już załadowana.");
-				//throw new PalletException($"Paleta {request.PalletId} jest już załadowana.");
-
-				//if (!(pallet.Status == PalletStatus.ToIssue || pallet.Status == PalletStatus.InTransit || pallet.Status == PalletStatus.Available ||
-				//	pallet.Status == PalletStatus.InStock)) throw new PalletException("Paleta nie ma statusu do załadowania");
 				var allowedStatuses = new[]
 				{
 					PalletStatus.ToIssue,
@@ -50,10 +46,7 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 				};
 				if (!allowedStatuses.Contains(pallet.Status))
 					return IssueResult.Fail("Paleta nie ma statusu do załadowania");
-				//throw new PalletException("Paleta nie ma statusu do załadowania");
-
-				pallet.Status = PalletStatus.Loaded;
-				
+				pallet.Status = PalletStatus.Loaded;				
 				await _mediator.Publish(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId,
 						ReasonMovement.Loaded, request.UserId, PalletStatus.Loaded, null), ct);
 				await _werehouseDbContext.SaveChangesAsync(ct);

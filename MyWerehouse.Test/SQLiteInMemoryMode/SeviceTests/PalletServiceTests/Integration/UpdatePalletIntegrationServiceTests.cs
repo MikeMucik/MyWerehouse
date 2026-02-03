@@ -66,14 +66,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				DateReceived = DateTime.Now,
 				Location = location,
 				Status = PalletStatus.Available,
-				ProductsOnPallet = [new ProductOnPallet { Product =product, Quantity =10,
-					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-				,DateAdded = DateTime.UtcNow,
-				}, new ProductOnPallet  {Product = product1,
-				Quantity = 200,
-				DateAdded = DateTime.Now,
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-			}]
+				ProductsOnPallet = [
+					new ProductOnPallet
+					{
+						Product =product,
+						Quantity =10,
+						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
+						DateAdded = DateTime.UtcNow,
+					},
+					new ProductOnPallet
+					{
+						Product = product1,
+						Quantity = 200,
+						DateAdded = DateTime.Now,
+						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
+					}				]
 			};
 			var inventoryP = new Inventory
 			{
@@ -113,15 +120,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
-					BestBefore = new DateOnly(2027, 3, 4) })				
+					BestBefore = new DateOnly(2027, 3, 4) })
 					]
 			};
-			var resultHandler =await _palletService.UpdatePalletAsync(updatedPallet, "user");
+			var resultHandler = await _palletService.UpdatePalletAsync(updatedPallet, "user");
 			//Assert
 			Assert.NotNull(resultHandler);
 			Assert.True(resultHandler.Success);
 			Assert.Equal("Q1010", resultHandler.PalletId);
-			
+
 			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -247,7 +254,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				ProductsOnPallet = [new ProductOnPallet { Product =product, Quantity =10,
 					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
 				,DateAdded = DateTime.UtcNow,
-				}, new ProductOnPallet	{Product = product1,
+				}, new ProductOnPallet  {Product = product1,
 				Quantity = 200,
 				DateAdded = DateTime.Now,
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
@@ -256,7 +263,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.Products.AddRange(product, product1, product2, product3);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
-			DbContext.SaveChanges();	
+			DbContext.SaveChanges();
 			//Act
 			var updatedPallet = new UpdatePalletDTO
 			{
@@ -274,14 +281,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,					
+					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
 					PalletId = "Q1010",
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 4) }),
 				(new ProductOnPalletDTO
-				{					
+				{
 					PalletId = "Q1010",
 					ProductId = product2.Id,
 					Quantity = 200,
@@ -301,9 +308,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.NotNull(resultHandler);
 			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
 
-			var result = DbContext.Pallets				
+			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.Single(x => x.Id ==pallet.Id);
+				.Single(x => x.Id == pallet.Id);
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
 			Assert.Equal(updatedPallet.ProductsOnPallet.Count, result.ProductsOnPallet.Count);

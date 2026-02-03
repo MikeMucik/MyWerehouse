@@ -26,25 +26,14 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
 		IEventCollector eventCollector,
-		IProductRepo productRepo, IAddPickingTaskToIssueService addPickingTaskToIssueService,
-		IGetVirtualPalletsService getVirtualPalletsService,
-		IGetProductCountService getProductCount,
-		IGetNumberPalletsAndRestService getNumberPalletsAndRestService,
-		IGetAvailablePalletsByProductService getAvailablePalletsByProductService,
-		IAssignFullPalletToIssueService assignFullPalletToIssueService) : IRequestHandler<UpdateIssueNewCommand, List<IssueResult>>
+		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueNewCommand, List<IssueResult>>
 	{
 		private readonly IIssueItemRepo _issueItemRepo = issueItemRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IEventCollector _eventCollector = eventCollector;
-		private readonly IProductRepo _productRepo = productRepo;
-		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
-		private readonly IGetVirtualPalletsService _getVirtualPalletsService = getVirtualPalletsService;
-		private readonly IGetProductCountService _getProductCount = getProductCount;
-		private readonly IGetNumberPalletsAndRestService _getNumberPalletsAndRest = getNumberPalletsAndRestService;
-		private readonly IGetAvailablePalletsByProductService _getAvailable = getAvailablePalletsByProductService;
-		private readonly IAssignFullPalletToIssueService _assignFullPalletToIssueService = assignFullPalletToIssueService;
+		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
 		public async Task<List<IssueResult>> Handle(UpdateIssueNewCommand request, CancellationToken ct)
 		{
 			var resultList = new List<IssueResult>();
@@ -58,7 +47,6 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 				//Kasowanie starych
 				try
 				{
-					//if (await _productRepo.IsExistProduct(request.Product.ProductId) == false) throw new ProductException($"Brak produktu o numerze{request.Product.ProductId} .");
 					var oldListPallets = new List<Pallet>();
 					var listOldPallets = issue.Pallets.ToList();
 					foreach (var pallet in listOldPallets)
@@ -94,66 +82,17 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						await transaction.CreateSavepointAsync($"BeforeProduct_{product.ProductId}", ct);
 						try
 						{
-							if (await _productRepo.IsExistProduct(product.ProductId) == false) throw new NotFoundProductException(product.ProductId);
-							var existingIssueItem = issue.IssueItems
-								.FirstOrDefault(x => x.ProductId == product.ProductId);
+							
 							var oldProperPallets = oldListPallets.Where(p => p.ProductsOnPallet.First().ProductId == product.ProductId);
-							var oldCount = oldProperPallets.Count();
-							//1 dostępność towaru	//var totalAvailable = await _mediator.Send(new GetProductCountQuery(product.ProductId, product.BestBefore), ct);
-							var totalAvailable = await _getProductCount.GetProductCountAsync(product.ProductId, product.BestBefore);
-							if (product.Quantity > totalAvailable)//
+
+							var result = await _assignProductToIssueAsync.AssignProductToIssue(issue, product, IssueAllocationPolicy.FullPalletFirst, oldListPallets, request.DTO.PerformedBy);
+							if (result.Success == false)
 							{
-								resultList.Add(IssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia."
-									, product.ProductId));
+								resultList.Add(IssueResult.Fail(result.Message, product.ProductId));
 								anyFailure = true;
 								continue;
 							}
-							//2 Oblicz pełne palety i resztę //var palletAmountFullResult = await _mediator.Send(new GetNumberPalletsAndRestQuery(product.ProductId, product.Quantity), ct);
-							var palletAmountFullResult = await _getNumberPalletsAndRest.GetNumbers(product.ProductId, product.Quantity);
-							if (palletAmountFullResult.Success is false)
-							{
-								resultList.Add(IssueResult.Fail(palletAmountFullResult.Message));
-								anyFailure = true;
-								continue;
-							}
-							var amountPallets = palletAmountFullResult.FullPallet - oldCount;
-							var rest = palletAmountFullResult.Rest;
-							//3. Pobierz dostępne palety
-							var availablePallets = await _getAvailable.GetPallets(product.ProductId, product.BestBefore, amountPallets);
-							
-							var allAvailablePallets = oldProperPallets
-								.Concat(availablePallets)
-								.DistinctBy(p => p.Id)
-								.Take(palletAmountFullResult.FullPallet)//reduction
-								.ToList();
-							//3.1 pobierz dostępne virtualPallet
-							//var availableVirtualPalletsQuery = await _mediator.Send(new GetVirtualPalletsQuery(product.ProductId, product.BestBefore), ct);
-							var availableVirtualPalletsQuery = await _getVirtualPalletsService.GetVirtualPalletsAsync(product.ProductId, product.BestBefore);
-							if (availableVirtualPalletsQuery is null)
-							{
-								resultList.Add(IssueResult.Fail("Brak palety do pickingu - błąd virtual"));
-								anyFailure = true;
-								continue;
-							}
-							//4. Przydziel pełne palety
-							
-							palletAssigned = allAvailablePallets;
-							
-							//palletAssigned = await _mediator.Send(new AssignFullPalletToIssueCommand(issue, allAvailablePallets, amountPallets), ct);
-							await _assignFullPalletToIssueService.AddPallets(issue, allAvailablePallets);
-							//5. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
-							if (rest > 0)
-							{
-								var newPickingTaskFromRest = await _addPickingTaskToIssueService.AddPickingTaskToIssue(
-									palletAssigned, availableVirtualPalletsQuery, issue,
-									product.ProductId, rest, product.BestBefore, request.DTO.PerformedBy);
-								if (newPickingTaskFromRest.Success is false)
-								{
-									resultList.Add(IssueResult.Fail(newPickingTaskFromRest.Message));
-									anyFailure = true;
-									continue;
-								}
-							}
+							palletAssigned = result.AssignedPallets.ToList();
 							var returnPallets = oldProperPallets.Except(palletAssigned).ToList();
 							foreach (var returnPallet in returnPallets)
 							{

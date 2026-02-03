@@ -5,12 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Invetories.Models;
@@ -47,12 +45,10 @@ namespace MyWerehouse.Application.Pallets.Commands.DeletePallet
 						?? throw new NotFoundPalletException(request.PalletId);
 				if (!await _palletMovementRepo.CanDeletePalletAsync(pallet.Id))
 					return PalletResult.Fail($"Palety o numerze {request.PalletId} nie można usunąć");
-					//throw new PalletException($"Palety o numerze {request.PalletId} nie można usunąć");
-
 				foreach (var pop in pallet.ProductsOnPallet)
 				{
 					_eventCollector.Add(new ChangeStockNotification(
-						StockChangeType.Decrease, // cofamy wpływ palety
+						StockChangeType.Decrease, // cofamy wpływ palety, Undo the pallet influence
 						[new StockItemChange(pop.ProductId, pop.Quantity)]
 					));
 				}

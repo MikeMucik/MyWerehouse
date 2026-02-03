@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		}
 		public async Task ReduceAllocation(Issue issue, int productId,int quantity, string userId)
 		{			
-			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId) ?? throw new NotFoundAlloactionException("Brak alokacji do redukcji");
+			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId) ?? throw new NotFoundPickingTaskException("Brak alokacji do redukcji");
 			foreach (var pickingTask in pickingTasks)
 			{
 				if (quantity <= 0) break;

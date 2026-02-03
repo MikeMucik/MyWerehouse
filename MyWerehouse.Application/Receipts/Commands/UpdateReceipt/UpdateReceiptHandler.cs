@@ -56,6 +56,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			try
 			{
 				// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
+				// Pallets don't change warehouse's stock until receipt is confirmed
 				var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
 					?? throw new NotFoundReceiptException(request.ReceiptId);
 				if (existingReceipt.ReceiptStatus == ReceiptStatus.Verified)
@@ -101,6 +102,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 					pallet.Status = PalletStatus.Receiving;
 					pallet.DateReceived = DateTime.UtcNow;
 					_synchronizerProductsConfig.SynchronizeProducts(pallet, dto.ProductsOnPallet);
+
 				}
 				//Dodanie nowych palet
 				var palletsAdded = request.DTO.Pallets

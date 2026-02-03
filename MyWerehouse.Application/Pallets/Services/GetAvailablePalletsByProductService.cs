@@ -21,7 +21,6 @@ namespace MyWerehouse.Application.Pallets.Services
 		}
 		public async Task<List<Pallet>> GetPallets(int productId, DateOnly? bestBefore, int amountFullPallet)
 		{
-			//var listPallets = await _repo.GetAvailablePallets(productId, bestBefore);
 			var product = await _productRepo.GetProductByIdAsync(productId)??
 				throw new NotFoundProductException(productId);
 			var palletsQuery = _repo.GetAvailablePallets(productId, bestBefore)

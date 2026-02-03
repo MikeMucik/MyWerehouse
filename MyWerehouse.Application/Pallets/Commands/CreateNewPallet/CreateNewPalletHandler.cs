@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMapper _mapper = mapper;
-		private readonly IMediator _mediator = mediator;
+		private readonly IPublisher _mediator = mediator;
 		private readonly IProductRepo _productRepo = productRepo;
 
 		public async Task<PalletResult> Handle(CreateNewPalletCommand request, CancellationToken ct)

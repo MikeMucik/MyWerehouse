@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
 
@@ -24,6 +25,13 @@ namespace MyWerehouse.Application.Products.Services
 			var amountPallets = amountUnits/ amountCarOnPallet;
 			var rest = amountUnits% amountCarOnPallet;
 			return AssignPallestResult.Ok(amountPallets, rest);
+		}
+		public async Task<int> GetBackOnlyFullPallest(int productId, int amountUnits)
+		{
+			var product = await _repo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException($"Produkt {productId} nie ma ustawionej liczby kartonów na paletę. Popraw produkt.");
+			var amountCarOnPallet = product.CartonsPerPallet;
+			var amountPallets = amountUnits / amountCarOnPallet;			
+			return amountPallets;
 		}
 	}
 }

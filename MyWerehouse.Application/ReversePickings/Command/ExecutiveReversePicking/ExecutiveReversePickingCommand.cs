@@ -5,10 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking
 {
 	public record ExecutiveReversePickingCommand(int TaskReversedId,
-		ReversePickingStrategy Strategy, string UserId):IRequest<ReversePickingResult>;	
+		ReversePickingStrategy Strategy, string? SourcePalletId, 
+		string UserId, List<Pallet>? Pallets):IRequest<ReversePickingResult>;	
 }

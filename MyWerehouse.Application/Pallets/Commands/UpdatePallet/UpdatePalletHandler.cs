@@ -89,14 +89,7 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 								StockChangeType.Decrease,
 								stockChangesD
 							));
-				}
-				//foreach (var pop in existingPallet.ProductsOnPallet)
-				//{
-				//	_eventCollector.Add(new ChangeStockNotification(
-				//		StockChangeType.Decrease, // cofamy wpływ palety
-				//		[new StockItemChange(pop.ProductId, pop.Quantity)]
-				//	));
-				//}
+				}				
 				_mapper.Map(request.UpdatingPallet, existingPallet);
 				CollectionSynchronizer.SynchronizeCollection(
 					existingPallet.ProductsOnPallet,
@@ -116,16 +109,10 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 						entity.PalletId = originalPalletId;
 					});							
 				
-				//foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
-				//{
-				//	_eventCollector.Add(new ChangeStockNotification(
-				//		StockChangeType.Increase, // wpływ na inventory
-				//		[new StockItemChange(pop.ProductId, pop.Quantity)]
-				//	));
-				//}
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await _mediator.Publish(new CreatePalletOperationNotification(existingPallet.Id, existingPallet.LocationId,
 								ReasonMovement.Picking, request.UserId, PalletStatus.ToIssue, null), ct);
+				//uaktulnianie stanów, update stock
 				foreach (var rv in _eventCollector.Events)
 				{
 					await _mediator.Publish(rv, ct);
@@ -137,12 +124,7 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			{
 				await transaction.RollbackAsync(ct);
 				return PalletResult.Fail(epe.Message);
-			}
-			//catch (PalletException epr)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return PalletResult.Fail(epr.Message);
-			//}
+			}			
 			catch(NotFoundPalletException epr)
 			{
 				await transaction.RollbackAsync(ct);

@@ -43,10 +43,6 @@
     <Folder Include="Histories\Queries\GetPalletHistoryQuery\" />
     <Folder Include="Inventories\Commands\ChangeQuantity\" />
     <Folder Include="Products\Queries\" />
-    <Folder Include="ReversePickings\Command\AddProductToSourcePallet\" />
-    <Folder Include="ReversePickings\Command\AddToExistingPallet\" />
-    <Folder Include="ReversePickings\Command\AddToNewPallet\" />
-    <Folder Include="ReversePickings\Queries\" />
   </ItemGroup>
 
 </Project>

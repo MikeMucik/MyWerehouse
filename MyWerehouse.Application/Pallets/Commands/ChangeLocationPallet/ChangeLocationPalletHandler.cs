@@ -29,12 +29,13 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 
 		public async Task<ChangeLocationResults> Handle(ChangeLocationPalletCommand request, CancellationToken ct)
 		{
+			//TODO Figure out change pallet's status when oprator set location
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ?? throw new NotFoundPalletException(request.PalletId);
 				//location is occupied?
-				//tu front musi przy pomocy backanedu wyliczyć locationId
+				//tu front musi przy pomocy backanedu wyliczyć locationId, frontend must find locationdId by data from a form
 				if (request.DestinationLocationId <= 0)
 					return new ChangeLocationResults
 					{

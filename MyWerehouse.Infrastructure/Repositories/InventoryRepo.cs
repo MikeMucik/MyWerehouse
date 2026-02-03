@@ -120,7 +120,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 		}
 		private IQueryable<Pallet> GetPalletsQuery(int productId, DateOnly? bestBefore)
 		{
-			var palletsWithProduct = _werehouseDbContext.Pallets
+			 var palletsWithProduct = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				 .Where(p => p.ProductsOnPallet.Any(pop => pop.ProductId == productId))
 				.AsQueryable();

@@ -9,10 +9,7 @@ namespace MyWerehouse.Application.Common.Results
 	public class PickingResult
 	{
 		public bool Success { get; set; }
-		//public bool RequiresOrderNumber { get; set; }
 		public string Message { get; set; }
-		//public List<IssueOptions> IssueOptions { get; set; } = new List<IssueOptions>();
-		//public string ProductInfo { get; set; }
 		public PickingResult() { }
 		public static PickingResult Ok(
 			string message)

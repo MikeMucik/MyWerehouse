@@ -28,6 +28,7 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 
 		public async Task<ReceiptResult> Handle(VerifyAndFinalizeReceiptCommand request, CancellationToken cancellationToken)
 		{
+			//TODO :MOże dodać porównanie papierów z tym co rzeczywiście przyjęte, compare amount assignment to real receipt
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(cancellationToken);
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
 			if (receipt == null || receipt.ReceiptStatus != ReceiptStatus.PhysicallyCompleted)

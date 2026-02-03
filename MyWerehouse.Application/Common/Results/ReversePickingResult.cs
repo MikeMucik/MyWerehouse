@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Common.Results
@@ -13,7 +14,7 @@ namespace MyWerehouse.Application.Common.Results
 		public string Message { get; set; }
 		public int ProductId { get; set; }
 		public string PalletId { get; set; }
-		//public List<ReversePicking> ReversePicking { get; set; }
+		public List<Pallet> PalletWithAddedProduct { get; set; }
 		public ReversePickingResult() { }
 		public static ReversePickingResult Ok(string message, int productId, string palletId)
 		{
@@ -25,14 +26,15 @@ namespace MyWerehouse.Application.Common.Results
 				PalletId = palletId
 			};
 		}
-		//public static ReversePickingResult Ok(List<ReversePicking> reversePicking)
-		//{
-		//	return new ReversePickingResult
-		//	{
-		//		Success = true,
-		//		ReversePicking = reversePicking
-		//	};
-		//}
+		public static ReversePickingResult Ok(string message, List<Pallet> palletWithAddedProduct)
+		{
+			return new ReversePickingResult
+			{
+				Success = true,
+				Message = message,
+				PalletWithAddedProduct = palletWithAddedProduct
+			};
+		}
 		public static ReversePickingResult Fail(string message, int productId, string palletId)
 		{
 			return new ReversePickingResult

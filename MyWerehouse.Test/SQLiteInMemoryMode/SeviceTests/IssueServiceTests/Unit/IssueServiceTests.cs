@@ -262,297 +262,297 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Unit
 		//	//Assert.Equal(300, result.QuantityRequest);
 		//	//Assert.Equal(200, result.QuantityOnStock);
 		//}
-		[Fact]
-		public async Task AddPalletsToIssueByProductAsync_AssignsFullPalletsAndAllocatesRest()
-		{
-			// Arrange
-			var productId = 100;
-			var bestBefore = new DateOnly(2025, 10, 10);
-			var cartonsPerPallet = 10;
-			var issueItem = new IssueItemDTO
-			{
-				ProductId = productId,
-				Quantity = 25, // 2 pełne palety + 5 do pickingu
-				BestBefore = bestBefore,
-			};
-			var availablePallets = new List<Pallet>
-				{
-				new Pallet
-					{
-						Id = "P1",
-					LocationId = 1,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10,
-					BestBefore =new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-				}
-			},
-				new Pallet
-				{
-					Id = "P2",
-					LocationId = 2,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10,
-							BestBefore =new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-					}
-				},
-				new Pallet
-				{
-					Id = "P3",
-					LocationId = 1,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore =new DateOnly(2026,1,1) }
-					}
-				}
-			};
-			var address = new Address
-			{
-				City = "Warsaw",
-				Country = "Poland",
-				PostalCode = "00-999",
-				StreetName = "Wiejska",
-				Phone = 4444444,
-				Region = "Mazowieckie",
-				StreetNumber = "23/3"
-			};
-			var initailCLient = new Client
-			{
-				Id = 1,
-				Name = "TestCompany",
-				Email = "123@op.pl",
-				Description = "Description",
-				FullName = "FullNameCompany",
-				Addresses = [address]
-			};
-			var issue = new Issue
-			{
-				//Id = 1,
-				ClientId = initailCLient.Id,
-				IssueDateTimeCreate = DateTime.Now,
-				IssueDateTimeSend = DateTime.Now.AddDays(7),
-				IssueStatus = IssueStatus.Pending,
-				Pallets = new List<Pallet>(),
-				PerformedBy = "TestUser",
-			};
-			DbContext.Clients.Add(initailCLient);
-			DbContext.Locations.AddRange(new Location { Id = 1, Aisle = 1, Bay = 1, Height = 1, Position = 1 }, new Location { Id = 2, Aisle = 2, Bay = 1, Height = 1, Position = 1 });
-			DbContext.Categories.Add(new Category { Id = 1, Name = "tested" });
-			DbContext.Pallets.AddRange(availablePallets);
-			DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
-			DbContext.Issues.Add(issue);
-			await DbContext.SaveChangesAsync();
-			var service = new IssueService(Mediator);
-			// Act
-			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
-			await DbContext.SaveChangesAsync();
+		//[Fact]
+		//public async Task AddPalletsToIssueByProductAsync_AssignsFullPalletsAndAllocatesRest()
+		//{
+		//	// Arrange
+		//	var productId = 100;
+		//	var bestBefore = new DateOnly(2025, 10, 10);
+		//	var cartonsPerPallet = 10;
+		//	var issueItem = new IssueItemDTO
+		//	{
+		//		ProductId = productId,
+		//		Quantity = 25, // 2 pełne palety + 5 do pickingu
+		//		BestBefore = bestBefore,
+		//	};
+		//	var availablePallets = new List<Pallet>
+		//		{
+		//		new Pallet
+		//			{
+		//				Id = "P1",
+		//			LocationId = 1,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10,
+		//			BestBefore =new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+		//		}
+		//	},
+		//		new Pallet
+		//		{
+		//			Id = "P2",
+		//			LocationId = 2,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10,
+		//					BestBefore =new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+		//			}
+		//		},
+		//		new Pallet
+		//		{
+		//			Id = "P3",
+		//			LocationId = 1,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore =new DateOnly(2026,1,1) }
+		//			}
+		//		}
+		//	};
+		//	var address = new Address
+		//	{
+		//		City = "Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		Phone = 4444444,
+		//		Region = "Mazowieckie",
+		//		StreetNumber = "23/3"
+		//	};
+		//	var initailCLient = new Client
+		//	{
+		//		Id = 1,
+		//		Name = "TestCompany",
+		//		Email = "123@op.pl",
+		//		Description = "Description",
+		//		FullName = "FullNameCompany",
+		//		Addresses = [address]
+		//	};
+		//	var issue = new Issue
+		//	{
+		//		//Id = 1,
+		//		ClientId = initailCLient.Id,
+		//		IssueDateTimeCreate = DateTime.Now,
+		//		IssueDateTimeSend = DateTime.Now.AddDays(7),
+		//		IssueStatus = IssueStatus.Pending,
+		//		Pallets = new List<Pallet>(),
+		//		PerformedBy = "TestUser",
+		//	};
+		//	DbContext.Clients.Add(initailCLient);
+		//	DbContext.Locations.AddRange(new Location { Id = 1, Aisle = 1, Bay = 1, Height = 1, Position = 1 }, new Location { Id = 2, Aisle = 2, Bay = 1, Height = 1, Position = 1 });
+		//	DbContext.Categories.Add(new Category { Id = 1, Name = "tested" });
+		//	DbContext.Pallets.AddRange(availablePallets);
+		//	DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
+		//	DbContext.Issues.Add(issue);
+		//	await DbContext.SaveChangesAsync();
+		//	var service = new IssueService(Mediator);
+		//	// Act
+		//	await service.AddPalletsToIssueByProductAsync(issue, issueItem);
+		//	await DbContext.SaveChangesAsync();
 
-			// Assert
-			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
-			Assert.Equal(2, issue.Pallets.Count);
-			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));						
-		}
-		[Fact]
-		public async Task AddPalletsToIssueByProductAsync_AssignsFullPalletsAndAllocatesRest_FullIntegration()
-		{
-			// Arrange
-			var productId = 100;
-			var bestBefore = new DateOnly(2025, 10, 10);
-			var cartonsPerPallet = 10;
+		//	// Assert
+		//	Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
+		//	Assert.Equal(2, issue.Pallets.Count);
+		//	Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));						
+		//}
+		//[Fact]
+		//public async Task AddPalletsToIssueByProductAsync_AssignsFullPalletsAndAllocatesRest_FullIntegration()
+		//{
+		//	// Arrange
+		//	var productId = 100;
+		//	var bestBefore = new DateOnly(2025, 10, 10);
+		//	var cartonsPerPallet = 10;
 
-			var issueItem = new IssueItemDTO
-			{
-				ProductId = productId,
-				Quantity = 25, // 2 pełne palety + 5 do pickingu
-				BestBefore = bestBefore,
-			};
+		//	var issueItem = new IssueItemDTO
+		//	{
+		//		ProductId = productId,
+		//		Quantity = 25, // 2 pełne palety + 5 do pickingu
+		//		BestBefore = bestBefore,
+		//	};
 
-			var availablePallets = new List<Pallet>
-			{
-				new Pallet
-				{
-					Id = "P1",
-					LocationId = 1,
-					Status = PalletStatus.Available,
-				ProductsOnPallet = new List<ProductOnPallet>
-				{
-					new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-				}
-			},
-				new Pallet
-				{
-					Id = "P2",
-					LocationId = 2,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-					}
-				},
-				new Pallet
-				{
-					Id = "P3",
-					LocationId = 1,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-					}
-				}
-			};
-			var address = new Address
-			{
-				City = "Warsaw",
-				Country = "Poland",
-				PostalCode = "00-999",
-				StreetName = "Wiejska",
-				Phone = 4444444,
-				Region = "Mazowieckie",
-				StreetNumber = "23/3"
-			};
-			var initailClient = new Client
-			{
-				Id = 1,
-				Name = "TestCompany",
-				Email = "123@op.pl",
-				Description = "Description",
-				FullName = "FullNameCompany",
-				Addresses = new List<Address> { address }
-			};
-			var issue = new Issue
-			{
-				ClientId = initailClient.Id,
-				IssueDateTimeCreate = DateTime.Now,
-				IssueDateTimeSend = DateTime.Now.AddDays(7),
-				IssueStatus = IssueStatus.New,
-				Pallets = new List<Pallet>(),
-				PerformedBy = "TestUser",
-			};
+		//	var availablePallets = new List<Pallet>
+		//	{
+		//		new Pallet
+		//		{
+		//			Id = "P1",
+		//			LocationId = 1,
+		//			Status = PalletStatus.Available,
+		//		ProductsOnPallet = new List<ProductOnPallet>
+		//		{
+		//			new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+		//		}
+		//	},
+		//		new Pallet
+		//		{
+		//			Id = "P2",
+		//			LocationId = 2,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+		//			}
+		//		},
+		//		new Pallet
+		//		{
+		//			Id = "P3",
+		//			LocationId = 1,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+		//			}
+		//		}
+		//	};
+		//	var address = new Address
+		//	{
+		//		City = "Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		Phone = 4444444,
+		//		Region = "Mazowieckie",
+		//		StreetNumber = "23/3"
+		//	};
+		//	var initailClient = new Client
+		//	{
+		//		Id = 1,
+		//		Name = "TestCompany",
+		//		Email = "123@op.pl",
+		//		Description = "Description",
+		//		FullName = "FullNameCompany",
+		//		Addresses = new List<Address> { address }
+		//	};
+		//	var issue = new Issue
+		//	{
+		//		ClientId = initailClient.Id,
+		//		IssueDateTimeCreate = DateTime.Now,
+		//		IssueDateTimeSend = DateTime.Now.AddDays(7),
+		//		IssueStatus = IssueStatus.New,
+		//		Pallets = new List<Pallet>(),
+		//		PerformedBy = "TestUser",
+		//	};
 
-			// Dodanie do DbContext
-			DbContext.Clients.Add(initailClient);
-			DbContext.Locations.AddRange(
-				new Location { Id = 1, Aisle = 1, Bay = 1, Height = 1, Position = 1 },
-				new Location { Id = 2, Aisle = 2, Bay = 1, Height = 1, Position = 1 }
-			);
-			DbContext.Categories.Add(new Category { Id = 1, Name = "tested" });
-			DbContext.Pallets.AddRange(availablePallets);
-			DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
-			DbContext.Issues.Add(issue);
-			await DbContext.SaveChangesAsync();
+		//	// Dodanie do DbContext
+		//	DbContext.Clients.Add(initailClient);
+		//	DbContext.Locations.AddRange(
+		//		new Location { Id = 1, Aisle = 1, Bay = 1, Height = 1, Position = 1 },
+		//		new Location { Id = 2, Aisle = 2, Bay = 1, Height = 1, Position = 1 }
+		//	);
+		//	DbContext.Categories.Add(new Category { Id = 1, Name = "tested" });
+		//	DbContext.Pallets.AddRange(availablePallets);
+		//	DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
+		//	DbContext.Issues.Add(issue);
+		//	await DbContext.SaveChangesAsync();
 
-			var service = new IssueService(Mediator);
+		//	var service = new IssueService(Mediator);
 
-			// Act
-			await service.AddPalletsToIssueByProductAsync(issue, issueItem);
-			await DbContext.SaveChangesAsync();
+		//	// Act
+		//	await service.AddPalletsToIssueByProductAsync(issue, issueItem);
+		//	await DbContext.SaveChangesAsync();
 
-			// Assert
-			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
-			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
-			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
-		}
-		[Fact]
-		public async Task AddPalletsToIssueByProductAsync_NotEnoughProduct_NotFullIntegration()
-		{
-			// Arrange
-			var productId = 100;
-			var bestBefore = new DateOnly(2025, 10, 10);
-			var cartonsPerPallet = 10;
-			var issueItem = new IssueItemDTO
-			{
-				ProductId = productId,
-				Quantity = 100, // brakuje 70
-				BestBefore = bestBefore,
-			};
-			var availablePallets = new List<Pallet>
-			{
-				new Pallet
-				{
-					Id = "P1",
-					LocationId = 1,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-					}
-				},
-				new Pallet
-				{
-					Id = "P2",
-					LocationId = 2,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-					}
-				},
-				new Pallet
-				{
-					Id = "P3",
-					LocationId = 1,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
-					{
-						new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-					}
-				}
-			};
-			var address = new Address
-			{
-				City = "Warsaw",
-				Country = "Poland",
-				PostalCode = "00-999",
-				StreetName = "Wiejska",
-				Phone = 4444444,
-				Region = "Mazowieckie",
-				StreetNumber = "23/3"
-			};
-			var initailClient = new Client
-			{
-				Id = 1,
-				Name = "TestCompany",
-				Email = "123@op.pl",
-				Description = "Description",
-				FullName = "FullNameCompany",
-				Addresses = new List<Address> { address }
-			};
-			var issue = new Issue
-			{
-				ClientId = initailClient.Id,
-				IssueDateTimeCreate = DateTime.Now,
-				IssueStatus = IssueStatus.New,
-				Pallets = new List<Pallet>(),
-				PerformedBy = "TestUser",
-			};
-			// Dodanie do DbContext
-			DbContext.Clients.Add(initailClient);
-			DbContext.Locations.AddRange(
-				new Location { Id = 1, Aisle = 1, Bay = 1, Height = 1, Position = 1 },
-				new Location { Id = 2, Aisle = 2, Bay = 1, Height = 1, Position = 1 }
-			);
-			DbContext.Categories.Add(new Category { Id = 1, Name = "tested" });
-			DbContext.Pallets.AddRange(availablePallets);
-			DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
-			DbContext.Issues.Add(issue);
-			await DbContext.SaveChangesAsync();
+		//	// Assert
+		//	Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
+		//	Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
+		//	Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
+		//}
+		//[Fact]
+		//public async Task AddPalletsToIssueByProductAsync_NotEnoughProduct_NotFullIntegration()
+		//{
+		//	// Arrange
+		//	var productId = 100;
+		//	var bestBefore = new DateOnly(2025, 10, 10);
+		//	var cartonsPerPallet = 10;
+		//	var issueItem = new IssueItemDTO
+		//	{
+		//		ProductId = productId,
+		//		Quantity = 100, // brakuje 70
+		//		BestBefore = bestBefore,
+		//	};
+		//	var availablePallets = new List<Pallet>
+		//	{
+		//		new Pallet
+		//		{
+		//			Id = "P1",
+		//			LocationId = 1,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+		//			}
+		//		},
+		//		new Pallet
+		//		{
+		//			Id = "P2",
+		//			LocationId = 2,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+		//			}
+		//		},
+		//		new Pallet
+		//		{
+		//			Id = "P3",
+		//			LocationId = 1,
+		//			Status = PalletStatus.Available,
+		//			ProductsOnPallet = new List<ProductOnPallet>
+		//			{
+		//				new ProductOnPallet { ProductId = productId, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
+		//			}
+		//		}
+		//	};
+		//	var address = new Address
+		//	{
+		//		City = "Warsaw",
+		//		Country = "Poland",
+		//		PostalCode = "00-999",
+		//		StreetName = "Wiejska",
+		//		Phone = 4444444,
+		//		Region = "Mazowieckie",
+		//		StreetNumber = "23/3"
+		//	};
+		//	var initailClient = new Client
+		//	{
+		//		Id = 1,
+		//		Name = "TestCompany",
+		//		Email = "123@op.pl",
+		//		Description = "Description",
+		//		FullName = "FullNameCompany",
+		//		Addresses = new List<Address> { address }
+		//	};
+		//	var issue = new Issue
+		//	{
+		//		ClientId = initailClient.Id,
+		//		IssueDateTimeCreate = DateTime.Now,
+		//		IssueStatus = IssueStatus.New,
+		//		Pallets = new List<Pallet>(),
+		//		PerformedBy = "TestUser",
+		//	};
+		//	// Dodanie do DbContext
+		//	DbContext.Clients.Add(initailClient);
+		//	DbContext.Locations.AddRange(
+		//		new Location { Id = 1, Aisle = 1, Bay = 1, Height = 1, Position = 1 },
+		//		new Location { Id = 2, Aisle = 2, Bay = 1, Height = 1, Position = 1 }
+		//	);
+		//	DbContext.Categories.Add(new Category { Id = 1, Name = "tested" });
+		//	DbContext.Pallets.AddRange(availablePallets);
+		//	DbContext.Products.Add(new Product { Id = productId, CartonsPerPallet = cartonsPerPallet, Name = "test", SKU = "123", CategoryId = 1 });
+		//	DbContext.Issues.Add(issue);
+		//	await DbContext.SaveChangesAsync();
 			
-			//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
+		//	//var pickingPalletRepo = new Mock<IPickingPalletRepo>();
 
-			var service = new IssueService(Mediator);
-			//Act
-			var result = await service.AddPalletsToIssueByProductAsync(issue, issueItem);
-			//Assert
-			Assert.False(result.Success);
-			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {productId}. Asortyment nie został dodany do zlecenia.", result.Message);
-			Assert.Equal(productId, result.ProductId);
-			Assert.Equal(issueItem.Quantity, result.QuantityRequest);
-			var stock = 30;
-			Assert.Equal(stock, result.QuantityOnStock);
-		}
+		//	var service = new IssueService(Mediator);
+		//	//Act
+		//	var result = await service.AddPalletsToIssueByProductAsync(issue, issueItem);
+		//	//Assert
+		//	Assert.False(result.Success);
+		//	Assert.Contains($"Nie wystarczająca ilości produktu o numerze {productId}. Asortyment nie został dodany do zlecenia.", result.Message);
+		//	Assert.Equal(productId, result.ProductId);
+		//	Assert.Equal(issueItem.Quantity, result.QuantityRequest);
+		//	var stock = 30;
+		//	Assert.Equal(stock, result.QuantityOnStock);
+		//}
 	}
 }

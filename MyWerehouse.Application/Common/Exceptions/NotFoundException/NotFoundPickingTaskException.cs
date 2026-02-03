@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Application.Common.Exceptions.NotFoundException
 {
-	public class NotFoundAlloactionException : NotFoundException
+	public class NotFoundPickingTaskException : NotFoundException
 	{
 		public int PickingTaskId { get; }
-		public NotFoundAlloactionException(int pickingTaskId)
+		public NotFoundPickingTaskException(int pickingTaskId)
 			: base($"Alokacja o numerze {pickingTaskId} nie istnieje")
 		{
 			PickingTaskId = pickingTaskId;
 		}
-		public NotFoundAlloactionException(string message): base(message) {	}
+		public NotFoundPickingTaskException(string message): base(message) {	}
 	}
 }

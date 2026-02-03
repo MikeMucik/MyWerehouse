@@ -746,8 +746,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Powinny być dwie alokacja (2 sztuk) powiązana z VirtualPallet dla "P2" i "P3"
 			Assert.Equal(2, pickingTasksForIssue1.Count);
-			var alloc1 = pickingTasksForIssue1.First();
-			var alloc2 = pickingTasksForIssue1.Last();
+			var alloc1 = pickingTasksForIssue1.Find(a => a.ProductId == product.Id);
+			var alloc2 = pickingTasksForIssue1.Find(a => a.ProductId == product1.Id);
 			Assert.Equal(2, alloc1.RequestedQuantity);
 			Assert.Equal(7, alloc2.RequestedQuantity);
 			Assert.NotNull(alloc1.VirtualPallet);
@@ -902,8 +902,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Powinny być dwie alokacja (2 sztuk) powiązana z VirtualPallet dla "P2" i "P3"
 			Assert.Equal(2, pickingTasksForIssue1.Count);
-			var alloc1 = pickingTasksForIssue1.First();
-			var alloc2 = pickingTasksForIssue1.Last();
+			var alloc1 = pickingTasksForIssue1.Find(a => a.ProductId == product.Id);
+			var alloc2 = pickingTasksForIssue1.Find(a => a.ProductId == product1.Id);
 			Assert.Equal(2, alloc1.RequestedQuantity);
 			Assert.Equal(7, alloc2.RequestedQuantity);
 			Assert.NotNull(alloc1.VirtualPallet);
@@ -1024,7 +1024,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Status = PalletStatus.Available,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) }
 						}
 					},
 					new Pallet
@@ -1034,7 +1034,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Status = PalletStatus.Available,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) }
 						}
 					},
 					new Pallet
@@ -1044,7 +1044,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Status = PalletStatus.Available,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) }
 						}
 					},
 					new Pallet
@@ -1054,7 +1054,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Status = PalletStatus.Available,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
-							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) }
 						}
 					}
 				};
@@ -1072,8 +1072,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 22, BestBefore = new DateOnly(2026,1,1) },
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 7, BestBefore = new DateOnly(2026,1,1) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 22, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) },
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 7, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) }
 				}
 			};
 
@@ -1092,8 +1092,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Powinny być dwie alokacja (2 sztuk) powiązana z VirtualPallet dla "P2" i "P3"
 			Assert.Equal(2, pickingTasksForIssue1.Count);
-			var alloc1 = pickingTasksForIssue1.First();
-			var alloc2 = pickingTasksForIssue1.Last();
+			var alloc1 = pickingTasksForIssue1.Find(a => a.ProductId == product.Id);
+			var alloc2 = pickingTasksForIssue1.Find(a => a.ProductId == product1.Id);
 			Assert.Equal(2, alloc1.RequestedQuantity);
 			Assert.Equal(7, alloc2.RequestedQuantity);
 			Assert.NotNull(alloc1.VirtualPallet);
@@ -1110,8 +1110,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 11, BestBefore = new DateOnly(2026,1,1) } ,
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 8, BestBefore = new DateOnly(2026,1,1) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 11, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) } ,
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)) }
 				}
 			};
 
@@ -1272,8 +1272,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Powinny być dwie alokacja (2 sztuk) powiązana z VirtualPallet dla "P2" i "P3"
 			Assert.Equal(2, pickingTasksForIssue1.Count);
-			var alloc1 = pickingTasksForIssue1.First();
-			var alloc2 = pickingTasksForIssue1.Last();
+			var alloc1 = pickingTasksForIssue1.Find(a => a.ProductId == product.Id);
+			var alloc2 = pickingTasksForIssue1.Find(a => a.ProductId == product1.Id);
 			Assert.Equal(2, alloc1.RequestedQuantity);
 			Assert.Equal(2, alloc2.RequestedQuantity);
 			Assert.NotNull(alloc1.VirtualPallet);
@@ -1633,106 +1633,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Assert.ThrowsAsync<NotFoundIssueException>(() => _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7)));
 			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);
 		}
-		//[Fact]
-		//public async Task UpdateIssueAsync_WhenFirstProductFailsAfterSync_ShouldNotPersistDirtyData_AndSaveSecondProduct()
-		//{
-		//	// --- ARRANGE ---
-
-		//	// 1. Setup Danych (2 produkty, 2 palety)
-		//	var productFail = new Product { Id = 1, Name = "FailProd", SKU = "F1", CartonsPerPallet = 10 };
-		//	var productSuccess = new Product { Id = 2, Name = "OkProd", SKU = "S1", CartonsPerPallet = 10 };
-
-		//	var palletForFail = new Pallet { Id = "P_Fail", Status = PalletStatus.Available, ProductsOnPallet = new() { new() { Product = productFail, Quantity = 10 } } };
-		//	var palletForSuccess = new Pallet { Id = "P_Ok", Status = PalletStatus.Available, ProductsOnPallet = new() { new() { Product = productSuccess, Quantity = 10 } } };
-
-		//	var issue = new Issue
-		//	{
-		//		Id = 1,
-		//		IssueStatus = IssueStatus.New,
-		//		ClientId = 1,
-		//		Pallets = new List<Pallet>() // Pusta lista na start
-		//	};
-
-		//	// Dodajemy do bazy (zakładam, że DbContext to prawdziwa instancja z SQLite)
-		//	DbContext.Products.AddRange(productFail, productSuccess);
-		//	DbContext.Pallets.AddRange(palletForFail, palletForSuccess);
-		//	DbContext.Issues.Add(issue);
-		//	await DbContext.SaveChangesAsync();
-
-		//	// 2. Setup Mocków Mediatora (Symulujemy, że logika biznesowa zwraca palety)
-		//	// Mockujemy zapytania o dostępność, żeby zawsze zwracały OK
-		//	_mediatorMock.Setup(m => m.Send(It.IsAny<GetProductCountQuery>(), It.IsAny<CancellationToken>()))
-		//		.ReturnsAsync(100);
-		//	_mediatorMock.Setup(m => m.Send(It.IsAny<GetNumberPalletsAndRestQuery>(), It.IsAny<CancellationToken>()))
-		//		.ReturnsAsync(new AssignPallestResult(1, 0)); // 1 pełna paleta
-
-		//	// Ważne: Zwracamy odpowiednie palety dla odpowiednich produktów
-		//	_mediatorMock.Setup(m => m.Send(It.Is<GetAvailablePalletsByProductQuery>(q => q.ProductId == productFail.Id), It.IsAny<CancellationToken>()))
-		//		.ReturnsAsync(new List<Pallet> { palletForFail });
-
-		//	_mediatorMock.Setup(m => m.Send(It.Is<GetAvailablePalletsByProductQuery>(q => q.ProductId == productSuccess.Id), It.IsAny<CancellationToken>()))
-		//		.ReturnsAsync(new List<Pallet> { palletForSuccess });
-
-		//	// Mockujemy przypisanie palet (to, co zwraca assigned pallets)
-		//	_mediatorMock.Setup(m => m.Send(It.Is<AssignFullPalletToIssueCommand>(c => c.Issue.Id == issue.Id), It.IsAny<CancellationToken>()))
-		//		.Returns<AssignFullPalletToIssueCommand, CancellationToken>((cmd, ct) => Task.FromResult(cmd.FreePallets)); // Zwracamy te same palety jako przypisane
-
-		//	// --- PUŁAPKA (THE TRAP) ---
-		//	// Symulujemy, że EventCollector ma jakieś zdarzenia, żeby wejść w pętlę foreach(evn in ...)
-		//	_eventCollector.Events.Add(new SomeDomainEvent());
-
-		//	// Konfigurujemy Mediatora tak, aby RZUCAŁ WYJĄTEK tylko przy publikacji eventu, 
-		//	// ale tylko w pierwszej iteracji (dla productFail).
-		//	// Ponieważ kod przetwarza produkty w pętli, musimy zidentyfikować moment.
-		//	// Najprościej: rzuć wyjątek, jeśli issue.Pallets zawiera "P_Fail".
-
-		//	_mediatorMock.Setup(m => m.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()))
-		//		.Callback(() =>
-		//		{
-		//			// Sprawdzamy stan bazy/obiektu w momencie publikacji eventu
-		//			// Jeśli aktualnie przetwarzamy FailProd, to synchronizer już dodał paletę P_Fail do issue.
-		//			var currentIssue = DbContext.Issues.Local.FirstOrDefault(i => i.Id == 1);
-		//			if (currentIssue != null && currentIssue.Pallets.Any(p => p.Id == "P_Fail"))
-		//			{
-		//				throw new Exception("BUM! Błąd po synchronizacji, ale przed Commitem!");
-		//			}
-		//		});
-
-		//	// 3. Act - Wywołanie metody
-		//	var updateDto = new UpdateIssueDTO
-		//	{
-		//		Id = issue.Id,
-		//		PerformedBy = "Tester",
-		//		Items = new List<IssueItemDTO>
-		//{
-		//	new IssueItemDTO { ProductId = productFail.Id, Quantity = 10 },    // To ma się wywalić
-		//          new IssueItemDTO { ProductId = productSuccess.Id, Quantity = 10 }  // To ma przejść
-		//      }
-		//	};
-
-		//	// Wywołujemy serwis
-		//	// Ignorujemy fakt, że metoda może zwrócić listę z błędami - interesuje nas stan bazy po operacji
-		//	var results = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
-
-		//	// --- ASSERT ---
-
-		//	// Pobieramy zlecenie "na świeżo" z nowym kontekstem lub reloadem, żeby zobaczyć co naprawdę siedzi w bazie
-		//	DbContext.ChangeTracker.Clear();
-		//	var issueFromDb = await DbContext.Issues.Include(i => i.Pallets).FirstAsync(i => i.Id == 1);
-
-		//	// OCZEKIWANIA:
-		//	// 1. Paleta P_Fail NIE powinna być przypisana (bo był Rollback).
-		//	// 2. Paleta P_Ok POWINNA być przypisana (bo druga iteracja się udała).
-
-		//	// DLACZEGO TWÓJ STARY KOD TU PADNIE?
-		//	// Bez ReloadAsync w catchu, paleta P_Fail zostanie w pamięci RAM obiektu Issue.
-		//	// Przy drugiej iteracji (dla P_Ok), EF Core zobaczy w kolekcji Pallets dwie palety: P_Fail i P_Ok.
-		//	// Mimo że P_Fail była wycofana transakcją, EF spróbuje ją zapisać ZNOWU przy okazji zapisywania P_Ok.
-		//	// Efekt: W bazie będą DWIE palety, mimo że dla pierwszej poleciał błąd.
-
-		//	Assert.DoesNotContain(issueFromDb.Pallets, p => p.Id == "P_Fail"); // To obleje stary kod
-		//	Assert.Contains(issueFromDb.Pallets, p => p.Id == "P_Ok");
-		//	Assert.Equal(1, issueFromDb.Pallets.Count); // Powinna być tylko 1
-		//}
+		
 	}
 }

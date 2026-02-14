@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
@@ -46,9 +45,7 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 				};
 				if (!allowedStatuses.Contains(pallet.Status))
 					return IssueResult.Fail("Paleta nie ma statusu do załadowania");
-				pallet.Status = PalletStatus.Loaded;				
-				await _mediator.Publish(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId,
-						ReasonMovement.Loaded, request.UserId, PalletStatus.Loaded, null), ct);
+				pallet.ChangeStatus(PalletStatus.Loaded, ReasonMovement.Loaded, request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return IssueResult.Ok($"Paleta {request.PalletId} została załadowana.");

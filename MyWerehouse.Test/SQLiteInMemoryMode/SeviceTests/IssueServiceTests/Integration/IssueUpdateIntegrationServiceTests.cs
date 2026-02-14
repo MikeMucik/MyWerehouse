@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
+using MyWerehouse.Application.Issues.Commands.UpdateIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -17,7 +19,7 @@ using Xunit.Sdk;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
-	public class IssueUpdateIntegrationServiceTests : IssueIntegrationCommandService
+	public class IssueUpdateIntegrationServiceTests :TestBase 
 	{
 		//HappyPath
 		[Fact]
@@ -93,9 +95,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				{
 					new IssueItemDTO { ProductId = product.Id, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 				}
-			};
-
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			};			
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -112,7 +113,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			new IssueItemDTO { ProductId = product.Id, Quantity = 15, BestBefore = new DateOnly(2026,1,1) }
 		}
 			};
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -228,7 +229,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -259,8 +260,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			new IssueItemDTO { ProductId = product.Id, Quantity = 15, BestBefore = new DateOnly(2026,1,1) }
 		}
 			};
-
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -277,27 +277,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					.ThenInclude(vp => vp.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
-
-
 			// Powinna być jedna alokacja (5 sztuk) powiązana z VirtualPallet dla "P2"
 			Assert.Single(pickingTasksForIssue);
 			var alloc = pickingTasksForIssue.Single();
 			Assert.Equal(5, alloc.RequestedQuantity);
 			Assert.NotNull(alloc.VirtualPallet);
 			Assert.Equal("P2", alloc.VirtualPallet.PalletId);
-
 			//kontrola zapisu historii
-
 			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == InitialPalletQuantity - pickingTask
 			var vp = DbContext.VirtualPallets
 				.Include(v => v.PickingTasks)
 				.First(v => v.PalletId == "P2");
-
 			Assert.Equal(5, vp.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(vp.InitialPalletQuantity - vp.PickingTasks.Sum(a => a.RequestedQuantity), vp.RemainingQuantity);
-
-
-
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.Single(result);
 			Assert.True(result.First().Success);
@@ -312,17 +304,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				.Where(h => h.PickingTaskId == alloc.Id)
 				.OrderBy(h => h.Id)
 				.ToList();
-
 			// Powinny być 2 wpisy: Create + Correction
 			Assert.Single(history);
-
 			// Ostatni wpis powinien być Correction
 			var lastHistory = history.Last();
-
 			Assert.Equal(PickingStatus.Allocated, lastHistory.StatusAfter);
 			Assert.Equal("User2", lastHistory.PerformedBy);
 			Assert.Equal(alloc.Id, lastHistory.PickingTaskId);
-
 		}
 		[Fact]
 		public async Task UpdateIssueAsync_NoPickingTaskForFirstAttempAndAssignsNewOnesWithOlsPickingTaskInBaseVirtualoPallet()
@@ -397,7 +385,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				InitialPalletQuantity = pallet2.ProductsOnPallet.First().Quantity,
 				PickingTasks = new List<PickingTask> { pickingTask }
 			};
-			//pickingTask.VirtualPallet = virtualPallet;
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -419,7 +406,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.Id == 2);
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -437,7 +424,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -548,10 +535,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Location = pallet2.Location,
 				InitialPalletQuantity = pallet2.ProductsOnPallet.First().Quantity,
 				PickingTasks = new List<PickingTask> { pickingTask }
-			};
-			//pickingTask.VirtualPallet = virtualPallet;
-			//DbContext.Clients.Add(client);
-			//DbContext.Categories.Add(category);
+			};			
 			DbContext.Products.Add(product);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.AddRange(pallet1, pallet2);
@@ -571,7 +555,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.Id == 2);
 			issue.IssueStatus = IssueStatus.ConfirmedToLoad;
@@ -590,11 +574,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 			var newIssueItems = DbContext.IssueItems.Where(i => i.IssueId == 3).ToList();
 			foreach (var it in newIssueItems) { Console.WriteLine($"Item: ProductId={it.ProductId}, Quantity={it.Quantity}, BestBefore={it.BestBefore}"); }
 			// Assert – sprawdź Issue
-
 			var newIssue = DbContext.Issues.Find(3);  // Lub Include(i => i.IssueItems)
 			var newIssueItems1 = DbContext.IssueItems.Where(i => i.IssueId == 3).ToList();
 
@@ -731,7 +714,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -769,7 +752,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -887,7 +870,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -925,7 +908,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -1077,7 +1060,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Equal(2, issue.Pallets.Count); // powinien być przypisany P1 p2
@@ -1115,7 +1098,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 			//var result1 = await _m
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -1257,7 +1240,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1295,7 +1278,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -1386,7 +1369,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1419,7 +1402,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -1506,7 +1489,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1524,7 +1507,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		}
 			};
 
-			var result = await _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7));
+			var result = await Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7)));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -1611,7 +1594,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1630,7 +1613,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 			// Assert & Act
-			var result = await Assert.ThrowsAsync<NotFoundIssueException>(() => _issueService.UpdateIssueAsync(updateDto, DateTime.UtcNow.AddDays(7)));
+			var result = await Assert.ThrowsAsync<NotFoundIssueException>(() => Mediator.Send(new UpdateIssueNewCommand(updateDto, DateTime.UtcNow.AddDays(7))));
 			Assert.Contains($"Zamówienie o numerze {updateDto.Id} nie zostało znalezione.", result.Message);
 		}
 		

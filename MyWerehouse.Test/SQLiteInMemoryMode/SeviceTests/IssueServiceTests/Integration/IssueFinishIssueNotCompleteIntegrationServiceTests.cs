@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Invetories.Models;
@@ -14,7 +15,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
-	public class IssueFinishIssueNotCompleteIntegrationServiceTests : IssueIntegrationCommandService
+	public class IssueFinishIssueNotCompleteIntegrationServiceTests : TestBase
 	{
 		[Fact]
 		public async Task FinishIssueNotCompleted_ShouldUpdateStatusesAndCreateMovementsAndHistory()
@@ -123,9 +124,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Clients.Add(initailCLient);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			//Act
-			await _issueService.FinishIssueNotCompleted(issueId, performedBy);
-
+			//Act			
+			await Mediator.Send(new FinishIssueNotCompletedCommand(issueId, performedBy));
 			// Assert
 			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
 			Assert.Equal(PalletStatus.Available, notLoadedPallet.Status);
@@ -165,8 +165,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Sprawdź, że zawiera wpis dla załadowanej palety P1
 			Assert.Contains(loadingHistories.Details, h => h.PalletId == "P1");
 
-			// Sprawdź, że status i wykonawca się zgadzają
-			
+			// Sprawdź, że status i wykonawca się zgadzają			
 				Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
 				Assert.Equal(performedBy, updatedIssue.PerformedBy);			
 		}

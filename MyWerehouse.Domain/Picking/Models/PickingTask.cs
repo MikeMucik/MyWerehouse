@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Domain.Picking.Models
 {
-	public class PickingTask
+	public class PickingTask : AggregateRoots
 	{
 		public int Id { get; set; }
 		public int VirtualPalletId { get; set; }

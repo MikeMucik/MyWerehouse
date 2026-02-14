@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -49,6 +49,8 @@ namespace MyWerehouse.Application.PickingPallets.Services
 						},
 				};
 				_palletRepo.AddPallet(pallet);
+				//pallet.AssignToPicking(pallet.Location, userId);
+				pallet.ChangeStatus(PalletStatus.Picking, ReasonMovement.Picking, userId);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
 					pickingTask.MarkPicked(newIdPallet); //
@@ -57,8 +59,8 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				{
 					pickingTask.MarkPartiallyPicked(newIdPallet, quantity);
 				}
-				_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId,
-				ReasonMovement.Picking, userId, PalletStatus.Picking, null));
+				//_eventCollector.Add(new ChangeStatusOfPalletNotification(pallet.Id, pallet.LocationId, pallet.Location.ToSnopShot(), pallet.LocationId, pallet.Location.ToSnopShot(),
+				//ReasonMovement.Picking, userId, PalletStatus.Picking, null));
 				return new CreatePalletResult(true, newIdPallet); //pokaż komunikat weź nową paletę
 			}
 			else
@@ -86,8 +88,10 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				{
 					pickingTask.MarkPartiallyPicked(oldPallet.Id, quantity);
 				}
-				_eventCollector.Add(new CreatePalletOperationNotification(oldPallet.Id, oldPallet.LocationId,
-				ReasonMovement.Picking, userId, PalletStatus.Picking, null));
+				//oldPallet.AssignToPicking(oldPallet.Location, userId);
+				oldPallet.ChangeStatus(PalletStatus.Picking, ReasonMovement.Picking, userId);
+				//_eventCollector.Add(new ChangeStatusOfPalletNotification(oldPallet.Id, oldPallet.LocationId, oldPallet.Location.ToSnopShot(), oldPallet.LocationId, oldPallet.Location.ToSnopShot(),
+				//ReasonMovement.Picking, userId, PalletStatus.Picking, null));
 				return new CreatePalletResult(false, oldPallet.Id);
 			}
 		}

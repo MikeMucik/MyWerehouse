@@ -8,11 +8,12 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Receviving.Events;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 {
-	public class CreateHistoryReceiptHandler :INotificationHandler<CreateHistoryReceiptNotification>
+	public class CreateHistoryReceiptHandler :INotificationHandler<ChangeStatusReceiptNotification>
 	{
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IHistoryReceiptRepo _historyReceiptRepo;
@@ -25,7 +26,7 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 			_historyReceiptRepo = historyReceiptRepo;
 			_werehouseDbContext = werehouseDbContext;
 		}
-		public async Task Handle(CreateHistoryReceiptNotification request, CancellationToken cancellationToken)
+		public async Task Handle(ChangeStatusReceiptNotification request, CancellationToken cancellationToken)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
 				?? throw new NotFoundReceiptException(request.ReceiptId);
@@ -46,7 +47,7 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 				Details = details
 			};
 			await _historyReceiptRepo.AddHistoryReceiptAsync(history, cancellationToken);
-			await _werehouseDbContext.SaveChangesAsync(cancellationToken);
+			//await _werehouseDbContext.SaveChangesAsync(cancellationToken);
 		}
 	}
 }

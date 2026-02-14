@@ -8,11 +8,12 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 {
-	public class CreateHistoryIssueHandler :INotificationHandler<CreateHistoryIssueNotification>
+	public class CreateHistoryIssueHandler :INotificationHandler<AddHistoryForIssueNotification>
 	{
 		private readonly IIssueRepo _issueRepo;
 		private readonly IHistoryIssueRepo _historyIssueRepo;
@@ -27,7 +28,7 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 			_historyIssueRepo = historyIssueRepo;		
 			_werehouseDbContext = werehouseDbContext;
 		}
-		public async Task Handle(CreateHistoryIssueNotification request, CancellationToken cancellationToken)
+		public async Task Handle(AddHistoryForIssueNotification request, CancellationToken cancellationToken)
 		{
 			var issue = await _issueRepo.GetIssueByIdWithPalletAndItemsAsync(request.IssueId, cancellationToken)
 				?? throw  new NotFoundIssueException(request.IssueId);

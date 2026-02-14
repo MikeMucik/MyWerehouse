@@ -10,10 +10,10 @@ using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Common.Utils;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
@@ -26,93 +26,59 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IMediator _mediator;
 		private readonly IEventCollector _eventCollector;
-		private readonly IProductRepo _productRepo;
+		private readonly IProductRepo _productRepo;		
 		public UpdatePalletHandler(IPalletRepo palletRepo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IMediator mediator,
 			IEventCollector eventCollector,
-			IProductRepo productRepo)
+			IProductRepo productRepo			
+			)
 		{
 			_palletRepo = palletRepo;
 			_mapper = mapper;
-			_werehouseDbContext =	werehouseDbContext;
+			_werehouseDbContext = werehouseDbContext;
 			_mediator = mediator;
 			_eventCollector = eventCollector;
-			_productRepo = productRepo;
+			_productRepo = productRepo;			
 		}
-		public async Task<PalletResult> Handle (UpdatePalletCommand request, CancellationToken ct)
+		public async Task<PalletResult> Handle(UpdatePalletCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
 				var existingPallet = await _palletRepo.GetPalletByIdAsync(request.UpdatingPallet.Id)
-						?? throw new NotFoundPalletException (request.UpdatingPallet.Id);
+						?? throw new NotFoundPalletException(request.UpdatingPallet.Id);
 				foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
 				{
 					if (!await _productRepo.IsExistProduct(pop.ProductId))
 						throw new NotFoundProductException(pop.ProductId);
 				}
-				var oldProducts = existingPallet.ProductsOnPallet
-					.GroupBy(p=>p.ProductId)
-					.ToDictionary(g=>g.Key, g=>g.Sum(x=>x.Quantity));
-				var newProducts = request.UpdatingPallet.ProductsOnPallet
-					.GroupBy(p => p.ProductId)
-					.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
-				var stockChangesI = new List<StockItemChange>();
-				var stockChangesD = new List<StockItemChange>();
-				var allProductIds = oldProducts.Keys.Union(newProducts.Keys);
-				foreach ( var productId in allProductIds)
+
+				var updatedProducts = request.UpdatingPallet.ProductsOnPallet
+					.Select(p=> _mapper.Map<ProductOnPallet>(p)).ToList()
+					.ToList();
+
+				var deltaToStock = existingPallet.CalculateQuantityDelta(updatedProducts);
+
+				foreach (var product in deltaToStock)
 				{
-					oldProducts.TryGetValue(productId, out var oldQty);
-					newProducts.TryGetValue(productId, out var newQty);
-					var delta = newQty - oldQty;
-					if(delta > 0)
-					{
-						stockChangesI.Add(new StockItemChange(productId, Math.Abs(delta)));						
-					}
-					if (delta < 0)
-					{
-						stockChangesD.Add(new StockItemChange(productId, Math.Abs(delta)));						
-					}
+					_eventCollector.Add(
+						new ChangeStockNotification(product.Quantity > 0 ? StockChangeType.Increase : StockChangeType.Decrease,
+						new[] { new StockItemChange(product.ProductId, Math.Abs(product.Quantity)) }));
 				}
-				if (stockChangesI.Count > 0)
-				{
-					_eventCollector.Add(new ChangeStockNotification(
-								StockChangeType.Increase,
-								stockChangesI
-							));
-				}
-				if (stockChangesD.Count > 0)
-				{
-					_eventCollector.Add(new ChangeStockNotification(
-								StockChangeType.Decrease,
-								stockChangesD
-							));
-				}				
-				_mapper.Map(request.UpdatingPallet, existingPallet);
-				CollectionSynchronizer.SynchronizeCollection(
-					existingPallet.ProductsOnPallet,
-				request.UpdatingPallet.ProductsOnPallet,
-					a => a.Id,
-					a => a.Id,
-					dto =>
-					{
-						var newProduct = _mapper.Map<ProductOnPallet>(dto);
-						newProduct.PalletId = existingPallet.Id;
-						return newProduct;
-					},
-					(dto, entity) =>
-					{
-						var originalPalletId = entity.PalletId;  // Zapisz oryginalne FK przed mapowaniem
-						_mapper.Map(dto, entity);  // Mapuj resztę
-						entity.PalletId = originalPalletId;
-					});							
-				
+
+				var existingProductsOnPallet = new HashSet<int>(
+					updatedProducts.Select(x => x.ProductId));
+				var productToRomove = existingPallet.ProductsOnPallet
+					.Where(x => !existingProductsOnPallet.Contains(x.ProductId))
+					.Select(x=>x.ProductId)
+					.ToList();
+				existingPallet.RemoveProducts(productToRomove);
+				existingPallet.ApplyProductChanges(updatedProducts);
+				existingPallet.ChangeStatus(request.UpdatingPallet.Status, ReasonMovement.Correction, request.UserId);
+
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await _mediator.Publish(new CreatePalletOperationNotification(existingPallet.Id, existingPallet.LocationId,
-								ReasonMovement.Picking, request.UserId, PalletStatus.ToIssue, null), ct);
-				//uaktulnianie stanów, update stock
 				foreach (var rv in _eventCollector.Events)
 				{
 					await _mediator.Publish(rv, ct);
@@ -124,8 +90,8 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			{
 				await transaction.RollbackAsync(ct);
 				return PalletResult.Fail(epe.Message);
-			}			
-			catch(NotFoundPalletException epr)
+			}
+			catch (NotFoundPalletException epr)
 			{
 				await transaction.RollbackAsync(ct);
 				return PalletResult.Fail(epr.Message);
@@ -144,3 +110,54 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 		}
 	}
 }
+//_mapper.Map(request.UpdatingPallet, existingPallet);
+//CollectionSynchronizer.SynchronizeCollection(
+//	existingPallet.ProductsOnPallet,
+//	request.UpdatingPallet.ProductsOnPallet,
+//	a => a.Id,
+//	a => a.Id,
+//	dto =>
+//	{
+//		var newProduct = _mapper.Map<ProductOnPallet>(dto);
+//		newProduct.PalletId = existingPallet.Id;
+//		return newProduct;
+//	},
+//	(dto, entity) =>
+//	{
+//		var originalPalletId = entity.PalletId;  // Zapisz oryginalne FK przed mapowaniem
+//		_mapper.Map(dto, entity);  // Mapuj resztę
+//		entity.PalletId = originalPalletId;
+//	});
+//var oldProducts = existingPallet.ProductsOnPallet
+//	.GroupBy(p => p.ProductId)
+//	.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
+//var newProducts = request.UpdatingPallet.ProductsOnPallet
+//	.GroupBy(p => p.ProductId)
+//	.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
+
+//var allProductIds = oldProducts.Keys.Union(newProducts.Keys);
+//foreach (var productId in allProductIds)
+//{
+//	oldProducts.TryGetValue(productId, out var oldQty);
+//	newProducts.TryGetValue(productId, out var newQty);
+//	var delta = newQty - oldQty;
+//	if (delta > 0)
+//	{
+//		_eventCollector.Add(new ChangeStockNotification(
+//				StockChangeType.Increase,
+//				[new StockItemChange(productId, delta)]));
+//	}
+//	if (delta < 0)
+//	{
+//		_eventCollector.Add(new ChangeStockNotification(
+//				StockChangeType.Decrease,
+//				[new StockItemChange(productId, Math.Abs(delta))]
+//			));
+//	}
+//}
+
+//List<int> ids = updatedProducts.Select(a => a.ProductId).ToList();
+//if( await _productRepo.EnsureAllExist(ids)) { throw new NotFoundProductException("nieprawidłowy produkt"); }
+//var updatedProducts = request.UpdatingPallet.ProductsOnPallet
+//	.Select(p => (p.ProductId, p.Quantity, p.BestBefore))
+//	.ToList();

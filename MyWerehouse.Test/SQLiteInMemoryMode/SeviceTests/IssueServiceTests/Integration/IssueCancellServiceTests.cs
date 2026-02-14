@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Issues.Commands.CancelIssue;
+using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.PickingPallets.Commands.DoPicking;
+using MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking;
 using MyWerehouse.Application.PickingPallets.DTOs;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
@@ -19,7 +20,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
-	public class IssueCancellServiceTests : IssueIntegrationCommandService
+	public class IssueCancellServiceTests : TestBase 
 	{
 		[Fact]
 		public async Task CancelIssueAsync_FullPalletAsignment_ShouldRestorePalletAvailability()
@@ -58,8 +59,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					{
 						Id = "P1",
 						Location = location,
-						Status = PalletStatus.Available,
-						//ReceiptId = 1,
+						Status = PalletStatus.Available,						
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -69,8 +69,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					{
 						Id = "P2",
 						Location = location,
-						Status = PalletStatus.Available,
-						//ReceiptId = 1,
+						Status = PalletStatus.Available,						
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -103,15 +102,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					new IssueItemDTO { ProductId = product.Id, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 				}
 			};
-
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand( createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
-			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert
 			Assert.NotNull(result);
 			var pallet = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
@@ -156,7 +154,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Id = "P1",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -167,7 +164,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Id = "P2",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -200,15 +196,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					new IssueItemDTO { ProductId = product.Id, Quantity = 20, BestBefore = new DateOnly(2026,1,1) }
 				}
 			};
-
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			//Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
-			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert
 			Assert.NotNull(result);
 			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "P1");
@@ -255,7 +250,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Id = "P1",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -266,7 +260,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Id = "P2",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -300,14 +293,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			//Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
-			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
@@ -382,7 +375,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Id = "P1",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -393,7 +385,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Id = "P2",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -427,7 +418,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await _issueService.CreateNewIssueAsync(createIssueDto, DateTime.UtcNow.AddDays(7));
+			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -454,7 +445,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(pickingTaskDone);
 			// Act 3 - cancel issue
 			var issueToCancelId = issue.Id;
-			var result = await _issueService.CancelIssueAsync(issueToCancelId, "UserC");
+			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
@@ -479,7 +470,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Assert – Result
 			Assert.True(result.Success);
 			Assert.Contains("Anulowano zlecenie", result.Message);
-
 
 			var reverseTasks = await DbContext.ReversePickings
 				.Where(rp => rp.SourcePalletId == "P2")

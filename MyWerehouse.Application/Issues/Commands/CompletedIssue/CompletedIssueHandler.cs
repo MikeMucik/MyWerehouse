@@ -8,6 +8,7 @@ using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
@@ -38,7 +39,7 @@ namespace MyWerehouse.Application.Issues.Commands.CompletedIssue
 				issue.IssueStatus = IssueStatus.IsShipped;
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId), ct);
+				await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
 				return IssueResult.Ok($"Zakończono załadunek {request.IssueId}.");
 			}
 			catch (NotFoundIssueException ei)

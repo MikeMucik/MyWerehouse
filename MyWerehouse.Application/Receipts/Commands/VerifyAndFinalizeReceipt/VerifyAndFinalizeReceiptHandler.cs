@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
@@ -15,6 +13,8 @@ using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Pallets.Events;
+using MyWerehouse.Domain.Receviving.Events;
 
 namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 {
@@ -48,9 +48,12 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 			}
 			foreach (var pallet in receipt.Pallets)
 			{
-				await _mediator.Publish(new CreatePalletOperationNotification(
+				await _mediator.Publish(new ChangeStatusOfPalletNotification(
 						pallet.Id,
 						pallet.LocationId,
+						pallet.Location.ToSnopShot(),
+						pallet.LocationId,
+						pallet.Location.ToSnopShot(),
 						ReasonMovement.Received,
 						receipt.PerformedBy,
 						PalletStatus.InStock,
@@ -58,7 +61,7 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 					), cancellationToken);				
 			}			
 			await _mediator.Publish(new ChangeStockNotification(StockChangeType.Increase, stockChanges), cancellationToken);
-			await _mediator.Publish(new CreateHistoryReceiptNotification(request.ReceiptId, receipt.ReceiptStatus, request.UserId), cancellationToken);
+			await _mediator.Publish(new ChangeStatusReceiptNotification(request.ReceiptId, receipt.ReceiptStatus, request.UserId), cancellationToken);
 			return ReceiptResult.Ok("Palety z przyjęcia zweryfikowano, gotowe do działania", request.ReceiptId);			
 		}
 	}

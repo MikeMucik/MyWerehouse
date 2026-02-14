@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
@@ -11,7 +12,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {
-	public class PalletChangeLocationIntegrationServiceTests : PalletIntegrationCommandService
+	public class PalletChangeLocationIntegrationServiceTests : TestBase// PalletIntegrationCommandService
 	{
 		[Fact]
 		public async Task ChangeLocation_ChangeLocationPalletAsync_ChangeData()
@@ -84,7 +85,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var movement = new PalletMovement
 			{
 				DestinationLocationId = 1,
-				MovementDate = DateTime.Now.AddDays(-2),
+				MovementDate = DateTime.UtcNow.AddDays(-2),
 				PalletId = pallet.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
@@ -93,7 +94,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			{
 				SourceLocationId = 1,
 				DestinationLocationId = 2,
-				MovementDate = DateTime.Now.AddDays(-1),
+				MovementDate = DateTime.UtcNow.AddDays(-1),
 				PalletId = pallet.Id,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
@@ -117,7 +118,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var palletId = "Q2000";
 			var destinationLocation = 2;
 			var userId = "U001";
-			var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId);
+			//var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId);
+			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
 			//Assert
 			Assert.True(result.Success);
 			Assert.False(result.RequiresConfirmation);
@@ -248,7 +250,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var palletId = "Q2000";
 			var destinationLocation = 2;
 			var userId = "U001";
-			var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId);
+			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
 			
 			//Assert
 			Assert.False(result.Success);
@@ -371,7 +373,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var destinationLocation = 2;
 			var userId = "U001";
 
-			var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId, force: true);
+			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId, true));
 			//Assert
 			Assert.True(result.Success);
 			Assert.False(result.RequiresConfirmation);

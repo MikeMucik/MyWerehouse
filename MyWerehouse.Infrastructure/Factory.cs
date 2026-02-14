@@ -22,7 +22,7 @@ namespace MyWerehouse.Infrastructure
 			var optionsBuilder = new DbContextOptionsBuilder<WerehouseDbContext>();
 			optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
 
-			return new WerehouseDbContext(optionsBuilder.Options);
+			return new WerehouseDbContext(optionsBuilder.Options, null);
 		}
 	}
 }

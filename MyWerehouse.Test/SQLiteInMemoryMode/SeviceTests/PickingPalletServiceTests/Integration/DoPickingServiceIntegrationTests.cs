@@ -16,13 +16,14 @@ using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Application.PickingPallets.DTOs;
+using MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
-	public class DoPickingServiceIntegrationTests : PickingIntegrationCommandService
+	public class DoPlannedPickingServiceIntegrationTests : TestBase
 	{
 		[Fact]
-		public async Task DoPickingAsync_HappyPath_AddToBasePickingDone()
+		public async Task DoPlannedPickingAsync_HappyPath_AddToBasePickingDone()
 		{
 			// Arrange
 			var category = new Category
@@ -131,8 +132,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickedQuantity = 30,
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
-			};
-			var result = await _pickingPalletService.DoPickingAsync(pickingTaskDTO, "user1");
+			};			
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
 			// Assert
 			Assert.NotNull(result);
@@ -272,7 +273,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id
 			};
-			var result = await _pickingPalletService.DoPickingAsync(pickingTaskDTO, "user1");
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
 			// Assert
 			Assert.NotNull(result);
@@ -430,7 +431,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			var result = await _pickingPalletService.DoPickingAsync(pickingTaskDTO, "user1");
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
 			// Assert
 			Assert.NotNull(result);
@@ -595,7 +596,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			var result = await _pickingPalletService.DoPickingAsync(pickingTaskDTO, "user1");
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
 			// Assert
 			Assert.NotNull(result);
@@ -759,7 +760,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id
 			};
-			var result = await _pickingPalletService.DoPickingAsync(pickingTaskDTO, "user1");
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
 			// Assert
 			Assert.NotNull(result);
@@ -969,7 +970,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				SourcePalletId = sourcePallet1.Id,
 				//BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 			};
-			var result = await _pickingPalletService.DoPickingAsync(pickingTaskDTO, "user1");
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
 			// Assert
 			Assert.NotNull(result);
@@ -1137,7 +1138,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				SourcePalletId = sourcePallet1.Id,
 				//BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 			};
-			var result = await _pickingPalletService.DoPickingAsync(pickingTaskDTO, "user1");
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
 			// Assert
 			Assert.NotNull(result);

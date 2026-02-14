@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
-	public class IssueMarkAsLoadedServiceTests : IssueIntegrationCommandService
+	public class IssueMarkAsLoadedServiceTests : TestBase
 	{
 		[Fact]
 		public async Task MarkAsLoaded_ChangeStatus_HappyPath()
@@ -90,7 +91,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(availablePallets);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _issueService.MarkAsLoadedAsync("P1", "User123");
+			var result = await Mediator.Send(new MarkAsLoadedCommand("P1", "User123"));
 			//Assert
 			Assert.True(result.Success);
 			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "P1");
@@ -176,7 +177,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(availablePallets);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _issueService.MarkAsLoadedAsync("P2", "User123");
+			var result = await Mediator.Send(new MarkAsLoadedCommand("P2", "User123"));
 			//Assert
 			Assert.False(result.Success);
 			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "P2");

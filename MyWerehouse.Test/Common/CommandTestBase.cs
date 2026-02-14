@@ -33,7 +33,7 @@ namespace MyWerehouse.Test.Common
 			var serviceProvider = services.BuildServiceProvider();
 			_mapper = serviceProvider.GetRequiredService<IMapper>();
 
-			_context = new WerehouseDbContext(options);
+			_context = new WerehouseDbContext(options, null);
 
 			_context.Database.EnsureCreated();
 		}

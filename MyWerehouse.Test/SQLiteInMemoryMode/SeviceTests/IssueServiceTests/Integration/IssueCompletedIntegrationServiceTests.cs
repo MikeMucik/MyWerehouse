@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Issues.Commands.CompletedIssue;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
@@ -13,7 +14,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
-	public class IssueCompletedIntegrationServiceTests : IssueIntegrationCommandService
+	public class IssueCompletedIntegrationServiceTests :TestBase 
 	{
 		[Fact]
 		public async Task CompletedIssueAsync_AllLoaded_HappyPath()
@@ -71,7 +72,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _issueService.CompletedIssueAsync(issue.Id, "UserLoader");
+			var result = await Mediator.Send(new CompletedIssueCommand(issue.Id, "UserLoader"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -133,7 +134,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _issueService.CompletedIssueAsync(issue.Id, "UserLoader");
+			var result = await Mediator.Send(new CompletedIssueCommand(issue.Id, "UserLoader"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.Success);

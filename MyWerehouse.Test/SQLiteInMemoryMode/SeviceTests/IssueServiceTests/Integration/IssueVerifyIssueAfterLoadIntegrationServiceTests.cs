@@ -16,10 +16,11 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
-	public class IssueVerifyIssueAfterLoadIntegrationServiceTests : IssueIntegrationCommandService
+	public class IssueVerifyIssueAfterLoadIntegrationServiceTests : TestBase
 	{
 		[Fact]
 		public async Task VerifyIssueAfterLoadingAsync_IsValid_UpdateDatabase()
@@ -58,13 +59,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var issue = new Issue
 			{
 				PickingTasks = new List<PickingTask>(),
-				Client = client,
-			//	IssueItems = new List<IssueItem> { new IssueItem
-			//{
-			//	Product = product,
-			//	Quantity = 20,
-			//	BestBefore = new DateOnly(2026, 1, 1)
-			//}},
+				Client = client,			
 				IssueStatus = IssueStatus.IsShipped,
 				PerformedBy = "user1",
 				IssueDateTimeCreate = DateTime.Now.AddDays(-7),
@@ -95,7 +90,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			await DbContext.SaveChangesAsync();
 
 			//Act
-			var result = await _issueService.VerifyIssueAfterLoadingAsync(issue.Id, "UserTest");
+			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -136,7 +131,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		public async Task VerifyIssueAfterLoadingAsync_IssueNotFound_ReturnFail()
 		{
 			//Act
-			var result = await _issueService.VerifyIssueAfterLoadingAsync(999, "userX");
+			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(999, "userX"));
 
 			//Assert
 			Assert.NotNull(result);
@@ -217,7 +212,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _issueService.VerifyIssueAfterLoadingAsync(issue.Id, "userX");
+			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
 
 			//Assert
 			Assert.NotNull(result);
@@ -297,7 +292,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _issueService.VerifyIssueAfterLoadingAsync(issue.Id, "userX");
+			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
 
 			//Assert
 			Assert.NotNull(result);
@@ -344,7 +339,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
 			{
-				//ProductId = product.Id,
 				Product = product,
 				Quantity = 20,
 				BestBefore = new DateOnly(2026, 1, 1)
@@ -372,7 +366,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			await DbContext.SaveChangesAsync();
 
 			// Act
-			var result = await _issueService.VerifyIssueAfterLoadingAsync(issue.Id, "user1");
+			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "user1"));
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);

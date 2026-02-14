@@ -16,12 +16,12 @@ using MyWerehouse.Domain.Receviving.Filters;
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
 	[Collection("QueryCollection")]
-	public class ReceiptViewIntegrationService
+	public class ReceiptViewIntegrationTests
 	{		
 		private readonly QueryTestFixture _fixture;
 		private readonly IMediator _mediator;
 
-		public ReceiptViewIntegrationService(QueryTestFixture fixture)
+		public ReceiptViewIntegrationTests(QueryTestFixture fixture)
 		{
 			_fixture = fixture;			
 			_mediator = _fixture.Mediator;			

@@ -9,6 +9,7 @@ using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Receviving.Events;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Infrastructure;
 
@@ -38,7 +39,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt
 				}
 				receipt.ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
 				await _werehouseDbContext.SaveChangesAsync(cancellationToken);
-				await _mediator.Publish(new CreateHistoryReceiptNotification(request.ReceiptId, receipt.ReceiptStatus, request.UserId), cancellationToken);				
+				await _mediator.Publish(new ChangeStatusReceiptNotification(request.ReceiptId, receipt.ReceiptStatus, request.UserId), cancellationToken);				
 				return ReceiptResult.Ok("Zakończono fizyczne przyjęcie - gotowe do weryfikacji", request.ReceiptId);
 			}
 			catch (NotFoundReceiptException erp)

@@ -112,8 +112,11 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			List<Pallet> allAvailablePallets = [.. alreadyAssignedPallets
 				.Concat(availablePallets)
 				.DistinctBy(p => p.Id)
-				.Take(amount)];
-			await _assignFullPalletToIssueService.AddPallets(issue, allAvailablePallets.ToList());
+				.Take(amount)];			
+			foreach (var pallet in allAvailablePallets)
+			{
+				issue.AssignPallet(pallet, issue.PerformedBy);				
+			}
 			return allAvailablePallets;
 		}
 	}

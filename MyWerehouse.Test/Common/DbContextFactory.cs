@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.Common
 			var options = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase(Guid.NewGuid().ToString())
 				.Options;
-			var mock = new Mock<WerehouseDbContext>(options) { CallBase = true };
+			var mock = new Mock<WerehouseDbContext>(options, null) { CallBase = true };
 			var context = mock.Object;
 			context.Database.EnsureCreated();
 			SeedDatabase(context);

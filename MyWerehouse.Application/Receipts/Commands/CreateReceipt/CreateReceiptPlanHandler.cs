@@ -11,6 +11,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Domain.Receviving.Events;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {
@@ -39,7 +40,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 				var receipt = new Receipt(request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
 				_receiptRepo.AddReceipt(receipt);
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await _mediator.Publish(new CreateHistoryReceiptNotification(receipt.Id, receipt.ReceiptStatus, request.DTO.PerformedBy), ct);
+				await _mediator.Publish(new ChangeStatusReceiptNotification(receipt.Id, receipt.ReceiptStatus, request.DTO.PerformedBy), ct);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				return ReceiptResult.Ok("Utworzono przyjęcie", receipt.Id);
 			}

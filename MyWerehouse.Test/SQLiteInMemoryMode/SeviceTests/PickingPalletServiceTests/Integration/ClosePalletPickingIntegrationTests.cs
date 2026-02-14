@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -14,7 +15,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
-	public class ClosePalletPickingIntegrationTests :PickingIntegrationCommandService
+	public class ClosePalletPickingIntegrationTests :TestBase
 	{
 		[Fact]
 		public async Task ClosePalletPicking_ProperPallet_ChangeStatus()
@@ -149,6 +150,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.NotNull(closedPallet);
 			Assert.Equal(PalletStatus.ToIssue, closedPallet.Status);
 			Assert.Equal(issue.Id, closedPallet.IssueId);
+			var history = DbContext.PalletMovements.SingleOrDefault(p => p.PalletId == pickingPallet.Id);
+			Assert.NotNull(history);
+			Assert.Equal(ReasonMovement.ToLoad, history.Reason);
 			Assert.Contains("Zamknięto paletę, dołączono do zlecenia", result.Message);
 		}
 	}

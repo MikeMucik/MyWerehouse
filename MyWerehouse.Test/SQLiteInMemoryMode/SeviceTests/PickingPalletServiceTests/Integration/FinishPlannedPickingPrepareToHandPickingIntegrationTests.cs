@@ -14,7 +14,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
-	public class FinishPlannedPickingPrepareToHandPickingIntegrationTests : PickingIntegrationCommandService
+	public class FinishPlannedPickingPrepareToHandPickingIntegrationTests : TestBase
 	{
 		[Fact]
 		public async Task FinishPlannedPickingPrepareToHandPicking_CancelPickingTask_CreateHandPicking()
@@ -199,8 +199,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Result.Count);
-			var resultForProduct1 = DbContext.HandPickingTasks.FirstOrDefault(x=>x.ProductId == 1 && x.IssueId ==1);
-			var resultForProduct2 = DbContext.HandPickingTasks.FirstOrDefault(x=>x.ProductId == 2 && x.IssueId ==1);
+			var resultForProduct1 = DbContext.HandPickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == 1);
+			var resultForProduct2 = DbContext.HandPickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == 1);
 			Assert.NotNull(resultForProduct1);
 			Assert.NotNull(resultForProduct2);
 			Assert.Equal(25, resultForProduct1.Quantity);

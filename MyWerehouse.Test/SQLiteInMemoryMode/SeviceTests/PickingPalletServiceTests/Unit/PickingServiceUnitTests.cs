@@ -21,6 +21,9 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
+using MyWerehouse.Application.PickingPallets.Queries.GetListToPicking;
+using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Unit
 {
@@ -267,18 +270,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 
-			var service = new PickingPalletService(Mediator);
+			//var service = new PickingPalletService(Mediator);
+			//var service = Mediator.Send(new GetListPickingPalletQuery())
 
 			// Act
-			var result = await service.GetListToPickingAsync(
-			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4)),
-			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)));
+			//var result = await service.GetListToPickingAsync(
+			//DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4)),
+			//DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)));
+			var result = Mediator.Send(
+				new GetListToPickingQuery
+				(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))));
 
 			// Assert
-			result.Should().HaveCount(5); //Tu daje 5 bo daje alokacje każdą osobno
-
+			result.Result.Should().HaveCount(5); //Tu daje 5 bo daje alokacje każdą osobno
+			//result.Equals(5, result.Result)
 			// Client1, Issue1, Product1 → 10 + 20 = 30
-			result.Should().ContainEquivalentOf(new ProductToIssueDTO
+			result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
 			{
 				ClientIdOut = client1.Id,
 				IssueId = issue1.Id,
@@ -287,7 +294,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			});
 
 			// Client1, Issue2, Product2 → 15
-			result.Should().ContainEquivalentOf(new ProductToIssueDTO
+			result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
 			{
 				ClientIdOut = client1.Id,
 				IssueId = issue2.Id,
@@ -296,7 +303,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			});
 
 			// Client2, Issue3, Product1 → 25
-			result.Should().ContainEquivalentOf(new ProductToIssueDTO
+			result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
 			{
 				ClientIdOut = client2.Id,
 				IssueId = issue3.Id,
@@ -555,12 +562,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 			
-			var service = new PickingPalletService(Mediator);
+			//var service = new PickingPalletService(Mediator);
 
 			// Act
-			var result = await service.GetListIssueToPickingAsync(
+			//var result = await service.GetListIssueToPickingAsync(
+			//	DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)),
+			//	DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)));
+			var result = await Mediator.Send(new GetListIssueToPickingQuery(
 				DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)),
-				DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)));
+				DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))));
 
 			// Assert
 			result.Should().HaveCount(2);// Tu mi liczy klientów - dlatego 2

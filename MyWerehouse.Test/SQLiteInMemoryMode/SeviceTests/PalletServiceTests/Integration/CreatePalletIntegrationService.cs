@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Products.Models;
@@ -11,7 +12,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {
-	public class CreatePalletIntegrationService : PalletIntegrationCommandService
+	public class CreatePalletIntegrationService :TestBase
 	{
 		[Fact]
 		public async Task PalletWithNoHistory_CreatePalletAsync_CreateToList()
@@ -58,7 +59,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				},
 			};
 			//Act
-			var result = await _palletService.CreatePalletAsync(newPallet, "user");
+			var result = await Mediator.Send(new CreateNewPalletCommand(newPallet, "user"));
+			
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -135,8 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			//Act
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-				_palletService.CreatePalletAsync(newPallet, "UserP"));
-			//var result = await _palletService.CreatePalletAsync(newPallet, "user");
+				Mediator.Send(new CreateNewPalletCommand(newPallet, "UserP")));
 			//Assert
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 		}
@@ -186,9 +187,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				},
 			};
 			//Act
-			var result = await _palletService.CreatePalletAsync(newPallet, "user");
+			var result = await Mediator.Send(new CreateNewPalletCommand(newPallet, "user"));
 			
-			//var result = await _palletService.CreatePalletAsync(newPallet, "user");
 			//Assert
 			Assert.NotNull(result);
 			Assert.Contains("Produkt o numerze 2 nie istnieje.", result.Message);

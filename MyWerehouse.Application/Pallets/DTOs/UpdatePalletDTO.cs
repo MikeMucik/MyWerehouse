@@ -26,8 +26,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 			profile.CreateMap<UpdatePalletDTO, Pallet>()
 				//.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
 				//.ForMember(dest => dest.LocationId, opt => opt.MapFrom(src => src.LocationId))
-				.ForMember(dest => dest.ProductsOnPallet, opt => opt.Ignore())
-				.ForMember(dest => dest.Location, opt => opt.Ignore())
+				//.ForMember(dest => dest.ProductsOnPallet, opt => opt.Ignore())
+				//.ForMember(dest => dest.Location, opt => opt.Ignore())
 				//.ForMember(dest => dest.Location, opt => opt.MapFrom<LocationResolver>()
 				;
 			profile.CreateMap<Pallet, UpdatePalletDTO>()

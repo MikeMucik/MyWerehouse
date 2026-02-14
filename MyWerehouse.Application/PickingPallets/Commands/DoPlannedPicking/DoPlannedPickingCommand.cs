@@ -7,7 +7,7 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.DTOs;
 
-namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
+namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 {
 	public record DoPlannedPickingCommand(PickingTaskDTO PickingTaskDTO, string UserId):IRequest<PickingResult>;	
 }

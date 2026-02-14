@@ -11,6 +11,7 @@ using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Issues.IssuesServices;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Infrastructure;
 
@@ -72,11 +73,8 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 				}
 				await transaction.CommitAsync(ct);
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//
-				foreach (var evn in _eventCollector.Events)
-				{
-					await _mediator.Publish(evn, CancellationToken.None);
-				}
+				await _mediator.Publish(new AddHistoryForIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//
+				
 				foreach (var factory in _eventCollector.DeferredEvents)
 				{
 					await _mediator.Publish(factory(), ct);

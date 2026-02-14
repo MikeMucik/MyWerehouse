@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using MediatR;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Invetories.Models;
@@ -16,7 +18,11 @@ namespace MyWerehouse.Infrastructure
 {
 	public class WerehouseDbContext : IdentityDbContext
 	{
-		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options) : base(options) { }
+		private readonly IPublisher _publisher;
+		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options, IPublisher? publisher) : base(options)
+		{
+			_publisher = publisher;
+		}
 		public DbSet<Address> Addresses { get; set; }
 		public DbSet<PickingTask> PickingTasks { get; set; }
 		public DbSet<Category> Categories { get; set; }
@@ -41,6 +47,39 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<Receipt> Receipts { get; set; }
 		public DbSet<ReversePicking> ReversePickings { get; set; }
 		public DbSet<VirtualPallet> VirtualPallets { get; set; }
+
+		public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
+		{
+			await DispatherDomainEventAsync();
+			return await base.SaveChangesAsync(ct);
+		}
+		private async Task DispatherDomainEventAsync()
+		{
+			var domainEntities = ChangeTracker
+				.Entries<AggregateRoots>()
+				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any())
+				.Select(x=>x.Entity)
+				.ToList();
+
+			if(!domainEntities.Any())
+			{
+				return;
+			}
+
+			if (_publisher == null) return;
+
+			var domainEvents = domainEntities
+				.SelectMany(x => x.DomainEvents)
+				.ToList();
+
+			domainEntities.ForEach(entity => entity.ClearDomainEvents());
+
+			foreach (var domainEvent in domainEvents)
+			{
+				await _publisher.Publish(domainEvent);
+			}
+
+		}
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);

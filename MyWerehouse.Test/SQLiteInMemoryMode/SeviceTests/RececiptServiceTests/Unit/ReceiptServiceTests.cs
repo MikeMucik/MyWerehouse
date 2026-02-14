@@ -18,6 +18,7 @@ using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Unit
 {
@@ -323,20 +324,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 					}
 				}
 			};
-			var userId = "U100";
-			//var receiptNewValidator = new CreateReceiptPlanDTOValidation();
-			//var receiptRepo = new ReceiptRepo(DbContext);
-			//var palletRepo = new PalletRepo(DbContext);
-			var service = new ReceiptService(Mediator
-				//,
-			//	receiptRepo,
-			//	mapper,
-			//	DbContext,
-				//palletRepo				
-				);
-			//Act			
-			await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
-
+			var userId = "U100";		
+			//Act						
+			await Mediator.Send(new UpdateReceiptCommand( updatingReceipt, userId));
 			//Assert
 			var result = DbContext.Receipts.SingleOrDefault(x => x.Id == updatingReceipt.Id);
 			Assert.NotNull(result);
@@ -472,11 +462,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			DbContext.Receipts.Add(initialReceipt);
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
-			//var MapperConfig = new MapperConfiguration(cfg =>
-			//{
-			//	cfg.AddProfile<MappingProfile>();
-			//});
-			//var mapper = MapperConfig.CreateMapper();
 			var updatingReceipt = new ReceiptDTO
 			{
 				Id = 1,
@@ -509,11 +494,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 					}
 				}
 			};
-			var userId = "U100";
-						
-			var service = new ReceiptService(Mediator);
-			//Act&Assert	
-			var result = await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var userId = "U100";		
+			//Act&Assert			
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt,userId));
 			Assert.NotNull(result);
 			Assert.False(result.Success);
 			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia.", result.Message);
@@ -673,11 +656,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 					}
 				}
 			};
-			var userId = "U100";			
-			var service = new ReceiptService(Mediator);
-			//Act			
-			await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
-
+			var userId = "U100";
+			//Act						
+			await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 
 			var result = DbContext.Receipts.Include(p => p.Pallets).ThenInclude(pp => pp.ProductsOnPallet).SingleOrDefault(x => x.Id == updatingReceipt.Id);

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Picking.Models
 {
-	public class ReversePicking
+	public class ReversePicking : AggregateRoots
 	{
 		public int Id { get; set; }
 		public required string PickingPalletId { get; set; }//paleta na której jest towar - kompletacyjna

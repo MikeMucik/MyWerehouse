@@ -6,20 +6,21 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
 using MyWerehouse.Application.Receipts.DTOs;
-using MyWerehouse.Infrastructure.Repositories;
-using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Application.Services;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Receviving.Models;
-using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptVerifyIntegrationService : ReceiptIntegratioCommandService
+	public class ReceiptVerifyIntegrationTests : TestBase
 	{
 		[Fact]
 		public async Task VerifyAndFinalizeReceiptAsync_WhenValid_UpdatesStatusAndInventory()
@@ -91,8 +92,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await _receiptService.VerifyAndFinalizeReceiptAsync(receipt.Id, "U001");
-
+			var result = await Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001"));			
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -185,7 +185,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await _receiptService.VerifyAndFinalizeReceiptAsync(receipt.Id, "U001");
+			var result = await Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001"));
 
 			// Assert
 			Assert.NotNull(result);

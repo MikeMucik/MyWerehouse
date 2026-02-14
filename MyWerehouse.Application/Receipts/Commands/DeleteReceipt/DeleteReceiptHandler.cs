@@ -10,6 +10,7 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Receviving.Events;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Infrastructure;
 
@@ -71,13 +72,11 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 							await transaction.CommitAsync(ct);
 							return ReceiptResult.Fail($"Nie można usunąć wszystkich palet z przyjęcia. Przyjęcie ma teraz status anulowane. Lista nie skasowanych palet : {string.Join(",", restPallet)}");
 						}
-
 						receipt.ReceiptStatus = ReceiptStatus.Cancelled;
-					}
-					;
+					};
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);
-					await _mediator.Publish(new CreateHistoryReceiptNotification(receipt.Id, ReceiptStatus.Cancelled,
+					await _mediator.Publish(new ChangeStatusReceiptNotification(receipt.Id, ReceiptStatus.Cancelled,
 						request.UserId), ct);
 					return ReceiptResult.Ok("Anulowano przyjęcie wraz z paletami z bazy", request.ReceiptId);
 				}

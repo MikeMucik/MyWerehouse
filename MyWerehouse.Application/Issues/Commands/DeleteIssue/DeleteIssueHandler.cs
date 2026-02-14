@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
@@ -52,11 +52,10 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 					case IssueStatus.Pending:
 					case IssueStatus.NotComplete:
 						issueToDelete.IssueStatus = IssueStatus.Cancelled;
-						foreach (var pallet in issueToDelete.Pallets)
+						var listPalletsToRemove = issueToDelete.Pallets.ToList();
+						foreach (var pallet in listPalletsToRemove)
 						{
-							pallet.IssueId = null;
-							pallet.Status = PalletStatus.Available;
-							palletList.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId, ReasonMovement.Correction, request.UserId, PalletStatus.Available, null));
+							issueToDelete.DetachPallet(pallet, request.UserId);
 						}
 						foreach (var pickingTask in issueToDelete.PickingTasks)
 						{
@@ -86,7 +85,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				await transaction.CommitAsync(ct);
 				if (!(issueToDelete.IssueStatus == IssueStatus.New))
 				{
-					await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId), ct);
+					await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
 				}
 				foreach (var p in palletList)
 				{

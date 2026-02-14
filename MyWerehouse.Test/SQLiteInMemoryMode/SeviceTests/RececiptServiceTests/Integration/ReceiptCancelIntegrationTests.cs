@@ -14,10 +14,11 @@ using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Application.Receipts.Commands.DeleteReceipt;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptCancelIntegrationService : ReceiptIntegratioCommandService
+	public class ReceiptCancelIntegrationTests : TestBase
 	{
 		//Zmiana metody z delete na cancel
 		[Fact]
@@ -125,7 +126,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
+			var result = await Mediator.Send(new DeleteReceiptCommand(initialReceipt.Id, "user"));
 			//Assert	
 			Assert.NotNull(result);
 			Assert.Contains("Anulowano przyjęcie wraz z paletami z bazy", result.Message);
@@ -178,7 +179,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(initialReceipt);		
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
+			var result = await Mediator.Send(new DeleteReceiptCommand(initialReceipt.Id, "user"));
 			//Assert	
 			Assert.NotNull(result);
 			Assert.Contains("Usunięto zlecenie", result.Message);
@@ -280,7 +281,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(initialLocation);
 			await DbContext.SaveChangesAsync();
 			//Act&Assert		
-			var result = await _receiptService.CancelReceiptAsync(initialReceipt.Id, "user");
+			var result = await Mediator.Send(new DeleteReceiptCommand(initialReceipt.Id, "user"));
 			Assert.NotNull(result);
 			Assert.Contains("Nie można usunąć zweryfikowanego przyjęcia", result.Message);		
 		}

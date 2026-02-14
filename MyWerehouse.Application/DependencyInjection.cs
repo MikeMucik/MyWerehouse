@@ -30,12 +30,8 @@ namespace MyWerehouse.Application
 			services.AddTransient<IClientService, ClientService>();
 			services.AddTransient<IHistoryService, HistoryService>();//do wywalenia??
 			services.AddTransient<IInventoryService, InventoryService>();//do wywalenia??
-			services.AddTransient<IIssueService, IssueService>();//do wywalenia??
 			services.AddTransient<ILocationService, LocationService>();
-			services.AddTransient<IPalletService, PalletService>();//do wywalenia??
-			services.AddTransient<IPickingPalletService, PickingPalletService>();//do wywalenia??
 			services.AddTransient<IProductService, ProductService>();
-			services.AddTransient<IReceiptService, ReceiptService>();//do wywalenia??
 			services.AddTransient<IReversePickingService, ReversePickingService>();//do wywalenia??
 																				   //services.AddAutoMapper(Assembly.GetExecutingAssembly());
 			services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));

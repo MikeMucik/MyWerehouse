@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Issues.IssuesServices
@@ -26,8 +26,11 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			{
 				pallet.IssueId = issue.Id;
 				// No change Status -> verify
-				_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id,
+				_eventCollector.Add(new ChangeStatusOfPalletNotification(pallet.Id,
 				pallet.LocationId,
+				pallet.Location.ToSnopShot(),
+				pallet.LocationId,
+				pallet.Location.ToSnopShot(),
 				ReasonMovement.ToLoad,
 				issue.PerformedBy,
 				PalletStatus.InTransit,

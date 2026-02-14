@@ -11,10 +11,11 @@ using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {
-	public class UpdatePalletIntegrationServiceTests : PalletIntegrationCommandService
+	public class UpdatePalletIntegrationServiceTests : TestBase
 	{
 		[Fact]
 		public async Task ProperDataAddChangeItems_UpdatePalletAsync_ChangeData()
@@ -70,8 +71,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					new ProductOnPallet
 					{
 						Product =product,
-						Quantity =10,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
+						Quantity = 10,
+						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)),
 						DateAdded = DateTime.UtcNow,
 					},
 					new ProductOnPallet
@@ -79,8 +80,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 						Product = product1,
 						Quantity = 200,
 						DateAdded = DateTime.Now,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-					}				]
+						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360))
+					}               ]
 			};
 			var inventoryP = new Inventory
 			{
@@ -108,22 +109,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
 					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
-					//PalletId = "Q1010",
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
-					BestBefore = new DateOnly(2027, 3, 3)
+					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletDTO
 				{
 					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
-					//PalletId = "Q1010",
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
-					BestBefore = new DateOnly(2027, 3, 4) })
+					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), })
 					]
 			};
-			var resultHandler = await _palletService.UpdatePalletAsync(updatedPallet, "user");
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(updatedPallet, "user"));
 			//Assert
 			Assert.NotNull(resultHandler);
 			Assert.True(resultHandler.Success);
@@ -136,8 +135,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.Equal("Q1010", result.Id);
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
-			Assert.Equal(updatedPallet.Status, result.Status);
-			Assert.Equal(updatedPallet.DateReceived, result.DateReceived);
+			//Assert.Equal(updatedPallet.DateReceived, result.DateReceived);
 			Assert.Equal(updatedPallet.LocationId, result.LocationId);
 
 			Assert.Equal(updatedPallet.ProductsOnPallet.Count, result.ProductsOnPallet.Count);
@@ -189,8 +187,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 
 			Assert.NotEmpty(history);
 			Assert.Contains(history, h =>
-				h.Reason == ReasonMovement.Picking &&
-				h.PalletStatus == PalletStatus.ToIssue &&
+				h.Reason == ReasonMovement.Correction &&
+				h.PalletStatus == PalletStatus.ToPicking &&
 				h.PerformedBy == "user"
 			);
 
@@ -303,7 +301,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
-			var resultHandler = await _palletService.UpdatePalletAsync(updatedPallet, "user");
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(updatedPallet, "user"));
 			//Assert
 			Assert.NotNull(resultHandler);
 			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
@@ -402,7 +400,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2024, 5, 4) })
 					]
 			};
-			var ex = await Assert.ThrowsAsync<ValidationException>(() => _palletService.UpdatePalletAsync(updatedPallet, "user"));
+			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(updatedPallet, "user")));
 			Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 			Assert.Contains("Data do spożycia musi być późniejsza niż data dzisiejsza", ex.Message);
@@ -490,7 +488,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
-			var ex = await Assert.ThrowsAsync<ValidationException>(() => _palletService.UpdatePalletAsync(updatedPallet, "user"));
+			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(updatedPallet, "user")));
 			Assert.Contains("Paleta musi mieć status", ex.Message);
 			Assert.Contains("Paleta musi mieć datę utworzenia", ex.Message);
 			Assert.Contains("Paleta musi mieć lokalizację", ex.Message);

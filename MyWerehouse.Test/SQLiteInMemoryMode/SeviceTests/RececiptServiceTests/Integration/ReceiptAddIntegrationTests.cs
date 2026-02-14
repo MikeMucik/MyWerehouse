@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt;
+using MyWerehouse.Application.Receipts.Commands.CreateReceipt;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -17,7 +19,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptAddIntegrationService : ReceiptIntegratioCommandService
+	public class ReceiptAddIntegrationTests : TestBase
 	{
 		//HappyPath
 		[Fact]
@@ -82,8 +84,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
 				UserId = "U001"
 			};
-
-			var newPallet = await _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto);
+						
+			var newPallet = await Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto));
 			//Assert
 			Assert.NotNull(newPallet);
 			var newPalletId = newPallet.PalletId;
@@ -160,8 +162,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				PerformedBy = "user",
 				RampNumber = 1
 			};
-			var result =
-				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
+			var result = await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
 			var receipt = DbContext.Receipts.Find(result.ReceiptId);
@@ -212,7 +213,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				RampNumber = 1
 			};
 			var result =
-				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
+				await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
 			Assert.Contains("Nieprawidłowy lub brak numeru użytkownika", result.Message);
@@ -250,7 +251,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				RampNumber = 1
 			};
 			var result =
-				await _receiptService.CreateReceiptPlanAsync(newPalletDto);
+				await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
 			Assert.Contains("Klient o numerze 2 nie istnieje.", result.Message);
@@ -318,7 +319,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				};
 
 				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-				_receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
+				Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto)));
 
 				Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 				Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
@@ -390,7 +391,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }, new() { ProductId = 2, Quantity = 100 }],
 				UserId = "U001"
 			};
-			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _receiptService.AddPalletToReceiptAsync(initialReceipt.Id, newPalletDto));
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto)));
 
 			Assert.Contains("Paleta przyjmowana może mieć tylko jeden rodzaj produktu", ex.Message);
 		}

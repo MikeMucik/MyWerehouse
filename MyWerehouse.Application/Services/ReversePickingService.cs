@@ -8,22 +8,14 @@ using AutoMapper.QueryableExtensions;
 using Azure.Core;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking;
 using MyWerehouse.Application.ReversePickings.DTOs;
-using MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking;
 using MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingToDo;
 using MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo;
-using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Services
 {
@@ -277,7 +269,7 @@ namespace MyWerehouse.Application.Services
 		//	{
 		//		sourcePallet.ProductsOnPallet.First().Quantity += task.Quantity;
 		//	}
-		//	_eventCollector.Add(new CreatePalletOperationNotification(
+		//	_eventCollector.Add(new ChangeStatusOfPalletNotification(
 		//		sourcePallet.Id,
 		//		sourcePallet.LocationId,
 		//		ReasonMovement.Correction,
@@ -295,7 +287,7 @@ namespace MyWerehouse.Application.Services
 		//		palletToAdd.ProductsOnPallet.First().Quantity += task.Quantity;
 		//	//}
 		//	//else throw new NotFoundPalletException("Brak palety do dodania");
-		//	_eventCollector.Add(new CreatePalletOperationNotification(
+		//	_eventCollector.Add(new ChangeStatusOfPalletNotification(
 		//		palletToAdd.Id,
 		//		palletToAdd.LocationId,
 		//		ReasonMovement.Correction,
@@ -323,7 +315,7 @@ namespace MyWerehouse.Application.Services
 		//	};
 		//	_palletRepo.AddPallet(newPallet);
 		//	_eventCollector.AddDeferred(() =>
-		//	new CreatePalletOperationNotification(
+		//	new ChangeStatusOfPalletNotification(
 		//		newPallet.Id, 1, ReasonMovement.New,
 		//		userId, PalletStatus.InStock, null));
 		//	return ReversePickingResult.Ok("Dodano towar do nowej palety.", task.ProductId, newPallet.Id);

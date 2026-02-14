@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Azure.Core;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -38,14 +38,16 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			productOnSourcePallet.Quantity -= quantityToPick;
 			if (productOnSourcePallet.Quantity == 0)
 			{
-				sourcePallet.Status = PalletStatus.Archived;
-				_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id, sourcePallet.LocationId,
-				ReasonMovement.Picking, issue.PerformedBy, PalletStatus.Archived, null));
+				sourcePallet.ChangeStatus(PalletStatus.Archived, ReasonMovement.Picking, userId);
+				//sourcePallet.Status = PalletStatus.Archived;
+				//_eventCollector.Add(new ChangeStatusOfPalletNotification(sourcePallet.Id, sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(), sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(),
+				//ReasonMovement.Picking, issue.PerformedBy, PalletStatus.Archived, null));
 			}
 			else
 			{
-				_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id,	sourcePallet.LocationId,
-				ReasonMovement.Picking, issue.PerformedBy, PalletStatus.ToPicking, null));
+				sourcePallet.ChangeStatus(PalletStatus.ToPicking, ReasonMovement.Picking, userId);
+				//_eventCollector.Add(new ChangeStatusOfPalletNotification(sourcePallet.Id,	sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(), sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(),
+				//ReasonMovement.Picking, issue.PerformedBy, PalletStatus.ToPicking, null));
 			}
 			return ProcessPickingActionResult.Ok();
 		}
@@ -85,7 +87,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		//			pickingTask.MarkPartiallyPicked(newIdPallet, quantity);
 		//		}
 
-		//		_eventCollector.Add(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId,
+		//		_eventCollector.Add(new ChangeStatusOfPalletNotification(pallet.Id, pallet.LocationId,
 		//		ReasonMovement.Picking, userId, PalletStatus.Picking, null));
 		//		return new CreatePalletResult(true, newIdPallet); //pokaż komunikat weź nową paletę
 		//	}
@@ -114,7 +116,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		//		{
 		//			pickingTask.MarkPartiallyPicked(oldPallet.Id, quantity);
 		//		}
-		//		_eventCollector.Add(new CreatePalletOperationNotification(oldPallet.Id, oldPallet.LocationId,
+		//		_eventCollector.Add(new ChangeStatusOfPalletNotification(oldPallet.Id, oldPallet.LocationId,
 		//		ReasonMovement.Picking, userId, PalletStatus.Picking, null));
 		//		return new CreatePalletResult(false, oldPallet.Id);
 		//	}

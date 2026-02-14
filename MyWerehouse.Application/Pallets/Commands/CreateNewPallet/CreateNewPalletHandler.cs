@@ -8,10 +8,10 @@ using MediatR;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
@@ -22,13 +22,15 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 		IPalletRepo palletRepo,
 		IMapper mapper,
 		IMediator mediator,
-		IProductRepo productRepo) : IRequestHandler<CreateNewPalletCommand, PalletResult>
+		IProductRepo productRepo,
+		ILocationRepo locationRepo) : IRequestHandler<CreateNewPalletCommand, PalletResult>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMapper _mapper = mapper;
 		private readonly IPublisher _mediator = mediator;
 		private readonly IProductRepo _productRepo = productRepo;
+		private readonly ILocationRepo _locationRepo = locationRepo;
 
 		public async Task<PalletResult> Handle(CreateNewPalletCommand request, CancellationToken ct)
 		{
@@ -41,19 +43,30 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 						throw new NotFoundProductException(product.ProductId);
 				}
 				var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
-				var pallet = _mapper.Map<Pallet>(request.DTO);
-				pallet.Id = newIdForPallet;
-				pallet.LocationId = 1;
-				pallet.Status = PalletStatus.InStock;
+				//var pallet = _mapper.Map<Pallet>(request.DTO);
+				var listProducts = new List<ProductOnPallet>();
+				foreach (var product in request.DTO.ProductsOnPallet)
+				{
+					var newProduct = new ProductOnPallet
+					{
+						ProductId = product.ProductId,
+						Quantity = product.Quantity,
+						DateAdded = product.DateAdded,
+						BestBefore = product.BestBefore,
+					};
+					listProducts.Add(newProduct);
+				}
+				var pallet = new Pallet(newIdForPallet, DateTime.UtcNow, listProducts);
 				_palletRepo.AddPallet(pallet);
+				var location = await _locationRepo.GetLocationByIdAsync(1);
+				pallet.AssignToWarehouse(location, request.UserId);
+
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new CreatePalletOperationNotification(pallet.Id, pallet.LocationId,
-								ReasonMovement.New, request.UserId, PalletStatus.InStock, null), ct);
 				//inventory
 				var stockChanges = pallet.ProductsOnPallet
 					.GroupBy(p => p.ProductId)
-					.Select(g => new StockItemChange(g.Key,	g.Sum(x => x.Quantity)))
+					.Select(g => new StockItemChange(g.Key, g.Sum(x => x.Quantity)))
 					.ToList();
 				if (stockChanges.Count != 0)
 				{

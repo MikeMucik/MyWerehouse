@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Receviving.Models;
 
-namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
+namespace MyWerehouse.Domain.Receviving.Events
 {
-	public record CreateHistoryReceiptNotification(
+	public record ChangeStatusReceiptNotification(
 		int ReceiptId,
 		ReceiptStatus ReceiptStatus,
-		string UserId):INotification;
+		string UserId) : IDomainEvent;
 	
 }

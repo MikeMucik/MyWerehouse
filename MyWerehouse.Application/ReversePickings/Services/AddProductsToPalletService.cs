@@ -7,14 +7,12 @@ using Microsoft.EntityFrameworkCore.Query;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.ReversePickings.Services
 {
@@ -46,13 +44,16 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				sourcePallet.ProductsOnPallet.Single().Quantity += reversePicking.Quantity;
 			}
 			else throw new NotFoundPalletException("Paleta źródłowa ma nieprawidłowy status.");
-			_eventCollector.Add(new CreatePalletOperationNotification(
+
+			_eventCollector.Add(new ChangeStatusOfPalletNotification(
 				sourcePallet.Id,
 				sourcePallet.LocationId,
+				sourcePallet.Location.ToSnopShot(),
+				sourcePallet.LocationId,
+				sourcePallet.Location.ToSnopShot(),
 				ReasonMovement.Correction,
 				userId,
 				sourcePallet.Status,
-				//PalletStatus.Available,
 				null));
 			return ReversePickingResult.Ok("Dodano towar do palety źródłowej", reversePicking.ProductId, reversePicking.SourcePalletId);
 		}
@@ -81,9 +82,12 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				pallet.ProductsOnPallet.Single().Quantity += addedAmount;
 				quantityToAdded -= addedAmount;
 
-				_eventCollector.Add(new CreatePalletOperationNotification(
+				_eventCollector.Add(new ChangeStatusOfPalletNotification(
 				pallet.Id,
 				pallet.LocationId,
+				pallet.Location.ToSnopShot(),
+				pallet.LocationId,
+				pallet.Location.ToSnopShot(),
 				ReasonMovement.ReversePicking,
 				userId,
 				PalletStatus.Available,
@@ -114,8 +118,8 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			};
 			_palletRepo.AddPallet(newPallet);
 			_eventCollector.AddDeferred(() =>
-			new CreatePalletOperationNotification(
-				newPallet.Id, 100100, ReasonMovement.ReversePicking,
+			new ChangeStatusOfPalletNotification(
+				newPallet.Id, 100100,"1-0-0-0", 100100, "1-0-0-0", ReasonMovement.ReversePicking,
 				userId, PalletStatus.InStock, null));
 			return ReversePickingResult.Ok("Dodano towar do nowej palety.", task.ProductId, newPallet.Id);
 

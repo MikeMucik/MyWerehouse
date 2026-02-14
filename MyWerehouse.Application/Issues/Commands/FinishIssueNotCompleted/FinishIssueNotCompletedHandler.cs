@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
@@ -36,36 +36,21 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 			{
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 						?? throw new NotFoundIssueException(request.IssueId);
-				var palletsReturn =	issue.RemoveNotLoadedPallets();
+				var palletsReturn =	issue.RemoveNotLoadedPallets(request.UserId);
 				
 				issue.IssueStatus = IssueStatus.IsShipped;
 				issue.PerformedBy = request.UserId;
+				// ten fragment chyba do wywalenia
+				var listPallets = issue.Pallets.ToList();
+				foreach (var pallet in listPallets)
+				{
+					pallet.ChangeStatus(PalletStatus.Loaded, ReasonMovement.ToLoad, request.UserId);
+				}
+				
+
+				await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-
-				foreach (var pallet in issue.Pallets)
-				{
-					await _mediator.Publish(new CreatePalletOperationNotification(
-							pallet.Id,
-							pallet.LocationId,
-							ReasonMovement.ToLoad,
-							request.UserId,
-							PalletStatus.Loaded,
-							null), ct);					
-				}
-				foreach (var pallet in palletsReturn)
-				{
-					await _mediator.Publish(new CreatePalletOperationNotification(
-							pallet.Id,
-							pallet.LocationId,
-							ReasonMovement.Correction,
-							request.UserId,
-							PalletStatus.Available,
-							null
-						), ct);
-				}
-				await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId), ct);
-				
 				return IssueResult.Ok($"Zamknięto wydanie {request.IssueId}.");
 			}
 			catch (NotFoundIssueException ei)

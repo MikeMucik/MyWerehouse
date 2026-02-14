@@ -20,8 +20,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public DateOnly? BestBefore { get; set; } // Może być null, jeśli produkt nie ma daty ważności
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<ProductOnPalletDTO, ProductOnPallet>()
-				.ForMember(dest => dest.Id, opt => opt.Ignore());
+			profile.CreateMap<ProductOnPalletDTO, ProductOnPallet>();
+				//.ForMember(dest => dest.Id, opt => opt.Ignore());
 			profile.CreateMap<ProductOnPallet, ProductOnPalletDTO>();
 		}
 	}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Pallets.Models;
@@ -12,7 +13,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptCompletePhysicalIntegrationService : ReceiptIntegratioCommandService
+	public class ReceiptCompletePhysicalIntegrationTests : TestBase
 	{
 		[Fact]
 		public async Task VerifyAndFinalizeReceiptAsync_WhenValid_UpdatesStatusAndInventory()
@@ -97,7 +98,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await _receiptService.CompletePhysicalReceiptAsync(receipt.Id, "user");
+			var result = await Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -187,7 +188,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await _receiptService.CompletePhysicalReceiptAsync(receipt.Id, "user");
+			var result = await Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.Success);

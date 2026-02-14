@@ -16,10 +16,11 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
-	public class ReceiptUpdateIntegrationService : ReceiptIntegratioCommandService
+	public class ReceiptUpdateIntegrationTests : TestBase
 	{
 		//HappyPath może jeszcze dodać z podmianą klienta
 		[Fact]
@@ -148,7 +149,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				}
 			};
 			var userId = "U100";
-			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -322,7 +323,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				}
 			};
 			var userId = "U100";
-			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -504,7 +505,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				}
 			};
 			var userId = "U100";
-			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -692,7 +693,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				}
 			};
 			var userId = "U100";
-			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var result = await Mediator.Send(new UpdateReceiptCommand( updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -827,7 +828,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				}
 			};
 			var userId = "U100";
-			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.Success);
@@ -967,7 +968,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				}
 			};
 			var userId = "U100";
-			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.Success);
@@ -1118,7 +1119,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				}
 			};
 			var userId = "U100";
-			var result = await _receiptService.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+			
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);

@@ -8,9 +8,10 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
@@ -36,20 +37,11 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ?? throw new NotFoundPalletException(request.PalletId);
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId) ?? throw new NotFoundIssueException(request.PalletId);
 				if (pallet.Status != PalletStatus.Picking)
-					return PickingResult.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet"); 
-				//to powyżej można rozszerzyć na konkretne przypaski
-				_pickingPalletRepo.ClosePickingPallet(request.PalletId, request.IssueId);
+					return PickingResult.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet");
+				//to powyżej można rozszerzyć na konkretne przypadki				
+				pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new CreatePalletOperationNotification(
-							pallet.Id,
-							pallet.LocationId,
-							ReasonMovement.Picking,
-							request.UserId,
-							PalletStatus.ToIssue,
-							null
-						), ct);
-				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.UserId),ct);
 				return PickingResult.Ok($"Zamknięto paletę, dołączono do zlecenia {issue.Id}.");
 			}
 			catch (NotFoundPalletException exp)
@@ -72,3 +64,14 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 		}
 	}
 }
+//_pickingPalletRepo.ClosePickingPallet(request.PalletId, request.IssueId);
+//await _mediator.Publish(new ChangeStatusOfPalletNotification(
+//			pallet.Id,
+//			pallet.LocationId,
+//			pallet.LocationId,
+//			ReasonMovement.Picking,
+//			request.UserId,
+//			PalletStatus.ToIssue,
+//			null
+//		), ct);
+//await _mediator.Publish(new AddHistoryForIssueNotification(issue.Id, request.UserId),ct);

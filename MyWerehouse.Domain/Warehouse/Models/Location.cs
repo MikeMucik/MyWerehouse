@@ -15,5 +15,6 @@ namespace MyWerehouse.Domain.Warehouse.Models
 		public int Position { get; set; }
 		public int Height { get; set; }			
 		public virtual ICollection<Pallet> Pallets { get; set; }
+		public string ToSnopShot() => $"{Bay}-{Aisle}-{Position}-{Height}";
 	}
 }

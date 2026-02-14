@@ -8,12 +8,12 @@ using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pallets.Events;
 
 namespace MyWerehouse.Application.PickingPallets.Services
 {
@@ -74,12 +74,15 @@ namespace MyWerehouse.Application.PickingPallets.Services
 						Location = palletToPicking.Location,
 						InitialPalletQuantity = palletToPicking.ProductsOnPallet.First().Quantity,
 					};
+
 					palletToPicking.Status = PalletStatus.ToPicking;
+					palletToPicking.AssignToPicking(palletToPicking.Location, userId);
 					await _pickingPalletRepo.AddPalletToPickingAsync(virtualPallet);
-					//_pickingPalletRepo.AddPalletToPicking(virtualPallet);
-					_eventCollector.Add(new CreatePalletOperationNotification(
-						palletToPicking.Id,	palletToPicking.LocationId,	ReasonMovement.Picking,
-						userId,	PalletStatus.ToPicking,	null));
+					
+
+					//_eventCollector.Add(new ChangeStatusOfPalletNotification(
+					//	palletToPicking.Id,	palletToPicking.LocationId, palletToPicking.Location.ToSnopShot(), palletToPicking.LocationId, palletToPicking.Location.ToSnopShot(), ReasonMovement.Picking,
+					//	userId,	PalletStatus.ToPicking,	null));
 					AllocateFromVirtualPallet(virtualPallet);
 				}
 			}

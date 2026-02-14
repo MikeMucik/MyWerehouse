@@ -79,7 +79,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 		public async Task NotProperData_UpdateProductAsync_ThrowException()
 		{
 			//Arrange
-			using var arrangeContext = new WerehouseDbContext(_contextOptions);
+			using var arrangeContext = new WerehouseDbContext(_contextOptions, null);
 			var address = new Address
 			{
 				Id = 20,

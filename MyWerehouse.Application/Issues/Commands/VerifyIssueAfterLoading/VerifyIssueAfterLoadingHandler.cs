@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Repositories;
@@ -52,17 +51,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading
 
 				foreach (var pallet in issue.Pallets)
 				{
-					pallet.Status = PalletStatus.Archived;
-					notifications.Add(
-						new CreatePalletOperationNotification(
-							pallet.Id,
-							pallet.LocationId,
-							ReasonMovement.Loaded,
-							request.VerifiedBy,
-							PalletStatus.Archived,
-							null
-						)
-					);
+					pallet.ChangeStatus(PalletStatus.Archived, ReasonMovement.Loaded, request.VerifiedBy);					
 				}
 				if (stockChanges.Count != 0)
 				{
@@ -75,7 +64,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading
 				}
 				await _dbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.VerifiedBy), ct);				
+				await _mediator.Publish(new AddHistoryForIssueNotification(issue.Id, request.VerifiedBy), ct);				
 				foreach (var notification in notifications)
 				{
 					await _mediator.Publish(notification, ct);

@@ -8,10 +8,11 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
@@ -37,7 +38,6 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				if (request.OldPalletId == request.NewPalletId)
 				{
 					return IssueResult.Fail("Nie można podmienić paletę na tą samą");
-					//throw new PalletException("Nie można podmienić paletę na tą samą");
 				}
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 					?? throw new NotFoundIssueException(request.IssueId);
@@ -46,63 +46,38 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				if (palletToAddingIssue == null || palletToRemoveFromIssue == null)
 				{
 					return IssueResult.Fail("Jedna z podanych palet nie istnieje.");
-					//throw new PalletException("Jedna z podanych palet nie istnieje.");
 				}
 				if (palletToRemoveFromIssue.IssueId != request.IssueId)
 				{
 					return IssueResult.Fail("Paleta do usunięcia nie należy do zlecenia.");
-					//throw new PalletException("Paleta do usunięcia nie należy do zlecenia.");
 				}
 				if (palletToAddingIssue.IssueId != null ||
 					(palletToAddingIssue.Status != PalletStatus.Available &&
 					palletToAddingIssue.Status != PalletStatus.InStock))
 				{
 					return IssueResult.Fail("Nowej palety nie można przypisać do zlecenia, błędny status.");
-					//throw new PalletException("Nowej palety nie można przypisać do zlecenia, błędny status.");
 				}
 				var productOnOldPallet = palletToRemoveFromIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
 				var productOnNewPallet = palletToAddingIssue.ProductsOnPallet.FirstOrDefault()?.ProductId;
 				if (productOnOldPallet is null)
 					return IssueResult.Fail("Paleta usuwana nie zawiera produktów.");
-				//throw new PalletException("Paleta usuwana nie zawiera produktów.");
 
 				if (productOnNewPallet is null)
 					return IssueResult.Fail("Nowa paleta nie zawiera produktów.");
-				//throw new PalletException("Nowa paleta nie zawiera produktów.");
 
 				if (productOnOldPallet != productOnNewPallet)
-					return IssueResult.Fail("Nie można podmienić palet z różnymi produktami.");
-				//throw new PalletException("Nie można podmienić palet z różnymi produktami.");		
+					return IssueResult.Fail("Nie można podmienić palet z różnymi produktami.");	
 				if (_issueRepo.GetIssueByIdAsync(request.IssueId) is null) throw new NotFoundIssueException(request.IssueId);
-				palletToAddingIssue.IssueId = issue.Id;
-				palletToAddingIssue.Status = PalletStatus.ToIssue;
-				issue.Pallets.Add(palletToAddingIssue);
-
-				palletToRemoveFromIssue.IssueId = null;
-				palletToRemoveFromIssue.Status = PalletStatus.Available;
-				issue.Pallets.Remove(palletToRemoveFromIssue);
+				issue.AssignPallet(palletToAddingIssue, request.UserId);
+				
+				issue.DetachPallet(palletToRemoveFromIssue, request.UserId);
+				
 				issue.IssueStatus = IssueStatus.ChangingPallet;
 				issue.PerformedBy = request.UserId;
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new CreatePalletOperationNotification(
-						palletToRemoveFromIssue.Id,
-						palletToRemoveFromIssue.LocationId,
-						ReasonMovement.Correction,
-						issue.PerformedBy,
-						PalletStatus.Available,
-						null
-					), ct);
-				await _mediator.Publish(new CreatePalletOperationNotification(
-							palletToAddingIssue.Id,
-							palletToAddingIssue.LocationId,
-							ReasonMovement.ToLoad,
-							issue.PerformedBy,
-							PalletStatus.ToIssue,
-							null
-						), ct);
-
-				await _mediator.Publish(new CreateHistoryIssueNotification(request.IssueId, request.UserId), ct);
+				
+				await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
 
 				return IssueResult.Ok("Podmieniono palety.", productOnOldPallet.Value);
 			}

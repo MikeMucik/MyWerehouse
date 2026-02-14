@@ -7,17 +7,17 @@ using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Pallets.Events.CreateOperation;
 using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
-namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
+namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 {
 	public class DoPlannedPickingHandler : IRequestHandler<DoPlannedPickingCommand, PickingResult>
 	{
@@ -97,9 +97,10 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPicking
 				else
 				{
 					//pallet lock with non-conformity 
-					sourcePallet.Status = PalletStatus.OnHold;
-					_eventCollector.Add(new CreatePalletOperationNotification(sourcePallet.Id, sourcePallet.LocationId,
-						ReasonMovement.Correction, request.UserId, PalletStatus.OnHold, null));
+					sourcePallet.ChangeStatus(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
+					//sourcePallet.Status = PalletStatus.OnHold;
+					//_eventCollector.Add(new ChangeStatusOfPalletNotification(sourcePallet.Id, sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(), sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(),
+					//	ReasonMovement.Correction, request.UserId, PalletStatus.OnHold, null));
 					var newQuantityToPickingTask = neededQuantity - pickedQuantity;
 					var newVirtualPallet =await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, new List<VirtualPallet>(),
 						issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId);

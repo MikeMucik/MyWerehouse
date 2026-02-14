@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			_mediator = _fixture.Mediator;
 		}
 		[Fact]
-		public async Task ShowDataToEdit_GetPalletToEditAsync_ReturnUpdatePalletDTO()
+		public async Task ShowDataToEdit_GetPalletToEdit_ReturnUpdatePalletDTO()
 		{
 			//Arrange
 			var palletId = "Q1001";
@@ -46,7 +46,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 		}
 
 		[Fact]
-		public async Task ShowDataToEdit_ShowPalletAsync_ReturnData()
+		public async Task ShowDataToEdit_GetPalletToEdit_ReturnData()
 		{
 			//Arrange
 			var palletId = "Q1000";

@@ -14,6 +14,7 @@ using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -195,7 +196,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						}
 					}
 					await _werehouseDbContext.SaveChangesAsync(ct);
-					await _mediator.Publish(new CreateHistoryIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//					
+					await _mediator.Publish(new AddHistoryForIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//					
 					await transaction.CommitAsync(ct);
 					return resultList;
 				}

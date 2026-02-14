@@ -15,7 +15,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
-	public class ExecutiveHandPickingIntegrationTest : PickingIntegrationCommandService
+	public class ExecutiveHandPickingIntegrationTest : TestBase
 	{
 		[Fact]
 		public async Task ExecutiveHandPicking_TaskAllNeededNoVirtualPallet_AddToIssue()
@@ -654,55 +654,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.NotNull(result);
 			Assert.False(result.Success);
 			Assert.Contains("Chcesz pobrać więcej niż potrzeba.", result.Message);
-			//var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
-			//Assert.Equal(2, pallets.Count);
-			//Assert.Contains(pallets, p => p.Id == "Q1001"); // pierwotna
-			//Assert.Contains(pallets, p => p.Id == "Q1002"); // ręczna
-
-			//Assert.Contains("Towar dołączono", result.Message);
-			//var handTask = DbContext.HandPickingTasks.Single(h =>
-			//	h.IssueId == issue.Id &&
-			//	h.ProductId == product1.Id);
-
-			//Assert.Equal(PickingStatus.PickedPartially, handTask.PickingStatus);
-			//Assert.Equal(20, handTask.Quantity);
-			//Assert.Equal(12, handTask.PickedQuantity);
-
-			//var virtualPallet = DbContext.VirtualPallets
-			//.Include(v => v.PickingTasks)
-			//.Single(v => v.PalletId == sourcePallet1.Id);
-
-			//Assert.NotNull(virtualPallet);
-			//Assert.Equal(sourcePallet1.Id, virtualPallet.PalletId);
-			//Assert.Single(virtualPallet.PickingTasks);
-
-			//var pickingTask = virtualPallet.PickingTasks.Single();
-
-			//Assert.Equal(issue.Id, pickingTask.IssueId);
-			//Assert.Equal(product1.Id, pickingTask.ProductId);
-			//Assert.Equal(12, pickingTask.Quantity);
-			//Assert.Equal(PickingStatus.Picked, pickingTask.PickingStatus);
-			//Assert.Equal(sourcePallet1.Id, pickingTask.VirtualPallet.PalletId);
-
-			//var palletsAdded = DbContext.Pallets
-			//	.Where(p => p.IssueId == issue.Id)
-			//	.ToList();
-
-			//var sourcePalletAfter = DbContext.Pallets
-			//	.Include(p => p.ProductsOnPallet)
-			//	.Single(p => p.Id == "Q1000");
-
-			//Assert.Equal(88, sourcePalletAfter.ProductsOnPallet.Single().Quantity);
-
-			//var plannedTasks = DbContext.PickingTasks
-			//	.Where(t => t.IssueId == issue.Id && t.PickingStatus == PickingStatus.Allocated)
-			//	.ToList();
-
-			//Assert.Empty(plannedTasks);
-			//Assert.True(DbContext.HistoryPickings.Any(h =>
-			//	h.IssueId == issue.Id &&
-			//	h.ProductId == product1.Id));
-
 		}
 	}
 }

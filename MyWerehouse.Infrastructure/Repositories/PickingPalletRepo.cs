@@ -73,11 +73,11 @@ namespace MyWerehouse.Infrastructure.Repositories
 			if (palletPicking == null) { return 0; }
 			return palletPicking.Id;
 		}
-		public async Task<VirtualPallet> GetVirtualPalletByIdAsync(int palletId)
+		public async Task<VirtualPallet> GetVirtualPalletByIdAsync(int? palletId)
 		{
 			return await _werehouseDbContext.VirtualPallets.FirstAsync(p => p.Id == palletId);
 		}
-		public void ClosePickingPallet(string palletId, int issueId)
+		public void ClosePickingPallet(string palletId, Guid issueId)
 		{
 			var pallet = _werehouseDbContext.Pallets.Find(palletId);
 			pallet.Status = PalletStatus.ToIssue;

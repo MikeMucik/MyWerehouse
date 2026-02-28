@@ -14,36 +14,36 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPrepareToHandPicking
 {
-	public class FinishPlannedPickingPrepareToHandPickingHandle : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, List<HandPickingDTO>>
+	public class FinishPlannedPickingPrepareToHandPickingHandle : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, List<PickingTaskDTO>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IIssueRepo _issueRepo;
-		private readonly IHandPickingTaskRepo _handPickingTaskRepo;
+		//private readonly IHandPickingTaskRepo _handPickingTaskRepo;
 		private readonly IMapper _mapper;
 		public FinishPlannedPickingPrepareToHandPickingHandle(
 			WerehouseDbContext werehouseDbContext,
 			IPickingTaskRepo pickingTaskRepo,
 			IIssueRepo issueRepo,
-			IHandPickingTaskRepo handPickingTaskRepo,
+			//IHandPickingTaskRepo handPickingTaskRepo,
 			IMapper mapper)
 		{
 			_werehouseDbContext = werehouseDbContext;
 			_pickingTaskRepo = pickingTaskRepo;
 			_issueRepo = issueRepo;
-			_handPickingTaskRepo = handPickingTaskRepo;
+			//_handPickingTaskRepo = handPickingTaskRepo;
 			_mapper = mapper;
 		}
-		public async Task<List<HandPickingDTO>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
+		public async Task<List<PickingTaskDTO>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
 		{
-			var listToDoTasks = new List<HandPickingDTO>();
+			var listToDoTasks = new List<PickingTaskDTO>();
 			var filtr = new IssueReceiptSearchFilter
 			{
 				DateTimeStart = DateTime.UtcNow.AddDays(-1),
 				DateTimeEnd = DateTime.UtcNow,
 			};
-			var listOfIsses = await _issueRepo.GetIssuesByFilter(filtr).ToListAsync(ct);
-			foreach (var issue in listOfIsses)
+			var listOfIssues = await _issueRepo.GetIssuesByFilter(filtr).ToListAsync(ct);
+			foreach (var issue in listOfIssues)
 			{
 				var listOfPickTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issue.Id);
 				var listByProductAndDate = listOfPickTasks
@@ -56,17 +56,17 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 					}).ToList();
 				foreach (var task in listByProductAndDate)
 				{
-					var taskToDo = new HandPickingTask
+					var taskToDo = new PickingTask
 					{
 						IssueId = issue.Id,
+						IssueNumber = issue.IssueNumber,
 						ProductId = task.ProductId,
-						Quantity = task.TotalQuantity,
+						RequestedQuantity = task.TotalQuantity,
 						PickingStatus = PickingStatus.Allocated,
-						BestBefore = task.BestBefore,
-						CreateDate = DateTime.UtcNow,
-					};
-					 _handPickingTaskRepo.AddHandPickingTask(taskToDo);
-					var handTaskDTO = _mapper.Map<HandPickingDTO>(taskToDo);
+						BestBefore = task.BestBefore,						
+					};					 
+					 _pickingTaskRepo.AddPickingTask(taskToDo);
+					var handTaskDTO = _mapper.Map<PickingTaskDTO>(taskToDo);
 					
 					listToDoTasks.Add(handTaskDTO);
 				}

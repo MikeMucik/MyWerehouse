@@ -15,6 +15,7 @@ using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -61,8 +62,6 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 					if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko  palety z przyjęcia
 					{
 						issue.DetachPallet(pallet, request.UserId);
-						//pallet.Status = PalletStatus.Available;
-						//pallet.IssueId = null;
 						listPallet.Add(pallet);
 					}
 				}
@@ -83,18 +82,19 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 					{
 						pickingTask.PickingStatus = PickingStatus.Cancelled;
 
-						_eventCollector.Add(new CreateHistoryPickingNotification(new HistoryDataPicking
-							(
+						_eventCollector.Add(new CreateHistoryPickingNotification(							
 								pickingTask.Id,
-								pickingTask.VirtualPallet.PalletId,
+								//pickingTask.PickingTaskNumber,
+								pickingTask.VirtualPallet.PalletId,								
 								pickingTask.IssueId,
+								pickingTask.IssueNumber,
 								pickingTask.ProductId,
 								pickingTask.RequestedQuantity,
 								0,
 								PickingStatus.Allocated,
 								pickingTask.PickingStatus,
 								request.UserId,
-								DateTime.UtcNow)));
+								DateTime.UtcNow));
 						vp.PickingTasks.Remove(pickingTask);
 						_pickingTaskRepo.DeletePickingTask(pickingTask);
 					}
@@ -104,18 +104,11 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);
 						vp.Pallet.Status = PalletStatus.Available;
 					}
-				}
-				issue.IssueStatus = IssueStatus.Cancelled;
-				issue.PerformedBy = request.UserId;
+				}				
+				issue.Cancel(request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
-
-				//foreach (var p in listPallet)
-				//{
-				//	await _mediator.Publish(new ChangeStatusOfPalletNotification(p.Id, 1,"1-1-1-1",1, "1-1-1-1",
-				//		ReasonMovement.CancelIssue, request.UserId, PalletStatus.Available, null), ct);
-				//}
+				
 				foreach (var evn in _eventCollector.Events)
 				{
 					await _mediator.Publish(evn, ct);

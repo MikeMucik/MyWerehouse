@@ -42,6 +42,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				};
 				var issue = new Issue
 				{
+					Id = Guid.NewGuid(),
+					IssueNumber =1,
 					IssueStatus = status,
 					Client = client,
 					PerformedBy = "UserInit",
@@ -111,6 +113,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				};
 				var issue = new Issue
 				{
+					Id = Guid.NewGuid(),
+					IssueNumber = 1,
 					Client = client,
 					IssueDateTimeCreate = DateTime.UtcNow,
 					IssueStatus = issueStatus,
@@ -189,11 +193,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Assert.Equal(PickingStatus.Cancelled, a.PickingStatus);
 			}
 			// Historia powinna się dodać (jeśli masz tabelę HistoryPicking)
+			var hhistory = DbContext.HandPickingTasks.FirstOrDefault(h=>h.IssueId == issueId);
 			var history = DbContext.HistoryPickings
 				.Where(h => h.PickingTaskId == issue.PickingTasks.First().Id)
 				.ToList();
 
 			Assert.NotEmpty(history);
+			//Assert.NotNull(hhistory);
 		}
 		[Fact]
 		public async Task DeleteIssueAsync_StatusOther_ReturnsFail()

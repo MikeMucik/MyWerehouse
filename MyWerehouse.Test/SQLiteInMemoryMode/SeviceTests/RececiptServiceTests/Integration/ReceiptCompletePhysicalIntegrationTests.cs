@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				StreetNumber = "23/3"
 			};
 			var client = new Client
-			{				
+			{
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
@@ -38,19 +38,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Addresses = [address]
 			};
 			var category = new Category
-			{				
+			{
 				Name = "Category A",
 				IsDeleted = false
 			};
 			var product = new Product
-			{				
+			{
 				Name = "Product A",
 				SKU = "123456",
 				Category = category,
 				IsDeleted = false
 			};
 			var location = new Location
-			{				
+			{
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{new ProductOnPallet
-						{				
+						{
 				Product = product,
 				Quantity = 10,
 				DateAdded = DateTime.UtcNow
@@ -76,15 +76,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
-				{new ProductOnPallet			{				
+				{new ProductOnPallet            {
 				Product = product,
 				Quantity = 10,
 				DateAdded = DateTime.UtcNow
 						}
 				}
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
-			{				
+			{
+				Id = receiptId1,
+				ReceiptNumber = 2,
 				Client = client,
 				ReceiptStatus = ReceiptStatus.InProgress,
 				PerformedBy = "U001",
@@ -173,8 +176,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 						}
 				}
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
 			{
+				Id = receiptId1,
+				ReceiptNumber = 1,
 				Client = client,
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U001",

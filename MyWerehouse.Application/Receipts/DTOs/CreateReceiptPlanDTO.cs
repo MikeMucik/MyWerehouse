@@ -12,7 +12,8 @@ namespace MyWerehouse.Application.Receipts.DTOs
 {
 	public class CreateReceiptPlanDTO :IMapFrom<Receipt>
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
+		public int ReceiptNumber { get; set; }
 		public int ClientId { get; set; }		
 		public DateTime ReceiptDateTime { get; set; }		
 		public string PerformedBy { get; set; } 

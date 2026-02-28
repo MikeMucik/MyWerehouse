@@ -120,13 +120,14 @@ namespace MyWerehouse.Test.MappingTest
 		[Fact]
 		public void Should_Map_AddPalletReceiptDTO_To_Pallet()
 		{
-
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var dto = new CreatePalletReceiptDTO
 			{
 				Id = "Q0001",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
-				ReceiptId = 1,
+				ReceiptId = receiptId1,
+				ReceiptNumber = 1,
 				Status = PalletStatus.Available,
 			};
 

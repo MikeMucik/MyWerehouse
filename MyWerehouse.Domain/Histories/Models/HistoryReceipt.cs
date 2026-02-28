@@ -10,7 +10,8 @@ namespace MyWerehouse.Domain.Histories.Models
 	public class HistoryReceipt
 	{
 		public int Id { get; set; }
-		public int ReceiptId { get; set; }
+		public Guid ReceiptId { get; set; }
+		public int ReceiptNumber { get; set; }
 		public int ClientId { get; set; } //migracja bo dodane pole
 		public ReceiptStatus StatusAfter { get; set; }
 		public string PerformedBy { get; set; }

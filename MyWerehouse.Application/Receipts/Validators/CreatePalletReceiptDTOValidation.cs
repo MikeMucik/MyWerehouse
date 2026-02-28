@@ -25,7 +25,7 @@ namespace MyWerehouse.Application.Receipts.Validators
 				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć lokalizację początkową")
 				.When(p => !string.IsNullOrWhiteSpace(p.Id));
-			RuleFor(p => p.ReceiptId)
+			RuleFor(p => p.ReceiptNumber)
 				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć numer przyjęcia")
 				.When(p => !string.IsNullOrWhiteSpace(p.Id));

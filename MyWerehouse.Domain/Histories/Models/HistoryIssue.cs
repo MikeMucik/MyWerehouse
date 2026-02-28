@@ -10,7 +10,8 @@ namespace MyWerehouse.Domain.Histories.Models
 	public class HistoryIssue
 	{
 		public int Id { get; set; }
-		public int IssueId { get; set; }
+		public Guid IssueId { get; set; }
+		public int IssueNumber { get; set; }
 		public int ClientId { get; set; }
 		public IssueStatus StatusAfter { get; set; }
 		public string PerformedBy { get; set; }

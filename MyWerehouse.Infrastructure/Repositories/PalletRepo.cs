@@ -23,10 +23,10 @@ namespace MyWerehouse.Infrastructure.Repositories
 			 _werehouseDbContext.Pallets.Add(pallet);
 			return pallet.Id;
 		}
-		public void DeletePallet(Pallet pallet)
-		{			
-				_werehouseDbContext.Pallets.Remove(pallet);			
-		}
+		//public void DeletePallet(Pallet pallet)
+		//{			
+		//		_werehouseDbContext.Pallets.Remove(pallet);			
+		//}
 		public async Task<Pallet?> GetPalletByIdAsync(string palletId)
 		{
 			return await _werehouseDbContext.Pallets
@@ -42,6 +42,9 @@ namespace MyWerehouse.Infrastructure.Repositories
 			var result = _werehouseDbContext.Pallets
 				.Include(a => a.ProductsOnPallet)
 				.Where(p => p.Status != PalletStatus.Archived);
+
+
+			//if dla receiptNumber
 			if (filter.ProductId > 0)
 			{
 				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
@@ -168,12 +171,21 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return pallet;
 		}
 
-		public async Task<Pallet?> GetPickingPalletByIssueId(int issueId)
+		public async Task<Pallet?> GetPickingPalletByIssueId(Guid issueId)
 		{
 		return	await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Where(p => p.IssueId == issueId && p.Status == PalletStatus.Picking)
 				.FirstOrDefaultAsync();
+		}
+
+		public async Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId)
+		{
+			return await _werehouseDbContext.Pallets
+				.Include(p=>p.ProductsOnPallet)
+				.Include(m=>m.PalletMovements)
+				.Where(p=>p.ReceiptId == reciptId)
+				.ToListAsync();
 		}
 
 

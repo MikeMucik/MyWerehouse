@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 {
-	public record ChangePalletInIssueCommand(int IssueId, string OldPalletId, string NewPalletId, string UserId):IRequest<IssueResult>;
+	public record ChangePalletInIssueCommand(Guid IssueId, string OldPalletId, string NewPalletId, string UserId):IRequest<IssueResult>;
 }

@@ -54,6 +54,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueItemTestsRepoSQLite
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber =1,
 				IssueDateTimeSend = new DateTime(2025, 12, 15),
 				Client = initailClient,
 				Pallets = new List<Pallet>(),
@@ -72,7 +74,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueItemTestsRepoSQLite
 					{
 						ProductId = product.Id,
 						Quantity = 10,
-						IssueId = issue.Id,
+						//IssueId = issue.Id,
+						IssueNumber = issue.IssueNumber,
 						BestBefore = new DateOnly(2026,1,1)
 					}
 				}

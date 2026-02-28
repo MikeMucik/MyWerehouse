@@ -17,6 +17,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -48,8 +49,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 				//Kasowanie starych
 				try
 				{
-					var oldListPallets = new List<Pallet>();
-					var listOldPallets = issue.Pallets.ToList();
+					var oldListPallets = new List<Pallet>();//
+					var listOldPallets = issue.Pallets.ToList();//
 					foreach (var pallet in listOldPallets)
 					{
 						issue.Pallets.Remove(pallet);
@@ -57,19 +58,22 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						oldListPallets.Add(pallet);
 					}
 					var listOldPickingTask = issue.PickingTasks.ToList();
+					//remove old PickingTask to Domain
 					foreach (var pickingTask in listOldPickingTask)
 					{
-						var historyPickingTaskOld = new CreateHistoryPickingNotification(new HistoryDataPicking(
+						var historyPickingTaskOld = new CreateHistoryPickingNotification(
 							pickingTask.Id,
+							//pickingTask.PickingTaskNumber,
 							pickingTask.VirtualPallet.PalletId,
 							pickingTask.IssueId,
+							pickingTask.IssueNumber,
 							pickingTask.ProductId,
 							pickingTask.RequestedQuantity,
 							0,
 							pickingTask.PickingStatus,
 							PickingStatus.Cancelled,
 							request.DTO.PerformedBy,
-							DateTime.UtcNow));
+							DateTime.UtcNow);
 						await _mediator.Publish(historyPickingTaskOld, ct);
 						issue.PickingTasks.Remove(pickingTask);
 						_werehouseDbContext.PickingTasks.Remove(pickingTask);
@@ -195,8 +199,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 							}
 						}
 					}
+					issue.AddHistory(request.DTO.PerformedBy);
 					await _werehouseDbContext.SaveChangesAsync(ct);
-					await _mediator.Publish(new AddHistoryForIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//					
 					await transaction.CommitAsync(ct);
 					return resultList;
 				}

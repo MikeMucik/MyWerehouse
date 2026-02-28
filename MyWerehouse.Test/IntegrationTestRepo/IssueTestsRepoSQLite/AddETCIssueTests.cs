@@ -142,6 +142,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Act		
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				IssueDateTimeSend = new DateTime(2025, 12, 15),
 				Client = initailClient,
 				Pallets = new List<Pallet>
@@ -251,6 +253,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Act		
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				IssueDateTimeSend = new DateTime(2025, 12, 15),
 				Client = initailClient,
 				Pallets = new List<Pallet>

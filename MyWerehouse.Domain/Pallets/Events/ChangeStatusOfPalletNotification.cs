@@ -7,7 +7,6 @@ using MediatR;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Pallets.PalletDto;
 
 namespace MyWerehouse.Domain.Pallets.Events
 {
@@ -20,5 +19,5 @@ namespace MyWerehouse.Domain.Pallets.Events
 	ReasonMovement ReasonMovement,
 	string UserId,
 	PalletStatus PalletStatus,
-	IReadOnlyCollection<PalletMovementDetailDto> Details) : IDomainEvent;
+	IReadOnlyCollection<PalletMovementDetail> Details) : IDomainEvent;
 }

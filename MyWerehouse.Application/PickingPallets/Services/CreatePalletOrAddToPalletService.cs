@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Events;
+using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -16,15 +15,17 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	public class CreatePalletOrAddToPalletService : ICreatePalletOrAddToPalletService
 	{
 		private readonly IPalletRepo _palletRepo;
-		private readonly IEventCollector _eventCollector;
-		public CreatePalletOrAddToPalletService(IPalletRepo palletRepo, IEventCollector eventCollector)
+		private readonly IIssueRepo _issueRepo;
+		public CreatePalletOrAddToPalletService(IPalletRepo palletRepo, IIssueRepo issueRepo)
 		{
-			_palletRepo = palletRepo;
-			_eventCollector = eventCollector;
+			_palletRepo = palletRepo;			
+			_issueRepo = issueRepo;
 		}
-		public async Task<CreatePalletResult> CreatePalletOrAddToPallet(int issueId, int productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion)
+		public async Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, int productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion)
 		{
-			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issueId);
+			//var issue = await _issueRepo.GetIssueByIdAsync(issueId);
+			
+			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issue.Id);
 			if (oldPallet == null)
 			{
 				var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
@@ -33,7 +34,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				{
 					Id = newIdPallet,
 					Status = PalletStatus.Picking,
-					IssueId = issueId,
+					IssueId = issue.Id,
 					LocationId = 100100,//pickingzone location
 					DateReceived = DateTime.UtcNow,
 					ProductsOnPallet = new List<ProductOnPallet>
@@ -49,8 +50,9 @@ namespace MyWerehouse.Application.PickingPallets.Services
 						},
 				};
 				_palletRepo.AddPallet(pallet);
-				//pallet.AssignToPicking(pallet.Location, userId);
-				pallet.ChangeStatus(PalletStatus.Picking, ReasonMovement.Picking, userId);
+				//issue.Pallets.Add(pallet);
+				issue.AssignPallet(pallet, userId);
+				pallet.AddHistory(PalletStatus.Picking, ReasonMovement.Picking, userId);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
 					pickingTask.MarkPicked(newIdPallet); //
@@ -58,9 +60,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				else
 				{
 					pickingTask.MarkPartiallyPicked(newIdPallet, quantity);
-				}
-				//_eventCollector.Add(new ChangeStatusOfPalletNotification(pallet.Id, pallet.LocationId, pallet.Location.ToSnopShot(), pallet.LocationId, pallet.Location.ToSnopShot(),
-				//ReasonMovement.Picking, userId, PalletStatus.Picking, null));
+				}				
 				return new CreatePalletResult(true, newIdPallet); //pokaż komunikat weź nową paletę
 			}
 			else
@@ -88,10 +88,8 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				{
 					pickingTask.MarkPartiallyPicked(oldPallet.Id, quantity);
 				}
-				//oldPallet.AssignToPicking(oldPallet.Location, userId);
-				oldPallet.ChangeStatus(PalletStatus.Picking, ReasonMovement.Picking, userId);
-				//_eventCollector.Add(new ChangeStatusOfPalletNotification(oldPallet.Id, oldPallet.LocationId, oldPallet.Location.ToSnopShot(), oldPallet.LocationId, oldPallet.Location.ToSnopShot(),
-				//ReasonMovement.Picking, userId, PalletStatus.Picking, null));
+				oldPallet.AddHistory(PalletStatus.Picking, ReasonMovement.Picking, userId);
+				
 				return new CreatePalletResult(false, oldPallet.Id);
 			}
 		}

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.Invetories.Models
 {
-	public enum StockChangeType
-	{
-		Increase = 0,
-		Decrease = 1,
-	}
+	//public enum StockChangeType
+	//{
+	//	Increase = 0,
+	//	Decrease = 1,
+	//}
 }

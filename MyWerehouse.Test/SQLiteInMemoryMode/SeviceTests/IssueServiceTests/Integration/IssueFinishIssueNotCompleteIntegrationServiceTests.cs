@@ -31,7 +31,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var initailCLient = new Client
+			var cLient = new Client
 			{
 				Id = 1,
 				Name = "TestCompany",
@@ -40,7 +40,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
-			var initailLocation = new Location
+			var location1 = new Location
 			{
 				Id = 10,
 				Aisle = 1,
@@ -48,7 +48,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Height = 1,
 				Position = 1
 			};
-			var initailLocation1 = new Location
+			var location2 = new Location
 			{
 				Id = 20,
 				Aisle = 1,
@@ -56,7 +56,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Height = 1,
 				Position = 1
 			};
-			var initialProduct = new Product
+			var product1 = new Product
 			{
 				Id = 10,
 				Name = "Test",
@@ -64,15 +64,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				CategoryId = 1,
 				IsDeleted = false,
 			};
-			var initialProduct1 = new Product
+			var product2 = new Product
 			{
-				Id = 101,
+				Id = 11,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
 				IsDeleted = false,
 			};
-			var issueId = 1;
+			var issueId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var issueId = issueId1;
 			var performedBy = "Janek";
 			var loadedPallet = new Pallet
 			{
@@ -81,47 +82,50 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LocationId = 10,
 				ProductsOnPallet = new List<ProductOnPallet>
 		{
-			new ProductOnPallet { ProductId = 101, Quantity = 5, }
+			new ProductOnPallet { ProductId = 10, Quantity = 5, }
 		}
 			};
 			var notLoadedPallet = new Pallet
 			{
 				Id = "P2",
-				Status = PalletStatus.OnHold,
+				Status = PalletStatus.ToIssue,
 				LocationId = 20,
-				ProductsOnPallet = new List<ProductOnPallet>()
+				ProductsOnPallet = new List<ProductOnPallet>
+				{
+					new ProductOnPallet{ProductId =11, Quantity =10 } }
 			};
 			var issue = new Issue
 			{
 				Id = issueId,
-				ClientId = initailCLient.Id,
+				IssueNumber = 1,
+				ClientId = cLient.Id,
 				IssueDateTimeCreate = new DateTime(2025, 6, 6, 2, 2, 2),
 				Pallets = new List<Pallet> { loadedPallet, notLoadedPallet },
 				PerformedBy = "TestUser",
 			};
-			var initialCategory = new Category
+			var category = new Category
 			{
 				Id = 1,
 				Name = "name",
 				IsDeleted = false
 			};
-			var inventory = new Inventory
-			{
-				Product = initialProduct,
-				LastUpdated = DateTime.Now.AddDays(-7),
-				Quantity = 100
-			};
 			var inventory1 = new Inventory
 			{
-				Product = initialProduct1,
+				Product = product1,
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
-			DbContext.Inventories.AddRange(inventory, inventory1);
-			DbContext.Categories.Add(initialCategory);
-			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			DbContext.Locations.AddRange(initailLocation, initailLocation1);
-			DbContext.Clients.Add(initailCLient);
+			var inventory2 = new Inventory
+			{
+				Product = product2,
+				LastUpdated = DateTime.Now.AddDays(-7),
+				Quantity = 100
+			};
+			DbContext.Inventories.AddRange(inventory1, inventory2);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product1, product2);
+			DbContext.Locations.AddRange(location1, location2);
+			DbContext.Clients.Add(cLient);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act			
@@ -145,7 +149,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Historia palet — sprawdź, czy została utworzona dla załadowanej palety
 			var palletHistories = await DbContext.PalletMovements
 				.FirstOrDefaultAsync(h => h.PalletId == "P1");
-				
+
 			Assert.NotNull(palletHistories);
 			Assert.Equal(PalletStatus.Loaded, palletHistories.PalletStatus);
 			Assert.Equal(performedBy, palletHistories.PerformedBy);
@@ -166,8 +170,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Contains(loadingHistories.Details, h => h.PalletId == "P1");
 
 			// Sprawdź, że status i wykonawca się zgadzają			
-				Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
-				Assert.Equal(performedBy, updatedIssue.PerformedBy);			
+			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
+			Assert.Equal(performedBy, updatedIssue.PerformedBy);
+			//Inventory - nie sprawdzamy po
+			//sprawdzenie ilości w Inventory (po odjęciu 10 i 0)
+			//var inventoryFromDb = await DbContext.Inventories.FirstAsync(i => i.ProductId == product1.Id);
+			//var inventory1FromDb = await DbContext.Inventories.FirstAsync(i => i.ProductId == product2.Id);
+			//Assert.Equal(95, inventoryFromDb.Quantity);
+			//Assert.Equal(100, inventory1FromDb.Quantity);
+
 		}
 	}
 }

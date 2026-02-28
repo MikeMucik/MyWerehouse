@@ -25,7 +25,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueItemTestsRepo
 		public async Task GetInfo_GetQuantityByIssueAndProduct_ReturnQuantity()
 		{
 			//Arrange
-			var issueId = 2;			
+			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var issueId = issueId2;			
 			var issue = _fixture.DbContext.Issues.Find(issueId);
 			//Act
 			

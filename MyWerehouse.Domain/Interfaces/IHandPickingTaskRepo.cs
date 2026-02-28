@@ -10,7 +10,7 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IHandPickingTaskRepo
 	{
 		void AddHandPickingTask(HandPickingTask handPickingTask);		
-		Task<HandPickingTask?> GetByIssueAndProductAsync(int issueId, int productId);
+		Task<HandPickingTask?> GetByIssueAndProductAsync(Guid issueId, int productId);
 		Task<List<HandPickingTask>> GetHandPickingTasksAsync(DateTime startDate,  DateTime endDate);
 		//void UpdateHandPickingTask(HandPickingTask handPickingTask);
 	}

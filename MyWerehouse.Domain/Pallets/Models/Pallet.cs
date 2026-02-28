@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Invetories.Events;
 using MyWerehouse.Domain.Invetories.Models;
-using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
-using MyWerehouse.Domain.Pallets.PalletDto;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -28,13 +27,13 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public PalletStatus Status { get; set; } = 0;
 		public virtual ICollection<ProductOnPallet> ProductsOnPallet { get; set; } = new List<ProductOnPallet>();
 		public virtual ICollection<PalletMovement> PalletMovements { get; set; } = new List<PalletMovement>();
-		public int? ReceiptId { get; set; }
+		//public int? ReceiptId { get; set; }
+		public Guid? ReceiptId { get; set; }
 		public virtual Receipt? Receipt { get; set; }
-		public int? IssueId { get; set; }
+		public Guid? IssueId { get; set; }
 		public virtual Issue? Issue { get; set; }
 		[Timestamp]
-
-		public byte[] RowVersion { get; set; }
+		public byte[] RowVersion { get; set; } //działa tylko w M-SQL wymaga DbUpdateConcurrencyException
 		public Pallet() { }
 		public Pallet(string id, DateTime dateReceived, ICollection<ProductOnPallet> productsOnPallet)
 		{
@@ -43,24 +42,22 @@ namespace MyWerehouse.Domain.Pallets.Models
 			ProductsOnPallet = productsOnPallet;
 		}
 		public Pallet(string id, DateTime dateReceived, int locationId, Location location)
-		//, PalletStatus status, int? receiptId, Receipt? receipt)
 		{
 			Id = id;
 			DateReceived = dateReceived;
 			LocationId = locationId;
 			Location = location;
-			//Status = status;
-			//ReceiptId = receiptId;
-			//Receipt = receipt;
 		}
 
-		public void AssignToWarehouse(Location location, string userId)
+		public void AssignToWarehouse(Location location, string userId, List<ProductOnPallet> products)
 		{
+			var listProducts = this.CreateStockItem();
 			Status = PalletStatus.InStock;
 			Location = location;
 
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
 				location.Id, location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.Received, userId, this.Status, BuildMovementDetails()));
+			this.AddDomainEvent(new ChangeStockNotification(listProducts));
 		}
 
 		public void ApplyProductChanges(List<ProductOnPallet> updatedProducts)
@@ -79,8 +76,17 @@ namespace MyWerehouse.Domain.Pallets.Models
 				}
 			}
 		}
-		public void UpdateProductChanges(List<ProductOnPalletDto> updatedProducts)
+		public void Update(string userId, List<ProductOnPallet> products, PalletStatus palletStatus)
 		{
+			Status = palletStatus;
+			this.UpdateProductChanges(products);
+			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
+				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.Correction, userId, this.Status, BuildMovementDetails()));
+
+		}
+		public void UpdateProductChanges(List<ProductOnPallet> updatedProducts)
+		{
+			var changeQuangtityInventory = this.CalculateQuantityDelta(updatedProducts);
 			var toRemove = ProductsOnPallet
 				.Where(existing => updatedProducts.All(d => d.ProductId != existing.ProductId))
 				.ToList();
@@ -110,6 +116,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 					existing.BestBefore = pop.BestBefore;
 				}
 			}
+			this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
 		}
 		public void AddProduct(int productId, int quantity, DateOnly? bestBefore)
 		{
@@ -123,12 +130,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 				BestBefore = bestBefore
 			});
 		}
-		public void ChangeStatus(PalletStatus status, ReasonMovement reason, string userId)
+		public void AddHistory(PalletStatus status, ReasonMovement reason, string userId)
 		{
 			this.Status = status;
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), reason, userId, this.Status, BuildMovementDetails()));
 		}
+
+		//
 		public void RemoveProducts(List<int> ids)
 		{
 			foreach (var id in ids)
@@ -137,9 +146,9 @@ namespace MyWerehouse.Domain.Pallets.Models
 				ProductsOnPallet.Remove(pop);
 			}
 		}
-		public List<StockProductChange> CalculateQuantityDelta(IEnumerable<ProductOnPallet> updatedProducts)//It must be done before update
+		public List<StockItemChange> CalculateQuantityDelta(IEnumerable<ProductOnPallet> updatedProducts)//It must be done before update
 		{
-			var result = new List<StockProductChange>();
+			var result = new List<StockItemChange>();
 			var updatedById = updatedProducts.ToDictionary(x => x.ProductId, x => x.Quantity);
 			var allIds = ProductsOnPallet.Select(x => x.ProductId).Union(updatedProducts.Select(p => p.ProductId));
 			foreach (var id in allIds)
@@ -149,38 +158,46 @@ namespace MyWerehouse.Domain.Pallets.Models
 				var delta = newQty - oldQty;
 				if (delta != 0)
 				{
-					result.Add(new StockProductChange(id, delta));
+					result.Add(new StockItemChange(id, delta));
 				}
 			}
 			return result;
 		}
-		public void AssignToIssue(Issue issue, Location location, string userId)
+		//
+		public void AssignToIssue(Issue issue, string userId)
 		{
-			if (issue == null) throw new DomainIssueException(this.Id);
+			if (issue == null) throw new DomainIssueException(issue.IssueNumber);
 			//IssueId = issue.Id;
 			Status = PalletStatus.InTransit;
 
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
-				location.Id, Location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
+				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
 		}
-		public void DetachToIssue(int issueId, string userId)
+		public void CancelFromReceipt(string userId)
+		{
+			Status = PalletStatus.Cancelled;
+			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
+				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
+
+		}
+		public void DetachToIssue(Guid issueId, string userId)
 		{
 			if (IssueId != issueId)
-				throw new DomainIssueException(Id);
+				throw new DomainIssueException("Niepoprawne wydanie dla palety");
 			IssueId = null;
 			Status = PalletStatus.Available;
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
 				Location.Id, Location.ToSnopShot(), Location.Id, Location.ToSnopShot(), ReasonMovement.CancelIssue, userId, this.Status, BuildMovementDetails()));
 		}
 
-		public void AssignToPicking(Location location, string userId)
+		public void AssignToPicking(string userId)
 		{
 			Status = PalletStatus.ToPicking;
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
-				location.Id, Location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.Picking, userId, this.Status, BuildMovementDetails()));
+				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.Picking, userId, this.Status, BuildMovementDetails()));
 		}
 
-		public void AssignToReceipt(int receiptId, string userId)
+		public void AssignToReceipt(Guid receiptId, string userId)
 		{
 			if (ReceiptId != null) throw new DomainReceiptException(this.Id);
 			ReceiptId = receiptId;
@@ -202,7 +219,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				LocationId, Location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.Moved, userId, this.Status, BuildMovementDetails()));
 			this.LocationId = location.Id;
 		}
-		public void CloseAndAddPickingPallet(int issueId, string userId, Location location)
+		public void CloseAndAddPickingPallet(Guid issueId, string userId, Location location)
 		{
 			if (Status != PalletStatus.Picking)
 				throw new DomainPalletException(this.Id);
@@ -211,57 +228,35 @@ namespace MyWerehouse.Domain.Pallets.Models
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id,
 				location.Id, Location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
 		}
+		public bool CanBeCancelled()
+		{
+			if (PalletMovements.Count > 1)
+				return false;
+			return true;
+		}
+
+
+
+
+
 		//metody pomocnicze
-		private IReadOnlyCollection<PalletMovementDetailDto> BuildMovementDetails()
+		private IReadOnlyCollection<PalletMovementDetail> BuildMovementDetails()
 		{
 			return ProductsOnPallet
-				.Select(p => new PalletMovementDetailDto
+				.Select(p => new PalletMovementDetail
 				(
 					p.ProductId,
 					p.Quantity
 				))
 				.ToList();
 		}
+		private IEnumerable<StockItemChange> CreateStockItem()
+		{
+			return ProductsOnPallet
+				.GroupBy(p => p.ProductId)
+				.Select(g => new StockItemChange(
+					g.Key,
+					g.Sum(q => q.Quantity)));
+		}
 	}
 }
-
-//ChangeStatus(PalletStatus status)
-
-//AssignToIssue(int issueId)
-
-//DetachFromIssue()(opcjonalnie)
-
-//AssignToReceipt(int receiptId)
-
-//MoveToLocation(int locationId)
-
-//SetDateReceived(DateTime date)
-//AddOrUpdateProduct(int productId, int quantity)
-
-//RemoveProduct(int productId)
-//CanModifyProducts()
-
-//CanChangeStatusTo(PalletStatus status)
-
-//IsAssignedToIssue()
-//public void UpdateListPallets(List<Pallet> updatedPallets)
-//{
-//	//do poprawy!!!
-//	//var updatedByPallets = updatedPallets.ToDictionary(x => x.Id);
-//	//var toRemove = ProductPallet
-
-//	foreach (var itemToUpadate in updatedPallets)
-//	{
-//		this.DateReceived = DateTime.UtcNow;
-//		this.IssueId = itemToUpadate.IssueId;
-//		this.Issue = itemToUpadate.Issue;
-//		this.LocationId = itemToUpadate.LocationId;
-//		this.Location = itemToUpadate.Location;
-//		this.Receipt = itemToUpadate.Receipt;
-//		this.ReceiptId = itemToUpadate.ReceiptId;
-//		this.Status = itemToUpadate.Status;
-
-//		//this.ProductsOnPallet = 
-//			UpdateProducts(itemToUpadate.ProductsOnPallet.ToList());				
-//	}
-//}

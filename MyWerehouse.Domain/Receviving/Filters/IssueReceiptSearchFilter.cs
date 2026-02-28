@@ -8,7 +8,8 @@ namespace MyWerehouse.Domain.Receviving.Filters
 {
 	public class IssueReceiptSearchFilter
 	{
-		public int IssueId { get; set; }
+		public Guid IssueId { get; set; }
+		public Guid ReceiptId { get; set; }
 		public int? ClientId { get; set; }
 		public string? ClientName { get; set; }
 		public int? ProductId { get; set; }

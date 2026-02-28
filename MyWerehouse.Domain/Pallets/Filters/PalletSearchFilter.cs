@@ -21,7 +21,7 @@ namespace MyWerehouse.Domain.Pallets.Filters
 		public DateTime? EndDate { get; set; }
 		public string? ReceiptUser {  get; set; }
 		public string? IssueUser { get; set; }
-		public int? ReceiptId { get; set; }//
-		public int? IssueId { get; set; }//
+		public Guid? ReceiptId { get; set; }//
+		public Guid? IssueId { get; set; }//
 	}
 }

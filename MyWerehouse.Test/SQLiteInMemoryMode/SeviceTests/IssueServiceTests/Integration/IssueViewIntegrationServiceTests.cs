@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
@@ -27,7 +26,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		public async Task GetIssueById_GetData_ReturnDTO()
 		{
 			//Arrange&Act
-			var query = new GetIssueByIdQuery(2);
+			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var query = new GetIssueByIdQuery(issueId2);
 
 			var result = await _mediator.Send(query);
 			//Assert
@@ -43,7 +43,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		public async Task GetIssueProductSummaryById_GetData_ReturnDTO()
 		{
 			//Arrange&Act
-			var query = new GetIssueProductSummaryByIdQuery(2);
+			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var query = new GetIssueProductSummaryByIdQuery(issueId2);
 
 			var result = await _mediator.Send(query);
 			//Assert
@@ -61,12 +62,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		public async Task LoadingIssueAsync_ProperData_ReturnList()
 		{
 			//Arrange&Act
-			var query = new LoadingIssueListQuery(2, "user");
+			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var query = new LoadingIssueListQuery(issueId2, "user");
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<ListPalletsToLoadDTO>(result);
-			Assert.Equal(2, result.IssueId);
+			Assert.Equal(issueId2, result.IssueId);
 			Assert.Equal(11, result.ClientId);
 			Assert.Equal("ClientTest1", result.ClientName);
 

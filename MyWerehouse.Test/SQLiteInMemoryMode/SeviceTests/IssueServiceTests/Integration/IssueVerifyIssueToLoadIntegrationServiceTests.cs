@@ -52,6 +52,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
@@ -118,6 +120,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
@@ -135,7 +139,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await Mediator.Send(new VerifyIssueToLoadCommand(2, "user123"));
+			var receiptId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
+			var result = await Mediator.Send(new VerifyIssueToLoadCommand(receiptId2, "user123"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.Success);

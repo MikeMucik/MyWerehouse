@@ -8,6 +8,6 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 {
-	public record VerifyIssueToLoadCommand(int IssueId, string UserId) : IRequest<IssueResult>;
+	public record VerifyIssueToLoadCommand(Guid IssueId, string UserId) : IRequest<IssueResult>;
 	
 }

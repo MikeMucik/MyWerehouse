@@ -10,7 +10,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 	public class IssueItem
 	{
 		public int Id { get; set; }
-		public int IssueId { get; set; }
+		public Guid IssueId { get; set; }
+		public int IssueNumber { get; set; }
 		public virtual Issue Issue { get; set; }
 		public int ProductId { get; set; }
 		public virtual Product Product { get; set; }

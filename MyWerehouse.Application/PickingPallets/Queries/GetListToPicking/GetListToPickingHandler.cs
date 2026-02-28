@@ -23,17 +23,17 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 			{
 				return new List<ProductToIssueDTO>();
 			}
-			var allNededIssuesIds = pickingPallets
+			var allNeededIssuesIds = pickingPallets
 				.SelectMany(p => p.PickingTasks)
 				.Select(i => i.IssueId)
 				.Distinct()
 				.ToList();
 
-			var allIssues = await _issueRepo.GetIssuesByIdsAsync(allNededIssuesIds);
+			var allIssues = await _issueRepo.GetIssuesByIdsAsync(allNeededIssuesIds);
 
 			var issueDictionary = allIssues.ToDictionary(i => i.Id);
 
-			var aggregationDictionary = new Dictionary<(int ClientId, int
+			var aggregationDictionary = new Dictionary<(int ClientId, Guid
 				IssueId, int product), ProductToIssueDTO>();
 
 			foreach (var pallet in pickingPallets)
@@ -61,6 +61,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 						{
 							ClientIdOut = clientId,
 							IssueId = pickingTask.IssueId,
+							IssueNumber = pickingTask.IssueNumber,
 							ProductId = productId,
 							Quantity = pickingTask.RequestedQuantity,
 						};

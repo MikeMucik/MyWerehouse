@@ -23,11 +23,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 		{
 			//Arrange
 			var id = 1;
+			var pickingId2 = Guid.Parse("11111111-2222-2222-1111-111111111111");
 			//Act
 			var result = await _reversePickingRepo.GetReversePickingAsync(id);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.PickingTaskId);
+			Assert.Equal(pickingId2, result.PickingTaskId);
 			Assert.Equal("Q5000", result.PickingPalletId);
 			Assert.Equal(10, result.ProductId);
 			Assert.Equal(10, result.Quantity);

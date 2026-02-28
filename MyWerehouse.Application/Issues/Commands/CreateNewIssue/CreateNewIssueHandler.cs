@@ -39,29 +39,37 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 		public async Task<List<IssueResult>> Handle(CreateNewIssueCommand request, CancellationToken ct)
 		{
 			var addedProducts = new List<IssueResult>();
+			var results = new List<IssueResult>();
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
 			try
 			{
 				var issue = new Issue(request.DTO.ClientId, request.DTO.PerformedBy, request.Date);
 				_issueRepo.AddIssue(issue);
+				issue.IssueNumber = await _issueRepo.GetNextNumberOfIssue();
+
+				//foreach (var item in request.DTO.Items)
+				//{
+				//	var allocation = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
+				//}
+
 				issue.IssueItems = new List<IssueItem>();
-				//var addedProducts = new List<IssueResult>();
 				foreach (var item in request.DTO.Items)
 				{					
-					IssueResult notAddedProducts;
+					IssueResult addingProducts;
 					var result = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
 					if (result.Success == false)
 					{
-						 notAddedProducts = IssueResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
+						 addingProducts = IssueResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
 					}
 					else
 					{
-						notAddedProducts = IssueResult.Ok(result.Message, item.ProductId);
+						addingProducts = IssueResult.Ok(result.Message, item.ProductId);
 					}
-					addedProducts.Add(notAddedProducts);
+					addedProducts.Add(addingProducts);
 					var newItem = new IssueItem
 					{
 						ProductId = item.ProductId,
+						IssueNumber = issue.IssueNumber,
 						Quantity = item.Quantity,
 						BestBefore = item.BestBefore,
 					};
@@ -71,14 +79,9 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 				{
 					issue.IssueStatus = IssueStatus.NotComplete;
 				}
+				issue.AddHistory(request.DTO.PerformedBy);
 				await transaction.CommitAsync(ct);
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				await _mediator.Publish(new AddHistoryForIssueNotification(issue.Id, request.DTO.PerformedBy), ct);//
-				
-				foreach (var factory in _eventCollector.DeferredEvents)
-				{
-					await _mediator.Publish(factory(), ct);
-				}
+				await _werehouseDbContext.SaveChangesAsync(ct);				
 				return addedProducts;
 			}
 			catch (DomainException ex)

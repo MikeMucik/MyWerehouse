@@ -208,9 +208,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 				Height = 1
 			};
 			DbContext.Locations.Add(location);
-			var issue= new Issue
+			var issue = new Issue
 			{
-				//Id = 2,
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = initailClient,
 				PerformedBy = "U002",
 				IssueDateTimeCreate = new DateTime(2025, 5, 5),
@@ -240,7 +241,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			var result = DbContext.Pallets.Find(pickingPallettoClose.Id);
 			Assert.NotNull(result);
 			Assert.Equal(PalletStatus.ToIssue, result.Status);
-			Assert.Equal(issue.Id, result.IssueId);	
+			Assert.Equal(issue.Id, result.IssueId);
 		}
 	}
 }

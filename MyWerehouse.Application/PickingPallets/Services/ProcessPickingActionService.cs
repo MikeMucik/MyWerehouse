@@ -7,9 +7,7 @@ using Azure.Core;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -17,15 +15,12 @@ namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public class ProcessPickingActionService : IProcessPickingActionService
 	{
-		private readonly ICreatePalletOrAddToPalletService _createPalletOrAddToPalletService;		
-		private readonly IEventCollector _eventCollector;
+		private readonly ICreatePalletOrAddToPalletService _createPalletOrAddToPalletService;
 
 		public ProcessPickingActionService(
-			ICreatePalletOrAddToPalletService createPalletOrAddToPalletService,			
-			IEventCollector eventCollector)
+			ICreatePalletOrAddToPalletService createPalletOrAddToPalletService)
 		{
-			_createPalletOrAddToPalletService = createPalletOrAddToPalletService; 			
-			_eventCollector = eventCollector;
+			_createPalletOrAddToPalletService = createPalletOrAddToPalletService;			
 		}
 		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, int productId, int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion)
 		{
@@ -33,24 +28,24 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			if (productOnSourcePallet is null)
 				return ProcessPickingActionResult.Fail($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
 			var bestBefore = pickingTask.BestBefore;
-			await _createPalletOrAddToPalletService.CreatePalletOrAddToPallet(issue.Id, productId,
+			
+			var pickingPallet =	await _createPalletOrAddToPalletService.CreatePalletOrAddToPallet(issue, productId,
 				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion);
+			//Usuwanie towaru z palety źródłowej
 			productOnSourcePallet.Quantity -= quantityToPick;
 			if (productOnSourcePallet.Quantity == 0)
 			{
-				sourcePallet.ChangeStatus(PalletStatus.Archived, ReasonMovement.Picking, userId);
-				//sourcePallet.Status = PalletStatus.Archived;
-				//_eventCollector.Add(new ChangeStatusOfPalletNotification(sourcePallet.Id, sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(), sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(),
-				//ReasonMovement.Picking, issue.PerformedBy, PalletStatus.Archived, null));
+				sourcePallet.AddHistory(PalletStatus.Archived, ReasonMovement.Picking, userId);
 			}
 			else
 			{
-				sourcePallet.ChangeStatus(PalletStatus.ToPicking, ReasonMovement.Picking, userId);
-				//_eventCollector.Add(new ChangeStatusOfPalletNotification(sourcePallet.Id,	sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(), sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(),
-				//ReasonMovement.Picking, issue.PerformedBy, PalletStatus.ToPicking, null));
+				sourcePallet.AddHistory(PalletStatus.ToPicking, ReasonMovement.Picking, userId);
 			}
-			return ProcessPickingActionResult.Ok();
+			return ProcessPickingActionResult.Ok(pickingPallet.PalletId);
 		}
+
+
+
 		//private async void CreatePalletOrAddToPallet(int issueId, int productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion)
 		//{
 		//	var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issueId);

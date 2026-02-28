@@ -11,7 +11,10 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IReceiptRepo
 	{		
 		void AddReceipt(Receipt receipt);		
-		Task<Receipt?> GetReceiptByIdAsync(int id);
+		void DeleteReceipt(Receipt receipt); 
+		Task<Receipt?> GetReceiptByIdAsync(Guid id);
+		Task<Receipt?> GetReceiptOnlyByIdAsync(Guid id);
 		IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter);
+		Task<int> GetNextNumberOfReceipt();
 	}
 }

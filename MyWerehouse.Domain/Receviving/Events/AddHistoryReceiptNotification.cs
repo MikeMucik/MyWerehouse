@@ -8,9 +8,12 @@ using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Domain.Receviving.Events
 {
-	public record ChangeStatusReceiptNotification(
-		int ReceiptId,
+	public record AddHistoryReceiptNotification(
+		Guid ReceiptId,
+		int ReceiptNumber,
+		int ClientId,
 		ReceiptStatus ReceiptStatus,
-		string UserId) : IDomainEvent;
-	
+		string UserId,
+		IReadOnlyCollection<HistoryReceiptIssueDetailDto> DetailDtos) : IDomainEvent;
+
 }

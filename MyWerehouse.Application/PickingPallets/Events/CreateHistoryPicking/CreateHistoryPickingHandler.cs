@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
@@ -19,16 +20,15 @@ namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 		public async Task Handle(CreateHistoryPickingNotification request, CancellationToken ct)
 		{			
 			var history = new HistoryPicking
-			{
-				PickingTaskId = request.DataPicking.PickingTaskId,
-				PalletId = request.DataPicking.PalletId,
-				IssueId = request.DataPicking.IssueId,
-				ProductId = request.DataPicking.ProductId,
-				QuantityAllocated = request.DataPicking.QuantityAllocated,
-				QuantityPicked = request.DataPicking.QuantityPicked,
-				StatusBefore = request.DataPicking.StatusBefore,
-				StatusAfter = request.DataPicking.StatusAfter,
-				PerformedBy = request.DataPicking.PerformedBy,
+			{				
+				PalletId = request.PalletId,
+				IssueId = request.IssueId,
+				ProductId = request.ProductId,
+				QuantityAllocated = request.QuantityAllocated,
+				QuantityPicked = request.QuantityPicked,
+				StatusBefore = request.StatusBefore,
+				StatusAfter = request.StatusAfter,
+				PerformedBy = request.PerformedBy,
 				DateTime = DateTime.UtcNow,
 			};
 			await _historyPickingRepo.AddHistoryPickingAsync(history, ct);

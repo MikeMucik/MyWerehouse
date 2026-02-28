@@ -24,12 +24,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		public async Task TakePickingTaskById_GetPickingTaskAsync_ReturnProperData()
 		{
 			//Arrange
-			var pickingTaskId = 1;
+			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var pickingId1 = Guid.Parse("11111111-1111-2222-1111-111111111111");
+			var pickingTaskId = pickingId1;
 			//Act
 			var result = await _pickingTaskRepo.GetPickingTaskAsync(pickingTaskId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.IssueId);
+			Assert.Equal(receiptId2, result.IssueId);
 			Assert.Equal(20, result.RequestedQuantity);
 			Assert.Equal(3, result.VirtualPallet.LocationId);
 		}
@@ -62,7 +64,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		public async Task ByIssueAndProductId_GetPickingTasksByIssueIdProductIdAsync_ReturnList()
 		{
 			//Arrange
-			var issueId = 2;
+			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var issueId = receiptId2;
 			var productId = 11;
 			//Act
 			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId);
@@ -76,7 +79,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		[Fact]
 		public async Task ByIssue_GetPickingTasksByIssueIdAsync_ReturnList()
 		{
-			var issueId = 2;			
+			//Arrange
+			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var issueId = receiptId2;			
 			//Act
 			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issueId);
 			//Assert

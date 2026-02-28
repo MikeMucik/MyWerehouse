@@ -14,5 +14,6 @@ namespace MyWerehouse.Domain.Receviving.Models
 		Verified = 3,
 		Correction = 4,		
 		Cancelled = 5,// gdy anuluje przyjęcie
+		Deleted =6,
 	}
 }

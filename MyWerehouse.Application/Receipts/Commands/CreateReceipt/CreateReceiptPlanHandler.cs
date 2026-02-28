@@ -17,13 +17,11 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {
 	public class CreateReceiptPlanHandler(WerehouseDbContext werehouseDbContext,
 		IReceiptRepo receiptRepo,
-		IMediator mediator,
 		IClientRepo clientRepo,
 		ILocationRepo locationRepo) : IRequestHandler<CreateReceiptPlanCommand, ReceiptResult>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
-		private readonly IMediator _mediator = mediator;
 		private readonly IClientRepo _clientRepo = clientRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 
@@ -35,14 +33,13 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 					return ReceiptResult.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.");
 				if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
 					return ReceiptResult.Fail("Wybrana rampa nie istnieje.");
-				//var userID = _currentUser.Id; // np. z Claims
 
 				var receipt = new Receipt(request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
+				receipt.ReceiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
 				_receiptRepo.AddReceipt(receipt);
+				receipt.ChangeStatus(ReceiptStatus.Planned, request.DTO.PerformedBy);
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await _mediator.Publish(new ChangeStatusReceiptNotification(receipt.Id, receipt.ReceiptStatus, request.DTO.PerformedBy), ct);
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				return ReceiptResult.Ok("Utworzono przyjęcie", receipt.Id);
+				return ReceiptResult.Ok("Utworzono przyjęcie", receipt.ReceiptNumber);
 			}
 			catch (ClientNotFoundException ei)
 			{
@@ -51,11 +48,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 			catch (InvalidUserIdException eu)
 			{
 				return ReceiptResult.Fail(eu.Message);
-			}
-			//catch (RampNotFoundException er)
-			//{
-			//	return ReceiptResult.Fail(er.Message);
-			//}
+			}			
 			catch (Exception ex)
 			{
 				//_logger.LogError(ex, "Błąd podczas operacji na przyjęciu");

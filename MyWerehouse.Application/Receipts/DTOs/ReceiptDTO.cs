@@ -13,7 +13,8 @@ namespace MyWerehouse.Application.Receipts.DTOs
 {
 	public class ReceiptDTO : IMapFrom<Receipt>
 	{
-		public int Id { get; set; }
+		public Guid ReceiptId { get; set; }
+		public int ReceiptNumber { get; set; }
 		public int ClientId { get; set; }
 		public DateTime ReceiptDateTime { get; set; }
 		public ICollection<UpdatePalletDTO> Pallets { get; set; } = new List<UpdatePalletDTO>();
@@ -27,6 +28,7 @@ namespace MyWerehouse.Application.Receipts.DTOs
 				//.ForMember(dest => dest.Pallets, opt => opt.Ignore());
 
 			profile.CreateMap<Receipt, ReceiptDTO>()
+				.ForMember(dest => dest.ReceiptId, opt=>opt.MapFrom(src => src.Id))
 				.ForMember(dest => dest.Pallets, opt => opt.MapFrom(src => src.Pallets)); 
 		}
 	}

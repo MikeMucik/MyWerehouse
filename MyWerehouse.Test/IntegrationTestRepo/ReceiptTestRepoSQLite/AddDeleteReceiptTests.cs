@@ -98,6 +98,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			//Act	
 			var receipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.Now,
 				ClientId = 1,
 				Pallets = new List<Pallet>
@@ -206,6 +208,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			//Act	
 			var receipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber =1,
 				ReceiptDateTime = DateTime.Now,
 				ClientId = 1,
 				Pallets = new List<Pallet>

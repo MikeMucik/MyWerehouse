@@ -13,10 +13,11 @@ namespace MyWerehouse.Domain.Interfaces
 	{
 		void AddIssue(Issue issue);
 		void DeleteIssue(Issue issue);	
-		Task<Issue?> GetIssueByIdAsync(int id);		
-		Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids);
-		Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(int id, CancellationToken cancellationToken);
+		Task<Issue?> GetIssueByIdAsync(Guid id);		
+		Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids);
+		Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(Guid id, CancellationToken cancellationToken);
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
-		Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id);		
+		Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(Guid id);
+		Task<int> GetNextNumberOfIssue();
 	}
 }

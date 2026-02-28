@@ -4,7 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Domain.Pallets.PalletDto
+namespace MyWerehouse.Domain.Interfaces
 {
-	public record PalletMovementDetailDto(int ProductId, int Quantity);
+	public interface IPickingReadOnlyRepo
+	{
+		//TODO
+	}
 }

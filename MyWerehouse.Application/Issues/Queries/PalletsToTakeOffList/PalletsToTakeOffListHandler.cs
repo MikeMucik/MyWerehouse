@@ -24,7 +24,7 @@ namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 				throw new NotFoundIssueException(request.IssueId);
 			var listToShow = new IssuePalletsWithLocationDTO
 			{
-				IssueId = request.IssueId,
+				IssueNumber = issue.IssueNumber,
 				PalletList = list
 			};
 			return listToShow;

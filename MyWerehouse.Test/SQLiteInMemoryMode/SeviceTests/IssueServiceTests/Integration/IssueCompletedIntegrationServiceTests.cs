@@ -51,11 +51,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber =1,
 				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
 			{
-				//ProductId = product.Id,
 				Product = product,
 				Quantity = 20,
 				BestBefore = new DateOnly(2026, 1, 1)
@@ -72,7 +73,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await Mediator.Send(new CompletedIssueCommand(issue.Id, "UserLoader"));
+			var result = await Mediator.Send(new CompletedLoadIssueCommand(issue.Id, "UserLoader"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.Success);
@@ -113,11 +114,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber =1,
 				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
 			{
-				//ProductId = product.Id,
 				Product = product,
 				Quantity = 20,
 				BestBefore = new DateOnly(2026, 1, 1)
@@ -134,7 +136,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await Mediator.Send(new CompletedIssueCommand(issue.Id, "UserLoader"));
+			var result = await Mediator.Send(new CompletedLoadIssueCommand(issue.Id, "UserLoader"));
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.Success);

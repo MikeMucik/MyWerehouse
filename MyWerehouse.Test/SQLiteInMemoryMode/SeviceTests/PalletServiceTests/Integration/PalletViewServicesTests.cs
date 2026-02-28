@@ -32,13 +32,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var palletId = "Q1001";
 			var query = new GetPalletToEditQuery(palletId);
 			//Act
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			var result = await _mediator.Send(query);
 			Assert.NotNull(result);
 			Assert.Single(result.ProductsOnPallet);
 			Assert.Equal(1, result.LocationId);
 			Assert.Equal(PalletStatus.OnHold, result.Status);
-			Assert.Equal(1, result.ReceiptId);
-			Assert.Equal(2, result.IssueId);
+			Assert.Equal(receiptId1, result.ReceiptId);
+			Assert.Equal(issueId1, result.IssueId);
 			Assert.Equal(new DateTime(2020, 1, 1), result.DateReceived);
 			var product1 = result.ProductsOnPallet.Single(p => p.ProductId == 10);
 			Assert.Equal(100, product1.Quantity);
@@ -55,11 +57,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 
 			var result = await _mediator.Send(query);
 			//Assert
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			Assert.NotNull(result);
 			Assert.NotNull(result.ProductsOnPallet);
 			Assert.Equal(2, result.ProductsOnPallet.Count);
-			Assert.Equal(1, result.ReceiptId);
-			Assert.Equal(2, result.IssueId);
+			Assert.Equal(receiptId1, result.ReceiptId);
+			Assert.Equal(issueId1, result.IssueId);
 			Assert.Equal(new DateTime(2020, 1, 1), result.DateReceived);
 			var product1 = result.ProductsOnPallet.Single(p => p.ProductId == 10);
 			Assert.Equal(50, product1.Quantity);

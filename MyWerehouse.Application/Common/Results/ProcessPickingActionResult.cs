@@ -10,12 +10,21 @@ namespace MyWerehouse.Application.Common.Results
 	{
 		public bool Success { get; set; }
 		public string Message { get; set; }
+		public string PalletId { get; set; }
 		public ProcessPickingActionResult() { }
 		public static ProcessPickingActionResult Ok()
 		{
 			return new ProcessPickingActionResult
 			{
 				Success = true
+			};
+		}
+		public static ProcessPickingActionResult Ok(string palletId)
+		{
+			return new ProcessPickingActionResult
+			{
+				Success = true,
+				PalletId = palletId
 			};
 		}
 		public static ProcessPickingActionResult Fail(string message)

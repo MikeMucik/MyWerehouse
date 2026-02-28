@@ -14,6 +14,7 @@ using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -60,22 +61,20 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 						foreach (var pickingTask in issueToDelete.PickingTasks)
 						{
 							pickingTask.PickingStatus = PickingStatus.Cancelled;
-							pickingTask.RequestedQuantity = 0;
-							var historyPicking = new HistoryDataPicking
-							(
+							pickingTask.RequestedQuantity = 0;							
+							pickingTaskList.Add(new CreateHistoryPickingNotification(
 								pickingTask.Id,
+								//pickingTask.PickingTaskNumber,
 								pickingTask.VirtualPallet.PalletId,
 								pickingTask.IssueId,
+								pickingTask.IssueNumber,
 								pickingTask.ProductId,
 								pickingTask.RequestedQuantity,
 								0,
 								PickingStatus.Allocated,
 								PickingStatus.Cancelled,
 								request.UserId,
-								DateTime.UtcNow);
-							pickingTaskList.Add(new CreateHistoryPickingNotification(historyPicking));
-							//pickingTaskList.Add(new CreateHistoryPickingNotification(pickingTask.VirtualPalletId, pickingTask.Id, request.UserId, PickingStatus.Allocated, 0));
-
+								DateTime.UtcNow));							
 						}
 						break;
 					default:
@@ -85,7 +84,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				await transaction.CommitAsync(ct);
 				if (!(issueToDelete.IssueStatus == IssueStatus.New))
 				{
-					await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
+					issueToDelete.AddHistory(request.UserId);
 				}
 				foreach (var p in palletList)
 				{

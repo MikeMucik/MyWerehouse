@@ -11,10 +11,12 @@ namespace MyWerehouse.Domain.Picking.Models
 	public class HandPickingTask
 	{
 		public int Id { get; set; }
-		public int IssueId { get; set; }
+		//public Guid Id { get; set; }		
+		public Guid IssueId { get; set; }
+		//public int PickinckTaskNumber { get; set; }
 		public Issue Issue { get; set; }
 		public int ProductId { get; set; }
-		public Product Product { get; set; }
+		//public Product Product { get; set; }
 		public int Quantity { get; set; }
 		public PickingStatus PickingStatus { get; set; }
 		public DateOnly? BestBefore { get; set; }

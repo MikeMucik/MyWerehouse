@@ -27,7 +27,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		[HttpGet("{id}")]
-		public async Task<IActionResult> Get(int id)
+		public async Task<IActionResult> Get(Guid id)
 		{
 			var result = await _mediator.Send(new GetIssueByIdQuery(id));
 			return Ok(result);

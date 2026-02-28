@@ -88,7 +88,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			};
 			var issue = new Issue
 			{
-				//Id = 2,
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = initailClient,
 				PerformedBy = "U002",
 				IssueDateTimeCreate = new DateTime(2025, 5, 5),
@@ -186,7 +187,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			};
 			var issue = new Issue
 			{
-				//Id = 2,
+				Id = Guid.NewGuid(),	
+				IssueNumber = 2,
 				Client = initailClient,
 				PerformedBy = "U002",
 				IssueDateTimeCreate = new DateTime(2025, 5, 5),

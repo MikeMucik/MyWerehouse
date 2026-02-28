@@ -103,6 +103,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber =1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow.AddDays(-6),
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(1),

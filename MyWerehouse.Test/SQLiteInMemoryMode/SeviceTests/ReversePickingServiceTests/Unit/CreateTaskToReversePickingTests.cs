@@ -9,7 +9,6 @@ using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -105,10 +104,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow.AddDays(-5),				
 				IssueStatus = IssueStatus.Pending,
-				//IssueStatus = IssueStatus.ConfirmedToLoad,
 				PerformedBy = "TestUser",
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(1),
 				Pallets = [pickingPallet]
@@ -145,10 +145,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			DbContext.VirtualPallets.AddRange(virtualPallet);
 			DbContext.SaveChanges();
 			//Act
-			//var result = await _reversePickingService.CreateTaskToReversePickingAsync(pickingPallet.Id, "UserReverse");
-			//var result = await Mediator.Send(new CreateTaskToReversePickingCommand(pickingPallet.Id, "UserReverse"));
-
-			//var _createReversePickingTask = new CreateReversePickingService();
+			
 			await _createReversePickingTask.CreateReversePicking(pickingPallet.Id, "UserReverse");
 			DbContext.SaveChanges();
 			//Assert			
@@ -224,6 +221,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueStatus = IssueStatus.New,

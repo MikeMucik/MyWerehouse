@@ -29,6 +29,7 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 				PalletSourceId = request.History.PalletSourceId,
 				PalletDestinationId = request.History.PalletDestinationId,
 				IssueId = request.History.IssueId,
+				IssueNumber = request.History.IssueNumber,
 				ProductId = request.History.ProductId,
 				DateTime = DateTime.UtcNow,
 				PerformedBy = request.UserId,

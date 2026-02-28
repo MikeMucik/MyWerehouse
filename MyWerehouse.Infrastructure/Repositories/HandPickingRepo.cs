@@ -21,7 +21,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			_werehouseDbContext.HandPickingTasks.Add(handPickingTask);
 		}
 
-		public async Task<HandPickingTask?> GetByIssueAndProductAsync(int issueId, int productId)
+		public async Task<HandPickingTask?> GetByIssueAndProductAsync(Guid issueId, int productId)
 		{
 			var task = await _werehouseDbContext.HandPickingTasks.FirstOrDefaultAsync(h => h.IssueId == issueId && h.ProductId == productId);
 			return task;

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Invetories.Models;
 
-namespace MyWerehouse.Application.Inventories.Events.ChangeStock
+namespace MyWerehouse.Domain.Invetories.Events
 {
 	public record StockItemChange(int ProductId, int Quantity);
-	public record ChangeStockNotification(StockChangeType ChangeType, IEnumerable<StockItemChange> Changes) : INotification;
+	public record ChangeStockNotification(IEnumerable<StockItemChange> Changes) : IDomainEvent;
 }

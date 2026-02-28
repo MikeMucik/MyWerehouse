@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Receviving.Filters;
+using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
@@ -24,12 +25,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 		public async Task ShowReceiptById_GetReceiptByIdAsync_ReturnList()
 		{
 			//Arrange
-			var id = 1;
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			Guid ReceiptId = receiptId1;
 			//Act
-			var result =await _receiptRepo.GetReceiptByIdAsync(id);
+			var result =await _receiptRepo.GetReceiptByIdAsync(ReceiptId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(id, result.Id);
+			Assert.Equal(ReceiptId, result.Id);
 			Assert.Equal(10, result.ClientId);
 		}
 		[Fact]

@@ -10,6 +10,6 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 	public class PickingGuideLineDTO
 	{
 		public int ClientIdOut { get; set; }
-		public List<IssueForPickingDTO> Issues { get; set; } = new List<IssueForPickingDTO>();
+		public List<IssueForPickingDTO> IssuesDetailsForPicking { get; set; } = new List<IssueForPickingDTO>();
 	}
 }

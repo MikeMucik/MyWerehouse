@@ -15,6 +15,8 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Application.Receipts.Commands.DeleteReceipt;
+using Xunit.Sdk;
+using MyWerehouse.Domain.DomainExceptions;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
@@ -50,7 +52,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
-				ReceiptId = 1,
+				//ReceiptId = 1,
 			};
 			var initialPallet1 = new Pallet
 			{
@@ -58,7 +60,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
-				ReceiptId = 1,
+				//ReceiptId = 1,
 			};
 			var initialProductOnPallet = new ProductOnPallet
 			{
@@ -78,14 +80,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var initialReceipt = new Receipt
 			{
-				Id = 1,
+				Id = receiptId1,
+				ReceiptNumber = 1,
 				ClientId = 1,
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				PerformedBy = "U002",
 				ReceiptDateTime = new DateTime(2025, 6, 6),
-				Pallets = [initialPallet]
+				Pallets = [initialPallet, initialPallet1]
 			};
 			var initailLocation = new Location
 			{
@@ -167,9 +171,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = [address]
-			};			
+			};
+			
 			var initialReceipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				Client = client,
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002",
@@ -182,7 +189,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new DeleteReceiptCommand(initialReceipt.Id, "user"));
 			//Assert	
 			Assert.NotNull(result);
-			Assert.Contains("Usunięto zlecenie", result.Message);
+			Assert.Contains("Anulowano przyjęcie z bazy", result.Message);
 		}
 			[Fact]
 		public async Task DeleteReceiptAsync_VerifiedReceipt_ThrowInfo()
@@ -232,8 +239,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Category = initialCategory,
 				IsDeleted = false,
 			};
+			
 			var initialReceipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				Client = initailCLient,
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "U002",
@@ -281,9 +291,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(initialLocation);
 			await DbContext.SaveChangesAsync();
 			//Act&Assert		
-			var result = await Mediator.Send(new DeleteReceiptCommand(initialReceipt.Id, "user"));
-			Assert.NotNull(result);
-			Assert.Contains("Nie można usunąć zweryfikowanego przyjęcia", result.Message);		
+			//var result = await Mediator.Send(new DeleteReceiptCommand(initialReceipt.Id, "user"));
+			var ex = await Assert.ThrowsAsync<DomainReceiptException>(async()=> await Mediator.Send(new DeleteReceiptCommand(initialReceipt.Id, "user")));
+			Assert.NotNull(ex);
+			Assert.Contains("Nie można usunąć zweryfikowanego przyjęcia", ex.Message);		
 		}
 	}
 }

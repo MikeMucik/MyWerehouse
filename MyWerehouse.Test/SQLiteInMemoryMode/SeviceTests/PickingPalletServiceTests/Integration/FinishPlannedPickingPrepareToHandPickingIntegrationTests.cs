@@ -124,6 +124,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueStatus = IssueStatus.New,
@@ -199,12 +201,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Result.Count);
-			var resultForProduct1 = DbContext.HandPickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == 1);
-			var resultForProduct2 = DbContext.HandPickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == 1);
+			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
+			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			Assert.NotNull(resultForProduct1);
 			Assert.NotNull(resultForProduct2);
-			Assert.Equal(25, resultForProduct1.Quantity);
-			Assert.Equal(10, resultForProduct2.Quantity);
+			Assert.Equal(25, resultForProduct1.RequestedQuantity);
+			Assert.Equal(10, resultForProduct2.RequestedQuantity);
 		}
 		[Fact]
 		public async Task FinishPlannedPickingPartialDonePrepareToHandPicking_CancelPickingTask_CreateHandPicking()
@@ -314,6 +316,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueStatus = IssueStatus.New,
@@ -390,12 +394,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Result.Count);
-			var resultForProduct1 = DbContext.HandPickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == 1);
-			var resultForProduct2 = DbContext.HandPickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == 1);
+			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
+			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			Assert.NotNull(resultForProduct1);
 			Assert.NotNull(resultForProduct2);
-			Assert.Equal(20, resultForProduct1.Quantity);
-			Assert.Equal(10, resultForProduct2.Quantity);
+			Assert.Equal(20, resultForProduct1.RequestedQuantity);
+			Assert.Equal(10, resultForProduct2.RequestedQuantity);
 		}
 	}
 }

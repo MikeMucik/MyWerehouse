@@ -23,7 +23,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 		public async Task ShowIssueById_GetIssueByIdAsync_ReturnIssue()
 		{
 			//Arrange
-			var id = 2;
+			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var id = issueId2;
 			//Act
 			var result = await _issueRepo.GetIssueByIdAsync(id);
 			//Assert
@@ -67,9 +68,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Arrange
 			var filter = new IssueReceiptSearchFilter
 			{
-				//DateTimeEnd = new DateTime(2025, 6, 6),
-				
-				//DateTimeStart = new DateTime(2020, 1, 1),
 				DateTimeStart = DateTime.UtcNow,
 				DateTimeEnd = DateTime.UtcNow.AddDays(1)
 			};
@@ -86,9 +84,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 		public async Task ShowListIssues_GetIssuesByIdsAsync_ReturnList()
 		{
 			//Arrange
-			var list = new List<int>
+			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+
+			var issueId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var list = new List<Guid>
 			{
-				1,2
+				issueId1, issueId2
 			};
 
 			//Act
@@ -103,7 +104,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 		public async Task ShowListIssues_GetPalletByIssueIdAsync_ReturnListPalletWithLocation()
 		{
 			//Arrange
-			var issueId = 2;
+			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var issueId = receiptId2;
 
 			//Act
 			var result =await _issueRepo.GetPalletByIssueIdAsync(issueId);

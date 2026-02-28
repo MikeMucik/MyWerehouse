@@ -27,7 +27,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 		private readonly IEventCollector _eventCollector;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService;
-		private readonly IHandPickingTaskRepo _handPickingTaskRepo;
+		private readonly IPickingTaskRepo _pickingTaskRepo;
+		//private readonly IHandPickingTaskRepo _handPickingTaskRepo;
 
 		public ExecuteHandPickingHandler(IPalletRepo palletRepo,
 			IPickingPalletRepo pickingPalletRepo,
@@ -37,7 +38,9 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 			IEventCollector eventCollector,
 			IAddPickingTaskToIssueService addPickingTaskToIssueService,
 			IProcessPickingActionService processPickingActionService,
-			IHandPickingTaskRepo handPickingTaskRepo)
+			IPickingTaskRepo pickingTaskRepo
+			//IHandPickingTaskRepo handPickingTaskRepo
+			)
 		{
 			_palletRepo = palletRepo;
 			_pickingPalletRepo = pickingPalletRepo;
@@ -47,15 +50,16 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 			_eventCollector = eventCollector;
 			_addPickingTaskToIssueService = addPickingTaskToIssueService;
 			_processPickingActionService = processPickingActionService;
-			_handPickingTaskRepo = handPickingTaskRepo;
+			_pickingTaskRepo = pickingTaskRepo;
+			//_handPickingTaskRepo = handPickingTaskRepo;
 		}
 		public async Task<PickingResult> Handle(ExecuteHandPickingCommand command, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletId)
-					?? throw new NotFoundPalletException(command.PalletId);
+				var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource)
+					?? throw new NotFoundPalletException(command.PalletIdSource);
 				//if (_werehouseDbContext.Entry(pallet).State == EntityState.Detached)
 				//{
 				//	_werehouseDbContext.Attach(pallet);
@@ -66,33 +70,39 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				}
 				var issue = await _issueRepo.GetIssueByIdAsync(command.IssueId)
 					?? throw new NotFoundIssueException(command.IssueId);
-				var product = pallet.ProductsOnPallet.FirstOrDefault()
-					?? throw new InvalidOperationException($"Paleta {command.PalletId} jest pusta.");
+				var product = pallet.ProductsOnPallet.FirstOrDefault()//
+					?? throw new InvalidOperationException($"Paleta {command.PalletIdSource} jest pusta.");
 				
-				if (command.Quanitity > pallet.ProductsOnPallet.First().Quantity)
+				if (command.Quanitity > pallet.ProductsOnPallet.First().Quantity)//
 				{
 					return PickingResult.Fail("Zadania nie można zrealizować, mniej na palecie niż chęć pobrania");
 				}
 				
-				var pickingHand = await _handPickingTaskRepo.GetByIssueAndProductAsync(command.IssueId, product.Id);
+				//var pickingHand = await _handPickingTaskRepo.GetByIssueAndProductAsync(command.IssueId, product.Id);
+				var pickingHand = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, product.Id);
+				var pickingTask = pickingHand
+					.Where(a=>a.VirtualPallet == null)
+					.First();
 				if (pickingHand == null)
 				{
 					return PickingResult.Fail("Brak zapotrzebowania na ten asortyment."); 
 				}
-				if (command.Quanitity > (pickingHand.Quantity - pickingHand.PickedQuantity))
+				if (command.Quanitity > (pickingTask.RequestedQuantity - pickingTask.PickedQuantity))
 				{
 					return PickingResult.Fail("Chcesz pobrać więcej niż potrzeba.");
 				}
-					if (pickingHand.PickingStatus == PickingStatus.Picked)
+				if (pickingTask.PickingStatus == PickingStatus.Picked)
 				{
 					return PickingResult.Fail("Zapotrzebowania na ten asortyment już zrealizowane");
 				}
 				VirtualPallet virtualPallet;
-				var vpId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(command.PalletId);
+				var vpId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(command.PalletIdSource);
 				if (vpId != 0)
 				{
 					int virtualPalletId = vpId;
+					
 					virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(virtualPalletId);
+					//virtualPallet.PickingTasks.Add(pickingTask);
 				}
 				else
 				{
@@ -103,7 +113,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 						DateMoved = DateTime.UtcNow,
 						LocationId = pallet.LocationId,
 						InitialPalletQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
-						PickingTasks = new List<PickingTask>()
+						//PickingTasks = new List<PickingTask>()
+						PickingTasks = [pickingTask]
 					};
 					_pickingPalletRepo.AddPalletToPicking(virtualPallet);  // Dodaj do repo
 				}
@@ -111,31 +122,24 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				{
 					return PickingResult.Fail("Zadania nie można zrealizować, mniej na palecie niż chęć pobrania");
 				}
-
-				var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, product.ProductId, command.Quanitity, product.BestBefore, command.UserId);
-				var newPickingTask = newPickingTaskInfo.OnePickingTask;
-				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quanitity, command.UserId, newPickingTask, PickingCompletion.Full);
-
-				if (pickingHand.Quantity == command.Quanitity)
+				//virtualPallet.PickingTasks.Add(pickingTask);
+				pickingTask.VirtualPallet = virtualPallet;
+				var completion = PickingCompletion.Full;
+				if (command.Quanitity < pickingTask.RequestedQuantity - pickingTask.PickedQuantity)
 				{
-					pickingHand.MarkHandPicked();
+					completion = PickingCompletion.Partial;
 				}
-				else
-				{
-					pickingHand.MarkHandPartiallyPicked(command.Quanitity);
-				}
+			 	await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quanitity, command.UserId, pickingTask, completion);
+								
+				pickingTask.AddHistory(command.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, command.Quanitity);
+				
+				var entries = _werehouseDbContext.ChangeTracker.Entries()
+				.Select(e => new { e.Entity.GetType().Name, e.State })
+				.ToList();
+
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				
-				foreach (var evn in _eventCollector.Events)
-				{
-					await _mediator.Publish(evn, ct);
-				}
-				foreach (var factory in _eventCollector.DeferredEvents)
-				{
-					await _mediator.Publish(factory(), ct);
-				}
-				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 
 				return PickingResult.Ok("Towar dołączono do zlecenia");

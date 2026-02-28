@@ -8,5 +8,5 @@ using MyWerehouse.Application.Receipts.DTOs;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceipt
 {
-	public record GetReceiptByIdQuery(int ReceiptId) :IRequest<ReceiptDTO>;	
+	public record GetReceiptByIdQuery(Guid ReceiptId) :IRequest<ReceiptDTO>;	
 }

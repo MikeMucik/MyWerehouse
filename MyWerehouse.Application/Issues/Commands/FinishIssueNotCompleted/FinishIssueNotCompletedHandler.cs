@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
@@ -36,21 +38,10 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 			{
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 						?? throw new NotFoundIssueException(request.IssueId);
-				var palletsReturn =	issue.RemoveNotLoadedPallets(request.UserId);
-				
-				issue.IssueStatus = IssueStatus.IsShipped;
-				issue.PerformedBy = request.UserId;
-				// ten fragment chyba do wywalenia
-				var listPallets = issue.Pallets.ToList();
-				foreach (var pallet in listPallets)
-				{
-					pallet.ChangeStatus(PalletStatus.Loaded, ReasonMovement.ToLoad, request.UserId);
-				}
-				
-
-				await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
+				var palletsReturn =	issue.RemoveNotLoadedPallets(request.UserId);				
+				issue.FinishIssueNotCompleted(request.UserId);				
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
+				await transaction.CommitAsync(ct);				
 				return IssueResult.Ok($"Zamknięto wydanie {request.IssueId}.");
 			}
 			catch (NotFoundIssueException ei)
@@ -70,3 +61,24 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 }
 
 
+//var stockChanges = issue.Pallets
+//	.SelectMany(p => p.ProductsOnPallet)
+//	.GroupBy(p => p.ProductId)
+//	.Select(g => new StockItemChange(g.Key, g.Sum(x => x.Quantity)))
+//	.ToList();
+//var notifications = new List<INotification>();
+
+//if (stockChanges.Count != 0)
+//{
+//	notifications.Add(
+//		new ChangeStockNotification(
+//			StockChangeType.Decrease,
+//			stockChanges
+//		)
+//	);
+//}
+
+//foreach (var notification in notifications)
+//{
+//	await _mediator.Publish(notification, ct);
+//}

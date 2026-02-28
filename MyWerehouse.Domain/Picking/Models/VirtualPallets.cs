@@ -18,8 +18,8 @@ namespace MyWerehouse.Domain.Picking.Models
 		public string PalletId { get; set; }
 		public Pallet Pallet { get; set; }
 		public int InitialPalletQuantity { get; set; }
-		public int LocationId { get; set; }
-		public Location Location { get; set; }
+		public int LocationId { get; set; }//needed??
+		public Location Location { get; set; }//needed??
 		public DateTime DateMoved { get; set; }
 		public virtual ICollection<PickingTask> PickingTasks { get; set; } //= new List<PickingTask>();
 		public virtual ICollection<HistoryPicking> HistoryPicking { get; set; } = new List<HistoryPicking>();

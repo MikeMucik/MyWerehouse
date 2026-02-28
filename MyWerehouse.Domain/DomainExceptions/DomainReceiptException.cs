@@ -11,10 +11,17 @@ namespace MyWerehouse.Domain.DomainExceptions
 	{
 		public string PalletId { get; set; }
 		public int ReceiptId { get; set; }
+		public string Message { get; set; }
 		public DomainReceiptException(string palletId)
 			: base($"Błąd przy zapisie do bazy palety o numerze {palletId}.")
 		{
 			PalletId = palletId;
+		}
+		public DomainReceiptException(string message, int receiptId):
+			base(message)
+		{
+			Message = message;
+			ReceiptId = receiptId;
 		}
 		public DomainReceiptException(int receiptId)
 			: base($"Błąd zapisu przyjęcia {receiptId}.")

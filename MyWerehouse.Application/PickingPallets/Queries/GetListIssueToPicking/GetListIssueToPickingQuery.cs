@@ -8,6 +8,6 @@ using MyWerehouse.Application.PickingPallets.DTOs;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 {
-	public record GetListIssueToPickingQuery(DateOnly DateIssueStart, DateOnly DateIssueEnd):IRequest<List<PickingGuideLineDTO>>;
-	
+	public record GetListIssueToPickingQuery(DateOnly DateIssueStart, DateOnly DateIssueEnd)
+		:IRequest<List<PickingGuideLineDTO>>;	
 }

@@ -9,7 +9,8 @@ namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class IssueForPickingDTO
 	{
-		public int IssueId { get; set; }
+		public Guid IssueId { get; set; }
+		public int IssueNumber { get; set; }
 		public List<ProductOnPalletPickingDTO> Products { get; set; } = new List<ProductOnPalletPickingDTO>();
 	}
 }

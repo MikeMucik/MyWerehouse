@@ -18,7 +18,8 @@ namespace MyWerehouse.Application.Receipts.DTOs
 		public int LocationId { get; set; }		
 		public PalletStatus Status { get; set; } = 0; 
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();	
-		public int ReceiptId { get; set; }		
+		public Guid ReceiptId { get; set; }		
+		public int ReceiptNumber { get; set; }		
 		public string UserId { get; set; }
 		public void Mapping(Profile profile)
 		{

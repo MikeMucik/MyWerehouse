@@ -84,7 +84,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 						DateAdded = new DateTime(2025, 8, 8),
 						BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),						
 					}
-
 				}
 			};
 			var pallet = new Pallet
@@ -106,6 +105,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -122,15 +123,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, pallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var handPicknigTask = new HandPickingTask
+			var handPicknigTask = new PickingTask
 			{
 				IssueId = issue.Id,
-				CreateDate = DateTime.UtcNow.AddDays(0),
-				Quantity = 20,
+				//CreateDate = DateTime.UtcNow.AddDays(0),
+				//RequestQuantity = 20,
+				PickingStatus = PickingStatus.Available,
+				RequestedQuantity =20,
 				ProductId = product1.Id,
 				BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
 			};
-			DbContext.HandPickingTasks.Add(handPicknigTask);
+			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
 			//Act
 			var result = await Mediator.Send(new ExecuteHandPickingCommand(sourcePallet1.Id, issue.Id, 20, "UserCor"));
@@ -142,12 +145,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Contains(pallets, p => p.Id == "Q1002"); // ręczna
 
 			Assert.Contains("Towar dołączono", result.Message);
-			var handTask = DbContext.HandPickingTasks.Single(h =>
+			var handTask = DbContext.PickingTasks.Single(h =>
 				h.IssueId == issue.Id &&
 				h.ProductId == product1.Id);
 
 			Assert.Equal(PickingStatus.Picked, handTask.PickingStatus);
-			Assert.Equal(20, handTask.Quantity);
+			Assert.Equal(20, handTask.RequestedQuantity);
 			
 			var virtualPallet = DbContext.VirtualPallets
 			.Include(v => v.PickingTasks)
@@ -157,8 +160,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(sourcePallet1.Id, virtualPallet.PalletId);
 			Assert.Single(virtualPallet.PickingTasks);
 
-			var pickingTask = virtualPallet.PickingTasks.Single();
-
+			//var pickingTask = virtualPallet.PickingTasks.Single();
+			var pickingTask = DbContext.PickingTasks.FirstOrDefault();
 			Assert.Equal(issue.Id, pickingTask.IssueId);
 			Assert.Equal(product1.Id, pickingTask.ProductId);
 			Assert.Equal(20, pickingTask.RequestedQuantity);
@@ -274,6 +277,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -290,13 +295,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, pallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var handPicknigTask = new HandPickingTask
+			var handPicknigTask = new PickingTask
 			{
 				IssueId = issue.Id,
-				CreateDate = DateTime.UtcNow.AddDays(-1),
-				Quantity = 20,
+				//CreateDate = DateTime.UtcNow.AddDays(-1),
+				RequestedQuantity = 20,
 				ProductId = product1.Id,
 				BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
+				PickingStatus = PickingStatus.Available,
 			};
 
 			var virtualPallet = new VirtualPallet
@@ -308,7 +314,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingTasks =[]
 			};
 			DbContext.VirtualPallets.Add(virtualPallet);
-			DbContext.HandPickingTasks.Add(handPicknigTask);
+			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
 			//Act
 			var result = await Mediator.Send(new ExecuteHandPickingCommand(sourcePallet1.Id, issue.Id, 20, "UserCor"));
@@ -321,12 +327,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Contains(pallets, p => p.Id == "Q1002"); // ręczna
 
 			Assert.Contains("Towar dołączono", result.Message);
-			var handTask = DbContext.HandPickingTasks.Single(h =>
+			var handTask = DbContext.PickingTasks.Single(h =>
 				h.IssueId == issue.Id &&
 				h.ProductId == product1.Id);
 
 			Assert.Equal(PickingStatus.Picked, handTask.PickingStatus);
-			Assert.Equal(20, handTask.Quantity);
+			Assert.Equal(20, handTask.RequestedQuantity);
 
 			var virtualPalletOld = DbContext.VirtualPallets
 			.Include(v => v.PickingTasks)
@@ -452,6 +458,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -468,15 +476,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, pallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var handPicknigTask = new HandPickingTask
+			var handPicknigTask = new PickingTask
 			{
 				IssueId = issue.Id,
-				CreateDate = DateTime.UtcNow.AddDays(-1),
-				Quantity = 20,
+				PickingStatus = PickingStatus.Available,
+				//CreateDate = DateTime.UtcNow.AddDays(-1),
+				RequestedQuantity = 20,
 				ProductId = product1.Id,
 				BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
 			};
-			DbContext.HandPickingTasks.Add(handPicknigTask);
+			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
 			//Act
 			var result = await Mediator.Send(new ExecuteHandPickingCommand(sourcePallet1.Id, issue.Id, 12, "UserCor"));
@@ -489,12 +498,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Contains(pallets, p => p.Id == "Q1002"); // ręczna
 
 			Assert.Contains("Towar dołączono", result.Message);
-			var handTask = DbContext.HandPickingTasks.Single(h =>
+			var handTask = DbContext.PickingTasks.Single(h =>
 				h.IssueId == issue.Id &&
 				h.ProductId == product1.Id);
 
 			Assert.Equal(PickingStatus.PickedPartially, handTask.PickingStatus);
-			Assert.Equal(20, handTask.Quantity);
+			Assert.Equal(20, handTask.RequestedQuantity);
 			Assert.Equal(12, handTask.PickedQuantity);
 
 			var virtualPallet = DbContext.VirtualPallets
@@ -509,8 +518,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			Assert.Equal(issue.Id, pickingTask.IssueId);
 			Assert.Equal(product1.Id, pickingTask.ProductId);
-			Assert.Equal(12, pickingTask.RequestedQuantity);
-			Assert.Equal(PickingStatus.Picked, pickingTask.PickingStatus);
+			Assert.Equal(20, pickingTask.RequestedQuantity);
+			Assert.Equal(PickingStatus.PickedPartially, pickingTask.PickingStatus);
 			Assert.Equal(sourcePallet1.Id, pickingTask.VirtualPallet.PalletId);
 
 			var palletsAdded = DbContext.Pallets
@@ -522,7 +531,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				.Single(p => p.Id == "Q1000");
 
 			Assert.Equal(88, sourcePalletAfter.ProductsOnPallet.Single().Quantity);
-
+			//
 			var plannedTasks = DbContext.PickingTasks
 				.Where(t => t.IssueId == issue.Id && t.PickingStatus == PickingStatus.Allocated)
 				.ToList();
@@ -622,6 +631,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueStatus = IssueStatus.New,
@@ -637,16 +648,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, pallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var handPicknigTask = new HandPickingTask
+			var handPicknigTask = new PickingTask
 			{
 				IssueId = issue.Id,
-				CreateDate = DateTime.UtcNow.AddDays(-1),
-				Quantity = 20,
+				//CreateDate = DateTime.UtcNow.AddDays(-1),
+				PickingStatus =	PickingStatus.Available,
+				RequestedQuantity = 20,
 				PickedQuantity = 10,
 				ProductId = product1.Id,
 				BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
 			};
-			DbContext.HandPickingTasks.Add(handPicknigTask);
+			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
 			//Act
 			var result = await Mediator.Send(new ExecuteHandPickingCommand(sourcePallet1.Id, issue.Id, 12, "UserCor"));

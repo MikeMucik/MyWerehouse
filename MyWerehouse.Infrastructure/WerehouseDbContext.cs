@@ -113,7 +113,10 @@ namespace MyWerehouse.Infrastructure
 			modelBuilder.Entity<PickingTask>(entity =>
 			{
 				entity.HasKey(e => e.Id);
-				entity.Property(e => e.Id).ValueGeneratedOnAdd();
+				entity.Property(e => e.Id).ValueGeneratedNever();
+
+				//entity.HasKey(e=>e.PickingTaskNumber);
+				//entity.Property(e=>e.PickingTaskNumber).ValueGeneratedOnAdd();
 
 				entity.Property(a => a.PickingStatus)
 				.HasConversion<string>();
@@ -239,7 +242,8 @@ namespace MyWerehouse.Infrastructure
 			modelBuilder.Entity<Issue>(entity =>
 			{
 				entity.HasKey(e => e.Id);
-				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+				entity.Property(x => x.Id).ValueGeneratedNever();
+				//entity.Property(x => x.IssueNumber).ValueGeneratedOnAdd();
 			
 				//entity.HasOne(a => a.Issue)
 				//	.WithMany(i => i.PickingTasks)
@@ -395,7 +399,9 @@ namespace MyWerehouse.Infrastructure
 			modelBuilder.Entity<Receipt>(entity =>
 			 {
 				 entity.HasKey(e => e.Id);
-				 entity.Property(x => x.Id).ValueGeneratedOnAdd();
+				 entity.Property(x=>x.Id).ValueGeneratedNever();
+				 
+				 //entity.Property(x => x.ReceiptNumber).ValueGeneratedOnAdd();
 
 				 entity.HasMany(r => r.Pallets)
 				 .WithOne(p => p.Receipt)
@@ -407,8 +413,6 @@ namespace MyWerehouse.Infrastructure
 			{
 				entity.HasKey(e => e.Id);
 				entity.Property(x => x.Id).ValueGeneratedOnAdd();
-
-
 			});
 		}
 	}

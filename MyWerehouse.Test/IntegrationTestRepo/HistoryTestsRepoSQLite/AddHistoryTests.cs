@@ -171,6 +171,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = initailClient,
 				IssueDateTimeCreate = DateTime.Now,
 				Pallets = new List<Pallet> { pallet1 },
@@ -188,6 +190,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			var historyIssue = new HistoryIssue
 			{
 				IssueId = issue.Id,
+				IssueNumber = issue.IssueNumber,
 				ClientId = issue.ClientId,
 				DateTime = DateTime.Now,
 				//Items
@@ -262,12 +265,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			{
 				Id = "Q1000",
 				DateReceived = DateTime.Now,
-				LocationId = 1,
+				Location = location1,
 				Status = PalletStatus.Available,
 				//ReceiptId = 10,
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
 			{
+				Id = receiptId1,
+				ReceiptNumber = 10,
 				Client = initailClient,
 				Pallets = new List<Pallet> { pallet1 },
 				ReceiptDateTime = DateTime.Now,
@@ -285,7 +291,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			//Act
 			var historyReceipt = new HistoryReceipt
 			{
+
 				ReceiptId = receipt.Id,
+				ReceiptNumber = receipt.ReceiptNumber,
 				ClientId = receipt.ClientId,
 				StatusAfter = ReceiptStatus.Verified,
 				DateTime = DateTime.Now,
@@ -294,7 +302,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			historyReceiptRepo.AddHistoryReceipt(historyReceipt);
 			DbContext.SaveChanges();
 			//Assert
-			var resultList = DbContext.HistoryReceipts.Where(m => m.ReceiptId == receipt.Id);
+			var resultList = DbContext.HistoryReceipts.Where(m => m.ReceiptNumber == receipt.ReceiptNumber);
 			var result = resultList.First();
 			Assert.NotNull(result);
 			Assert.Equal(ReceiptStatus.Verified, result.StatusAfter);
@@ -373,6 +381,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = initailClient,
 				IssueDateTimeCreate = DateTime.Now,
 				Pallets = new List<Pallet> { pallet1 },
@@ -406,6 +416,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			var historyPicking = new HistoryPicking
 			{
 				PickingTaskId = virtualPallet.PickingTasks.First().Id,
+				//PickingTaskNumber = virtualPallet.PickingTasks.First().PickingTaskNumber,
 				QuantityAllocated = virtualPallet.PickingTasks.First().RequestedQuantity,
 				StatusAfter = PickingStatus.Picked,
 				DateTime = DateTime.Now,
@@ -414,6 +425,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				ProductId = virtualPallet.PickingTasks.First().ProductId,
 				QuantityPicked = 1,
 				IssueId = issue.Id,
+				IssueNumber= issue.IssueNumber,
 				PalletId = pallet1.Id,
 
 			};

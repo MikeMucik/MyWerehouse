@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
-				ReceiptId = 10,
+				//ReceiptId = 10,
 			};
 			var product = new ProductOnPallet
 			{
@@ -40,12 +40,15 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
 			{
+				Id = receiptId1,
 				ReceiptDateTime = DateTime.Now,
 				ClientId = 1,
 				Pallets = new List<Pallet> { pallet },
 				PerformedBy = "U005"
+				
 			};
 
 			_context.ProductOnPallet.Add(product);

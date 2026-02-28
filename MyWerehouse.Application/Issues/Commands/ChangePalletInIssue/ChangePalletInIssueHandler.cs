@@ -71,14 +71,10 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				issue.AssignPallet(palletToAddingIssue, request.UserId);
 				
 				issue.DetachPallet(palletToRemoveFromIssue, request.UserId);
-				
-				issue.IssueStatus = IssueStatus.ChangingPallet;
-				issue.PerformedBy = request.UserId;
+								
+				issue.ChangePalletInIssue(request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				
-				await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);
-
 				return IssueResult.Ok("Podmieniono palety.", productOnOldPallet.Value);
 			}
 			catch (NotFoundPalletException ep)

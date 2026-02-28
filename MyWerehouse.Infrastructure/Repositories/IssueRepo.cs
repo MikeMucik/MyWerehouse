@@ -29,13 +29,13 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{			
 				_werehouseDbContext.Issues.Remove(issue);
 		}					
-		public async Task<Issue?> GetIssueByIdAsync(int id)
+		public async Task<Issue?> GetIssueByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}		
-		public async Task<List<Issue>> GetIssuesByIdsAsync(List<int> ids)
+		public async Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids)
 		{
 			return await _werehouseDbContext.Issues
 				.Where(i => i.IssueStatus != IssueStatus.Archived && ids.Contains(i.Id))
@@ -47,10 +47,10 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Where(i=>i.IssueStatus != IssueStatus.Archived)
 				//.AsQueryable();
 				;
-			if (filter.IssueId > 0)
-			{ 
-				result = result.Where(i=>i.Id == filter.IssueId);
-			}
+			//if (filter.IssueId != null)
+			//{ 
+			//	result = result.Where(i=>i.Id == filter.IssueId);
+			//}
 				if (filter.ClientId > 0)
 			{
 				result = result.Where(i => i.ClientId == filter.ClientId);
@@ -81,7 +81,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			
 			return result;
 		}
-		public async Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(int id)
+		public async Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(Guid id)
 		{
 			var list = await _werehouseDbContext.Pallets
 				.AsNoTracking()
@@ -96,7 +96,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return list;		
 		}
 
-		public async Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(int id, CancellationToken cancellationToken)
+		public async Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(Guid id, CancellationToken cancellationToken)
 		{
 			return await _werehouseDbContext.Issues				
 				.Include(i => i.Pallets)
@@ -104,6 +104,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Include(i=>i.IssueItems)
 					.ThenInclude(pp=>pp.Product)
 				.FirstOrDefaultAsync(i => i.Id == id);
+		}
+
+		public async Task<int> GetNextNumberOfIssue()
+		{
+			var number = await _werehouseDbContext.Issues.MaxAsync(x=>(int?)x.IssueNumber) ?? 0;
+			return number +1;
 		}
 	}
 }

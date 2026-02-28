@@ -25,32 +25,31 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 			{
 				return new List<PickingGuideLineDTO>();
 			}
-			var allNededIssuesIds = pickingPallets
+			var allNeededIssuesIds = pickingPallets
 				.SelectMany(p => p.PickingTasks)
 				.Select(i => i.IssueId)
 				.Distinct()
 				.ToList();
 
-			var allIssues = await _issueRepo.GetIssuesByIdsAsync(allNededIssuesIds);
+			var allIssues = await _issueRepo.GetIssuesByIdsAsync(allNeededIssuesIds);
 			var issueDictionary = allIssues.ToDictionary(i => i.Id);
 			return [.. pickingPallets
 				.SelectMany(p => p.PickingTasks.Select(a => new
 				{
-					IssueId = a.IssueId,
+					IssueNumber = a.IssueNumber,
 					Quantity = a.RequestedQuantity,
 					ProductId = a.ProductId,
-					//ProductId = p.Pallet.ProductsOnPallet.First().ProductId,
 					ClientIdOut = issueDictionary[a.IssueId].ClientId
 				}))
 				.GroupBy(x => x.ClientIdOut)
 				.Select(clientGroup => new PickingGuideLineDTO
 				{
 					ClientIdOut = clientGroup.Key,
-					Issues = [.. clientGroup
-						.GroupBy(a => a.IssueId)
+					IssuesDetailsForPicking = [.. clientGroup
+						.GroupBy(a => a.IssueNumber)
 						.Select(issueGroup => new IssueForPickingDTO
 						{
-							IssueId = issueGroup.Key,
+							IssueNumber = issueGroup.Key,
 							Products = [.. issueGroup
 								.GroupBy(a => a.ProductId)
 								.Select(prodGroup => new ProductOnPalletPickingDTO
@@ -60,7 +59,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 								})
 								.OrderBy(p => p.ProductId)]
 						})
-						.OrderBy(i => i.IssueId)]
+						.OrderBy(i => i.IssueNumber)]
 				})
 				.OrderBy(c => c.ClientIdOut)];
 		}

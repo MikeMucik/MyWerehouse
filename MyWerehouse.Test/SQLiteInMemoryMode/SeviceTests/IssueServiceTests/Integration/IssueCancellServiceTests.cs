@@ -78,6 +78,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				};
 			var recipt = new Receipt
 			{
+				//Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "UserMakae",
@@ -172,6 +174,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				};
 			var recipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "UserMakae",
@@ -268,6 +272,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				};
 			var recipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "UserMakae",
@@ -393,6 +399,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				};
 			var recipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "UserMakae",
@@ -427,7 +435,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);
 			var toPicking = new PickingTaskDTO
 			{
-				Id = pickingFromBase.Id,
+				//Id = pickingFromBase.Id,
+				//Id = pickingFromBase.PickingTaskNumber,
 				PickingStatus = PickingStatus.Allocated,
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
@@ -441,7 +450,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "Q0001");
 			//Assert
 			var pickingTaskDone = await DbContext.PickingTasks
-				.FirstOrDefaultAsync(x => x.Id == 1);
+				.FirstOrDefaultAsync(x => x.Id == pickingFromBase.Id);
 			Assert.NotNull(pickingTaskDone);
 			// Act 3 - cancel issue
 			var issueToCancelId = issue.Id;

@@ -46,8 +46,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.Users.Any())
 			{
 				context.Users.AddRange(
-					new IdentityUser { Id = "U001", UserName = "TestUser" },
-					new IdentityUser { Id = "U002", UserName = "TestUser2" }
+					new IdentityUser { Id = "TestUser", UserName = "TestUser" },
+					new IdentityUser { Id = "U002", UserName = "TestUser2" },
+					new IdentityUser { Id = "UserR", UserName = "TestUserRR" }
+					
 				);
 			}
 
@@ -114,35 +116,39 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new Address { Id = 11, Country = "ConutryTest1", City = "CityTest1", Region = "RegionTest1", Phone = 987987987, PostalCode = "test12ggt", StreetName = "StreetTest1", StreetNumber = "12/11", ClientId = 10 }
 				);
 			}
-
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var receiptId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
 			if (!context.Receipts.Any())
 			{
 				context.Receipts.AddRange(
 					new Receipt
 					{
-						Id = 1,
+						Id = receiptId1,
+						ReceiptNumber = 1,
 						ClientId = 10,
 						PerformedBy = "U001",
 						ReceiptDateTime = new DateTime(2023, 3, 3),
 					},
 					new Receipt
 					{
-						Id = 2,
+						Id = receiptId2,
+						ReceiptNumber = 2,
 						ClientId = 11,
 						PerformedBy = "U002",
 						ReceiptDateTime = new DateTime(2023, 4, 4)
 					}
 										);
 			}
+			var issuetId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			if (!context.Issues.Any())
 			{
 				context.Issues.Add(new Issue
 				{
-					Id = 2,
+					Id = issuetId2,
+					IssueNumber = 2,
 					ClientId = 11,
 					PerformedBy = "U002",
 					IssueDateTimeCreate = DateTime.UtcNow.AddDays(-5),
-					//IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
 					IssueDateTimeSend = DateTime.UtcNow.AddHours(23),//zmiana 
 					IssueItems = new List<IssueItem> { new IssueItem
 					{
@@ -172,8 +178,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.Available,
-						ReceiptId = 1,
-						IssueId = 2,//
+						ReceiptId = receiptId1,
+						IssueId = issuetId2,//
 					},
 					new Pallet
 					{
@@ -181,8 +187,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.OnHold,
-						ReceiptId = 1,
-						IssueId = 2,//
+						ReceiptId = receiptId1,
+						IssueId = issuetId2,//
 					},
 					new Pallet
 					{
@@ -190,7 +196,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Available,
-						ReceiptId = 2,
+						ReceiptId = receiptId2,
 					},
 					new Pallet
 					{
@@ -198,7 +204,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Damaged,
-						ReceiptId = 2,
+						ReceiptId = receiptId2,
 					},
 					new Pallet
 					{
@@ -206,7 +212,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
-						ReceiptId = 2,
+						ReceiptId = receiptId2,
 					},
 					new Pallet
 					{
@@ -214,7 +220,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2025, 1, 5),
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
-						ReceiptId = 2,
+						ReceiptId = receiptId2,
 					},
 					new Pallet
 					{
@@ -222,8 +228,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.ToIssue,
-						ReceiptId = 2,
-						IssueId = 2,//
+						ReceiptId =		receiptId2,
+						IssueId = issuetId2,//
 					},
 					new Pallet
 					{
@@ -231,7 +237,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateReceived = new DateTime(2025, 2, 1),
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
-						ReceiptId = 2,
+						ReceiptId = receiptId2,
 					},
 					//PickingPallet
 					new Pallet
@@ -271,15 +277,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						DateMoved = DateTime.UtcNow.AddDays(-1)						
 					});
 			}
+			var pickingId1 = Guid.Parse("11111111-1111-2222-1111-111111111111");
+			var pickingId2 = Guid.Parse("11111111-2222-2222-1111-111111111111");
+			var pickingId3 = Guid.Parse("11111111-3333-2222-1111-111111111111");
+			var pickingId4 = Guid.Parse("11111111-4444-2222-1111-111111111111");
+			var pickingId5 = Guid.Parse("11111111-5555-2222-1111-111111111111");
+			var pickingId6 = Guid.Parse("11111111-6666-2222-1111-111111111111");
 			if (!context.PickingTasks.Any())
 			{
 				context.PickingTasks.AddRange(
 					new PickingTask
 					{
-						Id = 1,
+						Id = pickingId1,
+						//PickingTaskNumber = 1,
 						VirtualPalletId = 1,
 						PickingStatus = PickingStatus.Allocated,
-						IssueId = 2,
+						IssueId = issuetId2,
 						RequestedQuantity = 20,
 						ProductId = 11,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
@@ -287,40 +300,44 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						
 					}, new PickingTask
 					{
-						Id = 2,
+						Id = pickingId2,
+						//PickingTaskNumber = 2,
 						VirtualPalletId = 1,
 						PickingStatus = PickingStatus.Picked,
-						IssueId = 2,
+						IssueId = issuetId2,
 						RequestedQuantity = 20,
 						ProductId = 11,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
 					{
-						Id = 3,
+						Id = pickingId3,
+						//PickingTaskNumber = 3,
 						VirtualPalletId = 2,
 						PickingStatus = PickingStatus.Allocated,
-						IssueId = 2,
+						IssueId = issuetId2,
 						RequestedQuantity = 50,
 						ProductId = 11,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
 					{
-						Id = 4,
+						Id = pickingId4,
+						//PickingTaskNumber = 4,
 						VirtualPalletId = 3,
 						PickingStatus = PickingStatus.Allocated,
-						IssueId = 2,
+						IssueId = issuetId2,
 						RequestedQuantity = 100,
 						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
 					{
-						Id = 5,
+						Id = pickingId5,
+						//PickingTaskNumber = 5,
 						VirtualPalletId = 3,
 						PickingStatus = PickingStatus.Picked,
-						IssueId = 2,
+						IssueId = issuetId2,
 						RequestedQuantity = 10,
 						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
@@ -328,10 +345,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new PickingTask
 					{
-						Id = 6,
+						Id = pickingId6,
+						//PickingTaskNumber = 6,
 						VirtualPalletId = 1,
 						PickingStatus = PickingStatus.Allocated,
-						IssueId = 2,
+						IssueId = issuetId2,
 						RequestedQuantity = 20,
 						ProductId = 11,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
@@ -450,22 +468,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new PalletMovement
 					{
 						Id = 1,
-						PalletId = "Q1000",
-						//ProductId = 10,
+						PalletId = "Q1000",						
 						DestinationLocationId = 2,
-						Reason = ReasonMovement.Moved,
-						//Quantity = 1,
+						Reason = ReasonMovement.Moved,						
 						MovementDate = new DateTime(2025, 2, 2),
 						PerformedBy = "TestUser",
 					},
 					new PalletMovement
 					{
 						Id = 2,
-						PalletId = "Q1001",
-						//ProductId = 10,
+						PalletId = "Q1001",						
 						DestinationLocationId = 1,
 						Reason = ReasonMovement.Moved,
-						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2),
 						PerformedBy = "TestUser",
 					},
@@ -473,10 +487,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = 3,
 						PalletId = "Q1002",
-						//ProductId = 11,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
-						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2),
 						PerformedBy = "TestUser",
 					},
@@ -484,10 +496,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = 4,
 						PalletId = "Q1010",
-						//ProductId = 10,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
-						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2),
 						PerformedBy = "TestUser",
 					},
@@ -495,10 +505,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = 5,
 						PalletId = "Q1000",
-						//ProductId = 10,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
-						//Quantity = 1,
 						MovementDate = new DateTime(2025, 2, 2),
 						PerformedBy = "TestUser",
 					}
@@ -555,15 +563,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 
 				context.Inventories.AddRange(
 					new Inventory
-					{
-						//Id = 1,						
+					{											
 						ProductId = 10,
 						Quantity = 10,
 						LastUpdated = new DateTime(2025, 5, 6)
 					},
 					new Inventory
-					{
-						//Id = 2,						
+					{										
 						ProductId = 11,
 						Quantity = 0,
 						LastUpdated = new DateTime(2025, 5, 6)
@@ -574,7 +580,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.ReversePickings.AddRange(
 					new ReversePicking
 					{
-						PickingTaskId = 2,
+						PickingTaskId = pickingId2,
 						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
 						PickingPalletId = "Q5000",
@@ -585,11 +591,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new ReversePicking
 					{
-						PickingTaskId = 5,
-						ProductId = 20,
+						PickingTaskId = pickingId5,
+						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
 						PickingPalletId = "Q5000",
-						Quantity = 20,
+						Quantity = 10,
 						Status = ReversePickingStatus.Pending,
 						UserId = "UserR"
 					}

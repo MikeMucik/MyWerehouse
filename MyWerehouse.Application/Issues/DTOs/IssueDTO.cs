@@ -13,7 +13,8 @@ namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class IssueDTO : IMapFrom<Issue>
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
+		public int IssueNumber { get; set; }
 		public int ClientId { get; set; }
 		public virtual Client Client { get; set; }
 		public DateTime IssueDateTimeCreate { get; set; }

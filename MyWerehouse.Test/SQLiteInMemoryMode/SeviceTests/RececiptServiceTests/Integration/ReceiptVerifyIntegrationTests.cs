@@ -6,17 +6,13 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
-using MyWerehouse.Application.Receipts.DTOs;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
 {
@@ -77,8 +73,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 						}
 				}
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
-			{				
+			{		
+				Id = receiptId1,
+				ReceiptNumber = 2,
 				Client = client,
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				PerformedBy = "U001",
@@ -107,7 +106,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			updatedPallet.Status.Should().Be(PalletStatus.InStock);
 
 			var historyRecipt = DbContext.HistoryReceipts
-				.FirstOrDefault(x => x.Id == receipt.Id);
+				.FirstOrDefault(x => x.ReceiptId == receipt.Id);
 			Assert.NotNull(historyRecipt);
 			Assert.Equal(ReceiptStatus.Verified, historyRecipt.StatusAfter);
 
@@ -170,8 +169,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 						}
 				}
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
 			{				
+				Id = receiptId1,
+				ReceiptNumber = 1,
 				Client = client,
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "U001",

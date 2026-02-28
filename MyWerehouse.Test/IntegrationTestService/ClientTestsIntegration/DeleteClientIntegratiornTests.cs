@@ -36,9 +36,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Addresses = [address]
 
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
 			{
-				Id = 10,
+				Id = receiptId1,
+				ReceiptNumber = 10,
 				ClientId = 10,
 				ReceiptDateTime = DateTime.Now,
 				PerformedBy = "U1234"

@@ -9,5 +9,5 @@ using MyWerehouse.Application.Receipts.DTOs;
 
 namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 {
-	public record AddPalletToReceiptCommand(int ReceiptId, CreatePalletReceiptDTO DTO) : IRequest<ReceiptResult>;	
+	public record AddPalletToReceiptCommand(Guid ReceiptId, CreatePalletReceiptDTO DTO) : IRequest<ReceiptResult>;	
 }

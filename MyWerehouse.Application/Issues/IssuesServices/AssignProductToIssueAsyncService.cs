@@ -27,8 +27,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 		IGetVirtualPalletsService getVirtualPalletsService,
 		IGetProductCountService getProductCountService,
 		IGetNumberPalletsAndRestService getNumberPalletsAndRestService,
-		IGetAvailablePalletsByProductService getAvailablePalletsByProductService,
-		IAssignFullPalletToIssueService assignFullPalletToIssueService,
+		IGetAvailablePalletsByProductService getAvailablePalletsByProductService,		
 		IProductRepo productRepo) : IAssignProductToIssueService
 	{
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
@@ -36,7 +35,6 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 		private readonly IGetProductCountService _getProductCountService = getProductCountService;
 		private readonly IGetNumberPalletsAndRestService _getNumberPalletsAndRestService = getNumberPalletsAndRestService;
 		private readonly IGetAvailablePalletsByProductService _getAvailablePalletsByProductService = getAvailablePalletsByProductService;
-		private readonly IAssignFullPalletToIssueService _assignFullPalletToIssueService = assignFullPalletToIssueService;
 		private readonly IProductRepo _productRepo = productRepo;
 
 		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO product, IssueAllocationPolicy policy, IReadOnlyCollection<Pallet> alreadyAssignedPallets, string userId)
@@ -72,7 +70,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			{
 				case IssueAllocationPolicy.FullPalletFirst:
 
-					amountPallets = await _getNumberPalletsAndRestService.GetBackOnlyFullPallest(product.ProductId, product.Quantity);
+					amountPallets = await _getNumberPalletsAndRestService.GetBackOnlyFullPallets(product.ProductId, product.Quantity);
 					palletAssigned = await SelectAndAssaignFullPallets(issue, product, alreadyAssignedPallets, amountPallets);
 					break;
 				//case IssueAllocationPolicy.FefoWithFullPalletPreference:
@@ -88,6 +86,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 				throw new DomainException("Allocated more product than requested.");
 			//3. pobierz dostępne virtualPallet;
 			var availableVirtualPalletsQuery = await _getVirtualPalletsService.GetVirtualPalletsAsync(product.ProductId, product.BestBefore);
+			//czy na pewno null ?? czy to potrzebne ??
 			if (availableVirtualPalletsQuery is null)
 			{
 				return AssignProductToIssueResult.Fail("Brak palety do pickingu - błąd virtual", product.ProductId);

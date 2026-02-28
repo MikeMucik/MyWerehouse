@@ -10,6 +10,7 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Invetories.Events;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
@@ -43,36 +44,19 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 						throw new NotFoundProductException(product.ProductId);
 				}
 				var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
-				//var pallet = _mapper.Map<Pallet>(request.DTO);
-				var listProducts = new List<ProductOnPallet>();
-				foreach (var product in request.DTO.ProductsOnPallet)
-				{
-					var newProduct = new ProductOnPallet
-					{
-						ProductId = product.ProductId,
-						Quantity = product.Quantity,
-						DateAdded = product.DateAdded,
-						BestBefore = product.BestBefore,
-					};
-					listProducts.Add(newProduct);
-				}
+				
+				var listProducts = request.DTO.ProductsOnPallet
+					.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
+					.ToList();
+				
 				var pallet = new Pallet(newIdForPallet, DateTime.UtcNow, listProducts);
 				_palletRepo.AddPallet(pallet);
 				var location = await _locationRepo.GetLocationByIdAsync(1);
-				pallet.AssignToWarehouse(location, request.UserId);
+				pallet.AssignToWarehouse(location, request.UserId, listProducts);
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				//inventory
-				var stockChanges = pallet.ProductsOnPallet
-					.GroupBy(p => p.ProductId)
-					.Select(g => new StockItemChange(g.Key, g.Sum(x => x.Quantity)))
-					.ToList();
-				if (stockChanges.Count != 0)
-				{
-					await _mediator.Publish(new ChangeStockNotification(
-						StockChangeType.Increase, stockChanges), ct);
-				}
+				
 				return PalletResult.Ok($"Dodano paletę {newIdForPallet} do stanu magazynowego, uaktualniono stan magazynowy.", newIdForPallet);
 			}
 			catch (NotFoundProductException epe)

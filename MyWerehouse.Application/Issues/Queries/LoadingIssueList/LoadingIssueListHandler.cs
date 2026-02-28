@@ -23,7 +23,8 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 			//zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
 			return new ListPalletsToLoadDTO
 			{
-				IssueId =request.IssueId,
+				IssueId = issue.Id,
+				IssueNumber =issue.IssueNumber,
 				ClientId = issue.ClientId,
 				ClientName = issue.Client.Name,
 				Pallets = issue.Pallets

@@ -720,6 +720,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var oldIssue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = initailClient,
 				IssueDateTimeCreate = new DateTime(2025, 8, 8),
 				//Pallets,
@@ -767,6 +769,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var createIssue = new CreateIssueDTO
 			{
+				//Id = Guid.NewGuid(),
 				ClientId = initailClient.Id,
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
@@ -774,12 +777,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					issueItem1, issueItem2
 				}
 			};
-			var result = await Mediator.Send(new CreateNewIssueCommand(createIssue, DateTime.UtcNow.AddDays(7)));
-			Assert.NotNull(result);
+			var result = await Mediator.Send(new CreateNewIssueCommand(createIssue, DateTime.UtcNow.AddDays(7)));			
 			// Assert
 			Assert.NotNull(result);
-			//Assert.False(result.S)
-			var issue = DbContext.Issues.FirstOrDefault(i => i.Id == 2);
+			//var issue = DbContext.Issues.FirstOrDefault(i => i.Id == createIssue.Id);
+			var issue = DbContext.Issues.FirstOrDefault(i => i.IssueNumber == 2);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));

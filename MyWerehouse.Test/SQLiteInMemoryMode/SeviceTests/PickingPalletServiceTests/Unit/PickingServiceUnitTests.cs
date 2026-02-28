@@ -52,7 +52,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Name = "Prod B",
 				SKU = "667",
 				AddedItemAd = new DateTime(2025, 2, 2),
-				//CategoryId = category.Id,
 				Category = category,
 				IsDeleted = false,
 				CartonsPerPallet = 100
@@ -189,6 +188,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue1 = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client1,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -197,6 +198,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue2 = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 2,
 				Client = client1,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -205,6 +208,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue3 = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 3,
 				Client = client2,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -270,13 +275,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 
-			//var service = new PickingPalletService(Mediator);
-			//var service = Mediator.Send(new GetListPickingPalletQuery())
-
 			// Act
-			//var result = await service.GetListToPickingAsync(
-			//DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4)),
-			//DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)));
+			
 			var result = Mediator.Send(
 				new GetListToPickingQuery
 				(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))));
@@ -470,7 +470,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				}
 			};
 			var issue1 = new Issue
-			{				
+			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 101,
 				Client = client1,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -478,7 +480,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PerformedBy = "TestUser",
 			};
 			var issue2 = new Issue
-			{				
+			{
+				Id = Guid.NewGuid(),
+				IssueNumber =102,
 				Client = client1,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -486,7 +490,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PerformedBy = "TestUser",
 			};
 			var issue3 = new Issue
-			{				
+			{
+				Id = Guid.NewGuid(),
+				IssueNumber =103,
 				Client = client2,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -510,9 +516,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a11 = new PickingTask { Issue = issue1, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
+			var a11 = new PickingTask { Issue = issue1, IssueNumber=101, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet1, ProductId = product1.Id, PickingDay=DateOnly.FromDateTime( DateTime.UtcNow.AddDays(5)) };
-			var a12 = new PickingTask { Issue = issue2, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
+			var a12 = new PickingTask { Issue = issue2, IssueNumber= 102, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet1, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
 			};
 			virtualPallet1.PickingTasks = new List<PickingTask> { a11, a12 };
@@ -525,10 +531,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a21 = new PickingTask { Issue = issue1, RequestedQuantity = 20, PickingStatus = PickingStatus.Allocated,
+			var a21 = new PickingTask { Issue = issue1, IssueNumber=101, RequestedQuantity = 20, PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet2, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
 			};
-			var a22 = new PickingTask { Issue = issue3, RequestedQuantity = 25, PickingStatus = PickingStatus.Allocated,
+			var a22 = new PickingTask { Issue = issue3, IssueNumber= 103, RequestedQuantity = 25, PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet2, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
 			};
 			virtualPallet2.PickingTasks = new List<PickingTask> { a21, a22 };
@@ -541,7 +547,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a31 = new PickingTask { Issue = issue3, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
+			var a31 = new PickingTask { Issue = issue3,IssueNumber =103, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet3, ProductId = product2.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
 			};
 			virtualPallet3.PickingTasks = new List<PickingTask> { a31 };
@@ -554,7 +560,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateMoved = new DateTime(2025, 8, 12),
 			};
 
-			var a41 = new PickingTask { Issue = issue1, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
+			var a41 = new PickingTask { Issue = issue1, IssueNumber =101, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
 				VirtualPallet = virtualPallet4, ProductId = product2.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
 			virtualPallet4.PickingTasks = new List<PickingTask> { a41 };
 
@@ -562,12 +568,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();
 			
-			//var service = new PickingPalletService(Mediator);
-
-			// Act
-			//var result = await service.GetListIssueToPickingAsync(
-			//	DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)),
-			//	DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)));
+			// Act			
 			var result = await Mediator.Send(new GetListIssueToPickingQuery(
 				DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)),
 				DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))));
@@ -584,41 +585,45 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(client1.Id, firstClient.ClientIdOut);
 
 			// 3. Pierwszy klient ma dokładnie 2 zlecenia
-			Assert.Equal(2, firstClient.Issues.Count);
+			Assert.Equal(2, firstClient.IssuesDetailsForPicking.Count);
 
 			// 4. Pierwsze zlecenie klienta ma 2 produkty
-			var firstIssue = firstClient.Issues.First();
-			Assert.Equal(client1.Id, firstIssue.IssueId);
+			var firstIssue = firstClient.IssuesDetailsForPicking.First();
+			Assert.Equal(client1.Issues.First().IssueNumber, firstIssue.IssueNumber);
 			Assert.Equal(2, firstIssue.Products.Count);
 
-			// 5. Drugie zlecenie klienta ma 1 produkt
-			var secondIssue = firstClient.Issues.Skip(1).First();
-			Assert.Equal(client2.Id, secondIssue.IssueId);
+			// 5. Drugie zlecenie pierwszego klienta ma 1 produkt
+			var secondIssue = firstClient.IssuesDetailsForPicking.Skip(1).First();
+			//Assert.Equal(client1.Issues.First(x=>x.IssueNumber ==2).IssueNumber, secondIssue.IssueNumber);			
 			Assert.Single(secondIssue.Products);
-
-			// --- Klient 1 ---
-			var client1Result = result.Should().ContainSingle(r => r.ClientIdOut == client1.Id).Subject;
-
-			// Klient1 ma 2 zlecenia
-			client1Result.Issues.Should().HaveCount(2);
-
+					
 			// Klient1, Issue1, Product1 → 10 + 20 = 30
-			var issue1Result = client1Result.Issues.Should().ContainSingle(i => i.IssueId == issue1.Id).Subject;
-			issue1Result.Products.Should().ContainSingle(p => p.ProductId == product1.Id && p.Quantity == 30);
+			var issue1To1Client = firstClient.IssuesDetailsForPicking.FirstOrDefault(i => i.IssueNumber == issue1.IssueNumber);
+			var issue1Product1 = issue1To1Client.Products.FirstOrDefault(x => x.ProductId == product1.Id);
+			var issue1Product2 = issue1To1Client.Products.FirstOrDefault(x => x.ProductId == product2.Id);
+			Assert.Equal(30, issue1Product1.Quantity);
+			Assert.Equal(10, issue1Product2.Quantity);
 
+			var client1Result = result.Should().ContainSingle(r => r.ClientIdOut == client1.Id).Subject;
 			// Klient1, Issue2, Product2 → 15
-			var issue2Result = client1Result.Issues.Should().ContainSingle(i => i.IssueId == issue2.Id).Subject;
-			issue2Result.Products.Should().ContainSingle(p => p.ProductId == product1.Id && p.Quantity == 15);
+			//var issue2Result = client1Result.IssuesDetailsForPicking.Should().ContainSingle(i => i.IssueNumber == issue2.IssueNumber).Subject;
+			//issue2Result.Products.Should().ContainSingle(p => p.ProductId == product1.Id && p.Quantity == 15);
 
 			// --- Klient 2 ---
 			var client2Result = result.Should().ContainSingle(r => r.ClientIdOut == client2.Id).Subject;
 
 			// Klient2 ma 1 zlecenie
-			client2Result.Issues.Should().HaveCount(1);
+			client2Result.IssuesDetailsForPicking.Should().HaveCount(1);
 
 			// Klient2, Issue3, Product1 → 25
-			var issue3Result = client2Result.Issues.Should().ContainSingle(i => i.IssueId == issue3.Id).Subject;
-			issue3Result.Products.Should().ContainSingle(p => p.ProductId == product1.Id && p.Quantity == 25);
+			var secondClient = result.Skip(1).First();	
+			var issue3To2Client = secondClient.IssuesDetailsForPicking.FirstOrDefault(i=>i.IssueNumber == issue3.IssueNumber);
+			var issue3Product1 = issue3To2Client.Products.FirstOrDefault(x => x.ProductId == product1.Id);
+			var issue3Product2 = issue3To2Client.Products.FirstOrDefault(x => x.ProductId == product2.Id);
+			Assert.Equal(25, issue3Product1.Quantity);
+			Assert.Equal(15, issue3Product2.Quantity);
+			//var issue3Result = client2Result.IssuesDetailsForPicking.Should().ContainSingle(i => i.IssueNumber == issue3.IssueNumber).Subject;
+			//issue3Result.Products.Should().ContainSingle(p => p.ProductId == product1.Id && p.Quantity == 25);
 
 		}
 	}

@@ -13,41 +13,31 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 {
-	public class CreateHistoryReceiptHandler :INotificationHandler<ChangeStatusReceiptNotification>
-	{
-		private readonly IReceiptRepo _receiptRepo;
-		private readonly IHistoryReceiptRepo _historyReceiptRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;
-		public CreateHistoryReceiptHandler(IReceiptRepo receiptRepo,
-			IHistoryReceiptRepo historyReceiptRepo,
-			WerehouseDbContext werehouseDbContext)
-		{
-			_receiptRepo = receiptRepo;
-			_historyReceiptRepo = historyReceiptRepo;
-			_werehouseDbContext = werehouseDbContext;
-		}
-		public async Task Handle(ChangeStatusReceiptNotification request, CancellationToken cancellationToken)
-		{
-			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
-				?? throw new NotFoundReceiptException(request.ReceiptId);
-			var details = receipt.Pallets != null && receipt.Pallets.Count != 0
-				? receipt.Pallets.Select(p => new HistoryReceiptDetail
-				{
-					PalletId = p.Id,
-					LocationId = p.LocationId,
-					LocationSnapShot = $"{p.Location.Bay}-{p.Location.Aisle}-{p.Location.Position}-{p.Location.Height}"
-				}).ToList() : new List<HistoryReceiptDetail>();
+	public class CreateHistoryReceiptHandler(IHistoryReceiptRepo historyReceiptRepo) : INotificationHandler<AddHistoryReceiptNotification>
+	{		
+		private readonly IHistoryReceiptRepo _historyReceiptRepo = historyReceiptRepo;
+
+		public async Task Handle(AddHistoryReceiptNotification request, CancellationToken ct)
+		{			
+			var details = request.DetailDtos ?? Enumerable.Empty<HistoryReceiptIssueDetailDto>();
 			var history = new HistoryReceipt
 			{
-				ReceiptId = receipt.Id,
-				ClientId = receipt.ClientId,
-				StatusAfter =request.ReceiptStatus,
+				ReceiptId = request.ReceiptId,
+				ReceiptNumber= request.ReceiptNumber,
+				ClientId = request.ClientId,
+				StatusAfter = request.ReceiptStatus,
 				PerformedBy = request.UserId,
 				DateTime = DateTime.UtcNow,
 				Details = details
+				.Select(d => new HistoryReceiptDetail
+				{
+					PalletId = d.PalletId,
+					LocationId = d.LocationId,
+					LocationSnapShot = d.LocationSnapShot,
+				})
+				.ToList() ?? new List<HistoryReceiptDetail>()
 			};
-			await _historyReceiptRepo.AddHistoryReceiptAsync(history, cancellationToken);
-			//await _werehouseDbContext.SaveChangesAsync(cancellationToken);
+			await _historyReceiptRepo.AddHistoryReceiptAsync(history, ct);
 		}
 	}
 }

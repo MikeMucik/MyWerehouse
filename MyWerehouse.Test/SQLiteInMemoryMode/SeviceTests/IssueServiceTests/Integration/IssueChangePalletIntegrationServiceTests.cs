@@ -52,6 +52,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 2,
 				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
@@ -93,7 +95,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenSamePalletIds()
 		{
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(1, "P1", "P1", "tester"));
+			//Arrange&Act
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId1, "P1", "P1", "tester"));
+			//Assert
 			Assert.False(result.Success);
 			Assert.Contains("tą samą", result.Message);
 		}
@@ -101,15 +106,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenIssueNotFound()
 		{
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(999, "P1", "P2", "tester"));
+			// Arrange&Act
+			var receiptId9 = Guid.Parse("91111111-1111-1111-1111-111111111111");
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId9, "P1", "P2", "tester"));
+			//Assert
 			Assert.False(result.Success);
-			Assert.Contains("Zamówienie o numerze 999 nie zostało znal", result.Message);
+			Assert.Contains($"Zamówienie o numerze {receiptId9} nie zostało znal", result.Message);
 		}
 
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenDifferentProducts()
 		{
-			// Arrange
+
 			//Arrange
 			var address = new Address
 			{
@@ -143,6 +151,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
@@ -205,10 +215,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber =1,
 				PickingTasks = new List<PickingTask>(),
 				Client = client,
 				IssueItems = new List<IssueItem> { new IssueItem
-			{				
+			{
 				Product = product,
 				Quantity = 20,
 				BestBefore = new DateOnly(2026, 1, 1)
@@ -224,9 +236,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(1, "P1", "P2", "tester"));
-
+			//Act
+			//var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, "P1", "P2", "tester"));
+			//Assert
 			Assert.False(result.Success);
 			Assert.Contains("błędny status", result.Message);
 		}

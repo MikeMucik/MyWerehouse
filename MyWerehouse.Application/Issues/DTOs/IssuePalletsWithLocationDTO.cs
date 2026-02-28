@@ -9,7 +9,7 @@ namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class IssuePalletsWithLocationDTO
 	{
-		public int IssueId { get; set; }
+		public int IssueNumber { get; set; }
 		public required List<PalletWithLocation> PalletList { get; set; } = new List<PalletWithLocation>();
 	}
 }

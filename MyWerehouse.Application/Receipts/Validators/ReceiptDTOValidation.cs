@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.Receipts.Validators
 	{
 		public ReceiptDTOValidation(IValidator<UpdatePalletDTO> palletValidator)
 		{
-			RuleFor(r => r.Id)
+			RuleFor(r => r.ReceiptNumber)
 				.GreaterThan(0)
 				.WithMessage("Przyjęcie musi mieć swój numer.");
 			RuleFor(r => r.ClientId)

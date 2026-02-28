@@ -13,53 +13,42 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 {
-	public class CreateHistoryIssueHandler :INotificationHandler<AddHistoryForIssueNotification>
-	{
-		private readonly IIssueRepo _issueRepo;
-		private readonly IHistoryIssueRepo _historyIssueRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;
-		public CreateHistoryIssueHandler(
-			IIssueRepo issueRepo,
-			IHistoryIssueRepo historyIssueRepo,
-			WerehouseDbContext werehouseDbContext
-			)
-		{
-			_issueRepo = issueRepo;
-			_historyIssueRepo = historyIssueRepo;		
-			_werehouseDbContext = werehouseDbContext;
-		}
+	public class CreateHistoryIssueHandler(IHistoryIssueRepo historyIssueRepo) 
+		: INotificationHandler<AddHistoryForIssueNotification>
+	{	
+		private readonly IHistoryIssueRepo _historyIssueRepo = historyIssueRepo;
+
 		public async Task Handle(AddHistoryForIssueNotification request, CancellationToken cancellationToken)
-		{
-			var issue = await _issueRepo.GetIssueByIdWithPalletAndItemsAsync(request.IssueId, cancellationToken)
-				?? throw  new NotFoundIssueException(request.IssueId);
-
-			var details = issue.Pallets != null && issue.Pallets.Count > 0 ?
-
-				issue.Pallets.Select(p => new HistoryIssueDetail
-				{
-					PalletId = p.Id,
-					LocationId = p.LocationId,
-					LocationSnapShot = $"{p.Location.Bay}-{p.Location.Aisle}-{p.Location.Position}-{p.Location.Height}"
-				}).ToList() : new List<HistoryIssueDetail>();
-
-			var items = issue.IssueItems.Select(p => new HistoryIssueItems
-			{
-				ProductId = p.ProductId,
-				Quantity = p.Quantity,
-				BestBefore = p.BestBefore,
-			}).ToList();
-
+		{		
+			var details = request.DetailDtos;
 			var history = new HistoryIssue
 			{
-				IssueId = issue.Id,
-				StatusAfter = issue.IssueStatus,
-				PerformedBy = request.PerformedBy??issue.PerformedBy,
-				Details = details.ToList(),
-				Items = items,
+				IssueId =request.IssueId,
+				IssueNumber = request.IssueNumber,
+				ClientId = request.ClientId,
+				StatusAfter = request.IssueStatus,
+				PerformedBy = request.UserId,
 				DateTime = DateTime.UtcNow,
+				//??issue.PerformedBy,
+				Details = details
+				.Select(d=> new HistoryIssueDetail
+				{
+					PalletId = d.PalletId,
+					LocationId = d.LocationId,
+					LocationSnapShot = d.LocationSnapShot,
+				})
+				.ToList(),
+				Items = request.Detailsitems
+				.Select(i=>new HistoryIssueItems
+				{
+					//Id = i.Id,
+					ProductId = i.ProductId,
+					Quantity= i.Quantity,
+					BestBefore = i.BestBedore
+				})
+				.ToList(),				
 			};
-			await _historyIssueRepo.AddHistoryIssueAsync(history, cancellationToken);
-			await _werehouseDbContext.SaveChangesAsync(cancellationToken);
+			await _historyIssueRepo.AddHistoryIssueAsync(history, cancellationToken);			
 		}
 	}
 }

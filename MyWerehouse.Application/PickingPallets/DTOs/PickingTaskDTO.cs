@@ -11,9 +11,10 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 {
 	public class PickingTaskDTO : IMapFrom<PickingTask>
 	{
-		public int Id { get; set; }
-		public int IssueId { get; set; }
-		public required string SourcePalletId { get; set; }		
+		public Guid Id { get; set; }
+		public Guid IssueId { get; set; }
+		public int IssueNumber { get; set; }
+		public string? SourcePalletId { get; set; }      //required 
 		public int ProductId { get; set; }
 		public int RequestedQuantity { get; set; }
 		public int PickedQuantity { get; set; }//faktyczna pobrana ilość
@@ -22,7 +23,15 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<PickingTask, PickingTaskDTO>()
-				.ReverseMap();
+				
+				;
+			//.ForMember(d => d.Id, opt => opt.MapFrom(s => s.PickingTaskNumber));
+			profile.CreateMap<PickingTaskDTO, PickingTask>()
+				//.ForMember(d=>d.I)
+				;
+				//.ForMember(d => d.IssueNumber, opt => opt.MapFrom(s => s.Id));
+				//.ForMember(d=>d.)
+
 		}
 	}
 }

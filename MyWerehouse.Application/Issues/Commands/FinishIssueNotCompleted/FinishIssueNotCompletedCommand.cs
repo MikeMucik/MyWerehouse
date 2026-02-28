@@ -8,6 +8,6 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 {
-	public record FinishIssueNotCompletedCommand(int IssueId, string UserId): IRequest<IssueResult>;
+	public record FinishIssueNotCompletedCommand(Guid IssueId, string UserId): IRequest<IssueResult>;
 	
 }

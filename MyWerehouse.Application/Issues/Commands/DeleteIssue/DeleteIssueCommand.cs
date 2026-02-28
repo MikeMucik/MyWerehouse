@@ -8,6 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 {
-	public record DeleteIssueCommand(int IssueId, string UserId) : IRequest<IssueResult>;
-	
+	public record DeleteIssueCommand(Guid IssueId, string UserId) : IRequest<IssueResult>;	
 }

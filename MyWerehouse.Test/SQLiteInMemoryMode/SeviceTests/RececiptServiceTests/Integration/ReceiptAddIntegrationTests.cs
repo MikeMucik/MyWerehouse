@@ -65,6 +65,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialReceipt = new Receipt
 			{
+				//Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				Client = initialCLient,
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002",
@@ -110,7 +112,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal(ReasonMovement.Received, movement.Reason);
 
 			var historyRecipt = DbContext.HistoryReceipts
-				.FirstOrDefault(x => x.Id == initialReceipt.Id);
+				.FirstOrDefault(x => x.ReceiptId == initialReceipt.Id);
 			Assert.NotNull(historyRecipt);
 			Assert.Equal(ReceiptStatus.InProgress, historyRecipt.StatusAfter);
 
@@ -157,6 +159,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Act
 			var newPalletDto = new CreateReceiptPlanDTO
 			{
+				//Id=1,
 				ClientId = initialCLient.Id,
 				ReceiptDateTime = DateTime.UtcNow,
 				PerformedBy = "user",
@@ -165,7 +168,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
-			var receipt = DbContext.Receipts.Find(result.ReceiptId);
+			var receipt = DbContext.Receipts.FirstOrDefault(x => x.ReceiptNumber == result.ReceiptId);
 			Assert.NotNull(receipt);
 			Assert.Equal(ReceiptStatus.Planned, receipt.ReceiptStatus);
 			Assert.Equal("user", receipt.PerformedBy);			
@@ -281,6 +284,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				};
 				var initialReceipt = new Receipt
 				{
+					Id = Guid.NewGuid(),
+					ReceiptNumber = 1,
 					Client = initialCLient,
 					ReceiptStatus = ReceiptStatus.Planned,
 					PerformedBy = "U002"
@@ -348,6 +353,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialReceipt = new Receipt
 			{
+				Id = Guid.NewGuid(),
+				ReceiptNumber = 1,
 				Client = initialCLient,
 				ReceiptStatus = ReceiptStatus.Planned,
 				PerformedBy = "U002"

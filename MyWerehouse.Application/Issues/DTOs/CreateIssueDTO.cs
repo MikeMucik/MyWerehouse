@@ -12,7 +12,8 @@ namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class CreateIssueDTO : IMapFrom<Issue>
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
+		public int IssueNumber { get; set; }
 		public int ClientId { get; set; }
 		public DateTime IssueDateTime { get; set; } = DateTime.UtcNow;
 		public string PerformedBy { get; set; }

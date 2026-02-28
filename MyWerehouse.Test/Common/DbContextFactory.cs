@@ -116,31 +116,37 @@ namespace MyWerehouse.Test.Common
 					new Address { Id = 11, Country = "ConutryTest1", City = "CityTest1", Region = "RegionTest1", Phone = 987987987, PostalCode = "test12ggt", StreetName = "StreetTest1", StreetNumber = "12/11", ClientId = 10 }
 				);
 			}
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var receiptId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
 
 			if (!context.Receipts.Any())
 			{
 				context.Receipts.AddRange(
 					new Receipt
 					{
-						Id = 1,
+						Id = receiptId1,
+						ReceiptNumber = 1,
 						ClientId = 10,
 						PerformedBy = "U001",
 						ReceiptDateTime = new DateTime(2023, 3, 3),
 					},
 					new Receipt
 					{
-						Id = 2,
+						Id = receiptId2,
+						ReceiptNumber = 2,
 						ClientId = 11,
 						PerformedBy = "U002",
 						ReceiptDateTime = new DateTime(2023, 4, 4)
 					}
 					);
 			}
+			var issueId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
 			if (!context.Issues.Any())
 			{
 				context.Issues.Add(new Issue
 				{
-					Id = 2,
+					Id = issueId2,
+					IssueNumber = 2,
 					ClientId = 11,
 					PerformedBy = "U002",
 					IssueDateTimeCreate = new DateTime(2025, 5, 5),
@@ -156,7 +162,6 @@ namespace MyWerehouse.Test.Common
 			}
 
 			context.SaveChanges();
-
 			// 3. Dane końcowe, zależne od receipt/issue/product
 			if (!context.Pallets.Any())
 			{
@@ -167,8 +172,8 @@ namespace MyWerehouse.Test.Common
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.Available,
-						ReceiptId = 1,
-						IssueId = 2,
+						ReceiptId = receiptId1,
+						IssueId = issueId2,
 					},
 					new Pallet
 					{
@@ -176,8 +181,8 @@ namespace MyWerehouse.Test.Common
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.OnHold,
-						ReceiptId = 1,
-						IssueId = 2,
+						ReceiptId = receiptId1,
+						IssueId = issueId2,
 					},
 					new Pallet
 					{
@@ -185,7 +190,7 @@ namespace MyWerehouse.Test.Common
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Available,
-						ReceiptId = 2,
+						ReceiptId = receiptId2,
 					},
 					new Pallet
 					{
@@ -193,7 +198,7 @@ namespace MyWerehouse.Test.Common
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Damaged,
-						ReceiptId = 2,
+						ReceiptId = receiptId2,
 					}
 				);
 			}

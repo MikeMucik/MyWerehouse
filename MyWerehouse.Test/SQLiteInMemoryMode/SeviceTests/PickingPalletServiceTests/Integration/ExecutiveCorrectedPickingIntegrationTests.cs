@@ -118,6 +118,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber =1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -200,7 +202,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.NotNull(pickingTaskAfter.VirtualPallet);
 			//Assert.Equal(PickingStatus.Allocated, pickingTaskAfter.PickingStatus);
 
-			// ✅ Historia ruchu została zapisana (jeśli masz historię)
+			// Historia ruchu została zapisana 
 			var history = await DbContext.HistoryPickings.ToListAsync();
 			Assert.NotEmpty(history);
 			Assert.Contains(history, h => h.PerformedBy == "user1" && h.PalletId == sourcePallet1.Id);
@@ -217,15 +219,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Name = "Category",
 				IsDeleted = false
 			};
-			var product1 = new Product
-			{
-				Name = "Prod A",
-				SKU = "666",
-				AddedItemAd = new DateTime(2025, 1, 1),
-				Category = category,
-				IsDeleted = false,
-				CartonsPerPallet = 100
-			};
+			//var product1 = new Product
+			//{
+			//	Name = "Prod A",
+			//	SKU = "666",
+			//	AddedItemAd = new DateTime(2025, 1, 1),
+			//	Category = category,
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 100
+			//};
 			var product2 = new Product
 			{
 				Name = "Prod B",
@@ -281,7 +283,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 					{
 						Product = product2,
 						Quantity = 100,
-						DateAdded = new DateTime(2025, 8, 8) }
+						DateAdded = new DateTime(2025, 8, 8)
+					}
 				}
 			};
 			var newToPickPallet = new Pallet
@@ -296,7 +299,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 					{
 						Product = product2,
 						Quantity = 20,
-						DateAdded = new DateTime(2025, 8, 8) }
+						DateAdded = new DateTime(2025, 8, 8)
+					}
 				}
 			};
 			var oldPalletPallet = new Pallet
@@ -311,11 +315,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 					{
 						Product = product2,
 						Quantity = 10,
-						DateAdded = new DateTime(2025, 8, 8) }
+						DateAdded = new DateTime(2025, 8, 8)
+					}
 				}
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -327,13 +334,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, locationPicking);
 			DbContext.Clients.AddRange(client);
-			DbContext.Products.AddRange(product1, product2);
+			DbContext.Products.AddRange(product2);
 			DbContext.Pallets.AddRange(sourcePallet1, newToPickPallet, oldPalletPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
 			var pickingTask2 = new PickingTask
 			{
-				Issue = issue,
+				Issue = issue,				
 				RequestedQuantity = 10,
 				PickingStatus = PickingStatus.Allocated,
 				ProductId = product2.Id,
@@ -411,7 +418,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				.Include(a => a.Issue)
 				.Include(a => a.VirtualPallet)
 				.OrderBy(a => a.Id)
-				.LastAsync();
+				.FirstOrDefaultAsync(a => a.Id != pickingTask2.Id);
+				//.FirstOrDefaultAsync(a => a.Id == );
 
 			Assert.NotNull(pickingTaskNew);
 			Assert.Equal(PickingStatus.Picked, pickingTaskNew.PickingStatus);
@@ -518,6 +526,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -697,6 +707,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueStatus = IssueStatus.New,

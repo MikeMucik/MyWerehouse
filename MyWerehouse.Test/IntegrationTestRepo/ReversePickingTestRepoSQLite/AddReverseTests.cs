@@ -104,6 +104,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			DbContext.SaveChanges();
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow.AddDays(-7),
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -143,7 +145,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				LocationId = location1.Id,
 				Status = PalletStatus.ToIssue,
 				DateReceived = DateTime.UtcNow,
-				IssueId = 1,
+				IssueId = issue.Id,
 				ProductsOnPallet = [new ProductOnPallet {
 					ProductId = product.Id,
 					Quantity = 10,

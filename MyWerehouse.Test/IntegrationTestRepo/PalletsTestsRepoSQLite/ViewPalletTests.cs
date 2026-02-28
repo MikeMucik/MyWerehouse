@@ -33,7 +33,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			Assert.NotNull(result);
 			Assert.Equal(PalletStatus.Available, result.Status);//DbCOntextFactory
 			Assert.Equal(1, result.LocationId);
-			Assert.Equal(1, result.ReceiptId);
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			Assert.Equal(receiptId1, result.ReceiptId);
 		}
 
 		[Fact]

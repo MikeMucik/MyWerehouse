@@ -19,8 +19,10 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public PalletStatus Status { get; set; } = 0; //np "Available", "To issue"
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new HashSet<ProductOnPalletDTO>();
 		public ICollection<PalletMovementDTO> PalletMovements { get; set; } = new List<PalletMovementDTO>();
-		public int? ReceiptId { get; set; }		
-		public int? IssueId { get; set; }
+		public Guid? ReceiptId { get; set; }		
+		public int? ReceiptNumber { get; set; }		//
+		public Guid? IssueId { get; set; }
+		public int? IssueNumber { get; set; }//
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Pallet, PalletDTO>();

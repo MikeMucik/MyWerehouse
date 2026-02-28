@@ -65,7 +65,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			foreach (var task in listTasks)
 			{
 				var itemHistory = new HistoryReversePickingItem(
-					task.Id, task.SourcePalletId, task.DestinationPalletId, issue.Id,
+					task.Id, task.SourcePalletId, task.DestinationPalletId, issue.Id, issue.IssueNumber,
 					task.ProductId, task.Quantity, null, task.Status);
 				_eventCollector.Add(new CreateHistoryReversePickingNotification(itemHistory, userId));
 			}

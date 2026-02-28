@@ -14,6 +14,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -78,11 +79,13 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 
 				await _processPickingActionService.ProcessPicking(sourcePallet, issue, request.PickingTaskDTO.ProductId,
 						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion);
-				var historyPicking = new HistoryDataPicking(pickingTaskToChange.Id, pickingTaskToChange.VirtualPallet.PalletId,
-							pickingTaskToChange.IssueId, pickingTaskToChange.ProductId, pickingTaskToChange.RequestedQuantity,
+				
+				_eventCollector.Add(new CreateHistoryPickingNotification(pickingTaskToChange.Id,
+					//pickingTaskToChange.PickingTaskNumber,
+					pickingTaskToChange.VirtualPallet.PalletId,
+							pickingTaskToChange.IssueId, pickingTaskToChange.IssueNumber, pickingTaskToChange.ProductId, pickingTaskToChange.RequestedQuantity,
 							request.PickingTaskDTO.PickedQuantity, PickingStatus.Allocated, pickingTaskToChange.PickingStatus,
-							request.UserId, DateTime.UtcNow);
-				_eventCollector.Add(new CreateHistoryPickingNotification(historyPicking));
+							request.UserId, DateTime.UtcNow));
 
 				if (neededQuantity == pickedQuantity)
 				{
@@ -97,7 +100,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				else
 				{
 					//pallet lock with non-conformity 
-					sourcePallet.ChangeStatus(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
+					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
 					//sourcePallet.Status = PalletStatus.OnHold;
 					//_eventCollector.Add(new ChangeStatusOfPalletNotification(sourcePallet.Id, sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(), sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(),
 					//	ReasonMovement.Correction, request.UserId, PalletStatus.OnHold, null));

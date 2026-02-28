@@ -8,6 +8,6 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 {
-	public record ExecuteHandPickingCommand(string PalletId, int IssueId, int Quanitity, string UserId):IRequest<PickingResult>;
-	
+	public record ExecuteHandPickingCommand(string PalletIdSource,
+		Guid IssueId, int Quanitity, string UserId):IRequest<PickingResult>;	
 }

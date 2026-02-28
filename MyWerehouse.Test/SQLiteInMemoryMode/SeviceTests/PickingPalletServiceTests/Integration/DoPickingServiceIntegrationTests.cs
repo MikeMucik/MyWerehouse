@@ -91,6 +91,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueStatus = IssueStatus.New,
@@ -126,7 +128,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask.Id,
+				//Id = pickingTask.PickingTaskNumber,				
 				IssueId = issue.Id,
+				IssueNumber = issue.IssueNumber,
 				ProductId = product.Id,
 				RequestedQuantity = pickingTask.RequestedQuantity,
 				PickedQuantity = 30,
@@ -230,6 +234,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				Pallets = [sourcePallet],
@@ -266,7 +272,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask.Id,
+				//Id = pickingTask.PickingTaskNumber,
 				IssueId = issue.Id,
+				IssueNumber = issue.IssueNumber,
 				ProductId = product.Id,
 				RequestedQuantity = 40,
 				PickedQuantity = 40,
@@ -385,6 +393,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				Pallets = [oldPallet],
@@ -424,6 +434,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
+				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -551,6 +562,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				Pallets = [oldPallet],
@@ -589,6 +602,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
+				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -716,6 +730,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				Pallets = [oldPallet],
@@ -753,6 +769,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
+				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -921,6 +938,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
@@ -962,6 +981,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
+				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -1091,6 +1111,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var issue = new Issue
 			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 1,
 				Client = client,
 				IssueDateTimeCreate = DateTime.UtcNow,
 				Pallets = [oldPallet],
@@ -1130,6 +1152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
+				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,

@@ -7,9 +7,9 @@ using Azure.Core;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Services
@@ -36,39 +36,37 @@ namespace MyWerehouse.Application.PickingPallets.Services
 					if (pickingTask.RequestedQuantity > quantity)
 					{
 						pickingTask.RequestedQuantity -= quantity;
-						quantity = 0;
-						var historyPicking = new HistoryDataPicking
-							(
-								pickingTask.Id,
+						quantity = 0;						
+						_eventCollector.Add(new CreateHistoryPickingNotification(pickingTask.Id,
+							//pickingTask.PickingTaskNumber,
 								pickingTask.VirtualPallet.PalletId,
 								pickingTask.IssueId,
+								pickingTask.IssueNumber,
 								pickingTask.ProductId,
 								pickingTask.RequestedQuantity,
 								0,
 								PickingStatus.Correction,
 								pickingTask.PickingStatus,
 								userId,
-								DateTime.UtcNow);
-						_eventCollector.Add(new CreateHistoryPickingNotification(historyPicking));
+								DateTime.UtcNow));
 					}
 					else
 					{
 						quantity -= pickingTask.RequestedQuantity;
 						pickingTask.PickingStatus = PickingStatus.Cancelled;
-						pickingTask.RequestedQuantity = 0;
-						var historyPicking = new HistoryDataPicking
-							(
-								pickingTask.Id,
+						pickingTask.RequestedQuantity = 0;						
+						_eventCollector.Add(new CreateHistoryPickingNotification(pickingTask.Id,
+							//pickingTask.PickingTaskNumber,
 								pickingTask.VirtualPallet.PalletId,
 								pickingTask.IssueId,
+								pickingTask.IssueNumber,
 								pickingTask.ProductId,
 								pickingTask.RequestedQuantity,
 								0,
 								PickingStatus.Correction,
 								pickingTask.PickingStatus,
 								userId,
-								DateTime.UtcNow);
-						_eventCollector.Add(new CreateHistoryPickingNotification(historyPicking));
+								DateTime.UtcNow));
 					}
 				}				
 			}			

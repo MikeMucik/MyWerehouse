@@ -48,7 +48,8 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 					var newId = await _palletRepo.GetNextPalletIdAsync();
 					var location = await _locationRepo.GetLocationByIdAsync(rampNumber)
 						?? throw new NotFoundLocationException(rampNumber);
-					var pallet = new Pallet(newId, DateTime.UtcNow, rampNumber, location);					
+					var pallet = new Pallet(newId, DateTime.UtcNow, rampNumber, location);	
+					//Jest dla wielu choć początkowe założenia mówiły o jednym produkcie na palecie
 					foreach (var dto in request.DTO.ProductsOnPallet)
 					{
 						if (!await _productRepo.IsExistProduct(dto.ProductId)) throw new NotFoundProductException(dto.ProductId);
@@ -80,62 +81,3 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		}
 	}
 }
-//if (receipt.ReceiptStatus == ReceiptStatus.Planned)
-//{
-//	receipt.ReceiptStatus = ReceiptStatus.InProgress;
-//	receipt.ReceiptDateTime = DateTime.UtcNow;
-//	startReceiving = true;
-//}
-
-//var listOfProduct = new List<ProductOnPallet>();
-//pallet.ApplyProductChanges()
-
-//foreach (var newProduct in request.DTO.ProductsOnPallet)
-//{
-
-//	var newProductToPallet = new ProductOnPallet
-//	{
-//		ProductId = newProduct.ProductId,
-//		Quantity = newProduct.Quantity,
-//		BestBefore = newProduct.BestBefore,
-//		DateAdded = DateTime.UtcNow,
-//	};
-//	listOfProduct.Add(newProductToPallet);
-//}
-
-//var palletToReceipt = new Pallet(newId, DateTime.UtcNow, listOfProduct);
-
-//palletToReceipt.LocationId = rampNumber;
-//palletToReceipt.AssignToReceipt(receipt.Id, request.DTO.UserId);
-
-//if (receipt.ReceiptStatus != ReceiptStatus.Planned && receipt.ReceiptStatus != ReceiptStatus.InProgress)
-//{
-//	return ReceiptResult.Fail("Nie można dodać palety zły status przyjęcia lub brak utworzenia przyjęcia");
-//}
-
-
-//var pallet = _mapper.Map<Pallet>(request.DTO);
-
-//pallet.ReceiptId = request.ReceiptId;
-//pallet.Id = newId; // await _palletRepo.GetNextPalletIdAsync();//kolejny numer palety
-//pallet.LocationId = rampNumber;//lokalizacja początkowa
-//pallet.DateReceived = DateTime.UtcNow;
-////pallet.Status = PalletStatus.Receiving;
-//if (!await _productRepo.IsExistProduct(request.DTO.ProductsOnPallet.First().ProductId))
-//	throw new NotFoundProductException(request.DTO.ProductsOnPallet.First().ProductId);
-
-
-
-
-//_palletRepo.AddPallet(palletToReceipt);
-
-//pallet.AssignToReceipt(receipt.Id, pallet.Location, request.DTO.UserId);
-
-
-
-//if (startReceiving)
-//{
-//	await _mediator.Publish(new ChangeStatusReceiptNotification(receipt.Id, receipt.ReceiptStatus, request.DTO.UserId), ct);
-//}
-
-//var startReceiving = false;

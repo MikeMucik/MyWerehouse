@@ -44,17 +44,8 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				sourcePallet.ProductsOnPallet.Single().Quantity += reversePicking.Quantity;
 			}
 			else throw new NotFoundPalletException("Paleta źródłowa ma nieprawidłowy status.");
-
-			_eventCollector.Add(new ChangeStatusOfPalletNotification(
-				sourcePallet.Id,
-				sourcePallet.LocationId,
-				sourcePallet.Location.ToSnopShot(),
-				sourcePallet.LocationId,
-				sourcePallet.Location.ToSnopShot(),
-				ReasonMovement.Correction,
-				userId,
-				sourcePallet.Status,
-				null));
+			sourcePallet.AddHistory(sourcePallet.Status, ReasonMovement.ReversePicking, userId);
+			
 			return ReversePickingResult.Ok("Dodano towar do palety źródłowej", reversePicking.ProductId, reversePicking.SourcePalletId);
 		}
 		public async Task<ReversePickingResult> AddToExistingPallet(ReversePicking task, List<Pallet> pallets, string userId)
@@ -65,13 +56,9 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			var cartonsOnPallet = product.CartonsPerPallet;
 			if (pallets.Count == 0)
 				throw new NotFoundPalletException("Brak palet do uzupełnienia");
-
 			if (pallets.Any(p => p.ProductsOnPallet.Single().Quantity >= cartonsOnPallet))
-				throw new NotFoundPalletException("Próba uzupełnienia pełnej palety");
-			
-			var palletsToAdd = pallets;
-			
-			foreach (var pallet in palletsToAdd)
+				throw new NotFoundPalletException("Próba uzupełnienia pełnej palety");				
+			foreach (var pallet in pallets)
 			{
 				if (quantityToAdded <= 0)
 					break;
@@ -81,19 +68,9 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				var addedAmount = Math.Min(quantityToAdded, freeSpace);
 				pallet.ProductsOnPallet.Single().Quantity += addedAmount;
 				quantityToAdded -= addedAmount;
-
-				_eventCollector.Add(new ChangeStatusOfPalletNotification(
-				pallet.Id,
-				pallet.LocationId,
-				pallet.Location.ToSnopShot(),
-				pallet.LocationId,
-				pallet.Location.ToSnopShot(),
-				ReasonMovement.ReversePicking,
-				userId,
-				PalletStatus.Available,
-				null));
+				pallet.AddHistory(pallet.Status, ReasonMovement.ReversePicking, userId);				
 			}			
-			return ReversePickingResult.Ok("Dodano towar.", palletsToAdd);
+			return ReversePickingResult.Ok("Dodano towar.", pallets);
 		}
 
 		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId)
@@ -104,8 +81,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				Id = newNumber,
 				DateReceived = DateTime.UtcNow,
 				LocationId = 100100,
-				Status = PalletStatus.InStock,
-				
+				Status = PalletStatus.InStock,				
 				//ReceiptId = 1000,//to trzeba poprawić żeby taka nowa paleta miała jakieś przyjęcie tylko palety kompletacyjne nie mają ReceiptId
 				ProductsOnPallet = new List<ProductOnPallet>
 				{new ProductOnPallet
@@ -117,12 +93,8 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				},
 			};
 			_palletRepo.AddPallet(newPallet);
-			_eventCollector.AddDeferred(() =>
-			new ChangeStatusOfPalletNotification(
-				newPallet.Id, 100100,"1-0-0-0", 100100, "1-0-0-0", ReasonMovement.ReversePicking,
-				userId, PalletStatus.InStock, null));
+			newPallet.AddHistory(PalletStatus.InStock, ReasonMovement.ReversePicking, userId);
 			return ReversePickingResult.Ok("Dodano towar do nowej palety.", task.ProductId, newPallet.Id);
-
 		}
 	}
 }

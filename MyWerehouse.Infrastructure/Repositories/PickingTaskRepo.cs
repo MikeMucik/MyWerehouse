@@ -39,16 +39,20 @@ namespace MyWerehouse.Infrastructure.Repositories
 					p.VirtualPalletId == palletPickingId &&
 					p.Issue.IssueDateTimeCreate >= pickingDate.AddDays(-7) &&
 					p.Issue.IssueDateTimeSend >= pickingDate &&
-					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2)	&&
+					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2) &&
 					p.PickingStatus == PickingStatus.Allocated)
 				.ToListAsync();
 			return pickingTask;
 		}
-		public async Task<PickingTask> GetPickingTaskAsync(int pickingTaskId)
+		//public async Task<PickingTask?> GetPickingTaskAsync(int pickingTaskNumber)
+		//{
+		//	return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.PickingTaskNumber == pickingTaskNumber);
+		//}
+		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid)
 		{
-			return await _werehouseDbContext.PickingTasks.FirstOrDefaultAsync(a => a.Id == pickingTaskId);
+			return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.Id == guid);
 		}
-		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(int issueId, int productId)
+		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, int productId)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
@@ -67,7 +71,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.ToListAsync();
 			return result;
 		}
-		public async Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(int issueId)
+		public async Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
@@ -76,7 +80,7 @@ namespace MyWerehouse.Infrastructure.Repositories
 			return result;
 		}
 
-		public async Task<List<VirtualPallet>> GetVirtualPalletsByIssue(int issueId)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsByIssue(Guid issueId)
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Where(x => x.IssueId == issueId)
@@ -91,6 +95,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 				.Where(x => x.PickingPalletId == pickingPalletId)
 				.ToListAsync();
 		}
+
+		//public async Task<int> GetNextNumberOfPickingTask()
+		//{
+		//	var number = await _werehouseDbContext.PickingTasks.MaxAsync(t => (int?)t.PickingTaskNumber) ?? 0;
+		//	return number + 1;
+		//}
 
 
 		//public async Task<List<PickingTask>> GetPickingTaskListAsync(int palletPickingId, DateTime pickingDate)

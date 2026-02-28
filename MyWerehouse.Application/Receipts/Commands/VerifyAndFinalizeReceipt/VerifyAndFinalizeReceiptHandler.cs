@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Inventories.Events.ChangeStock;
-using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Common.Results;
@@ -13,66 +11,38 @@ using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Pallets.Events;
-using MyWerehouse.Domain.Receviving.Events;
+using MyWerehouse.Domain.Invetories.Events;
+using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Domain.DomainExceptions;
 
 namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 {
 	public class VerifyAndFinalizeReceiptHandler(WerehouseDbContext werehouseDbContext,
-		IReceiptRepo receiptRepo,
-		IMediator mediator) : IRequestHandler<VerifyAndFinalizeReceiptCommand, ReceiptResult>
+		IReceiptRepo receiptRepo) : IRequestHandler<VerifyAndFinalizeReceiptCommand, ReceiptResult>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
-		private readonly IPublisher _mediator = mediator;
 
 		public async Task<ReceiptResult> Handle(VerifyAndFinalizeReceiptCommand request, CancellationToken cancellationToken)
 		{
-			//TODO :MOże dodać porównanie papierów z tym co rzeczywiście przyjęte, compare amount assignment to real receipt
+			
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(cancellationToken);
-			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
-			if (receipt == null || receipt.ReceiptStatus != ReceiptStatus.PhysicallyCompleted)
+			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId)
+				?? throw new NotFoundReceiptException(request.ReceiptId);			
+			//TODO :Dodać porównanie papierów z tym co rzeczywiście przyjęte, compare amount assignment to real receipt
+			try
 			{
-				return ReceiptResult.Fail("Nie można zweryfikować przyjęcia");
+				receipt.VerifiedReceipt(request.UserId);
+				await _werehouseDbContext.SaveChangesAsync(cancellationToken);
+				await transaction.CommitAsync(cancellationToken);
+				return ReceiptResult.Ok("Palety z przyjęcia zweryfikowano, gotowe do działania", receipt.ReceiptNumber);
+
 			}
-			var palletsVerified = receipt.VerifiedReceipt();
-			await _werehouseDbContext.SaveChangesAsync(cancellationToken);
-			await transaction.CommitAsync(cancellationToken);
-			var stockChanges = new List<StockItemChange>();
-					
-			foreach (var pallet in receipt.Pallets)
+			catch (DomainException de)
 			{
-				 stockChanges = [.. pallet.ProductsOnPallet
-					.GroupBy(p => p.ProductId)
-					.Select(g => new StockItemChange(g.Key, g.Sum(x => x.Quantity)))];
+				transaction.Rollback(); 
+				return ReceiptResult.Fail(de.Message);				
 			}
-			foreach (var pallet in receipt.Pallets)
-			{
-				await _mediator.Publish(new ChangeStatusOfPalletNotification(
-						pallet.Id,
-						pallet.LocationId,
-						pallet.Location.ToSnopShot(),
-						pallet.LocationId,
-						pallet.Location.ToSnopShot(),
-						ReasonMovement.Received,
-						receipt.PerformedBy,
-						PalletStatus.InStock,
-						null
-					), cancellationToken);				
-			}			
-			await _mediator.Publish(new ChangeStockNotification(StockChangeType.Increase, stockChanges), cancellationToken);
-			await _mediator.Publish(new ChangeStatusReceiptNotification(request.ReceiptId, receipt.ReceiptStatus, request.UserId), cancellationToken);
-			return ReceiptResult.Ok("Palety z przyjęcia zweryfikowano, gotowe do działania", request.ReceiptId);			
 		}
 	}
 }
-//var productQuantityChanges = new Dictionary<int, int>();	
-//foreach (var pallet in receipt.Pallets)
-//{
-//foreach (var product in pallet.ProductsOnPallet)
-//{
-//	productQuantityChanges[product.ProductId] =
-//		productQuantityChanges.GetValueOrDefault(product.ProductId) + product.Quantity;
-//}
-//	}
-//await _mediator.Publish(new ChangeStockNotification(StockChangeType.Increase, productQuantityChanges.Select(k=>new StockItemChange( k.Key, k.Value))), cancellationToken);

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Events;
@@ -36,36 +37,21 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 			{
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 						?? throw new NotFoundIssueException(request.IssueId);
-				//List<INotification> notificationList = [];
-				
 				//TODO check requested amount = prepered amount
-
 				issue.ConfirmToLoad(request.UserId);
-				//issue.IssueStatus = IssueStatus.ConfirmedToLoad;
-				//foreach (var pallet in issue.Pallets)
-				//{
-				//	pallet.ChangeStatus(PalletStatus.ToIssue, ReasonMovement.ToLoad, request.UserId, pallet.Location);
-				//	//if (pallet.Status != PalletStatus.ToIssue)
-				//	//{
-				//	//	pallet.Status = PalletStatus.ToIssue;
-				//	//}
-				//	//notificationList.Add(new ChangeStatusOfPalletNotification(pallet.Id, pallet.LocationId, pallet.Location.ToSnopShot(), pallet.LocationId, pallet.Location.ToSnopShot(),
-				//	//	ReasonMovement.ToLoad, request.UserId, PalletStatus.ToIssue, null));
-				//}
-
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
-				await _mediator.Publish(new AddHistoryForIssueNotification(request.IssueId, request.UserId), ct);//
-				//foreach (var p in notificationList)
-				//{
-				//	await _mediator.Publish(p, ct);
-				//}
-				return IssueResult.Ok("Wydanie zatwierdzono.", request.IssueId);
+				await transaction.CommitAsync(ct);				
+				return IssueResult.Ok("Wydanie zatwierdzono.");
 			}
 			catch (NotFoundIssueException ei)
 			{
 				await transaction.RollbackAsync(ct);
 				return IssueResult.Fail(ei.Message);
+			}
+			catch (DomainException exx)
+			{
+				await transaction.RollbackAsync(ct);
+				return IssueResult.Fail(exx.Message);
 			}
 			catch (Exception ex)
 			{

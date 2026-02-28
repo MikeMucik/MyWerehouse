@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.Products.Services
 			var rest = amountUnits% amountCarOnPallet;
 			return AssignPallestResult.Ok(amountPallets, rest);
 		}
-		public async Task<int> GetBackOnlyFullPallest(int productId, int amountUnits)
+		public async Task<int> GetBackOnlyFullPallets(int productId, int amountUnits)
 		{
 			var product = await _repo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException($"Produkt {productId} nie ma ustawionej liczby kartonów na paletę. Popraw produkt.");
 			var amountCarOnPallet = product.CartonsPerPallet;

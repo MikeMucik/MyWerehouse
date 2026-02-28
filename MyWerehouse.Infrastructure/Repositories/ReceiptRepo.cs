@@ -21,12 +21,21 @@ namespace MyWerehouse.Infrastructure.Repositories
 		{
 			_werehouseDbContext.Receipts.Add(receipt);
 		}
-		public async Task<Receipt?> GetReceiptByIdAsync(int id)
+
+		public void DeleteReceipt(Receipt receipt)
+		{
+			_werehouseDbContext.Remove(receipt);
+		}
+		public async Task<Receipt?> GetReceiptByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Receipts
-				//.AsNoTracking()
 				.Include(r => r.Pallets)
 					.ThenInclude(pr => pr.ProductsOnPallet)
+				.FirstOrDefaultAsync(r => r.Id == id);
+		}
+		public async Task<Receipt?> GetReceiptOnlyByIdAsync(Guid id)
+		{
+			return await _werehouseDbContext.Receipts
 				.FirstOrDefaultAsync(r => r.Id == id);
 		}
 		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)
@@ -66,6 +75,12 @@ namespace MyWerehouse.Infrastructure.Repositories
 				result = result.Where(i => i.PerformedBy == filter.UserId);
 			}
 			return result;
+		}
+
+		public async Task<int> GetNextNumberOfReceipt()
+		{
+			var number = await _werehouseDbContext.Receipts.MaxAsync(x => (int?)x.ReceiptNumber) ??0;
+			return number + 1;
 		}
 	}
 }

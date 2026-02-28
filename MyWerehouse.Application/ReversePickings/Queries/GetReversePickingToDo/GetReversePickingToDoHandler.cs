@@ -61,7 +61,9 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				BestBefore = pickingTask.BestBefore,
 			};
 			var palletsWithSource = _palletRepo.GetPalletsByFilter(filtr)//TODO reversePallet + reversePallet ;)
-				.Where(p => p.ReceiptId != 0 || p.Receipt != null)
+				.Where(p =>
+				//p.ReceiptId != 0 || 
+				p.Receipt != null)
 				//&& (r=> r.Status == PalletStatus.Available || r.Status == PalletStatus.ToPicking)
 				.Where(p=>p.Status == PalletStatus.Available || p.Status == PalletStatus.ToPicking);
 				;

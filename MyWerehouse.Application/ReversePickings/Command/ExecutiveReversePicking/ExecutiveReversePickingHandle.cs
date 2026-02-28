@@ -48,7 +48,8 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				string? sourcePalletId = null;
 				string? destinationPalletId = null;
 				var issueId = reversePicking.PickingTask.IssueId;
-				if (issueId == 0)
+				var issueNumber = reversePicking.PickingTask.IssueNumber;
+				if (issueId == null)
 					throw new NotFoundIssueException(reversePicking.PickingTask.IssueId);
 				switch (command.Strategy)
 				{
@@ -90,6 +91,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					reversePicking.SourcePalletId,
 					reversePicking.DestinationPalletId,
 					issueId,
+					issueNumber,
 					reversePicking.Quantity,
 					reversePicking.ProductId,
 					ReversePickingStatus.InProgress,

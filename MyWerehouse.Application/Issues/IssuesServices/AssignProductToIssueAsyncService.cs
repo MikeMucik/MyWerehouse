@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Services;
@@ -17,8 +16,6 @@ using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.IssuesServices
 {
@@ -87,10 +84,10 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			//3. pobierz dostępne virtualPallet;
 			var availableVirtualPalletsQuery = await _getVirtualPalletsService.GetVirtualPalletsAsync(product.ProductId, product.BestBefore);
 			//czy na pewno null ?? czy to potrzebne ??
-			if (availableVirtualPalletsQuery is null)
-			{
-				return AssignProductToIssueResult.Fail("Brak palety do pickingu - błąd virtual", product.ProductId);
-			}
+			//if (availableVirtualPalletsQuery is null)
+			//{
+			//	return AssignProductToIssueResult.Fail("Brak palety do pickingu - błąd virtual", product.ProductId);
+			//}
 			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 			if (rest > 0)
 			{

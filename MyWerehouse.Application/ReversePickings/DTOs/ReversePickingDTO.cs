@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 {
 	public class ReversePickingDTO : IMapFrom<ReversePicking>
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 		public required string PickingPalletId { get; set; }
 		//tu trzeba się zastanowić czy to w ogóle potrzebne poniższe dwie pozycje 
 		public string? SourcePalletId { get; set; }//paleta źródłowa na nią wraca towar lub do której dodajemy

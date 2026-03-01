@@ -11,16 +11,17 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 {
-	public class CreateHistoryPickingHandler(IHistoryPickingRepo historyPickingRepo,
-		WerehouseDbContext werehouseDbContext) : INotificationHandler<CreateHistoryPickingNotification>
+	public class CreateHistoryPickingHandler(IHistoryPickingRepo historyPickingRepo)
+		: INotificationHandler<CreateHistoryPickingNotification>
 	{
-		private readonly IHistoryPickingRepo _historyPickingRepo = historyPickingRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IHistoryPickingRepo _historyPickingRepo = historyPickingRepo;		
 
 		public async Task Handle(CreateHistoryPickingNotification request, CancellationToken ct)
 		{			
 			var history = new HistoryPicking
-			{				
+			{			
+				PickingTaskId = request.PickingTaskId,
+				IssueNumber = request.IssueNumber,
 				PalletId = request.PalletId,
 				IssueId = request.IssueId,
 				ProductId = request.ProductId,
@@ -31,8 +32,7 @@ namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 				PerformedBy = request.PerformedBy,
 				DateTime = DateTime.UtcNow,
 			};
-			await _historyPickingRepo.AddHistoryPickingAsync(history, ct);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _historyPickingRepo.AddHistoryPickingAsync(history, ct);			
 		}
 	}
 }

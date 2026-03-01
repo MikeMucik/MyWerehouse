@@ -23,15 +23,12 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 	public class DeleteIssueHandler : IRequestHandler<DeleteIssueCommand, IssueResult>
 	{
 		private readonly IIssueRepo _issueRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IMediator _mediator;
+		private readonly WerehouseDbContext _werehouseDbContext;		
 		public DeleteIssueHandler(IIssueRepo issueRepo,
-			WerehouseDbContext werehouseDbContext,
-			IMediator mediator)
+			WerehouseDbContext werehouseDbContext)
 		{
 			_issueRepo = issueRepo;
-			_werehouseDbContext = werehouseDbContext;
-			_mediator = mediator;
+			_werehouseDbContext = werehouseDbContext;			
 		}
 		public async Task<IssueResult> Handle(DeleteIssueCommand request, CancellationToken ct)
 		{
@@ -42,8 +39,6 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId)
 					?? throw new NotFoundIssueException(request.IssueId);
 
-				List<INotification> palletList = [];
-				List<INotification> pickingTaskList = [];
 				switch (issueToDelete.IssueStatus)
 				{
 					case IssueStatus.New:
@@ -61,39 +56,20 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 						foreach (var pickingTask in issueToDelete.PickingTasks)
 						{
 							pickingTask.PickingStatus = PickingStatus.Cancelled;
-							pickingTask.RequestedQuantity = 0;							
-							pickingTaskList.Add(new CreateHistoryPickingNotification(
-								pickingTask.Id,
-								//pickingTask.PickingTaskNumber,
-								pickingTask.VirtualPallet.PalletId,
-								pickingTask.IssueId,
-								pickingTask.IssueNumber,
-								pickingTask.ProductId,
-								pickingTask.RequestedQuantity,
-								0,
-								PickingStatus.Allocated,
-								PickingStatus.Cancelled,
-								request.UserId,
-								DateTime.UtcNow));							
+							pickingTask.RequestedQuantity = 0;
+							pickingTask.AddHistory(request.UserId, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
 						}
 						break;
 					default:
 						throw new NotFoundIssueException($"Zlecenia {issueToDelete.Id} nie można anulować.");
 				}
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
 				if (!(issueToDelete.IssueStatus == IssueStatus.New))
 				{
 					issueToDelete.AddHistory(request.UserId);
 				}
-				foreach (var p in palletList)
-				{
-					await _mediator.Publish(p, ct);
-				}
-				foreach (var a in pickingTaskList)
-				{
-					await _mediator.Publish(a, ct);
-				}
+				await _werehouseDbContext.SaveChangesAsync(ct);
+				await transaction.CommitAsync(ct);
+
 				return IssueResult.Ok($"Usunięto zamówienie o numerze {issueToDelete.Id}.");
 			}
 			catch (NotFoundIssueException ei)

@@ -5,15 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Moq;
-using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Services;
-using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.PickingPallets.DTOs;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -21,7 +13,6 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
 using MyWerehouse.Application.PickingPallets.Queries.GetListToPicking;
 using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
 
@@ -163,7 +154,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				{
 					new ProductOnPallet
 					{
-						//ProductId = product2.Id,
 						Product = product2,
 						Quantity = 70,
 						DateAdded = new DateTime(2025, 10, 10)
@@ -180,7 +170,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				{
 					new ProductOnPallet
 					{
-						//ProductId = product2.Id,
 						Product= product2,
 						Quantity = 100,
 						DateAdded = new DateTime(2025, 11, 11) }

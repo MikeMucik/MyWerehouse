@@ -1,20 +1,12 @@
 ﻿using System.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Issues.IssuesServices;
-using MyWerehouse.Application.Pallets.Services;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
-using MyWerehouse.Application.PickingPallets.Services;
-using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Events;
@@ -27,14 +19,12 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 		IIssueRepo issueRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
-		IEventCollector eventCollector,
 		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueNewCommand, List<IssueResult>>
 	{
 		private readonly IIssueItemRepo _issueItemRepo = issueItemRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
-		private readonly IEventCollector _eventCollector = eventCollector;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
 		public async Task<List<IssueResult>> Handle(UpdateIssueNewCommand request, CancellationToken ct)
 		{
@@ -61,20 +51,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					//remove old PickingTask to Domain
 					foreach (var pickingTask in listOldPickingTask)
 					{
-						var historyPickingTaskOld = new CreateHistoryPickingNotification(
-							pickingTask.Id,
-							//pickingTask.PickingTaskNumber,
-							pickingTask.VirtualPallet.PalletId,
-							pickingTask.IssueId,
-							pickingTask.IssueNumber,
-							pickingTask.ProductId,
-							pickingTask.RequestedQuantity,
-							0,
-							pickingTask.PickingStatus,
-							PickingStatus.Cancelled,
-							request.DTO.PerformedBy,
-							DateTime.UtcNow);
-						await _mediator.Publish(historyPickingTaskOld, ct);
+						pickingTask.AddHistory(request.DTO.PerformedBy, pickingTask.PickingStatus, PickingStatus.Cancelled, 0);
 						issue.PickingTasks.Remove(pickingTask);
 						_werehouseDbContext.PickingTasks.Remove(pickingTask);
 					}
@@ -86,8 +63,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					{
 						await transaction.CreateSavepointAsync($"BeforeProduct_{product.ProductId}", ct);
 						try
-						{
-							
+						{							
 							var oldProperPallets = oldListPallets.Where(p => p.ProductsOnPallet.First().ProductId == product.ProductId);
 
 							var result = await _assignProductToIssueAsync.AssignProductToIssue(issue, product, IssueAllocationPolicy.FullPalletFirst, oldListPallets, request.DTO.PerformedBy);
@@ -104,15 +80,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 								returnPallet.IssueId = null;
 								returnPallet.Status = PalletStatus.Available;
 							}
-							await _werehouseDbContext.SaveChangesAsync(ct);
-							foreach (var evn in _eventCollector.Events)
-							{
-								await _mediator.Publish(evn, CancellationToken.None);
-							}
-							foreach (var factory in _eventCollector.DeferredEvents)
-							{
-								await _mediator.Publish(factory(), ct);
-							}
+							await _werehouseDbContext.SaveChangesAsync(ct);							
 							resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
 							anySuccess = true;
 
@@ -150,11 +118,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 								// Tutaj DECYZJA: Czy throw? Jeśli rzucisz throw, przerwiesz pętlę dla kolejnych produktów.
 								// Jeśli chcesz kontynuować dla innych produktów, nie rób throw.
 							}
-						}
-						finally
-						{
-							_eventCollector.Clear();
-						}
+						}						
 					}
 					var touchedVirtualPalletIds = listOldPickingTask
 						.Select(a => a.VirtualPalletId)

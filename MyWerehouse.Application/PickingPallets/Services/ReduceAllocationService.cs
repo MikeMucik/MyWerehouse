@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
-using MediatR;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
@@ -17,12 +15,9 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	public class ReduceAllocationService : IReduceAllocationService
 	{
 		private readonly IPickingTaskRepo _pickingTaskRepo;
-		private readonly IEventCollector _eventCollector;
-		public ReduceAllocationService(IPickingTaskRepo pickingTaskRepo,
-			IEventCollector eventCollector)
+		public ReduceAllocationService(IPickingTaskRepo pickingTaskRepo)
 		{
-			_pickingTaskRepo = pickingTaskRepo;
-			_eventCollector = eventCollector;
+			_pickingTaskRepo = pickingTaskRepo;			
 		}
 		public async Task ReduceAllocation(Issue issue, int productId,int quantity, string userId)
 		{			
@@ -36,37 +31,15 @@ namespace MyWerehouse.Application.PickingPallets.Services
 					if (pickingTask.RequestedQuantity > quantity)
 					{
 						pickingTask.RequestedQuantity -= quantity;
-						quantity = 0;						
-						_eventCollector.Add(new CreateHistoryPickingNotification(pickingTask.Id,
-							//pickingTask.PickingTaskNumber,
-								pickingTask.VirtualPallet.PalletId,
-								pickingTask.IssueId,
-								pickingTask.IssueNumber,
-								pickingTask.ProductId,
-								pickingTask.RequestedQuantity,
-								0,
-								PickingStatus.Correction,
-								pickingTask.PickingStatus,
-								userId,
-								DateTime.UtcNow));
+						quantity = 0;
+						pickingTask.AddHistory(userId, PickingStatus.Correction, pickingTask.PickingStatus, 0);
 					}
 					else
 					{
 						quantity -= pickingTask.RequestedQuantity;
 						pickingTask.PickingStatus = PickingStatus.Cancelled;
-						pickingTask.RequestedQuantity = 0;						
-						_eventCollector.Add(new CreateHistoryPickingNotification(pickingTask.Id,
-							//pickingTask.PickingTaskNumber,
-								pickingTask.VirtualPallet.PalletId,
-								pickingTask.IssueId,
-								pickingTask.IssueNumber,
-								pickingTask.ProductId,
-								pickingTask.RequestedQuantity,
-								0,
-								PickingStatus.Correction,
-								pickingTask.PickingStatus,
-								userId,
-								DateTime.UtcNow));
+						pickingTask.RequestedQuantity = 0;
+						pickingTask.AddHistory(userId, PickingStatus.Correction, pickingTask.PickingStatus, 0);
 					}
 				}				
 			}			

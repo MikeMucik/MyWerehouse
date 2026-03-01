@@ -23,7 +23,7 @@ using MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integrat
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceTests.Integration
 {
-	public class ExecutiveReversePickingTests : ReverseIntegrationCommandService
+	public class ExecutiveReversePickingTests : TestBase
 	{		
 		[Fact]
 		public async Task ReversePickingExecute_BackToSourcePallet_ShouldRestorePalletsAvailabilityAndDoneReversePicking()
@@ -82,7 +82,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				};
 			var recipt = new Receipt
 			{
-				//Id = Guid.NewGuid(),
 				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
@@ -119,7 +118,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var toPicking = new PickingTaskDTO
 			{
 				Id = pickingFromBase.Id,
-				//Id = pickingFromBase.PickingTaskNumber,
 				PickingStatus = PickingStatus.Allocated,
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
@@ -200,10 +198,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 		[Fact]
 		public async Task ReversePickingExecute_ProductToNewPallet_ShouldRestorePalletsAvailabilityAndDoneReversePicking()
 		{
-			// Arrange – setup initial data
-
-			//var _issueService = new IssueService(Mediator);
-
+			// Arrange 
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -239,7 +234,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P1",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -250,7 +244,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P2",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -313,7 +306,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				.FirstOrDefaultAsync(x => x.Id == pickingFromBase.Id);
 			Assert.NotNull(pickingTaskDone);
 
-
 			// Act 3 - cancel issue
 			var issueToCancelId = issue.Id;
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
@@ -375,14 +367,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.NotNull(pickingPalletAfterReverse);
 			Assert.Equal(0, pickingPalletAfterReverse.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(PalletStatus.Archived, pickingPalletAfterReverse.Status);
+
+			var history = DbContext.HistoryPickings;
+			Assert.NotNull(history);
+			var history1 = DbContext.HistoryReversePickings;
+			Assert.NotNull(history1);
+			Assert.Equal(2, history1.Count());
 		}
 		[Fact]
 		public async Task ReversePickingExecute_ProductToExistPallet_ShouldRestorePalletsAvailabilityAndDoneReversePicking()
 		{
-			// Arrange – setup initial data
-
-			//var _issueService = new IssueService(Mediator);
-
+			// Arrange 
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -418,7 +413,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P1",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -429,7 +423,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P2",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -440,7 +433,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P3",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 1, BestBefore = new DateOnly(2026,1,1) }
@@ -486,7 +478,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var toPicking = new PickingTaskDTO
 			{
 				Id = pickingFromBase.Id,
-				//Id = pickingFromBase.PickingTaskNumber,
 				PickingStatus = PickingStatus.Allocated,
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
@@ -572,10 +563,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 		[Fact]
 		public async Task ReversePickingExecute_ProductToExistPallet_ShouldRestorePalletsAvailabilityAndDoneReversePickingNotArchaivePickingPallet()
 		{
-			// Arrange – setup initial data
-
-			//var _issueService = new IssueService(Mediator);
-
+			// Arrange 
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -618,7 +606,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P1",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -629,7 +616,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P2",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -640,7 +626,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P3",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 1, BestBefore = new DateOnly(2026,1,1) }
@@ -651,7 +636,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P4",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -702,7 +686,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var toPicking = new PickingTaskDTO
 			{
 				Id = pickingFromBase.Id,
-				//Id = pickingFromBase.PickingTaskNumber,
 				PickingStatus = PickingStatus.Allocated,
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
@@ -718,7 +701,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var pickingTaskDone = await DbContext.PickingTasks
 				.FirstOrDefaultAsync(x => x.IssueId == issue.Id && x.ProductId == product.Id);
 			Assert.NotNull(pickingTaskDone);
-
 
 			// Act 3 - cancel issue
 			var issueToCancelId = issue.Id;
@@ -836,7 +818,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P1",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -847,7 +828,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P2",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -858,7 +838,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P3",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 1, BestBefore = new DateOnly(2026,1,1) }
@@ -869,7 +848,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 						Id = "P4",
 						Location = location,
 						Status = PalletStatus.Available,
-						//ReceiptId = 1,
 						ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
@@ -916,7 +894,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var toPicking = new PickingTaskDTO
 			{
 				Id = pickingFromBase.Id,
-				//Id = pickingFromBase.PickingTaskNumber,
 				PickingStatus = PickingStatus.Allocated,
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
@@ -938,7 +915,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var toPicking1 = new PickingTaskDTO
 			{
 				Id = pickingFromBase1.Id,
-				//Id = pickingFromBase1.PickingTaskNumber,
 				PickingStatus = PickingStatus.Allocated,
 				BestBefore = pickingFromBase1.BestBefore,
 				RequestedQuantity = pickingFromBase1.RequestedQuantity,

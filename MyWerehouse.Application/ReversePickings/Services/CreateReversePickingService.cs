@@ -5,13 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
-using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.ReversePickings.Services
 {
@@ -19,17 +15,14 @@ namespace MyWerehouse.Application.ReversePickings.Services
 	{
 		private readonly IPalletRepo _palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
-		private readonly IReversePickingRepo _reversePickingRepo;		
-		private readonly IEventCollector _eventCollector;
+		private readonly IReversePickingRepo _reversePickingRepo;	
 		public CreateReversePickingService(IPalletRepo palletRepo,
 			IPickingTaskRepo pickingTaskRepo,
-			IReversePickingRepo reversePickingRepo,			
-			IEventCollector eventCollector)
+			IReversePickingRepo reversePickingRepo)
 		{
 			_palletRepo = palletRepo;
 			_pickingTaskRepo = pickingTaskRepo;
-			_reversePickingRepo = reversePickingRepo;
-			_eventCollector = eventCollector;
+			_reversePickingRepo = reversePickingRepo;			
 		}
 
 		public async Task CreateReversePicking(string palletId, string userId)
@@ -64,10 +57,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			}			
 			foreach (var task in listTasks)
 			{
-				var itemHistory = new HistoryReversePickingItem(
-					task.Id, task.SourcePalletId, task.DestinationPalletId, issue.Id, issue.IssueNumber,
-					task.ProductId, task.Quantity, null, task.Status);
-				_eventCollector.Add(new CreateHistoryReversePickingNotification(itemHistory, userId));
+				task.AddHistory(userId, issue.Id, issue.IssueNumber, ReversePickingStatus.Pending, ReversePickingStatus.Pending);
 			}
 		}
 	}

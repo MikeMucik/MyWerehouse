@@ -5,13 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -24,7 +21,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IIssueRepo _issueRepo;
 		private readonly IMediator _mediator;
-		private readonly IEventCollector _eventCollector;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
@@ -35,7 +31,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 			WerehouseDbContext werehouseDbContext,
 			IIssueRepo issueRepo,
 			IMediator mediator,
-			IEventCollector eventCollector,
 			IAddPickingTaskToIssueService addPickingTaskToIssueService,
 			IProcessPickingActionService processPickingActionService,
 			IPickingTaskRepo pickingTaskRepo
@@ -47,7 +42,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 			_werehouseDbContext = werehouseDbContext;
 			_issueRepo = issueRepo;
 			_mediator = mediator;
-			_eventCollector = eventCollector;
 			_addPickingTaskToIssueService = addPickingTaskToIssueService;
 			_processPickingActionService = processPickingActionService;
 			_pickingTaskRepo = pickingTaskRepo;
@@ -60,10 +54,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource)
 					?? throw new NotFoundPalletException(command.PalletIdSource);
-				//if (_werehouseDbContext.Entry(pallet).State == EntityState.Detached)
-				//{
-				//	_werehouseDbContext.Attach(pallet);
-				//}
+				
 				if (pallet.ProductsOnPallet.Count > 1)
 				{
 					return PickingResult.Fail("Zadania nie można zrealizować, paleta nie nadaje się do pobrań.");
@@ -101,8 +92,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				{
 					int virtualPalletId = vpId;
 					
-					virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(virtualPalletId);
-					//virtualPallet.PickingTasks.Add(pickingTask);
+					virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(virtualPalletId);					
 				}
 				else
 				{
@@ -113,7 +103,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 						DateMoved = DateTime.UtcNow,
 						LocationId = pallet.LocationId,
 						InitialPalletQuantity = pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
-						//PickingTasks = new List<PickingTask>()
 						PickingTasks = [pickingTask]
 					};
 					_pickingPalletRepo.AddPalletToPicking(virtualPallet);  // Dodaj do repo
@@ -121,8 +110,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				if (command.Quanitity > virtualPallet.RemainingQuantity)
 				{
 					return PickingResult.Fail("Zadania nie można zrealizować, mniej na palecie niż chęć pobrania");
-				}
-				//virtualPallet.PickingTasks.Add(pickingTask);
+				}				
 				pickingTask.VirtualPallet = virtualPallet;
 				var completion = PickingCompletion.Full;
 				if (command.Quanitity < pickingTask.RequestedQuantity - pickingTask.PickedQuantity)
@@ -132,12 +120,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 			 	await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quanitity, command.UserId, pickingTask, completion);
 								
 				pickingTask.AddHistory(command.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, command.Quanitity);
-				
-				var entries = _werehouseDbContext.ChangeTracker.Entries()
-				.Select(e => new { e.Entity.GetType().Name, e.State })
-				.ToList();
-
-
+			
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				
 				await transaction.CommitAsync(ct);
@@ -161,10 +144,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");				
 				return PickingResult.Fail("Wystąpił nieoczekiwany błąd. Zmiany zostały cofnięte.");
-			}
-			finally
-			{
-				_eventCollector.Clear();
 			}
 		}
 	}

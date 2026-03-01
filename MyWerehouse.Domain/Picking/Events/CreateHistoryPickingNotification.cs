@@ -8,22 +8,7 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Domain.Picking.Events
-{
-	//public record HistoryDataPicking(
-	//	int? PickingTaskId,
-	//	string PalletId,
-	//	Guid IssueId,
-	//	int IssueNumber,
-	//	int ProductId,
-	//	int QuantityAllocated,
-	//	int QuantityPicked,
-	//	PickingStatus StatusBefore,
-	//	PickingStatus StatusAfter,
-	//	string PerformedBy,
-	//	DateTime DateTime);
-
-	//public record CreateHistoryPickingNotification(
-	//	HistoryDataPicking DataPicking) : INotification;
+{	
 	public record CreateHistoryPickingNotification(
 		Guid PickingTaskId,
 		//int PickingTaskNumber,

@@ -298,18 +298,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			//Assert
 			var historyPallets = DbContext.PalletMovements
-				//.Where(h => h.PalletId == "P2")
+				.Where(h => h.PalletId == "P2")
 				.ToList();
 			// Assert – historia alokacji po aktualizacji
 			var history = DbContext.HistoryPickings
-				.Where(h => h.PickingTaskId == pickingTask.Id)
-				.OrderBy(h => h.Id)
+				//.Where(h => h.PickingTaskId == pickingTask.Id)
+				.OrderBy(h => h.DateTime)
 				.ToList();
-			// Powinny być 2 wpisy: Create + Correction
-			Assert.Equal(1, history.Count);// tak nie powinno być ma być 2
-			//Assert.Equal(2, history.Count);
-			//Assert.Single(history);
-			// Ostatni wpis powinien być Correction
+			// Powinny być 3 wpisy: Create + Cancel + Create
+			Assert.Equal(3, history.Count);
+										   
+										   // Ostatni wpis powinien być Correction
+			var firstHistory = history.Skip(1).First();
+			Assert.Equal(PickingStatus.Cancelled, firstHistory.StatusAfter);
 			var lastHistory = history.Last();
 			Assert.Equal(PickingStatus.Allocated, lastHistory.StatusAfter);
 			Assert.Equal("User2", lastHistory.PerformedBy);

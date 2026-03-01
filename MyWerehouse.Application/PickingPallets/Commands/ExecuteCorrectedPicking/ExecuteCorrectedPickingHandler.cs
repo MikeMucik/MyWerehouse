@@ -5,11 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Events;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-//using MyWerehouse.Application.PickingPallets.Commands.ExecuteManualPicking;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -26,7 +23,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IIssueRepo _issueRepo;
 		private readonly IMediator _mediator;
-		private readonly IEventCollector _eventCollector;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService;
 		private readonly IReduceAllocationService _reduceAllocationService;
@@ -36,7 +32,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 			WerehouseDbContext werehouseDbContext,
 			IIssueRepo issueRepo,
 			IMediator mediator,
-			IEventCollector eventCollector,
 			IAddPickingTaskToIssueService addPickingTaskToIssueService,
 			IProcessPickingActionService processPickingActionService,
 			IReduceAllocationService reduceAllocationService)
@@ -47,7 +42,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 			_werehouseDbContext = werehouseDbContext;
 			_issueRepo = issueRepo;
 			_mediator = mediator;
-			_eventCollector = eventCollector;
 			_addPickingTaskToIssueService = addPickingTaskToIssueService;
 			_processPickingActionService = processPickingActionService;
 			_reduceAllocationService = reduceAllocationService;
@@ -104,26 +98,18 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 				var newPickingTask = newPickingTaskInfo.OnePickingTask;
 				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, quantityToPick, request.UserId, newPickingTask, PickingCompletion.Full);
 
-				var debugEntries = _werehouseDbContext.ChangeTracker.Entries()
-					.Where(e => e.State != EntityState.Unchanged) // Pokaż tylko to, co EF chce zmienić
-					.Select(e => new
-					{
-						Entity = e.Entity.GetType().Name,
-						State = e.State,
-						DebugView = e.DebugView.ShortView
-					})
-					.ToList();
+				//var debugEntries = _werehouseDbContext.ChangeTracker.Entries()
+				//	.Where(e => e.State != EntityState.Unchanged) // Pokaż tylko to, co EF chce zmienić
+				//	.Select(e => new
+				//	{
+				//		Entity = e.Entity.GetType().Name,
+				//		State = e.State,
+				//		DebugView = e.DebugView.ShortView
+				//	})
+				//	.ToList();
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				foreach (var evn in _eventCollector.Events)
-				{
-					await _mediator.Publish(evn, ct);
-				}
-				foreach (var factory in _eventCollector.DeferredEvents)
-				{
-					await _mediator.Publish(factory(), ct);
-				}
-				//await _werehouseDbContext.SaveChangesAsync(ct);
+				
 				await transaction.CommitAsync(ct);
 
 				return PickingResult.Ok("Towar dołączono do zlecenia");
@@ -145,30 +131,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");				
 				return PickingResult.Fail("Wystąpił nieoczekiwany błąd. Zmiany zostały cofnięte.");
 			}
-			finally
-			{
-				_eventCollector.Clear();
-			}
 		}
 	}
 }
-//var pickingTaskList = await _mediator.Send(new ReducePickingTaskCommand(issue, product.ProductId, quantityToPick, request.UserId), ct);
-
-//var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, product.ProductId);
-//foreach (var item in pickingTasks)
-//{
-//	item.PickingStatus = PickingStatus.Cancelled;
-//	_eventCollector.Add(new CreateHistoryPickingNotification(new HistoryDataPicking
-//	(
-//					item.Id,
-//					item.VirtualPallet.PalletId,
-//					item.IssueId,
-//					item.ProductId,
-//					item.Quantity,
-//					0,
-//					PickingStatus.Allocated,
-//					item.PickingStatus,
-//					request.UserId,
-//					DateTime.UtcNow
-//	)));
-//}

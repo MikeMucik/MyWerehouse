@@ -22,7 +22,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 		public async Task ShowReversePicking_GetReversePickingAsync_ReturnRecord()
 		{
 			//Arrange
-			var id = 1;
+			var reversePickingTaskId1 = Guid.Parse("11111111-1111-1111-2222-111111111111");
+			var id = reversePickingTaskId1;
 			var pickingId2 = Guid.Parse("11111111-2222-2222-1111-111111111111");
 			//Act
 			var result = await _reversePickingRepo.GetReversePickingAsync(id);

@@ -4,11 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -19,14 +16,12 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 {
 	public class ExecutiveReversePickingHandle(WerehouseDbContext werehouseDbContext,
 		IReversePickingRepo reversePickingRepo,
-		IEventCollector eventCollector,
 		IMediator mediator,
 		IAddProductsToPalletService addProductsToPalletService,
 		IPalletRepo palletRepo) : IRequestHandler<ExecutiveReversePickingCommand, ReversePickingResult>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
-		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
-		private readonly IEventCollector _eventCollector = eventCollector;
+		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;		
 		private readonly IMediator _mediator = mediator;
 		private readonly IAddProductsToPalletService _addProductsToPalletService = addProductsToPalletService;
 		private readonly IPalletRepo _palletRepo = palletRepo;
@@ -43,7 +38,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				}
 				var pickingPallet = await _palletRepo.GetPalletByIdAsync(command.PickingPalletId)
 					?? throw new NotFoundPalletException("Brak palety do dekompletacji");
-				var productOnPallet = pickingPallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == reversePicking.ProductId);
+				var productOnPallet = pickingPallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == reversePicking.ProductId);//
 				reversePicking.Status = ReversePickingStatus.InProgress;
 				string? sourcePalletId = null;
 				string? destinationPalletId = null;
@@ -74,7 +69,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 
 						//default
 				}
-				productOnPallet.Quantity = 0;
+				productOnPallet.Quantity = 0;//
 				if (pickingPallet.ProductsOnPallet.All(x => x.Quantity == 0))
 				{
 					pickingPallet.Status = PalletStatus.Archived;
@@ -84,27 +79,9 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					pickingPallet.Status = PalletStatus.ReversePicking;//do przemyślenia
 				}
 				reversePicking.Status = ReversePickingStatus.Completed;
-				
+				reversePicking.AddHistory(command.UserId, issueId,issueNumber,ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
-				var history = new HistoryReversePickingItem(reversePicking.Id,
-					reversePicking.SourcePalletId,
-					reversePicking.DestinationPalletId,
-					issueId,
-					issueNumber,
-					reversePicking.Quantity,
-					reversePicking.ProductId,
-					ReversePickingStatus.InProgress,
-					ReversePickingStatus.Completed);
-				await _mediator.Publish(new CreateHistoryReversePickingNotification(history, command.UserId), ct);
-				foreach (var evn in _eventCollector.Events)
-				{
-					await _mediator.Publish(evn, ct);
-				}
-				foreach (var factory in _eventCollector.DeferredEvents)
-				{
-					await _mediator.Publish(factory(), ct);
-				}
+				await transaction.CommitAsync(ct);				
 				return result;
 			}
 			catch (NotFoundIssueException ie)
@@ -128,11 +105,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
 				throw new InvalidOperationException("Wystąpił błąd podczas wykonywania dekompletacji.", ex);
-			}
-			finally
-			{
-				_eventCollector.Clear();
-			}
+			}			
 		}
 	}
 }

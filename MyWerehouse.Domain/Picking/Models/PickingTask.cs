@@ -12,8 +12,7 @@ namespace MyWerehouse.Domain.Picking.Models
 {
 	public class PickingTask : AggregateRoots
 	{
-		public Guid Id { get; set; } = Guid.NewGuid(); //do zmiany z set na private set
-		//public int PickingTaskNumber { get; set; }
+		public Guid Id { get; set; } = Guid.NewGuid(); //do zmiany z set na private set		
 		public int? VirtualPalletId { get; set; }
 		public VirtualPallet? VirtualPallet { get; set; }
 		public Guid IssueId { get; set; }		
@@ -57,7 +56,6 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			this.AddDomainEvent(new CreateHistoryPickingNotification(
 				Id,
-				//PickingTaskNumber,
 				VirtualPallet.PalletId,
 				IssueId,
 				IssueNumber,

@@ -193,7 +193,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Assert.Equal(PickingStatus.Cancelled, a.PickingStatus);
 			}
 			// Historia powinna się dodać (jeśli masz tabelę HistoryPicking)
-			var hhistory = DbContext.HandPickingTasks.FirstOrDefault(h=>h.IssueId == issueId);
+			var hhistory = DbContext.PickingTasks.FirstOrDefault(h=>h.IssueId == issueId);
 			var history = DbContext.HistoryPickings
 				.Where(h => h.PickingTaskId == issue.PickingTasks.First().Id)
 				.ToList();

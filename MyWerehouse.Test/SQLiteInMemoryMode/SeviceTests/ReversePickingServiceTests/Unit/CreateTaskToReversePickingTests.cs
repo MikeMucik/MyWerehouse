@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Clients.Models;
@@ -15,13 +14,11 @@ using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Repositories;
-using MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceTests.Integration;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceTests.Unit
 {
-	public class CreateTaskToReversePickingTests : ReverseIntegrationCommandService
-	{
-	
+	public class CreateTaskToReversePickingTests : TestBase
+	{	
 		//HappyPath
 		[Fact]
 		public async Task CreateTaskToReversePicking_ProperData_AddToBase()
@@ -30,8 +27,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var _palletRepo = new PalletRepo(DbContext);
 			var _pickingTaskRepo = new PickingTaskRepo(DbContext);
 			var _reversePickingRepo = new ReversePickingRepo(DbContext);
-			var _eventCollector = new EventCollector();
-			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo, _eventCollector);
+			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo);
 			var category = new Category
 			{
 				Name = "Category",
@@ -149,11 +145,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			await _createReversePickingTask.CreateReversePicking(pickingPallet.Id, "UserReverse");
 			DbContext.SaveChanges();
 			//Assert			
-			var taskReverse = DbContext.ReversePickings.FirstOrDefault();
+			var taskReverse = DbContext.ReversePickings.SingleOrDefault();
 			Assert.NotNull(taskReverse);
-			
-			
-		}
+
+			// 1. Poprawna paleta źródłowa
+			Assert.Equal(pickingPallet.Id, taskReverse.PickingPalletId);
+
+			// 2. Poprawne Issue
+			Assert.Equal(issue.Id, taskReverse.PickingTask.IssueId);
+
+			// 3. Ilość cofnięta
+			Assert.Equal(40, taskReverse.Quantity);
+
+			// 4. Użytkownik wykonujący
+			Assert.Equal("UserReverse", taskReverse.UserId);
+
+			// 5. Reverse powinien być zapisany w bazie tylko jeden
+			Assert.Equal(1, DbContext.ReversePickings.Count());
+			}
 		//SadPath
 		[Fact]
 		public async Task CreateTaskToReversePicking_NonPickingPallet_ThrowInfo()
@@ -162,8 +171,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var _palletRepo = new PalletRepo(DbContext);
 			var _pickingTaskRepo = new PickingTaskRepo(DbContext);
 			var _reversePickingRepo = new ReversePickingRepo(DbContext);
-			var _eventCollector = new EventCollector();
-			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo, _eventCollector);
+			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo);
 			var category = new Category
 			{
 				Name = "Category",

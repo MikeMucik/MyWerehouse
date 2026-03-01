@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking
 {
-	public record ExecutiveReversePickingCommand(int TaskReversedId,
+	public record ExecutiveReversePickingCommand(Guid TaskReversedId,
 		ReversePickingStrategy Strategy, string PickingPalletId, 
 		string UserId, List<Pallet>? Pallets):IRequest<ReversePickingResult>;	
 }

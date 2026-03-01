@@ -575,11 +575,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						LastUpdated = new DateTime(2025, 5, 6)
 					});
 			}
+			var reversePickingTaskId1 = Guid.Parse("11111111-1111-1111-2222-111111111111");
+			var reversePickingTaskId2 = Guid.Parse("11111111-1111-1111-2333-111111111111");
 			if (!context.ReversePickings.Any())
 			{
 				context.ReversePickings.AddRange(
 					new ReversePicking
 					{
+						Id = reversePickingTaskId1,
 						PickingTaskId = pickingId2,
 						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
@@ -591,6 +594,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new ReversePicking
 					{
+						Id = reversePickingTaskId2,
 						PickingTaskId = pickingId5,
 						ProductId = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),

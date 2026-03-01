@@ -3,35 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Query;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.ReversePickings.Services
 {
 	public class AddProductsToPalletService : IAddProductsToPalletService
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IReversePickingRepo _reversePickingRepo;
-		private readonly IEventCollector _eventCollector;
 		private readonly IPalletRepo _palletRepo;
 		private readonly IProductRepo _productRepo;
-		public AddProductsToPalletService(WerehouseDbContext werehouseDbContext,
-			IReversePickingRepo reversePickingRepo,
-			IEventCollector eventCollector,
+		public AddProductsToPalletService(
 			IPalletRepo palletRepo,
 			IProductRepo productRepo)
-		{
-			 _reversePickingRepo = reversePickingRepo;
-			_werehouseDbContext	= werehouseDbContext;
-			_eventCollector = eventCollector;
+		{			
 			_palletRepo = palletRepo;
 			_productRepo = productRepo;
 		}

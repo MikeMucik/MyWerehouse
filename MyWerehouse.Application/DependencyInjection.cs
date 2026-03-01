@@ -10,7 +10,6 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Common.Behaviors;
 using MyWerehouse.Application.Common.Commands;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.IssuesServices;
@@ -32,7 +31,6 @@ namespace MyWerehouse.Application
 			services.AddTransient<IInventoryService, InventoryService>();//do wywalenia??
 			services.AddTransient<ILocationService, LocationService>();
 			services.AddTransient<IProductService, ProductService>();
-			services.AddTransient<IReversePickingService, ReversePickingService>();//do wywalenia??
 																				   //services.AddAutoMapper(Assembly.GetExecutingAssembly());
 			services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
 			services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -41,7 +39,6 @@ namespace MyWerehouse.Application
 				cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
 				cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 			});
-			services.AddScoped<IEventCollector, EventCollector>();
 			services.AddScoped<ICommandCollector, CommandCollector>();//do wywalenia??
 			services.AddTransient<ISynchronizerProductsConfig, SynchronizerProductsConfig>();
 			//new services
@@ -53,11 +50,9 @@ namespace MyWerehouse.Application
 			services.AddScoped<IGetProductCountService, GetProductCountService>();
 			services.AddScoped<IGetNumberPalletsAndRestService, GetNumberPalletsAndRestService>();
 			services.AddScoped<IGetAvailablePalletsByProductService, GetAvailablePalletsByProductService>();
-			services.AddScoped<IAssignFullPalletToIssueService, AssignFullPalletToIssueService>();
 			services.AddScoped<IAssignProductToIssueService, AssignProductToIssueAsyncService>();
 			services.AddScoped<IAddProductsToPalletService, AddProductsToPalletService>();
 			services.AddScoped<ICreateReversePickingService, CreateReversePickingService>();
-			services.AddScoped<IAddProductsToPalletService, AddProductsToPalletService>();
 			return services;
 		}
 	}

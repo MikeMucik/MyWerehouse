@@ -55,7 +55,7 @@ namespace MyWerehouse.Infrastructure
 			services.AddScoped<IReceiptRepo, ReceiptRepo>();
 			services.AddScoped<IReversePickingRepo, ReversePickingRepo>();
 
-			services.AddScoped<IHandPickingTaskRepo, HandPickingRepo>();
+			
 
 
 			return services;

@@ -4,18 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.ReversePickings.Services;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Events;
-using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -27,15 +20,13 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IMediator _mediator;
-		private readonly IEventCollector _eventCollector;		
+		private readonly IMediator _mediator;		
 		private readonly ICreateReversePickingService _createReversePickingService;
 		public CancelIssueHandler(IIssueRepo issueRepo,
 			IPickingTaskRepo pickingTaskRepo,
 			IPickingPalletRepo pickingPalletRepo,
 			WerehouseDbContext werehouseDbContext,
-			IMediator mediator,
-			IEventCollector eventCollector,			
+			IMediator mediator,	
 			ICreateReversePickingService createReversePickingService
 			)
 		{
@@ -43,8 +34,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			_pickingTaskRepo = pickingTaskRepo;
 			_pickingPalletRepo = pickingPalletRepo;
 			_werehouseDbContext = werehouseDbContext;
-			_mediator = mediator;
-			_eventCollector = eventCollector;			
+			_mediator = mediator;			
 			_createReversePickingService = createReversePickingService;
 		}
 		public async Task<IssueResult> Handle(CancelIssueCommand request, CancellationToken ct)
@@ -81,20 +71,8 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 					foreach (var pickingTask in pickingTaskToRemove)
 					{
 						pickingTask.PickingStatus = PickingStatus.Cancelled;
-
-						_eventCollector.Add(new CreateHistoryPickingNotification(							
-								pickingTask.Id,
-								//pickingTask.PickingTaskNumber,
-								pickingTask.VirtualPallet.PalletId,								
-								pickingTask.IssueId,
-								pickingTask.IssueNumber,
-								pickingTask.ProductId,
-								pickingTask.RequestedQuantity,
-								0,
-								PickingStatus.Allocated,
-								pickingTask.PickingStatus,
-								request.UserId,
-								DateTime.UtcNow));
+						pickingTask.AddHistory(request.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, 0);
+						
 						vp.PickingTasks.Remove(pickingTask);
 						_pickingTaskRepo.DeletePickingTask(pickingTask);
 					}
@@ -108,11 +86,6 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				issue.Cancel(request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				
-				foreach (var evn in _eventCollector.Events)
-				{
-					await _mediator.Publish(evn, ct);
-				}				
 				return IssueResult.Ok($"Anulowano zlecenie {request.IssueId}.");
 			}
 			catch (NotFoundIssueException ie)
@@ -126,23 +99,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
 				throw new InvalidOperationException("Wystąpił błąd podczas usuwania zlecenia.", ex);
-			}
-			finally
-			{
-				_eventCollector.Clear();
-			}
+			}			
 		}
 	}
 }
-//var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(request.IssueId);
-//var pickingTasksNotDone = pickingTasks.Where(a=>a.PickingStatus == PickingStatus.Allocated).ToList();
-//foreach (var pickingTask in pickingTasksNotDone)
-//{
-//	pickingTask.PickingStatus = PickingStatus.Cancelled;
-//	_eventCollector.Add(new CreateHistoryPickingNotification(pickingTask.VirtualPalletId,
-//		pickingTask.Id,
-//		request.UserId,
-//		PickingStatus.Allocated,
-//		pickingTask.Quantity));
-//	_pickingTaskRepo.DeletePickingTask(pickingTask);//czy wszystkie
-//}

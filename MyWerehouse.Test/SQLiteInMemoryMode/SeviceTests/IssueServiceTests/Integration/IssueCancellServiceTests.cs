@@ -435,8 +435,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);
 			var toPicking = new PickingTaskDTO
 			{
-				//Id = pickingFromBase.Id,
-				//Id = pickingFromBase.PickingTaskNumber,
+				Id = pickingFromBase.Id,
 				PickingStatus = PickingStatus.Allocated,
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,

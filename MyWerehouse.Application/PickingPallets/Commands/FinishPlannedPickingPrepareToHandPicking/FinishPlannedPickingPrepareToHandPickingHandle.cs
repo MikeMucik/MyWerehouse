@@ -19,19 +19,16 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IIssueRepo _issueRepo;
-		//private readonly IHandPickingTaskRepo _handPickingTaskRepo;
 		private readonly IMapper _mapper;
 		public FinishPlannedPickingPrepareToHandPickingHandle(
 			WerehouseDbContext werehouseDbContext,
 			IPickingTaskRepo pickingTaskRepo,
 			IIssueRepo issueRepo,
-			//IHandPickingTaskRepo handPickingTaskRepo,
 			IMapper mapper)
 		{
 			_werehouseDbContext = werehouseDbContext;
 			_pickingTaskRepo = pickingTaskRepo;
 			_issueRepo = issueRepo;
-			//_handPickingTaskRepo = handPickingTaskRepo;
 			_mapper = mapper;
 		}
 		public async Task<List<PickingTaskDTO>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)

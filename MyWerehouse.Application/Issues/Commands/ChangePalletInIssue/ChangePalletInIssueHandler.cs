@@ -4,15 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Events;
-using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
@@ -20,13 +14,11 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 {
 	public class ChangePalletInIssueHandler(WerehouseDbContext werehouseDbContext,
 		IIssueRepo issueRepo,
-		IPalletRepo palletRepo,
-		IMediator mediator) : IRequestHandler<ChangePalletInIssueCommand, IssueResult>
+		IPalletRepo palletRepo) : IRequestHandler<ChangePalletInIssueCommand, IssueResult>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IMediator _mediator = mediator;
+		private readonly IPalletRepo _palletRepo = palletRepo;		
 
 		public async Task<IssueResult> Handle(ChangePalletInIssueCommand request, CancellationToken ct)
 		{

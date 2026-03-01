@@ -27,7 +27,6 @@ namespace MyWerehouse.Infrastructure
 		public DbSet<PickingTask> PickingTasks { get; set; }
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Client> Clients { get; set; }
-		public DbSet<HandPickingTask> HandPickingTasks { get; set; }
 		public DbSet<HistoryIssue> HistoryIssues { get; set; }
 		public DbSet<HistoryIssueDetail> HistoryIssueDetails { get; set; }
 		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }//																
@@ -166,14 +165,7 @@ namespace MyWerehouse.Infrastructure
 					.UseCollation("SQL_Latin1_General_CP1_CI_AS");
 				}
 			});
-			modelBuilder.Entity<HandPickingTask>(entity =>
-			{
-				entity.HasKey(e => e.Id);
-				entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-				entity.Property(a => a.PickingStatus)
-				.HasConversion<string>();
-			});
 			modelBuilder.Entity<HistoryIssue>(entity =>
 			{
 				entity.HasKey(e => e.Id);
@@ -412,7 +404,7 @@ namespace MyWerehouse.Infrastructure
 			modelBuilder.Entity<ReversePicking>(entity =>
 			{
 				entity.HasKey(e => e.Id);
-				entity.Property(x => x.Id).ValueGeneratedOnAdd();
+				entity.Property(x => x.Id).ValueGeneratedNever();
 			});
 		}
 	}

@@ -4,17 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -27,8 +23,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 		private readonly IIssueRepo _issueRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IMediator _mediator;
-		private readonly IEventCollector _eventCollector;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService;
 		public DoPlannedPickingHandler(IPickingTaskRepo pickingTaskRepo,
@@ -36,8 +30,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 			IIssueRepo issueRepo,
 			IPickingPalletRepo pickingPalletRepo,
 			WerehouseDbContext werehouseDbContext,
-			IMediator mediator,
-			IEventCollector eventCollector,
 			IAddPickingTaskToIssueService addPickingTaskToIssueService,
 			IProcessPickingActionService processPickingActionService)
 		{
@@ -46,8 +38,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 			_issueRepo = issueRepo;
 			_pickingPalletRepo = pickingPalletRepo;
 			_werehouseDbContext = werehouseDbContext;
-			_mediator = mediator;
-			_eventCollector = eventCollector;
 			_addPickingTaskToIssueService = addPickingTaskToIssueService;
 			_processPickingActionService = processPickingActionService;
 		}
@@ -79,33 +69,19 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 
 				await _processPickingActionService.ProcessPicking(sourcePallet, issue, request.PickingTaskDTO.ProductId,
 						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion);
-				
-				_eventCollector.Add(new CreateHistoryPickingNotification(pickingTaskToChange.Id,
-					//pickingTaskToChange.PickingTaskNumber,
-					pickingTaskToChange.VirtualPallet.PalletId,
-							pickingTaskToChange.IssueId, pickingTaskToChange.IssueNumber, pickingTaskToChange.ProductId, pickingTaskToChange.RequestedQuantity,
-							request.PickingTaskDTO.PickedQuantity, PickingStatus.Allocated, pickingTaskToChange.PickingStatus,
-							request.UserId, DateTime.UtcNow));
-
+				pickingTaskToChange.AddHistory(request.UserId, PickingStatus.Allocated, pickingTaskToChange.PickingStatus, request.PickingTaskDTO.PickedQuantity);
 				if (neededQuantity == pickedQuantity)
 				{
 					await _werehouseDbContext.SaveChangesAsync(ct);
-					await transaction.CommitAsync(ct);
-					foreach (var evn in _eventCollector.Events)
-					{
-						await _mediator.Publish(evn, CancellationToken.None);
-					}
+					await transaction.CommitAsync(ct);					
 					return PickingResult.Ok("Towar dołączono do zlecenia");
 				}
 				else
 				{
 					//pallet lock with non-conformity 
-					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
-					//sourcePallet.Status = PalletStatus.OnHold;
-					//_eventCollector.Add(new ChangeStatusOfPalletNotification(sourcePallet.Id, sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(), sourcePallet.LocationId, sourcePallet.Location.ToSnopShot(),
-					//	ReasonMovement.Correction, request.UserId, PalletStatus.OnHold, null));
+					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);					
 					var newQuantityToPickingTask = neededQuantity - pickedQuantity;
-					var newVirtualPallet =await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, new List<VirtualPallet>(),
+					var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, new List<VirtualPallet>(),
 						issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId);
 					
 					if (newVirtualPallet.Success == false)
@@ -115,15 +91,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 					}
 
 					await _werehouseDbContext.SaveChangesAsync(ct);
-					await transaction.CommitAsync(ct);
-					foreach (var evn in _eventCollector.Events)
-					{
-						await _mediator.Publish(evn, CancellationToken.None);
-					}
-					foreach (var factory in _eventCollector.DeferredEvents)
-					{
-						await _mediator.Publish( factory(), CancellationToken.None);//await
-					}
+					await transaction.CommitAsync(ct);					
 					return PickingResult.Ok("Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety do kompletacji.");
 				}				
 			}
@@ -143,11 +111,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");				
 				return PickingResult.Fail("Wystąpił nieoczekiwany błąd. Zmiany zostały cofnięte.");
-			}
-			finally
-			{
-				_eventCollector.Clear();
-			}
+			}			
 		}
 	}
 }

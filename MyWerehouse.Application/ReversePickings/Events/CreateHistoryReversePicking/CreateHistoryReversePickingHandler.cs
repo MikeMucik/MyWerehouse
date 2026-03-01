@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking
@@ -22,23 +23,21 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 		}
 		public async Task Handle(CreateHistoryReversePickingNotification request, CancellationToken ct)
 		{
-			//Exceptions!!
 			var history = new HistoryReversePicking
 			{
-				ReversePickingId = request.History.ReversePickingId,
-				PalletSourceId = request.History.PalletSourceId,
-				PalletDestinationId = request.History.PalletDestinationId,
-				IssueId = request.History.IssueId,
-				IssueNumber = request.History.IssueNumber,
-				ProductId = request.History.ProductId,
+				ReversePickingId = request.ReversePickingId,
+				PalletSourceId = request.PalletSourceId,
+				PalletDestinationId = request.PalletDestinationId,
+				IssueId = request.IssueId,
+				IssueNumber = request.IssueNumber,
+				ProductId = request.ProductId,
 				DateTime = DateTime.UtcNow,
 				PerformedBy = request.UserId,
-				Quantity = request.History.Quantity,
-				StatusBefore = request.History.StatusBefore,
-				StatusAfter = request.History.StatusAfter,
+				Quantity = request.Quantity,
+				StatusBefore = request.StatusBefore,
+				StatusAfter = request.StatusAfter,
 			};
-			await _historyReversePickingRepo.AddHistoryReversePickingAsync(history, ct);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _historyReversePickingRepo.AddHistoryReversePickingAsync(history, ct);			
 		}
 	}
 }

@@ -9,6 +9,6 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 {
-	public record GetReversePickingToDoQuery(int PickingTaskId):IRequest<ReversePickingDetails>;
+	public record GetReversePickingToDoQuery(Guid PickingTaskId):IRequest<ReversePickingDetails>;
 	
 }

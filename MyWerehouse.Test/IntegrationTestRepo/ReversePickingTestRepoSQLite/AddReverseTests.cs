@@ -80,7 +80,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 						DateAdded = DateTime.UtcNow.AddMonths(-1),
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
 					}]
-				//ReceiptId = 10,
 			};
 			var pallet2 = new Pallet
 			{
@@ -94,7 +93,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 						DateAdded = DateTime.UtcNow.AddMonths(-1),
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
 					}]
-				//ReceiptId = 10,
 			};			
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -183,7 +181,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			Assert.NotNull(result);
 
 			// --- klucze i wymagane pola ---
-			Assert.True(result.Id > 0);
+			Assert.True(result.Id != null);
 
 			Assert.Equal(pickingPallet.Id, result.PickingPalletId);
 			Assert.Equal(pickingTask.Id, result.PickingTaskId);

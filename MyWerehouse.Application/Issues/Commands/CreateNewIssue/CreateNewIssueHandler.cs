@@ -5,13 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
 using MyWerehouse.Application.Issues.IssuesServices;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Infrastructure;
 
@@ -21,20 +18,14 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 	{
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IIssueRepo _issueRepo;
-		private readonly IMediator _mediator;
 		private readonly IAssignProductToIssueService _assignProductToIssueService;
-		private readonly IEventCollector _eventCollector;
 		public CreateNewIssueHandler(WerehouseDbContext werehouseDbContext,
 			IIssueRepo issueRepo,
-			IMediator mediator,
-			IAssignProductToIssueService assignProductToIssueService,
-			IEventCollector eventCollector)
+			IAssignProductToIssueService assignProductToIssueService)
 		{
 			_werehouseDbContext = werehouseDbContext;
-			_issueRepo = issueRepo;
-			_mediator = mediator;
-			_assignProductToIssueService = assignProductToIssueService;
-			_eventCollector = eventCollector;
+			_issueRepo = issueRepo;			
+			_assignProductToIssueService = assignProductToIssueService;			
 		}
 		public async Task<List<IssueResult>> Handle(CreateNewIssueCommand request, CancellationToken ct)
 		{
@@ -46,11 +37,6 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 				var issue = new Issue(request.DTO.ClientId, request.DTO.PerformedBy, request.Date);
 				_issueRepo.AddIssue(issue);
 				issue.IssueNumber = await _issueRepo.GetNextNumberOfIssue();
-
-				//foreach (var item in request.DTO.Items)
-				//{
-				//	var allocation = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
-				//}
 
 				issue.IssueItems = new List<IssueItem>();
 				foreach (var item in request.DTO.Items)
@@ -90,11 +76,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 
 				addedProducts.Add(IssueResult.Fail(ex.Message));
 				return addedProducts;
-			}
-			finally
-			{
-				_eventCollector.Clear();
-			}			
+			}					
 		}
 	}
 }

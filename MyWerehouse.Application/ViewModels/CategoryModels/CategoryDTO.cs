@@ -20,11 +20,12 @@ namespace MyWerehouse.Application.ViewModels.CategoryModels
 			profile.CreateMap<Category, CategoryDTO>().ReverseMap();				
 		}		
 	}
-	public class CategoryDTOValidation : AbstractValidator<CategoryDTO> 
+	public class CategoryDTOValidation : AbstractValidator<CategoryDTO>
 	{
 		public CategoryDTOValidation()
-		{
-			RuleFor(g => g.Name).NotNull().WithMessage("Podaj nazwę kategorii");				
+		{			
+			RuleFor(g => g.Name).NotNull().WithMessage("Podaj nazwę kategorii.");
+			RuleFor(g => g.Name).Must(value=> !string.IsNullOrEmpty(value)).WithMessage("Podaj nazwę kategorii.");
 		}
 	}
 }

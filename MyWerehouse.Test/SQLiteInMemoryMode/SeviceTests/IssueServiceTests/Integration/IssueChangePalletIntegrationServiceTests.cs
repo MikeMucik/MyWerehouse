@@ -77,8 +77,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, "P1", "P2", "tester"));
 
 			// Assert
-			Assert.True(result.Success);
-			Assert.Equal("Podmieniono palety.", result.Message);
+			Assert.True(result.Result.Success);
+			Assert.Equal("Podmieniono palety.", result.Result.Message);
 
 			var updatedIssue = await DbContext.Issues.Include(i => i.Pallets).FirstAsync(i => i.Id == issue.Id);
 			var p1 = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
@@ -99,8 +99,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId1, "P1", "P1", "tester"));
 			//Assert
-			Assert.False(result.Success);
-			Assert.Contains("tą samą", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("tą samą", result.Error);
 		}
 
 		[Fact]
@@ -110,14 +110,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var receiptId9 = Guid.Parse("91111111-1111-1111-1111-111111111111");
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId9, "P1", "P2", "tester"));
 			//Assert
-			Assert.False(result.Success);
-			Assert.Contains($"Zamówienie o numerze {receiptId9} nie zostało znal", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Zamówienie nie zostało znalezione.", result.Error);
 		}
 
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenDifferentProducts()
 		{
-
 			//Arrange
 			var address = new Address
 			{
@@ -176,8 +175,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, "P1", "P2", "tester"));
 
 			// Assert
-			Assert.False(result.Success);
-			Assert.Contains("różnymi produktami", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("różnymi produktami", result.Error);
 		}
 
 		[Fact]
@@ -240,8 +239,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			//var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, "P1", "P2", "tester"));
 			//Assert
-			Assert.False(result.Success);
-			Assert.Contains("błędny status", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("błędny status", result.Error);
 		}
 	}
 }

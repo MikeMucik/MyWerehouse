@@ -5,28 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 {
-	public class GetIssueProductSummaryByIdHandler : IRequestHandler<GetIssueProductSummaryByIdQuery, UpdateIssueDTO>
+	public class GetIssueProductSummaryByIdHandler : IRequestHandler<GetIssueProductSummaryByIdQuery, AppResult<UpdateIssueDTO>>
 	{
 		private readonly IIssueRepo _issueRepo;
-		private readonly IMapper _mapper;
-		public GetIssueProductSummaryByIdHandler(IIssueRepo issueRepo,
-			IMapper mapper)
+		public GetIssueProductSummaryByIdHandler(IIssueRepo issueRepo)
 		{
 			_issueRepo = issueRepo;
-			_mapper = mapper;
 		}
-		public async Task<UpdateIssueDTO> Handle(GetIssueProductSummaryByIdQuery query, CancellationToken ct)
+		public async Task<AppResult<UpdateIssueDTO>> Handle(GetIssueProductSummaryByIdQuery query, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(query.IssueId) ?? throw new NotFoundIssueException(query.IssueId);
-			
-			return new UpdateIssueDTO
+			var issue = await _issueRepo.GetIssueByIdAsync(query.IssueId);// ?? throw new NotFoundIssueException(query.IssueId);
+			if (issue == null) { return AppResult<UpdateIssueDTO>.Fail($"Zamówienie o numerze {query.IssueId} nie zostało znalezione.", ErrorType.NotFound); }
+			var dto = new UpdateIssueDTO
 			{
 				Id = issue.Id,
 				ClientId = issue.ClientId,
@@ -39,21 +36,7 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 				 }).ToList(),
 				DateToSend = issue.IssueDateTimeSend
 			};
+			return AppResult<UpdateIssueDTO>.Success(dto);
 		}
 	}
 }
-//var items = _mapper.Map<IssueItemDTO>(issue.IssueItems);
- //var items = issue.IssueItems
- //	//.OrderBy(a=>a.ProductId)
- //	.ProjectTo<IssueItemDTO>(_mapper.ConfigurationProvider)
- //	.ToListAsync();
-
-//var items = issue.Pallets
-//	.SelectMany(p => p.ProductsOnPallet)
-//	.GroupBy(pp => pp.ProductId)
-//	.Select(g => new IssueItemDTO
-//	{
-//		ProductId = g.Key,
-//		Quantity = g.Sum(x => x.Quantity) // suma z palet -> odpowiada ilości w Issue
-//	})
-//	.ToList();

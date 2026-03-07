@@ -121,8 +121,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId);
 			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
 			//Assert
-			Assert.True(result.Success);
-			Assert.False(result.RequiresConfirmation);
+			Assert.True(result.IsSuccess);
+			Assert.False(result.Result.RequiresConfirmation);
 			Assert.Contains($"Paleta {pallet.Id} została umieszczona w lokalizacji. ", result.Message);
 			var resultPallet = DbContext.Pallets.First(x => x.Id == palletId);
 			Assert.Equal(location2.Id, resultPallet.LocationId);			
@@ -253,8 +253,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
 			
 			//Assert
-			Assert.False(result.Success);
-			Assert.True(result.RequiresConfirmation);
+			Assert.True(result.IsSuccess);
+			Assert.False(result.Result.Success);
+			Assert.True(result.Result.RequiresConfirmation);
 			var fullNameLocation = $" Bay = {location2.Bay} Aisle = {location2.Aisle} Position = {location2.Position} Height ={location2.Height}";
 			Assert.Contains($"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {pallet2.Id}.", result.Message);
 		}
@@ -375,8 +376,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 
 			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId, true));
 			//Assert
-			Assert.True(result.Success);
-			Assert.False(result.RequiresConfirmation);
+			Assert.True(result.IsSuccess);
+			Assert.False(result.Result.RequiresConfirmation);
 			Assert.Contains($"Paleta {pallet1.Id} została umieszczona w lokalizacji. ", result.Message);
 
 			// sprawdzamy, że obie palety siedzą w tej samej lokalizacji

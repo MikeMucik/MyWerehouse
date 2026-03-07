@@ -4,24 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 {
-	public class LoadingIssueListHandler(IIssueRepo issueRepo) : IRequestHandler<LoadingIssueListQuery, ListPalletsToLoadDTO>
+	public class LoadingIssueListHandler(IIssueRepo issueRepo) : IRequestHandler<LoadingIssueListQuery, AppResult< ListPalletsToLoadDTO>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
-		public async Task<ListPalletsToLoadDTO> Handle (LoadingIssueListQuery request, CancellationToken ct)
+		public async Task<AppResult<ListPalletsToLoadDTO>> Handle (LoadingIssueListQuery request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-				?? throw new NotFoundIssueException(request.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+				if (issue == null)
+			{
+				return AppResult<ListPalletsToLoadDTO>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
+			}
+				//?? throw new NotFoundIssueException(request.IssueId);
 			//zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
-			return new ListPalletsToLoadDTO
+			var dto = new ListPalletsToLoadDTO
 			{
 				IssueId = issue.Id,
 				IssueNumber =issue.IssueNumber,
@@ -51,6 +54,7 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 				}).OrderBy(p => p.LocationId)
 				.ToList()
 			};
+			return AppResult<ListPalletsToLoadDTO>.Success(dto);
 		}
 	}
 }

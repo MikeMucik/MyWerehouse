@@ -5,14 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Services;
-using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Repositories;
 using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Products.Models;
@@ -143,7 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var resultForIssue = await Mediator.Send(new CreateNewIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
 
 			// Assert
-			var result = resultForIssue.First();
+			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
 			Assert.Contains($"Towar {product.Id} został dołączony do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
@@ -317,7 +311,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var resultForIssue = await Mediator.Send(new CreateNewIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
 			// Assert
-			var result = resultForIssue.First();
+			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
 			Assert.Contains("Towar 1 został dołączony do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
@@ -939,7 +933,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var resultForIssue = await Mediator.Send(new CreateNewIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
 
 			// Assert
-			var result = resultForIssue.First();
+			var result = resultForIssue.Result.First();
 			// Assert
 			Assert.False(result.Success);
 			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
@@ -1067,7 +1061,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var resultForIssue = await Mediator.Send(new CreateNewIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
 
 			// Assert
-			var result = resultForIssue.First();
+			var result = resultForIssue.Result.First();
 			// Assert
 			Assert.False(result.Success);
 			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);

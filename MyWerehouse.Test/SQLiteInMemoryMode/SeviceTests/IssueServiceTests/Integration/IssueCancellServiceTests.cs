@@ -338,7 +338,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(PickingStatus.Allocated, historyPicking.StatusBefore);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 		}
@@ -476,7 +476,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Single(pickingTasks);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 			var reverseTasks = await DbContext.ReversePickings

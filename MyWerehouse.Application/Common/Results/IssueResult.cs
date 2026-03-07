@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Common.Results
 		public bool Success { get; set; }
 		public string Message { get; set; }
 		public int ProductId { get; set; }
-		public Guid IssueId { get;private set; }
+		public Guid IssueId { get;private set; }		
 		public int QuantityRequest { get; set; }
 		public int QuantityOnStock { get; set; }	
 
@@ -29,26 +29,16 @@ namespace MyWerehouse.Application.Common.Results
 				ProductId = product
 			};
 		}
-		public static IssueResult Ok(
-			string message,
-			Guid issueId)
-		{
-			return new IssueResult
-			{
-				Success = true,
-				Message = message,
-				IssueId = issueId
-			};
-		}
-		public static IssueResult Ok(
-			string message)
-		{
-			return new IssueResult
-			{
-				Success = true,
-				Message = message,				
-			};
-		}
+		
+		//public static IssueResult Ok(
+		//	string message)
+		//{
+		//	return new IssueResult
+		//	{
+		//		Success = true,
+		//		Message = message,				
+		//	};
+		//}
 		public static IssueResult Fail(
 			string message,
 			int productNotAdded,
@@ -82,6 +72,6 @@ namespace MyWerehouse.Application.Common.Results
 				Success = false,
 				Message = message				
 			};
-		}
+		}		
 	}
 }

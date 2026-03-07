@@ -159,7 +159,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Single(pickingTasks);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 
@@ -177,7 +177,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var resultGetView = await Mediator.Send(new GetListReversePickingToDoQuery(1, 1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))));
 			//Assert 4
 			Assert.NotNull(resultGetView);
-			Assert.Single(resultGetView.DTOs);
+			Assert.Single(resultGetView.Result.DTOs);
 		}
 		[Fact]
 		public async Task GetReturnReverseTask_PalletsAsignmentAndPickingTaskDone_ShouldReturnInfoThreeOptionsAvailable()
@@ -312,7 +312,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Single(pickingTasks);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 
@@ -330,9 +330,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var resultGetView = await Mediator.Send(new GetReversePickingToDoQuery(task.Id));
 			//Assert 4
 			Assert.NotNull(resultGetView);
-			Assert.True(resultGetView.CanReturnToSource);
-			Assert.True(resultGetView.CanAddToExistingPallet);
-			Assert.True(resultGetView.AddToNewPallet);
+			Assert.True(resultGetView.Result.CanReturnToSource);
+			Assert.True(resultGetView.Result.CanAddToExistingPallet);
+			Assert.True(resultGetView.Result.AddToNewPallet);
 		}
 		[Fact]
 		public async Task GetReturnReverseTask_PalletsAsignmentAndPickingTaskDone_ShouldReturnInfoTwoOptionsAvailable()
@@ -487,7 +487,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Single(pickingTasks);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 			var reverseTasks = await DbContext.ReversePickings
@@ -504,10 +504,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var resultGetView = await Mediator.Send(new GetReversePickingToDoQuery(task.Id));
 			//Assert 4
 			Assert.NotNull(resultGetView);
-			Assert.False(resultGetView.CanReturnToSource);
-			Assert.True(resultGetView.CanAddToExistingPallet);
-			Assert.True(resultGetView.AddToNewPallet);
-			Assert.Equal(2, resultGetView.ListPalletsToAdd.Count);
+			Assert.False(resultGetView.Result.CanReturnToSource);
+			Assert.True(resultGetView.Result.CanAddToExistingPallet);
+			Assert.True(resultGetView.Result.AddToNewPallet);
+			Assert.Equal(2, resultGetView.Result.ListPalletsToAdd.Count);
 		}		
 	}
 }

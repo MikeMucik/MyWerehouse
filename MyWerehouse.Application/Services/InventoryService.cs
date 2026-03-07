@@ -9,11 +9,6 @@ using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.DTOs;
 using MyWerehouse.Application.Inventories.Queries.GetInventory;
-using MyWerehouse.Application.Inventories.Queries.GetProductCount;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Application.Inventories.Events.ChangeStock;
 using MyWerehouse.Application.Inventories.Services;
 
 namespace MyWerehouse.Application.Services

@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Services
@@ -20,8 +18,8 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			_pickingTaskRepo = pickingTaskRepo;			
 		}
 		public async Task ReduceAllocation(Issue issue, int productId,int quantity, string userId)
-		{			
-			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId) ?? throw new NotFoundPickingTaskException("Brak alokacji do redukcji");
+		{
+			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId);// ?? throw new NotFoundPickingTaskException("Brak alokacji do redukcji");
 			foreach (var pickingTask in pickingTasks)
 			{
 				if (quantity <= 0) break;

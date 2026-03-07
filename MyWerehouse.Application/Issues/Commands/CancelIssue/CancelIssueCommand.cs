@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 {
-	public record CancelIssueCommand(Guid IssueId, string UserId):IRequest<IssueResult>;	
+	public record CancelIssueCommand(Guid IssueId, string UserId):IRequest<AppResult<Unit>>;	
 }

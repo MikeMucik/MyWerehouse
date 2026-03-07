@@ -40,7 +40,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
 			Assert.Equal(client.Email, resultClient.Email);
-			var resultAddress = _context.Addresses.Where(a => a.ClientId == result);
+			var resultAddress = _context.Addresses.Where(a => a.ClientId == result.Result);
 			Assert.NotNull(resultAddress);
 			Assert.Equal("Wiejska", resultAddress.First().StreetName);
 		}
@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
 			Assert.Equal(client.Email, resultClient.Email);
-			var resultAddress = _context.Addresses.Where(a => a.ClientId == result);
+			var resultAddress = _context.Addresses.Where(a => a.ClientId == result.Result);
 			Assert.NotNull(resultAddress);
 			Assert.Contains(resultClient.Addresses, a => a.StreetName == address.StreetName);
 			Assert.Contains(resultClient.Addresses, a => a.StreetName == address1.StreetName);

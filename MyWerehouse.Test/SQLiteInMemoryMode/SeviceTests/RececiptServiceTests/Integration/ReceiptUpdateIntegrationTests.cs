@@ -157,7 +157,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == initialReceipt.Id);
 			Assert.Equal(initailCLient.Id, updatedReceipt.ClientId); // zmiana klienta
 																	 // Powinna być nowa paleta dodana do bazy (z innym Id niż Q1000)
@@ -336,7 +336,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == initialReceipt.Id);
 			Assert.Equal(initailCLient.Id, updatedReceipt.ClientId); // zmiana klienta
 																	 // Powinna być nowa paleta dodana do bazy (z innym Id niż Q1000)
@@ -537,7 +537,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == initialReceipt.Id);
 			Assert.Equal(initailCLient.Id, updatedReceipt.ClientId); // zmiana klienta
 
@@ -732,7 +732,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new UpdateReceiptCommand( updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var palletChanged = DbContext.Pallets.FirstOrDefault(p => p.Id == "Q1000");
 			Assert.Equal(product1.Id, palletChanged.ProductsOnPallet.First().ProductId);
 			Assert.Equal(200, palletChanged.ProductsOnPallet.First().Quantity);
@@ -872,8 +872,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Contains($"Przyjęcie o numerze 999 nie zostało znalezione.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains($"Przyjęcie o numerze 999 nie zostało znalezione.", result.Error);
 		}
 		[Fact]
 		public async Task UpdatePalletToReceiptAsync_NonProperDataInvalidPallet_ReturnInfo()
@@ -1019,8 +1019,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Contains($"Paleta o numerze {secondPallet.Id} należy do innego przyjęcia.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains($"Paleta o numerze {secondPallet.Id} należy do innego przyjęcia.", result.Error);
 		}
 		
 		//HappyPath
@@ -1175,7 +1175,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			//var newPallet = DbContext.Pallets.Find("Q2001");
 			//Assert.NotNull(newPallet);
 			var pallets = DbContext.Pallets

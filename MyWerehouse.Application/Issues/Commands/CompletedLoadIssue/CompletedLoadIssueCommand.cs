@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.CompletedIssue
 {
-	public record CompletedLoadIssueCommand(Guid IssueId, string UserId):IRequest<IssueResult>;	
+	public record CompletedLoadIssueCommand(Guid IssueId, string UserId):IRequest<AppResult<Unit>>;	
 }

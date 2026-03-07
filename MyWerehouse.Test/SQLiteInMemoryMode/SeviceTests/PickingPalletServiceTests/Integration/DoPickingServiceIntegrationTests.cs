@@ -141,7 +141,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -285,7 +285,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -446,7 +446,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask1.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -614,7 +614,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask1.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -769,7 +769,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
-				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -781,7 +780,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask1.Id);
 			var updatedSourcePallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -981,7 +980,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
-				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -994,7 +992,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 		}
 		//SadPath
 		[Fact]
@@ -1118,6 +1116,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Pallets = [oldPallet],
 				IssueStatus = IssueStatus.New,
 				PerformedBy = "TestUser",
+				IssueDateTimeSend = DateTime.UtcNow.AddDays(7)
 			};
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -1152,7 +1151,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
-				//Id = pickingTask1.PickingTaskNumber,
 				IssueId = issue.Id,
 				ProductId = product2.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -1165,7 +1163,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
+			Assert.False(result.IsSuccess);
 		}
 	}
 }

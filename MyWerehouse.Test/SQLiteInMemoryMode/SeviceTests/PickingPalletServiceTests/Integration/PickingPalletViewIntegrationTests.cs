@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
 using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
@@ -85,10 +86,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert 
-			Assert.IsType<List<PickingPalletWithLocationDTO>>(result);
-			Assert.NotEmpty(result);
+			Assert.IsType<AppResult<List<PickingPalletWithLocationDTO>>>(result);
+			Assert.NotEmpty(result.Result);
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Count);
+			Assert.Equal(3, result.Result.Count);
 		}
 		[Fact]
 		public async Task GetListIssueToPicking_GoodData_ReturnListByClientAndIssue()
@@ -99,10 +100,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert 
-			Assert.IsType<List<PickingGuideLineDTO>>(result);
-			Assert.NotEmpty(result);
+			Assert.IsType<AppResult<List<PickingGuideLineDTO>>>(result);
+			Assert.NotEmpty(result.Result);
 			Assert.NotNull(result);
-			Assert.Equal(1, result.Count);
+			Assert.Equal(1, result.Result.Count);
 		}
 	}
 }

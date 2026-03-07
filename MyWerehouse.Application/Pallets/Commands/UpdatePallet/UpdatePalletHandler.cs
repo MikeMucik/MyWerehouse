@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -13,38 +12,30 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
-	public class UpdatePalletHandler : IRequestHandler<UpdatePalletCommand, PalletResult>
+	public class UpdatePalletHandler(IPalletRepo palletRepo,
+		IMapper mapper,
+		WerehouseDbContext werehouseDbContext,
+		IProductRepo productRepo) : IRequestHandler<UpdatePalletCommand, AppResult<Unit>>
 	{
-		private readonly IPalletRepo _palletRepo;
-		private readonly IMapper _mapper;
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IMediator _mediator;
-		private readonly IProductRepo _productRepo;
-		public UpdatePalletHandler(IPalletRepo palletRepo,
-			IMapper mapper,
-			WerehouseDbContext werehouseDbContext,
-			IMediator mediator,
-			IProductRepo productRepo
-			)
-		{
-			_palletRepo = palletRepo;
-			_mapper = mapper;
-			_werehouseDbContext = werehouseDbContext;
-			_mediator = mediator;
-			_productRepo = productRepo;
-		}
-		public async Task<PalletResult> Handle(UpdatePalletCommand request, CancellationToken ct)
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IMapper _mapper = mapper;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IProductRepo _productRepo = productRepo;
+
+		public async Task<AppResult<Unit>> Handle(UpdatePalletCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				var existingPallet = await _palletRepo.GetPalletByIdAsync(request.UpdatingPallet.Id)
-						?? throw new NotFoundPalletException(request.UpdatingPallet.Id);
+				var existingPallet = await _palletRepo.GetPalletByIdAsync(request.UpdatingPallet.Id);
+				if (existingPallet == null)
+					return AppResult<Unit>.Fail($"Paleta o numerze {request.UpdatingPallet.Id} nie istnieje.", ErrorType.NotFound);
+						
 				
 				foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
 				{
 					if (!await _productRepo.IsExistProduct(pop.ProductId))
-						throw new NotFoundProductException(pop.ProductId);
+						return AppResult<Unit>.Fail($"Produkt o numerze {pop.ProductId} nie istnieje.", ErrorType.NotFound);
 				}
 
 				var updatedProducts = request.UpdatingPallet.ProductsOnPallet
@@ -56,24 +47,17 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 				await _werehouseDbContext.SaveChangesAsync(ct);
 
 				await transaction.CommitAsync(ct);
-				return PalletResult.Ok($"Paleta {request.UpdatingPallet.Id} została zaktualizowana.", request.UpdatingPallet.Id);
+				return AppResult<Unit>.Success(Unit.Value, $"Paleta {request.UpdatingPallet.Id} została zaktualizowana.");
+				
 			}
-			catch (NotFoundProductException epe)
-			{
-				await transaction.RollbackAsync(ct);
-				return PalletResult.Fail(epe.Message);
-			}
-			catch (NotFoundPalletException epr)
-			{
-				await transaction.RollbackAsync(ct);
-				return PalletResult.Fail(epr.Message);
-			}
+		
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas aktualizaowania przyjęcia");	
-				return PalletResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
+				//return PalletResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
+				throw;
 			}			
 		}
 	}

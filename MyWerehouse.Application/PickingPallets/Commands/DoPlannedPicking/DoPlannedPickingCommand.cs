@@ -9,5 +9,5 @@ using MyWerehouse.Application.PickingPallets.DTOs;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 {
-	public record DoPlannedPickingCommand(PickingTaskDTO PickingTaskDTO, string UserId):IRequest<PickingResult>;	
+	public record DoPlannedPickingCommand(PickingTaskDTO PickingTaskDTO, string UserId):IRequest<AppResult<Unit>>;	
 }

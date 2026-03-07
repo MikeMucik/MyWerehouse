@@ -91,7 +91,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Equal("Załadunek zatwierdzony, zasoby uaktulanione.", result.Message);
 
 			//sprawdzenie zmian w Issue
@@ -200,8 +200,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Equal($"Stan producktu {product.Id} pniżej zera - stan niedozwolony.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Equal($"Stan producktu {product.Id} pniżej zera - stan niedozwolony.", result.Error);
 		}
 
 		[Fact]
@@ -215,8 +215,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Equal($"Zamówienie o numerze {receiptId9} nie zostało znalezione.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Equal($"Zamówienie nie zostało znalezione.", result.Error);
 		}
 
 		[Fact]
@@ -298,8 +298,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Equal("Nie wszystkie palety mają status Loaded.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Equal("Nie wszystkie palety mają status Loaded.", result.Error);
 		}
 		[Fact]
 		public async Task VerifyIssueAfterLoadingAsync_IssueNotShipped_ThrowException_ReturnFail()
@@ -379,8 +379,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
 			//var ex =await Assert.ThrowsAsync<DomainIssueException>(async ()=> await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX")));
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Equal("Nie zakończono załadunku.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Equal("Nie zakończono załadunku.", result.Error);
 		}
 		[Fact]
 		public async Task VerifyIssueAfterLoading_ShouldUpdateStatusAndHistory_HappyPath()
@@ -454,7 +454,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "user1"));
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Equal("Załadunek zatwierdzony, zasoby uaktulanione.", result.Message);
 
 			// Sprawdzenie zmian w bazie

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Interfaces;
@@ -14,19 +13,17 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 {
-	public class CancelIssueHandler : IRequestHandler<CancelIssueCommand, IssueResult>
+	public class CancelIssueHandler : IRequestHandler<CancelIssueCommand, AppResult<Unit>>
 	{
 		private readonly IIssueRepo _issueRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IMediator _mediator;		
 		private readonly ICreateReversePickingService _createReversePickingService;
 		public CancelIssueHandler(IIssueRepo issueRepo,
 			IPickingTaskRepo pickingTaskRepo,
 			IPickingPalletRepo pickingPalletRepo,
 			WerehouseDbContext werehouseDbContext,
-			IMediator mediator,	
 			ICreateReversePickingService createReversePickingService
 			)
 		{
@@ -34,16 +31,16 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			_pickingTaskRepo = pickingTaskRepo;
 			_pickingPalletRepo = pickingPalletRepo;
 			_werehouseDbContext = werehouseDbContext;
-			_mediator = mediator;			
 			_createReversePickingService = createReversePickingService;
 		}
-		public async Task<IssueResult> Handle(CancelIssueCommand request, CancellationToken ct)
+		public async Task<AppResult<Unit>> Handle(CancelIssueCommand request, CancellationToken ct)
 		{
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-						?? throw new NotFoundIssueException(request.IssueId);
+				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+				if (issue == null)
+					return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 				var listPallet = new List<Pallet>();
 				//anulowanie zlecenia dla pełnych palet
 				var listPalletsOfIssue = issue.Pallets.ToList();
@@ -59,7 +56,9 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				var restPallets = issue.Pallets.Except(listPallet).ToList();
 				foreach (var p in restPallets)
 				{
-					await _createReversePickingService.CreateReversePicking(p.Id, request.UserId); ;
+					var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId);
+					if (!resultReverse.Success && resultReverse.Message.Contains("Zadania")) return AppResult<Unit>.Fail(resultReverse.Message, ErrorType.Conflict);
+					if (!resultReverse.Success ) return AppResult<Unit>.Fail(resultReverse.Message, ErrorType.NotFound);					
 				}
 				//usuń alokacje/pickingTask jeśli nie zrobione				
 				var virtualPallets = await _pickingTaskRepo.GetVirtualPalletsByIssue(request.IssueId);
@@ -72,7 +71,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 					{
 						pickingTask.PickingStatus = PickingStatus.Cancelled;
 						pickingTask.AddHistory(request.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, 0);
-						
+
 						vp.PickingTasks.Remove(pickingTask);
 						_pickingTaskRepo.DeletePickingTask(pickingTask);
 					}
@@ -82,24 +81,20 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);
 						vp.Pallet.Status = PalletStatus.Available;
 					}
-				}				
+				}
 				issue.Cancel(request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				return IssueResult.Ok($"Anulowano zlecenie {request.IssueId}.");
-			}
-			catch (NotFoundIssueException ie)
-			{
-				await transaction.RollbackAsync(ct);
-				return IssueResult.Fail(ie.Message);
+				return AppResult<Unit>.Success(Unit.Value, $"Anulowano zlecenie {request.IssueId}.");
 			}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
+
 				throw new InvalidOperationException("Wystąpił błąd podczas usuwania zlecenia.", ex);
-			}			
+			}
 		}
 	}
 }

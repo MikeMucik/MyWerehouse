@@ -320,7 +320,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var result = await Mediator.Send(new ExecuteHandPickingCommand(sourcePallet1.Id, issue.Id, 20, "UserCor"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
 			Assert.Contains(pallets, p => p.Id == "Q1001"); // pierwotna
@@ -491,7 +491,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var result = await Mediator.Send(new ExecuteHandPickingCommand(sourcePallet1.Id, issue.Id, 12, "UserCor"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
 			Assert.Contains(pallets, p => p.Id == "Q1001"); // pierwotna
@@ -664,8 +664,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var result = await Mediator.Send(new ExecuteHandPickingCommand(sourcePallet1.Id, issue.Id, 12, "UserCor"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Contains("Chcesz pobrać więcej niż potrzeba.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Chcesz pobrać więcej niż potrzeba.", result.Error);
 		}
 	}
 }

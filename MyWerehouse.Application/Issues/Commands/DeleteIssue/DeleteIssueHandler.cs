@@ -4,23 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Events;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 {
-	public class DeleteIssueHandler : IRequestHandler<DeleteIssueCommand, IssueResult>
+	public class DeleteIssueHandler : IRequestHandler<DeleteIssueCommand, AppResult<Unit>>
 	{
 		private readonly IIssueRepo _issueRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;		
@@ -30,15 +22,16 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 			_issueRepo = issueRepo;
 			_werehouseDbContext = werehouseDbContext;			
 		}
-		public async Task<IssueResult> Handle(DeleteIssueCommand request, CancellationToken ct)
+		public async Task<AppResult<Unit>> Handle(DeleteIssueCommand request, CancellationToken ct)
 		{
 
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId)
-					?? throw new NotFoundIssueException(request.IssueId);
-
+				var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+				//?? throw new NotFoundIssueException(request.IssueId);
+				if (issueToDelete == null)
+					return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 				switch (issueToDelete.IssueStatus)
 				{
 					case IssueStatus.New:
@@ -61,7 +54,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 						}
 						break;
 					default:
-						throw new NotFoundIssueException($"Zlecenia {issueToDelete.Id} nie można anulować.");
+						return AppResult<Unit>.Fail($"Zlecenia {issueToDelete.Id} nie można anulować.", ErrorType.Conflict);
 				}
 				if (!(issueToDelete.IssueStatus == IssueStatus.New))
 				{
@@ -70,13 +63,13 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 
-				return IssueResult.Ok($"Usunięto zamówienie o numerze {issueToDelete.Id}.");
+				return AppResult<Unit>.Success(Unit.Value, $"Usunięto zamówienie o numerze {issueToDelete.Id}.");
 			}
-			catch (NotFoundIssueException ei)
-			{
-				await transaction.RollbackAsync(ct);
-				return IssueResult.Fail(ei.Message);
-			}
+			//catch (NotFoundIssueException ei)
+			//{
+			//	await transaction.RollbackAsync(ct);
+			//	return IssueResult.Fail(ei.Message);
+			//}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

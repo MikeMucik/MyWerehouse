@@ -76,7 +76,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new CompletedLoadIssueCommand(issue.Id, "UserLoader"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
 		}
 		[Fact]
@@ -139,7 +139,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new CompletedLoadIssueCommand(issue.Id, "UserLoader"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
+			Assert.False(result.IsSuccess);
 			Assert.NotEqual(IssueStatus.IsShipped, issue.IssueStatus);
 		}
 	}

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Domain.Histories.Models;
@@ -16,7 +15,7 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 {
-	public class DoPlannedPickingHandler : IRequestHandler<DoPlannedPickingCommand, PickingResult>
+	public class DoPlannedPickingHandler : IRequestHandler<DoPlannedPickingCommand, AppResult<Unit>>
 	{
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IPalletRepo _palletRepo;
@@ -41,18 +40,23 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 			_addPickingTaskToIssueService = addPickingTaskToIssueService;
 			_processPickingActionService = processPickingActionService;
 		}
-		public async Task<PickingResult> Handle(DoPlannedPickingCommand request, CancellationToken ct)
+		public async Task<AppResult<Unit>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
-			{				
+			{
 				var newPickingTask = new PickingTask();
 				var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.Id);
 				var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(pickingTaskToChange.VirtualPalletId);
 				var issueId = pickingTaskToChange.IssueId;
-				var issue = await _issueRepo.GetIssueByIdAsync(issueId) ?? throw new NotFoundIssueException(issueId);
-				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId)
-					?? throw new NotFoundPalletException(request.PickingTaskDTO.SourcePalletId);
+				var issue = await _issueRepo.GetIssueByIdAsync(issueId);
+				if (issue == null)
+				{
+					return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				}
+				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId);
+				if(sourcePallet == null) return AppResult<Unit>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
+					//?? throw new NotFoundPalletException(request.PickingTaskDTO.SourcePalletId);
 				if (issue.IssueStatus == IssueStatus.Pending) { issue.IssueStatus = IssueStatus.InProgress; }
 				var neededQuantity = request.PickingTaskDTO.RequestedQuantity;
 				var pickedQuantity = request.PickingTaskDTO.PickedQuantity;
@@ -60,7 +64,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				if (pickedQuantity <= 0 || pickedQuantity > neededQuantity)
 				{
 					await transaction.RollbackAsync(ct);
-					return PickingResult.Fail("Operacja nie dozwolona");
+					return AppResult<Unit>.Fail("Operacja nie dozwolona", ErrorType.Conflict);//Technical
 				}
 				if (neededQuantity > pickedQuantity)
 				{
@@ -73,45 +77,40 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				if (neededQuantity == pickedQuantity)
 				{
 					await _werehouseDbContext.SaveChangesAsync(ct);
-					await transaction.CommitAsync(ct);					
-					return PickingResult.Ok("Towar dołączono do zlecenia");
+					await transaction.CommitAsync(ct);
+					return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia");
 				}
 				else
 				{
 					//pallet lock with non-conformity 
-					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);					
+					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
 					var newQuantityToPickingTask = neededQuantity - pickedQuantity;
 					var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, new List<VirtualPallet>(),
 						issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId);
-					
+
 					if (newVirtualPallet.Success == false)
 					{
 						await transaction.RollbackAsync(ct);
-						return PickingResult.Fail(newVirtualPallet.Message);
+						return AppResult<Unit>.Fail(newVirtualPallet.Message, ErrorType.Conflict);
 					}
-
 					await _werehouseDbContext.SaveChangesAsync(ct);
-					await transaction.CommitAsync(ct);					
-					return PickingResult.Ok("Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety do kompletacji.");
-				}				
+					await transaction.CommitAsync(ct);
+					return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety do kompletacji.");
+				}
 			}
-			catch (NotFoundPalletException pnfEx)
-			{
-				await transaction.RollbackAsync(ct);
-				return PickingResult.Fail(pnfEx.Message);
-			}
-			catch (NotFoundIssueException onfEx)
-			{
-				await transaction.RollbackAsync(ct);
-				return PickingResult.Fail(onfEx.Message);
-			}
+			//catch (NotFoundPalletException pnfEx)
+			//{
+			//	await transaction.RollbackAsync(ct);
+			//	return AppResult<PickingResult>.Fail(pnfEx.Message);
+			//}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");				
-				return PickingResult.Fail("Wystąpił nieoczekiwany błąd. Zmiany zostały cofnięte.");
-			}			
+				//return AppResult<PickingResult>.Fail("Wystąpił nieoczekiwany błąd. Zmiany zostały cofnięte.", ErrorType.Conflict);
+				throw;
+			}
 		}
 	}
 }

@@ -8,22 +8,23 @@ using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 {
 	//Lista ile danego towaru dla danego zlecenia posegregowane i zgrupowane po kliencie Product's list by issue&client
 	public class GetListIssueToPickingHandler(IPickingPalletRepo pickingPalletRepo,
-		IIssueRepo issueRepo) : IRequestHandler<GetListIssueToPickingQuery, List<PickingGuideLineDTO>>
+		IIssueRepo issueRepo) : IRequestHandler<GetListIssueToPickingQuery, AppResult< List<PickingGuideLineDTO>>>
 	{
 		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
-		public async Task<List<PickingGuideLineDTO>> Handle(GetListIssueToPickingQuery request, CancellationToken ct)
+		public async Task<AppResult<List<PickingGuideLineDTO>>> Handle(GetListIssueToPickingQuery request, CancellationToken ct)
 		{
 			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
 			if (pickingPallets.Count == 0)
 			{
-				return new List<PickingGuideLineDTO>();
+				return  AppResult< List<PickingGuideLineDTO>>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);	
 			}
 			var allNeededIssuesIds = pickingPallets
 				.SelectMany(p => p.PickingTasks)
@@ -33,7 +34,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 
 			var allIssues = await _issueRepo.GetIssuesByIdsAsync(allNeededIssuesIds);
 			var issueDictionary = allIssues.ToDictionary(i => i.Id);
-			return [.. pickingPallets
+			var result = new List<PickingGuideLineDTO>( pickingPallets
 				.SelectMany(p => p.PickingTasks.Select(a => new
 				{
 					IssueNumber = a.IssueNumber,
@@ -61,7 +62,9 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
 						})
 						.OrderBy(i => i.IssueNumber)]
 				})
-				.OrderBy(c => c.ClientIdOut)];
+				.OrderBy(c => c.ClientIdOut));
+			return AppResult<List<PickingGuideLineDTO>>.Success( result);
 		}
+		
 	}
 }

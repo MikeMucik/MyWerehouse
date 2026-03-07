@@ -12,5 +12,5 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 {
 	public record ExecutiveReversePickingCommand(Guid TaskReversedId,
 		ReversePickingStrategy Strategy, string PickingPalletId, 
-		string UserId, List<Pallet>? Pallets):IRequest<ReversePickingResult>;	
+		string UserId, List<Pallet>? Pallets):IRequest<AppResult<ReversePickingResult>>;	
 }

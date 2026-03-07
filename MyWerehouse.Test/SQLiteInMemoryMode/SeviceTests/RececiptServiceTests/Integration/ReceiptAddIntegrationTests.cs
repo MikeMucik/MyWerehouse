@@ -87,11 +87,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				UserId = "U001"
 			};
 						
-			var newPallet = await Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto));
+			var result = await Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto));
 			//Assert
-			Assert.NotNull(newPallet);
-			var newPalletId = newPallet.PalletId;
-			var palletFromDb = await DbContext.Pallets.FindAsync(newPalletId);
+			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
+			//var newPalletId = newPallet.PalletId;
+			var newPallet = DbContext.Pallets.FirstOrDefault(p => p.ReceiptId == initialReceipt.Id);
+			var palletFromDb = newPallet;
+				//await DbContext.Pallets.FindAsync(newPalletId);
 			Assert.NotNull(palletFromDb);
 			Assert.Equal(initialReceipt.Id, palletFromDb.ReceiptId);
 			Assert.Equal(PalletStatus.Receiving, palletFromDb.Status);
@@ -105,7 +108,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal(10, productsOnPallet[0].Quantity);
 
 			var movement = DbContext.PalletMovements
-				.FirstOrDefault(x => x.PalletId == newPalletId);
+				.FirstOrDefault(x => x.PalletId == newPallet.Id);
 
 			Assert.NotNull(movement);
 			Assert.Equal("U001", movement.PerformedBy);
@@ -120,7 +123,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				.Include(x => x.Pallets)
 				.FirstOrDefaultAsync(x => x.Id == initialReceipt.Id);
 
-			Assert.Contains(receipt.Pallets, p => p.Id == newPalletId);
+			Assert.Contains(receipt.Pallets, p => p.Id == newPallet.Id);
 		}
 
 		[Fact]
@@ -159,7 +162,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Act
 			var newPalletDto = new CreateReceiptPlanDTO
 			{
-				//Id=1,
 				ClientId = initialCLient.Id,
 				ReceiptDateTime = DateTime.UtcNow,
 				PerformedBy = "user",
@@ -168,7 +170,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
-			var receipt = DbContext.Receipts.FirstOrDefault(x => x.ReceiptNumber == result.ReceiptId);
+			var receipt = DbContext.Receipts.FirstOrDefault(x => x.ClientId == initialCLient.Id);
+			//var receipt = DbContext.Receipts.FirstOrDefault(x => x.ReceiptDateTime ==newPalletDto.ReceiptDateTime);
 			Assert.NotNull(receipt);
 			Assert.Equal(ReceiptStatus.Planned, receipt.ReceiptStatus);
 			Assert.Equal("user", receipt.PerformedBy);			
@@ -219,7 +222,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
-			Assert.Contains("Nieprawidłowy lub brak numeru użytkownika", result.Message);
+			Assert.Contains("Nieprawidłowy lub brak numeru użytkownika", result.Error);
 		}
 		[Fact]
 		public async Task CreateReceiptPlanAsync_NoProperData_NotAddToBase()
@@ -257,7 +260,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
-			Assert.Contains("Klient o numerze 2 nie istnieje.", result.Message);
+			Assert.Contains("Klient o numerze 2 nie istnieje.", result.Error);
 		}
 		[Fact]
 			public async Task NotProperDataProductQunatityZero_AddPalletToReceiptAsync_ThrowValidateException()

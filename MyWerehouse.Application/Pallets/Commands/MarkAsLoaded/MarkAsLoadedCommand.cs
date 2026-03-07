@@ -9,5 +9,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 {
-	public record MarkAsLoadedCommand(string PalletId, string UserId) : IRequest<IssueResult>;	
+	public record MarkAsLoadedCommand(string PalletId, string UserId) : IRequest<AppResult<Unit>>;	
 }

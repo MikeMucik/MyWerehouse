@@ -8,6 +8,7 @@ using AutoMapper.QueryableExtensions;//odejście od CleanArchitecture dla wydajn
 using MediatR;
 using Microsoft.EntityFrameworkCore;//odejście od CleanArchitecture dla wydajności, mniej kodu
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 /// QueryService zamiast Repository dla operacji Read.
@@ -15,7 +16,7 @@ using MyWerehouse.Domain.Interfaces;
 /// ProjectTo() generuje zoptymalizowane SQL SELECT tylko potrzebnych kolumn.
 namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
 {
-	public class FindPalletsByFiltrHandler:IRequestHandler<FindPalletsByFiltrQuery, List<PalletDTO>>
+	public class FindPalletsByFiltrHandler:IRequestHandler<FindPalletsByFiltrQuery, AppResult< List<PalletDTO>>>
 	{
 		private readonly IPalletRepo _palletRepo;
 		private readonly IMapper _mapper;
@@ -25,12 +26,12 @@ namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
 			_palletRepo = palletRepo;
 			_mapper  = mapper;
 		}
-		public async Task<List<PalletDTO>> Handle (FindPalletsByFiltrQuery request, CancellationToken ct)
+		public async Task<AppResult<List<PalletDTO>>> Handle (FindPalletsByFiltrQuery request, CancellationToken ct)
 		{
 			var pallets = _palletRepo.GetPalletsByFilter(request.Filter);
-			//?? throw new PalletException("Brak palety/palet o zadanych parametrach");
-			var palletDTO = await pallets.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync();
-			return palletDTO;
+			if (pallets == null) return AppResult<List<PalletDTO>>.Fail("Brak palety/palet o zadanych parametrach", ErrorType.NotFound);
+			var palletDTO = await pallets.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken: ct);
+			return AppResult<List<PalletDTO>>.Success(palletDTO);
 		}
 	}
 }

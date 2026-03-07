@@ -7,7 +7,7 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.ReversePickings.DTOs
 {
-	public class ReversePickingDetails
+	public class ReversePickingDetailsDTO
 	{
 		public ReversePickingDTO ReversePickingDTO { get; set; }
 		public List<Pallet> ListPalletsToAdd {  get; set; } = new List<Pallet>();

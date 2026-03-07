@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Domain.Products.Models;
+using Xunit.Sdk;
 
 namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 {
@@ -73,11 +75,11 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			};
 			//Act&Assert
 			var quantity = _context.Categories.Count();
-			var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
 			_categoryService.AddCategoryAsync(categoryDTO));
 			var result = _context.Categories.Count();
 			Assert.Equal(quantity, result);
-			Assert.Contains("Brak nazwy kategorii", ex.Message);
+			Assert.Contains("Podaj nazwę kategorii.", ex.Message);
 		}
 		[Fact]
 		public async Task AddCategoryTheSameName_AddCategoryAsync_NoAddedToList()
@@ -106,13 +108,16 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			{
 				Name = "TestCategory"
 			};
-			//Act&Assert
+			//Act
 			var quantity = _context.Categories.Count();
-			var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-			_categoryService.AddCategoryAsync(categoryDTO));
-			var result = _context.Categories.Count();
-			Assert.Equal(quantity, result);
-			Assert.Contains("Kategoria", ex.Message);
+			var result = await _categoryService.AddCategoryAsync(categoryDTO);
+			//var ex = await Assert.ThrowsAsync<NotFoundCategoryException>(() =>			_categoryService.AddCategoryAsync(categoryDTO));
+			//Assert
+			var resultBase = _context.Categories.Count();
+			Assert.Equal(_context.Categories.Count(), resultBase);
+			Assert.Contains("Kategoria o tej nazwie już istnieje.", result.Error);
+			Assert.Equal(quantity, resultBase);
+			//Assert.Contains("Kategoria", ex.Message);
 		}
 		[Fact]
 		public async Task RemoveCategory_DeleteCategoryAsync_DeleteFromList()
@@ -180,18 +185,39 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			Assert.NotNull(result);
 			Assert.Equal(updatedCategory.Name, result.Name);
 		}
+		//[Fact]
+		//public async Task UpdateCategoryNameNoName_UpdateCategoryAsync_ThrowException()
+		//{
+		//	//Arrange			
+		//	var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };			
+		//	_context.Categories.Add(updatingCategory);
+		//	_context.SaveChanges();
+		//	//Act&Assert
+		//	var updatedCategory = new CategoryDTO { Id = 88, Name = "" };
+		//	var ex = await Assert.ThrowsAsync<NotFoundCategoryException>(() =>
+		//		_categoryService.UpdateCategoryAsync(updatedCategory));
+		//		Assert.Contains("Brak nazwy kategorii - proszę podać", ex.Message);			
+		//}
 		[Fact]
 		public async Task UpdateCategoryNameNoName_UpdateCategoryAsync_ThrowException()
 		{
 			//Arrange			
-			var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };			
+			var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };
 			_context.Categories.Add(updatingCategory);
 			_context.SaveChanges();
 			//Act&Assert
 			var updatedCategory = new CategoryDTO { Id = 88, Name = "" };
-			var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-				_categoryService.UpdateCategoryAsync(updatedCategory));
-				Assert.Contains("Brak nazwy kategorii - proszę podać", ex.Message);			
+			//var result = await _categoryService.UpdateCategoryAsync(updatedCategory);
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(updatedCategory));
+			//Assert
+			//Assert.NotNull(result);
+			Assert.NotNull(ex);	
+			//Assert.False(result.IsSuccess);
+			Assert.Contains("Podaj nazwę kategorii.", ex.Message);
+			//var ex = await Assert.ThrowsAsync<NotFoundCategoryException>(() =>
+			//	_categoryService.UpdateCategoryAsync(updatedCategory));
+			//Assert.Contains("Brak nazwy kategorii - proszę podać", ex.Message);
+			
 		}
 	}
 }

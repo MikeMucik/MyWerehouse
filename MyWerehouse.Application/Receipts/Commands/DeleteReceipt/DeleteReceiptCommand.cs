@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 {
-	public record DeleteReceiptCommand(Guid ReceiptId, string UserId):IRequest<ReceiptResult>;	
+	public record DeleteReceiptCommand(Guid ReceiptId, string UserId):IRequest<AppResult<Unit>>;	
 }

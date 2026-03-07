@@ -4,40 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Receviving.Events;
-using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 {
 	public class DeleteReceiptHandler(WerehouseDbContext werehouseDbContext,
 		IReceiptRepo receiptRepo,
-		IPalletRepo palletRepo) : IRequestHandler<DeleteReceiptCommand, ReceiptResult>
+		IPalletRepo palletRepo) : IRequestHandler<DeleteReceiptCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 
-		public async Task<ReceiptResult> Handle(DeleteReceiptCommand request, CancellationToken ct)
+		public async Task<AppResult<Unit>> Handle(DeleteReceiptCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			{
 				try
 				{
-					var receipt = await _receiptRepo.GetReceiptOnlyByIdAsync(request.ReceiptId)
-					?? throw new NotFoundReceiptException(request.ReceiptId);
-
+					var receipt = await _receiptRepo.GetReceiptOnlyByIdAsync(request.ReceiptId);
+					//?? throw new NotFoundReceiptException(request.ReceiptId);
+					if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 					if (receipt.Delete(request.UserId))
 					{
 						_receiptRepo.DeleteReceipt(receipt);
-						return ReceiptResult.Ok("Anulowano przyjęcie z bazy", receipt.ReceiptNumber);
+						return AppResult<Unit>.Success(Unit.Value, "Anulowano przyjęcie z bazy");
 					}
 
 					var listPalletsOfReceipt = await _palletRepo.GetPalletsByReceiptId(request.ReceiptId);
@@ -47,7 +41,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 						canCancel = pallet.CanBeCancelled();
 						if (!canCancel)
 						{
-							return ReceiptResult.Fail("Nie można anulować przyjęcia, palety w obiegu magazynu.");
+							return AppResult<Unit>.Fail("Nie można anulować przyjęcia, palety w obiegu magazynu.");
 						}
 					}
 					foreach (var pallet in listPalletsOfReceipt)
@@ -57,24 +51,19 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 					receipt.Cancel(request.UserId);
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);
-					return ReceiptResult.Ok("Anulowano przyjęcie wraz z paletami z bazy", receipt.ReceiptNumber);
-				}
-				catch (NotFoundReceiptException erp)
-				{
-					await transaction.RollbackAsync(ct);
-					return ReceiptResult.Fail(erp.Message);
-				}
+					return AppResult<Unit>.Success(Unit.Value, "Anulowano przyjęcie wraz z paletami z bazy");
+				}				
 				catch (DomainException exd)
 				{
 					await transaction.RollbackAsync(ct);
 					throw;
-					//return ReceiptResult.Fail(exd.Message);
+					//return AppResult<Unit>.Fail(exd.Message);
 				}
 				catch (Exception ex)
 				{
 					await transaction.RollbackAsync(ct);
 					//_logger.LogError(ex, "Błąd podczas operacji na przyjęciu");
-					return ReceiptResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
+					return AppResult<Unit>.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
 				}
 			}
 		}

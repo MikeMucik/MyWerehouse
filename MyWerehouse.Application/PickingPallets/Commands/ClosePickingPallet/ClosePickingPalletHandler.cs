@@ -4,62 +4,57 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Events.CreateHistoryIssue;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Events;
-using MyWerehouse.Domain.Pallets.Events;
-using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 {
 	public class ClosePickingPalletHandler(IPalletRepo palletRepo,
 		IIssueRepo issueRepo,
-		IPickingPalletRepo pickingPalletRepo,
-		WerehouseDbContext werehouseDbContext,
-		IMediator mediator) : IRequestHandler<ClosePickingPalletCommand, PickingResult>
+		WerehouseDbContext werehouseDbContext) : IRequestHandler<ClosePickingPalletCommand, AppResult<Unit>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
-		private readonly IMediator _mediator = mediator;
 
-		public async Task<PickingResult>  Handle(ClosePickingPalletCommand request, CancellationToken ct)
+		public async Task<AppResult<Unit>> Handle(ClosePickingPalletCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId) ?? throw new NotFoundPalletException(request.PalletId);
-				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId) ?? throw new NotFoundIssueException(request.PalletId);
-				if (pallet.Status != PalletStatus.Picking)
-					return PickingResult.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet");
+				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
+				if (pallet == null)
+					return AppResult<Unit>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
+				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+				if (issue == null)
+					return AppResult<Unit>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
+				// chyba do domeny		
+				//if (pallet.Status != PalletStatus.Picking)
+				//	return AppResult<Unit>.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet");
 				//to powyżej można rozszerzyć na konkretne przypadki				
 				pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
-				return PickingResult.Ok($"Zamknięto paletę, dołączono do zlecenia {issue.Id}.");
+				return AppResult<Unit>.Success(Unit.Value, $"Zamknięto paletę, dołączono do zlecenia {issue.Id}.");
 			}
-			catch (NotFoundPalletException exp)
-			{
-				await transaction.RollbackAsync(ct);
-				return PickingResult.Fail(exp.Message);
-			}
-			catch (NotFoundIssueException exo)
-			{
-				await transaction.RollbackAsync(ct);
-				return PickingResult.Fail(exo.Message);
-			}
+			//catch (NotFoundPalletException exp)
+			//{
+			//	await transaction.RollbackAsync(ct);
+			//	return PickingResult.Fail(exp.Message);
+			//}
+			//catch (NotFoundIssueException exo)
+			//{
+			//	await transaction.RollbackAsync(ct);
+			//	return PickingResult.Fail(exo.Message);
+			//}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
-				return PickingResult.Fail("Nastąpił nieoczekiwany błąd");
+				//return PickingResult.Fail("Nastąpił nieoczekiwany błąd");
+				throw;
 			}
 		}
 	}

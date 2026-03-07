@@ -9,7 +9,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Common.Behaviors;
-using MyWerehouse.Application.Common.Commands;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.IssuesServices;
@@ -39,8 +38,6 @@ namespace MyWerehouse.Application
 				cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
 				cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 			});
-			services.AddScoped<ICommandCollector, CommandCollector>();//do wywalenia??
-			services.AddTransient<ISynchronizerProductsConfig, SynchronizerProductsConfig>();
 			//new services
 			services.AddScoped<IAddPickingTaskToIssueService, AddPickingTaskToIssueService>();
 			services.AddScoped<ICreatePalletOrAddToPalletService, CreatePalletOrAddToPalletService>();

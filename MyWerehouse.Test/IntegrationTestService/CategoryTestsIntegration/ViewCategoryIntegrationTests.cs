@@ -33,8 +33,7 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			var result = await _categoryService.GetCategoriesAsync(pageSize, pagenumber);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Categories.Count);
+			Assert.Equal(3, result.Result.Categories.Count);
 		}
 	}
-
 }

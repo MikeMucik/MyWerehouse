@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt
 {
-	public record CompletePhysicalReceiptCommand(Guid ReceiptId, string UserId): IRequest<ReceiptResult>;
+	public record CompletePhysicalReceiptCommand(Guid ReceiptId, string UserId): IRequest<AppResult<Unit>>;
 }

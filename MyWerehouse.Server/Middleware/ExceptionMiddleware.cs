@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.DomainExceptions;
 
 namespace MyWerehouse.Server.Middleware
@@ -18,11 +17,11 @@ namespace MyWerehouse.Server.Middleware
 			{
 				await _next(context);
 			}
-			catch (NotFoundException ex)
-			{
-				context.Response.StatusCode = StatusCodes.Status404NotFound;
-				await context.Response.WriteAsJsonAsync(ex.Message);
-			}
+			//catch (NotFoundException ex)
+			//{
+			//	context.Response.StatusCode = StatusCodes.Status404NotFound;
+			//	await context.Response.WriteAsJsonAsync(ex.Message);
+			//}
 			catch (DomainException ex)
 			{
 				context.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -41,7 +40,7 @@ namespace MyWerehouse.Server.Middleware
 				await HandleExceptionAsync(context, ex);				
 			}
 		}
-		private async Task HandleExceptionAsync(HttpContext context, Exception ex)
+		private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
 		{
 			context.Response.StatusCode = 500;
 			context.Response.ContentType = "application/json";

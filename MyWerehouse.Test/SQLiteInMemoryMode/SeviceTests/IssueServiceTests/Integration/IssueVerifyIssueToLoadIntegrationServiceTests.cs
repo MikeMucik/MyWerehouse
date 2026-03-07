@@ -143,7 +143,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new VerifyIssueToLoadCommand(receiptId2, "user123"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
+			Assert.False(result.IsSuccess);
 		}
 	}
 }

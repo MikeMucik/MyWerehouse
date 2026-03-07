@@ -11,37 +11,40 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
 	[Collection("QuerryCollection")]
 	public class ViewClientIntegrationTests(QuerryTestFixture fixture) : ClientIntegrationView(fixture)
-	{		
+	{
 		[Fact]
 		public async Task ShowClientDetails_DetailsOfClientAsync_ReturnData()
 		{
 			//Arrange
 			var clientId = 10;
 			//Act
-			var result =await _clientService.DetailsOfClientAsync(clientId);
+			var result = await _clientService.DetailsOfClientAsync(clientId);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal("ClientTest", result.Name);
+			Assert.Equal("ClientTest", result.Result.Name);
 			//Assert.Equal("TestDetails", result.Description);
-			Assert.Equal("ConutryTest", result.Address.First().Country);
+			Assert.Equal("ConutryTest", result.Result.Address.First().Country);
 		}
 		[Fact]
 		public async Task ShowClientDetailsWrongId_DetailsOfClientAsync_ThrowException()
 		{
 			//Arrange
 			var clientId = 100;
-			//Act&Assert
-			var result =await Assert.ThrowsAsync<ArgumentException>(() => _clientService.DetailsOfClientAsync(clientId));
-			Assert.Contains("Nie ma takiego klienta", result.Message);
+			//Act
+			var result = await _clientService.DetailsOfClientAsync(clientId);
+			//var result = await Assert.ThrowsAsync<NotFoundClientException>(() => _clientService.DetailsOfClientAsync(clientId));
+			//Assert
+			//Assert.Contains($"Nieprawidłowy numer client {clientId}.", result.Message);
+			Assert.Contains($"Nieprawidłowy numer client {clientId}.", result.Error);
 		}
 		[Fact]
 		public async Task ShowAllClient_First3_GetAllClientsAsync_ReturnList()
 		{
 			//Arrange&Act
-			var result =await _clientService.GetAllClientsAsync(3, 1);
+			var result = await _clientService.GetAllClientsAsync(3, 1);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Count);
+			Assert.Equal(3, result.Result.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilterName_GetClientsByFilterAsync_ReturnList()
@@ -52,10 +55,10 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Name = "Client"
 			};
 			//Act
-			var result =await _clientService.GetClientsByFilterAsync(3, 1, filter);
+			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Count);
+			Assert.Equal(3, result.Result.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilter_GetClientsByFilterAsync_ReturnList()
@@ -66,10 +69,10 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				FullName = "FullNameTestAddress1"
 			};
 			//Act
-			var result =await _clientService.GetClientsByFilterAsync(3, 1, filter);
+			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(1, result.Count);
+			Assert.Equal(1, result.Result.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilterNotExist_GetClientsByFilterAsync_ReturnList()
@@ -80,10 +83,10 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Name = "Test1111"
 			};
 			//Act
-			var result =await _clientService.GetClientsByFilterAsync(3, 1, filter);
+			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(0, result.Count);
+			Assert.Equal(0, result.Result.Count);
 		}
 	}
 }

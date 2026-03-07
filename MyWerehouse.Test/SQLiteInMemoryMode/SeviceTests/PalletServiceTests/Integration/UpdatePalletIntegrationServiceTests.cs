@@ -125,8 +125,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(updatedPallet, "user"));
 			//Assert
 			Assert.NotNull(resultHandler);
-			Assert.True(resultHandler.Success);
-			Assert.Equal("Q1010", resultHandler.PalletId);
+			Assert.True(resultHandler.IsSuccess);
+			Assert.Contains("Q1010", resultHandler.Message);
 
 			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
 			var result = DbContext.Pallets
@@ -306,8 +306,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(updatedPallet, "user"));
 			//Assert
 			Assert.NotNull(resultHandler);
-			Assert.True(resultHandler.Success);
-			Assert.Equal("Q1010", resultHandler.PalletId);
+			Assert.True(resultHandler.IsSuccess);
+			Assert.Contains("Q1010", resultHandler.Message);
 
 			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
 			var result = DbContext.Pallets

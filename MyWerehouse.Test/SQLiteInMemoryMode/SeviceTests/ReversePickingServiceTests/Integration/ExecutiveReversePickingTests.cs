@@ -163,7 +163,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Single(pickingTasks);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 			var reverseTasks = await DbContext.ReversePickings
@@ -182,9 +182,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				"Q0001", "UserReverse", null));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
-			Assert.True(resultReversePicking.Success);
-			Assert.Contains("Dodano towar do palety źródłowej", resultReversePicking.Message);
-			Assert.Equal("P2", resultReversePicking.PalletId);
+			Assert.True(resultReversePicking.Result.Success);
+			Assert.Contains("Dodano towar do palety źródłowej", resultReversePicking.Result.Message);
+			Assert.Equal("P2", resultReversePicking.Result.PalletId);
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "P2");
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(10, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
@@ -335,7 +335,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Single(pickingTasks);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 
@@ -355,9 +355,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				"Q0001", "UserReverse", null));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
-			Assert.True(resultReversePicking.Success);
-			Assert.Contains("Dodano towar do nowej palety.", resultReversePicking.Message);
-			Assert.Equal("Q0002", resultReversePicking.PalletId);
+			Assert.True(resultReversePicking.Result.Success);
+			Assert.Contains("Dodano towar do nowej palety.", resultReversePicking.Result.Message);
+			Assert.Equal("Q0002", resultReversePicking.Result.PalletId);
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "Q0002");
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(8, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
@@ -524,7 +524,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Single(pickingTasks);
 
 			// Assert – Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 
@@ -547,10 +547,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				"Q0001", "UserReverse", list));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
-			Assert.True(resultReversePicking.Success);
-			Assert.Contains("Dodano towar.", resultReversePicking.Message);			
+			Assert.True(resultReversePicking.Result.Success);
+			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);			
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "P3");
-			Assert.Contains(palletAfterreversePicking, resultReversePicking.PalletWithAddedProduct);
+			Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(9, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(PalletStatus.Available, palletAfterreversePicking.Status);
@@ -735,7 +735,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Single(pickingTasks);
 
 			// Assert 3– Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 
@@ -758,10 +758,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				"Q0001", "UserReverse", list));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
-			Assert.True(resultReversePicking.Success);
-			Assert.Contains("Dodano towar.", resultReversePicking.Message);
+			Assert.True(resultReversePicking.Result.Success);
+			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "P3");
-			Assert.Contains(palletAfterreversePicking, resultReversePicking.PalletWithAddedProduct);
+			Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(9, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(PalletStatus.Available, palletAfterreversePicking.Status);
@@ -961,7 +961,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Equal(2, pickingTasks.Count);
 
 			// Assert 3– Result
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 
@@ -984,10 +984,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				"Q0001", "UserReverse", list));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
-			Assert.True(resultReversePicking.Success);
-			Assert.Contains("Dodano towar.", resultReversePicking.Message);
+			Assert.True(resultReversePicking.Result.Success);
+			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.Id == "P3");
-			Assert.Contains(palletAfterreversePicking, resultReversePicking.PalletWithAddedProduct);
+			Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(9, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(PalletStatus.Available, palletAfterreversePicking.Status);

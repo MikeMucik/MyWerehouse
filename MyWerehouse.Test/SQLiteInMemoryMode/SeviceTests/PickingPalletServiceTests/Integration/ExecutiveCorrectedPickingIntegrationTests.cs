@@ -5,10 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
-using MyWerehouse.Application.Common.Exceptions;
 using MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPicking;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
@@ -16,9 +13,6 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
@@ -166,7 +160,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//var result = await _pickingPalletService.ExecuteManualPickingAsync(newToPickPallet.Id, issue.Id, "user1");
 			var result = await Mediator.Send(new ExecuteCorrectedPickingCommand(newToPickPallet.Id, issue.Id, "user1"));
 			// Assert		
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
 
 			// ✅ Paleta została zaktualizowana
@@ -372,7 +366,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			// Assert
 
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
 
 			// ✅ Paleta została zaktualizowana
@@ -565,7 +559,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Act
 			var result = await Mediator.Send(new ExecuteCorrectedPickingCommand(newToPickPallet.Id, issue.Id, "user1"));
 			// Assert		
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
 
 			// ✅ Paleta została zaktualizowana
@@ -609,9 +603,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// ✅ Walidacja, że kontekst nie trzyma niezatwierdzonych zmian
 			Assert.False(DbContext.ChangeTracker.HasChanges());
 		}
-
-
-
 
 
 		[Fact]
@@ -750,8 +741,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Act
 			var result = await Mediator.Send(new ExecuteCorrectedPickingCommand(newToPickPallet.Id, issue.Id, "user1"));
 			// Assert
-			Assert.False(result.Success);
-			Assert.Equal($"Zamówienie o numerze {issue.Id} nie zostało znalezione.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Equal($"Zamówienie o numerze {issue.Id} nie zostało znalezione.", result.Error);
 		}		
 	}
 }

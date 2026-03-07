@@ -200,7 +200,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var result = Mediator.Send(new FinishPlannedPickingPrepareToHandPickingCommand());
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Result.Count);
+			Assert.Equal(2, result.Result.Result.Count);
 			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			Assert.NotNull(resultForProduct1);
@@ -393,7 +393,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var result = Mediator.Send(new FinishPlannedPickingPrepareToHandPickingCommand());
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Result.Count);
+			Assert.Equal(2, result.Result.Result.Count);
 			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			Assert.NotNull(resultForProduct1);

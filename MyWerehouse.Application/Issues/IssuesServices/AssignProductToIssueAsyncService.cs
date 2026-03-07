@@ -5,14 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Pallets.Services;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Application.Products.Services;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
@@ -40,9 +38,10 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			if (issue.IssueStatus != IssueStatus.Pending && issue.IssueStatus != IssueStatus.New &&
 			issue.IssueStatus != IssueStatus.NotComplete)
 			{
-				throw new NotFoundIssueException("Błąd statusu zlecenia");
-			}			
-			if (await _productRepo.IsExistProduct(product.ProductId) == false) throw new NotFoundProductException(product.ProductId);
+				return AssignProductToIssueResult.Fail("Błąd statusu zlecenia");
+			}
+			if (!await _productRepo.IsExistProduct(product.ProductId))
+				return AssignProductToIssueResult.Fail($"Produkt o numerze {product.ProductId} nie istnieje.");
 			IReadOnlyCollection<Pallet> oldProperPallets = [];
 			if (alreadyAssignedPallets != null)
 			{
@@ -50,7 +49,9 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			}
 			alreadyAssignedPallets ??= [];
 			var oldCount = oldProperPallets.Count;
-			var productToAdded = await _productRepo.GetProductByIdAsync(product.ProductId) ?? throw new NotFoundProductException(product.ProductId);
+			var productToAdded = await _productRepo.GetProductByIdAsync(product.ProductId);
+			if (productToAdded is null) return AssignProductToIssueResult.Fail($"Produkt o numerze {product.ProductId} nie istnieje.");
+			//	?? throw new NotFoundProductException(product.ProductId);
 
 			//1. dostępność towaru	
 			var totalAvailable = await _getProductCountService.GetProductCountAsync(product.ProductId, product.BestBefore);
@@ -73,21 +74,17 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 				//case IssueAllocationPolicy.FefoWithFullPalletPreference:
 
 				default:
-					throw new NotSupportedException(
-			  $"Allocation policy {policy} is not supported.");
+					return AssignProductToIssueResult.Fail($"Allocation policy {policy} is not supported.");				
 			}
 
 			var quantityFromPallets = palletAssigned.Sum(q => q.ProductsOnPallet.First().Quantity);
 
-			var rest = product.Quantity - quantityFromPallets; if (rest < 0)
-				throw new DomainException("Allocated more product than requested.");
+			var rest = product.Quantity - quantityFromPallets;
+			if (rest < 0)
+				return AssignProductToIssueResult.Fail("Allocated more product than requested.");
 			//3. pobierz dostępne virtualPallet;
 			var availableVirtualPalletsQuery = await _getVirtualPalletsService.GetVirtualPalletsAsync(product.ProductId, product.BestBefore);
-			//czy na pewno null ?? czy to potrzebne ??
-			//if (availableVirtualPalletsQuery is null)
-			//{
-			//	return AssignProductToIssueResult.Fail("Brak palety do pickingu - błąd virtual", product.ProductId);
-			//}
+			
 			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 			if (rest > 0)
 			{

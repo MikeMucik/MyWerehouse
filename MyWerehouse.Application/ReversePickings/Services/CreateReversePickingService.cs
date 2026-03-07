@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Azure.Core;
-using MediatR;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -15,27 +13,28 @@ namespace MyWerehouse.Application.ReversePickings.Services
 	{
 		private readonly IPalletRepo _palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
-		private readonly IReversePickingRepo _reversePickingRepo;	
+		private readonly IReversePickingRepo _reversePickingRepo;
 		public CreateReversePickingService(IPalletRepo palletRepo,
 			IPickingTaskRepo pickingTaskRepo,
 			IReversePickingRepo reversePickingRepo)
 		{
 			_palletRepo = palletRepo;
 			_pickingTaskRepo = pickingTaskRepo;
-			_reversePickingRepo = reversePickingRepo;			
+			_reversePickingRepo = reversePickingRepo;
 		}
 
-		public async Task CreateReversePicking(string palletId, string userId)
+		public async Task<ReversePickingResult> CreateReversePicking(string palletId, string userId)
 		{
 			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId))
-				throw new NotFoundReversePickingException("Zadania dekompletacji są już utworzone.");
+				return ReversePickingResult.Fail("Zadania dekompletacji są już utworzone.");
 			var listTasks = new List<ReversePicking>();
-			var pallet = await _palletRepo.GetPalletByIdAsync(palletId)
-				?? throw new NotFoundPalletException(palletId);
-			var issue = pallet.Issue
-				?? throw new NotFoundIssueException("Brak zlecenia wydania.");
+			var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
+			if (pallet == null) return ReversePickingResult.Fail($"Paleta o numerze {palletId} nie istnieje.");
+			var issue = pallet.Issue;
+			if (issue == null) return ReversePickingResult.Fail("Brak zlecenia wydania.");
 			var pickingTasksOfPickingPallet = await _pickingTaskRepo.GetPickingTasksByPickingPalletIdAsync(palletId);
-			if (pickingTasksOfPickingPallet.Count == 0) throw new NotFoundPickingTaskException("Brak alokacji dla palety. Paleta nie do dekompletacji.");//
+			if (pickingTasksOfPickingPallet.Count == 0)
+				return ReversePickingResult.Fail("Brak alokacji dla palety. Paleta nie do dekompletacji.");
 			foreach (var pickingTaskToReverse in pickingTasksOfPickingPallet)
 			{
 				listTasks.Add(new ReversePicking
@@ -54,11 +53,12 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			foreach (var task in listTasks)
 			{
 				_reversePickingRepo.AddReversePicking(task);
-			}			
+			}
 			foreach (var task in listTasks)
 			{
 				task.AddHistory(userId, issue.Id, issue.IssueNumber, ReversePickingStatus.Pending, ReversePickingStatus.Pending);
 			}
+			return ReversePickingResult.Ok();
 		}
 	}
 }

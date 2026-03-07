@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("do stanu magazynowego, uaktualniono stan magazynowy", result.Message);
 			//Assert.False(string.IsNullOrWhiteSpace(result)); // numer palety został zwrócony
 			
@@ -191,7 +191,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			
 			//Assert
 			Assert.NotNull(result);
-			Assert.Contains("Produkt o numerze 2 nie istnieje.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Produkt o numerze 2 nie istnieje.", result.Error);
 		}
 	}
 }

@@ -14,7 +14,7 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 {
-	public class CreateNewIssueHandler : IRequestHandler<CreateNewIssueCommand, List<IssueResult>>
+	public class CreateNewIssueHandler : IRequestHandler<CreateNewIssueCommand, AppResult<List<IssueResult>>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IIssueRepo _issueRepo;
@@ -24,10 +24,10 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 			IAssignProductToIssueService assignProductToIssueService)
 		{
 			_werehouseDbContext = werehouseDbContext;
-			_issueRepo = issueRepo;			
-			_assignProductToIssueService = assignProductToIssueService;			
+			_issueRepo = issueRepo;
+			_assignProductToIssueService = assignProductToIssueService;
 		}
-		public async Task<List<IssueResult>> Handle(CreateNewIssueCommand request, CancellationToken ct)
+		public async Task<AppResult<List<IssueResult>>> Handle(CreateNewIssueCommand request, CancellationToken ct)
 		{
 			var addedProducts = new List<IssueResult>();
 			var results = new List<IssueResult>();
@@ -40,12 +40,12 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 
 				issue.IssueItems = new List<IssueItem>();
 				foreach (var item in request.DTO.Items)
-				{					
+				{
 					IssueResult addingProducts;
 					var result = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
 					if (result.Success == false)
 					{
-						 addingProducts = IssueResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
+						addingProducts = IssueResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
 					}
 					else
 					{
@@ -67,16 +67,16 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 				}
 				issue.AddHistory(request.DTO.PerformedBy);
 				await transaction.CommitAsync(ct);
-				await _werehouseDbContext.SaveChangesAsync(ct);				
-				return addedProducts;
+				await _werehouseDbContext.SaveChangesAsync(ct);
+				return AppResult<List<IssueResult>>.Success(addedProducts);
 			}
 			catch (DomainException ex)
 			{
 				await transaction.RollbackAsync(ct);
 
-				addedProducts.Add(IssueResult.Fail(ex.Message));
-				return addedProducts;
-			}					
+				//addedProducts.Add(IssueResult.Fail(ex.Message));
+				return AppResult<List<IssueResult>>.Fail(ex.Message, ErrorType.Technical);
+			}
 		}
 	}
 }

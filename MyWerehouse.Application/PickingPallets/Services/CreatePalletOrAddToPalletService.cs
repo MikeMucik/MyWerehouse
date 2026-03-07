@@ -15,16 +15,13 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	public class CreatePalletOrAddToPalletService : ICreatePalletOrAddToPalletService
 	{
 		private readonly IPalletRepo _palletRepo;
-		private readonly IIssueRepo _issueRepo;
-		public CreatePalletOrAddToPalletService(IPalletRepo palletRepo, IIssueRepo issueRepo)
+		public CreatePalletOrAddToPalletService(IPalletRepo palletRepo)
 		{
-			_palletRepo = palletRepo;			
-			_issueRepo = issueRepo;
+			_palletRepo = palletRepo;		
 		}
 		public async Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, int productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion)
 		{
-			//var issue = await _issueRepo.GetIssueByIdAsync(issueId);
-			
+			//var issue = await _issueRepo.GetIssueByIdAsync(issueId);			
 			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issue.Id);
 			if (oldPallet == null)
 			{

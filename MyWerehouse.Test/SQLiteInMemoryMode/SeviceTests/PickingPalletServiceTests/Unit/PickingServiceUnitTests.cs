@@ -563,14 +563,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))));
 
 			// Assert
-			result.Should().HaveCount(2);// Tu mi liczy klientów - dlatego 2
+			result.Result.Should().HaveCount(2);// Tu mi liczy klientów - dlatego 2
 					
 			// 1. Sprawdź, że w ogóle mamy jakiegoś klienta
 			Assert.NotNull(result);
-			Assert.NotEmpty(result);
+			Assert.NotEmpty(result.Result);
 
 			// 2. Pierwszy klient istnieje
-			var firstClient = result.First();
+			var firstClient = result.Result.First();
 			Assert.Equal(client1.Id, firstClient.ClientIdOut);
 
 			// 3. Pierwszy klient ma dokładnie 2 zlecenia
@@ -593,19 +593,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(30, issue1Product1.Quantity);
 			Assert.Equal(10, issue1Product2.Quantity);
 
-			var client1Result = result.Should().ContainSingle(r => r.ClientIdOut == client1.Id).Subject;
+			var client1Result = result.Result.Should().ContainSingle(r => r.ClientIdOut == client1.Id).Subject;
 			// Klient1, Issue2, Product2 → 15
 			//var issue2Result = client1Result.IssuesDetailsForPicking.Should().ContainSingle(i => i.IssueNumber == issue2.IssueNumber).Subject;
 			//issue2Result.Products.Should().ContainSingle(p => p.ProductId == product1.Id && p.Quantity == 15);
 
 			// --- Klient 2 ---
-			var client2Result = result.Should().ContainSingle(r => r.ClientIdOut == client2.Id).Subject;
+			var client2Result = result.Result.Should().ContainSingle(r => r.ClientIdOut == client2.Id).Subject;
 
 			// Klient2 ma 1 zlecenie
 			client2Result.IssuesDetailsForPicking.Should().HaveCount(1);
 
 			// Klient2, Issue3, Product1 → 25
-			var secondClient = result.Skip(1).First();	
+			var secondClient = result.Result.Skip(1).First();	
 			var issue3To2Client = secondClient.IssuesDetailsForPicking.FirstOrDefault(i=>i.IssueNumber == issue3.IssueNumber);
 			var issue3Product1 = issue3To2Client.Products.FirstOrDefault(x => x.ProductId == product1.Id);
 			var issue3Product2 = issue3To2Client.Products.FirstOrDefault(x => x.ProductId == product2.Id);

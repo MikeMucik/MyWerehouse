@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
@@ -15,19 +14,19 @@ namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public class AddPickingTaskToIssueService : IAddPickingTaskToIssueService
 	{		
-		private readonly IProductRepo _productRepo;
+		//private readonly IProductRepo _productRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly IPalletRepo _palletRepo;
-		public AddPickingTaskToIssueService(IProductRepo productRepo,
+		public AddPickingTaskToIssueService(
+			//IProductRepo productRepo,
 			IPickingPalletRepo pickingPalletRepo, IPalletRepo palletRepo)
 		{			
-			_productRepo = productRepo;
+			//_productRepo = productRepo;
 			_pickingPalletRepo = pickingPalletRepo;
 			_palletRepo = palletRepo;
 		}
 		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets, Issue issue, int productId, int rest, DateOnly? bestBefore, string userId)
 		{
-			_ = await _productRepo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException(productId);
 			var pickingTasks = new List<PickingTask>();
 			var quantity = rest;
 			//async Task AllocateFromVirtualPallet(VirtualPallet vp)
@@ -70,7 +69,8 @@ namespace MyWerehouse.Application.PickingPallets.Services
 						InitialPalletQuantity = palletToPicking.ProductsOnPallet.First().Quantity,
 					};
 					palletToPicking.AssignToPicking(userId);
-					await _pickingPalletRepo.AddPalletToPickingAsync(virtualPallet);
+					//await _pickingPalletRepo.AddPalletToPickingAsync(virtualPallet);
+					 _pickingPalletRepo.AddPalletToPicking(virtualPallet);
 					AllocateFromVirtualPallet(virtualPallet);
 				}
 			}
@@ -85,9 +85,10 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			return AddPickingTaskToIssueResult.Ok(pickingTasks);
 		}
 
-		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, int productId, int quantity, DateOnly? bestBefore, string userId)
+		//public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, int productId, int quantity, DateOnly? bestBefore, string userId)
+		public AddPickingTaskToIssueResult AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, int productId, int quantity, DateOnly? bestBefore, string userId)
 		{
-			_ = await _productRepo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException(productId);
+			//_ = await _productRepo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException(productId);
 			var pickingTask = CreatePickingTask(issue,				
 				quantity, virtualPallet, productId, bestBefore);
 			pickingTask.VirtualPallet = virtualPallet;

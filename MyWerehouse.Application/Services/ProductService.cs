@@ -11,12 +11,13 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Domain.Receviving.Filters;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Products.Filters;
+using MyWerehouse.Application.Common.Results;
+using MediatR;
 
 namespace MyWerehouse.Application.Services
 {
@@ -27,24 +28,24 @@ namespace MyWerehouse.Application.Services
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IInventoryRepo _inventoryRepo;
-		private readonly IValidator<AddProductDTO> _productValidator;		
+		private readonly IValidator<AddProductDTO> _productValidator;
 
 		public ProductService(
 			IProductRepo repo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IInventoryRepo inventoryRepo,
-			IReceiptRepo? receiptRepo = null,			
-			IValidator<AddProductDTO>? productValidator = null)			
+			IReceiptRepo? receiptRepo = null,
+			IValidator<AddProductDTO>? productValidator = null)
 		{
 			_productRepo = repo;
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
 			_inventoryRepo = inventoryRepo;
 			_receiptRepo = receiptRepo;
-			_productValidator = productValidator;			
+			_productValidator = productValidator;
 		}
-		
+
 		public ProductService(
 			IProductRepo repo,
 			IMapper mapper)
@@ -52,7 +53,7 @@ namespace MyWerehouse.Application.Services
 			_productRepo = repo;
 			_mapper = mapper;
 		}
-		public async Task<int> AddProductAsync(AddProductDTO productDTO)
+		public async Task<AppResult<int>> AddProductAsync(AddProductDTO productDTO)
 		{
 			var validationResult = _productValidator.Validate(productDTO);
 			if (!validationResult.IsValid)
@@ -62,9 +63,10 @@ namespace MyWerehouse.Application.Services
 			var existingProduct = _productRepo.FindProducts(new ProductSearchFilter { ProductName = productDTO.Name });
 			if (await existingProduct.AnyAsync())
 			{
-				throw new InvalidDataException("Produkt o tej nazwie już istnieje.");
+				return AppResult<int>.Fail("Produkt o tej nazwie już istnieje.", ErrorType.NotFound);
+				//throw new NotFoundProductException("Produkt o tej nazwie już istnieje.");
 			}
-			var productNew = _mapper.Map<Product>(productDTO);			 
+			var productNew = _mapper.Map<Product>(productDTO);
 			var product = _productRepo.AddProduct(productNew);
 			var inventory = new Inventory
 			{
@@ -74,11 +76,15 @@ namespace MyWerehouse.Application.Services
 			};
 			_inventoryRepo.AddInventory(inventory);
 			await _werehouseDbContext.SaveChangesAsync();
-			return product.Id;
+			return AppResult<int>.Success(product.Id);
 		}
-		public async Task DeleteProductAsync(int productId)
+		public async Task<AppResult<Unit>> DeleteProductAsync(int productId)
 		{
 			var product = await _productRepo.GetProductByIdAsync(productId) ?? throw new DomainException("Brak produktu o tym numerze");
+			if (product == null)
+			{
+				return AppResult<Unit>.Fail("Produkt o tej nazwie nie istnieje.", ErrorType.NotFound);
+			}
 			var filter = new IssueReceiptSearchFilter
 			{
 				ProductId = productId
@@ -87,21 +93,21 @@ namespace MyWerehouse.Application.Services
 			if (await receipt.AnyAsync())
 			{
 				_productRepo.SwitchOffProduct(product);
-				//await _productRepo.SwitchOffProductAsync(productId);
 			}
 			else
 			{
 				_productRepo.DeleteProduct(product);
 			}
 			await _werehouseDbContext.SaveChangesAsync();
+			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<AddProductDTO> GetProductToEditAsync(int productId)
+		public async Task<AppResult<AddProductDTO>> GetProductToEditAsync(int productId)
 		{
 			var product = await _productRepo.GetProductByIdAsync(productId);
 			var productDTO = _mapper.Map<AddProductDTO>(product);
-			return productDTO;
+			return AppResult<AddProductDTO>.Success( productDTO);
 		}
-		public async Task UpdateProductAsync(AddProductDTO productDTO)
+		public async Task<AppResult<Unit>> UpdateProductAsync(AddProductDTO productDTO)
 		{
 			var validationResult = _productValidator.Validate(productDTO);
 			if (!validationResult.IsValid)
@@ -111,18 +117,22 @@ namespace MyWerehouse.Application.Services
 			var existingProduct = await _productRepo.GetProductToEditAsync(productDTO.Id);
 			if (existingProduct == null)
 			{
-				throw new InvalidDataException($"Produkt o numerze {productDTO.Id} nie istnieje");
+				return AppResult<Unit>.Fail($"Produkt o numerze {productDTO.Id} nie istnieje", ErrorType.NotFound);
+				//throw new NotFoundProductException($"Produkt o numerze {productDTO.Id} nie istnieje");
 			}
 			_mapper.Map(productDTO, existingProduct);
 			await _werehouseDbContext.SaveChangesAsync();
+			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<DetailsOfProductDTO> DetailsOfProductAsync(int productId)
+		public async Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(int productId)
 		{
 			var product = await _productRepo.GetProductToEditAsync(productId);
+			if (product == null) return AppResult<DetailsOfProductDTO>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
-			return productDTO;
+			
+			return AppResult<DetailsOfProductDTO>.Success(productDTO);
 		}
-		public async Task<ListProductsDTO> GetProductsAsync(int pageSize, int PageNumber)
+		public async Task<AppResult<ListProductsDTO>> GetProductsAsync(int pageSize, int PageNumber)
 		{
 			var products = _productRepo.GetAllProducts()
 				.OrderBy(p => p.Id)
@@ -138,9 +148,9 @@ namespace MyWerehouse.Application.Services
 				CurrentPage = PageNumber,
 				Count = await products.CountAsync()
 			};
-			return productList;
+			return AppResult<ListProductsDTO>.Success(productList);
 		}
-		public async Task<ListProductsDTO> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter)
+		public async Task<AppResult<ListProductsDTO>> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter)
 		{
 			pageNumber = pageNumber <= 1 ? 1 : pageNumber;
 			var products = _productRepo.FindProducts(filter)
@@ -162,7 +172,7 @@ namespace MyWerehouse.Application.Services
 				CurrentPage = pageNumber,
 				Count = countProducts.Result,
 			};
-			return productList;
+			return AppResult<ListProductsDTO>.Success( productList);
 		}
 	}
 }

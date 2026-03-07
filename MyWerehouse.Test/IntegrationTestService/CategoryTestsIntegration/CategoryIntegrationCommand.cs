@@ -24,7 +24,10 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			var _categoryRepo = new CategoryRepo(_context);
 			var _productRepo = new ProductRepo(_context);
 			_validator = new CategoryDTOValidation();
-			_categoryService = new CategoryService(_categoryRepo, _mapper, _context, _productRepo, _validator);
+			_categoryService = new CategoryService(_categoryRepo,				
+				_mapper, _context, _productRepo, 
+				_validator
+					 );
 		}
 
 	}

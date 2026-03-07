@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
@@ -31,7 +30,9 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			{
 				sourcePallet.ProductsOnPallet.Single().Quantity += reversePicking.Quantity;
 			}
-			else throw new NotFoundPalletException("Paleta źródłowa ma nieprawidłowy status.");
+			else
+				return ReversePickingResult.Fail("Paleta źródłowa ma nieprawidłowy status.");
+				//throw new NotFoundPalletException("Paleta źródłowa ma nieprawidłowy status.");
 			sourcePallet.AddHistory(sourcePallet.Status, ReasonMovement.ReversePicking, userId);
 			
 			return ReversePickingResult.Ok("Dodano towar do palety źródłowej", reversePicking.ProductId, reversePicking.SourcePalletId);
@@ -39,13 +40,15 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		public async Task<ReversePickingResult> AddToExistingPallet(ReversePicking task, List<Pallet> pallets, string userId)
 		{
 			var quantityToAdded = task.Quantity;
-			var product = await _productRepo.GetProductByIdAsync(task.ProductId)
-				?? throw new NotFoundProductException(task.ProductId);
+			var product = await _productRepo.GetProductByIdAsync(task.ProductId);
+				//?? throw new NotFoundProductException(task.ProductId);
 			var cartonsOnPallet = product.CartonsPerPallet;
 			if (pallets.Count == 0)
-				throw new NotFoundPalletException("Brak palet do uzupełnienia");
+				return ReversePickingResult.Fail("Brak palet do uzupełnienia");
+				//throw new NotFoundPalletException("Brak palet do uzupełnienia");
 			if (pallets.Any(p => p.ProductsOnPallet.Single().Quantity >= cartonsOnPallet))
-				throw new NotFoundPalletException("Próba uzupełnienia pełnej palety");				
+				return ReversePickingResult.Fail("Próba uzupełnienia pełnej palety");
+			//throw new NotFoundPalletException("Próba uzupełnienia pełnej palety");				
 			foreach (var pallet in pallets)
 			{
 				if (quantityToAdded <= 0)

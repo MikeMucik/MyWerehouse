@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Application.Common.Exceptions
 {
-	public abstract class ValidationException : AppException
+	public abstract class ValidationException : 		Exception
 	{
 		protected ValidationException(string message) : base(message) { }
 	}

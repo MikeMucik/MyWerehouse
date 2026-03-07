@@ -15,7 +15,7 @@ using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {
-	[Collection("QueryCollection")]	
+	[Collection("QueryCollection")]
 	public class PalletViewServicesTests
 	{
 		private readonly QueryTestFixture _fixture;
@@ -36,13 +36,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			var result = await _mediator.Send(query);
 			Assert.NotNull(result);
-			Assert.Single(result.ProductsOnPallet);
-			Assert.Equal(1, result.LocationId);
-			Assert.Equal(PalletStatus.OnHold, result.Status);
-			Assert.Equal(receiptId1, result.ReceiptId);
-			Assert.Equal(issueId1, result.IssueId);
-			Assert.Equal(new DateTime(2020, 1, 1), result.DateReceived);
-			var product1 = result.ProductsOnPallet.Single(p => p.ProductId == 10);
+			Assert.Single(result.Result.ProductsOnPallet);
+			Assert.Equal(1, result.Result.LocationId);
+			Assert.Equal(PalletStatus.OnHold, result.Result.Status);
+			Assert.Equal(receiptId1, result.Result.ReceiptId);
+			Assert.Equal(issueId1, result.Result.IssueId);
+			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
+			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == 10);
 			Assert.Equal(100, product1.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product1.BestBefore);
 		}
@@ -60,15 +60,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			Assert.NotNull(result);
-			Assert.NotNull(result.ProductsOnPallet);
-			Assert.Equal(2, result.ProductsOnPallet.Count);
-			Assert.Equal(receiptId1, result.ReceiptId);
-			Assert.Equal(issueId1, result.IssueId);
-			Assert.Equal(new DateTime(2020, 1, 1), result.DateReceived);
-			var product1 = result.ProductsOnPallet.Single(p => p.ProductId == 10);
+			Assert.NotNull(result.Result.ProductsOnPallet);
+			Assert.Equal(2, result.Result.ProductsOnPallet.Count);
+			Assert.Equal(receiptId1, result.Result.ReceiptId);
+			Assert.Equal(issueId1, result.Result.IssueId);
+			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
+			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == 10);
 			Assert.Equal(50, product1.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product1.BestBefore);
-			var product2 = result.ProductsOnPallet.Single(p => p.ProductId == 11);
+			var product2 = result.Result.ProductsOnPallet.Single(p => p.ProductId == 11);
 			Assert.Equal(200, product2.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product2.BestBefore);
 		}
@@ -84,7 +84,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var query = new FindPalletsByFiltrQuery(filtr);
 			var result = _mediator.Send(query);
 			//Assert
-			Assert.NotEmpty(result.Result);
+			Assert.NotEmpty(result.Result.Result);
 		}
 		[Fact]
 		public void ShowPallets_FindPallets_ReturnCollectionEmpty()
@@ -98,7 +98,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var query = new FindPalletsByFiltrQuery(filtr);
 			var result = _mediator.Send(query);
 			//Assert
-			Assert.Empty(result.Result);
+			Assert.Empty(result.Result.Result);
 		}
 	}
 }

@@ -9,5 +9,5 @@ using MyWerehouse.Application.Pallets.DTOs;
 
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
-	public record CreateNewPalletCommand(PalletDTO DTO, string UserId) : IRequest<PalletResult>;
+	public record CreateNewPalletCommand(PalletDTO DTO, string UserId) : IRequest<AppResult<Unit>>;
 }

@@ -11,5 +11,5 @@ using MyWerehouse.Application.Receipts.DTOs;
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 
 {
-	public record CreateReceiptPlanCommand(CreateReceiptPlanDTO DTO) : IRequest<ReceiptResult>;
+	public record CreateReceiptPlanCommand(CreateReceiptPlanDTO DTO) : IRequest<AppResult<Unit>>;
 }

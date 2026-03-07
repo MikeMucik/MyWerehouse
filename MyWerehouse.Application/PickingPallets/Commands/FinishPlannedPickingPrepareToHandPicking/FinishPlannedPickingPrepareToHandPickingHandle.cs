@@ -11,10 +11,11 @@ using MyWerehouse.Domain.Receviving.Filters;
 using MyWerehouse.Domain.Picking.Models;
 using AutoMapper;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPrepareToHandPicking
 {
-	public class FinishPlannedPickingPrepareToHandPickingHandle : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, List<PickingTaskDTO>>
+	public class FinishPlannedPickingPrepareToHandPickingHandle : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, AppResult< List<PickingTaskDTO>>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
@@ -31,7 +32,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 			_issueRepo = issueRepo;
 			_mapper = mapper;
 		}
-		public async Task<List<PickingTaskDTO>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
+		public async Task<AppResult<List<PickingTaskDTO>>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
 		{
 			var listToDoTasks = new List<PickingTaskDTO>();
 			var filtr = new IssueReceiptSearchFilter
@@ -73,7 +74,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 				}
 			}
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return listToDoTasks;
+			return AppResult<List<PickingTaskDTO>>.Success(listToDoTasks);
 		}
 	}
 }

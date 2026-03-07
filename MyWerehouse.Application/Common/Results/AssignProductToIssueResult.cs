@@ -24,14 +24,13 @@ namespace MyWerehouse.Application.Common.Results
 				Message = message,
 				AssignedPallets = pallets
 			};
-		}
-		public static AssignProductToIssueResult Fail(string message, int productId)
+		}		
+		public static AssignProductToIssueResult Fail(string message)
 		{
 			return new AssignProductToIssueResult
 			{
 				Success = false,
-				Message = message,
-				ProductId = productId
+				Message = message
 			};
 		}
 		public static AssignProductToIssueResult Fail(

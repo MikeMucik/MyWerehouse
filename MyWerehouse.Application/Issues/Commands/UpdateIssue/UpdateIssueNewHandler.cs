@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
 using MyWerehouse.Application.Issues.DTOs;
@@ -9,7 +8,6 @@ using MyWerehouse.Application.Issues.IssuesServices;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure;
 
@@ -19,17 +17,20 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 		IIssueRepo issueRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
-		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueNewCommand, List<IssueResult>>
+		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueNewCommand, AppResult<List<IssueResult>>>
 	{
 		private readonly IIssueItemRepo _issueItemRepo = issueItemRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
-		public async Task<List<IssueResult>> Handle(UpdateIssueNewCommand request, CancellationToken ct)
+		public async Task<AppResult<List<IssueResult>>> Handle(UpdateIssueNewCommand request, CancellationToken ct)
 		{
 			var resultList = new List<IssueResult>();
-			var issue = await _issueRepo.GetIssueByIdAsync(request.DTO.Id) ?? throw new NotFoundIssueException(request.DTO.Id);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.DTO.Id);
+			if (issue == null)
+				return AppResult<List<IssueResult>>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+
 			// Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone lub nie zaczęty picking
 			if (issue.IssueStatus == IssueStatus.New ||
 				issue.IssueStatus == IssueStatus.Pending ||
@@ -63,16 +64,29 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					{
 						await transaction.CreateSavepointAsync($"BeforeProduct_{product.ProductId}", ct);
 						try
-						{							
+						{
 							var oldProperPallets = oldListPallets.Where(p => p.ProductsOnPallet.First().ProductId == product.ProductId);
 
 							var result = await _assignProductToIssueAsync.AssignProductToIssue(issue, product, IssueAllocationPolicy.FullPalletFirst, oldListPallets, request.DTO.PerformedBy);
-							if (result.Success == false)
+							//if (result.Success == false)
+							//{
+							//	resultList.Add(IssueResult.Fail(result.Message, product.ProductId));
+
+							if (!result.Success)
 							{
+								await transaction.RollbackToSavepointAsync($"BeforeProduct_{product.ProductId}", ct);
+								await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
+								await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
+								await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
+
 								resultList.Add(IssueResult.Fail(result.Message, product.ProductId));
 								anyFailure = true;
 								continue;
 							}
+
+							//anyFailure = true;
+							//continue;
+						//}
 							palletAssigned = result.AssignedPallets.ToList();
 							var returnPallets = oldProperPallets.Except(palletAssigned).ToList();
 							foreach (var returnPallet in returnPallets)
@@ -80,45 +94,44 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 								returnPallet.IssueId = null;
 								returnPallet.Status = PalletStatus.Available;
 							}
-							await _werehouseDbContext.SaveChangesAsync(ct);							
+							await _werehouseDbContext.SaveChangesAsync(ct);
 							resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
 							anySuccess = true;
 
 						}
 						catch (Exception ex) // Łapiemy wszystko tutaj, żeby obsłużyć logikę czyszczenia
 						{
-							await transaction.RollbackToSavepointAsync($"BeforeProduct_{product.ProductId}", ct);
-							await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
-							await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
-							await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
-							//await transaction.RollbackAsync(ct);
-							anyFailure = true;
-							// Obsługa konkretnych wyjątków do wyniku
-							if (ex is NotFoundProductException pEx)
-							{
-								resultList.Add(IssueResult.Fail(pEx.Message, product.ProductId));
-							}
-							else if (ex is NotFoundPalletException palEx)
-							{
-								resultList.Add(IssueResult.Fail(palEx.Message, product.ProductId));
-							}
-							else if (ex is NotFoundIssueException ei)
-							{
-								resultList.Add(IssueResult.Fail(ei.Message, product.ProductId));
-							}
-							else if (ex is DbUpdateConcurrencyException)
-							{
-								resultList.Add(IssueResult.Fail("Inny użytkownik operuje ..."));
-							}
-							else
-							{
+							//await transaction.RollbackToSavepointAsync($"BeforeProduct_{product.ProductId}", ct);
+							//await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
+							//await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
+							//await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
+							//anyFailure = true;
+							//// Obsługa konkretnych wyjątków do wyniku
+							//if (ex is NotFoundProductException pEx)
+							//{
+							//	resultList.Add(IssueResult.Fail(pEx.Message, product.ProductId));
+							//}
+							//else if (ex is NotFoundPalletException palEx)
+							//{
+							//	resultList.Add(IssueResult.Fail(palEx.Message, product.ProductId));
+							//}
+							//else if (ex is NotFoundIssueException ei)
+							//{
+							//	resultList.Add(IssueResult.Fail(ei.Message, product.ProductId));
+							//}
+							//else if (ex is DbUpdateConcurrencyException)
+							//{
+							//	resultList.Add(IssueResult.Fail("Inny użytkownik operuje ..."));
+							//}
+							//else
+							//{
 								// Logowanie krytyczne
 								// _logger.LogError(ex, ...)
 								resultList.Add(IssueResult.Fail("Wystąpił nieoczekiwany błąd", product.ProductId));
 								// Tutaj DECYZJA: Czy throw? Jeśli rzucisz throw, przerwiesz pętlę dla kolejnych produktów.
 								// Jeśli chcesz kontynuować dla innych produktów, nie rób throw.
-							}
-						}						
+							//}
+						}
 					}
 					var touchedVirtualPalletIds = listOldPickingTask
 						.Select(a => a.VirtualPalletId)
@@ -166,7 +179,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					issue.AddHistory(request.DTO.PerformedBy);
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);
-					return resultList;
+					//return resultList;
+					return AppResult<List<IssueResult>>.Success(resultList);
 				}
 				catch (Exception fatalEx)
 				{
@@ -204,22 +218,37 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 				}
 				if (hasNegativeDiff)
 				{
-					return new List<IssueResult>
-					{
-						IssueResult.Fail(string.Join(";", errorMessage),0)
-					};
+					return AppResult<List<IssueResult>>.Fail(
+						  string.Join(";", errorMessage),
+					   ErrorType.Conflict // lub Validation, zależnie od semantyki
+				   );
 				}
+				//return new AppResult<List<IssueResult>>
+				//{
+				//	IssueResult.Fail(string.Join(";", errorMessage),0)
+				//};
+
 				if (newQuantities.Count == 0)
 				{
-					return new List<IssueResult> { IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.", 0) };
+					var resultListNoQuantitesChange = new List<IssueResult>
+					{
+						IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.", 0)
+					};
+					return AppResult<List<IssueResult>>.Success(resultListNoQuantitesChange);
 				}
+				//return AppResult<List<IssueResult>>.Success(List<IssueResult>., "Brak zmian w ilościach - zlecenie bez modyfikacji.");
+					//return new List<IssueResult> { IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.", 0) };
+				//}
 				var dataForNewIssue = new CreateIssueDTO
 				{
 					ClientId = issue.ClientId,
 					Items = newQuantities,
 					PerformedBy = request.DTO.PerformedBy,
 				};
-				resultList = await _mediator.Send(new CreateNewIssueCommand(dataForNewIssue, request.DateToSend), ct);
+				var receiverFromCreate =  await _mediator.Send(new CreateNewIssueCommand(dataForNewIssue, request.DateToSend), ct);
+				if (receiverFromCreate.IsSuccess is false)
+					return AppResult<List<IssueResult>>.Fail("Nie udało się utworzyć nowego zlecenia.", ErrorType.Conflict); //Technical??
+				resultList = receiverFromCreate.Result.ToList();
 				foreach (var result in resultList)
 				{
 					if (result.Success)
@@ -227,13 +256,15 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 						result.Message += " (Dodatkowe zlecenie na ostatnią chwilę - stare jest w realizacji).";
 					}
 				}
-				return resultList;
+				//return resultList;
+				return AppResult<List<IssueResult>>.Success(resultList);
 			}
 			else
 			{
 				resultList.Add(IssueResult.Fail(
 					$"Nie można zaktualizować zlecenia {issue.Id}, status: {issue.IssueStatus}"));
-				return resultList;
+				return AppResult<List<IssueResult>>.Success(resultList);
+				//return resultList;
 			}
 		}
 

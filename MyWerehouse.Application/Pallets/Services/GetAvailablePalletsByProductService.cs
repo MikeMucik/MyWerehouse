@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 
@@ -21,8 +20,7 @@ namespace MyWerehouse.Application.Pallets.Services
 		}
 		public async Task<List<Pallet>> GetPallets(int productId, DateOnly? bestBefore, int amountFullPallet)
 		{
-			var product = await _productRepo.GetProductByIdAsync(productId)??
-				throw new NotFoundProductException(productId);
+			var product = await _productRepo.GetProductByIdAsync(productId);
 			var palletsQuery = _repo.GetAvailablePallets(productId, bestBefore)
 				.Select(p => new
 				{
@@ -47,16 +45,7 @@ namespace MyWerehouse.Application.Pallets.Services
 				.ToList();
 			foreach (var pallet in fullPallets)
 				pallet.Status = PalletStatus.InTransit;
-			return fullPallets;
-			//if (paletList.Count == 0) return new List<Pallet>();
-			//int taken = amountFullPallet;
-			//int sum = paletList.Take(taken).Sum(x => x.Qty);
-			//while (sum < neededCartoons && taken < paletList.Count)
-			//{
-			//	taken++;
-			//	sum = paletList.Take(taken).Sum(x => x.Qty);
-			//}
-			//throw new NotImplementedException();
+			return fullPallets;			
 		}
 	}
 }

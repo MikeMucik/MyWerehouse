@@ -8,6 +8,6 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading
 {
-	public record VerifyIssueAfterLoadingCommand(Guid IssueId, string VerifiedBy) : IRequest<IssueResult>;
+	public record VerifyIssueAfterLoadingCommand(Guid IssueId, string VerifiedBy) : IRequest<AppResult<Unit>>;
 	
 }

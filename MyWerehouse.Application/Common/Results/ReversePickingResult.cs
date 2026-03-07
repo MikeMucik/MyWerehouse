@@ -26,6 +26,13 @@ namespace MyWerehouse.Application.Common.Results
 				PalletId = palletId
 			};
 		}
+		public static ReversePickingResult Ok()
+		{
+			return new ReversePickingResult
+			{
+				Success = true,						
+			};
+		}
 		public static ReversePickingResult Ok(string message, List<Pallet> palletWithAddedProduct)
 		{
 			return new ReversePickingResult
@@ -35,16 +42,16 @@ namespace MyWerehouse.Application.Common.Results
 				PalletWithAddedProduct = palletWithAddedProduct
 			};
 		}
-		public static ReversePickingResult Fail(string message, int productId, string palletId)
-		{
-			return new ReversePickingResult
-			{
-				Success = false,
-				Message = message,
-				ProductId = productId,
-				PalletId = palletId
-			};
-		}
+		//public static ReversePickingResult Fail(string message, int productId, string palletId)
+		//{
+		//	return new ReversePickingResult
+		//	{
+		//		Success = false,
+		//		Message = message,
+		//		ProductId = productId,
+		//		PalletId = palletId
+		//	};
+		//}
 		public static ReversePickingResult Fail(string message)
 		{
 			return new ReversePickingResult

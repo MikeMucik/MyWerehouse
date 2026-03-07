@@ -104,7 +104,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Equal(ReceiptStatus.PhysicallyCompleted, receipt.ReceiptStatus);
 		}
 		[Fact]
@@ -197,7 +197,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user"));
 			//Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
+			Assert.False(result.IsSuccess);
 		}
 	}
 }

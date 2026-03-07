@@ -152,7 +152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Act
 			var result = await Mediator.Send(new DeleteIssueCommand(issueId, "UserX"));
 			// Assert
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var issueExists = DbContext.Issues.Any(i => i.Id == issueId);
 			Assert.False(issueExists); // fizycznie usunięte
 			// Brak palet lub alokacji związanych z tym issue
@@ -174,7 +174,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send( new DeleteIssueCommand(issueId, "UserX"));
 
 			// Assert
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var issue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.Include(i => i.PickingTasks)
@@ -216,8 +216,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var result = await Mediator.Send(new DeleteIssueCommand(issueId, "UserX"));
 
 			// Assert
-			Assert.False(result.Success);
-			Assert.Contains("nie można anulować", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("nie można anulować", result.Error);
 
 			// Nic nie powinno zostać zmienione
 			var issue = DbContext.Issues.First(i => i.Id == issueId);

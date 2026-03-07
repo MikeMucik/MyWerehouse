@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Receviving.Models;
 namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
 	public class DeleteClientIntegratiornTests : ClientIntegrationCommand
-	{			
+	{
 		[Fact]
 		public async Task HideClient_DeleteClientAsync_ChangeNotActive()
 		{
@@ -55,7 +55,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Id == clientId);
 			Assert.NotNull(resultClient);
 			Assert.True(resultClient.IsDeleted);
-		}		
+		}
 		[Fact]
 		public async Task ReomveClient_DeleteClientAsync_DeleteFromList()
 		{
@@ -88,16 +88,18 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			//Assert
 			var result = _context.Clients.FirstOrDefault(c => c.Id == clientId);
 			Assert.Null(result);
-		}		
+		}
 		[Fact]
 		public async Task ReomveNotExistingClient_DeleteClientAsync_ThrowException()
 		{
 			//Arrange
 			var clientId = 9891;
 			//Act
-			var e =await Assert.ThrowsAsync<DomainException>(() => _clientService.DeleteClientAsync(clientId));
+			var result = await _clientService.DeleteClientAsync(clientId);
+			//var e = await Assert.ThrowsAsync<DomainException>(() => _clientService.DeleteClientAsync(clientId));
 			//Assert
-			Assert.Equal($"Klient o numerze {clientId} nie istnieje.", e.Message);
+			//Assert.Equal($"Klient o numerze {clientId} nie istnieje.", e.Message);
+			Assert.Equal($"Klient o numerze {clientId} nie istnieje.", result.Error);
 		}
 	}
 }

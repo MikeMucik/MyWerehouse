@@ -5,35 +5,26 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Inventories.Events.ChangeStock;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Invetories.Events;
-using MyWerehouse.Domain.Invetories.Models;
-using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
 	public class CreateNewPalletHandler(WerehouseDbContext werehouseDbContext,
 		IPalletRepo palletRepo,
 		IMapper mapper,
-		IMediator mediator,
 		IProductRepo productRepo,
-		ILocationRepo locationRepo) : IRequestHandler<CreateNewPalletCommand, PalletResult>
+		ILocationRepo locationRepo) : IRequestHandler<CreateNewPalletCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMapper _mapper = mapper;
-		private readonly IPublisher _mediator = mediator;
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 
-		public async Task<PalletResult> Handle(CreateNewPalletCommand request, CancellationToken ct)
+		public async Task<AppResult<Unit>> Handle(CreateNewPalletCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
@@ -41,7 +32,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 				foreach (var product in request.DTO.ProductsOnPallet)
 				{
 					if (!await _productRepo.IsExistProduct(product.ProductId))
-						throw new NotFoundProductException(product.ProductId);
+						return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
 				}
 				var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
 				
@@ -57,19 +48,15 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				
-				return PalletResult.Ok($"Dodano paletę {newIdForPallet} do stanu magazynowego, uaktualniono stan magazynowy.", newIdForPallet);
-			}
-			catch (NotFoundProductException epe)
-			{
-				await transaction.RollbackAsync(ct);
-				return PalletResult.Fail(epe.Message);
-			}
+				return AppResult<Unit>.Success(Unit.Value,$"Dodano paletę {newIdForPallet} do stanu magazynowego, uaktualniono stan magazynowy.");
+			}			
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);
 				// Loguj ex dla developera!
 				//_logger.LogError(ex, "Błąd podczas aktualizaowania przyjęcia");	
-				return PalletResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.", ex.Message);
+				//return PalletResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.", ex.Message);
+				throw;
 			}
 		}
 	}

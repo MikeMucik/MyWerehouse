@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -248,9 +247,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			await DbContext.SaveChangesAsync();
 
 			//Act & Assert
-			var ex = await Assert.ThrowsAsync<NotFoundPickingTaskException>(() => _createReversePickingTask.CreateReversePicking(sourcePallet1.Id, "UserReverse"));
+			var result = await _createReversePickingTask.CreateReversePicking(sourcePallet1.Id, "UserReverse");
+			//var ex = await Assert.ThrowsAsync<NotFoundPickingTaskException>(() => _createReversePickingTask.CreateReversePicking(sourcePallet1.Id, "UserReverse"));
 			DbContext.SaveChanges();
-			Assert.Contains("Brak alokacji dla palety. Paleta nie do dekompletacji.", ex.Message);
+			Assert.Contains("Brak alokacji dla palety. Paleta nie do dekompletacji.", result.Message);
 		}
 	}
 }

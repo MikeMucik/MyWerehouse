@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 {
-	public record ClosePickingPalletCommand(string PalletId, Guid IssueId, string UserId) : IRequest<PickingResult>;
+	public record ClosePickingPalletCommand(string PalletId, Guid IssueId, string UserId) : IRequest<AppResult<Unit>>;
 }

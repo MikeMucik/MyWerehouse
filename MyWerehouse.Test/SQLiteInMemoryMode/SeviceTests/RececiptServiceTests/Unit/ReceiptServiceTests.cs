@@ -506,8 +506,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			//Act&Assert			
 			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt,userId));
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia.", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia.", result.Error);
 
 		}
 		[Fact]

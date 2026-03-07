@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receviving.Models;
@@ -94,7 +95,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001"));			
 			// Assert
 			Assert.NotNull(result);
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			Assert.Contains("Palety z przyjęcia zweryfikowano, gotowe do działania", result.Message);
 
 			var receiptVeryfying = await DbContext.Receipts.FindAsync(receipt.Id);
@@ -162,7 +163,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{new ProductOnPallet
-						{				
+						{
 				Product = product,
 				Quantity = 10,
 				DateAdded = DateTime.UtcNow
@@ -171,7 +172,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = new Receipt
-			{				
+			{
 				Id = receiptId1,
 				ReceiptNumber = 1,
 				Client = client,
@@ -185,14 +186,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
 			DbContext.Receipts.Add(receipt);
-			await DbContext.SaveChangesAsync();
+			await DbContext.SaveChangesAsync();			
+			
 			// Act
 			var result = await Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001"));
 
 			// Assert
 			Assert.NotNull(result);
-			Assert.False(result.Success);
-			Assert.Contains("Nie można zweryfikować przyjęcia", result.Message);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Nie można zweryfikować przyjęcia", result.Error);
 		}
 	}
 }

@@ -93,7 +93,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			//Act
 			var result = await Mediator.Send(new MarkAsLoadedCommand("P1", "User123"));
 			//Assert
-			Assert.True(result.Success);
+			Assert.True(result.IsSuccess);
 			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "P1");
 			Assert.NotNull(pallet);
 			Assert.Equal(PalletStatus.Loaded, pallet.Status);
@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			//Act
 			var result = await Mediator.Send(new MarkAsLoadedCommand("P2", "User123"));
 			//Assert
-			Assert.False(result.Success);
+			Assert.False(result.IsSuccess);
 			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "P2");
 			Assert.NotNull(pallet);
 			Assert.Equal(PalletStatus.Damaged, pallet.Status);

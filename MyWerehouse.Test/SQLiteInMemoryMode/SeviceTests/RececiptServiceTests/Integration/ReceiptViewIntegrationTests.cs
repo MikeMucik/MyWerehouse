@@ -7,7 +7,6 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MyWerehouse.Application.Common.Exceptions.NotFoundException;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
 using MyWerehouse.Domain.Pallets.Models;
@@ -37,25 +36,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(receiptId1, result.ReceiptId);
-			Assert.Equal(10, result.ClientId);
-			Assert.Equal("U001", result.PerformedBy);
-			Assert.Equal(new DateTime(2023, 3, 3), result.ReceiptDateTime);
+			Assert.Equal(receiptId1, result.Result.ReceiptId);
+			Assert.Equal(10, result.Result.ClientId);
+			Assert.Equal("U001", result.Result.PerformedBy);
+			Assert.Equal(new DateTime(2023, 3, 3), result.Result.ReceiptDateTime);
 			
 			// Jeśli DTO zawiera Pallets — ReceiptId = 1 ma palety Q1000 i Q1001
-			Assert.NotNull(result.Pallets);
-			Assert.Equal(2, result.Pallets.Count);
-			Assert.Contains(result.Pallets, p => p.Id == "Q1000");
-			Assert.Contains(result.Pallets, p => p.Id == "Q1001");
+			Assert.NotNull(result.Result.Pallets);
+			Assert.Equal(2, result.Result.Pallets.Count);
+			Assert.Contains(result.Result.Pallets, p => p.Id == "Q1000");
+			Assert.Contains(result.Result.Pallets, p => p.Id == "Q1001");
 
 			// Można też sprawdzić przykładowy produkt z jednej palety
-			var pallet = result.Pallets.First(p => p.Id == "Q1000");
+			var pallet = result.Result.Pallets.First(p => p.Id == "Q1000");
 			Assert.NotNull(pallet.ProductsOnPallet);
 			Assert.Contains(pallet.ProductsOnPallet, pop => pop.ProductId == 10 && pop.Quantity == 50);
 
 			// Dodatkowo: czy daty i statusy palet się zgadzają
-			Assert.Equal(PalletStatus.Available, result.Pallets.First(p => p.Id == "Q1000").Status);
-			Assert.Equal(PalletStatus.OnHold, result.Pallets.First(p => p.Id == "Q1001").Status);
+			Assert.Equal(PalletStatus.Available, result.Result.Pallets.First(p => p.Id == "Q1000").Status);
+			Assert.Equal(PalletStatus.OnHold, result.Result.Pallets.First(p => p.Id == "Q1001").Status);
 		}
 		[Fact]
 		public async Task GetReceiptDTOAsync_GetData_ReturnNull()
@@ -64,12 +63,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var receiptId9 = Guid.Parse("99111111-1111-1111-1111-111111111111");	
 			var query = new GetReceiptByIdQuery(receiptId9);
 
-			//var result = await _mediator.Send(query);
-			var rresult = await Assert.ThrowsAsync<NotFoundReceiptException>(async () => await _mediator.Send(query));
+			var result = await _mediator.Send(query);
+			//var rresult = await Assert.ThrowsAsync<NotFoundReceiptException>(async () => await _mediator.Send(query));
 			//Assert
-			//Assert.Null(result);
-			Assert.NotNull(rresult);
-			Assert.Contains($"Przyjęcie o numerze {receiptId9} nie zostało znalezione.", rresult.Message);
+			Assert.NotNull(result);
+			//Assert.NotNull(rresult);
+			Assert.Contains($"Przyjęcie o numerze {receiptId9} nie zostało znalezione.", result.Error);
 		}
 		//Testy multi
 		[Theory]
@@ -89,16 +88,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await _mediator.Send(query);
 			// Assert
 			Assert.NotNull(result);
-			Assert.Equal(receiptId, result.ReceiptId);
-			Assert.Equal(expectedClientId, result.ClientId);
-			Assert.Equal(expectedUser, result.PerformedBy);
+			Assert.Equal(receiptId, result.Result.ReceiptId);
+			Assert.Equal(expectedClientId, result.Result.ClientId);
+			Assert.Equal(expectedUser, result.Result.PerformedBy);
 			//Assert.Equal(expectedClientName, result.Client.Name);
 
 			// Sprawdź czy wszystkie oczekiwane palety są zwrócone
-			Assert.NotNull(result.Pallets);
+			Assert.NotNull(result.Result.Pallets);
 			foreach (var palletId in expectedPalletIds)
 			{
-				Assert.Contains(result.Pallets, p => p.Id == palletId);
+				Assert.Contains(result.Result.Pallets, p => p.Id == palletId);
 			}
 		}
 		[Fact]
@@ -115,17 +114,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
-			Assert.NotEmpty(result); // should return some data
+			Assert.NotEmpty(result.Result); // should return some data
 
 			// Verify that receipts 1 and 2 are included
-			var receiptIds = result.Select(r => r.ReceiptId).ToList();
+			var receiptIds = result.Result.Select(r => r.ReceiptId).ToList();
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receiptId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
 			Assert.Contains(receiptId1, receiptIds);
 			Assert.Contains(receiptId2, receiptIds);
 
 			// Optionally: ensure no duplicates and correct client mapping
-			Assert.All(result, r =>
+			Assert.All(result.Result, r =>
 			{
 				Assert.True(r.ClientId == 10 || r.ClientId == 11);
 				//Assert.True(r.ReceiptId > 0);

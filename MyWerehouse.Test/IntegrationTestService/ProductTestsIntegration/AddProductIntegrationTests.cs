@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Products.Models;
 
@@ -29,7 +30,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Act			
 			var result = await _productService.AddProductAsync(productNew);
 			//Assert
-			var product = _context.Products.Find(result);
+			var product = _context.Products.Find(result.Result);
 			Assert.NotNull(product);
 			Assert.Equal(productNew.Length, product.Details.Length);
 		}
@@ -78,8 +79,13 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				Description = "500",
 			};
 			//Act&Assert
-			var ex =await Assert.ThrowsAsync<InvalidDataException>(() => _productService.AddProductAsync(productNew));
-			Assert.Contains("Produkt o tej nazwie już istnieje.", ex.Message);
+			//Act
+			var result = await _productService.AddProductAsync(productNew);
+			//Assert
+			Assert.Contains("Produkt o tej nazwie już istnieje.", result.Error);
+			Assert.Equal(ErrorType.NotFound, result.ErrorType);
+			//var ex =await Assert.ThrowsAsync<NotFoundProductException>(() => _productService.AddProductAsync(productNew));
+			//Assert.Contains("Produkt o tej nazwie już istnieje.", ex.Message);
 		}
 		[Fact]
 		public async Task NewProductInvalidDataSKU_AddNewProductAsync_NoAddedToCollection()

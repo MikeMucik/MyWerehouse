@@ -27,7 +27,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public PalletStatus Status { get; set; } = 0;
 		public virtual ICollection<ProductOnPallet> ProductsOnPallet { get; set; } = new List<ProductOnPallet>();
 		public virtual ICollection<PalletMovement> PalletMovements { get; set; } = new List<PalletMovement>();
-		//public int? ReceiptId { get; set; }
 		public Guid? ReceiptId { get; set; }
 		public virtual Receipt? Receipt { get; set; }
 		public Guid? IssueId { get; set; }

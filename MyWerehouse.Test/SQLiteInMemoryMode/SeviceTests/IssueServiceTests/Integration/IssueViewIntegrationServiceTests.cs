@@ -64,7 +64,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		{
 			//Arrange&Act
 			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
-			var query = new LoadingIssueListQuery(issueId2, "user");
+			var query = new LoadingIssueListQuery(issueId2);
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);

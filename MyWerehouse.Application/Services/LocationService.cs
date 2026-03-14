@@ -47,7 +47,7 @@ namespace MyWerehouse.Application.Services
 			if (isEmpty != null)
 			{
 				return AppResult<Unit>.Fail("Miejsce paletowe nie jest puste nie można skasować", ErrorType.Conflict);
-					}
+			}
 			var location = await _locationRepo.GetLocationByIdAsync(id);
 			if (location == null)
 			{
@@ -71,13 +71,13 @@ namespace MyWerehouse.Application.Services
 			?? AppResult<Location>.Fail($"Nie ma lokalizacji o zadanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}");
 		}
 
-		//Nie wiem po co to ale czuje że będzie potrzebne
+		//potrzebne do many 
 		public AppResult<List<LocationDTO>> PrepareLocationsAsync(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{
 			var list = new List<LocationDTO>();
-			var locations =_locationRepo.CreateListLocationForBayRangeAisle(bay, startAisle, endAisle, amountPosition, amountHeigt);
+			var locations = _locationRepo.CreateListLocationForBayRangeAisle(bay, startAisle, endAisle, amountPosition, amountHeigt);
 			if (locations == null) return AppResult<List<LocationDTO>>.Fail("Brak elemntów do wyświetlenia", ErrorType.NotFound);
-			
+
 			foreach (var location in locations)
 			{
 				var locationFrom = _mapper.Map<LocationDTO>(location);

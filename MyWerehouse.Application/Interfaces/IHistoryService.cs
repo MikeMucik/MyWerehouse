@@ -11,9 +11,10 @@ namespace MyWerehouse.Application.Interfaces
 	public interface IHistoryService
 	{
 		Task <PalletHistoryDTO> GetHistoryPalletByIdAsync(string  id);
-		Task <ReceiptHistoryDTO> GetHistoryReceiptByIdAsync(string  id);
-		Task <IssueHistoryDTO> GetHistoryIssueByIdAsync(string  id);
-		Task <PickingPalletHistoryDTO> GetHistoryPickingPalletByIdAsync(string  id);
+		//TODO
+		Task <ReceiptHistoryDTO> GetHistoryReceiptByIdAsync(string  id);//
+		Task <IssueHistoryDTO> GetHistoryIssueByIdAsync(string  id);//
+		Task<PickingPalletHistoryDTO> GetHistoryPickingPalletByIdAsync(string id);//
 		//Task <ReversePickingHistoryDTO> GetHistoryReverseByIdAsync(string  id);
 	}
 }

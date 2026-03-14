@@ -8,7 +8,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 {
 	public class PalletWithLocation
 	{
-		public string PalletId	{ get; set; }//Required
+		public string PalletId { get; set; }
 		public int LocationId { get; set; }
+		//public string LocationName { get; set; }
 	}
 }

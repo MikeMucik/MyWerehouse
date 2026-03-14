@@ -4,26 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.DTOs;
-using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 {//Lista ile danego towaru dla danej alokacji Product's list by pickingTasks
+ //klient -> zamówienie -> produkt -> ilośc - Dictionary - płasko
 	public class GetListToPickingHandler(IPickingPalletRepo pickingPalletRepo,
-		IIssueRepo issueRepo) : IRequestHandler<GetListToPickingQuery, List<ProductToIssueDTO>>
+		IIssueRepo issueRepo) : IRequestHandler<GetListToPickingQuery, AppResult<List<ProductToIssueDTO>>>
 	{
 		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
-		public async Task<List<ProductToIssueDTO>> Handle (GetListToPickingQuery request, CancellationToken ct)
+		public async Task<AppResult<List<ProductToIssueDTO>>> Handle(GetListToPickingQuery request, CancellationToken ct)
 		{
-			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
-			if (pickingPallets.Count == 0)
+			var virtualPallets = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
+			if (virtualPallets.Count == 0)
 			{
-				return new List<ProductToIssueDTO>();
+				return AppResult<List<ProductToIssueDTO>>.Fail("Brak elementów do wyświelenia", ErrorType.NotFound);
 			}
-			var allNeededIssuesIds = pickingPallets
+			var allNeededIssuesIds = virtualPallets
 				.SelectMany(p => p.PickingTasks)
 				.Select(i => i.IssueId)
 				.Distinct()
@@ -36,18 +37,19 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 			var aggregationDictionary = new Dictionary<(int ClientId, Guid
 				IssueId, int product), ProductToIssueDTO>();
 
-			foreach (var pallet in pickingPallets)
+			//
+			foreach (var virtualPallet in virtualPallets)
 			{
-				var productOnPallet = pallet.Pallet?.ProductsOnPallet?.FirstOrDefault();
+				var productOnPallet = virtualPallet.Pallet?.ProductsOnPallet?.FirstOrDefault();
 				if (productOnPallet == null) continue;
 				var productId = productOnPallet.ProductId;
 
-				var pickingTasks = pallet.PickingTasks;
+				var pickingTasks = virtualPallet.PickingTasks;
 				foreach (var pickingTask in pickingTasks)
 				{
 					if (!issueDictionary.TryGetValue(pickingTask.IssueId, out var issue))
 					{
-						continue;
+						continue; //omijamy ten pickingTask
 					}
 					var clientId = issue.ClientId;
 					var key = (clientId, pickingTask.IssueId, productId);
@@ -69,12 +71,13 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 					}
 				}
 			}
-			return aggregationDictionary
-					.OrderBy(x => x.Key.ClientId)
-						.ThenBy(x => x.Key.IssueId)
-							.ThenBy(x => x.Key.product)
-					.Select(x => x.Value)
-					.ToList();
+			var result = aggregationDictionary
+						.OrderBy(x => x.Key.ClientId)
+							.ThenBy(x => x.Key.IssueId)
+								.ThenBy(x => x.Key.product)
+						.Select(x => x.Value)
+						.ToList();
+			return AppResult<List<ProductToIssueDTO>>.Success(result);
 		}
 	}
 }

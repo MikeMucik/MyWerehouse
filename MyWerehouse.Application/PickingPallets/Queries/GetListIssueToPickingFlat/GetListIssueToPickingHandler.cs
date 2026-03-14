@@ -9,9 +9,11 @@ using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
 
-namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking
+namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPickingBYCLient
 {
+	//Lista produkt ilość
 	//Lista ile danego towaru dla danego zlecenia posegregowane i zgrupowane po kliencie Product's list by issue&client
 	public class GetListIssueToPickingHandler(IPickingPalletRepo pickingPalletRepo,
 		IIssueRepo issueRepo) : IRequestHandler<GetListIssueToPickingQuery, AppResult< List<PickingGuideLineDTO>>>

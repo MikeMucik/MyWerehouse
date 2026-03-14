@@ -83,6 +83,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 					int virtualPalletId = vpId;
 					virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(virtualPalletId);
 				}
+				// dodanie do palety virtualPallet - można obęjść przez zmianę statusu, osobna akcja
 				else
 				{
 					pallet.Status = PalletStatus.ToPicking;
@@ -107,17 +108,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 				await transaction.CommitAsync(ct);
 
 				return AppResult<Unit>.Success(Unit.Value,"Towar dołączono do zlecenia");
-			}
-			//catch (NotFoundPalletException pnfEx)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return Unit.Fail(pnfEx.Message);
-			//}
-			//catch (NotFoundIssueException onfEx)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return PickingResult.Fail(onfEx.Message);
-			//}
+			}			
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

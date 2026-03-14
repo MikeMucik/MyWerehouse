@@ -42,10 +42,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Act			
 			var result = await _mediator.Send(query);
 			// Assert
-			Assert.True(result.Success);
-			Assert.Equal("Podaj numer zamówienia by kontynuować", result.Message);
-			Assert.NotNull(result.IssueOptions);
-			Assert.Equal(1, result.IssueOptions.Count);
+			Assert.True(result.IsSuccess);
+			Assert.Equal("Podaj numer zamówienia by kontynuować", result.Result.Message);
+			Assert.NotNull(result.Result.IssueOptions);
+			Assert.Equal(1, result.Result.IssueOptions.Count);
 			//Assert.Contains("20", result.ProductInfo);
 		}
 		[Fact]
@@ -58,9 +58,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert
-			Assert.IsType<List<PickingTaskDTO>>(result);
+			Assert.IsType<List<PickingTaskDTO>>(result.Result);
 			Assert.NotNull(result);
-			Assert.NotEmpty(result);
+			Assert.NotEmpty(result.Result);
 		}
 		[Fact]
 		public async Task GetListToPicking_GoodData_ReturnListForPickingTask()
@@ -72,10 +72,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert 
-			Assert.IsType<List<ProductToIssueDTO>>(result);
-			Assert.NotEmpty(result);
+			Assert.IsType<List<ProductToIssueDTO>>(result.Result);
+			Assert.NotEmpty(result.Result);
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Count);
+			Assert.Equal(2, result.Result.Count);
 		}	
 		[Fact]
 		public async Task GetListPickingPallet_GoodData_ReturnListOfPallets()

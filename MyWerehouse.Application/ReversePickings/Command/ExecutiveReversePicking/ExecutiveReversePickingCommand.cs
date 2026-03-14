@@ -14,3 +14,4 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 		ReversePickingStrategy Strategy, string PickingPalletId, 
 		string UserId, List<Pallet>? Pallets):IRequest<AppResult<ReversePickingResult>>;	
 }
+//List<Pallet> - strategy:ToExist

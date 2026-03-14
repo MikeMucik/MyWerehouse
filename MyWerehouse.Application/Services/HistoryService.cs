@@ -38,7 +38,6 @@ namespace MyWerehouse.Application.Services
 				.OrderByDescending(a => a.MovementDate)
 			 .ProjectTo<PalletMovementDTO>(_mapper.ConfigurationProvider)
 			 .ToListAsync();
-			//.ToList();
 			foreach (var item in details)
 			{
 				history.PalletMovementsDTO.Add(item);

@@ -13,30 +13,36 @@ using MyWerehouse.Infrastructure.Repositories;
 namespace MyWerehouse.Application.PickingPallets.Queries.PrepareCorrectedPicking
 {
 	public class PrepareCorrectedPickingHandler(IPalletRepo palletRepo,
-		IPickingTaskRepo pickingTaskRepo) : IRequestHandler<PrepareCorrectedPickingQuery, PrepareCorrectedPickingResult>
+		IPickingTaskRepo pickingTaskRepo) : IRequestHandler<PrepareCorrectedPickingQuery, AppResult<PrepareCorrectedPickingResult>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 
-		public async Task<PrepareCorrectedPickingResult> Handle(PrepareCorrectedPickingQuery request, CancellationToken ct)
+		public async Task<AppResult<PrepareCorrectedPickingResult>> Handle(PrepareCorrectedPickingQuery request, CancellationToken ct)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 			//Nie wyjątek bo to częsta sytuacja w rzeczywistości
 			if (pallet == null || pallet.Status == PalletStatus.Archived)
 			{
-				return PrepareCorrectedPickingResult.Fail($"Brak palety {request.PalletId} na stanie.");
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Brak palety {request.PalletId} na stanie.");
 			}
 
 			if (pallet.Status != PalletStatus.ToPicking)
 			{
-				return PrepareCorrectedPickingResult.Fail($"Paleta {request.PalletId} nie jest w pickingu, zmień status.");
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Paleta {request.PalletId} nie jest w pickingu, zmień status.");
+			}
+
+			if (pallet.Status == PalletStatus.Archived || pallet.Status == PalletStatus.OnHold)
+			{
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Paleta {request.PalletId} jest zablokowona, brak możliwości operacji.");
 			}
 
 			var product = pallet.ProductsOnPallet.FirstOrDefault();
 			if (product == null)
 			{
-				return PrepareCorrectedPickingResult.Fail($"Paleta {request.PalletId} jest pusta.");
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Paleta {request.PalletId} jest pusta.");
 			}
+
 			// Logika wyszukiwania pasujących zleceń			
 			var timeFrom = DateTime.UtcNow;
 			var timeTo = DateTime.UtcNow.AddDays(1);
@@ -50,10 +56,12 @@ namespace MyWerehouse.Application.PickingPallets.Queries.PrepareCorrectedPicking
 					QunatityToDo = g.Sum(a => a.RequestedQuantity)
 				})
 				.ToList();
-			return PrepareCorrectedPickingResult.RequiresOrder(
+			var result = PrepareCorrectedPickingResult.RequiresOrder(
 				productInfo: $"{product.PalletId} : {product.Quantity}",
+				//productInfo: new ProductInfoDto(product.PalletId, product.Quantity)
 				issueOptions: grouped,
 				message: "Podaj numer zamówienia by kontynuować");
+			return AppResult<PrepareCorrectedPickingResult>.Success(result);
 		}
 	}
 }

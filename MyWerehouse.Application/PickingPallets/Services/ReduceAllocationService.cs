@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		}
 		public async Task ReduceAllocation(Issue issue, int productId,int quantity, string userId)
 		{
-			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId);// ?? throw new NotFoundPickingTaskException("Brak alokacji do redukcji");
+			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId);
 			foreach (var pickingTask in pickingTasks)
 			{
 				if (quantity <= 0) break;
@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 						quantity -= pickingTask.RequestedQuantity;
 						pickingTask.PickingStatus = PickingStatus.Cancelled;
 						pickingTask.RequestedQuantity = 0;
-						pickingTask.AddHistory(userId, PickingStatus.Correction, pickingTask.PickingStatus, 0);
+						pickingTask.AddHistory(userId, PickingStatus.Correction, pickingTask.PickingStatus, 0);//
 					}
 				}				
 			}			

@@ -6,17 +6,32 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 {
-	public class PalletsToTakeOffListHandler(IIssueRepo issueRepo) : IRequestHandler<PalletsToTakeOffListQuery, AppResult<IssuePalletsWithLocationDTO>>
+	public class PalletsToTakeOffListHandler(IIssueRepo issueRepo
+		,ILocationRepo locationRepo) : IRequestHandler<PalletsToTakeOffListQuery, AppResult<IssuePalletsWithLocationDTO>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly ILocationRepo _locationRepo = locationRepo;
 		public async Task<AppResult<IssuePalletsWithLocationDTO>> Handle(PalletsToTakeOffListQuery request, CancellationToken ct)
 		{
 			var list = await _issueRepo.GetPalletByIssueIdAsync(request.IssueId);
+			var listDTO = new List<PalletWithLocationDTO>();
+			foreach (var item in list)
+			{
+				var location =await _locationRepo.GetLocationByIdAsync(item.LocationId);
+				var row = new PalletWithLocationDTO
+				{
+					PalletId = item.PalletId,
+					LocationId = item.LocationId,
+					LocationName = location.Bay + " " + location.Aisle + " " + location.Position + " " + location.Height,
+				};
+				listDTO.Add(row);
+			}
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 				if(issue == null)
 			{
@@ -29,7 +44,7 @@ namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 			var listToShow = new IssuePalletsWithLocationDTO
 			{
 				IssueNumber = issue.IssueNumber,
-				PalletList = list
+				PalletList = listDTO
 			};
 			return AppResult<IssuePalletsWithLocationDTO>.Success(listToShow);
 		}

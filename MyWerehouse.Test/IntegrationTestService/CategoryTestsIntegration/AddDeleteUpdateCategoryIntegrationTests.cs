@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Domain.Products.Models;
@@ -89,7 +90,6 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			{
 				Id = 1,
 				Name = "TestCategory"
-
 			};
 			var product = new Product
 			{
@@ -111,10 +111,10 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			//Act
 			var quantity = _context.Categories.Count();
 			var result = await _categoryService.AddCategoryAsync(categoryDTO);
-			//var ex = await Assert.ThrowsAsync<NotFoundCategoryException>(() =>			_categoryService.AddCategoryAsync(categoryDTO));
 			//Assert
 			var resultBase = _context.Categories.Count();
 			Assert.Equal(_context.Categories.Count(), resultBase);
+			Assert.Equal(ErrorType.Conflict, result.ErrorType);
 			Assert.Contains("Kategoria o tej nazwie już istnieje.", result.Error);
 			Assert.Equal(quantity, resultBase);
 			//Assert.Contains("Kategoria", ex.Message);
@@ -185,21 +185,9 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			Assert.NotNull(result);
 			Assert.Equal(updatedCategory.Name, result.Name);
 		}
-		//[Fact]
-		//public async Task UpdateCategoryNameNoName_UpdateCategoryAsync_ThrowException()
-		//{
-		//	//Arrange			
-		//	var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };			
-		//	_context.Categories.Add(updatingCategory);
-		//	_context.SaveChanges();
-		//	//Act&Assert
-		//	var updatedCategory = new CategoryDTO { Id = 88, Name = "" };
-		//	var ex = await Assert.ThrowsAsync<NotFoundCategoryException>(() =>
-		//		_categoryService.UpdateCategoryAsync(updatedCategory));
-		//		Assert.Contains("Brak nazwy kategorii - proszę podać", ex.Message);			
-		//}
+		
 		[Fact]
-		public async Task UpdateCategoryNameNoName_UpdateCategoryAsync_ThrowException()
+		public async Task UpdateCategoryNameNoName_UpdateCategoryAsync_ThrowValidationException()
 		{
 			//Arrange			
 			var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };
@@ -210,13 +198,8 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			//var result = await _categoryService.UpdateCategoryAsync(updatedCategory);
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(updatedCategory));
 			//Assert
-			//Assert.NotNull(result);
 			Assert.NotNull(ex);	
-			//Assert.False(result.IsSuccess);
 			Assert.Contains("Podaj nazwę kategorii.", ex.Message);
-			//var ex = await Assert.ThrowsAsync<NotFoundCategoryException>(() =>
-			//	_categoryService.UpdateCategoryAsync(updatedCategory));
-			//Assert.Contains("Brak nazwy kategorii - proszę podać", ex.Message);
 			
 		}
 	}

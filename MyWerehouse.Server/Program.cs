@@ -40,22 +40,22 @@ Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
-	//app.UseSwaggerUI(c =>
-	//{
-	//	c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
-	//	c.RoutePrefix = "swagger";
-	//});
-	//app.UseSwaggerUI(c =>
-	//{
-	//	c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
-	//	c.RoutePrefix = "swagger";
-	//	c.HeadContent = "<!-- Swagger UI clean -->";
-	//	//c.EnableTryItOutByDefault();
-	//	//c.ConfigObject = new Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIOptions
-	//	//{
-	//	//	DocExpansion = Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None
-	//	//};
-	//});
+	app.UseSwaggerUI(c =>
+	{
+		c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
+		c.RoutePrefix = "swagger";
+	});
+	app.UseSwaggerUI(c =>
+	{
+		c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
+		c.RoutePrefix = "swagger";
+		c.HeadContent = "<!-- Swagger UI clean -->";
+		//c.EnableTryItOutByDefault();
+		//c.ConfigObject = new Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIOptions
+		//{
+		//	DocExpansion = Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None
+		//};
+	});
 }
 app.UseStaticFiles();
 

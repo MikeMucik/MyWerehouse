@@ -26,7 +26,6 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 				try
 				{
 					var receipt = await _receiptRepo.GetReceiptOnlyByIdAsync(request.ReceiptId);
-					//?? throw new NotFoundReceiptException(request.ReceiptId);
 					if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 					if (receipt.Delete(request.UserId))
 					{

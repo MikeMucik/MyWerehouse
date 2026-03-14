@@ -9,5 +9,5 @@ using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 {
-	public record PalletsToTakeOffListQuery(Guid IssueId, string UserId):IRequest<AppResult<IssuePalletsWithLocationDTO>>;	
+	public record PalletsToTakeOffListQuery(Guid IssueId):IRequest<AppResult<IssuePalletsWithLocationDTO>>;	
 }

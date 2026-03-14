@@ -60,8 +60,7 @@ namespace MyWerehouse.Application.Services
 			//}
 			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) != null)
 			{
-				return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);
-				//throw new NotFoundCategoryException("Kategoria o tej nazwie już istnieje.");
+				return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);				
 			}
 			var category = _mapper.Map<Category>(categoryDTO);
 			_categoryRepo.AddCategory(category);
@@ -71,7 +70,6 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<Unit>> DeleteCategoryAsync(int id)
 		{
 			var category = await _categoryRepo.GetCategoryByIdAsync(id);
-					//?? throw new NotFoundCategoryException($"Kategoria o ID {id} nie została znalezniona");
 			if (category == null) return AppResult<Unit>.Fail($"Kategoria o ID {id} nie została znalezniona", ErrorType.NotFound);
 				var filter = new ProductSearchFilter
 				{
@@ -108,14 +106,12 @@ namespace MyWerehouse.Application.Services
 				if (categoryWithSameName != null && categoryWithSameName.Id == existingCategory.Id)
 				{
 					return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);
-					//throw new NotFoundCategoryException("Kategoria o tej nazwie już istnieje.");
 				}
 				existingCategory.Name = categoryDTO.Name;
 				await _werehouseDbContext.SaveChangesAsync();
 				return AppResult<Unit>.Success(Unit.Value, "Kategorię zaktualizowano.");
 			}
 			else return AppResult<Unit>.Fail($"Brak kategori o numerze {existingCategory.Id}", ErrorType.NotFound);
-				//throw new NotFoundCategoryException($"Brak kategori o numerze {existingCategory.Id}");
 		}
 		public async Task<AppResult<ListCategoriesDTO>> GetCategoriesAsync(int pageSize, int pageNumber)
 		{
@@ -134,6 +130,17 @@ namespace MyWerehouse.Application.Services
 				Count = await categories.CountAsync()
 			};
 			return AppResult<ListCategoriesDTO>.Success(categoriesList);
+		}
+
+		public async Task<AppResult<CategoryDTO>> GetCategoryByIdAsync(int id)
+		{
+			var result = _categoryRepo.GetCategoryByIdAsync(id);
+			if (result == null)
+			{
+				return AppResult<CategoryDTO>.Fail("Nie znaleziono kategorii.");
+			}
+			var categoryDTO = _mapper.Map<CategoryDTO>(result);
+			return AppResult<CategoryDTO>.Success(categoryDTO);
 		}
 	}
 }

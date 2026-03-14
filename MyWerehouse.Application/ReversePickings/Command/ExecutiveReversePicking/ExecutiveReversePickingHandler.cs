@@ -30,6 +30,14 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
+				if(command.Strategy == ReversePickingStrategy.AddToExistingPallet)
+				{
+					if (command.Pallets.Count == 0)
+					{
+						return AppResult< ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.");
+					}
+				}
+
 				var reversePicking = await _reversePickingRepo.GetReversePickingAsync(command.TaskReversedId);
 				if (reversePicking is null)
 				{
@@ -97,22 +105,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return AppResult<ReversePickingResult>.Success(result);
-			}
-			//catch (NotFoundIssueException ie)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return ReversePickingResult.Fail(ie.Message);
-			//}
-			//catch (NotFoundPalletException pe)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return ReversePickingResult.Fail(pe.Message);
-			//}
-			//catch (NotFoundProductException proe)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return ReversePickingResult.Fail(proe.Message);
-			//}
+			}			
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

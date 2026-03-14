@@ -271,10 +271,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))));
 
 			// Assert
-			result.Result.Should().HaveCount(5); //Tu daje 5 bo daje alokacje każdą osobno
+			result.Result.Result.Should().HaveCount(5); //Tu daje 5 bo daje alokacje każdą osobno
 			//result.Equals(5, result.Result)
 			// Client1, Issue1, Product1 → 10 + 20 = 30
-			result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
+			result.Result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
 			{
 				ClientIdOut = client1.Id,
 				IssueId = issue1.Id,
@@ -283,7 +283,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			});
 
 			// Client1, Issue2, Product2 → 15
-			result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
+			result.Result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
 			{
 				ClientIdOut = client1.Id,
 				IssueId = issue2.Id,
@@ -292,7 +292,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			});
 
 			// Client2, Issue3, Product1 → 25
-			result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
+			result.Result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
 			{
 				ClientIdOut = client2.Id,
 				IssueId = issue3.Id,

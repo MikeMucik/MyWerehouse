@@ -12,16 +12,12 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 {
-	public class DeleteIssueHandler : IRequestHandler<DeleteIssueCommand, AppResult<Unit>>
+	public class DeleteIssueHandler(IIssueRepo issueRepo,
+		WerehouseDbContext werehouseDbContext) : IRequestHandler<DeleteIssueCommand, AppResult<Unit>>
 	{
-		private readonly IIssueRepo _issueRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;		
-		public DeleteIssueHandler(IIssueRepo issueRepo,
-			WerehouseDbContext werehouseDbContext)
-		{
-			_issueRepo = issueRepo;
-			_werehouseDbContext = werehouseDbContext;			
-		}
+		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+
 		public async Task<AppResult<Unit>> Handle(DeleteIssueCommand request, CancellationToken ct)
 		{
 
@@ -29,7 +25,6 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 			try
 			{
 				var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId);
-				//?? throw new NotFoundIssueException(request.IssueId);
 				if (issueToDelete == null)
 					return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 				switch (issueToDelete.IssueStatus)
@@ -64,12 +59,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				await transaction.CommitAsync(ct);
 
 				return AppResult<Unit>.Success(Unit.Value, $"Usunięto zamówienie o numerze {issueToDelete.Id}.");
-			}
-			//catch (NotFoundIssueException ei)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return IssueResult.Fail(ei.Message);
-			//}
+			}			
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

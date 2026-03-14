@@ -1,43 +1,62 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.ViewModels.ProductModels;
+using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Products.Filters;
 
 namespace MyWerehouse.Server.Controllers
-{
-	[Route("api/[controller]")]
+{	
 	[ApiController]
+	[Route("api/product")]
 	public class ProductController : ControllerBase
 	{
-		// GET: api/<Product>
-		[HttpGet]
-		public IEnumerable<string> Get()
+		private readonly IProductService _productService;
+		public ProductController(IProductService productService)
 		{
-			return new string[] { "value1", "value2" };
+			_productService = productService;
 		}
-
-		// GET api/<Product>/5
 		[HttpGet("{id}")]
-		public string Get(int id)
+		public async Task<IActionResult> Get(int id)
 		{
-			return "value";
+			var result = await _productService.GetProductToEditAsync(id);
+			return Ok(result);
 		}
-
-		// POST api/<Product>
 		[HttpPost]
-		public void Post([FromBody] string value)
+		public async Task<IActionResult> Add(AddProductDTO productDTO)
 		{
+			var result = await _productService.AddProductAsync(productDTO);
+			return Ok(result);
 		}
-
-		// PUT api/<Product>/5
-		[HttpPut("{id}")]
-		public void Put(int id, [FromBody] string value)
+		[HttpPost("update")]
+		public async Task<IActionResult> Update(AddProductDTO productDTO)
 		{
+			var result = await _productService.UpdateProductAsync(productDTO);
+			return Ok(result);
 		}
-
-		// DELETE api/<Product>/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
+		[HttpPost("delete")]
+		public async Task<IActionResult> Delete(int id)
 		{
+			var result = await _productService.DeleteProductAsync(id);
+			return Ok(result);
+		}
+		[HttpGet("{id}/details")]
+		public async Task<IActionResult> GetDetails(int id)
+		{
+			var result = await _productService.DetailsOfProductAsync(id);
+			return Ok(result);
+		}
+		[HttpGet]
+		public async Task<IActionResult> GetAll(int page, int size)
+		{
+			var result = await _productService.GetProductsAsync(page, size);
+			return Ok(result);
+		}
+		[HttpGet("byFilter")]
+		public async Task<IActionResult> GetByFilter(int page, int size, ProductSearchFilter filtr)
+		{
+			var result = await _productService.FindProductsByFilterAsync(page, size, filtr);
+			return Ok(result);
 		}
 	}
 }

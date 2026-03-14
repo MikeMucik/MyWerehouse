@@ -15,5 +15,6 @@ namespace MyWerehouse.Application.Interfaces
 		Task<AppResult<Unit>> DeleteCategoryAsync(int id);
 		Task<AppResult<Unit>> UpdateCategoryAsync(CategoryDTO categoryDTO);
 		Task<AppResult<ListCategoriesDTO>> GetCategoriesAsync(int pageSize, int pageNumber);
+		Task<AppResult<CategoryDTO>> GetCategoryByIdAsync(int id);
 	}
 }

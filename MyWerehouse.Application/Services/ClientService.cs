@@ -135,7 +135,6 @@ namespace MyWerehouse.Application.Services
 			else
 			{
 				return AppResult<DetailsOfClientDTO>.Fail($"Nieprawidłowy numer client {id}.", ErrorType.NotFound);
-				//throw new NotFoundClientException(id);
 			}
 		}
 		public async Task<AppResult<ListClientsDTO>> GetClientsByFilterAsync(int pageSize, int pageNumber, ClientSearchFilter filter)

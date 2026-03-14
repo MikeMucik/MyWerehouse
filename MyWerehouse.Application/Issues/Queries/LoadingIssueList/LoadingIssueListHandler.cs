@@ -22,7 +22,6 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 			{
 				return AppResult<ListPalletsToLoadDTO>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
 			}
-				//?? throw new NotFoundIssueException(request.IssueId);
 			//zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
 			var dto = new ListPalletsToLoadDTO
 			{

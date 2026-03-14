@@ -16,12 +16,7 @@ namespace MyWerehouse.Server.Middleware
 			try
 			{
 				await _next(context);
-			}
-			//catch (NotFoundException ex)
-			//{
-			//	context.Response.StatusCode = StatusCodes.Status404NotFound;
-			//	await context.Response.WriteAsJsonAsync(ex.Message);
-			//}
+			}					
 			catch (DomainException ex)
 			{
 				context.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -32,7 +27,12 @@ namespace MyWerehouse.Server.Middleware
 				context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
 				await context.Response.WriteAsJsonAsync(new
 				{
-					Error = ex.Message
+					//Error = ex.Error.Select(ex => new
+					//{
+					//	Field = ex.PropertName,
+					//	Message = ex.ErrorMessage
+					//})
+					error = ex.Message
 				});
 			}
 			catch (Exception ex)
@@ -54,3 +54,8 @@ namespace MyWerehouse.Server.Middleware
 		}
 	}
 }
+//catch (NotFoundException ex)
+//{
+//	context.Response.StatusCode = StatusCodes.Status404NotFound;
+//	await context.Response.WriteAsJsonAsync(ex.Message);
+//}

@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.DTOs;
+using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
 using MyWerehouse.Domain.Interfaces;
 
-namespace MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet
+namespace MyWerehouse.Application.PickingPallets.Queries.GetListPickingPalletForOperator
 {
 	public class GetListPickingPalletHandler(IPickingPalletRepo pickingPalletRepo,
 		ILocationRepo locationRepo) : IRequestHandler<GetListPickingPalletQuery, AppResult<List<PickingPalletWithLocationDTO>>>
@@ -19,12 +20,12 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet
 		public async Task<AppResult<List<PickingPalletWithLocationDTO>>> Handle(GetListPickingPalletQuery request, CancellationToken ct)
 		{
 			var pickingPallets = new List<PickingPalletWithLocationDTO>();
-			var palletPicking = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateMovedStart, request.DateMovedEnd);
-			foreach (var pallet in palletPicking)
+			var palletsToPicking = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateMovedStart, request.DateMovedEnd);
+			foreach (var pallet in palletsToPicking)
 			{
-				var locationName = await _locationRepo.GetLocationByIdAsync(pallet.LocationId);//?? throw new NotFoundLocationException (pallet.LocationId);
-				if (locationName == null) return AppResult < List < PickingPalletWithLocationDTO >>.Fail($"Lokalizacja o numerze {pallet.LocationId} nie została znaleziona", ErrorType.NotFound);
-				var addedToPicking = pallet.DateMoved; ;
+				var locationName = await _locationRepo.GetLocationByIdAsync(pallet.LocationId);
+				if (locationName == null) return AppResult<List<PickingPalletWithLocationDTO>>.Fail($"Lokalizacja o numerze {pallet.LocationId} nie została znaleziona", ErrorType.NotFound);
+				var addedToPicking = pallet.DateMoved; 
 				var palletInWarehouseDTO = new PickingPalletWithLocationDTO
 				{
 					PalletId = pallet.PalletId,

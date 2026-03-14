@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo
 {
-	public class ShowTaskToDoHandler:IRequestHandler<ShowTaskToDoQuery, List<PickingTaskDTO>>
+	public class ShowTaskToDoHandler:IRequestHandler<ShowTaskToDoQuery, AppResult< List<PickingTaskDTO>>>
 	{
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
@@ -22,11 +23,12 @@ namespace MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo
 			_pickingTaskRepo = pickingTaskRepo;
 			_mapper = mapper;
 		}
-		public async Task<List<PickingTaskDTO>> Handle (ShowTaskToDoQuery request, CancellationToken ct)
+		public async Task<AppResult<List<PickingTaskDTO>>> Handle (ShowTaskToDoQuery request, CancellationToken ct)
 		{
 			var palletVirtualId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(request.PalletSourceScannedId);
 			var pickingTasks = await _pickingTaskRepo.GetPickingTaskListAsync(palletVirtualId, request.PickingDate);			
-			return pickingTasks.Select(pickingTask => _mapper.Map<PickingTaskDTO>(pickingTask)).ToList();
+			var result =  pickingTasks.Select(pickingTask => _mapper.Map<PickingTaskDTO>(pickingTask)).ToList();
+			return AppResult<List<PickingTaskDTO>>.Success(result);
 		}
 	}
 	

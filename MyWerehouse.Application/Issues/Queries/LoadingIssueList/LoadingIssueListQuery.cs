@@ -9,5 +9,5 @@ using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 {
-	public record LoadingIssueListQuery(Guid IssueId, string UserId): IRequest<AppResult<ListPalletsToLoadDTO>>;	
+	public record LoadingIssueListQuery(Guid IssueId): IRequest<AppResult<ListPalletsToLoadDTO>>;	
 }

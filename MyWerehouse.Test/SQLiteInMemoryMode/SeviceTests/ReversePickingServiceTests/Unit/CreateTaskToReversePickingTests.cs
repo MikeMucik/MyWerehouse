@@ -12,7 +12,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceTests.Unit
 {

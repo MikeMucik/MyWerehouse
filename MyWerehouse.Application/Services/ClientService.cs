@@ -14,11 +14,11 @@ using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Receviving.Filters;
-using MyWerehouse.Infrastructure;
 using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Application.Common.Utils;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Services
 {
@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.Services
 		private readonly IClientRepo _clientRepo;
 		private readonly IMapper _mapper;
 		private readonly IReceiptRepo _receiptRepo;
-		private readonly IValidator<AddClientDTO> _addClientValidator;
+		private readonly IValidator<ClientDTO> _addClientValidator;
 		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		public ClientService(
@@ -35,8 +35,9 @@ namespace MyWerehouse.Application.Services
 			IMapper mapper,
 			IReceiptRepo receiptRepo,
 			WerehouseDbContext werehouseDbContext,
-			IValidator<AddClientDTO>? addClientValidator = null,
-			IValidator<UpdateClientDTO>? updateClientValidator = null)
+			IValidator<ClientDTO>? addClientValidator = null
+			,IValidator<UpdateClientDTO>? updateClientValidator = null
+			)
 		{
 			_clientRepo = clientRepo;
 			_mapper = mapper;
@@ -44,18 +45,7 @@ namespace MyWerehouse.Application.Services
 			_werehouseDbContext = werehouseDbContext;
 			_addClientValidator = addClientValidator;
 			_updateClientValidator = updateClientValidator;
-		}
-		public ClientService(
-			IClientRepo clientRepo,
-			IMapper mapper,
-			IValidator<AddClientDTO>? addClientValidator = null,
-			IValidator<UpdateClientDTO>? updateClientValidator = null)
-		{
-			_clientRepo = clientRepo;
-			_mapper = mapper;
-			_addClientValidator = addClientValidator;
-			_updateClientValidator = updateClientValidator;
-		}
+		}		
 		public ClientService(
 			IClientRepo clientRepo,
 			IMapper mapper)
@@ -64,7 +54,7 @@ namespace MyWerehouse.Application.Services
 			_mapper = mapper;
 		}
 
-		public async Task<AppResult<int>> AddClientAsync(AddClientDTO addClient)
+		public async Task<AppResult<int>> AddClientAsync(ClientDTO addClient)
 		{
 			var validationResult = await _addClientValidator.ValidateAsync(addClient);
 			if (!validationResult.IsValid)
@@ -96,16 +86,17 @@ namespace MyWerehouse.Application.Services
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<AppResult<AddClientDTO>> GetClientToEditAsync(int id)
+		public async Task<AppResult<ClientDTO>> GetClientToEditAsync(int id)
 		{
 			var client = await _clientRepo.GetClientByIdAsync(id);
 			if (client == null) throw new ArgumentException($"Brak klienta o numerze {id}");
-			var clientDTO = _mapper.Map<AddClientDTO>(client);
-			return AppResult<AddClientDTO>.Success( clientDTO);
+			var clientDTO = _mapper.Map<ClientDTO>(client);
+			return AppResult<ClientDTO>.Success( clientDTO);
 		}
 		public async Task<AppResult<Unit>> UpdateClientAsync(UpdateClientDTO updatedClient)
 		{
 			var existingClient = await _clientRepo.GetClientByIdAsync(updatedClient.Id);
+			if(existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.");
 			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);//do testów
 			if (!validationResult.IsValid)
 			{
@@ -141,7 +132,7 @@ namespace MyWerehouse.Application.Services
 		{
 			var products = _clientRepo.GetClients(filter)
 				.OrderBy(p => p.Id)
-				.ProjectTo<AddClientDTO>(_mapper.ConfigurationProvider);
+				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider);
 			var clientsToShow = await products
 				.Skip(pageSize * (pageNumber - 1))
 				.Take(pageSize)
@@ -159,7 +150,7 @@ namespace MyWerehouse.Application.Services
 		{
 			var products = _clientRepo.GetAllClients()
 				.OrderBy(p => p.Id)
-				.ProjectTo<AddClientDTO>(_mapper.ConfigurationProvider);
+				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider);
 			var clientsToShow = await products
 				.Skip(pageSize * (PageNumber - 1))
 				.Take(pageSize)

@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 {

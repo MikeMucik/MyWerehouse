@@ -10,6 +10,5 @@ namespace MyWerehouse.Domain.Pallets.Models
 	{
 		public string PalletId { get; set; }
 		public int LocationId { get; set; }
-		//public string LocationName { get; set; }
 	}
 }

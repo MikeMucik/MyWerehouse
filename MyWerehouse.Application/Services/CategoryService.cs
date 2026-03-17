@@ -14,7 +14,7 @@ using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Services
 {

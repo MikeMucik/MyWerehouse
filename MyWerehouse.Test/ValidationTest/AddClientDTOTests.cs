@@ -28,7 +28,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new AddClientDTO
+			var client = new ClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
@@ -55,7 +55,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new AddClientDTO
+			var client = new ClientDTO
 			{
 				Name = "name",
 				//FullName = "fullname",
@@ -64,7 +64,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Description = "description",
 			};
 			//Act&Assert
-			validator.TestValidate(client).ShouldHaveValidationErrorFor(nameof(AddClientDTO.FullName));
+			validator.TestValidate(client).ShouldHaveValidationErrorFor(nameof(ClientDTO.FullName));
 		}
 		[Fact]
 		public void AddClientNoAddressData_ShouldNotReturnValidationError()
@@ -72,7 +72,7 @@ namespace MyWerehouse.Test.ValidationTest
 			//Arrange
 			var addressValidator = new AddressDTOValidation();
 			var validator = new AddClientDTOValidation(addressValidator);
-			var client = new AddClientDTO
+			var client = new ClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
@@ -81,7 +81,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Description = "description",
 			};
 			//Act&Assert
-			validator.TestValidate(client).ShouldHaveValidationErrorFor(nameof(AddClientDTO.Addresses));
+			validator.TestValidate(client).ShouldHaveValidationErrorFor(nameof(ClientDTO.Addresses));
 		}		
 	}
 }

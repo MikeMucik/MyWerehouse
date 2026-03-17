@@ -9,7 +9,7 @@ using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPicking
 {

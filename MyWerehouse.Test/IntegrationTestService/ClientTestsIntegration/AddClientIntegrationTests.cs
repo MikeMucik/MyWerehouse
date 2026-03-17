@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new AddClientDTO
+			var client = new ClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new AddClientDTO
+			var client = new ClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
@@ -101,7 +101,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new AddClientDTO
+			var client = new ClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
@@ -127,7 +127,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new AddClientDTO
+			var client = new ClientDTO
 			{
 				//Name = "name",
 				FullName = "fullname",

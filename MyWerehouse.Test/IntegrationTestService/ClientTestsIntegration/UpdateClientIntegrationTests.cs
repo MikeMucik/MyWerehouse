@@ -79,7 +79,6 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 		public async Task NotProperData_UpdateProductAsync_ThrowException()
 		{
 			//Arrange
-			using var arrangeContext = new WerehouseDbContext(_contextOptions, null);
 			var address = new Address
 			{
 				Id = 20,
@@ -103,9 +102,9 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Addresses = new List<Address> { address }
 
 			};
-			arrangeContext.Addresses.Add(address);
-			arrangeContext.Clients.Add(updatingClient);
-			arrangeContext.SaveChanges();
+			_context.Addresses.Add(address);
+			_context.Clients.Add(updatingClient);
+			_context.SaveChanges();
 			//Act&Assert
 			var addressU = new AddressDTO
 			{

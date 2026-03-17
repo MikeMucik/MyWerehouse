@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite

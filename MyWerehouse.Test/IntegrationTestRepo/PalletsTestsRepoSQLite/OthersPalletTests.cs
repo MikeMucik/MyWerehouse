@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure.Repositories;
-using MyWerehouse.Test.Common;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite

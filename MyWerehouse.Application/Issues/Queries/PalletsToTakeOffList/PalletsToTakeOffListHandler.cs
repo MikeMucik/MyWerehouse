@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 				{
 					PalletId = item.PalletId,
 					LocationId = item.LocationId,
-					LocationName = location.Bay + " " + location.Aisle + " " + location.Position + " " + location.Height,
+					LocationName = location.ToSnopShot()
 				};
 				listDTO.Add(row);
 			}

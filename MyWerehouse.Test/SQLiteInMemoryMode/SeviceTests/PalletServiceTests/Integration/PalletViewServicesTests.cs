@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using MediatR;
-using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {

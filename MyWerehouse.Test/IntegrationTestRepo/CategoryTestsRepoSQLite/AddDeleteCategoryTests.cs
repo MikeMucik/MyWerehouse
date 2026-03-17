@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite

@@ -7,7 +7,7 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 {

@@ -5,18 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePicking
 {
-	public class ListPalletsToReservePickingHandler(ILocationRepo locationRepo,
-		IReversePickingRepo reversePickingRepo,
+	public class ListPalletsToReservePickingHandler(IReversePickingRepo reversePickingRepo,
 		IPalletRepo palletRepo)
 		: IRequestHandler<ListPalletsToReservePickingQuery, AppResult<List<PalletWithLocationDTO>>>
 	{
-		private readonly ILocationRepo _locationRepo = locationRepo;
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 
@@ -24,15 +21,17 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePi
 		{
 			var list = new List<PalletWithLocationDTO>();
 			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(query.Start, query.End);
-			if(palletsIds.Count == 0)
+			if (palletsIds.Count == 0)
 			{
-				AppResult<List<PalletWithLocationDTO>>.Fail("Brak palet do wyświetlenia");
+				return AppResult<List<PalletWithLocationDTO>>.Fail("Brak palet do wyświetlenia.");
 			}
 			foreach (var id in palletsIds)
 			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(id);//
+				var pallet = await _palletRepo.GetPalletByIdAsync(id);
+				if (pallet == null)
+					return AppResult<List<PalletWithLocationDTO>>.Fail($"Brak palety w systemie {id}.");			
 				var locationName = pallet.Location;
-				var fullLocation = locationName.Bay + " " + locationName.Aisle + " " + locationName.Position + " " + locationName.Height;
+				var fullLocation = locationName.ToSnopShot();
 				var item = new PalletWithLocationDTO
 				{
 					PalletId = id,

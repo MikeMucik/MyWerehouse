@@ -10,7 +10,7 @@ using MyWerehouse.Application.Issues.IssuesServices;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 {

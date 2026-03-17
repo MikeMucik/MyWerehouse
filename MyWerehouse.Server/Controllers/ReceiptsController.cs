@@ -9,12 +9,11 @@ using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
 using MyWerehouse.Server.Extensions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyWerehouse.Server.Controllers
-{
-	[Route("api/[controller]")]
+{	
 	[ApiController]
+	[Route("api/recipe")]
 	public class ReceiptsController : ControllerBase
 	{
 		private readonly IMediator _mediator;

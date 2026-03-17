@@ -8,7 +8,7 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Commands.CompletedIssue;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CompletedLoadIssue
 {

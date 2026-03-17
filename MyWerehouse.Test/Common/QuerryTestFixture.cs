@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.Common
 {

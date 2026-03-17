@@ -9,15 +9,10 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.DTOs
 {
-	public class PalletWithLocationDTO //: IMapFrom<Pallet>
+	public class PalletWithLocationDTO 
 	{
 		public string PalletId { get; set; }
 		public string LocationName { get; set; }
-		public int LocationId { get; set; }  //
-		//public void Mapping(Profile profile)
-		//{
-		//	profile.CreateMap<Pallet, PalletWithLocationDTO>()
-		//		.ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.Location.Bay + " " + src.Location.Aisle + " " + src.Location.Position + " " + src.Location.Height));
-		//}
+		public int LocationId { get; set; }
 	}
 }

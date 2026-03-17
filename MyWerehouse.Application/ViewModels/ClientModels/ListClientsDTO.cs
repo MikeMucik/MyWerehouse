@@ -8,7 +8,7 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 {
 	public class ListClientsDTO
 	{
-		public List<AddClientDTO> AddClients { get; set; }//zmiana na mniej szczegółów
+		public List<ClientDTO> AddClients { get; set; }//zmiana na mniej szczegółów
 		public int CurrentPage { get; set; }
 		public int PageSize { get; set; }
 		public int Count { get; set; }

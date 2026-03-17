@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,13 +18,13 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 		public string Name { get; set; }
 		public string Email { get; set; }
 		public string Description { get; set; }
+		[MaxLength(250)]
 		public string FullName { get; set; }
 		public ICollection<AddressDTO> Addresses { get; set; } = new List<AddressDTO>();
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<UpdateClientDTO, Client >()
-				.ForMember(dest => dest.Addresses, opt => opt.Ignore())
-				;
+				.ForMember(dest => dest.Addresses, opt => opt.Ignore());
 		}
 	}
 	public class UpdateClientDTOValidation : AbstractValidator<UpdateClientDTO>

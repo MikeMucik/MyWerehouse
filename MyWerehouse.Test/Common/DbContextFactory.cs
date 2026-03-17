@@ -10,12 +10,12 @@ using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Infrastructure;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.Common
 {

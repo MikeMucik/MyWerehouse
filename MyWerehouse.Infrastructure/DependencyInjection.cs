@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Repositories;
-
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 
 namespace MyWerehouse.Infrastructure
 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration

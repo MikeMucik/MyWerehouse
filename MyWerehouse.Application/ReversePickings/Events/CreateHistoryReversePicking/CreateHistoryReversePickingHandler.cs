@@ -7,7 +7,7 @@ using MediatR;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Events;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking
 {

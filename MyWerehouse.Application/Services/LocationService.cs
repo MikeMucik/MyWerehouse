@@ -11,7 +11,7 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.LocationModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Services
 {

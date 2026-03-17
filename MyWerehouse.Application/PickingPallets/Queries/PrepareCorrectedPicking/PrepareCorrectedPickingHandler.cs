@@ -8,7 +8,6 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Infrastructure.Repositories;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.PrepareCorrectedPicking
 {

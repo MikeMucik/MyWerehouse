@@ -14,7 +14,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<ReversePicking> GetReversePickingAsync(Guid reversePickingId);
 		IQueryable<ReversePicking> GetReversePickings();
 		Task<bool> ExistsForPickingPalletAsync(string palletId);
-		//Task<List<ReversePicking>> GetReverseTaskByDate(DateOnly start, DateOnly end);
 		Task<List<string>> GetPalletsIdsByDate(DateOnly start, DateOnly end);
 	}
 }

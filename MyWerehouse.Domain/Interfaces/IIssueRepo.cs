@@ -15,7 +15,7 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeleteIssue(Issue issue);	
 		Task<Issue?> GetIssueByIdAsync(Guid id);		
 		Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids);
-		Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(Guid id, CancellationToken cancellationToken);
+		Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(Guid id);
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
 		Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(Guid id);
 		Task<int> GetNextNumberOfIssue();

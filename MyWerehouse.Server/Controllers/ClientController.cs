@@ -17,7 +17,7 @@ namespace MyWerehouse.Server.Controllers
 			_clientService = clientService;
 		}
 		[HttpPost]
-		public async Task<IActionResult> Add(AddClientDTO clientDTO)
+		public async Task<IActionResult> Add(ClientDTO clientDTO)
 		{
 			var result = await _clientService.AddClientAsync(clientDTO);
 			return Ok(result);

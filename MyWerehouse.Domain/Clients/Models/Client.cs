@@ -12,8 +12,10 @@ namespace MyWerehouse.Domain.Clients.Models
 		public string Description { get; set; }
 		public string FullName { get; set; }
 		public bool IsDeleted { get; set; } = false;
-		public virtual ICollection<Address> Addresses { get; set; }
+		public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 		public virtual ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
-		public virtual ICollection<Issue> Issues { get; set; }	= new List<Issue>();		
+		public virtual ICollection<Issue> Issues { get; set; }	= new List<Issue>();
+		//public const int MaxNameLength = 250;
+		//public const int MaxDiscriptionLength = 500;
 	}
 }

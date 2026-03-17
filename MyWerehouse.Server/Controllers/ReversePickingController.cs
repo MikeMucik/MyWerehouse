@@ -29,7 +29,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Pokaż zadania dekompletacyjne listę
 		[HttpGet]
-		public async Task<IActionResult> Tasks (GetListReversePickingToDoQuery query)
+		public async Task<IActionResult> Tasks ([FromQuery] GetListReversePickingToDoQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Pokaż zadanie z możliwymi opcjami dekompletacji
@@ -39,7 +39,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Lista palet do dekompletacji z localizacją
 		[HttpGet("Localization")]
-		public async Task<IActionResult> PalletsForReservePicking(ListPalletsToReservePickingQuery query)
+		public async Task<IActionResult> PalletsForReservePicking([FromQuery] ListPalletsToReservePickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 }

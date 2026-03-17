@@ -12,7 +12,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
@@ -20,7 +20,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 	{
 		public static class TestHelper
 		{
-			public static async Task<Issue> CreateIssueWithoutPalletsAsync(Infrastructure.WerehouseDbContext db, IssueStatus status = IssueStatus.New)
+			public static async Task<Issue> CreateIssueWithoutPalletsAsync(WerehouseDbContext db, IssueStatus status = IssueStatus.New)
 			{
 				var address = new Address
 				{
@@ -56,7 +56,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				return issue;
 			}
 			public static async Task<(Issue issue, List<Pallet> pallets)>
-				SetupBasicIssue(Infrastructure.WerehouseDbContext db, IssueStatus issueStatus, int qty)
+				SetupBasicIssue(WerehouseDbContext db, IssueStatus issueStatus, int qty)
 			{
 				var address = new Address
 				{

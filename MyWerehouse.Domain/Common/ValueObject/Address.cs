@@ -15,5 +15,6 @@ namespace MyWerehouse.Domain.Common.ValueObject
 		public string? AdditionalEmail { get; set; } //migracja bo dodałem "?"
 		public int ClientId { get; set; }
 		public Client Clients { get; set; }
+		//public const int MaxStreetLength = 95;
 	}
 }

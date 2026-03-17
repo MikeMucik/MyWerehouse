@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Histories.Filters;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite

@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.DomainExceptions;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 {

@@ -7,7 +7,7 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 {

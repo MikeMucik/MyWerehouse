@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using MyWerehouse.Application;
 using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode
 {

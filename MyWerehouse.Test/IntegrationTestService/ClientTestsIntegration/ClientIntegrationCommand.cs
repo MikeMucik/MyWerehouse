@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Repositories;
+using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.Common;
 
 namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
@@ -25,7 +23,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 		public readonly IReceiptRepo _receiptRepo;
 		protected readonly IValidator<AddressDTO> _addressValidator; // Zadeklaruj
 		protected readonly IValidator<UpdateClientDTO> _updateClientValidator; // Zadeklaruj
-		protected readonly IValidator<AddClientDTO> _addClientValidator; // Zadeklaruj
+		protected readonly IValidator<ClientDTO> _addClientValidator; // Zadeklaruj
 		public ClientIntegrationCommand() : base()
 		{
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
@@ -37,7 +35,8 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			_addClientValidator = new AddClientDTOValidation(_addressValidator);	
 			_updateClientValidator = new UpdateClientDTOValidation(_addressValidator);
 			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo, _context,
-				_addClientValidator, _updateClientValidator);
+				_addClientValidator, _updateClientValidator
+								   );
 		}
 	}
 }

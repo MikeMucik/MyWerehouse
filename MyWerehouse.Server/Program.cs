@@ -5,15 +5,16 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Server.Middleware;
 
 Environment.SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "");
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<MyWerehouse.Infrastructure.WerehouseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<WerehouseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Add services to the container.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-		.AddEntityFrameworkStores<MyWerehouse.Infrastructure.WerehouseDbContext>()
+		.AddEntityFrameworkStores<WerehouseDbContext>()
 		.AddDefaultTokenProviders();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
@@ -22,7 +23,6 @@ builder.Services.AddControllers();
 
 builder.Services.AddValidatorsFromAssemblyContaining<AddressDTOValidation>();
 //builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(c =>
 {
 	c.MapType<DateOnly>(() => new Microsoft.OpenApi.Models.OpenApiSchema

@@ -45,22 +45,24 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1000"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
 		}
 		[Fact]
 		public void ShowListIssuesByProduct_GetIssuesByFilter_ReturnList()
 		{
 			//Arrange
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			var filter = new IssueReceiptSearchFilter
 			{
-				ProductId = 10
+				ProductId = productId1
 			};
 			//Act
 			var result = _issueRepo.GetIssuesByFilter(filter);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1000"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
 		}
 		[Fact]
 		public void ShowListIssuesDate_GetIssuesByFilter_ReturnList()
@@ -77,8 +79,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1000"));
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1001"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1001"));
 		}
 		[Fact]
 		public async Task ShowListIssues_GetIssuesByIdsAsync_ReturnList()
@@ -97,8 +99,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1000"));
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1001"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1001"));
 		}
 		[Fact]
 		public async Task ShowListIssues_GetPalletByIssueIdAsync_ReturnListPalletWithLocation()
@@ -112,11 +114,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.All(result, p => Assert.False(string.IsNullOrWhiteSpace(p.PalletId)));
-			Assert.Contains(result, p => p.PalletId == "Q1000");
-			Assert.Contains(result, p => p.PalletId == "Q1000"&&p.LocationId ==1);
-			Assert.Contains(result, p => p.PalletId == "Q1001"&&p.LocationId ==1);
-			Assert.Contains(result, p => p.PalletId == "Q2000"&&p.LocationId ==3);		
+			Assert.All(result, p => Assert.False(p.PalletId == Guid.Empty));
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");
+			Assert.Contains(result, p => p.PalletNumber == "Q1000"&&p.LocationId ==1);
+			Assert.Contains(result, p => p.PalletNumber == "Q1001"&&p.LocationId ==1);
+			Assert.Contains(result, p => p.PalletNumber == "Q2000"&&p.LocationId ==3);		
+			//Assert.Contains(result, p => p.PalletId == "Q2000"&&p.LocationId ==3);		
 		}
 	}
 }

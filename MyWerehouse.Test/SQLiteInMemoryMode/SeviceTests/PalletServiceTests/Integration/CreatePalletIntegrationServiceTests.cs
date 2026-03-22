@@ -12,7 +12,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Integration
 {
-	public class CreatePalletIntegrationService :TestBase
+	public class CreatePalletIntegrationServiceTests :TestBase
 	{
 		[Fact]
 		public async Task PalletWithNoHistory_CreatePalletAsync_CreateToList()
@@ -32,7 +32,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var location = new Location
 			{
-
 				Aisle = 0,
 				Bay = 0,
 				Height = 0,
@@ -142,7 +141,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 		}
 		[Fact]
-		public async Task PalletWithNoHistory_CreatePalletAsync_ThrowDomainExcpetation()
+		public async Task PalletWithNoHistory_CreatePalletAsync_ThrowDomainExcpetion()
 		{
 			//Arrange
 			var category = new Category
@@ -176,12 +175,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.Products.Add(product);
 			DbContext.Inventories.Add(inventory);
 			DbContext.SaveChanges();
+			var product9Id = Guid.Parse("00000000-0000-0000-0009-000000000000");
 			var newPallet = new PalletDTO
 			{
 				ProductsOnPallet = new HashSet<ProductOnPalletDTO>{
 					new ProductOnPalletDTO
 						{
-							ProductId = 2,
+							ProductId =product9Id,
 							Quantity = 10,
 						}
 				},
@@ -192,7 +192,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains("Produkt o numerze 2 nie istnieje.", result.Error);
+			Assert.Contains($"Produkt o numerze {product9Id} nie istnieje.", result.Error);
 		}
 	}
 }

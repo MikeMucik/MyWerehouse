@@ -19,7 +19,9 @@ namespace MyWerehouse.Application.Pallets.Events.CreateMovement
 		{			
 			var movement = new PalletMovement
 			{
+				//Id = notification.PalletId,
 				PalletId = notification.PalletId,
+				PalletNumber = notification.PalletNumber,
 				SourceLocationId = notification.SourceLocationId,
 				SourceLocationSnapShot = notification.SourceSnapshot,
 				DestinationLocationId = notification.DestinationLocationId,

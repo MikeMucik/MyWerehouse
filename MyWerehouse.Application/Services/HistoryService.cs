@@ -29,12 +29,13 @@ namespace MyWerehouse.Application.Services
 			_mapper = mapper;			
 		}		
 		//Read history
-		public async Task<PalletHistoryDTO> GetHistoryPalletByIdAsync(string id)
+		public async Task<PalletHistoryDTO> GetHistoryPalletByIdAsync(Guid id)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(id);
 			var history = _mapper.Map<PalletHistoryDTO>(pallet);
 			var filter = new PalletMovementSearchFilter { };
-			var details = await _palletMovementRepo.GetDataByFilter(filter, id)
+			//var details = await _palletMovementRepo.GetDataByFilter(filter, id)
+			var details = await _palletMovementRepo.GetDataByFilter(filter, pallet.PalletNumber)
 				.OrderByDescending(a => a.MovementDate)
 			 .ProjectTo<PalletMovementDTO>(_mapper.ConfigurationProvider)
 			 .ToListAsync();

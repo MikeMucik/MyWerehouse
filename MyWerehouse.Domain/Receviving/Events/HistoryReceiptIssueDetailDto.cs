@@ -7,6 +7,6 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Domain.Receviving.Events
 {
-	public record HistoryReceiptIssueDetailDto(string PalletId, int LocationId, string LocationSnapShot);
+	public record HistoryReceiptIssueDetailDto( Guid PalletId, string PalletNumber, int LocationId, string LocationSnapShot);
 	
 }

@@ -221,9 +221,32 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				FullName = "FullNameCompany",
 				Addresses = [address1]
 			};
+			var initialCategory = new Category
+			{
+				Id = 1,
+				Name = "name",
+				IsDeleted = false
+			};
+			var initialProduct = new Product
+			{
+				//Id = 10,
+				Name = "Test",
+				SKU = "666666",
+				CategoryId = 1,
+				IsDeleted = false,
+			};
+			var initialProduct1 = new Product
+			{
+				//Id = 1,
+				Name = "Test",
+				SKU = "666666",
+				CategoryId = 1,
+				IsDeleted = false,
+			};
+			
 			var initialPallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -232,8 +255,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var initialProductOnPallet = new ProductOnPallet
 			{
 				Id = 1,
-				PalletId = "Q1000",
-				ProductId = 10,
+				Pallet = initialPallet,
+				//PalletId = "Q1000",
+				//ProductId = 10,
+				Product = initialProduct,
 				Quantity = 100,
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
@@ -258,28 +283,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				Height = 1,
 				Position = 1
 			};
-			var initialProduct = new Product
-			{
-				Id = 10,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			var initialProduct1 = new Product
-			{
-				Id = 1,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			var initialCategory = new Category
-			{
-				Id = 1,
-				Name = "name",
-				IsDeleted = false
-			};
+			
+			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);
 			DbContext.ProductOnPallet.Add(initialProductOnPallet);
@@ -319,7 +324,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 							{
 								Id = initialProductOnPallet.Id,
 								PalletId = initialPallet.Id,
-								ProductId = 1,
+								ProductId = initialProduct1.Id,
 								Quantity = 1,
 								DateAdded = DateTime.Now,
 							}
@@ -336,7 +341,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			Assert.Equal(2, result.ClientId);
 			var pallet = result.Pallets;
 			var product = pallet.First();
-			Assert.Equal(1, product.ProductsOnPallet.First(x => x.ProductId == 1).Quantity);
+			Assert.Equal(1, product.ProductsOnPallet.First(x => x.ProductId == initialProduct1.Id).Quantity);
 		}
 		[Fact]
 		public async Task NonProperDataWrongReceiptId_UpdatePalletToReceiptAsync_ThrowException()
@@ -425,7 +430,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var initialPallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				Location = initailLocation,
 				Status = PalletStatus.Available,
@@ -434,7 +439,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			var initialProductOnPallet = new ProductOnPallet
 			{
 				//Id = 1,
-				PalletId = "Q1000",
+				Pallet = initialPallet,
+				//PalletId = "Q1000",
 				Product = initialProduct,
 				Quantity = 100,
 				DateAdded = DateTime.Now,
@@ -442,7 +448,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q3000",
+				PalletNumber = "Q3000",
 				Location = initailLocation,
 				Receipt = initialReceipt1, //WrongData
 				Status = PalletStatus.Receiving,
@@ -483,7 +489,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				{
 					new()
 					{
-						Id = "Q3000",
+						Id = pallet2.Id,
+						PalletNumber = "Q3000",
 						LocationId = 1,
 						ReceiptId = receiptId9, //WrongData
 						Status = PalletStatus.Receiving,
@@ -494,7 +501,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 							{
 								Id = initialProductOnPallet.Id,
 								PalletId = initialPallet.Id,
-								ProductId = 1,
+								ProductId = initialProduct.Id,
 								Quantity = 1,
 								DateAdded = DateTime.Now,
 							}
@@ -588,7 +595,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var initialPallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				Location = initailLocation,
 				Status = PalletStatus.Available,
@@ -604,7 +611,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			};
 			var initialPallet1 = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = DateTime.Now,
 				Location = initailLocation,
 				Status = PalletStatus.Available,
@@ -650,7 +657,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				{
 					new()
 					{
-						Id = "Q1001",
+						Id = initialPallet1.Id,
+						PalletNumber = "Q1001",
 						LocationId = initailLocation.Id,
 						ReceiptId = initialReceipt.Id,
 						Status = PalletStatus.Receiving,
@@ -677,11 +685,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			Assert.NotNull(result);
 			Assert.Equal(2, result.ClientId);
 			Assert.Single(result.Pallets); // powinien zostać tylko jeden
-			Assert.Equal("Q1001", result.Pallets.First().Id);
+			Assert.Equal("Q1001", result.Pallets.First().PalletNumber);
 			await using var freshContext = CreateNewContext();
 			var newPallet = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.FirstOrDefault(p => p.Id == "Q1001");
+				.FirstOrDefault(p => p.PalletNumber == "Q1001");
 			Assert.NotNull(newPallet);
 			Assert.Equal(PalletStatus.Receiving, newPallet.Status);
 			Assert.Equal(1, newPallet.LocationId);
@@ -692,7 +700,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			//var productOnPalletChanged = DbContext.ProductOnPallet.FirstOrDefault(x => x.PalletId == "Q1001");
 			var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.Id == initialProductOnPallet1.Id);
 			Assert.NotNull(product);
-			Assert.Equal("Q1001", product.PalletId);
+			Assert.Equal(initialPallet1.Id, product.PalletId);
 			Assert.Equal(1, product.Quantity);
 			Assert.Equal(initialProduct1.Id, product.ProductId);			
 			//Sprawdzić co się dzieje z paletą wyrzuconą z przyjęcia			

@@ -66,7 +66,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			//Arrange
 			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			var issueId = receiptId2;
-			var productId = 11;
+			var productId = Guid.Parse("00000000-0000-0000-0002-000000000000");;
 			//Act
 			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId);
 			//Assert
@@ -93,16 +93,18 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		[Fact]
 		public async Task ByProductIdAndDates_GetPickingTasksProductIdAsync_ReturnList()
 		{
-			var productId = 11;			
+			//var productId = 11;
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			var dateStart = DateTime.UtcNow;
 			var dateEnd = DateTime.UtcNow.AddDays(1);
 			//Act
-			var result = await _pickingTaskRepo.GetPickingTasksProductIdAsync(productId, dateStart, dateEnd);
+			var result = await _pickingTaskRepo.GetPickingTasksProductIdAsync(productId2, dateStart, dateEnd);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
 			Assert.Equal(3, result.Count);
-			Assert.All(result, a => Assert.Equal(productId, a.ProductId));
+			Assert.All(result, a => Assert.Equal(productId2, a.ProductId));
 
 		}
 	}

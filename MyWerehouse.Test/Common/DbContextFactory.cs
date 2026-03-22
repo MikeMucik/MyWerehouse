@@ -75,13 +75,18 @@ namespace MyWerehouse.Test.Common
 			context.SaveChanges();
 
 			// 2. Dane zależne od powyższych
-
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+			var productId989 = Guid.Parse("00000000-0000-0000-0989-000000000000");
 			if (!context.Products.Any())
 			{
 				context.Products.AddRange(
-					new Product { Id = 10, Name = "Test", SKU = "0987654321", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 56, },
-					new Product { Id = 11, Name = "TestD", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 44, },
-					new Product { Id = 989, Name = "NotAdded", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 112, }
+					//Product.Create(productId1, "Test", "0987654321",  1, false, 56),
+					//Product.Create(productId1, "TestD", "fghtredfg",  1, false, 44),
+					//Product.Create(productId989, "NotAdded", "fghtredfg", 1, false, 112)
+					new Product { Id = productId1, Name = "Test", SKU = "0987654321", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 56, },
+					new Product { Id = productId2, Name = "TestD", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 44, },
+					new Product { Id = productId989, Name = "NotAdded", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 112, }
 				);
 			}
 
@@ -90,7 +95,7 @@ namespace MyWerehouse.Test.Common
 				context.ProductDetails.AddRange(
 					new ProductDetail
 					{
-						ProductId = 10,
+						ProductId = productId1,
 						Length = 10,
 						Height = 20,
 						Width = 30,
@@ -99,7 +104,7 @@ namespace MyWerehouse.Test.Common
 					},
 					new ProductDetail
 					{
-						ProductId = 11,
+						ProductId = productId2,
 						Length = 20,
 						Height = 40,
 						Width = 60,
@@ -153,7 +158,7 @@ namespace MyWerehouse.Test.Common
 					IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
 					IssueItems = new List<IssueItem> { new IssueItem
 					{
-						ProductId = 10,
+						ProductId = productId1,
 						CreatedAt = DateTime.Today,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
 						Quantity = 20,
@@ -163,12 +168,26 @@ namespace MyWerehouse.Test.Common
 
 			context.SaveChanges();
 			// 3. Dane końcowe, zależne od receipt/issue/product
+
+			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
+			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
+			var palletGuid3 = Guid.Parse("00000000-0003-1111-0000-000000000000");
+			var palletGuid4 = Guid.Parse("00000000-0004-1111-0000-000000000000");
+			//var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
+			//var palletGuid6 = Guid.Parse("00000000-0006-1111-0000-000000000000");
+			//var palletGuid7 = Guid.Parse("00000000-0007-1111-0000-000000000000");
+			//var palletGuid8 = Guid.Parse("00000000-0008-1111-0000-000000000000");
+			//var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");
+
+
+
 			if (!context.Pallets.Any())
 			{
 				context.Pallets.AddRange(
 					new Pallet
 					{
-						Id = "Q1000",
+						Id = palletGuid1,
+						PalletNumber = "Q1000",
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.Available,
@@ -177,7 +196,8 @@ namespace MyWerehouse.Test.Common
 					},
 					new Pallet
 					{
-						Id = "Q1001",
+						Id = palletGuid2,
+						PalletNumber = "Q1001",
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.OnHold,
@@ -186,7 +206,8 @@ namespace MyWerehouse.Test.Common
 					},
 					new Pallet
 					{
-						Id = "Q1002",
+						Id = palletGuid3,
+						PalletNumber ="Q1002",
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Available,
@@ -194,7 +215,8 @@ namespace MyWerehouse.Test.Common
 					},
 					new Pallet
 					{
-						Id = "Q1010",
+						Id = palletGuid4,
+						PalletNumber = "Q1010",
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Damaged,
@@ -209,47 +231,52 @@ namespace MyWerehouse.Test.Common
 					new ProductOnPallet
 					{
 						Id = 1,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 50,
 						BestBefore = new DateOnly(2026, 2, 2),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1000"
+						//PalletId = "Q1000"
+						PalletId = palletGuid1
 					},
 					new ProductOnPallet
 					{
 						Id = 2,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 100,
 						BestBefore = new DateOnly(2025, 2, 2),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1001"
+						//PalletId = "Q1001"
+						PalletId = palletGuid2
 					},
 					new ProductOnPallet
 					{
 						Id = 3,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = new DateOnly(2025, 2, 2),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1001"
+						//PalletId = "Q1001"
+						PalletId = palletGuid2
 					},
 					new ProductOnPallet
 					{
 						Id = 4,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = new DateOnly(2025, 2, 2),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1010"
+						//PalletId = "Q1010"
+						PalletId = palletGuid3
 					},
 					new ProductOnPallet
 					{
 						Id = 5,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = new DateOnly(2025, 2, 2),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1002"
+						//PalletId = "Q1002"
+						PalletId= palletGuid4
 					}
 				);
 			}
@@ -260,7 +287,8 @@ namespace MyWerehouse.Test.Common
 					new PalletMovement
 					{
 						Id = 1,
-						PalletId = "Q1000",
+						PalletId = palletGuid1,
+						PalletNumber = "Q1000",
 						//ProductId = 10,
 						DestinationLocationId = 2,
 						Reason = ReasonMovement.Moved,
@@ -271,7 +299,8 @@ namespace MyWerehouse.Test.Common
 					new PalletMovement
 					{
 						Id = 2,
-						PalletId = "Q1001",
+						PalletId = palletGuid2,
+						PalletNumber = "Q1001",
 						//ProductId = 10,
 						DestinationLocationId = 1,
 						Reason = ReasonMovement.Moved,
@@ -282,7 +311,8 @@ namespace MyWerehouse.Test.Common
 					new PalletMovement
 					{
 						Id = 3,
-						PalletId = "Q1002",
+						PalletId = palletGuid3,
+						PalletNumber = "Q1002",
 						//ProductId = 11,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
@@ -293,7 +323,8 @@ namespace MyWerehouse.Test.Common
 					new PalletMovement
 					{
 						Id = 4,
-						PalletId = "Q1010",
+						PalletId = palletGuid4,
+						PalletNumber = "Q1010",
 						//ProductId = 10,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
@@ -304,7 +335,8 @@ namespace MyWerehouse.Test.Common
 					new PalletMovement
 					{
 						Id = 5,
-						PalletId = "Q1000",
+						PalletId = palletGuid1,
+						PalletNumber = "Q1000",
 						//ProductId = 10,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
@@ -321,42 +353,42 @@ namespace MyWerehouse.Test.Common
 					{
 						Id = 1,
 						PalletMovementId = 1,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 100,
 					},
 					new PalletMovementDetail
 					{
 						Id = 6,
 						PalletMovementId = 1,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 2,
 						PalletMovementId = 2,
-						ProductId = 11,
+						ProductId =productId2,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 3,
 						PalletMovementId = 3,
-						ProductId = 11,
+						ProductId =productId2,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 4,
 						PalletMovementId = 4,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 5,
 						PalletMovementId = 5,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 1,
 					});
 			}
@@ -366,14 +398,14 @@ namespace MyWerehouse.Test.Common
 					new Inventory
 					{
 						//Id = 1,						
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 10,
 						LastUpdated = new DateTime(2025, 5, 6)
 					},
 					new Inventory
 					{
 						//Id = 2,						
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 0,
 						LastUpdated = new DateTime(2025, 5, 6)
 					});

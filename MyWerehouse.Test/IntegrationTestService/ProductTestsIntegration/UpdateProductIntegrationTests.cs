@@ -17,25 +17,27 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		public async Task ProperData_UpdateProductAsync_ChangeData()
 		{
 			// Arrange			
-			var details = new ProductDetail
-			{
-				//Id = 4,
-				ProductId = 4,
-				Height = 1,
-				Width = 1,
-				Length = 1,
-				Weight = 1,
-				Description = "Test"
-			};
+			
 			var updatingProduct = new Product
 			{
-				Id = 4,
+				//Id = 4,
 				Name = "Test",
 				CategoryId = 1,
 				SKU = "dede",
 				IsDeleted = false,
 				AddedItemAd = new DateTime(2024, 2, 2),
-				Details = details
+				//Details = details
+			};
+			var details = new ProductDetail
+			{
+				//Id = 4,
+				//ProductId = 4,
+				Product = updatingProduct,
+				Height = 1,
+				Width = 1,
+				Length = 1,
+				Weight = 1,
+				Description = "Test"
 			};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
@@ -43,7 +45,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Act
 			var updatedProduct = new AddProductDTO
 			{
-				Id = 4,
+				Id = updatingProduct.Id,
 				Name = "Testqw",
 				CategoryId = 2,
 				SKU = "q1233",
@@ -71,25 +73,27 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		public async Task NotProperDataName_UpdateProductAsync_ThrowsException()
 		{
 			// Arrange			
-			var details = new ProductDetail
-			{
-				//Id = 5,
-				ProductId = 5,
-				Height = 1,
-				Width = 1,
-				Length = 1,
-				Weight = 1,
-				Description = "Test"
-			};
+			
 			var updatingProduct = new Product
 			{
-				Id = 5,
+				//Id = 5,
 				Name = "Test",
 				CategoryId = 1,
 				SKU = "dede",
 				IsDeleted = false,
 				AddedItemAd = new DateTime(2024, 2, 2),
-				Details = details
+				//Details = details
+			};
+			var details = new ProductDetail
+			{
+				//Id = 5,
+				//ProductId = 5,
+				Product = updatingProduct,
+				Height = 1,
+				Width = 1,
+				Length = 1,
+				Weight = 1,
+				Description = "Test"
 			};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
@@ -97,7 +101,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Act&Assert
 			var updatedProduct = new AddProductDTO
 			{
-				Id = 5,
+				Id = updatingProduct.Id,
 				//Name = "Testqw",
 				CategoryId = 2,
 				SKU = "q1233",
@@ -119,25 +123,27 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		public async Task NotProperDataLength_UpdateProductAsync_ThrowsException()
 		{
 			// Arrange			
-			var details = new ProductDetail
-			{
-				//Id = 6,
-				ProductId = 6,
-				Height = 1,
-				Width = 1,
-				Length = 1,
-				Weight = 1,
-				Description = "Test"
-			};
+			
 			var updatingProduct = new Product
 			{
-				Id = 6,
+				//Id = 6,
 				Name = "Test",
 				CategoryId = 1,
 				SKU = "dede",
 				IsDeleted = false,
 				AddedItemAd = new DateTime(2024, 2, 2),
-				Details = details
+				//Details = details
+			};
+			var details = new ProductDetail
+			{
+				//Id = 6,
+				//ProductId = 6,
+				Product = updatingProduct,
+				Height = 1,
+				Width = 1,
+				Length = 1,
+				Weight = 1,
+				Description = "Test"
 			};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
@@ -145,7 +151,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Act&Assert
 			var updatedProduct = new AddProductDTO
 			{
-				Id = 6,
+				Id = updatingProduct.Id,
 				Name = "Testqw",
 				CategoryId = 2,
 				SKU = "q1233",

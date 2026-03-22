@@ -11,17 +11,17 @@ namespace MyWerehouse.Application.Pallets.Services
 {
 	public class GetAvailablePalletsByProductService : IGetAvailablePalletsByProductService
 	{
-		private readonly IPalletRepo _repo;
+		private readonly IPalletRepo _palletRepo;
 		private readonly IProductRepo _productRepo;
 		public GetAvailablePalletsByProductService(IPalletRepo palletRepo, IProductRepo productRepo)
 		{
-			_repo = palletRepo;
+			_palletRepo = palletRepo;
 			_productRepo = productRepo;
 		}
-		public async Task<List<Pallet>> GetPallets(int productId, DateOnly? bestBefore, int amountFullPallet)
+		public async Task<List<Pallet>> GetPallets(Guid productId, DateOnly? bestBefore, int amountFullPallet)
 		{
 			var product = await _productRepo.GetProductByIdAsync(productId);
-			var palletsQuery = _repo.GetAvailablePallets(productId, bestBefore)
+			var palletsQuery = _palletRepo.GetAvailablePallets(productId, bestBefore)
 				.Select(p => new
 				{
 					Pallet = p,
@@ -32,18 +32,21 @@ namespace MyWerehouse.Application.Pallets.Services
 					BestBefore = p.ProductsOnPallet
 					.Where(x => x.ProductId == productId)
 					.Select(x => x.BestBefore)
-					.FirstOrDefault()
+					.FirstOrDefault(),
+					//DateReceived = p.DateReceived
+					//.Where(x => x.ProductId == productId)
 				});
 				//.OrderByDescending(x => x.BestBefore);
 			var palletList = await palletsQuery
 				.OrderBy(x=>x.BestBefore)
+				.OrderBy(x=>x.Pallet.Location)
 				.ToListAsync();
-			var fullPallets = palletList
+			var fullPallets = palletList //dlaczego bierze P2 a nie P1
 				.Where(x => x.Qty == product.CartonsPerPallet)
 				.Take(amountFullPallet)
 				.Select(x=>x.Pallet)
 				.ToList();
-			foreach (var pallet in fullPallets)
+			foreach (var pallet in fullPallets)			//chyba tu jest błąd
 				pallet.Status = PalletStatus.InTransit;
 			return fullPallets;			
 		}

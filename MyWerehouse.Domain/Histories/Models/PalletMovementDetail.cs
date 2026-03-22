@@ -11,11 +11,11 @@ namespace MyWerehouse.Domain.Histories.Models
 		public int  Id { get; set; }
 		public int PalletMovementId { get; set; }
 		public virtual PalletMovement PalletMovement { get; set; }
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public int Quantity { get; set; } //+/- może zmiana na QuantityChange oczywiście zawsze dodatni 
 
 		public PalletMovementDetail() { }
-		public PalletMovementDetail(int productId, int quantity)
+		public PalletMovementDetail(Guid productId, int quantity)
 		{
 			ProductId = productId;
 			Quantity = quantity;

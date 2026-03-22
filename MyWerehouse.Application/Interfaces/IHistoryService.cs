@@ -10,7 +10,8 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IHistoryService
 	{
-		Task <PalletHistoryDTO> GetHistoryPalletByIdAsync(string  id);
+		Task <PalletHistoryDTO> GetHistoryPalletByIdAsync(Guid  id);
+		//Task <PalletHistoryDTO> GetHistoryPalletByIdAsync(string  id);
 		//TODO
 		Task <ReceiptHistoryDTO> GetHistoryReceiptByIdAsync(string  id);//
 		Task <IssueHistoryDTO> GetHistoryIssueByIdAsync(string  id);//

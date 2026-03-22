@@ -9,6 +9,6 @@ namespace MyWerehouse.Application.ReversePickings.Services
 {
 	public interface ICreateReversePickingService
 	{
-		Task<ReversePickingResult> CreateReversePicking(string palletId, string userId);
+		Task<ReversePickingResult> CreateReversePicking(Guid palletId, string userId);
 	}
 }

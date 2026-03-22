@@ -31,6 +31,7 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 				.Select(d=> new HistoryIssueDetail
 				{
 					PalletId = d.PalletId,
+					PalletNumber = d.PalletNumber,
 					LocationId = d.LocationId,
 					LocationSnapShot = d.LocationSnapShot,
 				})

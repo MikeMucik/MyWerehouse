@@ -11,7 +11,7 @@ namespace MyWerehouse.Domain.Interfaces
 	{
 		void AddIssueItem(IssueItem issueItem);
 		Task<IssueItem> GetIssueItemAsync(int id);
-		Task<int> GetQuantityByIssueAndProduct(Issue issue, int productId);
+		Task<int> GetQuantityByIssueAndProduct(Issue issue, Guid productId);
 		void DeleteIssueItem(IssueItem issue);
 	}
 }

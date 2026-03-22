@@ -9,8 +9,8 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IInventoryService
 	{
-		Task ChangeProductQuantityAsync(int productId, int quantity);
-		Task<InventoryDTO> GetInventoryAsync(int productId);
-		Task<int> GetProductCountAsync(int productId, DateOnly? BestBefore);
+		Task ChangeProductQuantityAsync(Guid productId, int quantity);
+		Task<InventoryDTO> GetInventoryAsync(Guid productId);
+		Task<int> GetProductCountAsync(Guid productId, DateOnly? BestBefore);
 	}
 }

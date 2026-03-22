@@ -38,7 +38,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		public async Task PrepareCorrectedPicking_GoodData_ReturnList()
 		{
 			// Arrange
-			var query = new PrepareCorrectedPickingQuery("Q5000");			
+			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");
+
+			//var query = new PrepareCorrectedPickingQuery("Q5000");			
+			var query = new PrepareCorrectedPickingQuery(palletGuid9);			
 			// Act			
 			var result = await _mediator.Send(query);
 			// Assert
@@ -52,7 +55,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 		public async Task ShowTaskToDo_GoodData_ReturnList()
 		{
 			// Arrange
-			var pallet = "Q1100";
+			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
+
+
+			//var pallet = "Q1100";
+			var pallet = palletGuid5;
 			var date = DateTime.UtcNow;
 			var query = new ShowTaskToDoQuery(pallet, date);
 			// Act

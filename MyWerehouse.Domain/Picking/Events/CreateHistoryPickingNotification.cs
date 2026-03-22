@@ -12,10 +12,11 @@ namespace MyWerehouse.Domain.Picking.Events
 	public record CreateHistoryPickingNotification(
 		Guid PickingTaskId,
 		//int PickingTaskNumber,
-		string PalletId,
+		Guid PalletId,
+		string PalletNumber,
 		Guid IssueId,
 		int IssueNumber,
-		int ProductId,
+		Guid ProductId,
 		int QuantityAllocated,
 		int QuantityPicked,
 		PickingStatus StatusBefore,

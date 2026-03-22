@@ -9,6 +9,6 @@ namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public interface IGetVirtualPalletsService
 	{
-		Task<List<VirtualPallet>> GetVirtualPalletsAsync(int productId, DateOnly bestBefore);
+		Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid productId, DateOnly bestBefore);
 	}
 }

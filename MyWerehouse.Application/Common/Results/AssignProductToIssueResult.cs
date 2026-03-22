@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.Common.Results
 	{
 		public bool Success { get; init; }
 		public string Message { get; init; }
-		public int ProductId { get; init; }		
+		public Guid ProductId { get; init; }		
 		public IReadOnlyList<Pallet> AssignedPallets { get; init; }
 		public int QuantityRequest { get; set; }
 		public int QuantityOnStock { get; set; }
@@ -35,7 +35,7 @@ namespace MyWerehouse.Application.Common.Results
 		}
 		public static AssignProductToIssueResult Fail(
 			string message,
-			int productNotAdded,
+			Guid productNotAdded,
 			int issueQuantity,
 			int onStock)
 		{

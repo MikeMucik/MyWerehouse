@@ -156,6 +156,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			return Pallets
 				.Select(p => new HistoryReceiptIssueDetailDto(
 					p.Id,
+					p.PalletNumber,
 					p.LocationId,
 					p.Location.ToSnopShot()))
 				.ToList();

@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Invetories.Models
 {
 	public class Inventory : AggregateRoots
 	{		
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public virtual Product Product { get; set; }
 		public int Quantity { get; set; }				
 		public DateTime LastUpdated { get; set; }

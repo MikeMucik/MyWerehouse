@@ -13,7 +13,8 @@ namespace MyWerehouse.Application.Receipts.DTOs
 {
 	public class CreatePalletReceiptDTO :IMapFrom<Pallet>
 	{
-		public string Id { get; set; }
+		public Guid Id { get; set; }
+		public string PalletNumber { get; set; }
 		public DateTime DateReceived { get; set; }
 		public int LocationId { get; set; }		
 		public PalletStatus Status { get; set; } = 0; 

@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 {
 	public class ProductToListDTO : IMapFrom<Product>
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 		public string Name { get; set; }
 		public string SKU { get; set; }
 		public string Category { get; set; }

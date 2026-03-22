@@ -58,7 +58,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var pallet = new Pallet
 			{
-				Id = "PAL001",
+				PalletNumber = "PAL001",
 				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
@@ -72,7 +72,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "PAL002",
+				PalletNumber = "PAL002",
 				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
@@ -151,7 +151,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var pallet = new Pallet
 			{
-				Id = "PAL001",
+				PalletNumber = "PAL001",
 				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
@@ -165,7 +165,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "PAL002",
+				PalletNumber = "PAL002",
 				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>

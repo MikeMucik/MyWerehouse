@@ -12,10 +12,11 @@ namespace MyWerehouse.Domain.Histories.Models
 	{
 		public int Id { get; set; }
 		public Guid PickingTaskId { get; set; }		
-		public string PalletId { get; set; }
+		public Guid PalletId { get; set; }
+		public string PalletNumber { get; set; }
 		public Guid IssueId { get; set; }
 		public int IssueNumber { get; set; }
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public int QuantityAllocated { get; set; }   // ile system przydzielił
 		public int QuantityPicked { get; set; }      // ile picker potwierdził
 		public PickingStatus StatusBefore { get; set; }

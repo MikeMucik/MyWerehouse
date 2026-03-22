@@ -52,33 +52,33 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IsDeleted = false,
 				CartonsPerPallet = 10,
 			};
-			var availablePallets = new List<Pallet>
+			//var availablePallets = new List<Pallet>
+			//{
+			var pallet1 = new Pallet
 			{
-				new Pallet
-				{
-					Id = "P1",
-					DateReceived = new DateTime(2025, 3, 3),
-					Location = location1,
-					Status = PalletStatus.ToIssue,
+				PalletNumber = "P1",
+				DateReceived = new DateTime(2025, 3, 3),
+				Location = location1,
+				Status = PalletStatus.ToIssue,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{
 					new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
 				}
-			},
-				new Pallet
-				{
-					Id = "P2",
-					DateReceived = new DateTime(2025, 3, 3),
-					Location = location2,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet2 = new Pallet
+			{
+				PalletNumber = "P2",
+				DateReceived = new DateTime(2025, 3, 3),
+				Location = location2,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 					{
 						new ProductOnPallet { Product = product, Quantity = 9, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
 					}
-				},
-				new Pallet
+			};
+		var pallet3 =		new Pallet
 				{
-					Id = "P3",
+					PalletNumber = "P3",
 					DateReceived = new DateTime(2025, 3, 3),
 					Location = location3,
 					Status = PalletStatus.Available,
@@ -86,15 +86,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					{
 						new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 					}
-				}
 			};
-			DbContext.Pallets.AddRange(availablePallets);
+			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await Mediator.Send(new MarkAsLoadedCommand("P1", "User123"));
+			var result = await Mediator.Send(new MarkAsLoadedCommand(pallet1.Id, "User123"));
 			//Assert
 			Assert.True(result.IsSuccess);
-			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "P1");
+			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "P1");
 			Assert.NotNull(pallet);
 			Assert.Equal(PalletStatus.Loaded, pallet.Status);
 		}
@@ -138,49 +137,49 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IsDeleted = false,
 				CartonsPerPallet = 10,
 			};
-			var availablePallets = new List<Pallet>
+			//var availablePallets = new List<Pallet>
+			//{
+			var palet1 = new Pallet
 			{
-				new Pallet
-				{
-					Id = "P1",
-					DateReceived = new DateTime(2025, 3, 3),
-					Location = location1,
-					Status = PalletStatus.ToIssue,
+				PalletNumber = "P1",
+				DateReceived = new DateTime(2025, 3, 3),
+				Location = location1,
+				Status = PalletStatus.ToIssue,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{
 					new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
 				}
-			},
-				new Pallet
-				{
-					Id = "P2",
-					DateReceived = new DateTime(2025, 3, 3),
-					Location = location2,
-					Status = PalletStatus.Damaged,
-					ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet2 = new Pallet
+			{
+				PalletNumber = "P2",
+				DateReceived = new DateTime(2025, 3, 3),
+				Location = location2,
+				Status = PalletStatus.Damaged,
+				ProductsOnPallet = new List<ProductOnPallet>
 					{
 						new ProductOnPallet { Product = product, Quantity = 9, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
 					}
-				},
-				new Pallet
-				{
-					Id = "P3",
-					DateReceived = new DateTime(2025, 3, 3),
-					Location = location3,
-					Status = PalletStatus.Available,
-					ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet3 = new Pallet
+			{
+				PalletNumber = "P3",
+				DateReceived = new DateTime(2025, 3, 3),
+				Location = location3,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 					{
 						new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 					}
-				}
 			};
-			DbContext.Pallets.AddRange(availablePallets);
+			
+			DbContext.Pallets.AddRange(palet1, pallet2, pallet3);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await Mediator.Send(new MarkAsLoadedCommand("P2", "User123"));
+			var result = await Mediator.Send(new MarkAsLoadedCommand(pallet2.Id, "User123"));
 			//Assert
 			Assert.False(result.IsSuccess);
-			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "P2");
+			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "P2");
 			Assert.NotNull(pallet);
 			Assert.Equal(PalletStatus.Damaged, pallet.Status);
 		}

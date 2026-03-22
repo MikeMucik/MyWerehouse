@@ -11,7 +11,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 {
 	public class PalletWithLocationDTO 
 	{
-		public string PalletId { get; set; }
+		public Guid PalletId { get; set; }
+		public string PalletNumber { get; set; }
 		public string LocationName { get; set; }
 		public int LocationId { get; set; }
 	}

@@ -10,6 +10,6 @@ namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public interface IReduceAllocationService
 	{
-		Task ReduceAllocation(Issue issues, int productId,int quatnity, string userId);
+		Task ReduceAllocation(Issue issues, Guid productId,int quatnity, string userId);
 	}
 }

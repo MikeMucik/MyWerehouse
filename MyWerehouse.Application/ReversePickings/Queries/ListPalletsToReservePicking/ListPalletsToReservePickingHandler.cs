@@ -29,12 +29,13 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePi
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(id);
 				if (pallet == null)
-					return AppResult<List<PalletWithLocationDTO>>.Fail($"Brak palety w systemie {id}.");			
+					return AppResult<List<PalletWithLocationDTO>>.Fail($"Brak palety w systemie {id}.");	//		
 				var locationName = pallet.Location;
 				var fullLocation = locationName.ToSnopShot();
 				var item = new PalletWithLocationDTO
 				{
 					PalletId = id,
+					PalletNumber = pallet.PalletNumber,
 					LocationId = pallet.LocationId,
 					LocationName = fullLocation,
 				};

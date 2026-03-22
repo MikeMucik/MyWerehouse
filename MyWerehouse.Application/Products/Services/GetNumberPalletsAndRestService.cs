@@ -15,7 +15,7 @@ namespace MyWerehouse.Application.Products.Services
 		{
 			_repo = productRepo;
 		}
-		public async Task<AssignPallestResult> GetNumbers(int productId, int amountUnits)
+		public async Task<AssignPallestResult> GetNumbers(Guid productId, int amountUnits)
 		{
 			var product = await _repo.GetProductByIdAsync(productId);
 			if (product.CartonsPerPallet == 0)
@@ -25,7 +25,7 @@ namespace MyWerehouse.Application.Products.Services
 			var rest = amountUnits% amountCarOnPallet;
 			return AssignPallestResult.Ok(amountPallets, rest);
 		}
-		public async Task<int> GetBackOnlyFullPallets(int productId, int amountUnits)
+		public async Task<int> GetBackOnlyFullPallets(Guid productId, int amountUnits)
 		{
 			var product = await _repo.GetProductByIdAsync(productId);
 			var amountCarOnPallet = product.CartonsPerPallet;

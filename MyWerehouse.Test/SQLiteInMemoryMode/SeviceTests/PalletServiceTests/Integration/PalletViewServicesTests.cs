@@ -25,11 +25,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 		public async Task ShowDataToEdit_GetPalletToEdit_ReturnUpdatePalletDTO()
 		{
 			//Arrange
+			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
+
 			var palletId = "Q1001";
-			var query = new GetPalletToEditQuery(palletId);
+			var query = new GetPalletToEditQuery(palletGuid2);
 			//Act
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			var result = await _mediator.Send(query);
 			Assert.NotNull(result);
 			Assert.Single(result.Result.ProductsOnPallet);
@@ -38,7 +43,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.Equal(receiptId1, result.Result.ReceiptId);
 			Assert.Equal(issueId1, result.Result.IssueId);
 			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
-			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == 10);
+			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId1);
 			Assert.Equal(100, product1.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product1.BestBefore);
 		}
@@ -47,8 +52,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 		public async Task ShowDataToEdit_GetPalletToEdit_ReturnData()
 		{
 			//Arrange
+			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
+
 			var palletId = "Q1000";
-			var query = new GetPalletToEditQuery(palletId);
+			var query = new GetPalletToEditQuery(palletGuid1);
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			//Act
 
 			var result = await _mediator.Send(query);
@@ -61,10 +71,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.Equal(receiptId1, result.Result.ReceiptId);
 			Assert.Equal(issueId1, result.Result.IssueId);
 			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
-			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == 10);
+			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId1);
 			Assert.Equal(50, product1.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product1.BestBefore);
-			var product2 = result.Result.ProductsOnPallet.Single(p => p.ProductId == 11);
+			var product2 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId2);
 			Assert.Equal(200, product2.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product2.BestBefore);
 		}

@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	public interface IProcessPickingActionService
 	{
 		Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet,
-		Issue issue, int productId, int quantityToPick,
+		Issue issue, Guid productId, int quantityToPick,
 		string userId, PickingTask pickingTask,
 		PickingCompletion pickingCompletion);
 	}

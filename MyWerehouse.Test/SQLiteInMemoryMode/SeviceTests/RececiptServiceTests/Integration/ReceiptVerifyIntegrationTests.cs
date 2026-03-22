@@ -62,7 +62,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var pallet = new Pallet
 			{
-				Id = "PAL001",
+				PalletNumber = "PAL001",
 				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>
@@ -158,7 +158,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var pallet = new Pallet
 			{
-				Id = "PAL001",
+				PalletNumber = "PAL001",
 				Location = location,
 				Status = PalletStatus.Receiving,
 				ProductsOnPallet = new List<ProductOnPallet>

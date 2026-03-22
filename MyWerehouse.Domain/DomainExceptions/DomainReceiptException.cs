@@ -9,14 +9,17 @@ namespace MyWerehouse.Domain.DomainExceptions
 {
 	public class DomainReceiptException :DomainException
 	{
-		public string PalletId { get; set; }
+		public string PalletNumber { get; set; }
+		public Guid PalletId { get; set; }
 		public int ReceiptId { get; set; }
 		public string Message { get; set; }
-		public DomainReceiptException(string palletId)
+		public DomainReceiptException(Guid palletId, string palletNumber)
 			: base($"Błąd przy zapisie do bazy palety o numerze {palletId}.")
 		{
+			PalletNumber = palletNumber;
 			PalletId = palletId;
 		}
+		//"Receipt operation failed"
 		public DomainReceiptException(string message, int receiptId):
 			base(message)
 		{
@@ -27,6 +30,11 @@ namespace MyWerehouse.Domain.DomainExceptions
 			: base($"Błąd zapisu przyjęcia {receiptId}.")
 		{
 			ReceiptId = receiptId;
+		}
+		public DomainReceiptException(string message)
+			: base(message)
+		{
+			
 		}
 	}
 }

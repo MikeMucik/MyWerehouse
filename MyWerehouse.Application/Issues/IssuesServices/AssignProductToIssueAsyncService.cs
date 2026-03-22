@@ -51,8 +51,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			var oldCount = oldProperPallets.Count;
 			var productToAdded = await _productRepo.GetProductByIdAsync(product.ProductId);
 			if (productToAdded is null) return AssignProductToIssueResult.Fail($"Produkt o numerze {product.ProductId} nie istnieje.");
-			//	?? throw new NotFoundProductException(product.ProductId);
-
+			
 			//1. dostępność towaru	
 			var totalAvailable = await _getProductCountService.GetProductCountAsync(product.ProductId, product.BestBefore);
 			if (product.Quantity > totalAvailable)//

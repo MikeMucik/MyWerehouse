@@ -22,7 +22,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			 _werehouseDbContext.Add(reversePicking);
 		}
 		
-		public async Task<bool> ExistsForPickingPalletAsync(string palletId)
+		public async Task<bool> ExistsForPickingPalletAsync(Guid palletId)
 		{
 			 if(await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r=>r.SourcePalletId == palletId) != null) return true ; return false;
 		}		
@@ -37,7 +37,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return  _werehouseDbContext.ReversePickings.Where(r=>r.Status != ReversePickingStatus.Archaive || r.Status != ReversePickingStatus.Completed);
 		}
 
-		public Task<List<string>> GetPalletsIdsByDate(DateOnly start, DateOnly end)
+		public Task<List<Guid>> GetPalletsIdsByDate(DateOnly start, DateOnly end)
 		{			
 			var task = _werehouseDbContext.ReversePickings.Where(r => r.DateMade >= start && r.DateMade <= end);
 			var palletIds = task

@@ -21,7 +21,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 		public void Configure(EntityTypeBuilder<Product> entity)
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Id).ValueGeneratedOnAdd();
+			entity.Property(e=>e.Id).ValueGeneratedNever();
+			//entity.Property(e => e.Id).ValueGeneratedOnAdd();
 			if (_providerName == "Microsoft.EntityFrameworkCore.SqlServer")
 			{
 				entity.Property(e => e.Name)

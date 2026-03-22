@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			_reversePickingRepo = reversePickingRepo;
 		}
 
-		public async Task<ReversePickingResult> CreateReversePicking(string palletId, string userId)
+		public async Task<ReversePickingResult> CreateReversePicking(Guid palletId, string userId)
 		{
 			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId))
 				return ReversePickingResult.Fail("Zadania dekompletacji są już utworzone.");

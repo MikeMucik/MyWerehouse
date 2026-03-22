@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				Location = location,
 				Status = PalletStatus.Available,
@@ -102,7 +102,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Act
 			var updatedPallet = new UpdatePalletDTO
 			{
-				Id = "Q1010",
+				Id = pallet.Id,
+				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
@@ -132,7 +133,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Single(x => x.Id == pallet.Id);
-			Assert.Equal("Q1010", result.Id);
+			Assert.Equal("Q1010", result.PalletNumber);
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
 			//Assert.Equal(updatedPallet.DateReceived, result.DateReceived);
@@ -244,7 +245,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				Location = location,
 				Status = PalletStatus.Available,
@@ -283,7 +284,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Act
 			var updatedPallet = new UpdatePalletDTO
 			{
-				Id = "Q1010",
+				Id = pallet.Id,
+				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
@@ -313,7 +315,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Single(x => x.Id == pallet.Id);
-			Assert.Equal("Q1010", result.Id);
+			Assert.Equal("Q1010", result.PalletNumber);
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
 			//Assert.Equal(updatedPallet.DateReceived, result.DateReceived);
@@ -353,8 +355,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			var inventoryProduct1 = inventoryItems.Single(i => i.ProductId == product1.Id);
 
 			Assert.Equal(
-				inventoryP.Quantity -pallet.ProductsOnPallet.First(p=>p.ProductId == product.Id).Quantity+
-				updatedPallet.ProductsOnPallet.First(p=>p.ProductId == product.Id).Quantity,
+				inventoryP.Quantity - pallet.ProductsOnPallet.First(p => p.ProductId == product.Id).Quantity +
+				updatedPallet.ProductsOnPallet.First(p => p.ProductId == product.Id).Quantity,
 				inventoryProduct.Quantity
 			);
 
@@ -428,7 +430,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				Location = location,
 				Status = PalletStatus.Available,
@@ -448,14 +450,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Act
 			var updatedPallet = new UpdatePalletDTO
 			{
-				Id = "Q1010",
+				Id = pallet.Id,
+				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
 					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
-					PalletId = "Q1010",
+					//PalletId = "Q1010",
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
@@ -463,21 +466,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				}),(new ProductOnPalletDTO
 				{
 					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
-					PalletId = "Q1010",
+					//PalletId = "Q1010",
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 4) }),
 				(new ProductOnPalletDTO
 				{
-					PalletId = "Q1010",
+					//PalletId = "Q1010",
 					ProductId = product2.Id,
 					Quantity = 200,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 5, 4) }),
 					(new ProductOnPalletDTO
 				{
-					PalletId = "Q1010",
+					//PalletId = "Q1010",
 					ProductId = product3.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
@@ -534,7 +537,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				Location = location,
 				Status = PalletStatus.Available,
@@ -553,14 +556,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Act&Assert
 			var updatedPallet = new UpdatePalletDTO
 			{
-				Id = "Q1010",
+				Id = pallet.Id,
+				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = 1,
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
 					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
-					PalletId = "Q1010",
+					//PalletId = "Q1010",
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
@@ -568,7 +572,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				}),(new ProductOnPalletDTO
 				{
 					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
-					PalletId = "Q1010",
+					//PalletId = "Q1010",
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
@@ -612,6 +616,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Category = category,
 				IsDeleted = false,
 			};
+			var product2 = new Product
+			{
+				Name = "Test22",
+				SKU = "67777",
+				Category = category,
+				IsDeleted = false,
+			};
 			var location = new Location
 			{
 				Aisle = 0,
@@ -621,17 +632,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				Location = location,
 				Status = PalletStatus.Available,
-				ProductsOnPallet = [new ProductOnPallet { Product =product, Quantity =10,
-					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-				,DateAdded = DateTime.UtcNow,
-				}, new ProductOnPallet  {Product = product1,
+				ProductsOnPallet = [
+				new ProductOnPallet
+				{ Product =product,
+				Quantity =10,
+				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
+				DateAdded = DateTime.UtcNow,},
+				 new ProductOnPallet
+				{Product = product1,
 				Quantity = 200,
+				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
 				DateAdded = DateTime.Now,
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
 			}]
 			};
 			DbContext.Locations.Add(location);
@@ -640,7 +655,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Act&Assert
 			var updatedPallet = new UpdatePalletDTO
 			{
-				Id = "Q1010",
+				Id = pallet.Id,
+				PalletNumber = "Q1010",
 				//DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				//LocationId = 1,
 				//Status = PalletStatus.ToPicking,
@@ -648,7 +664,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				{
 					//Id = product1.Id,
 					//PalletId = "Q2000",
-					ProductId = 10,
+					//ProductId = 10,
+					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
@@ -656,7 +673,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				{
 					//Id = product2.Id,
 					//PalletId = "Q2000",
-					ProductId = 20,
+					//ProductId = 20,
+					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
@@ -664,8 +682,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				(new ProductOnPalletDTO
 				{
 					//Id = 300,
-					PalletId = "Q2000",
-					ProductId = 30,
+					//PalletNumber = "Q2000",
+					//ProductId = 30,
+					ProductId = product2.Id,
 					Quantity = 200,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 5, 4) })

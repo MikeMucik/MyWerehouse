@@ -43,7 +43,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 		// paleta do edycji
 		[HttpGet("{id}")]
-		public async Task<IActionResult> GetForEdit(string id)
+		public async Task<IActionResult> GetForEdit(Guid id)
 			=> (await _mediator.Send(new GetPalletToEditQuery(id))).ToActionResult();		
 
 		// update palety

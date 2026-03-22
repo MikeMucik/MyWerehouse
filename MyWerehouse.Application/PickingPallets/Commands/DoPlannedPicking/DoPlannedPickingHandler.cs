@@ -54,7 +54,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				{
 					return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 				}
-				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId);
+				//if
+				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId.Value);
 				if(sourcePallet == null) return AppResult<Unit>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
 					//?? throw new NotFoundPalletException(request.PickingTaskDTO.SourcePalletId);
 				if (issue.IssueStatus == IssueStatus.Pending) { issue.IssueStatus = IssueStatus.InProgress; }

@@ -14,7 +14,7 @@ namespace MyWerehouse.Server.Controllers
 			_historyService = historyService;
 		}
 		[HttpGet("Pallet")]
-		public async Task<IActionResult> Pallet(string id)
+		public async Task<IActionResult> Pallet(Guid id) //a może jedna string
 		{
 			var result = await _historyService.GetHistoryPalletByIdAsync(id);
 			return Ok(result);

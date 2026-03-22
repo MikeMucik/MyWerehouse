@@ -60,7 +60,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -74,6 +74,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			var pallletMovement = new PalletMovement
 			{
 				PalletId = pallet1.Id,
+				PalletNumber = pallet1.PalletNumber,
 				SourceLocationId = location1.Id,
 				DestinationLocationId = location2.Id,
 				PalletMovementDetails = new List<PalletMovementDetail>
@@ -95,7 +96,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			palletMovementRepo.AddPalletMovement(pallletMovement);
 			DbContext.SaveChanges();
 			//Assert			
-			var resultList = DbContext.PalletMovements.Where(m => m.PalletId == "Q1000");
+			var resultList = DbContext.PalletMovements.Where(m => m.PalletNumber == "Q1000");
 			var result = resultList
 				//.OrderByDescending(p => p.MovementDate)
 				.FirstOrDefault();
@@ -163,7 +164,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -199,6 +200,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 					new HistoryIssueDetail
 					{
 						PalletId = pallet1.Id,
+						PalletNumber = pallet1.PalletNumber,
 						LocationId = location1.Id
 					}
 				},
@@ -215,7 +217,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			Assert.NotNull(result);
 			Assert.Equal(IssueStatus.Archived, result.StatusAfter);
 			Assert.Equal("U001", result.PerformedBy);
-			Assert.Contains(result.Details, h => h.PalletId == "Q1000");
+			Assert.Contains(result.Details, h => h.PalletNumber == "Q1000");
 		}
 		[Fact]
 		public void AddRecord_AddHistoryReceipt_AddToList()
@@ -263,7 +265,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 
 			var pallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -368,7 +370,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -427,6 +429,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				IssueId = issue.Id,
 				IssueNumber= issue.IssueNumber,
 				PalletId = pallet1.Id,
+				PalletNumber = pallet1.PalletNumber
 
 			};
 			var historyPickingRepo = new HistoryPickingRepo(DbContext);

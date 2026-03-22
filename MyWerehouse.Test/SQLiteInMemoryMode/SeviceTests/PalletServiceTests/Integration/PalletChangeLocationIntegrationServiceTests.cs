@@ -54,7 +54,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var productOnPallet1 = new ProductOnPallet
 			{
-				PalletId = "Q2000",
+				//PalletId = "Q2000",
 				Product = product1,
 				Quantity = 100,
 				DateAdded = new DateTime(2025, 4, 4, 8, 8, 8),
@@ -62,7 +62,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var productOnPallet2 = new ProductOnPallet
 			{
-				PalletId = "Q2000",
+				//PalletId = "Q2000",
 				Product = product2,
 				Quantity = 200,
 				DateAdded = DateTime.Now,
@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q2000",
+				PalletNumber = "Q2000",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -84,38 +84,40 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 
 			var movement = new PalletMovement
 			{
-				DestinationLocationId = 1,
+				DestinationLocationId = location1.Id,
 				MovementDate = DateTime.UtcNow.AddDays(-2),
 				PalletId = pallet.Id,
+				PalletNumber = pallet.PalletNumber,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
 			var movement2 = new PalletMovement
 			{
-				SourceLocationId = 1,
-				DestinationLocationId = 2,
+				SourceLocationId = location1.Id,
+				DestinationLocationId = location2.Id,
 				MovementDate = DateTime.UtcNow.AddDays(-1),
 				PalletId = pallet.Id,
+				PalletNumber = pallet.PalletNumber,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
 			var movementDetails1 = new PalletMovementDetail
 			{
 				PalletMovement = movement,
-				ProductId = 1,
+				ProductId = product1.Id,
 				Quantity = 1,
 			};
 			var movementDetails2 = new PalletMovementDetail
 			{
 				PalletMovement = movement2,
-				ProductId = 1,
+				ProductId = product1.Id,
 				Quantity = 1,
 			};
 			DbContext.PalletMovementDetails.AddRange(movementDetails1, movementDetails2);
 			DbContext.PalletMovements.AddRange(movement, movement2);
 			DbContext.SaveChanges();
 			//Act
-			var palletId = "Q2000";
+			var palletId = pallet.Id;
 			var destinationLocation = 2;
 			var userId = "U001";
 			//var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId);
@@ -175,7 +177,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var productOnPallet1 = new ProductOnPallet
 			{
-				PalletId = "Q2000",
+				//PalletId = "Q2000",
 				Product = product1,
 				Quantity = 100,
 				DateAdded = new DateTime(2025, 4, 4, 8, 8, 8),
@@ -183,7 +185,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var productOnPallet2 = new ProductOnPallet
 			{
-				PalletId = "Q2000",
+				//PalletId = "Q2000",
 				Product = product2,
 				Quantity = 200,
 				DateAdded = DateTime.Now,
@@ -191,7 +193,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "Q2000",
+				PalletNumber = "Q2000",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -199,7 +201,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q2001",
+				PalletNumber = "Q2001",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				Location = location2,
 				Status = PalletStatus.Available,
@@ -219,6 +221,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				DestinationLocationId = 1,
 				MovementDate = DateTime.Now.AddDays(-2),
 				PalletId = pallet1.Id,
+				PalletNumber = pallet1.PalletNumber,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
@@ -228,26 +231,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				DestinationLocationId = 2,
 				MovementDate = DateTime.Now.AddDays(-1),
 				PalletId = pallet1.Id,
+				PalletNumber = pallet1.PalletNumber,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
 			var movementDetails1 = new PalletMovementDetail
 			{
 				PalletMovement = movement,
-				ProductId = 1,
+				ProductId = product1.Id,
 				Quantity = 1,
 			};
 			var movementDetails2 = new PalletMovementDetail
 			{
 				PalletMovement = movement2,
-				ProductId = 1,
+				ProductId = product1.Id,
 				Quantity = 1,
 			};
 			DbContext.PalletMovementDetails.AddRange(movementDetails1, movementDetails2);
 			DbContext.PalletMovements.AddRange(movement, movement2);
 			DbContext.SaveChanges();
 			//Act
-			var palletId = "Q2000";
+			var palletId = pallet1.Id;
 			var destinationLocation = 2;
 			var userId = "U001";
 			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
@@ -299,7 +303,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var productOnPallet1 = new ProductOnPallet
 			{
-				PalletId = "Q2000",
+				//PalletId = "Q2000",
 				Product = product1,
 				Quantity = 100,
 				DateAdded = new DateTime(2025, 4, 4, 8, 8, 8),
@@ -307,7 +311,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var productOnPallet2 = new ProductOnPallet
 			{
-				PalletId = "Q2000",
+				//PalletId = "Q2000",
 				Product = product2,
 				Quantity = 200,
 				DateAdded = DateTime.Now,
@@ -315,7 +319,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "Q2000",
+				PalletNumber = "Q2000",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -323,11 +327,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q2001",
+				PalletNumber = "Q2001",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				Location = location2,
 				Status = PalletStatus.Available,
-				ProductsOnPallet = new List<ProductOnPallet> { productOnPallet1 }
+				//ProductsOnPallet = new List<ProductOnPallet> { productOnPallet1 }//
+				ProductsOnPallet = new List<ProductOnPallet> { productOnPallet2 }//
 			};
 
 			DbContext.Categories.Add(category);
@@ -342,6 +347,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				DestinationLocationId = 1,
 				MovementDate = DateTime.Now.AddDays(-2),
 				PalletId = pallet1.Id,
+				PalletNumber = pallet1.PalletNumber,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
@@ -351,26 +357,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				DestinationLocationId = 2,
 				MovementDate = DateTime.Now.AddDays(-1),
 				PalletId = pallet1.Id,
+				PalletNumber = pallet1.PalletNumber,
 				Reason = ReasonMovement.Moved,
 				PerformedBy = "TestUser",
 			};
 			var movementDetails1 = new PalletMovementDetail
 			{
 				PalletMovement = movement,
-				ProductId = 1,
+				ProductId = product1.Id,
 				Quantity = 1,
 			};
 			var movementDetails2 = new PalletMovementDetail
 			{
 				PalletMovement = movement2,
-				ProductId = 1,
+				ProductId = product1.Id,
 				Quantity = 1,
 			};
 			DbContext.PalletMovementDetails.AddRange(movementDetails1, movementDetails2);
 			DbContext.PalletMovements.AddRange(movement, movement2);
 			DbContext.SaveChanges();
 			//Act
-			var palletId = "Q2000";
+			var palletId = pallet1.Id;
 			var destinationLocation = 2;
 			var userId = "U001";
 
@@ -382,7 +389,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 
 			// sprawdzamy, że obie palety siedzą w tej samej lokalizacji
 			var movedPallet = DbContext.Pallets.First(x => x.Id == palletId);
-			var existingPallet = DbContext.Pallets.First(x => x.Id == "Q2001");
+			var existingPallet = DbContext.Pallets.First(x => x.Id == pallet2.Id);
 
 			Assert.Equal(destinationLocation, movedPallet.LocationId);
 			Assert.Equal(destinationLocation, existingPallet.LocationId);

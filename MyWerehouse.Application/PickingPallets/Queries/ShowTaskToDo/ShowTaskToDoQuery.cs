@@ -9,5 +9,5 @@ using MyWerehouse.Application.PickingPallets.DTOs;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo
 {
-	public record ShowTaskToDoQuery(string PalletSourceScannedId, DateTime PickingDate):IRequest<AppResult<List<PickingTaskDTO>>>;	
+	public record ShowTaskToDoQuery(Guid PalletSourceScannedId, DateTime PickingDate):IRequest<AppResult<List<PickingTaskDTO>>>;	
 }

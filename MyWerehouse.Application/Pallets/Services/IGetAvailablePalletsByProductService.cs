@@ -9,6 +9,6 @@ namespace MyWerehouse.Application.Pallets.Services
 {
 	public interface IGetAvailablePalletsByProductService
 	{
-		Task<List<Pallet>> GetPallets(int productId, DateOnly? bestBefore, int Reserved);
+		Task<List<Pallet>> GetPallets(Guid productId, DateOnly? bestBefore, int Reserved);
 	}
 }

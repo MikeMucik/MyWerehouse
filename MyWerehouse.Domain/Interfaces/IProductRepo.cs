@@ -15,11 +15,11 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeleteProduct(Product product);		
 		void SwitchOffProduct(Product product);					
 		//Task SwitchOffProductAsync(int id);					
-		Task<Product?> GetProductByIdAsync(int name);		
-		Task<Product?> GetProductToEditAsync(int name);		
+		Task<Product?> GetProductByIdAsync(Guid id);		
+		Task<Product?> GetProductToEditAsync(Guid id);		
 		IQueryable<Product> GetAllProducts();		
 		IQueryable<Product> FindProducts(ProductSearchFilter filter);		
-		Task<bool> IsExistProduct(int productId);
+		Task<bool> IsExistProduct(Guid id);
 		//Task<bool> EnsureAllExist(List<int> ids);
 	}
 }

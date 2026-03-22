@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 	{
 		public int Id { get; set; }
 		public int PalletMovementId { get; set; }		
-		public int ProductId { get; set; }		
+		public Guid ProductId { get; set; }		
 		public int QuantityChange { get; set; } //+/-
 		public void Mapping(Profile profile)
 		{

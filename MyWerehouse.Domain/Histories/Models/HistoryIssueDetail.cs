@@ -9,7 +9,8 @@ namespace MyWerehouse.Domain.Histories.Models
 	public class HistoryIssueDetail
 	{
 		public int Id { get; set; }
-		public string PalletId { get; set; }
+		public Guid PalletId { get; set; }
+		public string PalletNumber { get; set; }
 		public int LocationId { get; set; }
 		public string? LocationSnapShot { get; set; } //snapshot
 		public int HistoryIssueId { get; set; }

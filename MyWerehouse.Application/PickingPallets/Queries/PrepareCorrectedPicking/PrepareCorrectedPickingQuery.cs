@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.PrepareCorrectedPicking
 {
-	public record PrepareCorrectedPickingQuery(string PalletId):IRequest<AppResult<PrepareCorrectedPickingResult>>;	
+	public record PrepareCorrectedPickingQuery(Guid PalletId):IRequest<AppResult<PrepareCorrectedPickingResult>>;	
 }

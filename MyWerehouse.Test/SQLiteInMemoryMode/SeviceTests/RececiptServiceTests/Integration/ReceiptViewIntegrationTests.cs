@@ -30,6 +30,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 		{
 			//Arrange&Act
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			var query = new GetReceiptByIdQuery(receiptId1);
 						
 			var result = await _mediator.Send(query);
@@ -44,17 +46,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			// Jeśli DTO zawiera Pallets — ReceiptId = 1 ma palety Q1000 i Q1001
 			Assert.NotNull(result.Result.Pallets);
 			Assert.Equal(2, result.Result.Pallets.Count);
-			Assert.Contains(result.Result.Pallets, p => p.Id == "Q1000");
-			Assert.Contains(result.Result.Pallets, p => p.Id == "Q1001");
+			Assert.Contains(result.Result.Pallets, p => p.PalletNumber == "Q1000");
+			Assert.Contains(result.Result.Pallets, p => p.PalletNumber == "Q1001");
 
 			// Można też sprawdzić przykładowy produkt z jednej palety
-			var pallet = result.Result.Pallets.First(p => p.Id == "Q1000");
+			var pallet = result.Result.Pallets.First(p => p.PalletNumber == "Q1000");
 			Assert.NotNull(pallet.ProductsOnPallet);
-			Assert.Contains(pallet.ProductsOnPallet, pop => pop.ProductId == 10 && pop.Quantity == 50);
+			Assert.Contains(pallet.ProductsOnPallet, pop => pop.ProductId == productId1 && pop.Quantity == 50);
 
 			// Dodatkowo: czy daty i statusy palet się zgadzają
-			Assert.Equal(PalletStatus.Available, result.Result.Pallets.First(p => p.Id == "Q1000").Status);
-			Assert.Equal(PalletStatus.OnHold, result.Result.Pallets.First(p => p.Id == "Q1001").Status);
+			Assert.Equal(PalletStatus.Available, result.Result.Pallets.First(p => p.PalletNumber == "Q1000").Status);
+			Assert.Equal(PalletStatus.OnHold, result.Result.Pallets.First(p => p.PalletNumber == "Q1001").Status);
 		}
 		[Fact]
 		public async Task GetReceiptDTOAsync_GetData_ReturnNull()
@@ -70,6 +72,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Assert.NotNull(rresult);
 			Assert.Contains($"Przyjęcie o numerze {receiptId9} nie zostało znalezione.", result.Error);
 		}
+
 		//Testy multi
 		[Theory]
 		//var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -97,7 +100,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.NotNull(result.Result.Pallets);
 			foreach (var palletId in expectedPalletIds)
 			{
-				Assert.Contains(result.Result.Pallets, p => p.Id == palletId);
+				Assert.Contains(result.Result.Pallets, p => p.PalletNumber == palletId);
 			}
 		}
 		[Fact]
@@ -106,7 +109,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Arrange&Act		
 			var filter = new IssueReceiptSearchFilter
 			{
-				ProductId = 10
+				ProductId = Guid.Parse("00000000-0000-0000-0001-000000000000")
 			};
 			//var result = await _receiptService.GetReceiptDTOsAsync(filter);
 			var query = new GetReceiptsQuery(filter);

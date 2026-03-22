@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			{
 				var existingPallet = await _palletRepo.GetPalletByIdAsync(request.UpdatingPallet.Id);
 				if (existingPallet == null)
-					return AppResult<Unit>.Fail($"Paleta o numerze {request.UpdatingPallet.Id} nie istnieje.", ErrorType.NotFound);
+					return AppResult<Unit>.Fail($"Paleta o numerze {request.UpdatingPallet.PalletNumber} nie istnieje.", ErrorType.NotFound);
 						
 				
 				foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
@@ -47,7 +47,7 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 				await _werehouseDbContext.SaveChangesAsync(ct);
 
 				await transaction.CommitAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, $"Paleta {request.UpdatingPallet.Id} została zaktualizowana.");
+				return AppResult<Unit>.Success(Unit.Value, $"Paleta {request.UpdatingPallet.PalletNumber} została zaktualizowana.");
 				
 			}
 		

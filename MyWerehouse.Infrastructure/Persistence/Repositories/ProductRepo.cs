@@ -30,9 +30,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			product.IsDeleted = true;
 		}
-		public async Task<Product?> GetProductByIdAsync(int id)
+		public async Task<Product?> GetProductByIdAsync(Guid id)
 		{
-			if (id > 0)
+			if (id != Guid.Empty || id != null)//
 			{
 				var product = await _werehouseDbContext.Products
 					.FirstOrDefaultAsync(p => p.Id == id);
@@ -40,9 +40,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return null;
 		}
-		public async Task<Product?> GetProductToEditAsync(int id)
+		public async Task<Product?> GetProductToEditAsync(Guid id)
 		{
-			if (id > 0)
+			if (id != Guid.Empty)
 			{
 				var product = await _werehouseDbContext.Products
 					.Include(p => p.Details)
@@ -59,7 +59,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var result = _werehouseDbContext.Products
 				.Where(p => p.IsDeleted == false);
-
+			//if (filter.ProductId > 0)
+			//{
+			//	result = result.Where(p => p.ProductId == filter.ProductId);
+			//}
 			if (!string.IsNullOrEmpty(filter.ProductName))
 			{
 				result = result.Where(p => p.Name != null && p.Name.StartsWith(filter.ProductName));
@@ -96,9 +99,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return result;
 		}
 
-		public async Task<bool> IsExistProduct(int productId)
+		public async Task<bool> IsExistProduct(Guid id)
 		{
-			if (await _werehouseDbContext.Products.FindAsync(productId) != null) { return true; }
+			if (await _werehouseDbContext.Products.FindAsync(id) != null) { return true; }
 			return false;
 		}
 

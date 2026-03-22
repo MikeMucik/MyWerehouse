@@ -22,31 +22,32 @@ namespace MyWerehouse.Domain.Picking.Models
 		public PickingStatus PickingStatus { get; set; }
 
 
-		public int ProductId { get; set; } //
+		public Guid ProductId { get; set; } //
 		public DateOnly? BestBefore {  get; set; }
-		public string? PickingPalletId { get; set; }
+		//public string? PickingPalletId { get; set; }
+		public Guid? PickingPalletId { get; set; }
 		public Pallet? PickingPallet { get; set; }
 
 		public DateOnly? PickingDay { get; set; }
 		public int PickedQuantity { get; set; }
-		public void MarkPicked(string pickingPalletId)
+		public void MarkPicked(Guid pickingPalletId)
 		{
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
 				throw new InvalidOperationException("PickingTask already picked.");
 
-			if (string.IsNullOrWhiteSpace(pickingPalletId))
+			if (pickingPalletId == null)
 				throw new ArgumentException("Picking pallet id is required.");
 			//czy dołączyć do Issue?
 			PickedQuantity = RequestedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.Picked;
 		}
-		public void MarkPartiallyPicked(string pickingPalletId, int pickedQuantity)
+		public void MarkPartiallyPicked(Guid pickingPalletId, int pickedQuantity)
 		{
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
 				throw new InvalidOperationException("PickingTask already picked.");
 
-			if (string.IsNullOrWhiteSpace(pickingPalletId))
+			if (pickingPalletId == null)
 				throw new ArgumentException("Picking pallet id is required.");
 			PickedQuantity = pickedQuantity;
 			PickingPalletId = pickingPalletId;
@@ -57,6 +58,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			this.AddDomainEvent(new CreateHistoryPickingNotification(
 				Id,
 				VirtualPallet.PalletId,
+				VirtualPallet.Pallet.PalletNumber,
 				IssueId,
 				IssueNumber,
 				ProductId,

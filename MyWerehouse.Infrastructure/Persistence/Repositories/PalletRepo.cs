@@ -18,7 +18,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			_werehouseDbContext = werehouseDbContext;
 		}
 
-		public string AddPallet(Pallet pallet)
+		public Guid AddPallet(Pallet pallet)
 		{
 			 _werehouseDbContext.Pallets.Add(pallet);
 			return pallet.Id;
@@ -27,7 +27,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		//{			
 		//		_werehouseDbContext.Pallets.Remove(pallet);			
 		//}
-		public async Task<Pallet?> GetPalletByIdAsync(string palletId)
+		public async Task<Pallet?> GetPalletByIdAsync(Guid palletId)
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -45,7 +45,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 
 			//if dla receiptNumber
-			if (filter.ProductId > 0)
+			//if (filter.ProductId != null)
+			if (filter.ProductId.HasValue)
 			{
 				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
 			}
@@ -96,7 +97,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return result;
 		}
-		public IQueryable<Pallet> GetAvailablePallets(int productId, DateOnly? minBestBefore)
+		public IQueryable<Pallet> GetAvailablePallets(Guid productId, DateOnly? minBestBefore)
 		{
 			var pallets = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -110,7 +111,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.OrderBy(p => p.ProductsOnPallet
 					.Where(pp => pp.ProductId == productId)
 					.Min(pp => pp.BestBefore))
-				.ThenBy(p => p.LocationId);
+				.ThenBy(p => p.LocationId)
+				.ThenBy(p => p.DateReceived);
 			return pallets;
 		}
 		
@@ -121,7 +123,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			pallet.Status = PalletStatus.Available;					
 		}
 
-		public void ChangePalletStatus(string palletId, PalletStatus palletStatus)
+		public void ChangePalletStatus(Guid palletId, PalletStatus palletStatus)
 		{
 			var pallet =_werehouseDbContext.Pallets
 				.Find(palletId);
@@ -153,12 +155,15 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<string> GetNextPalletIdAsync()
 		{
 			var lastPallet = await _werehouseDbContext.Pallets
-				.Where(p => p.Id.StartsWith("Q"))
-				.OrderByDescending(p => p.Id)
+				.Where(static p => p.PalletNumber.StartsWith("Q"))
+				.OrderByDescending(p => p.PalletNumber)
 				.FirstOrDefaultAsync();
 
+			//var lastPallet = await _werehouseDbContext.Pallets.MaxAsync(p => p.PalletNumber);
+
 			int lastNumber = 0;
-			if (lastPallet != null && int.TryParse(lastPallet.Id.AsSpan(1), out var parsed))
+			if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))
+			//if (lastPallet != null && int.TryParse(lastPallet.AsSpan(1), out var parsed))
 			{
 				lastNumber = parsed;
 			}

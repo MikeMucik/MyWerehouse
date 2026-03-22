@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.Services
 			_getProductCountService = getProductCountService;
 		}
 
-		public async Task ChangeProductQuantityAsync(int productId, int quantity)
+		public async Task ChangeProductQuantityAsync(Guid productId, int quantity)
 		{
 			//return _mediator.Publish(new ChangeStockNotification()
 			//await _mediator.Send(new ChangeQuantityCommand(productId, quantity));
@@ -71,14 +71,14 @@ namespace MyWerehouse.Application.Services
 			//await _werehouseDbContext.SaveChangesAsync();
 		}
 
-		public async Task<InventoryDTO> GetInventoryAsync(int productId)
+		public async Task<InventoryDTO> GetInventoryAsync(Guid productId)
 		{
 			return await _mediator.Send(new GetInventoryQuery(productId));
 			//var inventory = await _inventoryRepo.GetInventoryForProductAsync(productId);
 			//var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
 			//return inventoryDTO;
 		}
-		public async Task<int> GetProductCountAsync(int productId, DateOnly? bestBefore)
+		public async Task<int> GetProductCountAsync(Guid productId, DateOnly? bestBefore)
 		{
 			//return	await _mediator.Send(new GetProductCountQuery(productId, bestBefore));
 			return	await _getProductCountService.GetProductCountAsync( productId, bestBefore);

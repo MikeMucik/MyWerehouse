@@ -35,7 +35,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 			var issueDictionary = allIssues.ToDictionary(i => i.Id);
 
 			var aggregationDictionary = new Dictionary<(int ClientId, Guid
-				IssueId, int product), ProductToIssueDTO>();
+				IssueId, Guid product), ProductToIssueDTO>();
 
 			//
 			foreach (var virtualPallet in virtualPallets)

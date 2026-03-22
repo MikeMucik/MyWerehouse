@@ -32,7 +32,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return await _werehouseDbContext.IssueItems.FirstOrDefaultAsync(a=>a.Id == id);
 		}
 
-		public async Task<int> GetQuantityByIssueAndProduct(Issue issue, int productId)
+		public async Task<int> GetQuantityByIssueAndProduct(Issue issue, Guid productId)
 		{
 			var record = await _werehouseDbContext.IssueItems
 				.FirstOrDefaultAsync(a => a.Issue == issue && a.ProductId == productId);

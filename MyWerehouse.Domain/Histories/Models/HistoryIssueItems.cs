@@ -9,7 +9,7 @@ namespace MyWerehouse.Domain.Histories.Models
 	public class HistoryIssueItems
 	{
 		public int Id { get; set; }
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public int Quantity { get; set; }
 		public DateOnly BestBefore { get; set; }
 		public int HistoryIssueId { get; set; }

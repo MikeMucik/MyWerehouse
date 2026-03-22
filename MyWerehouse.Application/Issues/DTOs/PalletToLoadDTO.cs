@@ -9,7 +9,8 @@ namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class PalletToLoadDTO
 	{
-		public string PalletId { get; set;}
+		public Guid PalletId { get; set;}
+		public string PalletNumber { get; set;}
 		public string LocationName { get; set;}//
 		public int LocationId { get; set;}
 		public PalletStatus PalletStatus { get; set;}

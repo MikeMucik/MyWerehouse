@@ -25,13 +25,17 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var reversePickingTaskId1 = Guid.Parse("11111111-1111-1111-2222-111111111111");
 			var id = reversePickingTaskId1;
 			var pickingId2 = Guid.Parse("11111111-2222-2222-1111-111111111111");
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
+			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");
 			//Act
 			var result = await _reversePickingRepo.GetReversePickingAsync(id);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(pickingId2, result.PickingTaskId);
-			Assert.Equal("Q5000", result.PickingPalletId);
-			Assert.Equal(10, result.ProductId);
+			//Assert.Equal("Q5000", result.PickingPalletId);
+			Assert.Equal(palletGuid9, result.PickingPalletId);
+			Assert.Equal(productId1, result.ProductId);
 			Assert.Equal(10, result.Quantity);
 			Assert.Equal("UserR", result.UserId);
 		}

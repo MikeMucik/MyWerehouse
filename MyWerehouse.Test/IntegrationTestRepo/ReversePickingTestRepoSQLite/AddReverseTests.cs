@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			};			
 			var pallet1 = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -83,7 +83,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q1011",
+				PalletNumber = "Q1011",
 				DateReceived = DateTime.Now,
 				Location = location2,
 				Status = PalletStatus.Available,
@@ -139,7 +139,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 
 			var pickingPallet = new Pallet
 			{
-				Id = "Q5000",
+				PalletNumber = "Q5000",
 				LocationId = location1.Id,
 				Status = PalletStatus.ToIssue,
 				DateReceived = DateTime.UtcNow,

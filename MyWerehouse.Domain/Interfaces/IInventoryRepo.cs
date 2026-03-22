@@ -10,14 +10,14 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IInventoryRepo
 	{		
 		void AddInventory (Inventory inventory);	
-		Task<Inventory?> GetInventoryForProductAsync(int productId);
-		Task<List<Inventory>> GetInventoriesForProductsAsync(List<int> productIds);//Do Dictionary
+		Task<Inventory?> GetInventoryForProductAsync(Guid productId);
+		Task<List<Inventory>> GetInventoriesForProductsAsync(List<Guid> productIds);//Do Dictionary
 		IQueryable<Inventory> GetAllInventory();		
-		Task <bool> HasStockAsync(int productId, int quantity);
-		Task<int> GetAvailableQuantityAsync(int productId, DateOnly? bestBefore);
-		Task<int> GetQuantityForProductAsync(int productId, DateOnly? bestBefore);
-		Task<int> GetQuantityProductReservedForIssueAsync(int productId, DateOnly? bestBefore);
-		Task<int> GetQuantityProductReservedForPickingAsync(int productId, DateOnly? bestBefore);
+		Task <bool> HasStockAsync(Guid productId, int quantity);
+		Task<int> GetAvailableQuantityAsync(Guid productId, DateOnly? bestBefore);
+		Task<int> GetQuantityForProductAsync(Guid productId, DateOnly? bestBefore);
+		Task<int> GetQuantityProductReservedForIssueAsync(Guid productId, DateOnly? bestBefore);
+		Task<int> GetQuantityProductReservedForPickingAsync(Guid productId, DateOnly? bestBefore);
 	}
 }
 //Exists(int productId)

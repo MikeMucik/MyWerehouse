@@ -20,8 +20,10 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		{
 			//Arrange
 			var productId = 10;
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			//Act
-			var result = await _productService.DetailsOfProductAsync(productId);
+			var result = await _productService.DetailsOfProductAsync(productId1);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal("Test", result.Result.Name);
@@ -32,9 +34,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		{
 			//Arrange
 			var productId = 90;
+			var productId9 = Guid.Parse("00000000-0000-0000-0009-000000000000");
+
 			//Act
 
-			var result = await _productService.DetailsOfProductAsync(productId);
+			var result = await _productService.DetailsOfProductAsync(productId9);
 			//Assert
 			//Assert.Null(result);
 			Assert.False(result.IsSuccess);
@@ -45,8 +49,10 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		{
 			//Arrange
 			var productId = 10;
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			//Act
-			var result = await _productService.GetProductToEditAsync(productId);
+			var result = await _productService.GetProductToEditAsync(productId1);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<AppResult<AddProductDTO>>(result);

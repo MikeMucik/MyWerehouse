@@ -12,10 +12,15 @@ namespace MyWerehouse.Domain.Picking.Models
 	{
 		//public int Id { get; set; }
 		public Guid Id { get; set; } = Guid.NewGuid(); //do zmiany z set na private set
-		public required string PickingPalletId { get; set; }//paleta na której jest towar - kompletacyjna
-		public string? SourcePalletId { get; set; }//paleta źródłowa na nią może wrócić towar 
-		public string? DestinationPalletId { get; set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach
-		public int ProductId { get; set; }
+		public required Guid PickingPalletId { get; set; }//paleta na której jest towar - kompletacyjna
+		//public required string PickingPalletNumber { get; set; }//paleta na której jest towar - kompletacyjna
+		//public string? SourcePalletId { get; set; }//paleta źródłowa na nią może wrócić towar 
+		public Guid? SourcePalletId { get; set; }//paleta źródłowa na nią może wrócić towar 
+		//public string? SourcePalletNumber { get; set; }//paleta źródłowa na nią może wrócić towar 
+		//public string? DestinationPalletId { get; set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach
+		public Guid? DestinationPalletId { get; set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach
+		//public string? DestinationPalletNumber { get; set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach
+		public Guid ProductId { get; set; }
 		public DateOnly? BestBefore { get; set; }
 		public int Quantity { get; set; }
 		public ReversePickingStatus Status { get; set; }
@@ -28,7 +33,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			this.AddDomainEvent(new CreateHistoryReversePickingNotification(
 				Id,
-				SourcePalletId,				
+				SourcePalletId,					
 				DestinationPalletId,
 				issueId,
 				issueNumber,

@@ -12,11 +12,23 @@ namespace MyWerehouse.Application.Common.Results
 	{
 		public bool Success { get; set; }
 		public string Message { get; set; }
-		public int ProductId { get; set; }
-		public string PalletId { get; set; }
+		public Guid ProductId { get; set; }
+		public Guid? PalletId { get; set; }
+		public string? PalletNumber { get; set; }
 		public List<Pallet> PalletWithAddedProduct { get; set; }
 		public ReversePickingResult() { }
-		public static ReversePickingResult Ok(string message, int productId, string palletId)
+		public static ReversePickingResult Ok(string message, Guid productId, Guid? palletId, string? palletNumber)
+		{
+			return new ReversePickingResult
+			{
+				Success = true,
+				Message = message,
+				ProductId = productId,
+				PalletId = palletId,
+				PalletNumber = palletNumber
+			};
+		}
+		public static ReversePickingResult Ok(string message, Guid productId, Guid? palletId)
 		{
 			return new ReversePickingResult
 			{

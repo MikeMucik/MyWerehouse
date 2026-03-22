@@ -25,7 +25,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			_pickingPalletRepo = pickingPalletRepo;
 			_palletRepo = palletRepo;
 		}
-		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets, Issue issue, int productId, int rest, DateOnly? bestBefore, string userId)
+		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets, Issue issue, Guid productId, int rest, DateOnly? bestBefore, string userId)
 		{
 			var pickingTasks = new List<PickingTask>();
 			var quantity = rest;
@@ -52,7 +52,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				var usedPalletsId = pallets?
 					.Select(p => p.Id)
 					.ToHashSet()
-					?? new HashSet<string>();
+					?? new HashSet<Guid>();
 				var availablePalletsReduced = availablePallets
 					.Where(p => !usedPalletsId.Contains(p.Id))
 					.ToList();
@@ -86,7 +86,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		}
 
 		//public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, int productId, int quantity, DateOnly? bestBefore, string userId)
-		public AddPickingTaskToIssueResult AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, int productId, int quantity, DateOnly? bestBefore, string userId)
+		public AddPickingTaskToIssueResult AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
 		{
 			//_ = await _productRepo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException(productId);
 			var pickingTask = CreatePickingTask(issue,				
@@ -97,7 +97,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
 		private static PickingTask CreatePickingTask(Issue issue, int quantity,
-				VirtualPallet vp, int productId, DateOnly? bestBefore)
+				VirtualPallet vp, Guid productId, DateOnly? bestBefore)
 		{
 			return new()
 			{

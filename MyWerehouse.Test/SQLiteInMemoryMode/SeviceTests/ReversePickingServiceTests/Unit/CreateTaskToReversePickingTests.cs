@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			};
 			var sourcePallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location,
 				Status = PalletStatus.ToPicking,
@@ -84,7 +84,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			}; 
 			var pickingPallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location,
 				Status = PalletStatus.ToIssue,
@@ -213,7 +213,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location,
 				Status = PalletStatus.ToPicking,

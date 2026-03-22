@@ -8,7 +8,7 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 {
-	public record ChangeLocationPalletCommand(string PalletId,
+	public record ChangeLocationPalletCommand(Guid PalletId,
 		int DestinationLocationId, string UserId, bool Force = false)
 		:IRequest<AppResult<ChangeLocationResults>>;	
 }

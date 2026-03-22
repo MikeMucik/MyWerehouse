@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.SaveChanges();
 			var pallet = new Pallet
 			{
-				Id = "Q00001",
+				PalletNumber = "Q00001",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -72,7 +72,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.SaveChanges();
 			var pallet = new Pallet
 			{
-				Id = "Q00001",
+				PalletNumber = "Q00001",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -153,7 +153,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.SaveChanges();
 			var pallet = new Pallet
 			{
-				Id = "Q00001",
+				PalletNumber = "Q00001",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,

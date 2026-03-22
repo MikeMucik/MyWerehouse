@@ -33,7 +33,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.VirtualPallets.Remove(virtualPallet);
 		}			
-		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(int productId)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid productId)
 		{
 			var list = await _werehouseDbContext.VirtualPallets
 					.Include(a => a.PickingTasks)
@@ -66,7 +66,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 			return list;
 		}
-		public async Task<int> GetVirtualPalletIdFromPalletIdAsync(string palletId)
+		public async Task<int> GetVirtualPalletIdFromPalletIdAsync(Guid palletId)
 		{
 			var palletPicking = await _werehouseDbContext.VirtualPallets
 				.FirstOrDefaultAsync(p => p.PalletId == palletId);
@@ -77,14 +77,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.VirtualPallets.FirstAsync(p => p.Id == palletId);
 		}
-		public void ClosePickingPallet(string palletId, Guid issueId)
+		public void ClosePickingPallet(Guid palletId, Guid issueId)
 		{
 			var pallet = _werehouseDbContext.Pallets.Find(palletId);
 			pallet.Status = PalletStatus.ToIssue;
 			pallet.IssueId = issueId;
 		}
 
-		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(int productId, DateOnly bestBefore)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly bestBefore)
 		{
 			return await _werehouseDbContext.VirtualPallets.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId).ToListAsync();
 		}

@@ -29,6 +29,7 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 				.Select(d => new HistoryReceiptDetail
 				{
 					PalletId = d.PalletId,
+					PalletNumber = d.PalletNumber,
 					LocationId = d.LocationId,
 					LocationSnapShot = d.LocationSnapShot,
 				})

@@ -232,7 +232,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 				{
 					var resultListNoQuantitesChange = new List<IssueResult>
 					{
-						IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.", 0)
+						IssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.")
 					};
 					return AppResult<List<IssueResult>>.Success(resultListNoQuantitesChange);
 				}

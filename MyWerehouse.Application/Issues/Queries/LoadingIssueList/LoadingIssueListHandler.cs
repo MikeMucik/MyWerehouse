@@ -39,6 +39,7 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 				.Select(p => new PalletToLoadDTO
 				{
 					PalletId = p.Id,
+					PalletNumber = p.PalletNumber,
 					LocationName = p.Location.ToSnopShot(),
 					PalletStatus = p.Status,
 					LocationId = p.LocationId,

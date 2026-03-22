@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.Picking.Models
 {
-	public record CreatePalletResult(bool NewPalletCreated, string PalletId);	
+	public record CreatePalletResult(bool NewPalletCreated, Guid PalletId);	
 }

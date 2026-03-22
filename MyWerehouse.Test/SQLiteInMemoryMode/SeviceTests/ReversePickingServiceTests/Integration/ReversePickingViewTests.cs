@@ -57,44 +57,43 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				Category = category,
 				CartonsPerPallet = 10
 			};
-			var pallets = new List<Pallet>
-				{
-					new Pallet
-					{
-						Id = "P1",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			//var pallets = new List<Pallet>
+			//	{
+			var pallet1 = new Pallet
+			{
+				PalletNumber = "P1",
+				Location = location,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 						}
-					},
-					new Pallet
-					{
-						Id = "P2",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet2 = new Pallet
+			{
+				PalletNumber = "P2",
+				Location = location,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 						}
-					}
-				};
+			};
 			var recipt = new Receipt
 			{
 				Id = Guid.NewGuid(),
-				ReceiptNumber= 1,
+				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "UserMakae",
 				Client = client,
-				Pallets = pallets,
+				Pallets = [pallet1, pallet2]
 			};
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location, location1);
-			DbContext.Pallets.AddRange(pallets);
+			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.Receipts.Add(recipt);
 			await DbContext.SaveChangesAsync();
 
@@ -123,13 +122,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
 				PickedQuantity = 8,
-				SourcePalletId = "P2",
+				SourcePalletNumber = "P2",
+				SourcePalletId = pallet2.Id,
 				ProductId = product.Id,
 
 			};
 			var _DoPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
 			var resultPicking = await Mediator.Send(_DoPicking);
-			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "Q0001");
+			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
 			//Assert
 			var pickingTaskDone = await DbContext.PickingTasks
 				.FirstOrDefaultAsync(x => x.Id == pickingFromBase.Id);
@@ -146,7 +146,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Equal("UserC", cancelledIssue.PerformedBy);
 
 			// Assert – Pallets restored
-			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
+			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
 			Assert.Equal(PalletStatus.Available, palletP1.Status);
 			Assert.Null(palletP1.IssueId);
 			Assert.Equal(1, palletP1.LocationId);
@@ -164,7 +164,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 
 			var reverseTasks = await DbContext.ReversePickings
-				.Where(rp => rp.SourcePalletId == "P2")
+				.Where(rp => rp.SourcePalletId == pallet2.Id)
 				.ToListAsync();
 
 			Assert.Single(reverseTasks);
@@ -203,6 +203,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			};
 			var category = new Category { Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var location2 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
 			var location1 = new Location { Id = 100100, Aisle = 10, Bay = 1, Height = 1, Position = 1 };
 			var product = new Product
 			{
@@ -211,43 +212,42 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				Category = category,
 				CartonsPerPallet = 10
 			};
-			var pallets = new List<Pallet>
-				{
-					new Pallet
-					{
-						Id = "P1",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			//var pallets = new List<Pallet>
+			//{
+			var pallet1 = new Pallet
+			{
+				PalletNumber = "P1",
+				Location = location,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 						}
-					},
-					new Pallet
-					{
-						Id = "P2",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet2 = new Pallet
+			{
+				PalletNumber = "P2",
+				Location = location2,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 						}
-					}
-				};
+			};
 			var recipt = new Receipt
-			{				
+			{
 				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "UserMakae",
 				Client = client,
-				Pallets = pallets,
+				Pallets = [pallet1, pallet2],
 			};
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
-			DbContext.Locations.AddRange(location, location1);
-			DbContext.Pallets.AddRange(pallets);
+			DbContext.Locations.AddRange(location, location1,location2);
+			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.Receipts.Add(recipt);
 			await DbContext.SaveChangesAsync();
 
@@ -276,13 +276,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
 				PickedQuantity = 8,
-				SourcePalletId = "P2",
+				SourcePalletNumber = "P2",
+				SourcePalletId = pallet2.Id,
 				ProductId = product.Id,
 
 			};
 			var _DoPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
 			var resultPicking = await Mediator.Send(_DoPicking);
-			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "Q0001");
+			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
 			//Assert
 			var pickingTaskDone = await DbContext.PickingTasks
 				.FirstOrDefaultAsync(x => x.Id == pickingFromBase.Id);
@@ -299,7 +300,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Equal("UserC", cancelledIssue.PerformedBy);
 
 			// Assert – Pallets restored
-			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
+			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
 			Assert.Equal(PalletStatus.Available, palletP1.Status);
 			Assert.Null(palletP1.IssueId);
 			Assert.Equal(1, palletP1.LocationId);
@@ -317,7 +318,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 
 			var reverseTasks = await DbContext.ReversePickings
-				.Where(rp => rp.SourcePalletId == "P2")
+				.Where(rp => rp.SourcePalletId == pallet2.Id)
 				.ToListAsync();
 
 			Assert.Single(reverseTasks);
@@ -358,6 +359,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			};
 			var category = new Category { Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var location2 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
+			var location3 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 3 };
+			var location4 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 4 };
 			var location1 = new Location { Id = 100100, Aisle = 10, Bay = 1, Height = 1, Position = 1 };
 			var product = new Product
 			{
@@ -366,63 +370,62 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				Category = category,
 				CartonsPerPallet = 10
 			};
-			var pallets = new List<Pallet>
-				{
-					new Pallet
-					{
-						Id = "P1",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			//var pallets = new List<Pallet>
+			//	{
+			var pallet1 = new Pallet
+			{
+				PalletNumber = "P1",
+				Location = location,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 						}
-					},
-					new Pallet
-					{
-						Id = "P2",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet2 = new Pallet
+			{
+				PalletNumber = "P2",
+				Location = location2,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 8, BestBefore = new DateOnly(2026,1,1) }
 						}
-					},
-					new Pallet
-					{
-						Id = "P3",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet3 = new Pallet
+			{
+				PalletNumber = "P3",
+				Location = location3,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 7, BestBefore = new DateOnly(2026,1,1) }
 						}
-					},
-					new Pallet
-					{
-						Id = "P4",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
+			};
+			var pallet4 = new Pallet
+			{
+				PalletNumber = "P4",
+				Location = location4,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>
 						{
 							new ProductOnPallet { Product = product, Quantity = 5, BestBefore = new DateOnly(2026,1,1) }
 						}
-					}
-				};
+			};
 			var recipt = new Receipt
-			{				
+			{
 				ReceiptNumber = 1,
 				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
 				ReceiptStatus = ReceiptStatus.Verified,
 				PerformedBy = "UserMakae",
 				Client = client,
-				Pallets = pallets,
+				Pallets = [pallet1, pallet2, pallet3, pallet4]
 			};
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
-			DbContext.Locations.AddRange(location, location1);
-			DbContext.Pallets.AddRange(pallets);
+			DbContext.Locations.AddRange(location, location1, location2, location3, location4);
+			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
 			DbContext.Receipts.Add(recipt);
 			await DbContext.SaveChangesAsync();
 
@@ -451,13 +454,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
 				PickedQuantity = 8,
-				SourcePalletId = "P2",
+				SourcePalletId = pallet2.Id,
+				SourcePalletNumber = "P2",
 				ProductId = product.Id,
 
 			};
 			var _DoPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
 			var resultPicking = await Mediator.Send(_DoPicking);
-			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.Id == "Q0001");
+			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
 			//Assert
 			var pickingTaskDone = await DbContext.PickingTasks
 				.FirstOrDefaultAsync(x => x.Id == pickingFromBase.Id);
@@ -474,7 +478,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Equal("UserC", cancelledIssue.PerformedBy);
 
 			// Assert – Pallets restored
-			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
+			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
 			Assert.Equal(PalletStatus.Available, palletP1.Status);
 			Assert.Null(palletP1.IssueId);
 			Assert.Equal(1, palletP1.LocationId);
@@ -491,7 +495,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Contains("Anulowano zlecenie", result.Message);
 
 			var reverseTasks = await DbContext.ReversePickings
-				.Where(rp => rp.SourcePalletId == "P2")
+				.Where(rp => rp.SourcePalletId == pallet2.Id)
 				.ToListAsync();
 
 			Assert.Single(reverseTasks);
@@ -508,6 +512,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.True(resultGetView.Result.CanAddToExistingPallet);
 			Assert.True(resultGetView.Result.AddToNewPallet);
 			Assert.Equal(2, resultGetView.Result.ListPalletsToAdd.Count);
-		}		
+		}
 	}
 }

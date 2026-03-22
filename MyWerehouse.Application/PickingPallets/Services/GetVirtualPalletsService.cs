@@ -15,7 +15,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		{
 			_pickingPalletRepo = pickingPalletRepo;
 		}
-		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(int productId, DateOnly bestBefore)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid productId, DateOnly bestBefore)
 		{
 			return await _pickingPalletRepo.GetVirtualPalletsByBBAsync(productId, bestBefore);
 		}

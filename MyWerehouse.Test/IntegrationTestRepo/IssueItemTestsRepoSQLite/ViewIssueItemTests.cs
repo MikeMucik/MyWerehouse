@@ -26,12 +26,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueItemTestsRepo
 		{
 			//Arrange
 			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			var issueId = issueId2;			
 			var issue = _fixture.DbContext.Issues.Find(issueId);
 			//Act
 			
 			var productId = 10;
-			var result = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId);
+			var result = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId1);
 			
 			//Assert			
 			Assert.Equal(150, result);

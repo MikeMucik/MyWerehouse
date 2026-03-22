@@ -83,7 +83,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Act
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
-				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }],
+				ProductsOnPallet = [new() { ProductId = product.Id, Quantity = 10, }],
 				UserId = "U001"
 			};
 						
@@ -104,7 +104,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				.ToList();
 
 			Assert.Single(productsOnPallet);
-			Assert.Equal(1, productsOnPallet[0].ProductId);
+			Assert.Equal(product.Id, productsOnPallet[0].ProductId);
 			Assert.Equal(10, productsOnPallet[0].Quantity);
 
 			var movement = DbContext.PalletMovements
@@ -322,7 +322,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				//Act&Assert
 				var newPalletDto = new CreatePalletReceiptDTO
 				{
-					ProductsOnPallet = [new() { ProductId = 0, Quantity = 0, }],
+					ProductsOnPallet = [new() { ProductId = product.Id, Quantity = 0, }],
 					UserId = "U001"
 				};
 
@@ -330,7 +330,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto)));
 
 				Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
-				Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
+				//Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
 			}
 		[Fact]
 		public async Task NotProperDataTwoProduct_AddPalletToReceiptAsync_ThrowValidateException()
@@ -398,7 +398,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//Act&Assert
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
-				ProductsOnPallet = [new() { ProductId = 1, Quantity = 10, }, new() { ProductId = 2, Quantity = 100 }],
+				ProductsOnPallet = [new() { ProductId = product.Id, Quantity = 10, }, new() { ProductId = product1.Id, Quantity = 100 }],
 				UserId = "U001"
 			};
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto)));

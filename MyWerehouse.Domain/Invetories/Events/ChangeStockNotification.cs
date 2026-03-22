@@ -9,6 +9,6 @@ using MyWerehouse.Domain.Invetories.Models;
 
 namespace MyWerehouse.Domain.Invetories.Events
 {
-	public record StockItemChange(int ProductId, int Quantity);
+	public record StockItemChange(Guid ProductId, int Quantity);
 	public record ChangeStockNotification(IEnumerable<StockItemChange> Changes) : IDomainEvent;
 }

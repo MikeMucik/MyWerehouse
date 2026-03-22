@@ -8,15 +8,15 @@ namespace MyWerehouse.Domain.DomainExceptions
 {
 	public class DomainInventoryException :DomainException
 	{
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public string Message { get; set; }
-		public DomainInventoryException(int productId, string message)
+		public DomainInventoryException(Guid productId, string message)
 			:base ($"Stan producktu {productId} pniżej zera - stan niedozwolony.")
 		{
 			ProductId = productId;
 			Message = message;
 		}
-		public DomainInventoryException(int productId)
+		public DomainInventoryException(Guid productId)
 			: base($"Stan producktu {productId} pniżej zera - stan niedozwolony.")
 		{
 			ProductId = productId;

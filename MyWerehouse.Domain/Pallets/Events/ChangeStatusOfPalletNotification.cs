@@ -11,7 +11,8 @@ using MyWerehouse.Domain.Pallets.Models;
 namespace MyWerehouse.Domain.Pallets.Events
 {
 	public record ChangeStatusOfPalletNotification(
-	string PalletId,
+	Guid PalletId,
+	string PalletNumber,
 	int SourceLocationId,
 	string SourceSnapshot,
 	int DestinationLocationId,

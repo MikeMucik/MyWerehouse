@@ -9,7 +9,7 @@ namespace MyWerehouse.Domain.Histories.Filters
 {
 	public class PalletMovementSearchFilter
 	{			
-		public int? ProductId { get; set; }
+		public Guid? ProductId { get; set; }
 		public string? ProductName { get; set; }		
 		public int? SourceLocationId { get; set; }
 		public int? DestinationLocationId { get; set; }		

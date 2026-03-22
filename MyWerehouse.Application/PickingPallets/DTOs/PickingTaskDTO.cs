@@ -14,8 +14,9 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 		public Guid Id { get; set; }
 		public Guid IssueId { get; set; }
 		public int IssueNumber { get; set; }
-		public string? SourcePalletId { get; set; }      //required 
-		public int ProductId { get; set; }
+		public Guid? SourcePalletId { get; set; }      //required 
+		public string? SourcePalletNumber { get; set; }      //required 
+		public Guid ProductId { get; set; }
 		public int RequestedQuantity { get; set; }
 		public int PickedQuantity { get; set; }//faktyczna pobrana ilość
 		public PickingStatus PickingStatus { get; set; }

@@ -26,10 +26,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			var result = _werehouseDbContext.PalletMovements				
 				.Include(md => md.PalletMovementDetails)
 					//.ThenInclude(m => m.Product)
-				.Where(p=>p.PalletId == id)
+				.Where(p=>p.PalletNumber == id)
 				.AsQueryable();
 
-			if (filter.ProductId > 0)
+			//if (filter.ProductId != Guid.Empty)
+			//if (filter.ProductId != null)
+			if (filter.ProductId.HasValue)
 			{
 				result = result
 					.Where(p => p.PalletMovementDetails.Any(md => md.ProductId == filter.ProductId));
@@ -72,7 +74,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return result;
 		}		
-		public async Task<bool> CanDeletePalletAsync(string id)
+		public async Task<bool> CanDeletePalletAsync(Guid id)
 		{
 			int movementCount = await _werehouseDbContext.PalletMovements
 				.Where(p => p.PalletId == id)

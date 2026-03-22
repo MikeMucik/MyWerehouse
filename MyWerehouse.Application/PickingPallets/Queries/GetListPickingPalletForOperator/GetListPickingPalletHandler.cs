@@ -25,10 +25,11 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListPickingPalletFor
 			{
 				var locationName = await _locationRepo.GetLocationByIdAsync(pallet.LocationId);
 				if (locationName == null) return AppResult<List<PickingPalletWithLocationDTO>>.Fail($"Lokalizacja o numerze {pallet.LocationId} nie została znaleziona", ErrorType.NotFound);
-				var addedToPicking = pallet.DateMoved;
+				var addedToPicking = pallet.DateMoved;//??
 				var palletInWarehouseDTO = new PickingPalletWithLocationDTO
 				{
 					PalletId = pallet.PalletId,
+					PalletNumber = pallet.Pallet.PalletNumber,
 					LocationName = locationName.ToSnopShot(),
 					AddedToPicking = addedToPicking
 				};

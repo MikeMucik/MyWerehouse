@@ -16,7 +16,7 @@ namespace MyWerehouse.Application.Inventories.Services
 			_inventoryRepo = inventoryRepo;
 		}
 
-		public async Task<int> GetProductCountAsync(int productId, DateOnly? bestBefore)
+		public async Task<int> GetProductCountAsync(Guid productId, DateOnly? bestBefore)
 		{
 			var totalProductByDate = await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
 			var totalProductReservedToIssues = await _inventoryRepo.GetQuantityProductReservedForIssueAsync(productId, bestBefore);

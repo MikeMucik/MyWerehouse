@@ -12,7 +12,8 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 {
 	public class AddProductDTO :IMapFrom<Product>
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
+		//public int ProductId { get; set; }
 		public string Name { get; set; }
 		public string SKU { get; set; }
 		//public string Category { get; set; }

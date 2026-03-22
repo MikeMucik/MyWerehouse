@@ -75,13 +75,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			context.SaveChanges();
 
 			// 2. Dane zależne od powyższych
-
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+			var productId989 = Guid.Parse("00000000-0000-0000-0989-000000000000");
 			if (!context.Products.Any())
 			{
 				context.Products.AddRange(
-					new Product { Id = 10, Name = "Test", SKU = "0987654321", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 56, },
-					new Product { Id = 11, Name = "TestD", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 44, },
-					new Product { Id = 989, Name = "NotAdded", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 112, }
+					//Product.Create(productId1, "Test", "0987654321", 1, false, 56),
+					//Product.Create(productId2, "TestD", "fghtredfg", 1, false, 44),
+					//Product.Create(productId989, "NotAdded", "fghtredfg", 1, false, 112)
+					new Product { Id = productId1, Name = "Test", SKU = "0987654321", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 56, },
+					new Product { Id = productId2, Name = "TestD", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 44, },
+					new Product { Id = productId989, Name = "NotAdded", SKU = "fghtredfg", CategoryId = 1, IsDeleted = false, CartonsPerPallet = 112, }
+
 				);
 			}
 
@@ -90,7 +96,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.ProductDetails.AddRange(
 					new ProductDetail
 					{
-						ProductId = 10,
+						ProductId = productId1,
 						Length = 10,
 						Height = 20,
 						Width = 30,
@@ -99,7 +105,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new ProductDetail
 					{
-						ProductId = 11,
+						ProductId = productId2,
 						Length = 20,
 						Height = 40,
 						Width = 60,
@@ -152,13 +158,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					IssueDateTimeSend = DateTime.UtcNow.AddHours(23),//zmiana 
 					IssueItems = new List<IssueItem> { new IssueItem
 					{
-						ProductId = 10,
+						ProductId = productId1,
 						CreatedAt = DateTime.Today,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
 						Quantity = 150,
 					}, new IssueItem
 					{
-						ProductId = 11,
+						ProductId = productId2,
 						CreatedAt = DateTime.Today,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
 						Quantity = 400,
@@ -169,12 +175,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			context.SaveChanges();
 
 			// 3. Dane końcowe, zależne od receipt/issue/product
+
+			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
+			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
+			var palletGuid3 = Guid.Parse("00000000-0003-1111-0000-000000000000");
+			var palletGuid4 = Guid.Parse("00000000-0004-1111-0000-000000000000");
+			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
+			var palletGuid6 = Guid.Parse("00000000-0006-1111-0000-000000000000");
+			var palletGuid7 = Guid.Parse("00000000-0007-1111-0000-000000000000");
+			var palletGuid8 = Guid.Parse("00000000-0008-1111-0000-000000000000");
+			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");
+
+
 			if (!context.Pallets.Any())
 			{
 				context.Pallets.AddRange(
 					new Pallet
 					{
-						Id = "Q1000",
+						Id = palletGuid1,
+						PalletNumber = "Q1000",
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.Available,
@@ -183,7 +202,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new Pallet
 					{
-						Id = "Q1001",
+						Id = palletGuid2,
+						PalletNumber = "Q1001",
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 1,
 						Status = PalletStatus.OnHold,
@@ -192,7 +212,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new Pallet
 					{
-						Id = "Q1002",
+						Id = palletGuid3,
+						PalletNumber = "Q1002",
 						DateReceived = new DateTime(2020, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Available,
@@ -200,7 +221,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new Pallet
 					{
-						Id = "Q1010",
+						Id = palletGuid4,
+						PalletNumber = "Q1010",
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.Damaged,
@@ -208,7 +230,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new Pallet
 					{
-						Id = "Q1100",
+						Id = palletGuid5,
+						PalletNumber = "Q1100",
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
@@ -216,7 +239,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new Pallet
 					{
-						Id = "Q1101",
+						Id = palletGuid6,
+						PalletNumber = "Q1101",
 						DateReceived = new DateTime(2025, 1, 5),
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
@@ -224,7 +248,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new Pallet
 					{
-						Id = "Q2000",
+						Id = palletGuid7,
+						PalletNumber = "Q2000",
 						DateReceived = new DateTime(2025, 1, 1),
 						LocationId = 3,
 						Status = PalletStatus.ToIssue,
@@ -233,7 +258,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					},
 					new Pallet
 					{
-						Id = "Q1200",
+						Id = palletGuid8,
+						PalletNumber = "Q1200",
 						DateReceived = new DateTime(2025, 2, 1),
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
@@ -242,7 +268,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					//PickingPallet
 					new Pallet
 					{
-						Id = "Q5000",
+						Id = palletGuid9,
+						PalletNumber = "Q5000",
 						DateReceived = new DateTime(2025, 2, 1),
 						LocationId = 3,
 						Status = PalletStatus.ToPicking,
@@ -255,7 +282,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new VirtualPallet
 					{
 						Id = 1,
-						PalletId = "Q1100",
+						//PalletId = "Q1100",
+						PalletId = palletGuid5,
 						InitialPalletQuantity = 200,
 						LocationId = 3,
 						DateMoved = DateTime.UtcNow.AddDays(-1)						
@@ -263,7 +291,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new VirtualPallet
 					{
 						Id = 2,
-						PalletId = "Q1101",
+						//PalletId = "Q1101",
+						PalletId = palletGuid6,
 						InitialPalletQuantity = 150,
 						LocationId = 3,
 						DateMoved = new DateTime(2024, 6, 6),						
@@ -271,7 +300,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new VirtualPallet
 					{
 						Id = 3,
-						PalletId = "Q1200",
+						//PalletId = "Q1200",
+						PalletId = palletGuid8,
 						InitialPalletQuantity = 300,
 						LocationId = 3,
 						DateMoved = DateTime.UtcNow.AddDays(-1)						
@@ -294,7 +324,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = issuetId2,
 						RequestedQuantity = 20,
-						ProductId = 11,
+						ProductId = productId2,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 						
@@ -306,7 +336,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PickingStatus = PickingStatus.Picked,
 						IssueId = issuetId2,
 						RequestedQuantity = 20,
-						ProductId = 11,
+						ProductId = productId2,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
@@ -317,7 +347,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = issuetId2,
 						RequestedQuantity = 50,
-						ProductId = 11,
+						ProductId = productId2,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
@@ -328,7 +358,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = issuetId2,
 						RequestedQuantity = 100,
-						ProductId = 10,
+						ProductId = productId1,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}, new PickingTask
@@ -339,7 +369,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PickingStatus = PickingStatus.Picked,
 						IssueId = issuetId2,
 						RequestedQuantity = 10,
-						ProductId = 10,
+						ProductId = productId1,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					},
@@ -351,7 +381,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						PickingStatus = PickingStatus.Allocated,
 						IssueId = issuetId2,
 						RequestedQuantity = 20,
-						ProductId = 11,
+						ProductId = productId2,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
 					}
@@ -363,101 +393,112 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new ProductOnPallet
 					{
 						Id = 1,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 50,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1000"
+						//PalletId = "Q1000"
+						PalletId = palletGuid1
 					},
 					new ProductOnPallet
 					{
 						Id = 2,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 100,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1001"
+						//PalletId = "Q1001"
+						PalletId = palletGuid2
 					},
 					new ProductOnPallet
 					{
 						Id = 3,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1000"
+						//PalletId = "Q1000"
+						PalletId = palletGuid1
 					},
 					new ProductOnPallet
 					{
 						Id = 4,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1010"
+						//PalletId = "Q1010"
+						PalletId = palletGuid4
 					},
 					new ProductOnPallet
 					{
 						Id = 5,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1002"
+						//PalletId = "Q1002"
+						PalletId = palletGuid3
 					},
 					new ProductOnPallet
 					{
 						Id = 6,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q1100"
+						//PalletId = "Q1100"
+						PalletId = palletGuid5
 					},
 					new ProductOnPallet//Issue
 					{
 						Id = 7,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 200,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 2, 2),
-						PalletId = "Q2000"
+						//PalletId = "Q2000"
+						PalletId = palletGuid7
 					},
 					new ProductOnPallet
 					{
 						Id = 8,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 150,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 3, 3),
-						PalletId = "Q1101"
+						//PalletId = "Q1101"
+						PalletId = palletGuid6
 					},
 					new ProductOnPallet
 					{
 						Id = 9,
-						ProductId = 10, // inny produkt
+						ProductId =productId1, // inny produkt
 						Quantity = 300,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 4, 4),
-						PalletId = "Q1200"
+						//PalletId = "Q1200"
+						PalletId = palletGuid8
 					},
 					new ProductOnPallet
 					{
 						Id = 10,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 10,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 4, 4),
-						PalletId = "Q5000"
+						//PalletId = "Q5000"
+						PalletId = palletGuid9
 					},
 					new ProductOnPallet
 					{
 						Id = 11,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 20,
 						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
 						DateAdded = new DateTime(2024, 4, 4),
-						PalletId = "Q5000"
+						//PalletId = "Q5000"
+						PalletId = palletGuid9
 					}
 				);
 			}
@@ -468,7 +509,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new PalletMovement
 					{
 						Id = 1,
-						PalletId = "Q1000",						
+						PalletNumber = "Q1000",						
+						PalletId = palletGuid1,						
 						DestinationLocationId = 2,
 						Reason = ReasonMovement.Moved,						
 						MovementDate = new DateTime(2025, 2, 2),
@@ -477,7 +519,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new PalletMovement
 					{
 						Id = 2,
-						PalletId = "Q1001",						
+						PalletNumber = "Q1001",	
+						PalletId = palletGuid2,
 						DestinationLocationId = 1,
 						Reason = ReasonMovement.Moved,
 						MovementDate = new DateTime(2025, 2, 2),
@@ -486,7 +529,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new PalletMovement
 					{
 						Id = 3,
-						PalletId = "Q1002",
+						PalletNumber = "Q1002",
+						PalletId = palletGuid3,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
 						MovementDate = new DateTime(2025, 2, 2),
@@ -495,7 +539,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new PalletMovement
 					{
 						Id = 4,
-						PalletId = "Q1010",
+						PalletNumber = "Q1010",
+						PalletId = palletGuid4,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
 						MovementDate = new DateTime(2025, 2, 2),
@@ -504,7 +549,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new PalletMovement
 					{
 						Id = 5,
-						PalletId = "Q1000",
+						PalletNumber = "Q1000",
+						PalletId = palletGuid1,
 						DestinationLocationId = 3,
 						Reason = ReasonMovement.Moved,
 						MovementDate = new DateTime(2025, 2, 2),
@@ -519,42 +565,42 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = 1,
 						PalletMovementId = 1,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 100,
 					},
 					new PalletMovementDetail
 					{
 						Id = 6,
 						PalletMovementId = 1,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 2,
 						PalletMovementId = 2,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 3,
 						PalletMovementId = 3,
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 4,
 						PalletMovementId = 4,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 1,
 					},
 					new PalletMovementDetail
 					{
 						Id = 5,
 						PalletMovementId = 5,
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 1,
 					});
 			}
@@ -564,13 +610,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.Inventories.AddRange(
 					new Inventory
 					{											
-						ProductId = 10,
+						ProductId = productId1,
 						Quantity = 10,
 						LastUpdated = new DateTime(2025, 5, 6)
 					},
 					new Inventory
 					{										
-						ProductId = 11,
+						ProductId = productId2,
 						Quantity = 0,
 						LastUpdated = new DateTime(2025, 5, 6)
 					});
@@ -584,9 +630,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = reversePickingTaskId1,
 						PickingTaskId = pickingId2,
-						ProductId = 10,
+						ProductId = productId1,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-						PickingPalletId = "Q5000",
+						//PickingPalletId = "Q5000",
+						PickingPalletId = palletGuid9,
 						Quantity = 10,
 						Status = ReversePickingStatus.Pending,
 						UserId = "UserR"
@@ -596,9 +643,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					{
 						Id = reversePickingTaskId2,
 						PickingTaskId = pickingId5,
-						ProductId = 10,
+						ProductId = productId1,
 						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-						PickingPalletId = "Q5000",
+						//PickingPalletId = "Q5000",
+						PickingPalletId = palletGuid9,
 						Quantity = 10,
 						Status = ReversePickingStatus.Pending,
 						UserId = "UserR"

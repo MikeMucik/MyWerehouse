@@ -13,8 +13,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 	public class ProductOnPalletDTO :IMapFrom<ProductOnPallet>
 	{
 		public int Id { get; set; }
-		public int ProductId { get; set; }		
-		public string PalletId { get; set; }		
+		public Guid ProductId { get; set; }		
+		public Guid PalletId { get; set; }		
 		public int Quantity { get; set; }
 		public DateTime DateAdded { get; set; }
 		public DateOnly? BestBefore { get; set; } // Może być null, jeśli produkt nie ma daty ważności
@@ -30,8 +30,9 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public ProductOnPalletDTOValidation() 
 		{
 			RuleFor(pp => pp.ProductId)
-				.GreaterThan(0)
-				.WithMessage("Produkt na palecie musi mieć numer produktu");			
+				.NotEqual(Guid.Empty)
+			//	.NotEqual(null)
+				.WithMessage("Produkt na palecie musi mieć numer produktu");
 			RuleFor(pp => pp.Quantity)
 				.GreaterThan(0)
 				.WithMessage("Ilość produktu musi być większa od zera");

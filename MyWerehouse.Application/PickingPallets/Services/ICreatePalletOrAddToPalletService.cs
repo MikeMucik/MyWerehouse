@@ -10,6 +10,6 @@ namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public interface ICreatePalletOrAddToPalletService
 	{
-		Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, int productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion);
+		Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, Guid productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion);
 	}
 }

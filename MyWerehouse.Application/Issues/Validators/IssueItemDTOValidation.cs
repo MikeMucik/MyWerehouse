@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.Issues.Validators
 		public IssueItemDTOValidation()
 		{
 			RuleFor(x => x.ProductId)
-				.GreaterThan(0).WithMessage("Nieprawidłowy numer produktu");
+				.NotEqual(Guid.Empty).WithMessage("Nieprawidłowy numer produktu");
 			RuleFor(x => x.Quantity)
 				.GreaterThan(0).WithMessage("Ilość produktu musi być większa dod zera");
 			RuleFor(x => x.BestBefore)

@@ -22,31 +22,35 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		public async Task ShowDataByProductId_GetInventoryForProductAsync_ReturnInfoOfQuantity()
 		{
 			//Arrange
-			var productId = 10;
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
+			//var productId = 10;
 			//Act
-			var result =await _inventoryRepo.GetInventoryForProductAsync(productId);
+			var result =await _inventoryRepo.GetInventoryForProductAsync(productId1);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(productId, result.ProductId);
+			Assert.Equal(productId1, result.ProductId);
 			Assert.Equal(10, result.Quantity); //DbContextFactory Q=10			
 		}
 		[Fact]
 		public void ShowAllData_GetAllInventory_ReturnListOfInventory()
 		{
 			//Arrange&Act
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			var result = _inventoryRepo.GetAllInventory();
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());
-			Assert.Equal(10, result.FirstOrDefault(p=>p.ProductId == 10).Quantity);			
+			Assert.Equal(10, result.FirstOrDefault(p=>p.ProductId == productId1).Quantity);			
 		}
 		[Fact]
 		public async Task CheckStockEnough_HasStockAsync_ReturnTrue()
 		{
 			//Arrange&Act			
 			var productId = 10;
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			var quantity = 8;
-			var result = await _inventoryRepo.HasStockAsync(productId, quantity);
+			var result = await _inventoryRepo.HasStockAsync(productId1, quantity);
 			//Assert
 			Assert.True(result);
 		}
@@ -54,9 +58,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		public async Task CheckStockNotEnough_HasStockAsync_ReturnFalse()
 		{
 			//Arrange&Act
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			var productId = 10;
 			var quantity = 80;
-			var result = await _inventoryRepo.HasStockAsync(productId, quantity);
+			var result = await _inventoryRepo.HasStockAsync(productId1, quantity);
 			//Assert
 			Assert.False(result);
 		}
@@ -65,9 +70,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 11;
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			var bestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365));			
 			//Act
-			var result =await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId, bestBefore);
+			var result =await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId2, bestBefore);
 			//Assert
 			Assert.Equal(110, result);
 		}
@@ -76,10 +83,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 11;
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			var bestBefore = new DateOnly(2025, 12, 12);
 			//var
 			//Act
-			var result = await _inventoryRepo.GetQuantityProductReservedForIssueAsync(productId, bestBefore);
+			var result = await _inventoryRepo.GetQuantityProductReservedForIssueAsync(productId2, bestBefore);
 			//Assert
 			Assert.Equal(200, result);
 		}
@@ -88,10 +97,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 11;
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			var bestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
 			//var
 			//Act
-			var result = await _inventoryRepo.GetAvailableQuantityAsync(productId, bestBefore);
+			var result = await _inventoryRepo.GetAvailableQuantityAsync(productId2, bestBefore);
 			//Assert
 			Assert.Equal(640, result);
 		}
@@ -100,10 +111,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 11;
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			var bestBefore = new DateOnly(2025, 12, 12);
 			//var
 			//Act
-			var result = await _inventoryRepo.GetQuantityForProductAsync(productId, bestBefore);
+			var result = await _inventoryRepo.GetQuantityForProductAsync(productId2, bestBefore);
 			//Assert
 			Assert.Equal(970, result);
 		}

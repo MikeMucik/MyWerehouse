@@ -27,11 +27,12 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		{
 			profile.CreateMap<Pallet, PalletDTO>();
 			profile.CreateMap<PalletDTO, Pallet>()
-				.ForMember(dest => dest.PalletMovements, opt => opt.Ignore())
-				//.ForMember(dest => dest.Id, opt => opt.Ignore())
-				;
+				.ForMember(dest => dest.PalletMovements, opt => opt.Ignore());
 		}
-		//public class PalletDTOValidation : AbstractValidator<PalletDTO>
+		
+	}
+}
+//public class PalletDTOValidation : AbstractValidator<PalletDTO>
 		//{
 		//	public PalletDTOValidation() 
 		//	{
@@ -40,5 +41,3 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		//			.WithMessage("Paleta musi zawierać produkty");
 		//	}
 		//}
-	}
-}

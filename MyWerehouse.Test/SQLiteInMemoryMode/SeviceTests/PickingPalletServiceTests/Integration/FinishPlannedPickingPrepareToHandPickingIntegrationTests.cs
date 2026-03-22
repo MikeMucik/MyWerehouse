@@ -79,7 +79,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -94,7 +94,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet2 = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -109,7 +109,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet3 = new Pallet
 			{
-				Id = "Q1002",
+				PalletNumber = "Q1002",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -201,8 +201,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Result.Result.Count);
-			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
-			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
+			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product1.Id && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
+			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product2.Id && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			Assert.NotNull(resultForProduct1);
 			Assert.NotNull(resultForProduct2);
 			Assert.Equal(25, resultForProduct1.RequestedQuantity);
@@ -271,7 +271,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -286,7 +286,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet2 = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -301,7 +301,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet3 = new Pallet
 			{
-				Id = "Q1002",
+				PalletNumber = "Q1002",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -394,8 +394,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Result.Result.Count);
-			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 1 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
-			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == 2 && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
+			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product1.Id && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
+			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product2.Id && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
 			Assert.NotNull(resultForProduct1);
 			Assert.NotNull(resultForProduct2);
 			Assert.Equal(20, resultForProduct1.RequestedQuantity);

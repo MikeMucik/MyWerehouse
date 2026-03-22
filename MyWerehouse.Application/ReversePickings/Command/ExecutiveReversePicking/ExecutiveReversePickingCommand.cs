@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Picking.Models;
 namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking
 {
 	public record ExecutiveReversePickingCommand(Guid TaskReversedId,
-		ReversePickingStrategy Strategy, string PickingPalletId, 
+		ReversePickingStrategy Strategy, Guid PickingPalletId, 
 		string UserId, List<Pallet>? Pallets):IRequest<AppResult<ReversePickingResult>>;	
 }
 //List<Pallet> - strategy:ToExist

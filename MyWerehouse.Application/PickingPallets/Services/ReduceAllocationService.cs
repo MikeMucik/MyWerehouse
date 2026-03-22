@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		{
 			_pickingTaskRepo = pickingTaskRepo;			
 		}
-		public async Task ReduceAllocation(Issue issue, int productId,int quantity, string userId)
+		public async Task ReduceAllocation(Issue issue, Guid productId,int quantity, string userId)
 		{
 			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issue.Id, productId);
 			foreach (var pickingTask in pickingTasks)

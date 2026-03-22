@@ -8,6 +8,6 @@ namespace MyWerehouse.Application.Inventories.Services
 {
 	public interface IGetProductCountService
 	{
-		Task<int> GetProductCountAsync(int productId, DateOnly? bestBefore);
+		Task<int> GetProductCountAsync(Guid productId, DateOnly? bestBefore);
 	}
 }

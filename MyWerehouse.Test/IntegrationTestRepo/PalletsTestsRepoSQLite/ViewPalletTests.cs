@@ -25,7 +25,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		public async Task GetPallet_GetPalletByIdAsync_ReturnSimplyData()
 		{
 			//Arrange
-			var paletId = "Q1000";
+			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
+			//var paletId = "Q1000";
+			var paletId = palletGuid1;
 			//Act
 			var result =await _palletRepo.GetPalletByIdAsync(paletId);
 			
@@ -41,7 +43,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		public async Task GetPallet_GetPalletWithProductsAsync_ReturnPalletWithProduct()
 		{
 			//Arrange
-			var paletId = "Q1000";
+			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
+			//var paletId = "Q1000";
+			var paletId = palletGuid1;
 			//Act
 			var result = await _palletRepo.GetPalletByIdAsync(paletId);
 			//Assert
@@ -54,16 +58,18 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		public void SearchPallets_FindPalletsByProductId_ReturnList()
 		{
 			//Arrange
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			var productId = new PalletSearchFilter
 			{
-				ProductId = 10
+				ProductId = productId1
 			};
 			//Act
 			var result = _palletRepo.GetPalletsByFilter(productId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(4, result.Count());
-			Assert.Contains(result, p => p.Id == "Q1000");
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 		}
 
 		[Fact]
@@ -80,7 +86,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(7, result.Count());
-			Assert.Contains(result, p => p.Id == "Q1000");
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 		}
 		[Fact]
 		public void SearchPallets_FindPalletsByDateBestBefore_ReturnList()
@@ -95,8 +101,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(9, result.Count());
-			Assert.Contains(result, p => p.Id == "Q1000");
-			Assert.Contains(result, p => p.Id == "Q1010");
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");
+			Assert.Contains(result, p => p.PalletNumber == "Q1010");
 		}
 		[Fact]
 		public void SearchPallets_FindPalletsByLocationId_ReturnList()
@@ -111,8 +117,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());
-			Assert.Contains(result, p=>p.Id == "Q1001");
-			Assert.Contains(result, p=>p.Id == "Q1000");
+			Assert.Contains(result, p=>p.PalletNumber == "Q1001");
+			Assert.Contains(result, p=>p.PalletNumber == "Q1000");
 		}
 		[Fact]
 		public void SearchPallets_FindPalletsByLocationId_ReturnNullList()
@@ -146,10 +152,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			{
 				Assert.NotNull(pallet.Receipt); 
 				Assert.Equal(10, pallet.Receipt.ClientId);
-				Assert.Contains(result, p => p.Id == "Q1000");
-				Assert.Contains(result, p => p.Id == "Q1001");
-				Assert.DoesNotContain(result, p => p.Id == "Q1010"); 				
-				Assert.DoesNotContain(result, p => p.Id == "Q1002"); 				
+				Assert.Contains(result, p => p.PalletNumber == "Q1000");
+				Assert.Contains(result, p => p.PalletNumber == "Q1001");
+				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1010"); 				
+				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1002"); 				
 			}
 		}
 		[Fact]
@@ -165,16 +171,16 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result); // zakładamy, że dane testowe zawierają takie palety
-			Assert.Contains(result, p => p.Id == "Q1001");
-			Assert.Contains(result, p => p.Id == "Q1000");
+			Assert.Contains(result, p => p.PalletNumber == "Q1001");
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 			foreach (var pallet in result)
 			{
 				Assert.NotNull(pallet.Issue); // powinno być przypisane
 				Assert.Equal(11, pallet.Issue.ClientId);
-				Assert.Contains(result, p => p.Id == "Q1000");
-				Assert.Contains(result, p => p.Id == "Q1001");
-				Assert.DoesNotContain(result, p => p.Id == "Q1010");
-				Assert.DoesNotContain(result, p => p.Id == "Q1002");
+				Assert.Contains(result, p => p.PalletNumber == "Q1000");
+				Assert.Contains(result, p => p.PalletNumber == "Q1001");
+				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1010");
+				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1002");
 			}
 		}
 		[Fact]
@@ -211,7 +217,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			Assert.NotEmpty(result);
 			foreach (var pallet in result)
 			{
-				Assert.Equal("Q1010", pallet.Id);
+				Assert.Equal("Q1010", pallet.PalletNumber);
 			}
 		}
 		[Fact]
@@ -219,27 +225,31 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 10;
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			DateOnly date = new DateOnly(2024,2,2);
 			//Act
-			var result = _palletRepo.GetAvailablePallets(productId, date);
+			var result = _palletRepo.GetAvailablePallets(productId1, date);
 			//Assert
 			Assert.NotNull(result);					
 			Assert.Equal(1, result.Count());			
-			Assert.Contains(result, p => p.Id == "Q1000");							
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");							
 		}
 		[Fact]
 		public void ReturnPalletsByProductIdAndDate2_GetAvailablePallets_ReturnList()
 		{
 			//Arrange
 			var productId = 11;
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			DateOnly date = new DateOnly(2024, 2, 2);
 			//Act
-			var result = _palletRepo.GetAvailablePallets(productId, date);
+			var result = _palletRepo.GetAvailablePallets(productId2, date);
 			//Assert
 			Assert.NotNull(result);						
 			Assert.Equal(2, result.Count());
-			Assert.Contains(result, p => p.Id == "Q1002");						
-			Assert.Contains(result, p => p.Id == "Q1000");						
+			Assert.Contains(result, p => p.PalletNumber == "Q1002");						
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");						
 		}
 		[Fact]
 		public async Task ReturnPallets_GetPalletByLocationAsync_ReturnList()
@@ -251,7 +261,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			//Assert.Equal(2, result.Count());
-			Assert.True(result.Id == "Q1000" || result.Id == "Q1001");
+			Assert.True(result.PalletNumber == "Q1000" || result.PalletNumber == "Q1001");
 				//||(result.Id, "Q1000"));
 			
 		}

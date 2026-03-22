@@ -92,7 +92,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				{
 					new Pallet
 					{
-						Id = "P1",
+						PalletNumber = "P1",
 						Location = location,
 						Status = PalletStatus.InTransit,
 						ProductsOnPallet = new List<ProductOnPallet>
@@ -102,7 +102,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					},
 					new Pallet
 					{
-						Id = "P2",
+						PalletNumber = "P2",
 						Location = location,
 						Status = PalletStatus.ToPicking,
 						ProductsOnPallet = new List<ProductOnPallet>

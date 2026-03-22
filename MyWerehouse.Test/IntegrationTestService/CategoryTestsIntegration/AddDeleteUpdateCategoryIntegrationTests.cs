@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			};
 			var product = new Product
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "fdsfd",
 				CategoryId = 1,
 				SKU = "aaa",
@@ -59,7 +59,7 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			};
 			var product = new Product
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "fdsfd",
 				CategoryId = 1,
 				SKU = "aaa",
@@ -93,7 +93,7 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			};
 			var product = new Product
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "fdsfd",
 				CategoryId = 1,
 				SKU = "aaa",
@@ -150,7 +150,7 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			};
 			var product = new Product
 			{
-				Id = 1,
+				//Id = 1,
 				Name = "fdsfd",
 				CategoryId = 1,
 				SKU = "aaa",

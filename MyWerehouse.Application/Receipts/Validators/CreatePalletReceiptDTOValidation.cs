@@ -16,19 +16,23 @@ namespace MyWerehouse.Application.Receipts.Validators
 			RuleFor(p => p.Status)
 				.NotEmpty()
 				.WithMessage("Paleta musi mieć status")
-				.When(p => !string.IsNullOrWhiteSpace(p.Id));
+				.When(p => p.Id != Guid.Empty);
+				//.When(p => !string.IsNullOrWhiteSpace(p.Id));
 			RuleFor(p => p.DateReceived)
 				.NotEmpty()
 				.WithMessage("Paleta musi mieć datę przyjęcia")
-				.When(p => !string.IsNullOrWhiteSpace(p.Id));
+				.When(p => p.Id != Guid.Empty);
+				//.When(p => !string.IsNullOrWhiteSpace(p.Id));
 			RuleFor(p => p.LocationId)
 				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć lokalizację początkową")
-				.When(p => !string.IsNullOrWhiteSpace(p.Id));
+				.When(p => p.Id != Guid.Empty);
+				//.When(p => !string.IsNullOrWhiteSpace(p.Id));
 			RuleFor(p => p.ReceiptNumber)
 				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć numer przyjęcia")
-				.When(p => !string.IsNullOrWhiteSpace(p.Id));
+				.When(p => p.Id != Guid.Empty);
+				//.When(p => !string.IsNullOrWhiteSpace(p.Id));
 			RuleFor(p => p.ProductsOnPallet)
 				.NotEmpty()
 				.WithMessage("Paleta musi zawierać towar/y");

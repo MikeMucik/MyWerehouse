@@ -76,7 +76,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location,
 				Status = PalletStatus.ToPicking,
@@ -135,7 +135,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				RequestedQuantity = pickingTask.RequestedQuantity,
 				PickedQuantity = 30,
 				PickingStatus = PickingStatus.Allocated,
-				SourcePalletId = sourcePallet.Id
+				SourcePalletId = sourcePallet.Id,
+				SourcePalletNumber = sourcePallet.PalletNumber
 			};			
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -219,7 +220,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location,
 				Status = PalletStatus.ToPicking,
@@ -279,7 +280,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				RequestedQuantity = 40,
 				PickedQuantity = 40,
 				PickingStatus = PickingStatus.Allocated,
-				SourcePalletId = sourcePallet.Id
+				SourcePalletId = sourcePallet.Id,
+				SourcePalletNumber = sourcePallet.PalletNumber
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -363,7 +365,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -378,7 +380,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var oldPallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Picking,
@@ -440,7 +442,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				RequestedQuantity = pickingTask1.RequestedQuantity,
 				PickedQuantity = 10,
 				PickingStatus = PickingStatus.Allocated,
-				SourcePalletId = sourcePallet1.Id
+				SourcePalletId = sourcePallet1.Id,
+				SourcePalletNumber = sourcePallet1.PalletNumber
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -532,7 +535,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -547,7 +550,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var oldPallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Picking,
@@ -608,7 +611,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				RequestedQuantity = pickingTask1.RequestedQuantity,
 				PickedQuantity = 10,
 				PickingStatus = PickingStatus.Allocated,
-				SourcePalletId = sourcePallet1.Id
+				SourcePalletId = sourcePallet1.Id,
+				SourcePalletNumber = sourcePallet1.PalletNumber
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -700,7 +704,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -715,7 +719,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var oldPallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Picking,
@@ -774,7 +778,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				RequestedQuantity = pickingTask1.RequestedQuantity,
 				PickedQuantity = 10,
 				PickingStatus = PickingStatus.Allocated,
-				SourcePalletId = sourcePallet1.Id
+				SourcePalletId = sourcePallet1.Id,
+				SourcePalletNumber = sourcePallet1.PalletNumber
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -886,7 +891,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -903,7 +908,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet2 = new Pallet
 			{
-				Id = "Q12000",
+				PalletNumber = "Q12000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -920,7 +925,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var oldPallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Picking,
@@ -986,6 +991,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickedQuantity = 5,
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
+				SourcePalletNumber = sourcePallet1.PalletNumber,
 				//BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
@@ -1058,7 +1064,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -1075,7 +1081,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet2 = new Pallet
 			{
-				Id = "Q12000",
+				PalletNumber = "Q12000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -1092,7 +1098,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var oldPallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Picking,
@@ -1157,6 +1163,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickedQuantity = 5,
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
+				SourcePalletNumber = sourcePallet1.PalletNumber,
 				//BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));

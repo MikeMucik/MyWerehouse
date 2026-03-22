@@ -19,7 +19,7 @@ namespace MyWerehouse.Server.Controllers
 			_mediator = mediator;
 		}
 		[HttpGet("{id}")]
-		public async Task<IActionResult> Get(int id)
+		public async Task<IActionResult> Get(Guid id)
 		{
 			var resut = await _mediator.Send(new GetInventoryQuery(id));
 			return Ok(resut);

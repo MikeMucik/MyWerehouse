@@ -13,14 +13,14 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	public interface IAddPickingTaskToIssueService
 	{
 		Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets,
-			List<VirtualPallet> virtualPallets, Issue issue, int productId,
+			List<VirtualPallet> virtualPallets, Issue issue, Guid productId,
 			int rest, DateOnly? bestBefore, string userId);
 		//Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(
 		//	VirtualPallet virtualPallet, Issue issue, int productId,
 		//	int quantity, DateOnly? bestBefore, string userId);
 
 		AddPickingTaskToIssueResult AddOnePickingTaskToIssue(
-			VirtualPallet virtualPallet, Issue issue, int productId,
+			VirtualPallet virtualPallet, Issue issue, Guid productId,
 			int quantity, DateOnly? bestBefore, string userId);
 	}
 }

@@ -46,7 +46,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 
 			var pallet = new Pallet
 			{
-				Id = "Q00001",
+				PalletNumber = "Q00001",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -86,7 +86,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 
 			// Sprawdź relację z Pallet
 			Assert.NotNull(createdVirtualPallet.Pallet);
-			Assert.Equal("Q00001", createdVirtualPallet.Pallet.Id);
+			Assert.Equal("Q00001", createdVirtualPallet.Pallet.PalletNumber);
 			Assert.Equal(pallet.LocationId, createdVirtualPallet.LocationId);
 
 			// Sprawdź ilości
@@ -130,7 +130,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			DbContext.Locations.Add(location);
 			var pallet = new Pallet
 			{
-				Id = "Q00001",
+				PalletNumber = "Q00001",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -220,7 +220,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			DbContext.Issues.Add(issue);
 			var pickingPallettoClose = new Pallet
 			{
-				Id = "Q3000",
+				PalletNumber = "Q3000",
 				Location = location,
 				Status = PalletStatus.Picking,
 				ProductsOnPallet = new List<ProductOnPallet> {

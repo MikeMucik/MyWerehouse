@@ -52,7 +52,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.Id == guid);
 		}
-		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, int productId)
+		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
@@ -60,7 +60,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 			return result;
 		}
-		public async Task<List<PickingTask>> GetPickingTasksProductIdAsync(int productId, DateTime from, DateTime to)
+		public async Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateTime from, DateTime to)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
@@ -89,7 +89,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(string pickingPalletId)
+		public async Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId)
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Where(x => x.PickingPalletId == pickingPalletId)

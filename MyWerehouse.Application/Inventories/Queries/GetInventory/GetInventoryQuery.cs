@@ -8,5 +8,5 @@ using MyWerehouse.Application.Inventories.DTOs;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventory
 {
-	public record GetInventoryQuery(int ProductId):IRequest<InventoryDTO>;	
+	public record GetInventoryQuery(Guid ProductId):IRequest<InventoryDTO>;	
 }

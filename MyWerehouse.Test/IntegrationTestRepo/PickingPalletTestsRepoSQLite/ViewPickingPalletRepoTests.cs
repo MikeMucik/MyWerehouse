@@ -24,15 +24,17 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 		{
 			//Arrange
 			var productId = 11;
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
+
 			//Act
-			var result = await _pickingPalletRepo.GetVirtualPalletsAsync(productId);			
+			var result = await _pickingPalletRepo.GetVirtualPalletsAsync(productId2);			
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
 			Assert.Equal(2, result.Count); // powinny być dwie palety: Q1100 i Q1101 
 
 			// Paleta Q1100
-			var pallet1 = result.FirstOrDefault(vp => vp.PalletId == "Q1100");
+			var pallet1 = result.FirstOrDefault(vp => vp.Pallet.PalletNumber == "Q1100");
 			Assert.NotNull(pallet1);
 			Assert.Equal(200, pallet1.InitialPalletQuantity);
 			Assert.Equal(3, pallet1.LocationId);
@@ -41,7 +43,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.Equal(PickingStatus.Allocated, pallet1.PickingTasks.First().PickingStatus);
 
 			// Paleta Q1101
-			var pallet2 = result.FirstOrDefault(vp => vp.PalletId == "Q1101");
+			var pallet2 = result.FirstOrDefault(vp => vp.Pallet.PalletNumber == "Q1101");
 			Assert.NotNull(pallet2);
 			Assert.Equal(150, pallet2.InitialPalletQuantity);
 			Assert.Equal(3, pallet2.LocationId);
@@ -50,12 +52,17 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.Equal(PickingStatus.Allocated, pallet2.PickingTasks.First().PickingStatus);
 
 			// Upewnij się, że nie zwrócono palety z innym produktem
-			Assert.DoesNotContain(result, vp => vp.PalletId == "Q1200");
+			Assert.DoesNotContain(result, vp => vp.Pallet.PalletNumber == "Q1200");
 		}
 		[Fact]
 		public async Task TakeVirtualPalletsByDates_GetVirtualPalletsAsync_ReturnList()
 		{
 			//Arrange
+			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
+			var palletGuid8 = Guid.Parse("00000000-0008-1111-0000-000000000000");
+
+			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
+
 			//var startDate = new DateTime(2025, 5, 5);
 			//var endDate = new DateTime(2025, 10, 10);
 			var startDate = DateTime.UtcNow.AddDays(-2);
@@ -68,11 +75,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			Assert.Equal(2, result.Count);
 			// upewniamy się, że to właściwe palety
 			var palletIds = result.Select(v => v.PalletId).ToList();
-			Assert.Contains("Q1100", palletIds);
-			Assert.Contains("Q1200", palletIds);
+			//Assert.Contains("Q1100", palletIds);
+			Assert.Contains(palletGuid5, palletIds);
+			//Assert.Contains("Q1200", palletIds);
+			Assert.Contains(palletGuid8, palletIds);
 
 			// żadna inna spoza zakresu
-			Assert.DoesNotContain("Q1101", palletIds);
+			//Assert.DoesNotContain("Q1101", palletIds);
+			Assert.DoesNotContain(palletGuid2, palletIds);
 
 			// opcjonalnie: sprawdzamy daty, że rzeczywiście są w zakresie
 			Assert.All(result, v =>
@@ -111,7 +121,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 		public async Task ReturnInt_GetVirtualPalletIdFromPalletIdAsync_ReturnVirtualPalletId()
 		{
 			//Arrange
-			var palletId = "Q1100";
+			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
+			//var palletId = "Q1100";
+			var palletId = palletGuid5;
 			//Act
 			var result = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletId);
 			//Assert

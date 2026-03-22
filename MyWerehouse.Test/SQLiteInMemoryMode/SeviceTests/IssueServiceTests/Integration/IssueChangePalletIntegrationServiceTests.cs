@@ -37,14 +37,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.ToIssue,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>{
@@ -74,18 +74,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, "P1", "P2", "tester"));
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 
 			// Assert
 			Assert.True(result.Result.Success);
 			Assert.Equal("Podmieniono palety.", result.Result.Message);
 
 			var updatedIssue = await DbContext.Issues.Include(i => i.Pallets).FirstAsync(i => i.Id == issue.Id);
-			var p1 = await DbContext.Pallets.FirstAsync(p => p.Id == "P1");
-			var p2 = await DbContext.Pallets.FirstAsync(p => p.Id == "P2");
+			var p1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
+			var p2 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P2");
 
-			Assert.DoesNotContain(updatedIssue.Pallets, p => p.Id == "P1");
-			Assert.Contains(updatedIssue.Pallets, p => p.Id == "P2");
+			Assert.DoesNotContain(updatedIssue.Pallets, p => p.PalletNumber == "P1");
+			Assert.Contains(updatedIssue.Pallets, p => p.PalletNumber == "P2");
 
 			Assert.Equal(PalletStatus.Available, p1.Status);
 			Assert.Equal(PalletStatus.InTransit, p2.Status);
@@ -95,9 +95,62 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenSamePalletIds()
 		{
-			//Arrange&Act
+			//Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
+			var category = new Category { Name = "Cat" };
+			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var pallet = new Pallet
+			{
+				PalletNumber = "P1",
+				Location = location,
+				Status = PalletStatus.ToIssue,
+				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+			};
+			var pallet1 = new Pallet
+			{
+				PalletNumber = "P2",
+				Location = location,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+			};
+			var issue = new Issue
+			{
+				Id = Guid.NewGuid(),
+				IssueNumber = 2,
+				PickingTasks = new List<PickingTask>(),
+				Client = client,
+				IssueItems = new List<IssueItem> { new IssueItem
+			{
+				Product = product,
+				Quantity = 20,
+				BestBefore = new DateOnly(2026, 1, 1)
+			}},
+				IssueStatus = IssueStatus.Pending,
+				PerformedBy = "user1",
+				IssueDateTimeCreate = DateTime.Now.AddDays(-7),
+				IssueDateTimeSend = DateTime.Now.AddDays(1),
+				Pallets = new List<Pallet> { pallet }
+			};
+			pallet.Issue = issue;
+			pallet.IssueId = issue.Id;
+			DbContext.Pallets.AddRange(pallet, pallet1);
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+			//&Act
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId1, "P1", "P1", "tester"));
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId1, pallet.Id, pallet.Id, "tester"));
 			//Assert
 			Assert.False(result.IsSuccess);
 			Assert.Contains("tą samą", result.Error);
@@ -106,9 +159,62 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task ChangePalletDuringLoadingAsync_ShouldFail_WhenIssueNotFound()
 		{
-			// Arrange&Act
+			// Arrange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
+			var category = new Category { Name = "Cat" };
+			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var pallet = new Pallet
+			{
+				PalletNumber = "P1",
+				Location = location,
+				Status = PalletStatus.ToIssue,
+				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+			};
+			var pallet1 = new Pallet
+			{
+				PalletNumber = "P2",
+				Location = location,
+				Status = PalletStatus.Available,
+				ProductsOnPallet = new List<ProductOnPallet>{
+							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+			};
+			//var issue = new Issue
+			//{
+			//	Id = Guid.NewGuid(),
+			//	IssueNumber = 2,
+			//	PickingTasks = new List<PickingTask>(),
+			//	Client = client,
+			//	IssueItems = new List<IssueItem> { new IssueItem
+			//{
+			//	Product = product,
+			//	Quantity = 20,
+			//	BestBefore = new DateOnly(2026, 1, 1)
+			//}},
+			//	IssueStatus = IssueStatus.Pending,
+			//	PerformedBy = "user1",
+			//	IssueDateTimeCreate = DateTime.Now.AddDays(-7),
+			//	IssueDateTimeSend = DateTime.Now.AddDays(1),
+			//	Pallets = new List<Pallet> { pallet }
+			//};
+			//pallet.Issue = issue;
+			//pallet.IssueId = issue.Id;
+			DbContext.Pallets.AddRange(pallet, pallet1);
+			//DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+			// Act
 			var receiptId9 = Guid.Parse("91111111-1111-1111-1111-111111111111");
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId9, "P1", "P2", "tester"));
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId9, pallet.Id, pallet1.Id, "tester"));
 			//Assert
 			Assert.False(result.IsSuccess);
 			Assert.Contains("Zamówienie nie zostało znalezione.", result.Error);
@@ -135,14 +241,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var productA = new Product { Name = "ProdA", SKU = "A", Category = category };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.ToIssue,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>{
@@ -172,7 +278,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, "P1", "P2", "tester"));
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 
 			// Assert
 			Assert.False(result.IsSuccess);
@@ -199,14 +305,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.ToIssue,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.ToIssue,
 				ProductsOnPallet = new List<ProductOnPallet>{
@@ -237,7 +343,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			await DbContext.SaveChangesAsync();
 			//Act
 			//var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, "P1", "P2", "tester"));
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 			//Assert
 			Assert.False(result.IsSuccess);
 			Assert.Contains("błędny status", result.Error);

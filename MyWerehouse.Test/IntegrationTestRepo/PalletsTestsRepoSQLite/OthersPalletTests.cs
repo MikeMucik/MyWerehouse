@@ -33,7 +33,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Locations.AddRange(location1, location2);
 			var pallet1 = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.ToIssue,
@@ -41,7 +41,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q1011",
+				PalletNumber = "Q1011",
 				DateReceived = DateTime.Now,
 				LocationId = 2,
 				Status = PalletStatus.Available,
@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Locations.AddRange(location1, location2);
 			var pallet1 = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -86,7 +86,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q1011",
+				PalletNumber = "Q1011",
 				DateReceived = DateTime.Now,
 				LocationId = 2,
 				Status = PalletStatus.ToIssue,
@@ -125,7 +125,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Locations.AddRange(location1, location2);
 			var pallet1 = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -133,7 +133,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q1011",
+				PalletNumber = "Q1011",
 				DateReceived = DateTime.Now,
 				LocationId = 2,
 				Status = PalletStatus.ToIssue,
@@ -172,7 +172,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Locations.AddRange(location1, location2);
 			var pallet1 = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -180,7 +180,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q1011",
+				PalletNumber = "Q1011",
 				DateReceived = DateTime.Now,
 				LocationId = 2,
 				Status = PalletStatus.ToIssue,

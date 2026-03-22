@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public Guid IssueId { get; set; }
 		public int IssueNumber { get; set; }
 		public virtual Issue Issue { get; set; }
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public virtual Product Product { get; set; }
 		public int Quantity { get; set; }
 		public DateOnly BestBefore { get; set; }

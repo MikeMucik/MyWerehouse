@@ -59,7 +59,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				result = result.Where(i => i.Client.Name == filter.ClientName);
 			}
-			if (filter.ProductId > 0)
+			//if (filter.ProductId != Guid.Empty)
+			if (filter.ProductId.HasValue)
 			{
 				result = result.Where(i => i.Pallets.Any(ip => ip.ProductsOnPallet.Any(ipp => ipp.ProductId == filter.ProductId)));
 			}
@@ -89,7 +90,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.OrderBy(p => p.LocationId)
 				.Select(p => new PalletWithLocation
 				{
-					PalletId = p.Id.ToString(),
+					PalletId = p.Id,
+					PalletNumber = p.PalletNumber.ToString(),
 					LocationId = p.LocationId,
 				})
 				.ToListAsync();

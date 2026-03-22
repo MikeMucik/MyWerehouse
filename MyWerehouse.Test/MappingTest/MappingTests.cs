@@ -123,7 +123,7 @@ namespace MyWerehouse.Test.MappingTest
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var dto = new CreatePalletReceiptDTO
 			{
-				Id = "Q0001",
+				PalletNumber = "Q0001",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				ReceiptId = receiptId1,

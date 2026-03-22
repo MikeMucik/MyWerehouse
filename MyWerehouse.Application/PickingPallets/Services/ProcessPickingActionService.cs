@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		{
 			_createPalletOrAddToPalletService = createPalletOrAddToPalletService;			
 		}
-		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, int productId, int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion)
+		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, Guid productId, int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion)
 		{
 			var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId);
 			if (productOnSourcePallet is null)

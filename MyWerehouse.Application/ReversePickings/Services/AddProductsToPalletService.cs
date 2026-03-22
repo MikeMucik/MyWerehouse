@@ -69,7 +69,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			var newNumber = await _palletRepo.GetNextPalletIdAsync();
 			var newPallet = new Pallet
 			{
-				Id = newNumber,
+				PalletNumber = newNumber,
 				DateReceived = DateTime.UtcNow,
 				LocationId = 100100,
 				Status = PalletStatus.InStock,				
@@ -85,7 +85,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			};
 			_palletRepo.AddPallet(newPallet);
 			newPallet.AddHistory(PalletStatus.InStock, ReasonMovement.ReversePicking, userId);
-			return ReversePickingResult.Ok("Dodano towar do nowej palety.", task.ProductId, newPallet.Id);
+			return ReversePickingResult.Ok("Dodano towar do nowej palety.", task.ProductId, newPallet.Id, newPallet.PalletNumber);
 		}
 	}
 }

@@ -77,14 +77,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			DbContext.Locations.AddRange(location1, location2);
 			var pallet1 = new Pallet
 			{
-				Id = "Q3000",
+				PalletNumber = "Q3000",
 				DateReceived = DateTime.Now,
 				Location = location1,
 				Status = PalletStatus.Available,
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q3001",
+				PalletNumber = "Q3001",
 				DateReceived = DateTime.Now,
 				Location = location2,
 				Status = PalletStatus.Available,
@@ -117,8 +117,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 
 			Assert.Equal("U005", result.PerformedBy);
 			Assert.Equal(1, result.ClientId);
-			Assert.Contains(result.Pallets, p => p.Id == "Q3000");
-			Assert.Contains(result.Pallets, p => p.Id == "Q3001");
+			Assert.Contains(result.Pallets, p => p.PalletNumber == "Q3000");
+			Assert.Contains(result.Pallets, p => p.PalletNumber == "Q3001");
 
 			foreach (var item in result.Pallets)
 			{
@@ -181,7 +181,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			DbContext.Locations.AddRange(location1, location2);
 			var pallet1 = new Pallet
 			{
-				Id = "Q3000",
+				PalletNumber = "Q3000",
 				DateReceived = DateTime.Now,
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -191,7 +191,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q3001",
+				PalletNumber = "Q3001",
 				DateReceived = DateTime.Now,
 				Location = location2,
 				Status = PalletStatus.Available,
@@ -228,8 +228,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 
 			Assert.Equal("U005", result.PerformedBy);
 			Assert.Equal(1, result.ClientId);
-			Assert.Contains(result.Pallets, p => p.Id == "Q3000");
-			Assert.Contains(result.Pallets, p => p.Id == "Q3001");
+			Assert.Contains(result.Pallets, p => p.PalletNumber == "Q3000");
+			Assert.Contains(result.Pallets, p => p.PalletNumber == "Q3001");
 
 			foreach (var pallet in result.Pallets)
 			{
@@ -240,8 +240,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			}
 
 			// --- Paleta 1: Q3000 ---
-			var p1 = result.Pallets.First(p => p.Id == "Q3000");
-			Assert.Equal("Q3000", p1.Id);
+			var p1 = result.Pallets.First(p => p.PalletNumber == "Q3000");
+			Assert.Equal("Q3000", p1.PalletNumber);
 			Assert.Equal(1, p1.ProductsOnPallet.Count);
 
 			var p1Prod = p1.ProductsOnPallet.First();
@@ -250,8 +250,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			Assert.Equal(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), p1Prod.BestBefore);
 
 			// --- Paleta 2: Q3001 ---
-			var p2 = result.Pallets.First(p => p.Id == "Q3001");
-			Assert.Equal("Q3001", p2.Id);
+			var p2 = result.Pallets.First(p => p.PalletNumber == "Q3001");
+			Assert.Equal("Q3001", p2.PalletNumber);
 			Assert.Equal(1, p2.ProductsOnPallet.Count);
 
 			var p2Prod = p2.ProductsOnPallet.First();

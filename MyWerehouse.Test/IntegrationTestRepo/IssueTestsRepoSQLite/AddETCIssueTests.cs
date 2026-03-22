@@ -64,7 +64,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 
 			var pallet1 = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -72,7 +72,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q1011",
+				PalletNumber = "Q1011",
 				DateReceived = DateTime.Now,
 				LocationId = 2,
 				Status = PalletStatus.Available,
@@ -97,7 +97,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			{
 				new Pallet
 				{
-					Id = "P1",
+					PalletNumber = "P1",
 					DateReceived = new DateTime(2025, 3, 3),
 					Location = location1,
 					Status = PalletStatus.Available,
@@ -108,7 +108,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			},
 				new Pallet
 				{
-					Id = "P2",
+					PalletNumber = "P2",
 					DateReceived = new DateTime(2025, 3, 3),
 					Location = location2,
 					Status = PalletStatus.Available,
@@ -119,7 +119,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 				},
 				new Pallet
 				{
-					Id = "P3",
+					PalletNumber = "P3",
 					DateReceived = new DateTime(2025, 3, 3),
 					Location = location3,
 					Status = PalletStatus.Available,
@@ -163,8 +163,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 
 			Assert.Equal("U003", result.PerformedBy);
 			Assert.Equal(1, result.ClientId);
-			Assert.Contains(result.Pallets, p => p.Id == "Q1010");
-			Assert.Contains(result.Pallets, p => p.Id == "Q1011");
+			Assert.Contains(result.Pallets, p => p.PalletNumber == "Q1010");
+			Assert.Contains(result.Pallets, p => p.PalletNumber == "Q1011");
 
 			foreach (var item in result.Pallets)
 			{
@@ -217,14 +217,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "Q1010",
+				PalletNumber = "Q1010",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,				
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q1011",
+				PalletNumber = "Q1011",
 				DateReceived = DateTime.Now,
 				LocationId = 2,
 				Status = PalletStatus.Available,				

@@ -6,20 +6,15 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.DomainExceptions
 {
-	public class DomainPalletException :DomainException
+	public class DomainProductOnPalletException :DomainException
 	{
 		public Guid PalletId { get; set; }
 		public string PalletNumber { get; set; }
-		public DomainPalletException(Guid palletId,string palletNumber)
-			:base($"Błąd przy zapisie do bazy palety o numerze {palletNumber}.") 
+		public DomainProductOnPalletException(Guid palletId, string palletNumber)
+			: base($"Brak produktów na palecie {palletNumber}.")
 		{
 			PalletId = palletId;
 			PalletNumber = palletNumber;
 		}
-		public DomainPalletException()
-			: base($"Błąd przy zapisie do bazy.")
-		{			
-		}
-
 	}
 }

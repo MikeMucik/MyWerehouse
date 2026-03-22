@@ -71,7 +71,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToIssue,
@@ -141,8 +141,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.NotNull(result);
 			var pallets = DbContext.Pallets.Where(p=>p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
-			Assert.Contains(pallets, p => p.Id == "Q1001"); // pierwotna
-			Assert.Contains(pallets, p => p.Id == "Q1002"); // ręczna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // pierwotna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // ręczna
 
 			Assert.Contains("Towar dołączono", result.Message);
 			var handTask = DbContext.PickingTasks.Single(h =>
@@ -174,7 +174,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var sourcePalletAfter = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.Single(p => p.Id == "Q1000");
+				.Single(p => p.PalletNumber == "Q1000");
 
 			Assert.Equal(80, sourcePalletAfter.ProductsOnPallet.Single().Quantity);
 
@@ -242,7 +242,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -260,7 +260,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToIssue,
@@ -323,8 +323,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.True(result.IsSuccess);
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
-			Assert.Contains(pallets, p => p.Id == "Q1001"); // pierwotna
-			Assert.Contains(pallets, p => p.Id == "Q1002"); // ręczna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // pierwotna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // ręczna
 
 			Assert.Contains("Towar dołączono", result.Message);
 			var handTask = DbContext.PickingTasks.Single(h =>
@@ -356,7 +356,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var sourcePalletAfter = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.Single(p => p.Id == "Q1000");
+				.Single(p => p.PalletNumber == "Q1000");
 
 			Assert.Equal(80, sourcePalletAfter.ProductsOnPallet.Single().Quantity);
 
@@ -423,7 +423,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -441,7 +441,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToIssue,
@@ -494,8 +494,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.True(result.IsSuccess);
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
-			Assert.Contains(pallets, p => p.Id == "Q1001"); // pierwotna
-			Assert.Contains(pallets, p => p.Id == "Q1002"); // ręczna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // pierwotna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // ręczna
 
 			Assert.Contains("Towar dołączono", result.Message);
 			var handTask = DbContext.PickingTasks.Single(h =>
@@ -528,7 +528,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var sourcePalletAfter = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.Single(p => p.Id == "Q1000");
+				.Single(p => p.PalletNumber == "Q1000");
 
 			Assert.Equal(88, sourcePalletAfter.ProductsOnPallet.Single().Quantity);
 			//
@@ -596,7 +596,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var sourcePallet1 = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.Available,
@@ -614,7 +614,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1001",
+				PalletNumber = "Q1001",
 				DateReceived = new DateTime(2025, 8, 8),
 				Location = location1,
 				Status = PalletStatus.ToIssue,

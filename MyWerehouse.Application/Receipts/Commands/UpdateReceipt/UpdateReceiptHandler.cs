@@ -61,13 +61,13 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				{
 					if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
 					{
-						return AppResult<Unit>.Fail($"Paleta o numerze {item.Id} należy do innego przyjęcia.", ErrorType.Conflict);
+						return AppResult<Unit>.Fail($"Paleta o numerze {item.PalletNumber} należy do innego przyjęcia.", ErrorType.Conflict);
 					}
 				}
 				//List palet do usunięcia z bazy danych 
 				var incomingPalletsIds = request.DTO.Pallets
 					.Select(p => p.Id)
-					.Where(id => !string.IsNullOrEmpty(id))
+					.Where(id => id != Guid.Empty)//
 					.ToHashSet();
 				var palletToDelete = existingReceipt.Pallets
 					.Where(p => !incomingPalletsIds.Contains(p.Id))
@@ -95,7 +95,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				}
 				//Dodanie nowych palet
 				var palletsAdded = request.DTO.Pallets
-					.Where(p => p.Id == null)
+					.Where(p => p.Id == Guid.Empty)//
 					.ToList();
 				foreach (var palletToAdd in palletsAdded)
 				{

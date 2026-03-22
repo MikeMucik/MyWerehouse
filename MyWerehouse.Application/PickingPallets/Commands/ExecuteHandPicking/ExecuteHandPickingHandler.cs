@@ -66,7 +66,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				{
 					return AppResult< Unit>.Fail("Zadania nie można zrealizować, mniej na palecie niż chęć pobrania", ErrorType.Conflict);
 				}
-				var pickingHand = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, product.Id);
+				var pickingHand = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, product.ProductId);
 				var pickingTask = pickingHand
 					.Where(a => a.VirtualPallet == null)
 					.First();

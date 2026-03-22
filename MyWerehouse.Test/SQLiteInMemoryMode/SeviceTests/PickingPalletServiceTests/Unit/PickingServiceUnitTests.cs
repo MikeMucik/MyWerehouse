@@ -115,7 +115,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};			
 			var pallet1 = new Pallet
 			{
-				Id = "Q10",
+				PalletNumber = "Q10",
 				DateReceived = new DateTime(2025, 8, 8),				
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -130,7 +130,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q11",
+				PalletNumber = "Q11",
 				DateReceived = new DateTime(2025, 9, 9),				
 				Location = location2,
 				Status = PalletStatus.ToPicking,
@@ -146,7 +146,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet3 = new Pallet
 			{
-				Id = "Q12",
+				PalletNumber = "Q12",
 				DateReceived = new DateTime(2025, 10, 10),
 				Location = location3,
 				Status = PalletStatus.ToPicking,
@@ -162,7 +162,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet4 = new Pallet
 			{
-				Id = "Q13",
+				PalletNumber = "Q13",
 				DateReceived = new DateTime(2025, 11, 11),
 				Location = location4,
 				Status = PalletStatus.ToPicking,
@@ -398,7 +398,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 
 			var pallet1 = new Pallet
 			{
-				Id = "Q10",
+				PalletNumber = "Q10",
 				DateReceived = new DateTime(2025, 8, 8),				
 				Location = location1,
 				Status = PalletStatus.ToPicking,
@@ -413,7 +413,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet2 = new Pallet
 			{
-				Id = "Q11",
+				PalletNumber = "Q11",
 				DateReceived = new DateTime(2025, 9, 9),				
 				Location = location2,
 				Status = PalletStatus.ToPicking,
@@ -429,7 +429,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet3 = new Pallet
 			{
-				Id = "Q12",
+				PalletNumber = "Q12",
 				DateReceived = new DateTime(2025, 10, 10),
 				Location = location3,
 				Status = PalletStatus.ToPicking,
@@ -445,7 +445,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet4 = new Pallet
 			{
-				Id = "Q13",
+				PalletNumber = "Q13",
 				DateReceived = new DateTime(2025, 11, 11),
 				Location = location4,
 				Status = PalletStatus.ToPicking,

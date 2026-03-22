@@ -23,6 +23,7 @@ namespace MyWerehouse.Application.PickingPallets.Events.CreateHistoryPicking
 				PickingTaskId = request.PickingTaskId,
 				IssueNumber = request.IssueNumber,
 				PalletId = request.PalletId,
+				PalletNumber = request.PalletNumber,
 				IssueId = request.IssueId,
 				ProductId = request.ProductId,
 				QuantityAllocated = request.QuantityAllocated,

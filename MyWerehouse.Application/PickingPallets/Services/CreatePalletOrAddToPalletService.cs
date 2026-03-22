@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		{
 			_palletRepo = palletRepo;		
 		}
-		public async Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, int productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion)
+		public async Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, Guid productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion)
 		{
 			//var issue = await _issueRepo.GetIssueByIdAsync(issueId);			
 			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issue.Id);
@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				var sourcePalletBB = bestBefore;
 				var pallet = new Pallet
 				{
-					Id = newIdPallet,
+					PalletNumber = newIdPallet,
 					Status = PalletStatus.Picking,
 					IssueId = issue.Id,
 					LocationId = 100100,//pickingzone location
@@ -38,7 +38,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 						{
 							new ProductOnPallet
 							{
-								PalletId = newIdPallet,
+								//PalletNumber = pallet.PalletNumber,
 								ProductId =productId,
 								Quantity =quantity,
 								DateAdded = DateTime.UtcNow,
@@ -46,19 +46,19 @@ namespace MyWerehouse.Application.PickingPallets.Services
 							}
 						},
 				};
-				_palletRepo.AddPallet(pallet);
+			var palletId =	_palletRepo.AddPallet(pallet);
 				//issue.Pallets.Add(pallet);
 				issue.AssignPallet(pallet, userId);
 				pallet.AddHistory(PalletStatus.Picking, ReasonMovement.Picking, userId);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
-					pickingTask.MarkPicked(newIdPallet); //
+					pickingTask.MarkPicked(palletId); //
 				}
 				else
 				{
-					pickingTask.MarkPartiallyPicked(newIdPallet, quantity);
+					pickingTask.MarkPartiallyPicked(palletId, quantity);
 				}				
-				return new CreatePalletResult(true, newIdPallet); //pokaż komunikat weź nową paletę
+				return new CreatePalletResult(true, palletId); //pokaż komunikat weź nową paletę
 			}
 			else
 			{

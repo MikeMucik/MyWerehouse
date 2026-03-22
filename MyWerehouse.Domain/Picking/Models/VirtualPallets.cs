@@ -15,7 +15,7 @@ namespace MyWerehouse.Domain.Picking.Models
 	public class VirtualPallet
 	{
 		public int Id { get; set; }
-		public string PalletId { get; set; }
+		public Guid PalletId { get; set; }
 		public Pallet Pallet { get; set; }
 		public int InitialPalletQuantity { get; set; }
 		public int LocationId { get; set; }//needed??

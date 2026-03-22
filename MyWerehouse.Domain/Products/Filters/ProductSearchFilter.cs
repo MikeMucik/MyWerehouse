@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace MyWerehouse.Domain.Products.Filters;
 public class ProductSearchFilter
 {
+	//public Guid ProductId { get; set; }//
 	public string ProductName { get; set; }
 	public string SKU { get; set; }
 	public string Category { get; set; }

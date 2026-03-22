@@ -58,7 +58,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var product1 = new Product
 			{
-				Id = 10,
+				//Id = 10,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
@@ -66,7 +66,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var product2 = new Product
 			{
-				Id = 11,
+				//Id = 11,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
@@ -77,22 +77,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var performedBy = "Janek";
 			var loadedPallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Status = PalletStatus.Loaded,
 				LocationId = 10,
 				ProductsOnPallet = new List<ProductOnPallet>
 		{
-			new ProductOnPallet { ProductId = 10, Quantity = 5, }
+			new ProductOnPallet { ProductId = product1.Id, Quantity = 5, }
 		}
 			};
 			var notLoadedPallet = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Status = PalletStatus.ToIssue,
 				LocationId = 20,
 				ProductsOnPallet = new List<ProductOnPallet>
 				{
-					new ProductOnPallet{ProductId =11, Quantity =10 } }
+					new ProductOnPallet{ProductId =product2.Id, Quantity =10 } }
 			};
 			var issue = new Issue
 			{
@@ -142,13 +142,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(IssueStatus.IsShipped, updatedIssue.IssueStatus);
 
 			// sprawdź czy P2 została usunięta z przypisania do zlecenia:
-			var palletP2 = await DbContext.Pallets.FindAsync("P2");
+			//var palletP2 = await DbContext.Pallets.FindAsync("P2");
+			var palletP2 = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "P2");
 			Assert.NotNull(palletP2);
 			Assert.Equal(PalletStatus.Available, palletP2.Status);
 			Assert.Null(palletP2.IssueId);
 			// Historia palet — sprawdź, czy została utworzona dla załadowanej palety
 			var palletHistories = await DbContext.PalletMovements
-				.FirstOrDefaultAsync(h => h.PalletId == "P1");
+				.FirstOrDefaultAsync(h => h.PalletNumber == "P1");
 
 			Assert.NotNull(palletHistories);
 			Assert.Equal(PalletStatus.Loaded, palletHistories.PalletStatus);
@@ -156,7 +157,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			// Sprawdź, że dla palety P2 (niezaładowanej) też utworzono historię zmiany statusu
 			var palletHistoryP2 = await DbContext.PalletMovements
-				.FirstOrDefaultAsync(h => h.PalletId == "P2");
+				.FirstOrDefaultAsync(h => h.PalletNumber == "P2");
 			Assert.NotNull(palletHistoryP2);
 			Assert.Equal(PalletStatus.Available, palletHistoryP2.PalletStatus);
 			Assert.Equal(performedBy, palletHistoryP2.PerformedBy);
@@ -167,7 +168,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(loadingHistories);
 
 			// Sprawdź, że zawiera wpis dla załadowanej palety P1
-			Assert.Contains(loadingHistories.Details, h => h.PalletId == "P1");
+			Assert.Contains(loadingHistories.Details, h => h.PalletNumber == "P1");
 
 			// Sprawdź, że status i wykonawca się zgadzają			
 			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);

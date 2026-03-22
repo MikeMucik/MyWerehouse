@@ -6,7 +6,9 @@ namespace MyWerehouse.Domain.Products.Models
 {
 	public class Product
 	{
-		public int Id { get; set; }
+		//public Guid Id { get; private set; } = Guid.NewGuid();
+		public Guid Id { get; set; } = Guid.NewGuid();
+		//public int ProductId { get; set; }
 		public string Name { get; set; }
 		public string SKU { get; set; }		
 		public DateTime AddedItemAd {  get; set; } = DateTime.Now;
@@ -18,5 +20,21 @@ namespace MyWerehouse.Domain.Products.Models
 		public virtual ICollection<Issue> IssueList { get; set; } = new List<Issue>();
 		public ProductDetail Details { get; set; }
 		public virtual Inventory InventoryItem { get; set; }
+		public Product()
+		{
+			
+		}
+		public static Product Create(Guid id, string name, string SKU, int  categoryId, bool isDeleted, int cartoonPerPallets)
+		{
+			return new Product
+			{
+				Id = id,
+				Name = name,
+				SKU = SKU,
+				CategoryId = categoryId,
+				IsDeleted = isDeleted,
+				CartonsPerPallet = cartoonPerPallets
+			};
+		}
 	}
 }

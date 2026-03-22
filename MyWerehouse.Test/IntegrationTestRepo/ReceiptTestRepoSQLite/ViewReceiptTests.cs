@@ -47,22 +47,24 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1000"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
 		}
 		[Fact]
 		public void ShowListReceiptsByProduct_GetIssuesByFilter_ReturnList()
 		{
 			//Arrange
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+
 			var filter = new IssueReceiptSearchFilter
 			{
-				ProductId = 10
+				ProductId = productId1
 			};
 			//Act
 			var result = _receiptRepo.GetReceiptByFilter(filter);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1000"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
 		}
 		[Fact]
 		public void ShowListReceiptsDate_GetIssuesByFilter_ReturnList()
@@ -79,8 +81,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1000"));
-			Assert.Contains(result, p => p.Pallets.Any(i => i.Id == "Q1001"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1001"));
 		}
 	}
 }

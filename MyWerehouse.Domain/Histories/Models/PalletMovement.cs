@@ -10,7 +10,8 @@ namespace MyWerehouse.Domain.Histories.Models
 	public class PalletMovement
 	{
 		public int Id { get; set; }
-		public string PalletId { get; set; }
+		public Guid PalletId { get; set; }
+		public string PalletNumber { get; set; }
 		public int? SourceLocationId { get; set; }
 		public string? SourceLocationSnapShot { get; set; }
 		public int? DestinationLocationId { get; set; }

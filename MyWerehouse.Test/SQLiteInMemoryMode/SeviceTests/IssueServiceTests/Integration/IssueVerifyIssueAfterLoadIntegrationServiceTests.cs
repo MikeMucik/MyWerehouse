@@ -39,14 +39,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet>{
@@ -148,14 +148,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet>{
@@ -240,14 +240,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.ToIssue,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.Available,
 				ProductsOnPallet = new List<ProductOnPallet>{
@@ -322,14 +322,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet>{
@@ -403,14 +403,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product1 = new Product { Name = "Prod2", SKU = "SKU2", Category = category, CartonsPerPallet = 20 };
 			var pallet = new Pallet
 			{
-				Id = "P1",
+				PalletNumber = "P1",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
 			};
 			var pallet1 = new Pallet
 			{
-				Id = "P2",
+				PalletNumber = "P2",
 				Location = location,
 				Status = PalletStatus.Loaded,
 				ProductsOnPallet = new List<ProductOnPallet>{

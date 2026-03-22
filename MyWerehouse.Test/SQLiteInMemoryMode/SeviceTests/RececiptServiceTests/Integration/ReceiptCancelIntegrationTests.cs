@@ -40,27 +40,49 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
+			var initialCategory = new Category
+			{
+				Id = 1,
+				Name = "name",
+				IsDeleted = false
+			};
+			var product = new Product
+			{
+				//Id = 10,
+				Name = "Test",
+				SKU = "666666",
+				CategoryId = 1,
+				IsDeleted = false,
+			};
+			var product1 = new Product
+			{
+				//Id = 1,
+				Name = "Test",
+				SKU = "666666",
+				CategoryId = 1,
+				IsDeleted = false,
+			};
 			var initialPallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
-				Status = PalletStatus.Available,
-				//ReceiptId = 1,
+				Status = PalletStatus.Available,				
 			};
 			var initialPallet1 = new Pallet
 			{
-				Id = "Q2000",
+				PalletNumber = "Q2000",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
-				Status = PalletStatus.Available,
-				//ReceiptId = 1,
+				Status = PalletStatus.Available,				
 			};
 			var initialProductOnPallet = new ProductOnPallet
 			{
 				Id = 1,
-				PalletId = "Q1000",
-				ProductId = 10,
+				Pallet = initialPallet,
+				//PalletId = "Q1000",
+				//ProductId = 10,
+				Product = product,
 				Quantity = 100,
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
@@ -68,8 +90,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var initialProductOnPallet1 = new ProductOnPallet
 			{
 				Id = 2,
-				PalletId = "Q2000",
-				ProductId = 1,
+				Pallet = initialPallet1,
+				//PalletId = "Q2000",
+				//ProductId = 1,
+				Product = product1,
 				Quantity = 200,
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
@@ -93,30 +117,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Height = 1,
 				Position = 1
 			};
-			var initialProduct = new Product
-			{
-				Id = 10,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			var initialProduct1 = new Product
-			{
-				Id = 1,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			var initialCategory = new Category
-			{
-				Id = 1,
-				Name = "name",
-				IsDeleted = false
-			};
+			
+			
 			DbContext.Categories.Add(initialCategory);
-			DbContext.Products.AddRange(initialProduct, initialProduct1);
+			DbContext.Products.AddRange(product, product1);
 			DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
 			DbContext.Pallets.AddRange(initialPallet, initialPallet1);
 			DbContext.Clients.Add(initailCLient);
@@ -245,7 +249,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialPallet = new Pallet
 			{
-				Id = "Q1000",
+				PalletNumber = "Q1000",
 				DateReceived = DateTime.Now,
 				Location = initialLocation,
 				Status = PalletStatus.Available,
@@ -253,7 +257,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialPallet1 = new Pallet
 			{
-				Id = "Q2000",
+				PalletNumber = "Q2000",
 				DateReceived = DateTime.Now,
 				Location = initialLocation,
 				Status = PalletStatus.Available,
@@ -261,15 +265,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialProductOnPallet = new ProductOnPallet
 			{				
-				PalletId = "Q1000",
+				Pallet = initialPallet,
+				//PalletId = "Q1000",
 				Product = initialProduct,
 				Quantity = 100,
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
 			};
 			var initialProductOnPallet1 = new ProductOnPallet
-			{				
-				PalletId = "Q2000",
+			{		
+				Pallet = initialPallet1,
+				//PalletId = "Q2000",
 				Product = initialProduct1,
 				Quantity = 200,
 				DateAdded = DateTime.Now,

@@ -18,7 +18,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Arrange
 			var product1 = new Product
 			{
-				Id = 10,
+				//Id = 10,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			};
 			var pallet = new Pallet
 			{
-				Id = "Q1234",
+				PalletNumber = "Q1234",
 				DateReceived = DateTime.Now,
 				LocationId = 1,
 				Status = PalletStatus.Available,
@@ -34,8 +34,10 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			};
 			var product = new ProductOnPallet
 			{
-				PalletId = "Q1234",
-				ProductId = 10,
+				//PalletId = "Q1234",
+				Pallet = pallet,
+				//ProductId = 10,
+				Product = product1,
 				Quantity = 100,
 				DateAdded = DateTime.Now,
 				BestBefore = new DateOnly(2027, 3, 3)
@@ -57,9 +59,9 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			_context.SaveChanges();
 			var productId = 10;
 			//Act
-			await _productService.DeleteProductAsync(productId);
+			await _productService.DeleteProductAsync(product1.Id);
 			//Assert
-			var result = _context.Products.FirstOrDefault(p => p.Id == productId);
+			var result = _context.Products.FirstOrDefault(p => p.Id == product1.Id);
 			Assert.NotNull(result);
 			Assert.True(result.IsDeleted);
 		}
@@ -69,7 +71,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Arrange
 			var product1 = new Product
 			{
-				Id = 10,
+				//Id = 10,
 				Name = "Test",
 				SKU = "666666",
 				CategoryId = 1,
@@ -79,20 +81,22 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			_context.SaveChanges();
 			var productId = 10;
 			//Act
-			await _productService.DeleteProductAsync(productId);
+			await _productService.DeleteProductAsync(product1.Id);
 			//Assert
-			var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+			var product = _context.Products.FirstOrDefault(p => p.Id == product1.Id);
 			Assert.Null(product);
 		}
 		[Fact]
 		public async Task NotProperIdProduct_DeleteProductAsync_ThrowException()
 		{
 			//Arrange
-			var productId = 9891;
+			var productId =Guid.Parse("00000000-0000-0000-0000-000000000000");
 			//Act&Assert
-			var e =await Assert.ThrowsAsync<DomainException>(() => _productService.DeleteProductAsync(productId));
-			Assert.NotNull(e);
-			Assert.Contains("Brak produktu o tym numerze", e.Message);
+			//var e =await Assert.ThrowsAsync<DomainException>(() => _productService.DeleteProductAsync(productId));
+			var result =await _productService.DeleteProductAsync(productId);
+			//Assert.NotNull(e);
+			Assert.NotNull(result);
+			Assert.Contains("Brak produktu o tym numerze", result.Error);
 		}
 	}
 }

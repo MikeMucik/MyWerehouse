@@ -12,7 +12,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 {
 	public class UpdatePalletDTO : IMapFrom<Pallet>
 	{
-		public string Id { get; set; }
+		public Guid Id { get; set; }
+		public string PalletNumber { get; set; }//
 		public DateTime DateReceived { get; set; }
 		public int LocationId { get; set; }
 		//public virtual Location Location { get; set; }

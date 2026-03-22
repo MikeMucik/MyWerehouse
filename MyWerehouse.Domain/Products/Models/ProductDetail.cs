@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Products.Models
 		public int Width { get; set; }
 		public int Weight { get; set; }
 		public string Description {  get; set; }
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public Product Product { get; set; }
 	}
 }

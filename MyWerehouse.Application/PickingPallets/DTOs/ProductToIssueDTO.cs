@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 		public int ClientIdOut { get; set; }
 		public Guid IssueId { get; set; }
 		public int IssueNumber { get; set; }
-		public int ProductId { get; set; }
+		public Guid ProductId { get; set; }
 		public int Quantity { get; set; }		
 	}
 }

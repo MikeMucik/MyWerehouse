@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Pallets.DTOs
 {
 	public class ProductOnPalletDTO :IMapFrom<ProductOnPallet>
 	{
-		public int Id { get; set; }
+		//public int Id { get; set; }
 		public Guid ProductId { get; set; }		
 		public Guid PalletId { get; set; }		
 		public int Quantity { get; set; }
@@ -20,7 +20,7 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public DateOnly? BestBefore { get; set; } // Może być null, jeśli produkt nie ma daty ważności
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<ProductOnPalletDTO, ProductOnPallet>();
+			//profile.CreateMap<ProductOnPalletDTO, ProductOnPallet>();
 				//.ForMember(dest => dest.Id, opt => opt.Ignore());
 			profile.CreateMap<ProductOnPallet, ProductOnPalletDTO>();
 		}
@@ -31,7 +31,6 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		{
 			RuleFor(pp => pp.ProductId)
 				.NotEqual(Guid.Empty)
-			//	.NotEqual(null)
 				.WithMessage("Produkt na palecie musi mieć numer produktu");
 			RuleFor(pp => pp.Quantity)
 				.GreaterThan(0)

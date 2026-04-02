@@ -12,33 +12,35 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 {
 	public class UpdateProductIntegrationTests : ProductIntegrationCommand
 	{
+		//private class SeedFor
 
 		[Fact]
 		public async Task ProperData_UpdateProductAsync_ChangeData()
 		{
 			// Arrange			
-			
-			var updatingProduct = new Product
-			{
-				//Id = 4,
-				Name = "Test",
-				CategoryId = 1,
-				SKU = "dede",
-				IsDeleted = false,
-				AddedItemAd = new DateTime(2024, 2, 2),
-				//Details = details
-			};
-			var details = new ProductDetail
-			{
-				//Id = 4,
-				//ProductId = 4,
-				Product = updatingProduct,
-				Height = 1,
-				Width = 1,
-				Length = 1,
-				Weight = 1,
-				Description = "Test"
-			};
+
+			var updatingProduct = Product.Create("Test", "dede", 1, 56);
+			//{
+			//	//Id = 4,
+			//	Name = "Test",
+			//	CategoryId = 1,
+			//	SKU = "dede",
+			//	IsDeleted = false,
+			//	AddedItemAd = new DateTime(2024, 2, 2),
+			//	//Details = details
+			//};
+			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
+			//var details = new ProductDetail
+			//{
+			//	//Id = 4,
+			//	//ProductId = 4,
+			//	Product = updatingProduct,
+			//	Height = 1,
+			//	Width = 1,
+			//	Length = 1,
+			//	Weight = 1,
+			//	Description = "Test"
+			//};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
@@ -50,51 +52,53 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				CategoryId = 2,
 				SKU = "q1233",
 				IsDeleted = false,
-				AddedItemAd = DateTime.Now,				
+				AddedItemAd = DateTime.Now,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
 				Length = 10,
 				Description = "TestOk",
-			};		
-				await _productService.UpdateProductAsync(updatedProduct);			
+			};
+			await _productService.UpdateProductAsync(updatedProduct);
 			//Assert			
-				var result = _context.Products
-					.Include(d => d.Details)
-					.FirstOrDefault(x => x.Id == updatingProduct.Id);
-				Assert.NotNull(result);
-				Assert.Equal(updatedProduct.Name, result.Name);
-				Assert.Equal(updatedProduct.SKU, result.SKU);
-				Assert.Equal(updatedProduct.CategoryId, result.CategoryId);
-				Assert.Equal(updatedProduct.Length, result.Details.Length);
-				Assert.Equal(updatedProduct.Height, result.Details.Height);			
+			var result = _context.Products
+				.Include(d => d.Details)
+				.FirstOrDefault(x => x.Id == updatingProduct.Id);
+			Assert.NotNull(result);
+			Assert.Equal(updatedProduct.Name, result.Name);
+			Assert.Equal(updatedProduct.SKU, result.SKU);
+			Assert.Equal(updatedProduct.CategoryId, result.CategoryId);
+			Assert.Equal(updatedProduct.Length, result.Details.Length);
+			Assert.Equal(updatedProduct.Height, result.Details.Height);
 		}
 		[Fact]
 		public async Task NotProperDataName_UpdateProductAsync_ThrowsException()
 		{
 			// Arrange			
-			
-			var updatingProduct = new Product
-			{
-				//Id = 5,
-				Name = "Test",
-				CategoryId = 1,
-				SKU = "dede",
-				IsDeleted = false,
-				AddedItemAd = new DateTime(2024, 2, 2),
-				//Details = details
-			};
-			var details = new ProductDetail
-			{
-				//Id = 5,
-				//ProductId = 5,
-				Product = updatingProduct,
-				Height = 1,
-				Width = 1,
-				Length = 1,
-				Weight = 1,
-				Description = "Test"
-			};
+			var updatingProduct = Product.Create("Test", "dede", 1, 56);
+			//var updatingProduct = new Product
+			//{
+			//	//Id = 5,
+			//	Name = "Test",
+			//	CategoryId = 1,
+			//	SKU = "dede",
+			//	IsDeleted = false,
+			//	AddedItemAd = new DateTime(2024, 2, 2),
+			//	//Details = details
+			//};
+			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
+
+			//var details = new ProductDetail
+			//{
+			//	//Id = 5,
+			//	//ProductId = 5,
+			//	Product = updatingProduct,
+			//	Height = 1,
+			//	Width = 1,
+			//	Length = 1,
+			//	Weight = 1,
+			//	Description = "Test"
+			//};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
@@ -115,36 +119,38 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 				Description = "TestOk",
 
 			};
-				var e =await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(updatedProduct));
-				Assert.Contains("Uzupełnij dane - nazwa", e.Message);
-			
+			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(updatedProduct));
+			Assert.Contains("Uzupełnij dane - nazwa", e.Message);
+
 		}
 		[Fact]
 		public async Task NotProperDataLength_UpdateProductAsync_ThrowsException()
 		{
 			// Arrange			
-			
-			var updatingProduct = new Product
-			{
-				//Id = 6,
-				Name = "Test",
-				CategoryId = 1,
-				SKU = "dede",
-				IsDeleted = false,
-				AddedItemAd = new DateTime(2024, 2, 2),
-				//Details = details
-			};
-			var details = new ProductDetail
-			{
-				//Id = 6,
-				//ProductId = 6,
-				Product = updatingProduct,
-				Height = 1,
-				Width = 1,
-				Length = 1,
-				Weight = 1,
-				Description = "Test"
-			};
+			var updatingProduct = Product.Create("Test", "dede", 1, 56);
+			//var updatingProduct = new Product
+			//{
+			//	//Id = 6,
+			//	Name = "Test",
+			//	CategoryId = 1,
+			//	SKU = "dede",
+			//	IsDeleted = false,
+			//	AddedItemAd = new DateTime(2024, 2, 2),
+			//	//Details = details
+			//};
+			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
+
+			//var details = new ProductDetail
+			//{
+			//	//Id = 6,
+			//	//ProductId = 6,
+			//	Product = updatingProduct,
+			//	Height = 1,
+			//	Width = 1,
+			//	Length = 1,
+			//	Weight = 1,
+			//	Description = "Test"
+			//};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();

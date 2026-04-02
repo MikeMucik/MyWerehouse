@@ -79,7 +79,7 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<AppResult<Unit>> DeleteProductAsync(Guid id)
 		{
-			var product = await _productRepo.GetProductByIdAsync(id);// ?? throw new DomainException("Brak produktu o tym numerze");
+			var product = await _productRepo.GetProductByIdAsync(id);
 			if (product == null)
 			{
 				return AppResult<Unit>.Fail("Brak produktu o tym numerze", ErrorType.NotFound);
@@ -91,7 +91,8 @@ namespace MyWerehouse.Application.Services
 			var receipt = _receiptRepo.GetReceiptByFilter(filter);
 			if (await receipt.AnyAsync())
 			{
-				_productRepo.SwitchOffProduct(product);
+				product.Hide();
+				//_productRepo.SwitchOffProduct(product);
 			}
 			else
 			{

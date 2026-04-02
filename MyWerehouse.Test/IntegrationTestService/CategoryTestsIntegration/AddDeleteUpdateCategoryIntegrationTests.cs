@@ -24,15 +24,16 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 				Name = "TestCategory"
 
 			};
-			var product = new Product
-			{
-				//Id = 1,
-				Name = "fdsfd",
-				CategoryId = 1,
-				SKU = "aaa",
-				IsDeleted = false,
-				CartonsPerPallet = 56
-			};
+			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			//var product = new Product
+			//{
+			//	//Id = 1,
+			//	Name = "fdsfd",
+			//	CategoryId = 1,
+			//	SKU = "aaa",
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 56
+			//};
 
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -57,15 +58,16 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 				Name = "TestCategory"
 
 			};
-			var product = new Product
-			{
-				//Id = 1,
-				Name = "fdsfd",
-				CategoryId = 1,
-				SKU = "aaa",
-				IsDeleted = false,
-				CartonsPerPallet = 56
-			};
+			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			//var product = new Product
+			//{
+			//	//Id = 1,
+			//	Name = "fdsfd",
+			//	CategoryId = 1,
+			//	SKU = "aaa",
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 56
+			//};
 
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -91,15 +93,16 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 				Id = 1,
 				Name = "TestCategory"
 			};
-			var product = new Product
-			{
-				//Id = 1,
-				Name = "fdsfd",
-				CategoryId = 1,
-				SKU = "aaa",
-				IsDeleted = false,
-				CartonsPerPallet = 56
-			};
+			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			//var product = new Product
+			//{
+			//	//Id = 1,
+			//	Name = "fdsfd",
+			//	CategoryId = 1,
+			//	SKU = "aaa",
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 56
+			//};
 
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -148,15 +151,16 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 				Name = "TestCategory"
 
 			};
-			var product = new Product
-			{
-				//Id = 1,
-				Name = "fdsfd",
-				CategoryId = 1,
-				SKU = "aaa",
-				IsDeleted = false,
-				CartonsPerPallet = 56
-			};
+			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			//var product = new Product
+			//{
+			//	//Id = 1,
+			//	Name = "fdsfd",
+			//	CategoryId = 1,
+			//	SKU = "aaa",
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 56
+			//};
 
 			_context.Products.Add(product);
 			_context.Categories.Add(category);

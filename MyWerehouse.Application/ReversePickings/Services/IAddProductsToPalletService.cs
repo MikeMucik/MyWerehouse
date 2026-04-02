@@ -13,6 +13,6 @@ namespace MyWerehouse.Application.ReversePickings.Services
 	{
 		ReversePickingResult AddProductsToSourcePallet(ReversePicking task, string userId);
 		Task<ReversePickingResult> AddToExistingPallet(ReversePicking task, List<Pallet> pallets, string userId);
-		Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId);
+		Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId, int rampNumber);
 	}
 }

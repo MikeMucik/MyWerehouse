@@ -58,32 +58,30 @@ namespace MyWerehouse.Test.MappingTest
 		{
 			//Arrange
 			var category = new Category { Id = 1, Name = "TestCategory" };
-			var details = new ProductDetail
-			{
-				Length = 100,
-				Height = 200,
-				Width = 300,
-				Weight = 400,
-				Description = "500",
-			};
-			var productNew = new Product
-			{
-				Name = "Apple",
-				SKU = "666666",
-				CategoryId = 1,
-				Category = category,
-				Details = details,
-				AddedItemAd = DateTime.Now,
-			};
-
+			
+			var productNew = Product.Create("Apple", "666666", 1, 56);
+			var details = ProductDetail.CreateDetails(productNew.Id, 100, 200, 120, 400, "500");
+			//var details = new ProductDetail
+			//{
+			//	ProductId = 
+			//	Length = 100,
+			//	Height = 200,
+			//	Width = 300,
+			//	Weight = 400,
+			//	Description = "500",
+			//};
+			productNew.SetDetails(details);
+			productNew.SetCategory(category);
 			//Act
 			var product = _mapper.Map<DetailsOfProductDTO>(productNew);
 			//Assert
 			Assert.Equal(product.Name, productNew.Name);
 
 			Assert.Equal(product.Length, productNew.Details.Length);
-			Assert.Equal(product.CategoryName, productNew.Category.Name);
+			Assert.Equal(product.CategoryName, productNew.Category.Name); //to daje błąd
+			Assert.Equal(product.CategoryId, productNew.CategoryId);
 		}
+
 		//[Fact]
 		//public void Should_Map_AddPalletDTO_To_Pallet()
 		//{
@@ -117,25 +115,25 @@ namespace MyWerehouse.Test.MappingTest
 		//	//Assert.Single(entity.ProductsOnPallet);
 		//	//Assert.Equal(10, entity.ProductsOnPallet.First().ProductId);
 		//}
-		[Fact]
-		public void Should_Map_AddPalletReceiptDTO_To_Pallet()
-		{
-			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var dto = new CreatePalletReceiptDTO
-			{
-				PalletNumber = "Q0001",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				ReceiptId = receiptId1,
-				ReceiptNumber = 1,
-				Status = PalletStatus.Available,
-			};
+		//[Fact]
+		//public void Should_Map_AddPalletReceiptDTO_To_Pallet()
+		//{
+		//	var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+		//	var dto = new CreatePalletReceiptDTO
+		//	{
+		//		PalletNumber = "Q0001",
+		//		DateReceived = DateTime.Now,
+		//		LocationId = 1,
+		//		ReceiptId = receiptId1,
+		//		ReceiptNumber = 1,
+		//		Status = PalletStatus.Available,
+		//	};
 
-			var entity = _mapper.Map<Pallet>(dto);
+		//	var entity = _mapper.Map<Pallet>(dto);
 
-			Assert.NotNull(entity);
-			Assert.Equal(dto.Id, entity.Id);
-		}
+		//	Assert.NotNull(entity);
+		//	Assert.Equal(dto.Id, entity.Id);
+		//}
 		//[Fact]
 		//public void Should_Map_AddPalletPickingDTO_To_Pallet()
 		//{

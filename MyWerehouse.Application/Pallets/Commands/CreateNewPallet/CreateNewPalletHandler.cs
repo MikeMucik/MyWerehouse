@@ -35,15 +35,27 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 						return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
 				}
 				var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
+				var pallet = Pallet.Create(newIdForPallet);
+
+				var productOnPallet = new List<ProductOnPallet>();
+
+				foreach(var product in request.DTO.ProductsOnPallet)
+				{
+					pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
+				}
+
+				//var listProducts = request.DTO.ProductsOnPallet
+				//	.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
+				//	.ToList();
+
 				
-				var listProducts = request.DTO.ProductsOnPallet
-					.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
-					.ToList();
+				//pallet.ApplyProductChanges(listProducts);
+				//var pallet = new Pallet(newIdForPallet, DateTime.UtcNow, listProducts);
 				
-				var pallet = new Pallet(newIdForPallet, DateTime.UtcNow, listProducts);
+
 				_palletRepo.AddPallet(pallet);
-				var location = await _locationRepo.GetLocationByIdAsync(1);
-				pallet.AssignToWarehouse(location, request.UserId, listProducts);
+				var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
+				pallet.AssignToWarehouse(location, request.UserId);
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);

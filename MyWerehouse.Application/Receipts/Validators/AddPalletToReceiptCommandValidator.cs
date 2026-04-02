@@ -12,27 +12,13 @@ namespace MyWerehouse.Application.Receipts.Validators
 	public class AddPalletToReceiptCommandValidator : AbstractValidator<AddPalletToReceiptCommand>
 	{
 		public AddPalletToReceiptCommandValidator(IValidator<ProductOnPalletDTO> productOnPalletValidator)
-		{		
-			RuleFor(p => p.DTO.Status)
-				.NotEmpty()
-				.WithMessage("Paleta musi mieć status")
-				.When(p => p.DTO.Id != Guid.Empty);
-			RuleFor(p => p.DTO.DateReceived)
-				.NotEmpty()
-				.WithMessage("Paleta musi mieć datę przyjęcia")
-				//.When(p => !string.IsNullOrWhiteSpace(p.DTO.Id));
-				.When(p => p.DTO.Id != Guid.Empty);
-				//.When(p => !string.IsNullOrWhiteSpace(p.DTO.Id));
-			RuleFor(p => p.DTO.LocationId)
-				.GreaterThan(0)
-				.WithMessage("Paleta musi mieć lokalizację początkową")
-				.When(p => p.DTO.Id != Guid.Empty);
-				//.When(p => !string.IsNullOrWhiteSpace(p.DTO.Id));
+		{
+			RuleFor(p => p.ReceiptId)
+				.NotNull()
+				.WithMessage("Paleta musi mieć numer przyjęcia");
 			RuleFor(p => p.DTO.ReceiptNumber)
 				.GreaterThan(0)
-				.WithMessage("Paleta musi mieć numer przyjęcia")
-				.When(p => p.DTO.Id != Guid.Empty);
-				//.When(p => !string.IsNullOrWhiteSpace(p.DTO.Id));
+				.WithMessage("Paleta musi mieć numer przyjęcia");
 			RuleFor(p => p.DTO.ProductsOnPallet)
 				.NotEmpty()
 				.WithMessage("Paleta musi zawierać towar/y");

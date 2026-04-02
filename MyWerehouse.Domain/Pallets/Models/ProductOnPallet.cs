@@ -9,14 +9,57 @@ namespace MyWerehouse.Domain.Pallets.Models
 {
 	public class ProductOnPallet
 	{
-		public int Id { get; set; }
-		public Guid ProductId { get; set; }
-		public virtual Product Product { get; set; }
-		public Guid PalletId { get; set; }
-		//public string PalletNumber { get; set; }
-		public virtual Pallet Pallet { get; set; }		
-		public int Quantity { get; set; }
-		public DateTime DateAdded { get; set; }
-		public DateOnly? BestBefore { get; set; } 
+		public int Id { get; private set; }
+		public Guid ProductId { get; private set; }
+		public Product Product { get; private set; }
+		public Guid PalletId { get; private set; }
+		public Pallet Pallet { get; private set; }
+		public int Quantity { get; private set; }
+		public DateTime DateAdded { get; private set; }
+		public DateOnly? BestBefore { get; private set; }
+
+		private ProductOnPallet() { }
+
+		private ProductOnPallet(int id, Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestBefore)
+		{
+			Id = id;
+			ProductId = productId;
+			PalletId = palletId;
+			Quantity = quantity;
+			DateAdded = dateAdded;
+			BestBefore = bestBefore;
+		}
+		public static ProductOnPallet CreateForSeed(int id, Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestbefore)
+			=> new ProductOnPallet(id, productId, palletId, quantity, dateAdded, bestbefore);
+
+
+		private ProductOnPallet( Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestBefore)
+		{			
+			ProductId = productId;
+			PalletId = palletId;
+			Quantity = quantity;
+			DateAdded = dateAdded;
+			BestBefore = bestBefore;
+		}
+		public static ProductOnPallet Create(Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestbefore)
+			=> new ProductOnPallet(productId, palletId, quantity, dateAdded, bestbefore);
+
+		public void SetQuantity(int quantity)
+		{
+			if (quantity < 0) throw new InvalidDataException("Value can't be below zero.");
+			Quantity = quantity;
+		}
+		public void AddQuantity(int quantity)
+		{
+			//if (quantity < 0) throw new InvalidDataException("Value can't be below zero.");
+			Quantity += quantity;
+			if (Quantity < 0) throw new InvalidDataException("Value can't be below zero.");
+		}
+		public void SetBestBefore(DateOnly? bestBefore)
+		{
+			BestBefore = bestBefore;
+		}
+		
 	}
+
 }

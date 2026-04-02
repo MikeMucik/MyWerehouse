@@ -33,25 +33,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category { Name = "Cat" };
+			var category = new Category {Id =1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var pallet = new Pallet
-			{
-				PalletNumber = "P1",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
-			};
-			var pallet1 = new Pallet
-			{
-				PalletNumber = "P2",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet>{
-							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
-			};
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			//var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
+			//var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "P1",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+			//};
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet1 = new Pallet
+			//{
+			//	PalletNumber = "P2",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet>{
+			//				new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+			//};
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),
@@ -64,10 +70,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IssueDateTimeSend = DateTime.Now.AddDays(1),
 				Pallets = new List<Pallet> { pallet, pallet1 }
 			};
-			pallet.Issue = issue;
-			pallet1.Issue = issue;
-			pallet.IssueId = issue.Id;
-			pallet1.IssueId = issue.Id;
+			//pallet.AssignToIssue(issue, "user");
+			//pallet1.AssignToIssue(issue, "user");
+			//pallet.Issue = issue;
+			//pallet1.Issue = issue;
+			//pallet.IssueId = issue.Id;
+			//pallet1.IssueId = issue.Id;
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -82,6 +90,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -142,25 +154,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category { Name = "Cat" };
+			var category = new Category {Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var pallet = new Pallet
-			{
-				PalletNumber = "P1",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
-			};
-			var pallet1 = new Pallet
-			{
-				PalletNumber = "P2",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet>{
-							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
-			};
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			//var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
+			//var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "P1",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+			//};
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet1 = new Pallet
+			//{
+			//	PalletNumber = "P2",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet>{
+			//				new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+			//};
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),
@@ -173,10 +191,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IssueDateTimeSend = DateTime.Now.AddDays(1),
 				Pallets = new List<Pallet> { pallet, pallet1 }
 			};
-			pallet.Issue = issue;
-			pallet1.Issue = issue;
-			pallet.IssueId = issue.Id;
-			pallet1.IssueId = issue.Id;
+			//pallet.AssignToIssue(issue, "user");
+			//pallet1.AssignToIssue(issue, "user");
+			//pallet.Issue = issue;
+			//pallet1.Issue = issue;
+			//pallet.IssueId = issue.Id;
+			//pallet1.IssueId = issue.Id;
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -191,6 +211,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 5
 			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Locations.Add(location);
+			DbContext.Products.AddRange(product, product1);
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -234,25 +258,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category { Name = "Cat" };
+			var category = new Category {Id =1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var pallet = new Pallet
-			{
-				PalletNumber = "P1",
-				Location = location,
-				Status = PalletStatus.ToIssue,
-				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
-			};
-			var pallet1 = new Pallet
-			{
-				PalletNumber = "P2",
-				Location = location,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = new List<ProductOnPallet>{
-							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
-			};
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			//var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
+			//var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "P1",
+			//	Location = location,
+			//	Status = PalletStatus.ToIssue,
+			//	ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+			//};
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet1 = new Pallet
+			//{
+			//	PalletNumber = "P2",
+			//	Location = location,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = new List<ProductOnPallet>{
+			//				new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+			//};
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),
@@ -271,10 +301,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IssueDateTimeSend = DateTime.Now.AddDays(1),
 				Pallets = new List<Pallet> { pallet, pallet1 }
 			};
-			pallet.Issue = issue;
-			pallet1.Issue = issue;
-			pallet.IssueId = issue.Id;
-			pallet1.IssueId = issue.Id;
+			//pallet.AssignToIssue(issue, "user");
+			//pallet1.AssignToIssue(issue, "user");
+			//pallet.Issue = issue;
+			//pallet1.Issue = issue;
+			//pallet.IssueId = issue.Id;
+			//pallet1.IssueId = issue.Id;
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -289,6 +321,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -316,25 +352,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category { Name = "Cat" };
+			var category = new Category {Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var pallet = new Pallet
-			{
-				PalletNumber = "P1",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
-			};
-			var pallet1 = new Pallet
-			{
-				PalletNumber = "P2",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet>{
-							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
-			};
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			//var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
+			//var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "P1",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+			//};
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet1 = new Pallet
+			//{
+			//	PalletNumber = "P2",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet>{
+			//				new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+			//};
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),
@@ -353,10 +395,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IssueDateTimeSend = DateTime.Now.AddDays(1),
 				Pallets = new List<Pallet> { pallet, pallet1 }
 			};
-			pallet.Issue = issue;
-			pallet1.Issue = issue;
-			pallet.IssueId = issue.Id;
-			pallet1.IssueId = issue.Id;
+			//pallet.AssignToIssue(issue, "user");
+			//pallet1.AssignToIssue(issue, "user");
+			//pallet.Issue = issue;
+			//pallet1.Issue = issue;
+			//pallet.IssueId = issue.Id;
+			//pallet1.IssueId = issue.Id;
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -371,6 +415,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Locations.Add(location);
+			DbContext.Products.AddRange(product, product1);
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -397,25 +445,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category { Name = "Cat" };
+			var category = new Category {Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			var product1 = new Product { Name = "Prod2", SKU = "SKU2", Category = category, CartonsPerPallet = 20 };
-			var pallet = new Pallet
-			{
-				PalletNumber = "P1",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
-			};
-			var pallet1 = new Pallet
-			{
-				PalletNumber = "P2",
-				Location = location,
-				Status = PalletStatus.Loaded,
-				ProductsOnPallet = new List<ProductOnPallet>{
-							new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
-			};
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			//var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
+			//var product1 = new Product { Name = "Prod2", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "P1",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet> { new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026, 1, 1) } }
+			//};
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet1 = new Pallet
+			//{
+			//	PalletNumber = "P2",
+			//	Location = location,
+			//	Status = PalletStatus.Loaded,
+			//	ProductsOnPallet = new List<ProductOnPallet>{
+			//				new ProductOnPallet { Product = product1, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }}
+			//};
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),
@@ -434,7 +488,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				IssueDateTimeSend = DateTime.Now.AddDays(1),
 				Pallets = new List<Pallet> { pallet, pallet1 }
 			};
-			DbContext.Issues.Add(issue);
+			//pallet.AssignToIssue(issue, "user");
+			//pallet1.AssignToIssue(issue, "user");
+			//pallet.Issue = issue;
+			//pallet1.Issue = issue;
+			//pallet.IssueId = issue.Id;
+			//pallet1.IssueId = issue.Id;
+
 			var inventory = new Inventory
 			{
 				Product = product,
@@ -447,6 +507,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Locations.Add(location);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Issues.Add(issue);
 			DbContext.AddRange(inventory, inventory1);
 			await DbContext.SaveChangesAsync();
 

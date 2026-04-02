@@ -56,44 +56,42 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Height = 1,
 				Position = 1
 			};
-			var product1 = new Product
+			var category = new Category
 			{
-				//Id = 10,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
+				Id = 1,
+				Name = "name",
+				IsDeleted = false
 			};
-			var product2 = new Product
-			{
-				//Id = 11,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
+			var product1 = Product.Create("Test", "666666", 1, 56);
+			
+			var product2 = Product.Create("Test1", "666666", 1, 65);
+			
 			var issueId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var issueId = issueId1;
 			var performedBy = "Janek";
-			var loadedPallet = new Pallet
-			{
-				PalletNumber = "P1",
-				Status = PalletStatus.Loaded,
-				LocationId = 10,
-				ProductsOnPallet = new List<ProductOnPallet>
-		{
-			new ProductOnPallet { ProductId = product1.Id, Quantity = 5, }
-		}
-			};
-			var notLoadedPallet = new Pallet
-			{
-				PalletNumber = "P2",
-				Status = PalletStatus.ToIssue,
-				LocationId = 20,
-				ProductsOnPallet = new List<ProductOnPallet>
-				{
-					new ProductOnPallet{ProductId =product2.Id, Quantity =10 } }
-			};
+			var loadedPallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 10, PalletStatus.Loaded, null, null);
+			loadedPallet.AddProduct(product1.Id, 5, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			//var loadedPallet = new Pallet
+			//{
+			//	PalletNumber = "P1",
+			//	Status = PalletStatus.Loaded,
+			//	LocationId = 10,
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//	{
+			//		new ProductOnPallet { ProductId = product1.Id, Quantity = 5, }
+			//	}
+			//};
+			var notLoadedPallet = Pallet.CreateForTests("P2", DateTime.UtcNow, 20, PalletStatus.ToIssue, null, null);
+			notLoadedPallet.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			//var notLoadedPallet = new Pallet
+			//{
+			//	PalletNumber = "P2",
+			//	Status = PalletStatus.ToIssue,
+			//	LocationId = 20,
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//	{
+			//		new ProductOnPallet{ProductId =product2.Id, Quantity =10 } }
+			//};
 			var issue = new Issue
 			{
 				Id = issueId,
@@ -103,12 +101,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Pallets = new List<Pallet> { loadedPallet, notLoadedPallet },
 				PerformedBy = "TestUser",
 			};
-			var category = new Category
-			{
-				Id = 1,
-				Name = "name",
-				IsDeleted = false
-			};
+			
 			var inventory1 = new Inventory
 			{
 				Product = product1,
@@ -121,12 +114,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
-			DbContext.Inventories.AddRange(inventory1, inventory2);
+			
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.AddRange(location1, location2);
 			DbContext.Clients.Add(cLient);
 			DbContext.Issues.Add(issue);
+			DbContext.Inventories.AddRange(inventory1, inventory2);
 			await DbContext.SaveChangesAsync();
 			//Act			
 			await Mediator.Send(new FinishIssueNotCompletedCommand(issueId, performedBy));

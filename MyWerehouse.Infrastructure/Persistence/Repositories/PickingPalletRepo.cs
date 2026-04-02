@@ -77,12 +77,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.VirtualPallets.FirstAsync(p => p.Id == palletId);
 		}
-		public void ClosePickingPallet(Guid palletId, Guid issueId)
-		{
-			var pallet = _werehouseDbContext.Pallets.Find(palletId);
-			pallet.Status = PalletStatus.ToIssue;
-			pallet.IssueId = issueId;
-		}
+		//public void ClosePickingPallet(Guid palletId, Guid issueId)
+		//{
+		//	var pallet = _werehouseDbContext.Pallets.Find(palletId);
+		//	pallet.Status = PalletStatus.ToIssue;
+		//	pallet.IssueId = issueId;
+		//}
 
 		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly bestBefore)
 		{

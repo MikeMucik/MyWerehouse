@@ -42,16 +42,17 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueItemTestsRepoSQLite
 			{
 				Name = "name",
 				IsDeleted = false
-			};
-			var product = new Product
-			{
-				Name = "TestFull",
-				SKU = "123",
-				AddedItemAd = new DateTime(2024, 1, 1),
-				Category = initialCategory,
-				IsDeleted = false,
-				CartonsPerPallet = 10,
-			};
+			}; 
+			var product = Product.Create("TestFull", "123", 1, 10);
+			//var product = new Product
+			//{
+			//	Name = "TestFull",
+			//	SKU = "123",
+			//	AddedItemAd = new DateTime(2024, 1, 1),
+			//	Category = initialCategory,
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 10,
+			//};			
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),

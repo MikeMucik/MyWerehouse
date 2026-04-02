@@ -43,16 +43,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var category = new Category
 			{
+				Id =1,
 				Name = "Category A",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Product A",
-				SKU = "123456",
-				CategoryId = 1,
-				IsDeleted = false
-			};
+			var product = Product.Create("Product A", "123456", 1, 56);
+			
 			var location = new Location
 			{
 				Aisle = 1,
@@ -60,30 +56,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Height = 1,
 				Position = 1
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "PAL001",
-				Location = location,
-				Status = PalletStatus.Receiving,
-				ProductsOnPallet = new List<ProductOnPallet>
-				{new ProductOnPallet
-						{				
-				Product = product,
-				Quantity = 10,
-				DateAdded = DateTime.UtcNow
-						}
-				}
-			};
+			var pallet = Pallet.CreateForTests("PAL001", DateTime.UtcNow, 1, PalletStatus.New, null, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2027, 3, 3));
+			
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var receipt = new Receipt
-			{		
-				Id = receiptId1,
-				ReceiptNumber = 2,
-				Client = client,
-				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-				PerformedBy = "U001",
-				Pallets = [pallet]
-			};
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
+				new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
+			receipt.AttachPallet(pallet, location, "001");
+			
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -139,16 +119,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var category = new Category
 			{
+				Id =1,
 				Name = "Category A",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Product A",
-				SKU = "123456",
-				CategoryId = 1,
-				IsDeleted = false
-			};
+			var product = Product.Create("Product A", "123456", 1, 56);
+			
 			var location = new Location
 			{
 				Aisle = 1,
@@ -156,30 +132,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Height = 1,
 				Position = 1
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "PAL001",
-				Location = location,
-				Status = PalletStatus.Receiving,
-				ProductsOnPallet = new List<ProductOnPallet>
-				{new ProductOnPallet
-						{
-				Product = product,
-				Quantity = 10,
-				DateAdded = DateTime.UtcNow
-						}
-				}
-			};
+			var pallet = Pallet.CreateForTests("PAL001", DateTime.UtcNow, 1, PalletStatus.Receiving, null, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2027, 3, 3));
+			
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var receipt = new Receipt
-			{
-				Id = receiptId1,
-				ReceiptNumber = 1,
-				Client = client,
-				ReceiptStatus = ReceiptStatus.Verified,
-				PerformedBy = "U001",
-				Pallets = [pallet]
-			};
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
+				new DateTime(2025, 6, 6), ReceiptStatus.Verified, 1);
+			
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);

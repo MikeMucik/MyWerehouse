@@ -28,7 +28,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public void SwitchOffProduct(Product product)
 		{
-			product.IsDeleted = true;
+			//product.IsDeleted = true;
 		}
 		public async Task<Product?> GetProductByIdAsync(Guid id)
 		{

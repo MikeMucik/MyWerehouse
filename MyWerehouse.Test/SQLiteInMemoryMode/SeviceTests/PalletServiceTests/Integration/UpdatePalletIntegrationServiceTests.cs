@@ -26,34 +26,38 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product1 = new Product
-			{
-				Name = "Test11",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product2 = new Product
-			{
-				Name = "Test22",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product3 = new Product
-			{
-				Name = "Test33",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+			//var product = new Product
+			//{
+			//	Name = "Test",
+			//	SKU = "666666",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
+			var product1 = Product.Create("Test11", "67777", 1, 56);
+			//var product1 = new Product
+			//{
+			//	Name = "Test11",
+			//	SKU = "67777",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
+			var product2 = Product.Create("Test22", "667777", 1, 56);
+			//var product2 = new Product
+			//{
+			//	Name = "Test22",
+			//	SKU = "67777",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
+			var product3 = Product.Create("Test33", "67777", 1, 56);
+			//var product3 = new Product
+			//{
+			//	Name = "Test33",
+			//	SKU = "67777",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
 			var location = new Location
 			{
 				Aisle = 0,
@@ -61,28 +65,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Height = 0,
 				Position = 0
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q1010",
-				DateReceived = DateTime.Now,
-				Location = location,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = [
-					new ProductOnPallet
-					{
-						Product =product,
-						Quantity = 10,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)),
-						DateAdded = DateTime.UtcNow,
-					},
-					new ProductOnPallet
-					{
-						Product = product1,
-						Quantity = 200,
-						DateAdded = DateTime.Now,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360))
-					}               ]
-			};
+			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 200, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q1010",
+			//	DateReceived = DateTime.Now,
+			//	Location = location,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = [
+			//		new ProductOnPallet
+			//		{
+			//			Product =product,
+			//			Quantity = 10,
+			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)),
+			//			DateAdded = DateTime.UtcNow,
+			//		},
+			//		new ProductOnPallet
+			//		{
+			//			Product = product1,
+			//			Quantity = 200,
+			//			DateAdded = DateTime.Now,
+			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360))
+			//		}               ]
+			//};
 			var inventoryP = new Inventory
 			{
 				Product = product,
@@ -93,7 +100,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Product = product1,
 				Quantity = 200
 			};
-
+			DbContext.Categories.Add(category);
 			DbContext.Inventories.AddRange(inventoryP, inventoryP1);
 			DbContext.Products.AddRange(product, product1, product2, product3);
 			DbContext.Locations.Add(location);
@@ -109,14 +116,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
@@ -208,34 +215,38 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product1 = new Product
-			{
-				Name = "Test11",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product2 = new Product
-			{
-				Name = "Test22",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product3 = new Product
-			{
-				Name = "Test33",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+			//var product = new Product
+			//{
+			//	Name = "Test",
+			//	SKU = "666666",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
+			var product1 = Product.Create("Test11", "67777", 1, 56);
+			//var product1 = new Product
+			//{
+			//	Name = "Test11",
+			//	SKU = "67777",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
+			var product2 = Product.Create("Test22", "667777", 1, 56);
+			//var product2 = new Product
+			//{
+			//	Name = "Test22",
+			//	SKU = "67777",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
+			var product3 = Product.Create("Test33", "67777", 1, 56);
+			//var product3 = new Product
+			//{
+			//	Name = "Test33",
+			//	SKU = "67777",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
 			var location = new Location
 			{
 				Aisle = 0,
@@ -243,28 +254,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Height = 0,
 				Position = 0
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q1010",
-				DateReceived = DateTime.Now,
-				Location = location,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = [
-					new ProductOnPallet
-					{
-						Product =product,
-						Quantity = 100,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)),
-						DateAdded = DateTime.UtcNow,
-					},
-					new ProductOnPallet
-					{
-						Product = product1,
-						Quantity = 300,
-						DateAdded = DateTime.Now,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360))
-					}               ]
-			};
+			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q1010",
+			//	DateReceived = DateTime.Now,
+			//	Location = location,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = [
+			//		new ProductOnPallet
+			//		{
+			//			Product =product,
+			//			Quantity = 100,
+			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)),
+			//			DateAdded = DateTime.UtcNow,
+			//		},
+			//		new ProductOnPallet
+			//		{
+			//			Product = product1,
+			//			Quantity = 300,
+			//			DateAdded = DateTime.Now,
+			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360))
+			//		}               ]
+			//};
 			var inventoryP = new Inventory
 			{
 				Product = product,
@@ -275,7 +289,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Product = product1,
 				Quantity = 2000
 			};
-
+			DbContext.Categories.Add(category);
 			DbContext.Inventories.AddRange(inventoryP, inventoryP1);
 			DbContext.Products.AddRange(product, product1, product2, product3);
 			DbContext.Locations.Add(location);
@@ -291,14 +305,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
 					ProductId = product.Id,
 					Quantity = 50,
 					DateAdded = DateTime.Now,
 					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
 					ProductId = product1.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
@@ -392,34 +406,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product1 = new Product
-			{
-				Name = "Test11",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product2 = new Product
-			{
-				Name = "Test22",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product3 = new Product
-			{
-				Name = "Test33",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+
+			var product1 = Product.Create("Test11", "67777", 1, 56);
+
+			var product2 = Product.Create("Test22", "667777", 1, 56);
+
+			var product3 = Product.Create("Test33", "67777", 1, 56);
+
 			var location = new Location
 			{
 
@@ -428,21 +422,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Height = 0,
 				Position = 0
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q1010",
-				DateReceived = DateTime.Now,
-				Location = location,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = [new ProductOnPallet { Product =product, Quantity =10,
-					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-				,DateAdded = DateTime.UtcNow,
-				}, new ProductOnPallet  {Product = product1,
-				Quantity = 200,
-				DateAdded = DateTime.Now,
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-			}]
-			};
+			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 200, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q1010",
+			//	DateReceived = DateTime.Now,
+			//	Location = location,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = [new ProductOnPallet { Product =product, Quantity =10,
+			//		BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
+			//	,DateAdded = DateTime.UtcNow,
+			//	}, new ProductOnPallet  {Product = product1,
+			//	Quantity = 200,
+			//	DateAdded = DateTime.Now,
+			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
+			//}]
+			//};
+			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1, product2, product3);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
@@ -457,7 +455,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
 					//PalletId = "Q1010",
 					ProductId = product.Id,
 					Quantity = 100,
@@ -465,7 +463,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
 					//PalletId = "Q1010",
 					ProductId = product1.Id,
 					Quantity = 300,
@@ -514,20 +512,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product1 = new Product
-			{
-				Name = "Test11",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+
+			var product1 = Product.Create("Test11", "67777", 1, 56);
+
 			var location = new Location
 			{
 				Aisle = 0,
@@ -535,22 +523,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Height = 0,
 				Position = 0
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q1010",
-				DateReceived = DateTime.Now,
-				Location = location,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = [new ProductOnPallet { Product =product, Quantity =10,
-					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-				,DateAdded = DateTime.UtcNow,
-				}, new ProductOnPallet  {Product = product1,
-				Quantity = 200,
-				DateAdded = DateTime.Now,
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
-			}]
-			};
+			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q1010",
+			//	DateReceived = DateTime.Now,
+			//	Location = location,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = [new ProductOnPallet { Product =product, Quantity =10,
+			//		BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
+			//	,DateAdded = DateTime.UtcNow,
+			//	}, new ProductOnPallet  {Product = product1,
+			//	Quantity = 200,
+			//	DateAdded = DateTime.Now,
+			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))
+			//}]
+			//};
+			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
+			DbContext.Products.AddRange(product,product1 );
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act&Assert
@@ -563,7 +556,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Status = PalletStatus.ToPicking,
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
 					//PalletId = "Q1010",
 					ProductId = product.Id,
 					Quantity = 100,
@@ -571,7 +564,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletDTO
 				{
-					Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
+					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product1).Id,
 					//PalletId = "Q1010",
 					ProductId = product1.Id,
 					Quantity = 300,
@@ -599,30 +592,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Arange			
 			var category = new Category
 			{
+				Id = 1,
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product1 = new Product
-			{
-				Name = "Test11",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
-			var product2 = new Product
-			{
-				Name = "Test22",
-				SKU = "67777",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+
+			var product1 = Product.Create("Test11", "67777", 1, 56);
+
+			var product2 = Product.Create("Test22", "667777", 1, 56);
+
 			var location = new Location
 			{
 				Aisle = 0,
@@ -630,25 +609,30 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Height = 0,
 				Position = 0
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q1010",
-				DateReceived = DateTime.Now,
-				Location = location,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = [
-				new ProductOnPallet
-				{ Product =product,
-				Quantity =10,
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
-				DateAdded = DateTime.UtcNow,},
-				 new ProductOnPallet
-				{Product = product1,
-				Quantity = 200,
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
-				DateAdded = DateTime.Now,
-			}]
-			};
+			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q1010",
+			//	DateReceived = DateTime.Now,
+			//	Location = location,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = [
+			//	new ProductOnPallet
+			//	{ Product =product,
+			//	Quantity =10,
+			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
+			//	DateAdded = DateTime.UtcNow,},
+			//	 new ProductOnPallet
+			//	{Product = product1,
+			//	Quantity = 200,
+			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
+			//	DateAdded = DateTime.Now,
+			//}]
+			//};
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1, product2);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();

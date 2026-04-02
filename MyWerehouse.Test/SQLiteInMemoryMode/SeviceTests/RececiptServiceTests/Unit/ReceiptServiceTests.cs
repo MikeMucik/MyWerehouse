@@ -203,6 +203,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
+			var initailLocation = new Location
+			{
+				Id = 1,
+				Aisle = 1,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
 			var initailCLient = new Client
 			{
 				Id = 1,
@@ -227,70 +235,55 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				Name = "name",
 				IsDeleted = false
 			};
-			var initialProduct = new Product
-			{
-				//Id = 10,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			var initialProduct1 = new Product
-			{
-				//Id = 1,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
-			
-			var initialPallet = new Pallet
-			{
-				PalletNumber = "Q1000",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				//ReceiptId = 1
-			};
-			var initialProductOnPallet = new ProductOnPallet
-			{
-				Id = 1,
-				Pallet = initialPallet,
-				//PalletId = "Q1000",
-				//ProductId = 10,
-				Product = initialProduct,
-				Quantity = 100,
-				DateAdded = DateTime.Now,
-				BestBefore = new DateOnly(2027, 3, 3)
-			};
+			var initialProduct = Product.Create("Test", "666666", 1, 56);
+
+			var initialProduct1 = Product.Create("Test", "666666", 1, 56);
+
+			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			//var initialPallet = new Pallet
+			//{
+			//	PalletNumber = "Q1000",
+			//	DateReceived = DateTime.Now,
+			//	LocationId = 1,
+			//	Status = PalletStatus.Available,
+			//	//ReceiptId = 1
+			//};
+			//var initialProductOnPallet = new ProductOnPallet
+			//{
+			//	Id = 1,
+			//	Pallet = initialPallet,
+			//	//PalletId = "Q1000",
+			//	//ProductId = 10,
+			//	Product = initialProduct,
+			//	Quantity = 100,
+			//	DateAdded = DateTime.Now,
+			//	BestBefore = new DateOnly(2027, 3, 3)
+			//};
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var initialReceipt = new Receipt
-			{
-				Id = receiptId1,
-				ReceiptNumber = 1,
-				ClientId = 1,
-				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-				RampNumber = 1,
-				Pallets = [initialPallet]
-			};
-			var initailLocation = new Location
-			{
-				Id = 1,
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			
-			
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
+			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
+			receipt.AttachPallet(initialPallet, initailLocation, "U002");
+			//var initialReceipt = new Receipt
+			//{
+			//	Id = receiptId1,
+			//	ReceiptNumber = 1,
+			//	ClientId = 1,
+			//	ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+			//	PerformedBy = "U002",
+			//	ReceiptDateTime = new DateTime(2025, 6, 6),
+			//	RampNumber = 1,
+			//	Pallets = [initialPallet]
+			//};
+
+
+
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			DbContext.ProductOnPallet.Add(initialProductOnPallet);
+			//DbContext.ProductOnPallet.Add(initialProductOnPallet);
 			DbContext.Pallets.Add(initialPallet);
 			DbContext.Clients.AddRange(initailCLient, initailCLient1);
-			DbContext.Receipts.Add(initialReceipt);
+			DbContext.Receipts.Add(receipt);
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
 
@@ -301,13 +294,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			//var mapper = MapperConfig.CreateMapper();
 			var updatingReceipt = new ReceiptDTO
 			{
-				ReceiptId = initialReceipt.Id,
-				ReceiptNumber = initialReceipt.ReceiptNumber,
+				ReceiptId = receipt.Id,
+				ReceiptNumber = receipt.ReceiptNumber,
 				ClientId = 2,
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
-				RampNumber =1,
+				RampNumber = 1,
 				Pallets =
 				new List<UpdatePalletDTO>
 				{
@@ -315,14 +308,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 					{
 						Id = initialPallet.Id,
 						LocationId = 1,
-						ReceiptId = initialReceipt.Id,
+						ReceiptId = receipt.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
 						{
 							new()
 							{
-								Id = initialProductOnPallet.Id,
+								//Id = initialProductOnPallet.Id,
 								PalletId = initialPallet.Id,
 								ProductId = initialProduct1.Id,
 								Quantity = 1,
@@ -332,9 +325,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 					}
 				}
 			};
-			var userId = "U100";		
+			var userId = "U100";
 			//Act						
-			await Mediator.Send(new UpdateReceiptCommand( updatingReceipt, userId));
+			await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			//Assert
 			var result = DbContext.Receipts.SingleOrDefault(x => x.Id == updatingReceipt.ReceiptId);
 			Assert.NotNull(result);
@@ -385,14 +378,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				FullName = "FullNameCompany",
 				Addresses = [address1]
 			};
-			var initialProduct = new Product
-			{
-				//Id = 10,
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
+
 			var initialCategory = new Category
 			{
 				//Id = 1,
@@ -407,78 +393,87 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				Height = 1,
 				Position = 1
 			};
-			var initialReceipt = new Receipt
-			{
-				Id= Guid.NewGuid(),
-				ReceiptNumber = 1,
-				Client = initailCLient,
-				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-				//Pallets = [initialPallet]
-			};
-			//var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var initialReceipt1 = new Receipt
-			{
-				Id = Guid.NewGuid(),
-				ReceiptNumber = 2,
-				Client = initailCLient1,
-				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-				//Pallets = [initialPallet]
-			};
-			var initialPallet = new Pallet
-			{
-				PalletNumber = "Q1000",
-				DateReceived = DateTime.Now,
-				Location = initailLocation,
-				Status = PalletStatus.Available,
-				Receipt = initialReceipt,
-			};
-			var initialProductOnPallet = new ProductOnPallet
-			{
-				//Id = 1,
-				Pallet = initialPallet,
-				//PalletId = "Q1000",
-				Product = initialProduct,
-				Quantity = 100,
-				DateAdded = DateTime.Now,
-				BestBefore = new DateOnly(2027, 3, 3)
-			};
-			var pallet2 = new Pallet
-			{
-				PalletNumber = "Q3000",
-				Location = initailLocation,
-				Receipt = initialReceipt1, //WrongData
-				Status = PalletStatus.Receiving,
-				DateReceived = DateTime.Now,
-				ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet
-							{
-								//Id = initialProductOnPallet.Id,
-								//PalletId = initialPallet.Id,
-								Product = initialProduct,
-								Quantity = 1,
-								DateAdded = DateTime.Now,
-								BestBefore = new DateOnly(2027, 3, 3)
-							}
-						}
-			};
+			var initialProduct = Product.Create("Test", "666666", 1, 56);
+			var receipt1 = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U002",
+			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
+			//var initialReceipt = new Receipt
+			//{
+			//	Id= Guid.NewGuid(),
+			//	ReceiptNumber = 1,
+			//	Client = initailCLient,
+			//	ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+			//	PerformedBy = "U002",
+			//	ReceiptDateTime = new DateTime(2025, 6, 6),
+			//	//Pallets = [initialPallet]
+			//};
+
+			var receipt2 = Receipt.CreateForSeed(Guid.NewGuid(), 1, 2, "U002",
+			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
+			//var initialReceipt1 = new Receipt
+			//{
+			//	Id = Guid.NewGuid(),
+			//	ReceiptNumber = 2,
+			//	Client = initailCLient1,
+			//	ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+			//	PerformedBy = "U002",
+			//	ReceiptDateTime = new DateTime(2025, 6, 6),
+			//	//Pallets = [initialPallet]
+			//};
+			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, receipt1.Id, null);
+			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			//var initialPallet = new Pallet
+			//{
+			//	PalletNumber = "Q1000",
+			//	DateReceived = DateTime.Now,
+			//	Location = initailLocation,
+			//	Status = PalletStatus.Available,
+			//	Receipt = initialReceipt,
+			//};
+			//var initialProductOnPallet = new ProductOnPallet
+			//{
+			//	//Id = 1,
+			//	Pallet = initialPallet,
+			//	//PalletId = "Q1000",
+			//	Product = initialProduct,
+			//	Quantity = 100,
+			//	DateAdded = DateTime.Now,
+			//	BestBefore = new DateOnly(2027, 3, 3)
+			//};
+			var pallet2 = Pallet.CreateForTests("Q3000", DateTime.UtcNow, 1, PalletStatus.Receiving, receipt2.Id, null);
+			pallet2.AddProduct(initialProduct.Id, 1, new DateOnly(2027, 3, 3));
+			//var pallet2 = new Pallet
+			//{
+			//	PalletNumber = "Q3000",
+			//	Location = initailLocation,
+			//	Receipt = initialReceipt1, //WrongData
+			//	Status = PalletStatus.Receiving,
+			//	DateReceived = DateTime.Now,
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//			{
+			//				new ProductOnPallet
+			//				{
+			//					//Id = initialProductOnPallet.Id,
+			//					//PalletId = initialPallet.Id,
+			//					Product = initialProduct,
+			//					Quantity = 1,
+			//					DateAdded = DateTime.Now,
+			//					BestBefore = new DateOnly(2027, 3, 3)
+			//				}
+			//			}
+			//};
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(initialProduct);
-			DbContext.ProductOnPallet.Add(initialProductOnPallet);
+			//DbContext.ProductOnPallet.Add(initialProductOnPallet);
 			DbContext.Pallets.AddRange(initialPallet, pallet2);
 			DbContext.Clients.AddRange(initailCLient, initailCLient1);
-			DbContext.Receipts.Add(initialReceipt);
+			DbContext.Receipts.AddRange(receipt1, receipt2);
 			DbContext.Locations.Add(initailLocation);
 			await DbContext.SaveChangesAsync();
 			var receiptId9 = Guid.Parse("99111111-1111-1111-1111-111111111111");
 			var updatingReceipt = new ReceiptDTO
 			{
-				ReceiptId = initialReceipt.Id,
-				ReceiptNumber =1,
+				ReceiptId = receipt1.Id,
+				ReceiptNumber = 1,
 				ClientId = 2,
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
@@ -499,7 +494,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 						{
 							new()
 							{
-								Id = initialProductOnPallet.Id,
+								//Id = initialProductOnPallet.Id,
 								PalletId = initialPallet.Id,
 								ProductId = initialProduct.Id,
 								Quantity = 1,
@@ -509,9 +504,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 					}
 				}
 			};
-			var userId = "U100";		
+			var userId = "U100";
 			//Act&Assert			
-			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt,userId));
+			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
 			Assert.Contains("Paleta o numerze Q3000 należy do innego przyjęcia.", result.Error);
@@ -562,20 +557,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				Name = "name",
 				IsDeleted = false
 			};
-			var initialProduct = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = initialCategory,
-				IsDeleted = false,
-			};
-			var initialProduct1 = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = initialCategory,
-				IsDeleted = false,
-			};
+			var initialProduct = Product.Create("Test", "666666", 1, 56);
+
+			var initialProduct1 = Product.Create("Test", "666666", 1, 56);
+
 			var initailLocation = new Location
 			{
 				Aisle = 1,
@@ -583,91 +568,102 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 				Height = 1,
 				Position = 1
 			};
+			DbContext.SaveChanges();
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var initialReceipt = new Receipt
-			{
-				Id = receiptId1,
-				ReceiptNumber = 1,
-				Client = initailCLient,
-				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-				PerformedBy = "U002",
-				ReceiptDateTime = new DateTime(2025, 6, 6),
-			};
-			var initialPallet = new Pallet
-			{
-				PalletNumber = "Q1000",
-				DateReceived = DateTime.Now,
-				Location = initailLocation,
-				Status = PalletStatus.Available,
-				Receipt = initialReceipt,
-			};
-			var initialProductOnPallet = new ProductOnPallet
-			{
-				Pallet = initialPallet,
-				Product = initialProduct,
-				Quantity = 100,
-				DateAdded = DateTime.Now,
-				BestBefore = new DateOnly(2027, 3, 3)
-			};
-			var initialPallet1 = new Pallet
-			{
-				PalletNumber = "Q1001",
-				DateReceived = DateTime.Now,
-				Location = initailLocation,
-				Status = PalletStatus.Available,
-				Receipt = initialReceipt,
-			};
-			var initialProductOnPallet1 = new ProductOnPallet
-			{
-				Pallet = initialPallet1,
-				Product = initialProduct1,
-				Quantity = 100,
-				DateAdded = DateTime.Now,
-				BestBefore = new DateOnly(2027, 3, 3)
-			};
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
+			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
+			//var initialReceipt = new Receipt
+			//{
+			//	Id = receiptId1,
+			//	ReceiptNumber = 1,
+			//	Client = initailCLient,
+			//	ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+			//	PerformedBy = "U002",
+			//	ReceiptDateTime = new DateTime(2025, 6, 6),
+			//};
+			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			//var initialPallet = new Pallet
+			//{
+			//	PalletNumber = "Q1000",
+			//	DateReceived = DateTime.Now,
+			//	Location = initailLocation,
+			//	Status = PalletStatus.Available,
+			//	Receipt = initialReceipt,
+			//};
+			//var initialProductOnPallet = new ProductOnPallet
+			//{
+			//	Pallet = initialPallet,
+			//	Product = initialProduct,
+			//	Quantity = 100,
+			//	DateAdded = DateTime.Now,
+			//	BestBefore = new DateOnly(2027, 3, 3)
+			//};
+			//var initialPallet1 = Pallet.CreateForTests("Q1001", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			//initialPallet1.AddProduct(initialProduct1.Id, 100, new DateOnly(2027, 3, 3));
+			//var initialPallet1 = new Pallet
+			//{
+			//	PalletNumber = "Q1001",
+			//	DateReceived = DateTime.Now,
+			//	Location = initailLocation,
+			//	Status = PalletStatus.Available,
+			//	Receipt = initialReceipt,
+			//};
+			//var initialProductOnPallet1 = new ProductOnPallet
+			//{
+			//	Pallet = initialPallet1,
+			//	Product = initialProduct1,
+			//	Quantity = 100,
+			//	DateAdded = DateTime.Now,
+			//	BestBefore = new DateOnly(2027, 3, 3)
+			//};
 
-			initialPallet.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet };
-			initialPallet1.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet1 };
-			initialReceipt.Pallets = new List<Pallet> { initialPallet, initialPallet1 };
+			//initialPallet.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet };
+			//initialPallet1.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet1 };
+			//initialReceipt.Pallets = new List<Pallet> { initialPallet, initialPallet1 };
 
-			initialProductOnPallet.PalletId = initialPallet.Id;
-			initialProductOnPallet.ProductId = initialProduct.Id;
-			initialProductOnPallet1.PalletId = initialPallet1.Id;
-			initialProductOnPallet1.ProductId = initialProduct.Id;
+			//initialProductOnPallet.PalletId = initialPallet.Id;
+			//initialProductOnPallet.ProductId = initialProduct.Id;
+			//initialProductOnPallet1.PalletId = initialPallet1.Id;
+			//initialProductOnPallet1.ProductId = initialProduct.Id;
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);
 			DbContext.Clients.AddRange(initailCLient, initailCLient1);
 			DbContext.Locations.Add(initailLocation);
-			DbContext.Receipts.Add(initialReceipt);
-			DbContext.Pallets.AddRange(initialPallet, initialPallet1);
-			DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
-
-			await DbContext.SaveChangesAsync();			
+			DbContext.Receipts.Add(receipt);
+			DbContext.Pallets.AddRange(initialPallet
+				//, initialPallet1
+				);
+			//DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
+			receipt.AttachPallet(initialPallet, initailLocation, "UserMakae");
+			await DbContext.SaveChangesAsync();
+			//receipt.AttachPallet(initialPallet, initailLocation, "UserMakae");
+			//receipt.AttachPallet(initialPallet1, initailLocation, "UserMakae");
 			var updatingReceipt = new ReceiptDTO
 			{
-				ReceiptId = initialReceipt.Id,
-				ReceiptNumber= initialReceipt.ReceiptNumber,
+				ReceiptId = receipt.Id,
+				ReceiptNumber = receipt.ReceiptNumber,
 				ClientId = initailCLient1.Id,
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
-				RampNumber =1,
+				RampNumber = 1,
 				Pallets =
 				new List<UpdatePalletDTO>
 				{
 					new()
 					{
-						Id = initialPallet1.Id,
-						PalletNumber = "Q1001",
+						//Id = initialPallet1.Id,
+						//PalletNumber = "Q1001",
 						LocationId = initailLocation.Id,
-						ReceiptId = initialReceipt.Id,
+						ReceiptId = receipt.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
 						{
 							new()
 							{
-								Id = initialProductOnPallet1.Id,
+								//Id = initialProductOnPallet1.Id,
 								ProductId = initialProduct1.Id,
 								Quantity = 1,
 								DateAdded = DateTime.Now,
@@ -693,230 +689,232 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.U
 			Assert.NotNull(newPallet);
 			Assert.Equal(PalletStatus.Receiving, newPallet.Status);
 			Assert.Equal(1, newPallet.LocationId);
-			Assert.Equal(initialReceipt.Id, newPallet.ReceiptId);
+			Assert.Equal(receipt.Id, newPallet.ReceiptId);
 			//var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.Id == 2);
 
 			var productOnPalletChanged = newPallet.ProductsOnPallet.First();
 			//var productOnPalletChanged = DbContext.ProductOnPallet.FirstOrDefault(x => x.PalletId == "Q1001");
-			var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.Id == initialProductOnPallet1.Id);
+			var initialPallet1 = DbContext.Pallets.FirstOrDefault(x => x.PalletNumber == "Q1001");
+			var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.Id == initialPallet1.ProductsOnPallet.First().Id);
+			//initialProductOnPallet1.Id);
 			Assert.NotNull(product);
 			Assert.Equal(initialPallet1.Id, product.PalletId);
 			Assert.Equal(1, product.Quantity);
-			Assert.Equal(initialProduct1.Id, product.ProductId);			
+			Assert.Equal(initialProduct1.Id, product.ProductId);
 			//Sprawdzić co się dzieje z paletą wyrzuconą z przyjęcia			
 		}
-//		[Fact]
-//		public async Task ProperDataOneAddedOneRemoveOnePalletsAndClient_UpdatePalletToReceiptAsync_AddedToBase_MockedMapper()
-//		{
-//			//Arrange
-//			var address = new Address
-//			{
-//				City = "Warsaw",
-//				Country = "Poland",
-//				PostalCode = "00-999",
-//				StreetName = "Wiejska",
-//				Phone = 4444444,
-//				Region = "Mazowieckie",
-//				StreetNumber = "23/3"
-//			};
-//			var address1 = new Address
-//			{
-//				City = "1111Warsaw",
-//				Country = "Poland",
-//				PostalCode = "00-999",
-//				StreetName = "Wiejska",
-//				Phone = 4444444,
-//				Region = "Mazowieckie",
-//				StreetNumber = "23/3"
-//			};
-//			var initailCLient = new Client
-//			{
-//				Name = "TestCompany",
-//				Email = "123@op.pl",
-//				Description = "Description",
-//				FullName = "FullNameCompany",
-//				Addresses = [address]
-//			};
-//			var initailCLient1 = new Client
-//			{
-//				Name = "222TestCompany",
-//				Email = "222123@op.pl",
-//				Description = "Description",
-//				FullName = "FullNameCompany",
-//				Addresses = [address1]
-//			};
-//			var initialCategory = new Category { Name = "name", IsDeleted = false };
-//			var initialProduct = new Product
-//			{
-//				Name = "Test",
-//				SKU = "666666",
-//				Category = initialCategory,
-//				IsDeleted = false
-//			};
-//			var initialProduct1 = new Product
-//			{
-//				Name = "Test",
-//				SKU = "666666",
-//				Category = initialCategory,
-//				IsDeleted = false
-//			};
-//			var initailLocation = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-//			var initialReceipt = new Receipt
-//			{
-//				Client = initailCLient,
-//				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-//				PerformedBy = "U002",
-//				ReceiptDateTime = new DateTime(2025, 6, 6)
-//			};
-//			var initialPallet = new Pallet
-//			{
-//				Id = "Q1000",
-//				DateReceived = DateTime.Now,
-//				Location = initailLocation,
-//				Status = PalletStatus.Available,
-//				Receipt = initialReceipt
-//			};
-//			var initialProductOnPallet = new ProductOnPallet
-//			{
-//				Pallet = initialPallet,
-//				Product = initialProduct,
-//				Quantity = 100,
-//				DateAdded = DateTime.Now,
-//				BestBefore = new DateOnly(2027, 3, 3)
-//			};
-//			var initialPallet1 = new Pallet
-//			{
-//				Id = "Q1001",
-//				DateReceived = DateTime.Now,
-//				Location = initailLocation,
-//				Status = PalletStatus.Available,
-//				Receipt = initialReceipt
-//			};
-//			var initialProductOnPallet1 = new ProductOnPallet
-//			{
-//				Pallet = initialPallet1,
-//				Product = initialProduct1,
-//				Quantity = 100,
-//				DateAdded = DateTime.Now,
-//				BestBefore = new DateOnly(2027, 3, 3)
-//			};
+		//		[Fact]
+		//		public async Task ProperDataOneAddedOneRemoveOnePalletsAndClient_UpdatePalletToReceiptAsync_AddedToBase_MockedMapper()
+		//		{
+		//			//Arrange
+		//			var address = new Address
+		//			{
+		//				City = "Warsaw",
+		//				Country = "Poland",
+		//				PostalCode = "00-999",
+		//				StreetName = "Wiejska",
+		//				Phone = 4444444,
+		//				Region = "Mazowieckie",
+		//				StreetNumber = "23/3"
+		//			};
+		//			var address1 = new Address
+		//			{
+		//				City = "1111Warsaw",
+		//				Country = "Poland",
+		//				PostalCode = "00-999",
+		//				StreetName = "Wiejska",
+		//				Phone = 4444444,
+		//				Region = "Mazowieckie",
+		//				StreetNumber = "23/3"
+		//			};
+		//			var initailCLient = new Client
+		//			{
+		//				Name = "TestCompany",
+		//				Email = "123@op.pl",
+		//				Description = "Description",
+		//				FullName = "FullNameCompany",
+		//				Addresses = [address]
+		//			};
+		//			var initailCLient1 = new Client
+		//			{
+		//				Name = "222TestCompany",
+		//				Email = "222123@op.pl",
+		//				Description = "Description",
+		//				FullName = "FullNameCompany",
+		//				Addresses = [address1]
+		//			};
+		//			var initialCategory = new Category { Name = "name", IsDeleted = false };
+		//			var initialProduct = new Product
+		//			{
+		//				Name = "Test",
+		//				SKU = "666666",
+		//				Category = initialCategory,
+		//				IsDeleted = false
+		//			};
+		//			var initialProduct1 = new Product
+		//			{
+		//				Name = "Test",
+		//				SKU = "666666",
+		//				Category = initialCategory,
+		//				IsDeleted = false
+		//			};
+		//			var initailLocation = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
+		//			var initialReceipt = new Receipt
+		//			{
+		//				Client = initailCLient,
+		//				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+		//				PerformedBy = "U002",
+		//				ReceiptDateTime = new DateTime(2025, 6, 6)
+		//			};
+		//			var initialPallet = new Pallet
+		//			{
+		//				Id = "Q1000",
+		//				DateReceived = DateTime.Now,
+		//				Location = initailLocation,
+		//				Status = PalletStatus.Available,
+		//				Receipt = initialReceipt
+		//			};
+		//			var initialProductOnPallet = new ProductOnPallet
+		//			{
+		//				Pallet = initialPallet,
+		//				Product = initialProduct,
+		//				Quantity = 100,
+		//				DateAdded = DateTime.Now,
+		//				BestBefore = new DateOnly(2027, 3, 3)
+		//			};
+		//			var initialPallet1 = new Pallet
+		//			{
+		//				Id = "Q1001",
+		//				DateReceived = DateTime.Now,
+		//				Location = initailLocation,
+		//				Status = PalletStatus.Available,
+		//				Receipt = initialReceipt
+		//			};
+		//			var initialProductOnPallet1 = new ProductOnPallet
+		//			{
+		//				Pallet = initialPallet1,
+		//				Product = initialProduct1,
+		//				Quantity = 100,
+		//				DateAdded = DateTime.Now,
+		//				BestBefore = new DateOnly(2027, 3, 3)
+		//			};
 
-//			initialPallet.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet };
-//			initialPallet1.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet1 };
-//			initialReceipt.Pallets = new List<Pallet> { initialPallet, initialPallet1 };
+		//			initialPallet.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet };
+		//			initialPallet1.ProductsOnPallet = new List<ProductOnPallet> { initialProductOnPallet1 };
+		//			initialReceipt.Pallets = new List<Pallet> { initialPallet, initialPallet1 };
 
-//			initialProductOnPallet.PalletId = initialPallet.Id;
-//			initialProductOnPallet.ProductId = initialProduct.Id;
-//			initialProductOnPallet1.PalletId = initialPallet1.Id;
-//			initialProductOnPallet1.ProductId = initialProduct.Id;
+		//			initialProductOnPallet.PalletId = initialPallet.Id;
+		//			initialProductOnPallet.ProductId = initialProduct.Id;
+		//			initialProductOnPallet1.PalletId = initialPallet1.Id;
+		//			initialProductOnPallet1.ProductId = initialProduct.Id;
 
-//			DbContext.Categories.Add(initialCategory);
-//			DbContext.Products.AddRange(initialProduct, initialProduct1);
-//			DbContext.Clients.AddRange(initailCLient, initailCLient1);
-//			DbContext.Locations.Add(initailLocation);
-//			DbContext.Receipts.Add(initialReceipt);
-//			DbContext.Pallets.AddRange(initialPallet, initialPallet1);
-//			DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
+		//			DbContext.Categories.Add(initialCategory);
+		//			DbContext.Products.AddRange(initialProduct, initialProduct1);
+		//			DbContext.Clients.AddRange(initailCLient, initailCLient1);
+		//			DbContext.Locations.Add(initailLocation);
+		//			DbContext.Receipts.Add(initialReceipt);
+		//			DbContext.Pallets.AddRange(initialPallet, initialPallet1);
+		//			DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
 
-//			await DbContext.SaveChangesAsync();
+		//			await DbContext.SaveChangesAsync();
 
-//			// 🧩 Mockowany mapper – zwraca po prostu ten sam obiekt, nie zmienia właściwości
-//			var mockMapper = new Mock<IMapper>();
-//			mockMapper.Setup(m => m.Map<ReceiptDTO, Receipt>(It.IsAny<ReceiptDTO>(), It.IsAny<Receipt>()))
-//					  .Returns((ReceiptDTO src, Receipt dest) => dest);
+		//			// 🧩 Mockowany mapper – zwraca po prostu ten sam obiekt, nie zmienia właściwości
+		//			var mockMapper = new Mock<IMapper>();
+		//			mockMapper.Setup(m => m.Map<ReceiptDTO, Receipt>(It.IsAny<ReceiptDTO>(), It.IsAny<Receipt>()))
+		//					  .Returns((ReceiptDTO src, Receipt dest) => dest);
 
-//			// Pozostałe mocki
-//			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
-//			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
-//			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
-//			var mockLocationRepo = new Mock<ILocationRepo>();
+		//			// Pozostałe mocki
+		//			var mockValidator = new Mock<IValidator<CreatePalletReceiptDTO>>();
+		//			var mockReceiptValidator = new Mock<IValidator<ReceiptDTO>>();
+		//			var mockUpdateValidator = new Mock<IValidator<UpdatePalletDTO>>();
+		//			var mockLocationRepo = new Mock<ILocationRepo>();
 
-//			var updatingReceipt = new ReceiptDTO
-//			{
-//				Id = initialReceipt.Id,
-//				ClientId = initailCLient1.Id,
-//				PerformedBy = "U002",
-//				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
-//				ReceiptDateTime = new DateTime(2025, 6, 6),
-//				Pallets =
-//				[
-//					new()
-//			{
-//				Id = "Q1001",
-//				LocationId = initailLocation.Id,
-//				ReceiptId = initialReceipt.Id,
-//				Status = PalletStatus.Receiving,
-//				DateReceived = DateTime.Now,
-//				ProductsOnPallet =
-//				[
-//					new()
-//					{
-//						Id = initialProductOnPallet1.Id,
-//						ProductId = initialProduct1.Id,
-//						Quantity = 1,
-//						DateAdded = DateTime.Now
-//					}
-//				]
-//			}
-//				]
-//			};
+		//			var updatingReceipt = new ReceiptDTO
+		//			{
+		//				Id = initialReceipt.Id,
+		//				ClientId = initailCLient1.Id,
+		//				PerformedBy = "U002",
+		//				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
+		//				ReceiptDateTime = new DateTime(2025, 6, 6),
+		//				Pallets =
+		//				[
+		//					new()
+		//			{
+		//				Id = "Q1001",
+		//				LocationId = initailLocation.Id,
+		//				ReceiptId = initialReceipt.Id,
+		//				Status = PalletStatus.Receiving,
+		//				DateReceived = DateTime.Now,
+		//				ProductsOnPallet =
+		//				[
+		//					new()
+		//					{
+		//						Id = initialProductOnPallet1.Id,
+		//						ProductId = initialProduct1.Id,
+		//						Quantity = 1,
+		//						DateAdded = DateTime.Now
+		//					}
+		//				]
+		//			}
+		//				]
+		//			};
 
-//			var userId = "U100";
-//			mockValidator.Setup(m => m.Validate(It.IsAny<CreatePalletReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
-//			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
-//			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
+		//			var userId = "U100";
+		//			mockValidator.Setup(m => m.Validate(It.IsAny<CreatePalletReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
+		//			mockUpdateValidator.Setup(m => m.Validate(It.IsAny<UpdatePalletDTO>())).Returns(new FluentValidation.Results.ValidationResult());
+		//			mockReceiptValidator.Setup(m => m.Validate(It.IsAny<ReceiptDTO>())).Returns(new FluentValidation.Results.ValidationResult());
 
-//			var receiptRepo = new ReceiptRepo(DbContext);
-//			var palletRepo = new PalletRepo(DbContext);
-//			var receiptNewValidator = new CreateReceiptPlanDTOValidation();
-//			var service = new ReceiptService(Mediator,
-//				receiptRepo,
-//				mockMapper.Object, // 🔥 zamockowany mapper
-//				DbContext,
-//				palletRepo,
-//				mockValidator.Object,
-//				mockReceiptValidator.Object,
-//				receiptNewValidator
-//			);
+		//			var receiptRepo = new ReceiptRepo(DbContext);
+		//			var palletRepo = new PalletRepo(DbContext);
+		//			var receiptNewValidator = new CreateReceiptPlanDTOValidation();
+		//			var service = new ReceiptService(Mediator,
+		//				receiptRepo,
+		//				mockMapper.Object, // 🔥 zamockowany mapper
+		//				DbContext,
+		//				palletRepo,
+		//				mockValidator.Object,
+		//				mockReceiptValidator.Object,
+		//				receiptNewValidator
+		//			);
 
-//			//Act
-//			await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
+		//			//Act
+		//			await service.UpdateReceiptPalletsAsync(updatingReceipt, userId);
 
-//			//Assert
-//			var result = DbContext.Receipts
-//				.Include(p => p.Pallets)
-//				.ThenInclude(pp => pp.ProductsOnPallet)
-//				.SingleOrDefault(x => x.Id == updatingReceipt.Id);
+		//			//Assert
+		//			var result = DbContext.Receipts
+		//				.Include(p => p.Pallets)
+		//				.ThenInclude(pp => pp.ProductsOnPallet)
+		//				.SingleOrDefault(x => x.Id == updatingReceipt.Id);
 
-//			Assert.NotNull(result);
-//			Assert.Equal(initailCLient1.Id, result.ClientId);
-//			Assert.Single(result.Pallets); // tylko jedna paleta
-//			Assert.Equal("Q1001", result.Pallets.First().Id);
+		//			Assert.NotNull(result);
+		//			Assert.Equal(initailCLient1.Id, result.ClientId);
+		//			Assert.Single(result.Pallets); // tylko jedna paleta
+		//			Assert.Equal("Q1001", result.Pallets.First().Id);
 
-//			service.Verify(r => r.UpdateAsync(
-//	It.Is<Receipt>(r =>
-//		r.Pallets.Any(p =>
-//			p.ProductsOnPallet.Any(prod => prod.Quantity == 50)
-//		)
-//	)
-//), Times.Once);
-//			////potrzebny nowy Context
-//			//await using var freshContext = CreateNewContext();
+		//			service.Verify(r => r.UpdateAsync(
+		//	It.Is<Receipt>(r =>
+		//		r.Pallets.Any(p =>
+		//			p.ProductsOnPallet.Any(prod => prod.Quantity == 50)
+		//		)
+		//	)
+		//), Times.Once);
+		//			////potrzebny nowy Context
+		//			//await using var freshContext = CreateNewContext();
 
-//			//var newPallet = freshContext.Pallets
-//			//	.Include(p => p.ProductsOnPallet)
-//			//	.FirstOrDefault(p => p.Id == "Q1001");
+		//			//var newPallet = freshContext.Pallets
+		//			//	.Include(p => p.ProductsOnPallet)
+		//			//	.FirstOrDefault(p => p.Id == "Q1001");
 
-//			//Assert.NotNull(newPallet);
-//			//Assert.Equal(PalletStatus.Receiving, newPallet.Status);
-//			//Assert.Equal(initailLocation.Id, newPallet.LocationId);
-//			//Assert.Equal(initialReceipt.Id, newPallet.ReceiptId);
+		//			//Assert.NotNull(newPallet);
+		//			//Assert.Equal(PalletStatus.Receiving, newPallet.Status);
+		//			//Assert.Equal(initailLocation.Id, newPallet.LocationId);
+		//			//Assert.Equal(initialReceipt.Id, newPallet.ReceiptId);
 
-//			//var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.PalletId == "Q1001");
-//			//Assert.NotNull(product);
-//			//Assert.Equal("Q1001", product.PalletId);
-//			//Assert.Equal(1, product.Quantity);
-//			//Assert.Equal(initialProduct1.Id, product.ProductId);
-//		}
+		//			//var product = DbContext.ProductOnPallet.FirstOrDefault(p => p.PalletId == "Q1001");
+		//			//Assert.NotNull(product);
+		//			//Assert.Equal("Q1001", product.PalletId);
+		//			//Assert.Equal(1, product.Quantity);
+		//			//Assert.Equal(initialProduct1.Id, product.ProductId);
+		//		}
 	}
 }

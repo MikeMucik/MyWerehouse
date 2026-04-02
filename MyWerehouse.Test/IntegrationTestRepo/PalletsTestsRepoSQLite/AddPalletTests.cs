@@ -28,14 +28,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			};
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q00001",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				//ReceiptId = 10,
-			};
+			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q00001",
+			//	DateReceived = DateTime.Now,
+			//	LocationId = 1,
+			//	Status = PalletStatus.Available,
+			//	//ReceiptId = 10,
+			//};
 			var palletRepo = new PalletRepo(DbContext);
 			//Act
 			var result = palletRepo.AddPallet(pallet);
@@ -50,15 +51,16 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		{
 			//Arrange
 			var category = new Category
-			{
+			{Id =1 ,
 				Name = "TestC",
 			};
-			var product = new Product
-			{
-				Category = category,
-				Name = "TestP",
-				SKU = "1234Test",
-			};
+			var product = Product.Create("TestP", "1234Test", 1, 56);
+			//var product = new Product
+			//{
+			//	Category = category,
+			//	Name = "TestP",
+			//	SKU = "1234Test",
+			//};
 			var location = new Location
 			{
 				Bay = 1,
@@ -70,23 +72,25 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Products.Add(product);
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q00001",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				//ReceiptId = 10,
-				ProductsOnPallet = new List<ProductOnPallet> {
-						new ProductOnPallet
-						{
-							Product = product,
-							Quantity = 1,
-							DateAdded = DateTime.Now,
-							BestBefore = DateOnly.FromDateTime(DateTime.Now.AddMonths(24)),
-						}
-				}
-			};
+			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 1, DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q00001",
+			//	DateReceived = DateTime.Now,
+			//	LocationId = 1,
+			//	Status = PalletStatus.Available,
+			//	//ReceiptId = 10,
+			//	ProductsOnPallet = new List<ProductOnPallet> {
+			//			new ProductOnPallet
+			//			{
+			//				Product = product,
+			//				Quantity = 1,
+			//				DateAdded = DateTime.Now,
+			//				BestBefore = DateOnly.FromDateTime(DateTime.Now.AddMonths(24)),
+			//			}
+			//	}
+			//};
 			var palletRepo = new PalletRepo(DbContext);
 			//Act
 			var result = palletRepo.AddPallet(pallet);
@@ -128,18 +132,20 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			{
 				Name = "TestC",
 			};
-			var product1 = new Product
-			{
-				Category = category,
-				Name = "TestP",
-				SKU = "1234Test",
-			};
-			var product2 = new Product
-			{
-				Category = category,
-				Name = "TestP2",
-				SKU = "1234Test2",
-			};
+			var product1 = Product.Create("TestP", "1234Test", 1, 56);
+			//var product1 = new Product
+			//{
+			//	Category = category,
+			//	Name = "TestP",
+			//	SKU = "1234Test",
+			//};
+			var product2 = Product.Create("TestP2", "1234Test2", 1, 56);			
+			//var product2 = new Product
+			//{
+			//	Category = category,
+			//	Name = "TestP2",
+			//	SKU = "1234Test2",
+			//};
 			var location = new Location
 			{
 				Bay = 1,
@@ -151,30 +157,33 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q00001",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				//ReceiptId = 10,
-				ProductsOnPallet = new List<ProductOnPallet> {
-						new ProductOnPallet
-						{
-							Product = product1,
-							Quantity = 1,
-							DateAdded = DateTime.Now,
-							BestBefore = DateOnly.FromDateTime(DateTime.Now.AddMonths(24)),
-						},
-						new ProductOnPallet
-						{
-							Product = product2,
-							Quantity = 20,
-							DateAdded = DateTime.Now,
-							BestBefore = DateOnly.FromDateTime(DateTime.Now.AddMonths(24)),
-						}
-				}
-			};
+			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product1.Id, 1, DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
+			pallet.AddProduct(product2.Id, 20, DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));		
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q00001",
+			//	DateReceived = DateTime.Now,
+			//	LocationId = 1,
+			//	Status = PalletStatus.Available,
+			//	//ReceiptId = 10,
+			//	ProductsOnPallet = new List<ProductOnPallet> {
+			//			new ProductOnPallet
+			//			{
+			//				Product = product1,
+			//				Quantity = 1,
+			//				DateAdded = DateTime.Now,
+			//				BestBefore = DateOnly.FromDateTime(DateTime.Now.AddMonths(24)),
+			//			},
+			//			new ProductOnPallet
+			//			{
+			//				Product = product2,
+			//				Quantity = 20,
+			//				DateAdded = DateTime.Now,
+			//				BestBefore = DateOnly.FromDateTime(DateTime.Now.AddMonths(24)),
+			//			}
+			//	}
+			//};
 			var palletRepo = new PalletRepo(DbContext);
 			//Act
 			var result = palletRepo.AddPallet(pallet);

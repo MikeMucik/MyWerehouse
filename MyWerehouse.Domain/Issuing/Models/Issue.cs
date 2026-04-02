@@ -46,32 +46,39 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
 			foreach (var pallet in toReturn)
-			{
-				//pallet.Status = PalletStatus.Available;
-				pallet.IssueId = null;
+			{				
+				pallet.DetachToIssue(Id, userId);
 				pallet.AddHistory(PalletStatus.Available, ReasonMovement.Correction, userId);
 				Pallets.Remove(pallet);
 			}
 			return toReturn;
 		}
-		public void AssignPallet(Pallet pallet, string userId)
+		public void ReservePallet(Pallet pallet, string userId)
 		{
+			if (pallet.Status == PalletStatus.ToIssue)
+				throw new DomainException("Already reserved");
 			this.Pallets.Add(pallet);
-			pallet.IssueId = Id;
-			pallet.AssignToIssue(this, userId);
+			pallet.ReserveToIssue(this, userId);
 		}
 
+		
 		public void DetachPallet(Pallet pallet, string userId)
 		{
 			this.Pallets.Remove(pallet);
 			pallet.DetachToIssue(this.Id, userId);
 		}
+		//public void AssignPallet(Pallet pallet, string userId)
+		//{
+		//	this.Pallets.Add(pallet);
+		//	pallet.AssignToIssue(this, userId);
+		//}
 		public void ConfirmToLoad(string userId)
 		{
 			IssueStatus = IssueStatus.ConfirmedToLoad;
 			foreach (var pallet in Pallets)
 			{
-				pallet.IssueId = Id;
+				pallet.AssignToIssue(this, userId);
+				//pallet.IssueId = Id;
 				pallet.AddHistory(PalletStatus.ToIssue, ReasonMovement.ToLoad, userId);
 			}
 			this.AddDomainEvent(new AddHistoryForIssueNotification(

@@ -7,6 +7,7 @@ using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 {
@@ -36,15 +37,25 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				Addresses = [address]
 
 			};
-			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var receipt = new Receipt
+			var location = new Location
 			{
-				Id = receiptId1,
-				ReceiptNumber = 10,
-				ClientId = 10,
-				ReceiptDateTime = DateTime.Now,
-				PerformedBy = "U1234"
+				Aisle = 1,
+				Bay = 1,
+				Height = 1,
+				Position = 1
 			};
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 10, "U1234",
+			DateTime.UtcNow, ReceiptStatus.PhysicallyCompleted, 1);
+			//var receipt = new Receipt
+			//{
+			//	Id = receiptId1,
+			//	ReceiptNumber = 10,
+			//	ClientId = 10,
+			//	ReceiptDateTime = DateTime.Now,
+			//	PerformedBy = "U1234"
+			//};
+			_context.Locations.Add(location);
 			_context.Receipts.Add(receipt);
 			_context.Clients.Add(client);
 			_context.SaveChanges();

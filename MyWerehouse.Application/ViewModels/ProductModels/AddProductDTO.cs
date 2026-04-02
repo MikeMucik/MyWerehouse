@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 				//.ForMember(dest=>dest.Category, opt=>opt.MapFrom(src=>src.Category.Name))
 				.ForMember(dest=>dest.Description, opt=>opt.MapFrom(src=>src.Details.Description))
 				//.ForMember(dest=>dest.DetailsId, opt=>opt.MapFrom(src=>src.Details.Id))
-				.ForMember(dest=>dest.AddedItemAd, opt=>opt.MapFrom(src=>src.AddedItemAd))
+				//.ForMember(dest=>dest.AddedItemAd, opt=>opt.MapFrom(src=>src.AddedItemAd))
 				.ReverseMap();
 		}
 		

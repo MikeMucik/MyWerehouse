@@ -21,7 +21,8 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		{
 			_createPalletOrAddToPalletService = createPalletOrAddToPalletService;			
 		}
-		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, Guid productId, int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion)
+		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, Guid productId,
+			int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion, int rampNumber)
 		{
 			var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId);
 			if (productOnSourcePallet is null)
@@ -29,9 +30,10 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			var bestBefore = pickingTask.BestBefore;
 			
 			var pickingPallet =	await _createPalletOrAddToPalletService.CreatePalletOrAddToPallet(issue, productId,
-				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion);
+				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion, rampNumber);
 			//Usuwanie towaru z palety źródłowej
-			productOnSourcePallet.Quantity -= quantityToPick;
+			//productOnSourcePallet.Quantity -= quantityToPick;
+			productOnSourcePallet.AddQuantity(-quantityToPick);
 			if (productOnSourcePallet.Quantity == 0)
 			{
 				sourcePallet.AddHistory(PalletStatus.Archived, ReasonMovement.Picking, userId);

@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPicking
 {
-	public record ExecuteCorrectedPickingCommand(Guid PalletId, Guid IssueId, string UserId):IRequest<AppResult<Unit>>;	
+	public record ExecuteCorrectedPickingCommand(Guid PalletId, Guid IssueId, string UserId, int RampNumber):IRequest<AppResult<Unit>>;	
 }

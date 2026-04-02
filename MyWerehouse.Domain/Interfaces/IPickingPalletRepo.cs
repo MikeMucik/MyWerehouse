@@ -19,6 +19,6 @@ namespace MyWerehouse.Domain.Interfaces
 		//Task<DateTime> TakeDateAddedToPickingAsync(int pickingPalletId);
 		Task<int> GetVirtualPalletIdFromPalletIdAsync(Guid palletId);
 		Task<VirtualPallet?> GetVirtualPalletByIdAsync(int? palletId);
-		void ClosePickingPallet(Guid palletId, Guid issueId);		
+		//void ClosePickingPallet(Guid palletId, Guid issueId);		
 	}
 }

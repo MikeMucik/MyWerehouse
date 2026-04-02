@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MyWerehouse.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDatBase : Migration
+    public partial class WarehouseDataBase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,7 +56,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    Name = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -71,9 +71,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    Email = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    Description = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    FullName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    Email = table.Column<string>(type: "nvarchar(254)", maxLength: 254, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    FullName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -87,11 +87,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ReversePickingId = table.Column<int>(type: "int", nullable: false),
-                    PalletSourceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PalletDestinationId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IssueId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ReversePickingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PalletSourceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PalletSourceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PalletDestinationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PalletDestinationNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IssueNumber = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     StatusBefore = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StatusAfter = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -229,10 +232,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    SKU = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    SKU = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
                     AddedItemAd = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -255,12 +257,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Country = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    City = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    Region = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    Country = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    Region = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
                     Phone = table.Column<int>(type: "int", nullable: false),
                     PostalCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    StreetName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
+                    StreetName = table.Column<string>(type: "nvarchar(95)", maxLength: 95, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
                     StreetNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
                     AdditionalEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClientId = table.Column<int>(type: "int", nullable: false)
@@ -280,7 +282,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "Inventories",
                 columns: table => new
                 {
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -299,14 +301,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "Issues",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IssueNumber = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     IssueDateTimeCreate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IssueDateTimeSend = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IssueStatus = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: true)
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -328,7 +330,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "ProductDetails",
                 columns: table => new
                 {
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Length = table.Column<int>(type: "int", nullable: false),
                     Height = table.Column<int>(type: "int", nullable: false),
                     Width = table.Column<int>(type: "int", nullable: false),
@@ -350,14 +352,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "Receipts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReceiptNumber = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     ReceiptDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReceiptStatus = table.Column<int>(type: "int", nullable: false),
                     RampNumber = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: true)
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -381,7 +383,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IssueId = table.Column<int>(type: "int", nullable: false),
+                    IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IssueNumber = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     StatusAfter = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -404,8 +407,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IssueId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IssueNumber = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     BestBefore = table.Column<DateOnly>(type: "date", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -433,7 +437,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ReceiptId = table.Column<int>(type: "int", nullable: false),
+                    ReceiptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReceiptNumber = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     StatusAfter = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -454,12 +459,13 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "Pallets",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", maxLength: 10, nullable: false),
+                    PalletNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateReceived = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ReceiptId = table.Column<int>(type: "int", nullable: true),
-                    IssueId = table.Column<int>(type: "int", nullable: true),
+                    ReceiptId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
                 constraints: table =>
@@ -491,7 +497,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PalletId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PalletNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
                     LocationSnapShot = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HistoryIssueId = table.Column<int>(type: "int", nullable: false)
@@ -513,7 +520,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     BestBefore = table.Column<DateOnly>(type: "date", nullable: false),
                     HistoryIssueId = table.Column<int>(type: "int", nullable: false)
@@ -535,7 +542,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PalletId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PalletNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
                     LocationSnapShot = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HistoryReceiptId = table.Column<int>(type: "int", nullable: false)
@@ -557,7 +565,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PalletId = table.Column<string>(type: "nvarchar(10)", nullable: false),
+                    PalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PalletNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SourceLocationId = table.Column<int>(type: "int", nullable: true),
                     SourceLocationSnapShot = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DestinationLocationId = table.Column<int>(type: "int", nullable: true),
@@ -584,8 +593,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    PalletId = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PalletId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 10, nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
                     BestBefore = table.Column<DateTime>(type: "date", nullable: true)
@@ -613,7 +622,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PalletId = table.Column<string>(type: "nvarchar(10)", nullable: false),
+                    PalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     InitialPalletQuantity = table.Column<int>(type: "int", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
                     DateMoved = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -642,7 +651,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PalletMovementId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -662,10 +671,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PickingTaskId = table.Column<int>(type: "int", nullable: true),
-                    PalletId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    IssueId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    PickingTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PalletNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IssueNumber = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QuantityAllocated = table.Column<int>(type: "int", nullable: false),
                     QuantityPicked = table.Column<int>(type: "int", nullable: false),
                     StatusBefore = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -694,15 +705,16 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "PickingTasks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    VirtualPalletId = table.Column<int>(type: "int", nullable: false),
-                    IssueId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VirtualPalletId = table.Column<int>(type: "int", nullable: true),
+                    IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IssueNumber = table.Column<int>(type: "int", nullable: false),
+                    RequestedQuantity = table.Column<int>(type: "int", nullable: false),
                     PickingStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BestBefore = table.Column<DateOnly>(type: "date", nullable: true),
-                    PickingPalletId = table.Column<string>(type: "nvarchar(10)", nullable: true),
+                    PickingPalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PickingDay = table.Column<DateOnly>(type: "date", nullable: true),
                     PickedQuantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -732,16 +744,16 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "ReversePickings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PickingPalletId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SourcePalletId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DestinationPalletId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PickingPalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SourcePalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DestinationPalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BestBefore = table.Column<DateOnly>(type: "date", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    PickingTaskId = table.Column<int>(type: "int", nullable: false),
+                    PickingTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DateMade = table.Column<DateOnly>(type: "date", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>

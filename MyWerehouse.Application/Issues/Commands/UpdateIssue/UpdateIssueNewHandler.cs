@@ -44,8 +44,10 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					var listOldPallets = issue.Pallets.ToList();//
 					foreach (var pallet in listOldPallets)
 					{
-						issue.Pallets.Remove(pallet);
-						pallet.Status = PalletStatus.InTransit;
+						//issue.Pallets.Remove(pallet);
+						pallet.DetachToIssue(issue.Id, request.DTO.PerformedBy);
+						pallet.ChangeStatus(PalletStatus.InTransit);//chyba zbędne
+						//pallet.Status = PalletStatus.InTransit;
 						oldListPallets.Add(pallet);
 					}
 					var listOldPickingTask = issue.PickingTasks.ToList();
@@ -53,7 +55,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					foreach (var pickingTask in listOldPickingTask)
 					{
 						pickingTask.AddHistory(request.DTO.PerformedBy, pickingTask.PickingStatus, PickingStatus.Cancelled, 0);
-						issue.PickingTasks.Remove(pickingTask);
+						issue.PickingTasks.Remove(pickingTask);//DDD!!
+						//DDD!!
 						_werehouseDbContext.PickingTasks.Remove(pickingTask);
 					}
 					await _werehouseDbContext.SaveChangesAsync(ct);
@@ -91,8 +94,10 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 							var returnPallets = oldProperPallets.Except(palletAssigned).ToList();
 							foreach (var returnPallet in returnPallets)
 							{
-								returnPallet.IssueId = null;
-								returnPallet.Status = PalletStatus.Available;
+								//returnPallet.DetachToIssue(issue.Id, request.DTO.PerformedBy);
+								returnPallet.ChangeStatus(PalletStatus.Available);
+								//returnPallet.IssueId = null;
+								//returnPallet.Status = PalletStatus.Available;
 							}
 							await _werehouseDbContext.SaveChangesAsync(ct);
 							resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
@@ -127,9 +132,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 							//{
 								// Logowanie krytyczne
 								// _logger.LogError(ex, ...)
-								resultList.Add(IssueResult.Fail("Wystąpił nieoczekiwany błąd", product.ProductId));
-								// Tutaj DECYZJA: Czy throw? Jeśli rzucisz throw, przerwiesz pętlę dla kolejnych produktów.
-								// Jeśli chcesz kontynuować dla innych produktów, nie rób throw.
+								resultList.Add(IssueResult.Fail("Wystąpił nieoczekiwany błąd", product.ProductId));								
 							//}
 						}
 					}
@@ -152,7 +155,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					{
 						if (vp.Pallet != null)
 						{
-							vp.Pallet.Status = PalletStatus.Available;
+							//vp.Pallet.Status = PalletStatus.Available;
+							vp.Pallet.ChangeStatus(PalletStatus.Available);
 						}
 						_werehouseDbContext.VirtualPallets.Remove(vp);
 					}
@@ -165,17 +169,17 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					{
 						issue.IssueStatus = IssueStatus.NotComplete;
 					}
-					foreach (var palletToStock in oldListPallets)
-					{
-						if (!issue.Pallets.Any(p => p.Id == palletToStock.Id))
-						{
-							if (palletToStock.IssueId == null || palletToStock.IssueId == issue.Id)
-							{
-								palletToStock.Status = PalletStatus.Available;
-								palletToStock.IssueId = null;
-							}
-						}
-					}
+					//foreach (var palletToStock in oldListPallets)
+					//{
+					//	if (!issue.Pallets.Any(p => p.Id == palletToStock.Id))
+					//	{
+					//		if (palletToStock.IssueId == null || palletToStock.IssueId == issue.Id)
+					//		{
+					//			palletToStock.Status = PalletStatus.Available;
+					//			palletToStock.IssueId = null;
+					//		}
+					//	}
+					//}
 					issue.AddHistory(request.DTO.PerformedBy);
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);

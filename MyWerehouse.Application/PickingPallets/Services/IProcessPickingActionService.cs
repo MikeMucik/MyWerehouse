@@ -15,6 +15,6 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet,
 		Issue issue, Guid productId, int quantityToPick,
 		string userId, PickingTask pickingTask,
-		PickingCompletion pickingCompletion);
+		PickingCompletion pickingCompletion, int rampNumber);
 	}
 }

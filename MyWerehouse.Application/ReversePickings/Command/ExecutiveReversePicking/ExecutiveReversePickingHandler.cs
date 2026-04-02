@@ -56,6 +56,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				reversePicking.Status = ReversePickingStatus.InProgress;
 				string? sourcePalletId = null;
 				string? destinationPalletId = null;
+				//Do zmiany
 				var issueId = reversePicking.PickingTask.IssueId;
 				var issueNumber = reversePicking.PickingTask.IssueNumber;
 				if (issueId == null)
@@ -72,7 +73,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 						var hasAnyAllocated = virtualPalletPickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated);
 						if (!hasAnyAllocated)
 						{
-							palletFromSource.Status = PalletStatus.Available;
+							palletFromSource.ChangeStatus(PalletStatus.Available);
 						}
 						break;
 					case ReversePickingStrategy.AddToExistingPallet:
@@ -86,19 +87,22 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 						//TODO front co potrzebuje						
 						break;
 					case ReversePickingStrategy.AddToNewPallet:
-						result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId);
+						if (command.RampNumber == null) return AppResult<ReversePickingResult>.Fail("Brak lokalizacji dekompletacji", ErrorType.Validation);
+						result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId, command.RampNumber.Value);
 						break;
 
 						//default
 				}
-				productOnPallet.Quantity = 0;//
+				//productOnPallet.Quantity = 0;//
+				productOnPallet.SetQuantity(0);
 				if (pickingPallet.ProductsOnPallet.All(x => x.Quantity == 0))
 				{
-					pickingPallet.Status = PalletStatus.Archived;
+					//pickingPallet.Status = PalletStatus.Archived;
+					pickingPallet.ToArchive(command.UserId);
 				}
 				else
 				{
-					pickingPallet.Status = PalletStatus.ReversePicking;//do przemyślenia
+					pickingPallet.ChangeStatus(PalletStatus.ReversePicking);//do przemyślenia
 				}
 				reversePicking.Status = ReversePickingStatus.Completed;
 				reversePicking.AddHistory(command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);

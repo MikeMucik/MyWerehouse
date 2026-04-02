@@ -11,22 +11,22 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Receipts.DTOs
 {
-	public class CreatePalletReceiptDTO :IMapFrom<Pallet>
+	public class CreatePalletReceiptDTO //:IMapFrom<Pallet>
 	{
-		public Guid Id { get; set; }
-		public string PalletNumber { get; set; }
-		public DateTime DateReceived { get; set; }
-		public int LocationId { get; set; }		
-		public PalletStatus Status { get; set; } = 0; 
+		//public Guid Id { get; set; }
+		//public string PalletNumber { get; set; }
+		//public DateTime DateReceived { get; set; }
+		//public int LocationId { get; set; }		
+		//public PalletStatus Status { get; set; } = 0; 
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();	
 		public Guid ReceiptId { get; set; }		
 		public int ReceiptNumber { get; set; }		
 		public string UserId { get; set; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<CreatePalletReceiptDTO, Pallet>()
-				.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src => src.ProductsOnPallet));				
-		}
+		//public void Mapping(Profile profile)
+		//{
+		//	profile.CreateMap<CreatePalletReceiptDTO, Pallet>()
+		//		.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src => src.ProductsOnPallet));				
+		//}
 	}
 	//public class CreatePalletReceiptDTOValidation : AbstractValidator<CreatePalletReceiptDTO> 
 	//{

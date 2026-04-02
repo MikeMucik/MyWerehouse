@@ -79,7 +79,8 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 					if (vp.PickingTasks.Count == 0)
 					{
 						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);
-						vp.Pallet.Status = PalletStatus.Available;
+						vp.Pallet.ChangeStatus(PalletStatus.Available);
+						//vp.Pallet.Status = PalletStatus.Available;
 					}
 				}
 				issue.Cancel(request.UserId);

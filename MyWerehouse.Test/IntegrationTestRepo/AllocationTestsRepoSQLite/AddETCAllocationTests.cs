@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
@@ -42,14 +43,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			var newCategory = new Category
 			{
 				Name = "CategoryName"
-			};			
-			var product = new Product
-			{
-				Name = "Banana",
-				SKU = "1234567890",
-				CategoryId = 1,
-				CartonsPerPallet = 56,
 			};
+			var product = Product.Create("Banana", "1234567890", 1, 56);
+			//var product = new Product
+			//{
+			//	Name = "Banana",
+			//	SKU = "1234567890",
+			//	CategoryId = 1,
+			//	CartonsPerPallet = 56,
+			//};
 			var location = new Location
 			{
 				Bay = 1,
@@ -57,23 +59,26 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 				Position = 1,
 				Height = 1
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q00001",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = new List<ProductOnPallet> {
-					new ProductOnPallet
-					{
-						Product = product,
-						Quantity = 10,
-						DateAdded = DateTime.UtcNow.AddMonths(-1),
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
-					}
-				}
-			};
+			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q00001",
+			//	DateReceived = DateTime.Now,
+			//	LocationId = 1,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = new List<ProductOnPallet> {
+			//		new ProductOnPallet
+			//		{
+			//			Product = product,
+			//			Quantity = 10,
+			//			DateAdded = DateTime.UtcNow.AddMonths(-1),
+			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
+			//		}
+			//	}
+			//};
 			DbContext.Clients.Add(initailClient);
+			DbContext.Products.Add(product);
 			DbContext.Categories.Add(newCategory);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
@@ -142,13 +147,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			{
 				Name = "CategoryName"
 			};
-			var product = new Product
-			{
-				Name = "Banana",
-				SKU = "1234567890",
-				CategoryId = 1,
-				CartonsPerPallet = 56,
-			};
+			var product = Product.Create("Banana", "1234567890", 1, 56);
+			//var product = new Product
+			//{
+			//	Name = "Banana",
+			//	SKU = "1234567890",
+			//	CategoryId = 1,
+			//	CartonsPerPallet = 56,
+			//};
 			var location = new Location
 			{
 				Bay = 1,
@@ -156,22 +162,41 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 				Position = 1,
 				Height = 1
 			};
-			var pallet = new Pallet
-			{
-				PalletNumber = "Q00001",
-				DateReceived = DateTime.Now,
-				LocationId = 1,
-				Status = PalletStatus.Available,
-				ProductsOnPallet = new List<ProductOnPallet> {
-					new ProductOnPallet
-					{
-						Product = product,
-						Quantity = 10,
-						DateAdded = DateTime.UtcNow.AddMonths(-1),
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
-					}
-				}
-			};
+			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)));
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q00001",
+			//	DateReceived = DateTime.Now,
+			//	LocationId = 1,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = new List<ProductOnPallet> {
+			//		new ProductOnPallet
+			//		{
+			//			Product = product,
+			//			Quantity = 10,
+			//			DateAdded = DateTime.UtcNow.AddMonths(-1),
+			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
+			//		}
+			//	}
+			//};
+			//var pallet = new Pallet
+			//{
+			//	PalletNumber = "Q00001",
+			//	DateReceived = DateTime.Now,
+			//	LocationId = 1,
+			//	Status = PalletStatus.Available,
+			//	ProductsOnPallet = new List<ProductOnPallet> {
+			//		new ProductOnPallet
+			//		{
+			//			Product = product,
+			//			Quantity = 10,
+			//			DateAdded = DateTime.UtcNow.AddMonths(-1),
+			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
+			//		}
+			//	}
+			//};
+			DbContext.Products.Add(product);
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(newCategory);
 			DbContext.Locations.Add(location);

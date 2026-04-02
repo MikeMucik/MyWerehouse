@@ -26,8 +26,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Pallet, PalletDTO>();
-			profile.CreateMap<PalletDTO, Pallet>()
-				.ForMember(dest => dest.PalletMovements, opt => opt.Ignore());
+			//profile.CreateMap<PalletDTO, Pallet>()
+				//.ForMember(dest => dest.PalletMovements, opt => opt.Ignore());
 		}
 		
 	}

@@ -230,20 +230,20 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<bool>("IsDeleted")
@@ -257,7 +257,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clients", (string)null);
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Common.ValueObject.Address", b =>
@@ -273,8 +273,8 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<int>("ClientId")
@@ -282,8 +282,8 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<string>("Country")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<int>("Phone")
@@ -297,14 +297,14 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<string>("Region")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<string>("StreetName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(95)
+                        .HasColumnType("nvarchar(95)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<string>("StreetNumber")
@@ -317,7 +317,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryIssue", b =>
@@ -334,7 +334,10 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IssueId")
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssueNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("PerformedBy")
@@ -349,7 +352,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("IssueId");
 
-                    b.ToTable("HistoryIssues", (string)null);
+                    b.ToTable("HistoryIssues");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryIssueDetail", b =>
@@ -369,7 +372,10 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<string>("LocationSnapShot")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PalletId")
+                    b.Property<Guid>("PalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PalletNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -377,7 +383,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("HistoryIssueId");
 
-                    b.ToTable("HistoryIssueDetails", (string)null);
+                    b.ToTable("HistoryIssueDetails");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryIssueItems", b =>
@@ -394,8 +400,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("HistoryIssueId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -404,7 +410,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("HistoryIssueId");
 
-                    b.ToTable("HistoryIssueItems", (string)null);
+                    b.ToTable("HistoryIssueItems");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPicking", b =>
@@ -418,22 +424,28 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IssueId")
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssueNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("PalletId")
+                    b.Property<Guid>("PalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PalletNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PerformedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PickingTaskId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PickingTaskId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("QuantityAllocated")
                         .HasColumnType("int");
@@ -464,7 +476,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("VirtualPalletId");
 
-                    b.ToTable("HistoryPickings", (string)null);
+                    b.ToTable("HistoryPickings");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryReceipt", b =>
@@ -485,7 +497,10 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ReceiptId")
+                    b.Property<Guid>("ReceiptId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ReceiptNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("StatusAfter")
@@ -496,7 +511,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ReceiptId");
 
-                    b.ToTable("HistoryReceipts", (string)null);
+                    b.ToTable("HistoryReceipts");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryReceiptDetail", b =>
@@ -516,7 +531,10 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<string>("LocationSnapShot")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PalletId")
+                    b.Property<Guid>("PalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PalletNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -524,7 +542,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("HistoryReceiptId");
 
-                    b.ToTable("HistoryReceiptDetails", (string)null);
+                    b.ToTable("HistoryReceiptDetails");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryReversePicking", b =>
@@ -538,27 +556,36 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IssueId")
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssueNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("PalletDestinationId")
+                    b.Property<Guid?>("PalletDestinationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PalletDestinationNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PalletSourceId")
+                    b.Property<Guid?>("PalletSourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PalletSourceNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PerformedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReversePickingId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ReversePickingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("StatusAfter")
                         .IsRequired()
@@ -569,7 +596,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("HistoryReversePickings", (string)null);
+                    b.ToTable("HistoryReversePickings");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.PalletMovement", b =>
@@ -589,9 +616,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("MovementDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PalletId")
+                    b.Property<Guid>("PalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PalletNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PalletStatus")
                         .HasColumnType("int");
@@ -614,7 +644,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("PalletId");
 
-                    b.ToTable("PalletMovements", (string)null);
+                    b.ToTable("PalletMovements");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.PalletMovementDetail", b =>
@@ -628,8 +658,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("PalletMovementId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -638,13 +668,13 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("PalletMovementId");
 
-                    b.ToTable("PalletMovementDetails", (string)null);
+                    b.ToTable("PalletMovementDetails");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Invetories.Models.Inventory", b =>
                 {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
@@ -654,16 +684,13 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("Inventories", (string)null);
+                    b.ToTable("Inventories");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Issuing.Models.Issue", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
@@ -674,6 +701,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("IssueDateTimeSend")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("IssueNumber")
+                        .HasColumnType("int");
+
                     b.Property<int>("IssueStatus")
                         .HasColumnType("int");
 
@@ -681,8 +711,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -690,7 +720,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Issues", (string)null);
+                    b.ToTable("Issues");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Issuing.Models.IssueItem", b =>
@@ -707,11 +737,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IssueId")
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssueNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -722,26 +755,31 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("IssueItems", (string)null);
+                    b.ToTable("IssueItems");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Pallets.Models.Pallet", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateReceived")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("IssueId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("IssueId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReceiptId")
-                        .HasColumnType("int");
+                    b.Property<string>("PalletNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ReceiptId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -760,7 +798,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ReceiptId");
 
-                    b.ToTable("Pallets", (string)null);
+                    b.ToTable("Pallets");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Pallets.Models.ProductOnPallet", b =>
@@ -777,13 +815,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PalletId")
-                        .IsRequired()
+                    b.Property<Guid>("PalletId")
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -794,40 +831,43 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductOnPallet", (string)null);
+                    b.ToTable("ProductOnPallet");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.PickingTask", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateOnly?>("BestBefore")
                         .HasColumnType("date");
 
-                    b.Property<int>("IssueId")
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IssueNumber")
                         .HasColumnType("int");
 
                     b.Property<int>("PickedQuantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("PickingPalletId")
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<DateOnly?>("PickingDay")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("PickingPalletId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PickingStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductId")
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RequestedQuantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VirtualPalletId")
+                    b.Property<int?>("VirtualPalletId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -838,38 +878,37 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("VirtualPalletId");
 
-                    b.ToTable("PickingTasks", (string)null);
+                    b.ToTable("PickingTasks");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.ReversePicking", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateOnly?>("BestBefore")
                         .HasColumnType("date");
 
-                    b.Property<string>("DestinationPalletId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("DateMade")
+                        .HasColumnType("date");
 
-                    b.Property<string>("PickingPalletId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("DestinationPalletId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("PickingTaskId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PickingPalletId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PickingTaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("SourcePalletId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("SourcePalletId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -882,7 +921,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("PickingTaskId");
 
-                    b.ToTable("ReversePickings", (string)null);
+                    b.ToTable("ReversePickings");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.VirtualPallet", b =>
@@ -902,9 +941,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PalletId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<Guid>("PalletId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -912,7 +950,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("PalletId");
 
-                    b.ToTable("VirtualPallets", (string)null);
+                    b.ToTable("VirtualPallets");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Products.Models.Category", b =>
@@ -928,22 +966,19 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Products.Models.Product", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("AddedItemAd")
                         .HasColumnType("datetime2");
@@ -959,27 +994,27 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<string>("SKU")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Products.Models.ProductDetail", b =>
                 {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -999,16 +1034,13 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("ProductDetails", (string)null);
+                    b.ToTable("ProductDetails");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Receviving.Models.Receipt", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
@@ -1017,14 +1049,17 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("RampNumber")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ReceiptDateTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ReceiptNumber")
+                        .HasColumnType("int");
 
                     b.Property<int>("ReceiptStatus")
                         .HasColumnType("int");
@@ -1035,7 +1070,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Receipts", (string)null);
+                    b.ToTable("Receipts");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Warehouse.Models.Location", b =>
@@ -1060,7 +1095,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Locations", (string)null);
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1314,8 +1349,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.HasOne("MyWerehouse.Domain.Picking.Models.VirtualPallet", "VirtualPallet")
                         .WithMany("PickingTasks")
                         .HasForeignKey("VirtualPalletId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Issue");
 

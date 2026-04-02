@@ -15,11 +15,15 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	public class CreatePalletOrAddToPalletService : ICreatePalletOrAddToPalletService
 	{
 		private readonly IPalletRepo _palletRepo;
-		public CreatePalletOrAddToPalletService(IPalletRepo palletRepo)
+		private readonly ILocationRepo _locationRepo;
+		public CreatePalletOrAddToPalletService(IPalletRepo palletRepo, ILocationRepo locationRepo)
 		{
-			_palletRepo = palletRepo;		
+			_palletRepo = palletRepo;
+			_locationRepo = locationRepo;
 		}
-		public async Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, Guid productId, int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask, PickingCompletion pickingCompletion)
+		public async Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, Guid productId,
+			int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask,
+			PickingCompletion pickingCompletion, int rampNumber)
 		{
 			//var issue = await _issueRepo.GetIssueByIdAsync(issueId);			
 			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issue.Id);
@@ -27,28 +31,33 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			{
 				var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
 				var sourcePalletBB = bestBefore;
-				var pallet = new Pallet
-				{
-					PalletNumber = newIdPallet,
-					Status = PalletStatus.Picking,
-					IssueId = issue.Id,
-					LocationId = 100100,//pickingzone location
-					DateReceived = DateTime.UtcNow,
-					ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet
-							{
-								//PalletNumber = pallet.PalletNumber,
-								ProductId =productId,
-								Quantity =quantity,
-								DateAdded = DateTime.UtcNow,
-								BestBefore = sourcePalletBB
-							}
-						},
-				};
-			var palletId =	_palletRepo.AddPallet(pallet);
-				//issue.Pallets.Add(pallet);
-				issue.AssignPallet(pallet, userId);
+				var pallet = Pallet.Create(newIdPallet);
+				var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
+				pallet.AddLocation(location);
+				//var pallet = Pallet.CreateForPicking(newIdPallet, issue.Id);
+				pallet.AddProduct(productId, quantity, sourcePalletBB);
+				//pallet.ReserveToIssue(issue, userId);//
+				//var pallet = new Pallet
+				//{
+				//	PalletNumber = newIdPallet,
+				//	Status = PalletStatus.Picking,
+				//	IssueId = issue.Id,
+				//	LocationId = 100100,//pickingzone location
+				//	DateReceived = DateTime.UtcNow,
+				//	ProductsOnPallet = new List<ProductOnPallet>
+				//		{
+				//			new ProductOnPallet
+				//			{
+				//				//PalletNumber = pallet.PalletNumber,
+				//				ProductId =productId,
+				//				Quantity =quantity,
+				//				DateAdded = DateTime.UtcNow,
+				//				BestBefore = sourcePalletBB
+				//			}
+				//		},
+				//};
+				var palletId =	_palletRepo.AddPallet(pallet);
+				issue.ReservePallet(pallet, userId);//
 				pallet.AddHistory(PalletStatus.Picking, ReasonMovement.Picking, userId);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
@@ -66,16 +75,21 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				var existingProduct = pickingPallet.ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId);
 				if (existingProduct != null)
 				{
-					existingProduct.Quantity += quantity;
+					//sourcePallet.ProductsOnPallet.Single().AddQuantity(reversePicking.Quantity);
+					existingProduct.AddQuantity(quantity);
+					//existingProduct.Quantity += quantity;
 				}
 				else
 				{
-					pickingPallet.ProductsOnPallet.Add(new ProductOnPallet
-					{
-						ProductId = productId,
-						Quantity = quantity,
-						DateAdded = DateTime.UtcNow,
-					});
+					pickingPallet.ProductsOnPallet.Add(ProductOnPallet.Create(productId,pickingPallet.Id, quantity, DateTime.UtcNow, bestBefore));
+
+						//new ProductOnPallet
+						//{
+						//	ProductId = productId,
+						//	Quantity = quantity,
+						//	DateAdded = DateTime.UtcNow,
+						//	BestBefore = bestBefore
+						//});
 				}
 				if (pickingCompletion == PickingCompletion.Full)
 				{

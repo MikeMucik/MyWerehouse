@@ -21,17 +21,13 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 		public int PickedQuantity { get; set; }//faktyczna pobrana ilość
 		public PickingStatus PickingStatus { get; set; }
 		public DateOnly? BestBefore { get; set; }
+
+		public int RampNumber { get; set; } //lokalizacja pickingu
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<PickingTask, PickingTaskDTO>()
-				
-				;
-			//.ForMember(d => d.Id, opt => opt.MapFrom(s => s.PickingTaskNumber));
-			profile.CreateMap<PickingTaskDTO, PickingTask>()
-				//.ForMember(d=>d.I)
-				;
-				//.ForMember(d => d.IssueNumber, opt => opt.MapFrom(s => s.Id));
-				//.ForMember(d=>d.)
+			profile.CreateMap<PickingTask, PickingTaskDTO>();
+			
+			profile.CreateMap<PickingTaskDTO, PickingTask>();			
 
 		}
 	}

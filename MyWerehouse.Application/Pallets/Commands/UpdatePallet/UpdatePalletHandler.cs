@@ -38,11 +38,23 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 						return AppResult<Unit>.Fail($"Produkt o numerze {pop.ProductId} nie istnieje.", ErrorType.NotFound);
 				}
 
-				var updatedProducts = request.UpdatingPallet.ProductsOnPallet
-					.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
-					.ToList();
+				var updatedProducts1 =new List<ProductOnPallet>();
+				foreach (var product in request.UpdatingPallet.ProductsOnPallet)
+				{
+					var updatetedProduct = ProductOnPallet.Create(product.ProductId,
+						product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);						
+					//	new ProductOnPallet
+					//{
+					//	ProductId = product.ProductId,
+					//	PalletId = product.PalletId,
+					//	Quantity = product.Quantity,
+					//	DateAdded = product.DateAdded,
+					//	BestBefore = product.BestBefore,
+					//};
+					updatedProducts1.Add(updatetedProduct);
+				}
 
-				existingPallet.Update(request.UserId, updatedProducts, request.UpdatingPallet.Status);
+				existingPallet.Update(request.UserId, updatedProducts1, request.UpdatingPallet.Status);
 				
 				await _werehouseDbContext.SaveChangesAsync(ct);
 

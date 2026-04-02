@@ -21,5 +21,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 		Picking = 10, //destination	
 		Cancelled = 11, //anulowana				  
 		ReversePicking = 12,//stworzona z pickingu
+		New = 13, //neutralne do testów
 	}
 }

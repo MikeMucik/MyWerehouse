@@ -34,24 +34,30 @@ MyWarehouse to backendowa aplikacja do zarządzania procesami magazynowymi
 
 System WMS ma za zadanie organizować proces przepływu produktu przez magazyn, odpowiada za przyjecia asortymentu, przygotowaniu 
 i wydaniu towaru, w tym zawiera się kompletacja(wybór policy jak dobierane są palety) jak i anulowanie zmówienia, jak i dekompletacja,
- znaciskiem na wydanie towaru (Issue), picking oraz zarządzanie paletami. 
+z naciskiem na wydanie towaru (Issue), picking oraz zarządzanie paletami. 
 
 System wspiera pracę magazynu, w którym towary są składowane na paletach,
  wydawane w kartonach oraz kontrolowane pod kątem daty przydatności (BestBefore).
 
 Aplikacja została zaprojektowana w sposób umożliwiający precyzyjne planowanie pracy pickerów oraz bezpieczną alokację zasobów magazynowych.
 
-Key Business Concepts
+Key Business Concepts:
 
 Issue – zlecenie wydania towaru (np. tworzone na podstawie e-maila od klienta)
+
+Receipt - przyjęcie towaru, zestaw palet przyjętych w jednej dostawie
 
 Pallet – fizyczna paleta magazynowa z określoną ilością kartonów
 
 Picking – proces kompletacji towaru pod konkretne Issue
 
+ReversePicking - proces dekompletacji, gdy kompletacja ukończona ale zlecenie Issue wycofane
+
 BestBefore – data przydatności, brana pod uwagę przy alokacji palet
 
 Pallet Movements – rejestr zmian lokalizacji palet oraz jej historia
+
+HistoryReceipt, HistoryIssue, HistoryPicking, HistoryReversePicking - zapis historii operacji
 
 Architecture"
 
@@ -63,7 +69,6 @@ jawne use-case’y (Command / Query)
 
 brak logiki biznesowej w kontrolerach
 
-//
 Technologie
 
 .NET 9
@@ -78,7 +83,7 @@ SQLite (In-Memory) – testy integracyjne
 InMemoryDataBase - testy dla CRUD
 Swagger / OpenAPI
 
-Solution Structure
+Solution Structure(w toku)
 src/
 ├─ MyWarehouse.Api
 │  └─ Controllers, Swagger, Middleware
@@ -103,6 +108,7 @@ Infrastructure – dostęp do bazy danych i integracje techniczne
 
 Tests – testy integracyjne bez mocków
 
+Testy - jednostkowe
 
 CQRS & MediatR
 Commands
@@ -159,6 +165,8 @@ Testy integracyjne wykorzystują:
 SQLite In-Memory
 
 realne repozytoria (bez mocków)
+
+Testy jednostkowe do rozbudowy
 
 Testing
 

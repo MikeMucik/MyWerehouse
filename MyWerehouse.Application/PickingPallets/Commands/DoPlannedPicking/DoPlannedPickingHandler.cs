@@ -56,8 +56,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				}
 				//if
 				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId.Value);
-				if(sourcePallet == null) return AppResult<Unit>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
-					//?? throw new NotFoundPalletException(request.PickingTaskDTO.SourcePalletId);
+				if (sourcePallet == null) return AppResult<Unit>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
 				if (issue.IssueStatus == IssueStatus.Pending) { issue.IssueStatus = IssueStatus.InProgress; }
 				var neededQuantity = request.PickingTaskDTO.RequestedQuantity;
 				var pickedQuantity = request.PickingTaskDTO.PickedQuantity;
@@ -73,7 +72,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				}
 
 				await _processPickingActionService.ProcessPicking(sourcePallet, issue, request.PickingTaskDTO.ProductId,
-						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion);
+						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion, request.PickingTaskDTO.RampNumber);
 				pickingTaskToChange.AddHistory(request.UserId, PickingStatus.Allocated, pickingTaskToChange.PickingStatus, request.PickingTaskDTO.PickedQuantity);
 				if (neededQuantity == pickedQuantity)
 				{

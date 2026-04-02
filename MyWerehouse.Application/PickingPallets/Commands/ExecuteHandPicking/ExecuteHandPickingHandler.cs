@@ -112,7 +112,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				{
 					completion = PickingCompletion.Partial;
 				}
-				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quanitity, command.UserId, pickingTask, completion);
+				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quanitity, command.UserId, pickingTask, completion, command.NumberRamp);
 
 				pickingTask.AddHistory(command.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, command.Quanitity);
 

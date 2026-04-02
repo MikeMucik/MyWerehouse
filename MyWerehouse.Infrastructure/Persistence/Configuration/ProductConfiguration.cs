@@ -37,6 +37,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 			.WithOne(i => i.Product)
 			.HasForeignKey<Inventory>(i => i.ProductId);
 
+			//entity.OwnsOne(p=>p.Details)
+
+
 			entity.HasOne(p => p.Details)
 			.WithOne(p => p.Product)
 			.HasForeignKey<ProductDetail>(p => p.ProductId)

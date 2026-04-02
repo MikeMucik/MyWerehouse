@@ -107,7 +107,8 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 				.Take(amount)];			
 			foreach (var pallet in allAvailablePallets)
 			{
-				issue.AssignPallet(pallet, issue.PerformedBy);				
+				//issue.AssignPallet(pallet, issue.PerformedBy);				
+				issue.ReservePallet(pallet, issue.PerformedBy);				
 			}
 			return allAvailablePallets;
 		}

@@ -57,14 +57,15 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 		public async Task NewProductInvalidDataName_AddNewProductAsync_NoAddedToCollection()
 		{
 			//Arrange
-			var product = new Product
-			{
+			var product = Product.Create( "Test", "666666", 1, 56);
+			//var product = new Product
+			//{
 
-				Name = "Test",
-				SKU = "666666",
-				CategoryId = 1,
-				IsDeleted = false,
-			};
+			//	Name = "Test",
+			//	SKU = "666666",
+			//	CategoryId = 1,
+			//	IsDeleted = false,
+			//};
 			_context.Products.Add(product);
 			_context.SaveChanges();
 			var productNew = new AddProductDTO

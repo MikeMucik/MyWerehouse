@@ -86,7 +86,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 				// dodanie do palety virtualPallet - można obęjść przez zmianę statusu, osobna akcja
 				else
 				{
-					pallet.Status = PalletStatus.ToPicking;
+					pallet.ChangeStatus(PalletStatus.ToPicking);
 					virtualPallet = new VirtualPallet
 					{
 						Pallet = pallet,
@@ -101,7 +101,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 				await _reduceAllocationService.ReduceAllocation(issue, product.ProductId, quantityToPick, request.UserId);
 				var newPickingTaskInfo = _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, product.ProductId, quantityToPick, product.BestBefore, request.UserId);
 				var newPickingTask = newPickingTaskInfo.OnePickingTask;
-				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, quantityToPick, request.UserId, newPickingTask, PickingCompletion.Full);
+				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, quantityToPick, request.UserId, newPickingTask, PickingCompletion.Full, request.RampNumber);
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
 

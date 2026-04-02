@@ -28,19 +28,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var _reversePickingRepo = new ReversePickingRepo(DbContext);
 			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo);
 			var category = new Category
-			{
+			{	Id = 1,
 				Name = "Category",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Prod B",
-				SKU = "777",
-				AddedItemAd = new DateTime(2025, 1, 1),
-				Category = category,
-				IsDeleted = false,
-				CartonsPerPallet = 100
-			};
+			var product = Product.Create("Prod B", "777", 1, 100);
+			//var product = new Product
+			//{
+			//	Name = "Prod B",
+			//	SKU = "777",
+			//	AddedItemAd = new DateTime(2025, 1, 1),
+			//	Category = category,
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 100
+			//};
 			var location = new Location
 			{
 				Aisle = 1,
@@ -67,36 +68,40 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				Addresses = [address],
 				IsDeleted = false,
 			};
-			var sourcePallet = new Pallet
-			{
-				PalletNumber = "Q1000",
-				DateReceived = new DateTime(2025, 8, 8),
-				Location = location,
-				Status = PalletStatus.ToPicking,
-				ProductsOnPallet = new List<ProductOnPallet>
-				{
-					new ProductOnPallet
-					{
-						Product = product,
-						Quantity = 60,
-						DateAdded = new DateTime(2025, 8, 8) }
-				}
-			}; 
-			var pickingPallet = new Pallet
-			{
-				PalletNumber = "Q1001",
-				DateReceived = new DateTime(2025, 8, 8),
-				Location = location,
-				Status = PalletStatus.ToIssue,
-				ProductsOnPallet = new List<ProductOnPallet>
-				{
-					new ProductOnPallet
-					{
-						Product = product,
-						Quantity = 40,
-						DateAdded = new DateTime(2025, 8, 8) }
-				}
-			};
+			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
+			sourcePallet.AddProductForTests(product.Id, 60, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			//var sourcePallet = new Pallet
+			//{
+			//	PalletNumber = "Q1000",
+			//	DateReceived = new DateTime(2025, 8, 8),
+			//	Location = location,
+			//	Status = PalletStatus.ToPicking,
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//	{
+			//		new ProductOnPallet
+			//		{
+			//			Product = product,
+			//			Quantity = 60,
+			//			DateAdded = new DateTime(2025, 8, 8) }
+			//	}
+			//}; 
+			var pickingPallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, null);
+			pickingPallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
+			//var pickingPallet = new Pallet
+			//{
+			//	PalletNumber = "Q1001",
+			//	DateReceived = new DateTime(2025, 8, 8),
+			//	Location = location,
+			//	Status = PalletStatus.ToIssue,
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//	{
+			//		new ProductOnPallet
+			//		{
+			//			Product = product,
+			//			Quantity = 40,
+			//			DateAdded = new DateTime(2025, 8, 8) }
+			//	}
+			//};
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),
@@ -176,15 +181,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				Name = "Category",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Prod B",
-				SKU = "777",
-				AddedItemAd = new DateTime(2025, 1, 1),
-				Category = category,
-				IsDeleted = false,
-				CartonsPerPallet = 100
-			};
+			var product = Product.Create("Prod B", "777", 1, 100);
+			//var product = new Product
+			//{
+			//	Name = "Prod B",
+			//	SKU = "777",
+			//	AddedItemAd = new DateTime(2025, 1, 1),
+			//	Category = category,
+			//	IsDeleted = false,
+			//	CartonsPerPallet = 100
+			//};
 			var location = new Location
 			{
 				Aisle = 1,
@@ -211,21 +217,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				Addresses = [address],
 				IsDeleted = false,
 			};
-			var sourcePallet1 = new Pallet
-			{
-				PalletNumber = "Q1000",
-				DateReceived = new DateTime(2025, 8, 8),
-				Location = location,
-				Status = PalletStatus.ToPicking,
-				ProductsOnPallet = new List<ProductOnPallet>
-				{
-					new ProductOnPallet
-					{
-						Product = product,
-						Quantity = 100,
-						DateAdded = new DateTime(2025, 8, 8) }
-				}
-			};
+			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
+			sourcePallet1.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
+			//var sourcePallet1 = new Pallet
+			//{
+			//	PalletNumber = "Q1000",
+			//	DateReceived = new DateTime(2025, 8, 8),
+			//	Location = location,
+			//	Status = PalletStatus.ToPicking,
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//	{
+			//		new ProductOnPallet
+			//		{
+			//			Product = product,
+			//			Quantity = 100,
+			//			DateAdded = new DateTime(2025, 8, 8) }
+			//	}
+			//};
 			var issue = new Issue
 			{
 				Id = Guid.NewGuid(),

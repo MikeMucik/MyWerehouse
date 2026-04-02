@@ -54,7 +54,8 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				if (productOnOldPallet != productOnNewPallet)
 					return AppResult<IssueResult>.Fail("Nie można podmienić palet z różnymi produktami.", ErrorType.Conflict);
 
-				issue.AssignPallet(palletToAddingIssue, request.UserId);
+				//issue.AssignPallet(palletToAddingIssue, request.UserId);
+				issue.ReservePallet(palletToAddingIssue, request.UserId);
 
 				issue.DetachPallet(palletToRemoveFromIssue, request.UserId);
 

@@ -32,22 +32,19 @@ namespace MyWerehouse.Application.Pallets.Services
 					BestBefore = p.ProductsOnPallet
 					.Where(x => x.ProductId == productId)
 					.Select(x => x.BestBefore)
-					.FirstOrDefault(),
-					//DateReceived = p.DateReceived
-					//.Where(x => x.ProductId == productId)
+					.FirstOrDefault(),					
 				});
-				//.OrderByDescending(x => x.BestBefore);
 			var palletList = await palletsQuery
-				.OrderBy(x=>x.BestBefore)
+				.OrderBy(x=>x.BestBefore ?? DateOnly.MaxValue)
 				.OrderBy(x=>x.Pallet.Location)
 				.ToListAsync();
-			var fullPallets = palletList //dlaczego bierze P2 a nie P1
+			var fullPallets = palletList 
 				.Where(x => x.Qty == product.CartonsPerPallet)
 				.Take(amountFullPallet)
 				.Select(x=>x.Pallet)
 				.ToList();
-			foreach (var pallet in fullPallets)			//chyba tu jest błąd
-				pallet.Status = PalletStatus.InTransit;
+			foreach (var pallet in fullPallets)         //chyba tu jest błąd
+				pallet.ChangeStatus(PalletStatus.InTransit);
 			return fullPallets;			
 		}
 	}

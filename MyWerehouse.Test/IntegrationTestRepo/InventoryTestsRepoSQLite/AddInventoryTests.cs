@@ -17,19 +17,24 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var category = new Category
-			{
+			{ Id =1,
 				Name = "TestC",
 			};
-			var product = new Product
-			{
-				Category = category,
-				Name = "TestP",
-				SKU = "1234Test",
-			};
+			var product = Product.Create("TestP", "1234Test", 1, 56);
+			//var product = new Product
+			//{
+			//	Category = category,
+			//	Name = "TestP",
+			//	SKU = "1234Test",
+			//};
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.SaveChanges();
 			var quantity = 10;
 			var date = DateTime.UtcNow;
 			var inventory = new Inventory
 			{
+				//ProductId = product.Id,
 				Product = product,
 				Quantity = quantity,
 				LastUpdated = date,

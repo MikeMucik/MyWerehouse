@@ -20,16 +20,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Arrange
 			var category = new Category
 			{
+				Id =1,
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+			//var product = new Product
+			//{
+			//	Name = "Test",
+			//	SKU = "666666",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
 			var location = new Location
 			{
 				Aisle = 0,
@@ -43,7 +45,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Quantity = 10,
 				LastUpdated = DateTime.UtcNow.AddDays(-1)
 			};
-
+			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.Inventories.Add(inventory);
@@ -58,7 +60,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				},
 			};
 			//Act
-			var result = await Mediator.Send(new CreateNewPalletCommand(newPallet, "user"));
+			var result = await Mediator.Send(new CreateNewPalletCommand(newPallet,1, "user"));
 			
 			//Assert
 			Assert.NotNull(result);
@@ -95,19 +97,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Arrange
 			var category = new Category
 			{
+				Id =1,
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+			//var product = new Product
+			//{
+			//	Name = "Test",
+			//	SKU = "666666",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
 			var location = new Location
 			{
-
 				Aisle = 0,
 				Bay = 0,
 				Height = 0,
@@ -119,7 +122,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Quantity = 10,
 				LastUpdated = DateTime.UtcNow.AddDays(-1)
 			};
-
+			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.Inventories.Add(inventory);
@@ -136,7 +139,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			};
 			//Act
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-				Mediator.Send(new CreateNewPalletCommand(newPallet, "UserP")));
+				Mediator.Send(new CreateNewPalletCommand(newPallet,1, "UserP")));
 			//Assert
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 		}
@@ -146,19 +149,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Arrange
 			var category = new Category
 			{
+				Id = 1,
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = category,
-				IsDeleted = false,
-			};
+			var product = Product.Create("Test", "666666", 1, 56);
+			//var product = new Product
+			//{
+			//	Name = "Test",
+			//	SKU = "666666",
+			//	Category = category,
+			//	IsDeleted = false,
+			//};
 			var location = new Location
 			{
-
 				Aisle = 0,
 				Bay = 0,
 				Height = 0,
@@ -170,7 +174,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Quantity = 10,
 				LastUpdated = DateTime.UtcNow.AddDays(-1)
 			};
-
+			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.Inventories.Add(inventory);
@@ -187,7 +191,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				},
 			};
 			//Act
-			var result = await Mediator.Send(new CreateNewPalletCommand(newPallet, "user"));
+			var result = await Mediator.Send(new CreateNewPalletCommand(newPallet,1, "user"));
 			
 			//Assert
 			Assert.NotNull(result);

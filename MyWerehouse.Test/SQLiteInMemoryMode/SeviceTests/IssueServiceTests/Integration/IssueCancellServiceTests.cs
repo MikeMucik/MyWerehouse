@@ -44,56 +44,33 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-			var category = new Category { Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product
-			{
-				Name = "Prod1",
-				SKU = "SKU1",
-				Category = category,
-				CartonsPerPallet = 10
-			};
-			var pallets = new List<Pallet>
-				{
-					new Pallet
-					{
-						PalletNumber = "P1",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					},
-					new Pallet
-					{
-						PalletNumber = "P2",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					}
-				};
-			var recipt = new Receipt
-			{
-				//Id = Guid.NewGuid(),
-				ReceiptNumber = 1,
-				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
-				ReceiptStatus = ReceiptStatus.Verified,
-				PerformedBy = "UserMakae",
-				Client = client,
-				Pallets = pallets,
-			};
+			var location1 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			
+			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
+				DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
+
+			//var palletP1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			var palletP1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			palletP1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			//var palletP2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
+			var palletP2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, null, null);
+			palletP2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
-			DbContext.Locations.Add(location);
-			DbContext.Pallets.AddRange(pallets);
-			DbContext.Receipts.Add(recipt);
+			DbContext.Locations.AddRange(location, location1);
+			DbContext.Pallets.AddRange(palletP1, palletP2);
+			DbContext.Receipts.Add(receipt);
+			
+			receipt.AttachPallet(palletP1, location, "UserMakae");
+			receipt.AttachPallet(palletP2, location1, "UserMakae");
+			
+			palletP1.ChangeStatus(PalletStatus.Available);
+			palletP2.ChangeStatus(PalletStatus.Available);
 			await DbContext.SaveChangesAsync();
-
 			// Act 1 – create issue with 1 pallet (10 szt.)
 			var createIssueDto = new CreateIssueDTO
 			{
@@ -121,7 +98,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 		[Fact]
 		public async Task CancelIssueAsync_FullPalletsAsignment_ShouldRestorePalletsAvailability()
 		{
-			// Arrange – setup initial data
+			// Arrange 
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -140,56 +117,66 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-			var category = new Category { Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product
-			{
-				Name = "Prod1",
-				SKU = "SKU1",
-				Category = category,
-				CartonsPerPallet = 10
-			};
-			var pallets = new List<Pallet>
-				{
-					new Pallet
-					{
-						PalletNumber = "P1",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					},
-					new Pallet
-					{
-						PalletNumber = "P2",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					}
-				};
-			var recipt = new Receipt
-			{
-				Id = Guid.NewGuid(),
-				ReceiptNumber = 1,
-				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
-				ReceiptStatus = ReceiptStatus.Verified,
-				PerformedBy = "UserMakae",
-				Client = client,
-				Pallets = pallets,
-			};
+			var location1 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			
+			//var pallets = new List<Pallet>
+			//	{
+			//		new Pallet
+			//		{
+			//			PalletNumber = "P1",
+			//			Location = location,
+			//			Status = PalletStatus.Available,
+			//			ProductsOnPallet = new List<ProductOnPallet>
+			//			{
+			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+			//			}
+			//		},
+			//		new Pallet
+			//		{
+			//			PalletNumber = "P2",
+			//			Location = location,
+			//			Status = PalletStatus.Available,
+			//			ProductsOnPallet = new List<ProductOnPallet>
+			//			{
+			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+			//			}
+			//		}
+			//	};
+			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
+				DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
+			//receipt.AttachPallet(palletP1, location, "UserMakae");
+			//receipt.AttachPallet(palletP2, location, "UserMakae");
+			//var recipt = new Receipt
+			//{
+			//	Id = Guid.NewGuid(),
+			//	ReceiptNumber = 1,
+			//	ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
+			//	ReceiptStatus = ReceiptStatus.Verified,
+			//	PerformedBy = "UserMakae",
+			//	Client = client,
+			//	Pallets = [palletP1,palletP2]
+			//};
+			var palletP1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			palletP1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			var palletP2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, null, null);
+			palletP2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
-			DbContext.Locations.Add(location);
-			DbContext.Pallets.AddRange(pallets);
-			DbContext.Receipts.Add(recipt);
+			DbContext.Locations.AddRange(location, location1);
+			
+			DbContext.Receipts.Add(receipt);
+			DbContext.Pallets.AddRange(palletP1, palletP2);
 			await DbContext.SaveChangesAsync();
-
+			receipt.AttachPallet(palletP1, location, "UserMakae");
+			receipt.AttachPallet(palletP2, location1, "UserMakae");
+			palletP1.ChangeStatus(PalletStatus.Available);
+			palletP2.ChangeStatus(PalletStatus.Available);
+await DbContext.SaveChangesAsync();
 			// Act 1 – create issue with 1 pallet (10 szt.)
 			var createIssueDto = new CreateIssueDTO
 			{
@@ -238,56 +225,65 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-			var category = new Category { Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product
-			{
-				Name = "Prod1",
-				SKU = "SKU1",
-				Category = category,
-				CartonsPerPallet = 10
-			};
-			var pallets = new List<Pallet>
-				{
-					new Pallet
-					{
-						PalletNumber = "P1",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					},
-					new Pallet
-					{
-						PalletNumber = "P2",
-						Location = location,
-						Status = PalletStatus.Available,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					}
-				};
-			var recipt = new Receipt
-			{
-				Id = Guid.NewGuid(),
-				ReceiptNumber = 1,
-				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
-				ReceiptStatus = ReceiptStatus.Verified,
-				PerformedBy = "UserMakae",
-				Client = client,
-				Pallets = pallets,
-			};
+			var location1 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			//var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
+			
+			//var pallets = new List<Pallet>
+			//	{
+			//		new Pallet
+			//		{
+			//			PalletNumber = "P1",
+			//			Location = location,
+			//			Status = PalletStatus.Available,
+			//			ProductsOnPallet = new List<ProductOnPallet>
+			//			{
+			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+			//			}
+			//		},
+			//		new Pallet
+			//		{
+			//			PalletNumber = "P2",
+			//			Location = location,
+			//			Status = PalletStatus.Available,
+			//			ProductsOnPallet = new List<ProductOnPallet>
+			//			{
+			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+			//			}
+			//		}
+			//	};
+			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
+				DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
+			//receipt.AttachPallet(palletPP1, location, "UserMakae");
+			//receipt.AttachPallet(palletPP2, location, "UserMakae");
+			//var recipt = new Receipt
+			//{
+			//	Id = Guid.NewGuid(),
+			//	ReceiptNumber = 1,
+			//	ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
+			//	ReceiptStatus = ReceiptStatus.Verified,
+			//	PerformedBy = "UserMakae",
+			//	Client = client,
+			//	Pallets = [palletPP1, palletPP2],
+			//};
+			var palletPP1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			palletPP1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			var palletPP2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			palletPP2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
-			DbContext.Locations.Add(location);
-			DbContext.Pallets.AddRange(pallets);
-			DbContext.Receipts.Add(recipt);
-			await DbContext.SaveChangesAsync();
-
+			DbContext.Locations.AddRange(location, location1);
+			DbContext.Pallets.AddRange(palletPP1, palletPP2);
+			DbContext.Receipts.Add(receipt);
+			
+			receipt.AttachPallet(palletPP1, location, "UserMakae");
+			receipt.AttachPallet(palletPP2, location, "UserMakae");
+			palletPP1.ChangeStatus(PalletStatus.Available);
+			palletPP2.ChangeStatus(PalletStatus.Available);
+await DbContext.SaveChangesAsync();
 			// Act 1 – create issue with 1 pallet (10 szt.)
 			var createIssueDto = new CreateIssueDTO
 			{
@@ -364,57 +360,64 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-			var category = new Category { Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var location2 = new Location { Aisle = 1, Bay = 1, Height = 2, Position = 1 };
 			var location1 = new Location { Id = 100100, Aisle = 10, Bay = 1, Height = 1, Position = 1 };
-			var product = new Product
-			{
-				Name = "Prod1",
-				SKU = "SKU1",
-				Category = category,
-				CartonsPerPallet = 10
-			};			
-			var pallet1 = new Pallet
-			{
-				PalletNumber = "P1",
-				Location = location,
-				Status = PalletStatus.Available,
-				DateReceived = DateTime.UtcNow.AddDays(-10),
-				ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-			};
-			var pallet2 = new Pallet
-			{
-				PalletNumber = "P2",
-				Location = location2,
-				Status = PalletStatus.Available,
-				DateReceived = DateTime.UtcNow.AddDays(-9),
-				ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-			};
-			var recipt = new Receipt
-			{
-				Id = Guid.NewGuid(),
-				ReceiptNumber = 1,
-				ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
-				ReceiptStatus = ReceiptStatus.Verified,
-				PerformedBy = "UserMakae",
-				Client = client,
-				Pallets = [pallet1, pallet2],
-			};
+			var product = Product.Create("Prod1", "SKU1", 1, 10);
+			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
+				DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
+			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow.AddDays(-10), 1, PalletStatus.Available,null, null);
+			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow.AddDays(-9), 2, PalletStatus.Available, null, null);
+			pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			//var pallet1 = new Pallet
+			//{
+			//	PalletNumber = "P1",
+			//	Location = location,
+			//	Status = PalletStatus.Available,
+			//	DateReceived = DateTime.UtcNow.AddDays(-10),
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//			{
+			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+			//			}
+			//};
+			//var pallet2 = new Pallet
+			//{
+			//	PalletNumber = "P2",
+			//	Location = location2,
+			//	Status = PalletStatus.Available,
+			//	DateReceived = DateTime.UtcNow.AddDays(-9),
+			//	ProductsOnPallet = new List<ProductOnPallet>
+			//			{
+			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
+			//			}
+			//};
+			
+			
+			//var recipt = new Receipt
+			//{
+			//	Id = Guid.NewGuid(),
+			//	ReceiptNumber = 1,
+			//	ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
+			//	ReceiptStatus = ReceiptStatus.Verified,
+			//	PerformedBy = "UserMakae",
+			//	Client = client,
+			//	Pallets = [pallet1, pallet2],
+			//};
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location, location1, location2);
 			DbContext.Pallets.AddRange(pallet1, pallet2);
-			DbContext.Receipts.Add(recipt);
-			await DbContext.SaveChangesAsync();
+			DbContext.Receipts.Add(receipt);
+			//await DbContext.SaveChangesAsync();
+			receipt.AttachPallet(pallet1, location, "UserMakae");
+			receipt.AttachPallet(pallet2, location2, "UserMakae");
+			pallet1.ChangeStatus(PalletStatus.Available);
+			pallet2.ChangeStatus(PalletStatus.Available);
 
+			await DbContext.SaveChangesAsync();
 			// Act 1 – create issue with 1 pallet (10 szt.)
 			var createIssueDto = new CreateIssueDTO
 			{
@@ -429,7 +432,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1 lub P2
+			Assert.Single(issue.Pallets); // powinien być przypisany P1 
 			Assert.Equal(issue.Pallets.First().PalletNumber, "P1");
 			//Assert.Equal(issue.Pallets.First().PalletNumber, "P1");
 			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
@@ -446,15 +449,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				SourcePalletId = pallet2.Id,
 				SourcePalletNumber = "P2",
 				ProductId = product.Id,
-
+				RampNumber = 100100
 			};
-			var _DoPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
-			var resultPicking = await Mediator.Send(_DoPicking);
+			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var resultPicking = await Mediator.Send(doPicking);
 			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
 			//Assert
 			var pickingTaskDone = await DbContext.PickingTasks
 				.FirstOrDefaultAsync(x => x.Id == pickingFromBase.Id);
 			Assert.NotNull(pickingTaskDone);
+			Assert.Equal(2, issue.Pallets.Count);
 			// Act 3 - cancel issue
 			var issueToCancelId = issue.Id;
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));

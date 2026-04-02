@@ -27,12 +27,14 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 			try
 			{
 				if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
-					return AppResult < Unit >.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.", ErrorType.NotFound);
+					return AppResult<Unit>.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.", ErrorType.NotFound);
 				if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
-					return AppResult < Unit >.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
-
-				var receipt = new Receipt(request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
-				receipt.ReceiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
+					return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
+				var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
+				var receipt = Receipt.Create(receiptNumber, request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
+				receipt.AddHistory(request.DTO.PerformedBy);
+				//var receipt = new Receipt(request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
+				//receipt.ReceiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
 				_receiptRepo.AddReceipt(receipt);
 				receipt.ChangeStatus(ReceiptStatus.Planned, request.DTO.PerformedBy);
 				await _werehouseDbContext.SaveChangesAsync(ct);

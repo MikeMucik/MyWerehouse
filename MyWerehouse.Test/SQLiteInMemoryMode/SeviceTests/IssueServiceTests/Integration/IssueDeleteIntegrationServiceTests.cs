@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.Commands.DeleteIssue;
 using MyWerehouse.Domain.Clients.Models;
@@ -16,7 +17,7 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
-	public class IssueDeleteIntegrationServiceTests : TestBase 
+	public class IssueDeleteIntegrationServiceTests : TestBase
 	{
 		public static class TestHelper
 		{
@@ -43,7 +44,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				var issue = new Issue
 				{
 					Id = Guid.NewGuid(),
-					IssueNumber =1,
+					IssueNumber = 1,
 					IssueStatus = status,
 					Client = client,
 					PerformedBy = "UserInit",
@@ -77,40 +78,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					Addresses = new List<Address> { address }
 				};
 				var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
-				var category = new Category { Name = "Cat", IsDeleted = false };
-				var product = new Product
-				{
-					Name = "TestFull",
-					SKU = "123",
-					AddedItemAd = new DateTime(2024, 1, 1),
-					Category = category,
-					IsDeleted = false,
-					CartonsPerPallet = 10,
-				};			
+				var category = new Category { Id = 1, Name = "Cat", IsDeleted = false };
+				var product = Product.Create("TestFull", "123", 1, 10);
+				
+				var pallets = new List<Pallet>();
 
-				var pallets = new List<Pallet>
-				{
-					new Pallet
-					{
-						PalletNumber = "P1",
-						Location = location,
-						Status = PalletStatus.InTransit,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new() { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					},
-					new Pallet
-					{
-						PalletNumber = "P2",
-						Location = location,
-						Status = PalletStatus.ToPicking,
-						ProductsOnPallet = new List<ProductOnPallet>
-						{
-							new() { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-						}
-					}
-				};
+				var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.InTransit, null, null);
+				pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+				pallets.Add(pallet1);
+				var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToPicking, null, null);
+				pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+				pallets.Add(pallet2);
+								
 				var issue = new Issue
 				{
 					Id = Guid.NewGuid(),
@@ -121,10 +100,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
 					PerformedBy = "User1",
 					Pallets = pallets,
+					//Pallets = [pallet1,pallet2],
 					PickingTasks = new List<PickingTask>()
 				};
-				foreach (var p in pallets)
-					p.Issue = issue;
+				//foreach (var p in pallets)
+				//	p.Issue = issue;
+				//pallet1.AddLocation(location);
+				//pallet1.AssignToIssue(issue, "user");
+				//pallet2.AddLocation(location);
+				//pallet2.AssignToIssue(issue, "user");
 				// Dodaj przykładową alokację
 				issue.PickingTasks.Add(new PickingTask
 				{
@@ -138,6 +122,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 						Location = location,
 					}
 				});
+				db.Categories.Add(category);
+				db.Products.Add(product);
+				db.Locations.Add(location);				
 				db.Issues.Add(issue);
 				await db.SaveChangesAsync();
 				return (issue, pallets);
@@ -155,7 +142,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.True(result.IsSuccess);
 			var issueExists = DbContext.Issues.Any(i => i.Id == issueId);
 			Assert.False(issueExists); // fizycznie usunięte
-			// Brak palet lub alokacji związanych z tym issue
+									   // Brak palet lub alokacji związanych z tym issue
 			Assert.Empty(DbContext.Pallets.Where(p => p.IssueId == issueId));
 			Assert.Empty(DbContext.PickingTasks.Where(a => a.IssueId == issueId));
 		}
@@ -171,7 +158,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				qty: 12);
 			var issueId = setup.issue.Id;
 			// Act
-			var result = await Mediator.Send( new DeleteIssueCommand(issueId, "UserX"));
+			var result = await Mediator.Send(new DeleteIssueCommand(issueId, "UserX"));
 
 			// Assert
 			Assert.True(result.IsSuccess);
@@ -193,7 +180,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				Assert.Equal(PickingStatus.Cancelled, a.PickingStatus);
 			}
 			// Historia powinna się dodać (jeśli masz tabelę HistoryPicking)
-			var hhistory = DbContext.PickingTasks.FirstOrDefault(h=>h.IssueId == issueId);
+			var hhistory = DbContext.PickingTasks.FirstOrDefault(h => h.IssueId == issueId);
 			var history = DbContext.HistoryPickings
 				.Where(h => h.PickingTaskId == issue.PickingTasks.First().Id)
 				.ToList();

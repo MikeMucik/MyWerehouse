@@ -116,42 +116,42 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return pallets;
 		}
 		
-		public void ClearPalletFromListIssue(Pallet pallet)
-		{			
-			if (pallet is null) return;
-			pallet.IssueId = null;
-			pallet.Status = PalletStatus.Available;					
-		}
+		//public void ClearPalletFromListIssue(Pallet pallet)
+		//{			
+		//	if (pallet is null) return;
+		//	pallet.IssueId = null;
+		//	pallet.Status = PalletStatus.Available;					
+		//}
 
-		public void ChangePalletStatus(Guid palletId, PalletStatus palletStatus)
-		{
-			var pallet =_werehouseDbContext.Pallets
-				.Find(palletId);
-			switch (palletStatus)
-			{
-				case PalletStatus.ToIssue:
-					pallet.Status = PalletStatus.ToIssue;
-					break;
-				case PalletStatus.Damaged:
-					pallet.Status = PalletStatus.Damaged;
-					break;
-				case PalletStatus.OnHold:
-					pallet.Status = PalletStatus.OnHold;
-					break;
-				case PalletStatus.Loaded:
-					pallet.Status = PalletStatus.Loaded;
-					break;
-				case PalletStatus.ToPicking:
-					pallet.Status = PalletStatus.ToPicking;
-					break;
-				case PalletStatus.Archived:
-					pallet.Status = PalletStatus.Archived;
-					break;
-				default:
-					pallet.Status = PalletStatus.Available;
-					break;
-			}
-		}
+		//public void ChangePalletStatus(Guid palletId, PalletStatus palletStatus)
+		//{
+		//	var pallet =_werehouseDbContext.Pallets
+		//		.Find(palletId);
+		//	switch (palletStatus)
+		//	{
+		//		case PalletStatus.ToIssue:
+		//			pallet.Status = PalletStatus.ToIssue;
+		//			break;
+		//		case PalletStatus.Damaged:
+		//			pallet.Status = PalletStatus.Damaged;
+		//			break;
+		//		case PalletStatus.OnHold:
+		//			pallet.Status = PalletStatus.OnHold;
+		//			break;
+		//		case PalletStatus.Loaded:
+		//			pallet.Status = PalletStatus.Loaded;
+		//			break;
+		//		case PalletStatus.ToPicking:
+		//			pallet.Status = PalletStatus.ToPicking;
+		//			break;
+		//		case PalletStatus.Archived:
+		//			pallet.Status = PalletStatus.Archived;
+		//			break;
+		//		default:
+		//			pallet.Status = PalletStatus.Available;
+		//			break;
+		//	}
+		//}
 		public async Task<string> GetNextPalletIdAsync()
 		{
 			var lastPallet = await _werehouseDbContext.Pallets

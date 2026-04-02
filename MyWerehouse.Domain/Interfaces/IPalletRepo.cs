@@ -17,8 +17,8 @@ namespace MyWerehouse.Domain.Interfaces
 		IQueryable<Pallet> GetAvailablePallets(Guid productId, DateOnly? minBestBefore);
 		Task<Pallet?> GetPickingPalletByIssueId(Guid issueId);			
 		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);			
-		void ClearPalletFromListIssue(Pallet pallet);
-		void ChangePalletStatus(Guid palletId, PalletStatus palletStatus);//być może przuda się do innych metod		
+		//void ClearPalletFromListIssue(Pallet pallet);
+		//void ChangePalletStatus(Guid palletId, PalletStatus palletStatus);//być może przuda się do innych metod		
 		Task<string> GetNextPalletIdAsync();		
 		Task<Pallet> CheckOccupancyAsync(int locationId); //numer lokacji
 														  //			

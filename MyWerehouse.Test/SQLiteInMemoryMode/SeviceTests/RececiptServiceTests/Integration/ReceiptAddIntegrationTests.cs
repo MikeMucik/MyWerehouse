@@ -23,7 +23,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 	{
 		//HappyPath
 		[Fact]
-		public async Task AddPalletToReceiptAsync_ProperData__AddedToBase()
+		public async Task AddPalletToReceiptAsync_ProperData_AddedToBase()
 		{
 			//Arrange
 			var address = new Address
@@ -46,6 +46,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			};
 			var initialCategory = new Category
 			{
+				Id = 1,
 				Name = "name",
 				IsDeleted = false
 			};
@@ -56,22 +57,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Height = 1,
 				Position = 1
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = initialCategory,
-				IsDeleted = false,
-			};
-			var initialReceipt = new Receipt
-			{
-				//Id = Guid.NewGuid(),
-				ReceiptNumber = 1,
-				Client = initialCLient,
-				ReceiptStatus = ReceiptStatus.Planned,
-				PerformedBy = "U002",
-				RampNumber = 1
-			};			
+			var product = Product.Create("Test", "666666", 1, 56);
+			var initialReceipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U002",
+				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			//var initialReceipt = new Receipt
+			//{
+			//	//Id = Guid.NewGuid(),
+			//	ReceiptNumber = 1,
+			//	Client = initialCLient,
+			//	ReceiptStatus = ReceiptStatus.Planned,
+			//	PerformedBy = "U002",
+			//	RampNumber = 1
+			//};			
 			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
@@ -84,7 +81,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var newPalletDto = new CreatePalletReceiptDTO
 			{
 				ProductsOnPallet = [new() { ProductId = product.Id, Quantity = 10, }],
-				UserId = "U001"
+				UserId = "U001",
+				ReceiptNumber = initialReceipt.ReceiptNumber,
+				ReceiptId = initialReceipt.Id,
 			};
 						
 			var result = await Mediator.Send(new AddPalletToReceiptCommand(initialReceipt.Id, newPalletDto));
@@ -199,7 +198,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = [address]
-			}; var location = new Location
+			};
+			var location = new Location
 			{
 				Id = 1,
 				Aisle = 1,
@@ -285,14 +285,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					FullName = "FullNameCompany",
 					Addresses = [address]
 				};
-				var initialReceipt = new Receipt
-				{
-					Id = Guid.NewGuid(),
-					ReceiptNumber = 1,
-					Client = initialCLient,
-					ReceiptStatus = ReceiptStatus.Planned,
-					PerformedBy = "U002"
-				};
+			var initialReceipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U002",
+				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			//var initialReceipt = new Receipt
+			//	{
+			//		Id = Guid.NewGuid(),
+			//		ReceiptNumber = 1,
+			//		Client = initialCLient,
+			//		ReceiptStatus = ReceiptStatus.Planned,
+			//		PerformedBy = "U002"
+			//	};
 				var initialLocation = new Location
 				{
 					Aisle = 1,
@@ -301,17 +303,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					Position = 1
 				};
 				var initialCategory = new Category
-				{				
+				{		
+					Id =1,
 					Name = "name",
 					IsDeleted = false
 				};
-				var product = new Product
-				{
-					Name = "Test",
-					SKU = "666666",
-					Category = initialCategory,
-					IsDeleted = false,
-				};
+			var product = Product.Create("Test", "666666", 1, 56);
 			
 				DbContext.Categories.Add(initialCategory);
 				DbContext.Products.Add(product);
@@ -354,14 +351,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
-			var initialReceipt = new Receipt
-			{
-				Id = Guid.NewGuid(),
-				ReceiptNumber = 1,
-				Client = initialCLient,
-				ReceiptStatus = ReceiptStatus.Planned,
-				PerformedBy = "U002"
-			};
+			var initialReceipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U002",
+				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			//var initialReceipt = new Receipt
+			//{
+			//	Id = Guid.NewGuid(),
+			//	ReceiptNumber = 1,
+			//	Client = initialCLient,
+			//	ReceiptStatus = ReceiptStatus.Planned,
+			//	PerformedBy = "U002"
+			//};
 			var initialLocation = new Location
 			{
 				Aisle = 1,
@@ -370,25 +369,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Position = 1
 			};
 			var initialCategory = new Category
-			{
+			{Id = 1,
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = initialCategory,
-				IsDeleted = false,
-			};
-			var product1 = new Product
-			{
-				Name = "Test",
-				SKU = "666666",
-				Category = initialCategory,
-				IsDeleted = false,
-			};
-		
+			var product = Product.Create("Test", "666666", 1, 56);
+			
+			var product1 = Product.Create("Test", "666666", 1, 56);
+			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(product, product1);
 			DbContext.Clients.Add(initialCLient);

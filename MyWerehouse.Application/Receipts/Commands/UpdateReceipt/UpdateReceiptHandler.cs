@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		private readonly IProductRepo _productRepo;
 		private readonly IClientRepo _clientRepo;
 		private readonly ILocationRepo _locationRepo;
-		private readonly IMapper _mapper;
+		//private readonly IMapper _mapper;
 
 		public UpdateReceiptHandler(WerehouseDbContext werehouseDbContext,
 			IReceiptRepo receiptRepo,
@@ -29,8 +29,10 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			IPalletRepo palletRepo,
 			IProductRepo productRepo,
 			IClientRepo clientRepo,
-			ILocationRepo locationRepo,
-			IMapper mapper)
+			ILocationRepo locationRepo
+			//,
+			//IMapper mapper
+			)
 		{
 			_werehouseDbContext = werehouseDbContext;
 			_receiptRepo = receiptRepo;
@@ -38,7 +40,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			_productRepo = productRepo;
 			_clientRepo = clientRepo;
 			_locationRepo = locationRepo;
-			_mapper = mapper;
+			//_mapper = mapper;
 		}
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
@@ -48,7 +50,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
 				// Pallets don't change warehouse's stock until receipt is confirmed
 				var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.DTO.ReceiptId); 
-					//?? throw new NotFoundReceiptException(request.DTO.ReceiptNumber);
 				if (existingReceipt == null)
 					return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.DTO.ReceiptNumber} nie zostało znalezione.", ErrorType.NotFound);
 				if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
@@ -86,11 +87,31 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				{
 					if (!existingPallets.TryGetValue(dto.Id!, out var pallet))
 						continue;
-				var	listOfProducts = dto.ProductsOnPallet
-						.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
-						.ToList();
+
+					var productsForPallet = new List<ProductOnPallet>();
+
+					foreach (var product in dto.ProductsOnPallet) //możliwość na kilka produktów na razie zbędne
+					{
+						var productForPallet = ProductOnPallet.Create(product.ProductId,
+							product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);
+							
+						//	new ProductOnPallet
+						//{
+						//	ProductId = product.ProductId,
+						//	PalletId = product.PalletId,
+						//	Quantity = product.Quantity,
+						//	DateAdded = product.DateAdded,
+						//	BestBefore = product.BestBefore
+						//};
+						productsForPallet.Add(productForPallet);
+					}
+
+					//var	listOfProducts = dto.ProductsOnPallet
+					//	.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
+					//	.ToList();
 					
-					pallet.UpdateProductChanges(listOfProducts);
+					//pallet.UpdateProductChanges(listOfProducts);
+					pallet.UpdateProductChanges(productsForPallet);
 					pallet.AddHistory(PalletStatus.Receiving, ReasonMovement.Correction, request.UserId);
 				}
 				//Dodanie nowych palet
@@ -102,15 +123,19 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 					var newId = await _palletRepo.GetNextPalletIdAsync();
 					var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber);
 						if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {request.DTO.RampNumber} nie została znaleziona", ErrorType.NotFound);
-					var pallet = new Pallet(newId, DateTime.UtcNow, request.DTO.RampNumber, location);
+					var pallet = Pallet.Create(newId);
+					//var pallet = Pallet.CreateForReceipt(newId, request.DTO.RampNumber, request.DTO.ReceiptId);
+					//var pallet = new Pallet(newId, DateTime.UtcNow, request.DTO.RampNumber, location);
+					//pallet.ApplyProductChanges
 					foreach (var dto in palletToAdd.ProductsOnPallet)
 					{
 						if (!await _productRepo.IsExistProduct(dto.ProductId))
 							return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound); 
 						pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
 					}
+					
 					_palletRepo.AddPallet(pallet);
-					existingReceipt.AttachPallet(pallet, request.UserId);
+					existingReceipt.AttachPallet(pallet,location,  request.UserId);
 				}
 				existingReceipt.UpdateReceipt(request.UserId, request.DTO.ClientId);
 				await _werehouseDbContext.SaveChangesAsync(ct);

@@ -58,7 +58,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				string? destinationPalletId = null;
 				//Do zmiany
 				var issueId = reversePicking.PickingTask.IssueId;
-				var issueNumber = reversePicking.PickingTask.IssueNumber;
+				var issueNumber = reversePicking.PickingTask.Issue.IssueNumber;
 				if (issueId == null)
 				{
 					return AppResult<ReversePickingResult>.Fail($"Zamówienie o numerze {issueId} nie zostało znalezione.", ErrorType.NotFound);

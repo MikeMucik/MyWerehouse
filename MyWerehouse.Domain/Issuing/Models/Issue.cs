@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
@@ -17,36 +18,116 @@ namespace MyWerehouse.Domain.Issuing.Models
 {
 	public class Issue : AggregateRoots
 	{
-		public Guid Id { get; set; } = Guid.NewGuid();
-		public int IssueNumber { get; set; }
-		public int ClientId { get; set; }
-		public virtual Client Client { get; set; }
-		public DateTime IssueDateTimeCreate { get; set; }
-		public DateTime IssueDateTimeSend { get; set; }
-		public virtual ICollection<Pallet> Pallets { get; set; } = new List<Pallet>();
-		public virtual ICollection<HistoryIssue> HistoryIssues { get; set; } = new List<HistoryIssue>();
-		public virtual ICollection<HistoryPicking> HistoryPickings { get; set; } = new List<HistoryPicking>();
-		public virtual ICollection<PickingTask> PickingTasks { get; set; } = new List<PickingTask>();
-		public string PerformedBy { get; set; }
-		public IssueStatus IssueStatus { get; set; }
-		public virtual ICollection<IssueItem> IssueItems { get; set; } = new List<IssueItem>();//nowe powiązanie		
-		public Issue() { }
-		public Issue(int clientId, string performedBy, DateTime dateToSend)
+		//public Guid Id { get; set; } = Guid.NewGuid();
+		public Guid Id { get; private set; } = Guid.NewGuid();
+		public int IssueNumber { get; private set; }
+		public int ClientId { get; private set; }
+		public Client Client { get; private set; }
+		public DateTime IssueDateTimeCreate { get; private set; }
+		public DateTime IssueDateTimeSend { get; private set; }
+		public ICollection<Pallet> Pallets { get; private set; } = new List<Pallet>();
+		public ICollection<HistoryIssue> HistoryIssues { get; private set; } = new List<HistoryIssue>();
+		public ICollection<HistoryPicking> HistoryPickings { get; private set; } = new List<HistoryPicking>();
+		public ICollection<PickingTask> PickingTasks { get; private set; } = new List<PickingTask>();
+		public string PerformedBy { get; private set; }
+		public IssueStatus IssueStatus { get; private set; }
+		public ICollection<IssueItem> IssueItems { get; private set; } = new List<IssueItem>();//nowe powiązanie		
+																							   //public Issue() { }
+		private Issue() { }
+		//public Issue(int clientId, string performedBy, DateTime dateToSend)
+		//{
+		//	ClientId = clientId;
+		//	if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
+		//	PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
+		//	IssueDateTimeSend = dateToSend;
+		//	if (dateToSend < DateTime.UtcNow) throw new DomainException("Data wysyłki nie może być w przeszłości");
+		//	IssueStatus = IssueStatus.New;
+		//	IssueDateTimeCreate = DateTime.UtcNow;
+		//}
+
+		private Issue(int issueNumber, int clientId, DateTime dateToSend, string performedBy)
 		{
-			ClientId = clientId;
+			Id = Guid.NewGuid();
+			IssueNumber = issueNumber;
 			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
-			PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
-			IssueDateTimeSend = dateToSend;
+			ClientId = clientId;
 			if (dateToSend < DateTime.UtcNow) throw new DomainException("Data wysyłki nie może być w przeszłości");
-			IssueStatus = IssueStatus.New;
+			IssueDateTimeSend = dateToSend;
 			IssueDateTimeCreate = DateTime.UtcNow;
+			PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
+			IssueStatus = IssueStatus.New;
 		}
 
+		public static Issue Create(int issueNumber, int clientId, DateTime dateToSend, string performedBy)
+			=> new Issue(issueNumber, clientId, dateToSend, performedBy);
+
+		private Issue(Guid id, int issueNumber, int clientId, DateTime issueDateTimeCreate,
+			DateTime issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems)
+		{
+			Id = id;
+			IssueNumber = issueNumber;
+			ClientId = clientId;
+			IssueDateTimeCreate = issueDateTimeCreate;
+			IssueDateTimeSend = issueDateTimeSend;
+			PerformedBy = performedBy;
+			IssueStatus = issueStatus;
+			IssueItems = issueItems;
+		}
+		public static Issue CreateForSeed(Guid id, int issueNumber, int clientId, DateTime issueDateTimeCreate,
+			DateTime issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems) =>
+			new Issue(id, issueNumber, clientId, issueDateTimeCreate, issueDateTimeSend,
+				performedBy, issueStatus, issueItems);
+
+		public void ChangeUser(string userId)
+		{
+			if (userId == null) throw new ArgumentNullException("userId");
+			PerformedBy = userId;
+		}
+		public void ChangeStatus(IssueStatus issueStatus)
+		{
+			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived) throw new InvalidOperationException("Operation forbidden.");
+			IssueStatus = issueStatus;
+		}
+		public void CancelIssue(string userId)
+		{
+			IssueStatus = IssueStatus.Cancelled;
+			AddHistory(userId);
+			foreach (var pallet in Pallets)
+			{
+				pallet.DetachToIssue(Id, userId);
+			}
+			foreach (var task in PickingTasks)
+			{
+				task.Cancel(userId);
+				//task.PickingStatus = PickingStatus.Cancelled;
+				//task.RequestedQuantity = 0;
+				//task.AddHistory(userId, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
+			}
+		}
+		public int GetQuantityForProduct(Guid productId)
+		{
+			var item = IssueItems
+				.FirstOrDefault(x => x.ProductId == productId);
+			return item?.Quantity ?? 0;
+		}
+		public void AddIssueItem(Guid productId, int quantity, DateOnly bestBefore)
+		{
+			var existing = IssueItems.FirstOrDefault(x => x.ProductId == productId);
+			if (existing != null)
+			{
+				//existing.IncreaseQuantity(quantity);
+				//return;
+				throw new InvalidOperationException("IssueItem exist.");
+			}
+			if (quantity <= 0) throw new InvalidDataException("Quantity must be grater than zero.");
+			var item = new IssueItem(Id, productId, quantity, bestBefore);
+			this.IssueItems.Add(item);
+		}
 		public List<Pallet> RemoveNotLoadedPallets(string userId)
 		{
 			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
 			foreach (var pallet in toReturn)
-			{				
+			{
 				pallet.DetachToIssue(Id, userId);
 				pallet.AddHistory(PalletStatus.Available, ReasonMovement.Correction, userId);
 				Pallets.Remove(pallet);
@@ -61,17 +142,25 @@ namespace MyWerehouse.Domain.Issuing.Models
 			pallet.ReserveToIssue(this, userId);
 		}
 
-		
+
 		public void DetachPallet(Pallet pallet, string userId)
 		{
 			this.Pallets.Remove(pallet);
 			pallet.DetachToIssue(this.Id, userId);
 		}
-		//public void AssignPallet(Pallet pallet, string userId)
-		//{
-		//	this.Pallets.Add(pallet);
-		//	pallet.AssignToIssue(this, userId);
-		//}
+
+		public void AssignPallet(Pallet pallet, string userId)
+		{
+			this.Pallets.Add(pallet);
+			pallet.AssignToIssue(this, userId);
+		}
+		public void AttachPickingTask(PickingTask task)
+		{
+			this.PickingTasks.Add(task);
+		}
+
+
+
 		public void ConfirmToLoad(string userId)
 		{
 			IssueStatus = IssueStatus.ConfirmedToLoad;
@@ -106,8 +195,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(Pallets.ToList())));
 		}
 		public void FinishIssueNotCompleted(string userId)
-		{			
-			PerformedBy = userId;			
+		{
+			PerformedBy = userId;
 			foreach (var pallet in Pallets)
 			{
 				pallet.AddHistory(pallet.Status, ReasonMovement.Loaded, userId);
@@ -133,9 +222,9 @@ namespace MyWerehouse.Domain.Issuing.Models
 		}
 		public void CompletedLoad(string userId)
 		{
-			foreach(var pallet in Pallets)
+			foreach (var pallet in Pallets)
 			{
-				if(pallet.Status != PalletStatus.Loaded)
+				if (pallet.Status != PalletStatus.Loaded)
 				{
 					throw new DomainIssueException("Nie załadowano wszystkich palet.");
 				}
@@ -152,12 +241,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 			Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
 		}
 
-		public void CreateIssue(string userId, bool Success)
-		{
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
-			Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
-
-		}
 		private IReadOnlyCollection<HistoryReceiptIssueDetailDto> BuildListPalletsForIssue()
 		{
 			return Pallets
@@ -170,9 +253,10 @@ namespace MyWerehouse.Domain.Issuing.Models
 		}
 		private IReadOnlyCollection<AddListItemsOfIssueDetailsDto> BuildListItems()
 		{
+			if (IssueItems is null) throw new ArgumentNullException("No data for items.");
 			return IssueItems
 				.Select(i => new AddListItemsOfIssueDetailsDto(
-					//i.Id,
+					i.Id,
 					i.ProductId,
 					i.Quantity,
 					i.BestBefore))

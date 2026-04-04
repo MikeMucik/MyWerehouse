@@ -46,15 +46,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				IsDeleted = false
 			};
 			var product = Product.Create("TestFull", "123", 1, 10);
-			//var product = new Product
-			//{
-			//	Name = "TestFull",
-			//	SKU = "123",
-			//	AddedItemAd = new DateTime(2024, 1, 1),
-			//	Category = category,
-			//	IsDeleted = false,
-			//	CartonsPerPallet = 10,
-			//};
+			
 			var location1 = new Location
 			{
 				Aisle = 1,
@@ -72,58 +64,22 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);
 			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.Now.AddMonths(12)));
 
-			//var pallet1 = new Pallet
-			//{
-			//	PalletNumber = "Q1010",
-			//	DateReceived = DateTime.Now,
-			//	Location = location1,
-			//	Status = PalletStatus.Available,
-			//	ProductsOnPallet= [new ProductOnPallet {
-			//			Product = product,
-			//			Quantity = 10,
-			//			DateAdded = DateTime.UtcNow.AddMonths(-1),
-			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
-			//		}]
-			//};
 			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 1, PalletStatus.Available, null, null);
 			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.Now.AddMonths(12)));
-			//var pallet2 = new Pallet
-			//{
-			//	PalletNumber = "Q1011",
-			//	DateReceived = DateTime.Now,
-			//	Location = location2,
-			//	Status = PalletStatus.Available,
-			//	ProductsOnPallet = [new ProductOnPallet {
-			//			Product = product,
-			//			Quantity = 10,
-			//			DateAdded = DateTime.UtcNow.AddMonths(-1),
-			//			BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
-			//		}]
-			//};			
+					
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1, location2);			
 			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.SaveChanges();
-			var issue = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber = 1,
-				Client = client,
-				IssueDateTimeCreate = DateTime.UtcNow.AddDays(-7),
-				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-				//Pallets = [pallet1, pickingPallet],
-				PerformedBy = "UserS",
-				//PickingTasks = [pickingTask],
-				IssueStatus = IssueStatus.ConfirmedToLoad,
-				IssueItems = [new IssueItem {
-					CreatedAt = DateTime.UtcNow.AddDays(-7),
-					Product = product,
-					Quantity = 18,
-					BestBefore = DateOnly.FromDateTime ( DateTime.UtcNow.AddDays(365))
-				}]
+			var issueId = Guid.NewGuid();
+			var issueItem =new List<IssueItem>{
+				IssueItem.CreateForSeed(1, issueId, product.Id,18, DateOnly.FromDateTime ( DateTime.UtcNow.AddDays(365)), DateTime.UtcNow.AddDays(-7))
 			};
+			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow.AddDays(-7),
+			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
+			
 			var virtualPallet = new VirtualPallet
 			{
 				PalletId = pallet2.Id,
@@ -131,35 +87,27 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				LocationId = location1.Id,
 				DateMoved = DateTime.UtcNow.AddDays(-7),			
 			};
-			var pickingTask = new PickingTask
-			{
-				Issue = issue,
-				PickingStatus = PickingStatus.Picked,
-				RequestedQuantity = 10,
-				VirtualPallet = virtualPallet,
-				ProductId = product.Id,
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12))
-			};
+			var pickingGuid = Guid.NewGuid();
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Picked, product.Id,
+				DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 10);
+			//var pickingTask = new PickingTask
+			//{
+			//	Issue = issue,
+			//	PickingStatus = PickingStatus.Picked,
+			//	RequestedQuantity = 10,
+			//	VirtualPallet = virtualPallet,
+			//	ProductId = product.Id,
+			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12))
+			//};
 
 			virtualPallet.PickingTasks = [pickingTask];
 			var pickingPallet = Pallet.CreateForTests("Q5000", DateTime.Now, 1, PalletStatus.ToIssue, null, null);
 			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
-			//var pickingPallet = new Pallet
-			//{
-			//	PalletNumber = "Q5000",
-			//	LocationId = location1.Id,
-			//	Status = PalletStatus.ToIssue,
-			//	DateReceived = DateTime.UtcNow,
-			//	IssueId = issue.Id,
-			//	ProductsOnPallet = [new ProductOnPallet {
-			//		ProductId = product.Id,
-			//		Quantity = 10,
-			//		DateAdded = DateTime.UtcNow.AddDays(-7),
-			//		BestBefore =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(365))
-			//	}]
-			//};
-			issue.Pallets = [pallet1, pickingPallet];
-			issue.PickingTasks = [pickingTask];
+			
+			issue.ReservePallet(pallet1, "User");
+			issue.ReservePallet(pallet2, "User");
+			issue.AttachPickingTask(pickingTask);
+			
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.Pallets.Add(pickingPallet);

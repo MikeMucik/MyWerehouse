@@ -45,7 +45,7 @@ namespace MyWerehouse.Infrastructure
 
 			services.AddScoped<IInventoryRepo, InventoryRepo>();
 			services.AddScoped<IIssueRepo, IssueRepo>();
-			services.AddScoped<IIssueItemRepo, IssueItemRepo>();
+			
 			services.AddScoped<ILocationRepo, LocationRepo>();
 			services.AddScoped<IPalletMovementRepo, PalletMovementRepo>();
 			services.AddScoped<IPalletRepo, PalletRepo>();

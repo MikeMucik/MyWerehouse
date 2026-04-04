@@ -101,106 +101,28 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			};
 			var pallet1 = Pallet.CreateForTests("Q10", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
 			pallet1.AddProductForTests(product1.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
-			//var pallet1 = new Pallet
-			//{
-			//	PalletNumber = "Q10",
-			//	DateReceived = new DateTime(2025, 8, 8),				
-			//	Location = location1,
-			//	Status = PalletStatus.ToPicking,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{
-			//		new ProductOnPallet
-			//		{						
-			//			Product = product1,
-			//			Quantity = 40,
-			//			DateAdded = new DateTime(2025, 8, 8) }
-			//	}
-			//};
+			
 			var pallet2 = Pallet.CreateForTests("Q11", new DateTime(2025, 9, 9), 2, PalletStatus.ToPicking, null, null);
 			pallet2.AddProductForTests(product1.Id, 50, new DateTime(2025, 9, 9), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
-			//var pallet2 = new Pallet
-			//{
-			//	PalletNumber = "Q11",
-			//	DateReceived = new DateTime(2025, 9, 9),				
-			//	Location = location2,
-			//	Status = PalletStatus.ToPicking,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{
-			//		new ProductOnPallet
-			//		{	
-			//			Product = product1,
-			//			Quantity = 50,
-			//			DateAdded = new DateTime(2025, 9, 9)
-			//		}
-			//	}
-			//};
+			
 			var pallet3 = Pallet.CreateForTests("Q12", new DateTime(2025, 10, 10), 3, PalletStatus.ToPicking, null, null);
 			pallet3.AddProductForTests(product2.Id, 70, new DateTime(2025, 10, 10), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
-			//var pallet3 = new Pallet
-			//{
-			//	PalletNumber = "Q12",
-			//	DateReceived = new DateTime(2025, 10, 10),
-			//	Location = location3,
-			//	Status = PalletStatus.ToPicking,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{
-			//		new ProductOnPallet
-			//		{
-			//			Product = product2,
-			//			Quantity = 70,
-			//			DateAdded = new DateTime(2025, 10, 10)
-			//		}
-			//	}
-			//};
+			
 			var pallet4 = Pallet.CreateForTests("Q13", new DateTime(2025, 11, 11), 4, PalletStatus.ToPicking, null, null);
 			pallet4.AddProductForTests(product2.Id, 100, new DateTime(2025, 11, 11), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
-			//var pallet4 = new Pallet
-			//{
-			//	PalletNumber = "Q13",
-			//	DateReceived = new DateTime(2025, 11, 11),
-			//	Location = location4,
-			//	Status = PalletStatus.ToPicking,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{
-			//		new ProductOnPallet
-			//		{
-			//			Product= product2,
-			//			Quantity = 100,
-			//			DateAdded = new DateTime(2025, 11, 11) }
-			//	}
-			//};
-			var issue1 = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber = 1,
-				Client = client1,
-				IssueDateTimeCreate = DateTime.UtcNow,
-				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-				IssueStatus = IssueStatus.New,
-				PerformedBy = "TestUser",
-			};
-			var issue2 = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber = 2,
-				Client = client1,
-				IssueDateTimeCreate = DateTime.UtcNow,
-				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-				IssueStatus = IssueStatus.New,
-				PerformedBy = "TestUser",
-			};
-			var issue3 = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber = 3,
-				Client = client2,
-				IssueDateTimeCreate = DateTime.UtcNow,
-				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-				IssueStatus = IssueStatus.New,
-				PerformedBy = "TestUser",
-			};
 			
-
+			var issue1Id = Guid.NewGuid();
+			var issue1 = Issue.CreateForSeed(issue1Id, 1, 1, DateTime.UtcNow,
+			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			
+			var issue2Id = Guid.NewGuid();
+			var issue2 = Issue.CreateForSeed(issue2Id, 2, 1, DateTime.UtcNow,
+			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			
+			var issue3Id = Guid.NewGuid();
+			var issue3 = Issue.CreateForSeed(issue3Id, 3, 2, DateTime.UtcNow,
+			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			
 			DbContext.Addresses.AddRange(address1, address2);
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, location2, location3, location4);
@@ -217,9 +139,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				//Location = pallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),				
 			};
-
-			var a11 = new PickingTask { Issue = issue1, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
-			var a12 = new PickingTask { Issue = issue2, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid11 = Guid.NewGuid();
+			var a11 = PickingTask.CreateForSeed(pickingGuid11, 1, issue1Id, 10, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),0);
+			//var a11 = new PickingTask { Issue = issue1, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid12 = Guid.NewGuid();
+			var a12 = PickingTask.CreateForSeed(pickingGuid12, 1, issue1Id, 15, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),0);
+			//var a12 = new PickingTask { Issue = issue2, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet1, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
 			virtualPallet1.PickingTasks = new List<PickingTask> { a11, a12 };
 
 			var virtualPallet2 = new VirtualPallet
@@ -230,9 +155,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				//Location = pallet2.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
-
-			var a21 = new PickingTask { Issue = issue1, RequestedQuantity = 20, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
-			var a22 = new PickingTask { Issue = issue3, RequestedQuantity = 25, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid21 = Guid.NewGuid();
+			var a21 = PickingTask.CreateForSeed(pickingGuid21, 2, issue1Id, 20, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a21 = new PickingTask { Issue = issue1, RequestedQuantity = 20, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid22 = Guid.NewGuid();
+			var a22 = PickingTask.CreateForSeed(pickingGuid22, 2, issue1Id, 25, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a22 = new PickingTask { Issue = issue3, RequestedQuantity = 25, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet2, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
 			virtualPallet2.PickingTasks = new List<PickingTask> { a21, a22 };
 
 			var virtualPallet3 = new VirtualPallet
@@ -243,8 +171,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				//Location = pallet3.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
-
-			var a31 = new PickingTask { Issue = issue2, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet3, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid31 = Guid.NewGuid();
+			var a31 = PickingTask.CreateForSeed(pickingGuid31, 3, issue1Id, 15, PickingStatus.Allocated, product2.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a31 = new PickingTask { Issue = issue2, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet3, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
 			virtualPallet3.PickingTasks = new List<PickingTask> { a31 };
 
 			var virtualPallet4 = new VirtualPallet
@@ -255,8 +184,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				//Location = pallet4.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
-
-			var a41 = new PickingTask { Issue = issue1, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet4, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid41 = Guid.NewGuid();
+			var a41 = PickingTask.CreateForSeed(pickingGuid41, 4, issue1Id, 10, PickingStatus.Allocated, product2.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a41 = new PickingTask { Issue = issue1, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated, VirtualPallet = virtualPallet4, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
 			virtualPallet4.PickingTasks = new List<PickingTask> { a41 };
 
 			DbContext.PickingTasks.AddRange(a11, a12, a21, a22, a31, a41);
@@ -311,25 +241,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IsDeleted = false
 			};
 			var product1 = Product.Create("Prod A", "666", 1, 50);
-			//var product1 = new Product
-			//{
-			//	Name = "Prod A",
-			//	SKU = "666",
-			//	AddedItemAd = new DateTime(2025, 1, 1),				
-			//	Category = category,
-			//	IsDeleted = false,
-			//	CartonsPerPallet = 50
-			//};
+			
 			var product2 = Product.Create("Prod B", "667", 1, 100);
-			//var product2 = new Product
-			//{
-			//	Name = "Prod B",
-			//	SKU = "667",
-			//	AddedItemAd = new DateTime(2025, 2, 2),				
-			//	Category = category,
-			//	IsDeleted = false,
-			//	CartonsPerPallet = 100
-			//};
+			
 			var location1 = new Location
 			{
 				Aisle = 1,
@@ -396,6 +310,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Addresses = [address2],
 				IsDeleted = false,
 			};
+			DbContext.Addresses.AddRange(address1, address2);
+			DbContext.Categories.Add(category);
+			DbContext.Locations.AddRange(location1, location2, location3, location4);
+			DbContext.Clients.AddRange(client1, client2);
+			DbContext.Products.AddRange(product1, product2);
+			DbContext.SaveChanges();
+			var issue1Id = Guid.NewGuid();
+			var issue1 = Issue.CreateForSeed(issue1Id, 101, 1, DateTime.UtcNow,
+			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			var issue2Id = Guid.NewGuid();
+			var issue2 = Issue.CreateForSeed(issue2Id, 102, 1, DateTime.UtcNow,
+			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			var issue3Id = Guid.NewGuid();
+			var issue3 = Issue.CreateForSeed(issue3Id, 103, 2, DateTime.UtcNow,
+			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
 			var pallet1 = Pallet.CreateForTests("Q10", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
 			pallet1.AddProductForTests(product1.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			//var pallet1 = new Pallet
@@ -467,42 +396,40 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//	}
 			//};
 			
-			var issue1 = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber = 101,
-				Client = client1,
-				IssueDateTimeCreate = DateTime.UtcNow,
-				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-				IssueStatus = IssueStatus.New,
-				PerformedBy = "TestUser",
-			};
-			var issue2 = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber =102,
-				Client = client1,
-				IssueDateTimeCreate = DateTime.UtcNow,
-				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-				IssueStatus = IssueStatus.New,
-				PerformedBy = "TestUser",
-			};
-			var issue3 = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber =103,
-				Client = client2,
-				IssueDateTimeCreate = DateTime.UtcNow,
-				IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-				IssueStatus = IssueStatus.New,
-				PerformedBy = "TestUser",
-			};
+			//var issue1 = new Issue
+			//{
+			//	Id = Guid.NewGuid(),
+			//	IssueNumber = 101,
+			//	Client = client1,
+			//	IssueDateTimeCreate = DateTime.UtcNow,
+			//	IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
+			//	IssueStatus = IssueStatus.New,
+			//	PerformedBy = "TestUser",
+			//};
+			
+			//var issue2 = new Issue
+			//{
+			//	Id = Guid.NewGuid(),
+			//	IssueNumber =102,
+			//	Client = client1,
+			//	IssueDateTimeCreate = DateTime.UtcNow,
+			//	IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
+			//	IssueStatus = IssueStatus.New,
+			//	PerformedBy = "TestUser",
+			//};
+			
+			//var issue3 = new Issue
+			//{
+			//	Id = Guid.NewGuid(),
+			//	IssueNumber =103,
+			//	Client = client2,
+			//	IssueDateTimeCreate = DateTime.UtcNow,
+			//	IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
+			//	IssueStatus = IssueStatus.New,
+			//	PerformedBy = "TestUser",
+			//};
 
-			DbContext.Addresses.AddRange(address1, address2);
-			DbContext.Categories.Add(category);
-			DbContext.Locations.AddRange(location1, location2, location3, location4);
-			DbContext.Clients.AddRange(client1, client2);
-			DbContext.Products.AddRange(product1, product2);
+			
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
 			DbContext.Issues.AddRange(issue1, issue2, issue3);
 			await DbContext.SaveChangesAsync();
@@ -513,12 +440,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Location = pallet1.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
-
-			var a11 = new PickingTask { Issue = issue1, IssueNumber=101, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
-				VirtualPallet = virtualPallet1, ProductId = product1.Id, PickingDay=DateOnly.FromDateTime( DateTime.UtcNow.AddDays(5)) };
-			var a12 = new PickingTask { Issue = issue2, IssueNumber= 102, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
-				VirtualPallet = virtualPallet1, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
-			};
+			var pickingGuid11 = Guid.NewGuid();
+			var a11 = PickingTask.CreateForSeed(pickingGuid11, 1, issue1Id, 10, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a11 = new PickingTask { Issue = issue1, IssueNumber=101, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
+			//	VirtualPallet = virtualPallet1, ProductId = product1.Id, PickingDay=DateOnly.FromDateTime( DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid12 = Guid.NewGuid();
+			var a12 = PickingTask.CreateForSeed(pickingGuid12, 1, issue1Id, 15, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a12 = new PickingTask { Issue = issue2, IssueNumber= 102, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
+			//	VirtualPallet = virtualPallet1, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))	};
 			virtualPallet1.PickingTasks = new List<PickingTask> { a11, a12 };
 
 			var virtualPallet2 = new VirtualPallet
@@ -528,13 +457,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Location = pallet2.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
-
-			var a21 = new PickingTask { Issue = issue1, IssueNumber=101, RequestedQuantity = 20, PickingStatus = PickingStatus.Allocated,
-				VirtualPallet = virtualPallet2, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
-			};
-			var a22 = new PickingTask { Issue = issue3, IssueNumber= 103, RequestedQuantity = 25, PickingStatus = PickingStatus.Allocated,
-				VirtualPallet = virtualPallet2, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
-			};
+			var pickingGuid21 = Guid.NewGuid();
+			var a21 = PickingTask.CreateForSeed(pickingGuid21, 2, issue1Id, 20, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a21 = new PickingTask { Issue = issue1, IssueNumber=101, RequestedQuantity = 20, PickingStatus = PickingStatus.Allocated,
+			//	VirtualPallet = virtualPallet2, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))};
+			var pickingGuid22 = Guid.NewGuid();
+			var a22 = PickingTask.CreateForSeed(pickingGuid22, 2, issue1Id, 25, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a22 = new PickingTask { Issue = issue3, IssueNumber= 103, RequestedQuantity = 25, PickingStatus = PickingStatus.Allocated,
+			//	VirtualPallet = virtualPallet2, ProductId = product1.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))};
 			virtualPallet2.PickingTasks = new List<PickingTask> { a21, a22 };
 
 			var virtualPallet3 = new VirtualPallet
@@ -544,10 +474,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Location = pallet3.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
-
-			var a31 = new PickingTask { Issue = issue3,IssueNumber =103, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
-				VirtualPallet = virtualPallet3, ProductId = product2.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))
-			};
+			var pickingGuid31 = Guid.NewGuid();
+			var a31 = PickingTask.CreateForSeed(pickingGuid31, 3, issue1Id, 15, PickingStatus.Allocated, product2.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a31 = new PickingTask { Issue = issue3,IssueNumber =103, RequestedQuantity = 15, PickingStatus = PickingStatus.Allocated,
+			//	VirtualPallet = virtualPallet3, ProductId = product2.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))};
 			virtualPallet3.PickingTasks = new List<PickingTask> { a31 };
 
 			var virtualPallet4 = new VirtualPallet
@@ -557,9 +487,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Location = pallet4.Location,
 				DateMoved = new DateTime(2025, 8, 12),
 			};
-
-			var a41 = new PickingTask { Issue = issue1, IssueNumber =101, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
-				VirtualPallet = virtualPallet4, ProductId = product2.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
+			var pickingGuid41 = Guid.NewGuid();
+			var a41 = PickingTask.CreateForSeed(pickingGuid41, 4, issue1Id, 10, PickingStatus.Allocated, product2.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
+			//var a41 = new PickingTask { Issue = issue1, IssueNumber =101, RequestedQuantity = 10, PickingStatus = PickingStatus.Allocated,
+			//	VirtualPallet = virtualPallet4, ProductId = product2.Id, PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)) };
 			virtualPallet4.PickingTasks = new List<PickingTask> { a41 };
 
 			DbContext.PickingTasks.AddRange(a11, a12, a21, a22, a31, a41);

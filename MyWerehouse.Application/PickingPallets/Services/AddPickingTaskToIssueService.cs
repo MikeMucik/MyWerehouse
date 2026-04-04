@@ -14,14 +14,14 @@ namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public class AddPickingTaskToIssueService : IAddPickingTaskToIssueService
 	{		
-		//private readonly IProductRepo _productRepo;
+		private readonly IProductRepo _productRepo;
 		private readonly IPickingPalletRepo _pickingPalletRepo;
 		private readonly IPalletRepo _palletRepo;
 		public AddPickingTaskToIssueService(
-			//IProductRepo productRepo,
+			IProductRepo productRepo,
 			IPickingPalletRepo pickingPalletRepo, IPalletRepo palletRepo)
 		{			
-			//_productRepo = productRepo;
+			_productRepo = productRepo;
 			_pickingPalletRepo = pickingPalletRepo;
 			_palletRepo = palletRepo;
 		}
@@ -76,7 +76,8 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			}
 			if (quantity > 0)
 			{
-				return AddPickingTaskToIssueResult.Fail($"Nie ma więcej asortymentu {productId} - nie można utworzyć zadania pickingu.");
+				var productFull = await _productRepo.GetProductByIdAsync(productId);
+				return AddPickingTaskToIssueResult.Fail($"Nie ma więcej asortymentu {productId}, {productFull.SKU} - nie można utworzyć zadania pickingu.");
 			}
 			foreach (var pickingTask in pickingTasks)
 			{
@@ -85,13 +86,12 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			return AddPickingTaskToIssueResult.Ok(pickingTasks);
 		}
 
-		//public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, int productId, int quantity, DateOnly? bestBefore, string userId)
 		public AddPickingTaskToIssueResult AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
 		{
-			//_ = await _productRepo.GetProductByIdAsync(productId) ?? throw new NotFoundProductException(productId);
 			var pickingTask = CreatePickingTask(issue,				
 				quantity, virtualPallet, productId, bestBefore);
-			pickingTask.VirtualPallet = virtualPallet;
+			pickingTask.SetVirtualPallet(virtualPallet.Id);
+			//pickingTask.VirtualPallet = virtualPallet;
 			virtualPallet.PickingTasks.Add(pickingTask);
 			pickingTask.AddHistory(userId, PickingStatus.Available, PickingStatus.Allocated, 0);			
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
@@ -99,18 +99,20 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		private static PickingTask CreatePickingTask(Issue issue, int quantity,
 				VirtualPallet vp, Guid productId, DateOnly? bestBefore)
 		{
-			return new()
-			{
-				Issue = issue,
-				IssueId = issue.Id,
-				IssueNumber = issue.IssueNumber,	
-				RequestedQuantity = quantity,
-				PickingStatus = PickingStatus.Allocated,
-				VirtualPallet = vp,
-				ProductId = productId,
-				BestBefore = bestBefore,
-				PickingDay = DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)) //added new field
-			};
+			//return new()
+			//{
+			//	Issue = issue,
+			//	IssueId = issue.Id,
+			//	IssueNumber = issue.IssueNumber,	
+			//	RequestedQuantity = quantity,
+			//	PickingStatus = PickingStatus.Allocated,
+			//	VirtualPallet = vp,
+			//	ProductId = productId,
+			//	BestBefore = bestBefore,
+			//	PickingDay = DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)) //added new field
+			//};
+			return PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated, productId, bestBefore, null,
+				DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
 		}
 	}
 }

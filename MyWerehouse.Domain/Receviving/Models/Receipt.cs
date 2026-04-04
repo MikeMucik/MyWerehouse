@@ -33,6 +33,8 @@ namespace MyWerehouse.Domain.Receviving.Models
 		public Receipt(int clientId, string performedBy, int rampNumber)
 		{
 			//if (clientId <= 0) throw new InvalidClientNumberException(clientId);
+			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
+
 			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
 			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
 			ClientId = clientId;

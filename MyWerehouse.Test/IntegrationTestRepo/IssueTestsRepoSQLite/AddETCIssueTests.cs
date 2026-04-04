@@ -54,22 +54,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			//var location3 = new Location
-			//{
-			//	Aisle = 3,
-			//	Bay = 1,
-			//	Height = 1,
-			//	Position = 1
-			//};
+			
 			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);			
-			//var pallet1 = new Pallet
-			//{
-			//	PalletNumber = "Q1010",
-			//	DateReceived = DateTime.Now,
-			//	LocationId = 1,
-			//	Status = PalletStatus.Available,
-			//	//ReceiptId = 10,
-			//};
+			
 			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 2, PalletStatus.Available, null, null);
 			//var pallet2 = new Pallet
 			//{
@@ -140,21 +127,25 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.SaveChanges();
 			var issueRepo = new IssueRepo(DbContext);
-			//Act		
-			var issue = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber = 1,
-				IssueDateTimeSend = new DateTime(2025, 12, 15),
-				Client = initailClient,
-				Pallets = new List<Pallet>
-			{
-				pallet1,
-				pallet2
-			},
-				PerformedBy = "U003"
-			};
+			//Act	
+			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
+				, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
+			//var issue = new Issue
+			//{
+			//	Id = Guid.NewGuid(),
+			//	IssueNumber = 1,
+			//	IssueDateTimeSend = new DateTime(2025, 12, 15),
+			//	Client = initailClient,
+			//	Pallets = new List<Pallet>
+			//{
+			//	pallet1,
+			//	pallet2
+			//},
+			//	PerformedBy = "U003"
+			//};
 			issueRepo.AddIssue(issue);
+			issue.ReservePallet(pallet1, "U003");
+			issue.ReservePallet(pallet2, "U003");
 			DbContext.SaveChanges();
 			//Assert
 			var result = DbContext.Issues
@@ -258,20 +249,26 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			DbContext.Pallets.AddRange(pallet1, pallet2);			
 			var issueRepo = new IssueRepo(DbContext);
 			//Act		
-			var issue = new Issue
-			{
-				Id = Guid.NewGuid(),
-				IssueNumber = 1,
-				IssueDateTimeSend = new DateTime(2025, 12, 15),
-				Client = initailClient,
-				Pallets = new List<Pallet>
-			{
-				pallet1,
-				pallet2
-			},
-				PerformedBy = "U003"
-			};
+			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
+			, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
+			//var issue = new Issue
+			//{
+			//	Id = Guid.NewGuid(),
+			//	IssueNumber = 1,
+			//	IssueDateTimeSend = new DateTime(2025, 12, 15),
+			//	Client = initailClient,
+			//	Pallets = new List<Pallet>
+			//{
+			//	pallet1,
+			//	pallet2
+			//},
+			//	PerformedBy = "U003"
+			//};
 			issueRepo.AddIssue(issue);
+			pallet1.AddLocation(location1);
+			pallet2.AddLocation(location2);
+			issue.ReservePallet(pallet1, "U003");
+			issue.ReservePallet(pallet2, "U003");
 			DbContext.SaveChanges();
 			//Act
 			issueRepo.DeleteIssue(issue);

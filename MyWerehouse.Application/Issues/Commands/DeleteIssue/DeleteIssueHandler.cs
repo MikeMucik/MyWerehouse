@@ -35,31 +35,17 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 
 					case IssueStatus.Pending:
 					case IssueStatus.NotComplete:
-						issueToDelete.IssueStatus = IssueStatus.Cancelled;
-						var listPalletsToRemove = issueToDelete.Pallets.ToList();
-						foreach (var pallet in listPalletsToRemove)
-						{
-							issueToDelete.DetachPallet(pallet, request.UserId);
-						}
-						foreach (var pickingTask in issueToDelete.PickingTasks)
-						{
-							pickingTask.PickingStatus = PickingStatus.Cancelled;
-							pickingTask.RequestedQuantity = 0;
-							pickingTask.AddHistory(request.UserId, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
-						}
+						issueToDelete.CancelIssue(request.UserId);
+
 						break;
 					default:
 						return AppResult<Unit>.Fail($"Zlecenia {issueToDelete.Id} nie można anulować.", ErrorType.Conflict);
-				}
-				if (!(issueToDelete.IssueStatus == IssueStatus.New))
-				{
-					issueToDelete.AddHistory(request.UserId);
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 
 				return AppResult<Unit>.Success(Unit.Value, $"Usunięto zamówienie o numerze {issueToDelete.Id}.");
-			}			
+			}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);
@@ -70,3 +56,23 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 		}
 	}
 }
+
+//if (!(issueToDelete.IssueStatus == IssueStatus.New))
+//{
+//	issueToDelete.ChangeStatus(IssueStatus.Cancelled);
+//	issueToDelete.AddHistory(request.UserId);
+//}
+
+
+//issueToDelete.IssueStatus = IssueStatus.Cancelled;
+//var listPalletsToRemove = issueToDelete.Pallets.ToList();
+//foreach (var pallet in listPalletsToRemove)
+//{
+//	issueToDelete.DetachPallet(pallet, request.UserId);
+//}
+//foreach (var pickingTask in issueToDelete.PickingTasks)
+//{
+//	pickingTask.PickingStatus = PickingStatus.Cancelled;
+//	pickingTask.RequestedQuantity = 0;
+//	pickingTask.AddHistory(request.UserId, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
+//}

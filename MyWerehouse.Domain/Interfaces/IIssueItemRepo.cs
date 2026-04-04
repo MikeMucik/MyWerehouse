@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Domain.Interfaces
 {
-	public interface IIssueItemRepo
-	{
-		void AddIssueItem(IssueItem issueItem);
-		Task<IssueItem> GetIssueItemAsync(int id);
-		Task<int> GetQuantityByIssueAndProduct(Issue issue, Guid productId);
-		void DeleteIssueItem(IssueItem issue);
-	}
+	//public interface IIssueItemRepo
+	//{
+	//	void AddIssueItem(IssueItem issueItem);
+	//	Task<IssueItem> GetIssueItemAsync(int id);
+	//	Task<int> GetQuantityByIssueAndProduct(Issue issue, Guid productId);
+	//	void DeleteIssueItem(IssueItem issue);
+	//}
 }

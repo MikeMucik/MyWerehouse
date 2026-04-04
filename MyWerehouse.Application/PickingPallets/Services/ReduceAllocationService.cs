@@ -28,16 +28,18 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				{
 					if (pickingTask.RequestedQuantity > quantity)
 					{
-						pickingTask.RequestedQuantity -= quantity;
+						//pickingTask.RequestedQuantity -= quantity;
+						pickingTask.ReduceQuantity(quantity);
 						quantity = 0;
 						pickingTask.AddHistory(userId, PickingStatus.Correction, pickingTask.PickingStatus, 0);
 					}
 					else
 					{
 						quantity -= pickingTask.RequestedQuantity;
-						pickingTask.PickingStatus = PickingStatus.Cancelled;
-						pickingTask.RequestedQuantity = 0;
-						pickingTask.AddHistory(userId, PickingStatus.Correction, pickingTask.PickingStatus, 0);//
+						pickingTask.Cancel(userId);
+						//pickingTask.PickingStatus = PickingStatus.Cancelled;
+						//pickingTask.RequestedQuantity = 0;
+						//pickingTask.AddHistory(userId, PickingStatus.Correction, pickingTask.PickingStatus, 0);//
 					}
 				}				
 			}			

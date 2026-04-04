@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.Issuing.Events
 {
-	public record AddListItemsOfIssueDetailsDto(Guid ProductId, int Quantity, DateOnly BestBedore);
+	public record AddListItemsOfIssueDetailsDto(int Id,Guid ProductId, int Quantity, DateOnly BestBedore);
 	
 }

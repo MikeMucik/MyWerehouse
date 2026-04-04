@@ -106,7 +106,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				{
 					return AppResult< Unit>.Fail("Zadania nie można zrealizować, mniej na palecie niż chęć pobrania", ErrorType.Conflict);
 				}
-				pickingTask.VirtualPallet = virtualPallet;
+				pickingTask.SetVirtualPallet(virtualPallet.Id);
+				//pickingTask.VirtualPallet = virtualPallet;
 				var completion = PickingCompletion.Full;
 				if (command.Quanitity < pickingTask.RequestedQuantity - pickingTask.PickedQuantity)
 				{

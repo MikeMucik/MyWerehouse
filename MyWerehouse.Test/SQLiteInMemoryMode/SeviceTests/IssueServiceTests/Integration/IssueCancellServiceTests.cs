@@ -48,7 +48,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var location1 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
-			
+
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 				DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
 
@@ -64,10 +64,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Locations.AddRange(location, location1);
 			DbContext.Pallets.AddRange(palletP1, palletP2);
 			DbContext.Receipts.Add(receipt);
-			
+
 			receipt.AttachPallet(palletP1, location, "UserMakae");
 			receipt.AttachPallet(palletP2, location1, "UserMakae");
-			
+
 			palletP1.ChangeStatus(PalletStatus.Available);
 			palletP2.ChangeStatus(PalletStatus.Available);
 			await DbContext.SaveChangesAsync();
@@ -121,32 +121,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var location1 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
-			
-			//var pallets = new List<Pallet>
-			//	{
-			//		new Pallet
-			//		{
-			//			PalletNumber = "P1",
-			//			Location = location,
-			//			Status = PalletStatus.Available,
-			//			ProductsOnPallet = new List<ProductOnPallet>
-			//			{
-			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-			//			}
-			//		},
-			//		new Pallet
-			//		{
-			//			PalletNumber = "P2",
-			//			Location = location,
-			//			Status = PalletStatus.Available,
-			//			ProductsOnPallet = new List<ProductOnPallet>
-			//			{
-			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-			//			}
-			//		}
-			//	};
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
-				DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
+	DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
 			//receipt.AttachPallet(palletP1, location, "UserMakae");
 			//receipt.AttachPallet(palletP2, location, "UserMakae");
 			//var recipt = new Receipt
@@ -168,7 +144,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location, location1);
-			
+
 			DbContext.Receipts.Add(receipt);
 			DbContext.Pallets.AddRange(palletP1, palletP2);
 			await DbContext.SaveChangesAsync();
@@ -176,7 +152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			receipt.AttachPallet(palletP2, location1, "UserMakae");
 			palletP1.ChangeStatus(PalletStatus.Available);
 			palletP2.ChangeStatus(PalletStatus.Available);
-await DbContext.SaveChangesAsync();
+			await DbContext.SaveChangesAsync();
 			// Act 1 – create issue with 1 pallet (10 szt.)
 			var createIssueDto = new CreateIssueDTO
 			{
@@ -230,7 +206,7 @@ await DbContext.SaveChangesAsync();
 			var location1 = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 2 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
 			//var product = new Product { Name = "Prod1", SKU = "SKU1", Category = category, CartonsPerPallet = 10 };
-			
+
 			//var pallets = new List<Pallet>
 			//	{
 			//		new Pallet
@@ -278,12 +254,12 @@ await DbContext.SaveChangesAsync();
 			DbContext.Locations.AddRange(location, location1);
 			DbContext.Pallets.AddRange(palletPP1, palletPP2);
 			DbContext.Receipts.Add(receipt);
-			
+
 			receipt.AttachPallet(palletPP1, location, "UserMakae");
 			receipt.AttachPallet(palletPP2, location, "UserMakae");
 			palletPP1.ChangeStatus(PalletStatus.Available);
 			palletPP2.ChangeStatus(PalletStatus.Available);
-await DbContext.SaveChangesAsync();
+			await DbContext.SaveChangesAsync();
 			// Act 1 – create issue with 1 pallet (10 szt.)
 			var createIssueDto = new CreateIssueDTO
 			{
@@ -367,7 +343,7 @@ await DbContext.SaveChangesAsync();
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 				DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
-			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow.AddDays(-10), 1, PalletStatus.Available,null, null);
+			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow.AddDays(-10), 1, PalletStatus.Available, null, null);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow.AddDays(-9), 2, PalletStatus.Available, null, null);
 			pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
@@ -393,8 +369,8 @@ await DbContext.SaveChangesAsync();
 			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 			//			}
 			//};
-			
-			
+
+
 			//var recipt = new Receipt
 			//{
 			//	Id = Guid.NewGuid(),

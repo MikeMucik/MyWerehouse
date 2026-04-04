@@ -153,22 +153,30 @@ namespace MyWerehouse.Test.Common
 			var issueId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
 			if (!context.Issues.Any())
 			{
-				context.Issues.Add(new Issue
+				var issueItems = new List<IssueItem>
 				{
-					Id = issueId2,
-					IssueNumber = 2,
-					ClientId = 11,
-					PerformedBy = "U002",
-					IssueDateTimeCreate = new DateTime(2025, 5, 5),
-					IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
-					IssueItems = new List<IssueItem> { new IssueItem
-					{
-						ProductId = productId1,
-						CreatedAt = DateTime.Today,
-						BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
-						Quantity = 20,
-					} }
-				});
+					IssueItem.CreateForSeed(1,issueId2, productId1, 150, DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),  DateTime.Today),
+					IssueItem.CreateForSeed(2,issueId2, productId2, 400, DateOnly.FromDateTime(DateTime.Today.AddMonths(3)), DateTime.Today)
+				};
+				context.Issues.Add(
+					Issue.CreateForSeed(issueId2, 2, 11, DateTime.UtcNow.AddDays(-5), DateTime.UtcNow.AddHours(23), "U002", IssueStatus.New, issueItems));
+
+				//context.Issues.Add(new Issue
+				//{
+				//	Id = issueId2,
+				//	IssueNumber = 2,
+				//	ClientId = 11,
+				//	PerformedBy = "U002",
+				//	IssueDateTimeCreate = new DateTime(2025, 5, 5),
+				//	IssueDateTimeSend = new DateTime(2025, 5, 6),//zmiana 
+				//	IssueItems = new List<IssueItem> { new IssueItem
+				//	{
+				//		ProductId = productId1,
+				//		CreatedAt = DateTime.Today,
+				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
+				//		Quantity = 20,
+				//	} }
+				//});
 			}
 
 			context.SaveChanges();

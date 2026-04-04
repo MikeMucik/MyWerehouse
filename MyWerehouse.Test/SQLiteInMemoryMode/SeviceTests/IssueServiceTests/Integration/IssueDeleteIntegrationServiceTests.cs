@@ -41,16 +41,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					FullName = "FullNameCompany",
 					Addresses = new List<Address> { address }
 				};
-				var issue = new Issue
-				{
-					Id = Guid.NewGuid(),
-					IssueNumber = 1,
-					IssueStatus = status,
-					Client = client,
-					PerformedBy = "UserInit",
-					Pallets = new List<Pallet>(),
-					PickingTasks = new List<PickingTask>()
-				};
+
+				var issueId = Guid.NewGuid();
+
+				var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-7),
+				DateTime.UtcNow.AddDays(7), "UserInit", status, null);
+
 				db.Clients.Add(client);
 				db.Issues.Add(issue);
 				await db.SaveChangesAsync();
@@ -80,52 +76,50 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 				var category = new Category { Id = 1, Name = "Cat", IsDeleted = false };
 				var product = Product.Create("TestFull", "123", 1, 10);
-				
-				var pallets = new List<Pallet>();
 
-				var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.InTransit, null, null);
+				var pallets = new List<Pallet>();
+				var issueId = Guid.NewGuid();
+				var issueItem = new List<IssueItem> { IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)) };
+				var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-7),
+				DateTime.UtcNow.AddDays(7), "UserInit", issueStatus, issueItem);
+				var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.InTransit, null, issue.Id);
 				pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet1);
-				var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToPicking, null, null);
+				var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToPicking, null, issue.Id);
 				pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet2);
-								
-				var issue = new Issue
-				{
-					Id = Guid.NewGuid(),
-					IssueNumber = 1,
-					Client = client,
-					IssueDateTimeCreate = DateTime.UtcNow,
-					IssueStatus = issueStatus,
-					IssueDateTimeSend = DateTime.UtcNow.AddDays(7),
-					PerformedBy = "User1",
-					Pallets = pallets,
-					//Pallets = [pallet1,pallet2],
-					PickingTasks = new List<PickingTask>()
-				};
-				//foreach (var p in pallets)
-				//	p.Issue = issue;
-				//pallet1.AddLocation(location);
-				//pallet1.AssignToIssue(issue, "user");
-				//pallet2.AddLocation(location);
-				//pallet2.AssignToIssue(issue, "user");
 				// Dodaj przykładową alokację
-				issue.PickingTasks.Add(new PickingTask
+				var virtualPallet = new VirtualPallet
 				{
-					Issue = issue,
-					RequestedQuantity = qty,
-					PickingStatus = PickingStatus.Allocated,
-					VirtualPallet = new VirtualPallet
-					{
-						Pallet = pallets[1],
-						InitialPalletQuantity = qty,
-						Location = location,
-					}
-				});
+					Id = 1,
+					Pallet = pallet2,
+					InitialPalletQuantity = 10,
+					Location = pallet2.Location,
+					//DateMoved = new DateTime(2025, 8, 12),
+					//PickingTasks = new List<PickingTask> { pickingTask3 }
+				};
+				var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), 1, issue.Id, qty, PickingStatus.Allocated, product.Id,
+					null, null, null, 0);
+				//new PickingTask
+				//{
+				//	Issue = issue,
+				//	RequestedQuantity = qty,
+				//	PickingStatus = PickingStatus.Allocated,
+				//	VirtualPallet = new VirtualPallet
+				//	{
+				//		PalletId = pallets[1].Id,
+				//		InitialPalletQuantity = qty,
+				//		Location = location,
+				//	}
+				//});
+				db.Clients.Add(client);
 				db.Categories.Add(category);
 				db.Products.Add(product);
-				db.Locations.Add(location);				
+				db.Locations.Add(location);
+				db.VirtualPallets.Add(virtualPallet);
+				db.PickingTasks.Add(pickingTask);
 				db.Issues.Add(issue);
+				db.Pallets.AddRange(pallet1, pallet2);
 				await db.SaveChangesAsync();
 				return (issue, pallets);
 			}

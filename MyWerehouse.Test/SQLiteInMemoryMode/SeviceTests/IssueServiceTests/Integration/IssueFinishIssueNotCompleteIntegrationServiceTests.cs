@@ -65,62 +65,31 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product1 = Product.Create("Test", "666666", 1, 56);
 			
 			var product2 = Product.Create("Test1", "666666", 1, 65);
-			
-			var issueId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var issueId = issueId1;
-			var performedBy = "Janek";
-			var loadedPallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 10, PalletStatus.Loaded, null, null);
-			loadedPallet.AddProduct(product1.Id, 5, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
-			//var loadedPallet = new Pallet
-			//{
-			//	PalletNumber = "P1",
-			//	Status = PalletStatus.Loaded,
-			//	LocationId = 10,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{
-			//		new ProductOnPallet { ProductId = product1.Id, Quantity = 5, }
-			//	}
-			//};
-			var notLoadedPallet = Pallet.CreateForTests("P2", DateTime.UtcNow, 20, PalletStatus.ToIssue, null, null);
-			notLoadedPallet.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
-			//var notLoadedPallet = new Pallet
-			//{
-			//	PalletNumber = "P2",
-			//	Status = PalletStatus.ToIssue,
-			//	LocationId = 20,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{
-			//		new ProductOnPallet{ProductId =product2.Id, Quantity =10 } }
-			//};
-			var issue = new Issue
-			{
-				Id = issueId,
-				IssueNumber = 1,
-				ClientId = cLient.Id,
-				IssueDateTimeCreate = new DateTime(2025, 6, 6, 2, 2, 2),
-				Pallets = new List<Pallet> { loadedPallet, notLoadedPallet },
-				PerformedBy = "TestUser",
-			};
-			
-			var inventory1 = new Inventory
-			{
-				Product = product1,
-				LastUpdated = DateTime.Now.AddDays(-7),
-				Quantity = 100
-			};
-			var inventory2 = new Inventory
-			{
-				Product = product2,
-				LastUpdated = DateTime.Now.AddDays(-7),
-				Quantity = 100
-			};
-			
+
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.AddRange(location1, location2);
 			DbContext.Clients.Add(cLient);
+			DbContext.SaveChanges();
+			var issueId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var issueId = issueId1;
+			var issueItem = new List<IssueItem>
+			{
+				IssueItem.CreateForSeed(1, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product2.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+			};
+			var performedBy = "Janek";
+			var loadedPallet = Pallet.CreateForTests("P1", DateTime.UtcNow, location1.Id, PalletStatus.Loaded, null, issueId);
+			loadedPallet.AddProduct(product1.Id, 5, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			
+			var notLoadedPallet = Pallet.CreateForTests("P2", DateTime.UtcNow, location2.Id, PalletStatus.ToIssue, null,issueId);
+			notLoadedPallet.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			
+			var issue = Issue.CreateForSeed(issueId, 2, cLient.Id, new DateTime(2025, 6, 6, 2, 2, 2),
+			new DateTime(2025, 6, 12, 2, 2, 2), "TestUser", IssueStatus.Pending, issueItem);
+						
+			DbContext.Pallets.AddRange(notLoadedPallet, loadedPallet);
 			DbContext.Issues.Add(issue);
-			DbContext.Inventories.AddRange(inventory1, inventory2);
 			await DbContext.SaveChangesAsync();
 			//Act			
 			await Mediator.Send(new FinishIssueNotCompletedCommand(issueId, performedBy));
@@ -136,7 +105,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(IssueStatus.IsShipped, updatedIssue.IssueStatus);
 
 			// sprawdź czy P2 została usunięta z przypisania do zlecenia:
-			//var palletP2 = await DbContext.Pallets.FindAsync("P2");
 			var palletP2 = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "P2");
 			Assert.NotNull(palletP2);
 			Assert.Equal(PalletStatus.Available, palletP2.Status);
@@ -167,13 +135,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			// Sprawdź, że status i wykonawca się zgadzają			
 			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
 			Assert.Equal(performedBy, updatedIssue.PerformedBy);
-			//Inventory - nie sprawdzamy po
-			//sprawdzenie ilości w Inventory (po odjęciu 10 i 0)
-			//var inventoryFromDb = await DbContext.Inventories.FirstAsync(i => i.ProductId == product1.Id);
-			//var inventory1FromDb = await DbContext.Inventories.FirstAsync(i => i.ProductId == product2.Id);
-			//Assert.Equal(95, inventoryFromDb.Quantity);
-			//Assert.Equal(100, inventory1FromDb.Quantity);
-
 		}
 	}
 }

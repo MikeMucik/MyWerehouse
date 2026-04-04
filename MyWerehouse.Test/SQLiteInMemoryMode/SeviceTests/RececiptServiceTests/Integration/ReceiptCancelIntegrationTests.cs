@@ -288,7 +288,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			//DbContext.ProductOnPallet.AddRange(initialProductOnPallet, initialProductOnPallet1);
 			DbContext.Pallets.AddRange(initialPallet, initialPallet1);
 			DbContext.Clients.Add(initailCLient);
 			DbContext.Receipts.Add(initialReceipt);

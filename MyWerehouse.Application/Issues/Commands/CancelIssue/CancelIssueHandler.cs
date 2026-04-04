@@ -69,8 +69,9 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 						.ToList();
 					foreach (var pickingTask in pickingTaskToRemove)
 					{
-						pickingTask.PickingStatus = PickingStatus.Cancelled;
-						pickingTask.AddHistory(request.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, 0);
+						pickingTask.Cancel(request.UserId);
+						//pickingTask.PickingStatus = PickingStatus.Cancelled;
+						//pickingTask.AddHistory(request.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, 0);
 
 						vp.PickingTasks.Remove(pickingTask);
 						_pickingTaskRepo.DeletePickingTask(pickingTask);

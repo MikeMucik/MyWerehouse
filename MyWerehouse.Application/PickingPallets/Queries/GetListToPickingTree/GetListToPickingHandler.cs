@@ -63,7 +63,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 						{
 							ClientIdOut = clientId,
 							IssueId = pickingTask.IssueId,
-							IssueNumber = pickingTask.IssueNumber,
+							IssueNumber = pickingTask.Issue.IssueNumber,
 							ProductId = productId,
 							Quantity = pickingTask.RequestedQuantity,
 						};

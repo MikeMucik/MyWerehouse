@@ -7,9 +7,7 @@ namespace MyWerehouse.Domain.Products.Models
 {
 	public class Product
 	{
-		public Guid Id { get; private set; }// = Guid.NewGuid();
-											//public Guid Id { get; set; } = Guid.NewGuid();
-											//public int ProductId { get; set; }
+		public Guid Id { get; private set; }
 		public string Name { get; private set; }
 		public string SKU { get; private set; }
 		public DateTime AddedAd { get; private set; }

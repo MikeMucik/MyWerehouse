@@ -32,8 +32,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public static ProductOnPallet CreateForSeed(int id, Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestbefore)
 			=> new ProductOnPallet(id, productId, palletId, quantity, dateAdded, bestbefore);
 
-
-		private ProductOnPallet( Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestBefore)
+		//TODO usuń public static dla apki
+		internal ProductOnPallet( Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestBefore)
 		{			
 			ProductId = productId;
 			PalletId = palletId;

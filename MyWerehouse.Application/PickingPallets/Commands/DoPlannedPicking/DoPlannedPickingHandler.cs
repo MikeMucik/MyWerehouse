@@ -45,7 +45,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				var newPickingTask = new PickingTask();
+				//var newPickingTask = new PickingTask();
 				var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.Id);
 				var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(pickingTaskToChange.VirtualPalletId);
 				var issueId = pickingTaskToChange.IssueId;
@@ -57,7 +57,10 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				//if
 				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId.Value);
 				if (sourcePallet == null) return AppResult<Unit>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
-				if (issue.IssueStatus == IssueStatus.Pending) { issue.IssueStatus = IssueStatus.InProgress; }
+				if (issue.IssueStatus == IssueStatus.Pending) 
+				{
+					issue.ChangeStatus(IssueStatus.InProgress);
+				}
 				var neededQuantity = request.PickingTaskDTO.RequestedQuantity;
 				var pickedQuantity = request.PickingTaskDTO.PickedQuantity;
 				var completion = PickingCompletion.Full;
@@ -81,9 +84,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 					return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia");
 				}
 				else
-				{
-					//pallet lock with non-conformity 
-					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
+				{					
 					var newQuantityToPickingTask = neededQuantity - pickedQuantity;
 					var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, new List<VirtualPallet>(),
 						issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId);
@@ -93,16 +94,13 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 						await transaction.RollbackAsync(ct);
 						return AppResult<Unit>.Fail(newVirtualPallet.Message, ErrorType.Conflict);
 					}
+					//pallet lock with non-conformity
+					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);
 					return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety do kompletacji.");
 				}
-			}
-			//catch (NotFoundPalletException pnfEx)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return AppResult<PickingResult>.Fail(pnfEx.Message);
-			//}
+			}			
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

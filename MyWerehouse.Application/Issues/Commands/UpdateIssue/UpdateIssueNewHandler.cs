@@ -13,13 +13,12 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 {
-	public class UpdateIssueNewHandler(IIssueItemRepo issueItemRepo,
+	public class UpdateIssueNewHandler(
 		IIssueRepo issueRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
 		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueNewCommand, AppResult<List<IssueResult>>>
 	{
-		private readonly IIssueItemRepo _issueItemRepo = issueItemRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
@@ -162,12 +161,15 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					}
 					if (anySuccess)
 					{
-						issue.PerformedBy = request.DTO.PerformedBy;
-						issue.IssueStatus = IssueStatus.Pending;
+						//issue.PerformedBy = request.DTO.PerformedBy;
+						issue.ChangeUser(request.DTO.PerformedBy);
+						//issue.IssueStatus = IssueStatus.Pending;
+						issue.ChangeStatus(IssueStatus.Pending);
 					}
 					if (anyFailure)
 					{
-						issue.IssueStatus = IssueStatus.NotComplete;
+						//issue.IssueStatus = IssueStatus.NotComplete;
+						issue.ChangeStatus(IssueStatus.NotComplete);
 					}
 					//foreach (var palletToStock in oldListPallets)
 					//{
@@ -201,7 +203,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 				foreach (var product in request.DTO.Items)
 				{
 					var productId = product.ProductId;
-					var oldQuantity = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId);
+					var oldQuantity = issue.GetQuantityForProduct(productId);
+					//var oldQuantity = await _issueItemRepo.GetQuantityByIssueAndProduct(issue, productId);
 					var newQuantity = product.Quantity - oldQuantity;
 					if (newQuantity < 0)
 					{

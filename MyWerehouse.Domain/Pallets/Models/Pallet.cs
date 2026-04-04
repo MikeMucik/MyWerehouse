@@ -150,7 +150,11 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void ReserveToIssue(Issue issue, string userId)
 		{
 			if (issue == null) throw new DomainIssueException("Issue not exists.");
-			Status = PalletStatus.InTransit;
+			if(Status != PalletStatus.Picking) 
+			{
+				Status = PalletStatus.InTransit;
+			}
+			//żeby można było dalej kompletować na tą samą paletę
 			IssueId = issue.Id;
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
@@ -250,10 +254,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void ChangeStatus(PalletStatus status)
 		{
 			//invarianty!!
+			if (status == PalletStatus.Archived) throw new InvalidOperationException("Pallet in archive.");
 			this.Status = status;
 		}
 		public void AddHistory(PalletStatus status, ReasonMovement reason, string userId)
 		{
+			if (Status == PalletStatus.Archived) throw new InvalidOperationException("Pallet in archive.");
+			//if (status == PalletStatus.Archived) throw new InvalidOperationException("Pallet in archive.");
+
 			this.Status = status;
 			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), reason, userId, this.Status, BuildMovementDetails()));

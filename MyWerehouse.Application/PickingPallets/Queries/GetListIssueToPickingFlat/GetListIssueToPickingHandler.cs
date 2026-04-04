@@ -39,7 +39,7 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPickingBY
 			var result = new List<PickingGuideLineDTO>( pickingPallets
 				.SelectMany(p => p.PickingTasks.Select(a => new
 				{
-					IssueNumber = a.IssueNumber,
+					IssueNumber = a.Issue.IssueNumber,
 					Quantity = a.RequestedQuantity,
 					ProductId = a.ProductId,
 					ClientIdOut = issueDictionary[a.IssueId].ClientId

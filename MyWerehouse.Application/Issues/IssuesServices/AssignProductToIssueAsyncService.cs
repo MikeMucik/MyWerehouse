@@ -34,7 +34,9 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 
 		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO product, IssueAllocationPolicy policy, IReadOnlyCollection<Pallet> alreadyAssignedPallets, string userId)
 		{
-			if (issue.IssueStatus == IssueStatus.New) issue.IssueStatus = IssueStatus.Pending;
+			if (issue.IssueStatus == IssueStatus.New)
+				issue.ChangeStatus(IssueStatus.Pending);
+				//issue.IssueStatus = IssueStatus.Pending;
 			if (issue.IssueStatus != IssueStatus.Pending && issue.IssueStatus != IssueStatus.New &&
 			issue.IssueStatus != IssueStatus.NotComplete)
 			{

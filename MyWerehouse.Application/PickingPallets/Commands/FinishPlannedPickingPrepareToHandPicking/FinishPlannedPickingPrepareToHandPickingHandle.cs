@@ -72,7 +72,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 				}
 				foreach (var task in listOfPickTasks)
 				{
-					task.Cancel(command.UserId);
+					task.Cancel(command.UserId, issue.IssueNumber);
 					//task.PickingStatus = PickingStatus.Cancelled;
 				}
 			}

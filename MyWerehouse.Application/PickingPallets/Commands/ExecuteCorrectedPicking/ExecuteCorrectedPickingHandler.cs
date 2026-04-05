@@ -99,7 +99,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 					_pickingPalletRepo.AddPalletToPicking(virtualPallet);  // Dodaj do repo
 				}
 				await _reduceAllocationService.ReduceAllocation(issue, product.ProductId, quantityToPick, request.UserId);
-				var newPickingTaskInfo = _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, product.ProductId, quantityToPick, product.BestBefore, request.UserId);
+				var newPickingTaskInfo =await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, product.ProductId, quantityToPick, product.BestBefore, request.UserId);
 				var newPickingTask = newPickingTaskInfo.OnePickingTask;
 				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, quantityToPick, request.UserId, newPickingTask, PickingCompletion.Full, request.RampNumber);
 

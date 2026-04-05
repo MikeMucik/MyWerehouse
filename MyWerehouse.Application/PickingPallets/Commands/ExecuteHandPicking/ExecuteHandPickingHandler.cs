@@ -114,8 +114,10 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 					completion = PickingCompletion.Partial;
 				}
 				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quanitity, command.UserId, pickingTask, completion, command.NumberRamp);
+				var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
+				pickingTask.AddHistory(command.UserId, sourcePallet.Id, sourcePallet.PalletNumber,issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
 
-				pickingTask.AddHistory(command.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, command.Quanitity);
+				//pickingTask.AddHistory(command.UserId, PickingStatus.Allocated, pickingTask.PickingStatus, command.Quanitity);
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
 

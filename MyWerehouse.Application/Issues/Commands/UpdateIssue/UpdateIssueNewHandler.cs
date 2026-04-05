@@ -10,16 +10,19 @@ using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
 
 namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 {
 	public class UpdateIssueNewHandler(
 		IIssueRepo issueRepo,
+		IPalletRepo palletRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
 		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueNewCommand, AppResult<List<IssueResult>>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
@@ -53,7 +56,10 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					//remove old PickingTask to Domain
 					foreach (var pickingTask in listOldPickingTask)
 					{
-						pickingTask.AddHistory(request.DTO.PerformedBy, pickingTask.PickingStatus, PickingStatus.Cancelled, 0);
+						var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
+						pickingTask.AddHistory(request.DTO.PerformedBy, sourcePallet.Id, sourcePallet.PalletNumber,issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
+
+						//pickingTask.AddHistory(request.DTO.PerformedBy, pickingTask.PickingStatus, PickingStatus.Cancelled, 0);
 						issue.PickingTasks.Remove(pickingTask);//DDD!!
 						//DDD!!
 						_werehouseDbContext.PickingTasks.Remove(pickingTask);

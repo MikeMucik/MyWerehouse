@@ -55,11 +55,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		private PickingTask(Guid id, int? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore, Guid? pickingPalletId,
 			DateOnly? pickingDay, int pickedQuantity)
-		{
-			if (pickingStatus == PickingStatus.Allocated && virtualPalletId == null)
-			{
-				throw new ArgumentNullException(nameof(pickingStatus));
-			}
+		{			
 			Id = id;
 			VirtualPalletId = virtualPalletId;
 			IssueId = issueId;
@@ -77,10 +73,10 @@ namespace MyWerehouse.Domain.Picking.Models
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
 		
-		public void Cancel(string userId)
+		public void Cancel(string userId,int issueNumber)
 		{
 			this.PickingStatus = PickingStatus.Cancelled;
-			AddHistory(userId, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
+			AddHistory(userId, VirtualPallet.PalletId, VirtualPallet.Pallet.PalletNumber,issueNumber, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
 			this.RequestedQuantity = 0;
 		}
 		
@@ -88,6 +84,11 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
 			this.VirtualPalletId = virtualPalletId;
+		}
+		public void SetVirtualPalletEntity(VirtualPallet virtualPallet)
+		{
+			//if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
+			this.VirtualPallet = virtualPallet;
 		}
 		public void ReduceQuantity(int quantity)
 		{
@@ -116,14 +117,17 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.PickedPartially;
 		}
-		public void AddHistory(string userId, PickingStatus statusBefore, PickingStatus statusAfter, int quantityPicked)
+		public void AddHistory(string userId, Guid palletId, string palletNumber,int issueNumber, PickingStatus statusBefore, PickingStatus statusAfter, int quantityPicked)
 		{
 			this.AddDomainEvent(new CreateHistoryPickingNotification(
 				Id,
-				VirtualPallet.PalletId,
-				VirtualPallet.Pallet.PalletNumber,
+				//VirtualPallet.PalletId,
+				//VirtualPallet.Pallet.PalletNumber,
+				palletId,
+				palletNumber,
 				IssueId,
-				Issue.IssueNumber,
+				//Issue.IssueNumber,
+				issueNumber,
 				ProductId,
 				RequestedQuantity,
 				quantityPicked,

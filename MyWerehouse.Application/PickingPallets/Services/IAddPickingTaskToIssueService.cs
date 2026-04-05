@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		//	VirtualPallet virtualPallet, Issue issue, int productId,
 		//	int quantity, DateOnly? bestBefore, string userId);
 
-		AddPickingTaskToIssueResult AddOnePickingTaskToIssue(
+		Task< AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(
 			VirtualPallet virtualPallet, Issue issue, Guid productId,
 			int quantity, DateOnly? bestBefore, string userId);
 	}

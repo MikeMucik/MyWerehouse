@@ -98,7 +98,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			foreach (var task in PickingTasks)
 			{
-				task.Cancel(userId);
+				task.Cancel(userId, IssueNumber);
 				//task.PickingStatus = PickingStatus.Cancelled;
 				//task.RequestedQuantity = 0;
 				//task.AddHistory(userId, PickingStatus.Allocated, PickingStatus.Cancelled, 0);

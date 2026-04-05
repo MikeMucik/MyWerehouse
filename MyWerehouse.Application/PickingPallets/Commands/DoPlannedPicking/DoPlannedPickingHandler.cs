@@ -76,7 +76,10 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 
 				await _processPickingActionService.ProcessPicking(sourcePallet, issue, request.PickingTaskDTO.ProductId,
 						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion, request.PickingTaskDTO.RampNumber);
-				pickingTaskToChange.AddHistory(request.UserId, PickingStatus.Allocated, pickingTaskToChange.PickingStatus, request.PickingTaskDTO.PickedQuantity);
+				//var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
+				pickingTaskToChange.AddHistory(request.UserId, sourcePallet.Id, sourcePallet.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
+
+				//pickingTaskToChange.AddHistory(request.UserId, PickingStatus.Allocated, pickingTaskToChange.PickingStatus, request.PickingTaskDTO.PickedQuantity);
 				if (neededQuantity == pickedQuantity)
 				{
 					await _werehouseDbContext.SaveChangesAsync(ct);

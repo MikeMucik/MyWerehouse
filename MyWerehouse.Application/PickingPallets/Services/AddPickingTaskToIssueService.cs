@@ -34,10 +34,14 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			{
 				if (quantity <= 0 || vp.RemainingQuantity <= 0) return;
 				var taken = Math.Min(quantity, vp.RemainingQuantity);
-				var pickingTask = CreatePickingTask(issue,					
-					taken, vp, productId, bestBefore);
+				var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated,productId, bestBefore,
+					null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
+				//var pickingTask = CreatePickingTask(issue,					
+				//	taken, vp, productId, bestBefore);
 				pickingTasks.Add(pickingTask);
 				vp.PickingTasks.Add(pickingTask);
+				pickingTask.SetVirtualPalletEntity(vp);// taka zaślepka żeby działało
+				//pickingTask.VirtualPallet = vp;
 				quantity -= taken;
 			}
 			foreach (var vp in virtualPallets)
@@ -72,6 +76,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 					//await _pickingPalletRepo.AddPalletToPickingAsync(virtualPallet);
 					 _pickingPalletRepo.AddPalletToPicking(virtualPallet);
 					AllocateFromVirtualPallet(virtualPallet);
+					//pickingTask.AddHistory(userId, sourcePallet.Id, sourcePallet.PalletNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
 				}
 			}
 			if (quantity > 0)
@@ -81,19 +86,24 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			}
 			foreach (var pickingTask in pickingTasks)
 			{
-				pickingTask.AddHistory(userId, PickingStatus.Available, PickingStatus.Allocated, 0);				
+				var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
+				pickingTask.AddHistory(userId, sourcePallet.Id, sourcePallet.PalletNumber,issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
+				//pickingTask.AddHistory(userId, PickingStatus.Available, PickingStatus.Allocated, 0);				
 			}
 			return AddPickingTaskToIssueResult.Ok(pickingTasks);
 		}
 
-		public AddPickingTaskToIssueResult AddOnePickingTaskToIssue(VirtualPallet virtualPallet, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
+		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet vp, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
 		{
-			var pickingTask = CreatePickingTask(issue,				
-				quantity, virtualPallet, productId, bestBefore);
-			pickingTask.SetVirtualPallet(virtualPallet.Id);
+			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated,
+				productId, bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
+			//var pickingTask = CreatePickingTask(issue,				
+			//	quantity, virtualPallet, productId, bestBefore);
+			pickingTask.SetVirtualPallet(vp.Id);
 			//pickingTask.VirtualPallet = virtualPallet;
-			virtualPallet.PickingTasks.Add(pickingTask);
-			pickingTask.AddHistory(userId, PickingStatus.Available, PickingStatus.Allocated, 0);			
+			vp.PickingTasks.Add(pickingTask);
+			var sourcePallet = await _palletRepo.GetPalletByIdAsync(vp.PalletId);
+			pickingTask.AddHistory(userId,sourcePallet.Id, sourcePallet.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);			
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
 		private static PickingTask CreatePickingTask(Issue issue, int quantity,

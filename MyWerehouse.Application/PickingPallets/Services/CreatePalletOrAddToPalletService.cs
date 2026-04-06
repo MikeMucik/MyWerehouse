@@ -25,13 +25,15 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask,
 			PickingCompletion pickingCompletion, int rampNumber)
 		{
-			//var issue = await _issueRepo.GetIssueByIdAsync(issueId);			
+			//var issue = await _issueRepo.GetIssueByIdAsync(issueId);	
+			//Tworzę nową paletę		
 			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issue.Id);
 			if (oldPallet == null)
 			{
 				var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
 				var sourcePalletBB = bestBefore;
 				var pallet = Pallet.Create(newIdPallet);
+				pallet.ChangeStatus(PalletStatus.Picking);//Bo paleta kompletacyjna
 				var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 				pallet.AddLocation(location);
 				//var pallet = Pallet.CreateForPicking(newIdPallet, issue.Id);
@@ -58,7 +60,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				//};
 				var palletId =	_palletRepo.AddPallet(pallet);
 				issue.ReservePallet(pallet, userId);//
-				pallet.AddHistory(PalletStatus.Picking, ReasonMovement.Picking, userId);
+				//pallet.AddHistory(PalletStatus.Picking, ReasonMovement.Picking, userId);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
 					pickingTask.MarkPicked(palletId); //

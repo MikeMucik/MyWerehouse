@@ -105,7 +105,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					pickingPallet.ChangeStatus(PalletStatus.ReversePicking);//do przemyślenia
 				}
 				reversePicking.Status = ReversePickingStatus.Completed;
-				reversePicking.AddHistory(command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
+				reversePicking.AddHistory(pickingPallet.Id, command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return AppResult<ReversePickingResult>.Success(result);

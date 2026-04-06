@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Linq;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
@@ -46,8 +47,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					var listOldPallets = issue.Pallets.ToList();//
 					foreach (var pallet in listOldPallets)
 					{
-						//issue.Pallets.Remove(pallet);
-						pallet.DetachToIssue(issue.Id, request.DTO.PerformedBy);
+						//pallet.DetachToIssue(issue.Id, request.DTO.PerformedBy);
+						issue.DetachPallet(pallet, request.DTO.PerformedBy);
 						pallet.ChangeStatus(PalletStatus.InTransit);//chyba zbędne
 						//pallet.Status = PalletStatus.InTransit;
 						oldListPallets.Add(pallet);
@@ -57,12 +58,9 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					foreach (var pickingTask in listOldPickingTask)
 					{
 						var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
-						pickingTask.AddHistory(request.DTO.PerformedBy, sourcePallet.Id, sourcePallet.PalletNumber,issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
-
-						//pickingTask.AddHistory(request.DTO.PerformedBy, pickingTask.PickingStatus, PickingStatus.Cancelled, 0);
-						issue.PickingTasks.Remove(pickingTask);//DDD!!
-						//DDD!!
-						_werehouseDbContext.PickingTasks.Remove(pickingTask);
+						issue.RemovePickingTask(pickingTask);
+						pickingTask.Cancel(request.DTO.PerformedBy, issue.IssueNumber);
+						
 					}
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					var palletAssigned = new List<Pallet>();
@@ -76,10 +74,6 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 							var oldProperPallets = oldListPallets.Where(p => p.ProductsOnPallet.First().ProductId == product.ProductId);
 
 							var result = await _assignProductToIssueAsync.AssignProductToIssue(issue, product, IssueAllocationPolicy.FullPalletFirst, oldListPallets, request.DTO.PerformedBy);
-							//if (result.Success == false)
-							//{
-							//	resultList.Add(IssueResult.Fail(result.Message, product.ProductId));
-
 							if (!result.Success)
 							{
 								await transaction.RollbackToSavepointAsync($"BeforeProduct_{product.ProductId}", ct);
@@ -91,15 +85,10 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 								anyFailure = true;
 								continue;
 							}
-
-							//anyFailure = true;
-							//continue;
-						//}
 							palletAssigned = result.AssignedPallets.ToList();
 							var returnPallets = oldProperPallets.Except(palletAssigned).ToList();
 							foreach (var returnPallet in returnPallets)
 							{
-								//returnPallet.DetachToIssue(issue.Id, request.DTO.PerformedBy);
 								returnPallet.ChangeStatus(PalletStatus.Available);
 								//returnPallet.IssueId = null;
 								//returnPallet.Status = PalletStatus.Available;
@@ -149,7 +138,8 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					// Pobieramy kandydatów do usunięcia WRAZ z ich fizycznymi paletami
 					var virtualPalletsToCheck = await _werehouseDbContext.VirtualPallets
 						.Include(vp => vp.Pallet) // Ważne!
-						.Where(vp => touchedVirtualPalletIds.Contains(vp.Id))
+						.Where(vp => touchedVirtualPalletIds != null &&
+						 touchedVirtualPalletIds.Contains(vp.Id))
 						.ToListAsync(ct);
 
 					var emptyVirtualPallets = virtualPalletsToCheck

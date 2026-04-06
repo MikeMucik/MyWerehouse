@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Picking.Models
 	public class PickingTask : AggregateRoots
 	{
 		public Guid Id { get; private set; }		
-		public int? VirtualPalletId { get; private set; }
+		public Guid? VirtualPalletId { get; private set; }
 		public VirtualPallet? VirtualPallet { get; private set; }
 		public Guid IssueId { get; private set; }
 		public Issue Issue { get; private set; }
@@ -28,7 +28,7 @@ namespace MyWerehouse.Domain.Picking.Models
 
 		private PickingTask() { }
 
-		private PickingTask(int? virtualPalletId, Guid issueId, int requestedQuantity,
+		private PickingTask(Guid? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore, Guid? pickingPalletId,
 			DateOnly? pickingDay, int pickedQuantity)
 		{
@@ -47,12 +47,12 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingDay = pickingDay;
 			PickedQuantity = pickedQuantity;
 		}
-		public static PickingTask Create(int? virtualPalletId, Guid issueId, int requestedQuantity,
+		public static PickingTask Create(Guid? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore, Guid? pickingPalletId,
 			DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
 
-		private PickingTask(Guid id, int? virtualPalletId, Guid issueId, int requestedQuantity,
+		private PickingTask(Guid id, Guid? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore, Guid? pickingPalletId,
 			DateOnly? pickingDay, int pickedQuantity)
 		{			
@@ -68,7 +68,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickedQuantity = pickedQuantity;
 		}
 
-		public static PickingTask CreateForSeed(Guid id, int? virtualPalletId, Guid issueId, int requestedQuantity,
+		public static PickingTask CreateForSeed(Guid id, Guid? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore,
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
@@ -80,16 +80,16 @@ namespace MyWerehouse.Domain.Picking.Models
 			this.RequestedQuantity = 0;
 		}
 		
-		public void SetVirtualPallet(int virtualPalletId)
+		public void SetVirtualPallet(Guid virtualPalletId)
 		{
 			if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
 			this.VirtualPalletId = virtualPalletId;
 		}
-		public void SetVirtualPalletEntity(VirtualPallet virtualPallet)
-		{
-			//if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
-			this.VirtualPallet = virtualPallet;
-		}
+		//public void SetVirtualPalletEntity(VirtualPallet virtualPallet)
+		//{
+		//	//if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
+		//	this.VirtualPallet = virtualPallet;
+		//}
 		public void ReduceQuantity(int quantity)
 		{
 			RequestedQuantity -= quantity;
@@ -121,12 +121,9 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			this.AddDomainEvent(new CreateHistoryPickingNotification(
 				Id,
-				//VirtualPallet.PalletId,
-				//VirtualPallet.Pallet.PalletNumber,
 				palletId,
 				palletNumber,
 				IssueId,
-				//Issue.IssueNumber,
 				issueNumber,
 				ProductId,
 				RequestedQuantity,

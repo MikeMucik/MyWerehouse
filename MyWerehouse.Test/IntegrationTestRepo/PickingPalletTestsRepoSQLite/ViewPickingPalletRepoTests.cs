@@ -122,21 +122,23 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 		{
 			//Arrange
 			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
+			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			//var palletId = "Q1100";
 			var palletId = palletGuid5;
 			//Act
 			var result = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletId);
 			//Assert
-			Assert.NotEqual(0, result);
-			Assert.Equal(1, result);
+			Assert.NotEqual(Guid.Empty, result);
+			Assert.Equal(vpId1, result);
 		}
 		[Fact]
 		public async Task ReturnData_GetVirtualPalletByIdAsync_GiveBackProperData()
 		{
 			//Arrange
+			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			var virtualPalletId = 1;
 			//Act
-			var result = await _pickingPalletRepo.GetVirtualPalletByIdAsync(virtualPalletId);
+			var result = await _pickingPalletRepo.GetVirtualPalletByIdAsync(vpId1);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<VirtualPallet>(result);

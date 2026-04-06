@@ -66,14 +66,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 			return list;
 		}
-		public async Task<int> GetVirtualPalletIdFromPalletIdAsync(Guid palletId)
+		public async Task<Guid> GetVirtualPalletIdFromPalletIdAsync(Guid palletId)
 		{
 			var palletPicking = await _werehouseDbContext.VirtualPallets
 				.FirstOrDefaultAsync(p => p.PalletId == palletId);
-			if (palletPicking == null) { return 0; }
+			if (palletPicking == null) { return Guid.Empty; }
 			return palletPicking.Id;
 		}
-		public async Task<VirtualPallet> GetVirtualPalletByIdAsync(int? palletId)
+		public async Task<VirtualPallet> GetVirtualPalletByIdAsync(Guid? palletId)
 		{
 			return await _werehouseDbContext.VirtualPallets.FirstAsync(p => p.Id == palletId);
 		}

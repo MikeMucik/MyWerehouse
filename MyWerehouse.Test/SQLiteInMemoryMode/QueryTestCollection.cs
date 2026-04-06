@@ -50,7 +50,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new IdentityUser { Id = "TestUser", UserName = "TestUser" },
 					new IdentityUser { Id = "U002", UserName = "TestUser2" },
 					new IdentityUser { Id = "UserR", UserName = "TestUserRR" }
-					
+
 				);
 			}
 
@@ -91,7 +91,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.ProductDetails.Any())
 			{
 				context.ProductDetails.AddRange(
-					ProductDetail.CreateDetails(productId1, 10, 20, 30, 2, "TestDetails"),					
+					ProductDetail.CreateDetails(productId1, 10, 20, 30, 2, "TestDetails"),
 					ProductDetail.CreateDetails(productId2, 20, 40, 60, 3, "TestDetails 11"));
 			}
 
@@ -109,23 +109,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.Receipts.AddRange(
 					Receipt.CreateForSeed(receiptId1, 1, 10, "U001", new DateTime(2023, 3, 3), ReceiptStatus.Verified, 1),
 					Receipt.CreateForSeed(receiptId2, 2, 11, "U002", new DateTime(2023, 4, 4), ReceiptStatus.Verified, 1)
-					//new Receipt
-					//	{
-					//		Id = receiptId1,
-					//		ReceiptNumber = 1,
-					//		ClientId = 10,
-					//		PerformedBy = "U001",
-					//		ReceiptDateTime = new DateTime(2023, 3, 3),
-					//	},
-					//new Receipt
-					//{
-					//	Id = receiptId2,
-					//	ReceiptNumber = 2,
-					//	ClientId = 11,
-					//	PerformedBy = "U002",
-					//	ReceiptDateTime = new DateTime(2023, 4, 4)
-					//}
-										);
+														);
 			}
 			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			if (!context.Issues.Any())
@@ -134,45 +118,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				{
 					IssueItem.CreateForSeed(1,issueId2, productId1, 150, DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),  DateTime.Today),
 					IssueItem.CreateForSeed(2,issueId2, productId2, 400, DateOnly.FromDateTime(DateTime.Today.AddMonths(3)), DateTime.Today)
-					//new IssueItem
-					//{
-					//	ProductId = productId1,
-					//	CreatedAt = DateTime.Today,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
-					//	Quantity = 150,
-					//}, new IssueItem
-					//{
-					//	ProductId = productId2,
-					//	CreatedAt = DateTime.Today,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
-					//	Quantity = 400,
-					//}
 				};
 				context.Issues.Add(
-					Issue.CreateForSeed(issueId2, 2, 11, DateTime.UtcNow.AddDays(-5), DateTime.UtcNow.AddHours(23), "U002", IssueStatus.New, issueItems) );
-					
-				//	new Issue
-				//{
-				//	Id = issueId2,
-				//	IssueNumber = 2,
-				//	ClientId = 11,
-				//	PerformedBy = "U002",
-				//	IssueDateTimeCreate = DateTime.UtcNow.AddDays(-5),
-				//	IssueDateTimeSend = DateTime.UtcNow.AddHours(23),//zmiana 
-				//	IssueItems = new List<IssueItem> { new IssueItem
-				//	{
-				//		ProductId = productId1,
-				//		CreatedAt = DateTime.Today,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
-				//		Quantity = 150,
-				//	}, new IssueItem
-				//	{
-				//		ProductId = productId2,
-				//		CreatedAt = DateTime.Today,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(3)),
-				//		Quantity = 400,
-				//	}}
-				//});
+					Issue.CreateForSeed(issueId2, 2, 11, DateTime.UtcNow.AddDays(-5), DateTime.UtcNow.AddHours(23), "U002", IssueStatus.New, issueItems));
 			}
 
 			context.SaveChanges();
@@ -194,56 +142,53 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			{
 				context.Pallets.AddRange(
 					Pallet.CreateForSeed(palletGuid1, "Q1000", new DateTime(2020, 1, 1), 1, PalletStatus.Available, receiptId1, issueId2),
-					
 					Pallet.CreateForSeed(palletGuid2, "Q1001", new DateTime(2020, 1, 1), 1, PalletStatus.OnHold, receiptId1, issueId2),
-					
 					Pallet.CreateForSeed(palletGuid3, "Q1002", new DateTime(2020, 1, 1), 3, PalletStatus.Available, receiptId2, null),
-					
-					Pallet.CreateForSeed(palletGuid4,"Q1010",new DateTime(2025, 1, 1),3,PalletStatus.Damaged, receiptId2, null),
-					
+					Pallet.CreateForSeed(palletGuid4, "Q1010", new DateTime(2025, 1, 1), 3, PalletStatus.Damaged, receiptId2, null),
 					Pallet.CreateForSeed(palletGuid5, "Q1100", new DateTime(2025, 1, 1), 3, PalletStatus.ToPicking, receiptId2, null),
-					
 					Pallet.CreateForSeed(palletGuid6, "Q1101", new DateTime(2025, 1, 5), 3, PalletStatus.ToPicking, receiptId2, null),
-					
 					Pallet.CreateForSeed(palletGuid7, "Q2000", new DateTime(2025, 1, 1), 3, PalletStatus.ToIssue, receiptId2, issueId2),
-					
 					Pallet.CreateForSeed(palletGuid8, "Q1200", new DateTime(2025, 2, 1), 3, PalletStatus.ToPicking, receiptId2, null),
-					
 					//PickingPallet
 					Pallet.CreateForSeed(palletGuid9, "Q5000", new DateTime(2025, 2, 1), 3, PalletStatus.ToPicking, null, null)
-					
 				);
 			}
+			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
+			var vpId2 = Guid.Parse("22222222-2222-2222-1111-111111111111");
+			var vpId3 = Guid.Parse("22222222-3333-2222-1111-111111111111");
 			if (!context.VirtualPallets.Any())
 			{
 				context.VirtualPallets.AddRange(
-					new VirtualPallet
-					{
-						Id = 1,
-						//PalletId = "Q1100",
-						PalletId = palletGuid5,
-						InitialPalletQuantity = 200,
-						LocationId = 3,
-						DateMoved = DateTime.UtcNow.AddDays(-1)						
-					},
-					new VirtualPallet
-					{
-						Id = 2,
-						//PalletId = "Q1101",
-						PalletId = palletGuid6,
-						InitialPalletQuantity = 150,
-						LocationId = 3,
-						DateMoved = new DateTime(2024, 6, 6),						
-					},
-					new VirtualPallet
-					{
-						Id = 3,
-						//PalletId = "Q1200",
-						PalletId = palletGuid8,
-						InitialPalletQuantity = 300,
-						LocationId = 3,
-						DateMoved = DateTime.UtcNow.AddDays(-1)						
-					});
+					VirtualPallet.CreateForSeed(vpId1, palletGuid5, 200, 3, DateTime.UtcNow.AddDays(-1)),
+					//new VirtualPallet
+					//{
+					//	Id = 1,
+					//	//PalletId = "Q1100",
+					//	PalletId = palletGuid5,
+					//	InitialPalletQuantity = 200,
+					//	LocationId = 3,
+					//	DateMoved = DateTime.UtcNow.AddDays(-1)
+					//},
+					VirtualPallet.CreateForSeed(vpId2, palletGuid6, 150, 3, new DateTime(2024, 6, 6)),
+					//new VirtualPallet
+					//{
+					//	Id = 2,
+					//	//PalletId = "Q1101",
+					//	PalletId = palletGuid6,
+					//	InitialPalletQuantity = 150,
+					//	LocationId = 3,
+					//	DateMoved = new DateTime(2024, 6, 6),
+					//},
+					VirtualPallet.CreateForSeed(vpId3, palletGuid8, 300, 3, DateTime.UtcNow.AddDays(-1)));
+					//new VirtualPallet
+					//{
+					//	Id = 3,
+					//	//PalletId = "Q1200",
+					//	PalletId = palletGuid8,
+					//	InitialPalletQuantity = 300,
+					//	LocationId = 3,
+					//	DateMoved = DateTime.UtcNow.AddDays(-1)
+					//});
 			}
 			var pickingId1 = Guid.Parse("11111111-1111-2222-1111-111111111111");
 			var pickingId2 = Guid.Parse("11111111-2222-2222-1111-111111111111");
@@ -254,216 +199,34 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.PickingTasks.Any())
 			{
 				context.PickingTasks.AddRange(
-					PickingTask.CreateForSeed(pickingId1, 1, issueId2, 20, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),
-				//new PickingTask
-				//	{
-				//		Id = pickingId1,
-				//		//PickingTaskNumber = 1,
-				//		VirtualPalletId = 1,
-				//		PickingStatus = PickingStatus.Allocated,
-				//		IssueId = issueId2,
-				//		RequestedQuantity = 20,
-				//		ProductId = productId2,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-				//		PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))						
-				//	},
-				PickingTask.CreateForSeed(pickingId2, 1, issueId2, 20, PickingStatus.Picked, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 20),
-				//new PickingTask
-				//	{
-				//		Id = pickingId2,
-				//		//PickingTaskNumber = 2,
-				//		VirtualPalletId = 1,
-				//		PickingStatus = PickingStatus.Picked,
-				//		IssueId = issueId2,
-				//		RequestedQuantity = 20,
-				//		ProductId = productId2,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-				//		PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
-				//	},
-				PickingTask.CreateForSeed(pickingId3, 2, issueId2, 50, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),
-				//new PickingTask
-				//	{
-				//		Id = pickingId3,
-				//		//PickingTaskNumber = 3,
-				//		VirtualPalletId = 2,
-				//		PickingStatus = PickingStatus.Allocated,
-				//		IssueId = issueId2,
-				//		RequestedQuantity = 50,
-				//		ProductId = productId2,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-				//		PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
-				//	},
-				PickingTask.CreateForSeed(pickingId4, 3, issueId2, 100, PickingStatus.Allocated, productId1,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),
-				//new PickingTask
-				//	{
-				//		Id = pickingId4,
-				//		//PickingTaskNumber = 4,
-				//		VirtualPalletId = 3,
-				//		PickingStatus = PickingStatus.Allocated,
-				//		IssueId = issueId2,
-				//		RequestedQuantity = 100,
-				//		ProductId = productId1,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-				//		PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
-				//	}, 
-				PickingTask.CreateForSeed(pickingId5, 3, issueId2, 10, PickingStatus.Picked, productId1,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 10),
-				//new PickingTask
-				//	{
-				//		Id = pickingId5,
-				//		//PickingTaskNumber = 5,
-				//		VirtualPalletId = 3,
-				//		PickingStatus = PickingStatus.Picked,
-				//		IssueId = issueId2,
-				//		RequestedQuantity = 10,
-				//		ProductId = productId1,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-				//		PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
-				//	},
-				PickingTask.CreateForSeed(pickingId6, 1, issueId2, 20, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 10)
-					//new PickingTask
-					//{
-					//	Id = pickingId6,
-					//	//PickingTaskNumber = 6,
-					//	VirtualPalletId = 1,
-					//	PickingStatus = PickingStatus.Allocated,
-					//	IssueId = issueId2,
-					//	RequestedQuantity = 20,
-					//	ProductId = productId2,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2))
-					//}
+					PickingTask.CreateForSeed(pickingId1, vpId1, issueId2, 20, PickingStatus.Allocated, productId2,
+				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),				
+				PickingTask.CreateForSeed(pickingId2, vpId1, issueId2, 20, PickingStatus.Picked, productId2,
+				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 20),				
+				PickingTask.CreateForSeed(pickingId3, vpId2, issueId2, 50, PickingStatus.Allocated, productId2,
+				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),				
+				PickingTask.CreateForSeed(pickingId4, vpId3, issueId2, 100, PickingStatus.Allocated, productId1,
+				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),				
+				PickingTask.CreateForSeed(pickingId5, vpId3, issueId2, 10, PickingStatus.Picked, productId1,
+				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 10),				
+				PickingTask.CreateForSeed(pickingId6, vpId1, issueId2, 20, PickingStatus.Allocated, productId2,
+				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 10)					
 					);
 			}
 			if (!context.ProductOnPallet.Any())
 			{
 				context.ProductOnPallet.AddRange(
-					ProductOnPallet.CreateForSeed(1, productId1, palletGuid1, 50, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 1,
-					//	ProductId = productId1,
-					//	Quantity = 50,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 2, 2),
-					//	//PalletId = "Q1000"
-					//	PalletId = palletGuid1
-					//},
-					ProductOnPallet.CreateForSeed(2, productId1, palletGuid2, 100, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 2,
-					//	ProductId = productId1,
-					//	Quantity = 100,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 2, 2),
-					//	//PalletId = "Q1001"
-					//	PalletId = palletGuid2
-					//},
-					ProductOnPallet.CreateForSeed(3, productId2, palletGuid1, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 3,
-					//	ProductId = productId2,
-					//	Quantity = 200,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 2, 2),
-					//	//PalletId = "Q1000"
-					//	PalletId = palletGuid1
-					//},
-					ProductOnPallet.CreateForSeed(4, productId2, palletGuid4, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 4,
-					//	ProductId = productId2,
-					//	Quantity = 200,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 2, 2),
-					//	//PalletId = "Q1010"
-					//	PalletId = palletGuid4
-					//},
-					ProductOnPallet.CreateForSeed(5, productId2, palletGuid3, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 5,
-					//	ProductId = productId2,
-					//	Quantity = 200,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 2, 2),
-					//	//PalletId = "Q1002"
-					//	PalletId = palletGuid3
-					//},
-					ProductOnPallet.CreateForSeed(6, productId2, palletGuid5, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 6,
-					//	ProductId = productId2,
-					//	Quantity = 200,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 2, 2),
-					//	//PalletId = "Q1100"
-					//	PalletId = palletGuid5
-					//},
-					ProductOnPallet.CreateForSeed(7, productId2, palletGuid7, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet//Issue
-					//{
-					//	Id = 7,
-					//	ProductId = productId2,
-					//	Quantity = 200,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 2, 2),
-					//	//PalletId = "Q2000"
-					//	PalletId = palletGuid7
-					//},
-					ProductOnPallet.CreateForSeed(8, productId2, palletGuid6, 150, new DateTime(2024, 3, 3), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 8,
-					//	ProductId = productId2,
-					//	Quantity = 150,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 3, 3),
-					//	//PalletId = "Q1101"
-					//	PalletId = palletGuid6
-					//},
-					ProductOnPallet.CreateForSeed(9, productId1, palletGuid8, 300, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 9,
-					//	ProductId =productId1, // inny produkt
-					//	Quantity = 300,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 4, 4),
-					//	//PalletId = "Q1200"
-					//	PalletId = palletGuid8
-					//},
-					ProductOnPallet.CreateForSeed(10, productId1, palletGuid9, 10, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					//new ProductOnPallet
-					//{
-					//	Id = 10,
-					//	ProductId = productId1,
-					//	Quantity = 10,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 4, 4),
-					//	//PalletId = "Q5000"
-					//	PalletId = palletGuid9
-					//},
-					ProductOnPallet.CreateForSeed(11, productId2, palletGuid9, 20, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366)))
-					//new ProductOnPallet
-					//{
-					//	Id = 11,
-					//	ProductId = productId2,
-					//	Quantity = 20,
-					//	BestBefore = DateOnly.FromDateTime(DateTime.Today.AddDays(366)),
-					//	DateAdded = new DateTime(2024, 4, 4),
-					//	//PalletId = "Q5000"
-					//	PalletId = palletGuid9
-					//}
+					ProductOnPallet.CreateForSeed(1, productId1, palletGuid1, 50, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(2, productId1, palletGuid2, 100, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(3, productId2, palletGuid1, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(4, productId2, palletGuid4, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(5, productId2, palletGuid3, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(6, productId2, palletGuid5, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(7, productId2, palletGuid7, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(8, productId2, palletGuid6, 150, new DateTime(2024, 3, 3), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(9, productId1, palletGuid8, 300, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(10, productId1, palletGuid9, 10, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
+					ProductOnPallet.CreateForSeed(11, productId2, palletGuid9, 20, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366)))				
 				);
 			}
 
@@ -473,17 +236,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new PalletMovement
 					{
 						Id = 1,
-						PalletNumber = "Q1000",						
-						PalletId = palletGuid1,						
+						PalletNumber = "Q1000",
+						PalletId = palletGuid1,
 						DestinationLocationId = 2,
-						Reason = ReasonMovement.Moved,						
+						Reason = ReasonMovement.Moved,
 						MovementDate = new DateTime(2025, 2, 2),
 						PerformedBy = "TestUser",
 					},
 					new PalletMovement
 					{
 						Id = 2,
-						PalletNumber = "Q1001",	
+						PalletNumber = "Q1001",
 						PalletId = palletGuid2,
 						DestinationLocationId = 1,
 						Reason = ReasonMovement.Moved,
@@ -573,13 +336,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 
 				context.Inventories.AddRange(
 					new Inventory
-					{											
+					{
 						ProductId = productId1,
 						Quantity = 10,
 						LastUpdated = new DateTime(2025, 5, 6)
 					},
 					new Inventory
-					{										
+					{
 						ProductId = productId2,
 						Quantity = 0,
 						LastUpdated = new DateTime(2025, 5, 6)

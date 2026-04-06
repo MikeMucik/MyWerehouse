@@ -216,14 +216,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Locations.AddRange(location1, location2, location3, location4, location5);
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4, pallet5);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet = new VirtualPallet
-			{
-				PickingTasks = [],
-				InitialPalletQuantity = 2,
-				PalletId = pallet2.Id,
-				DateMoved = DateTime.UtcNow.AddDays(-7),
-				Location = location2,
-			};
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 2, location2.Id, DateTime.UtcNow.AddDays(-7));
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
 
@@ -532,26 +525,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			
 			var oldIssue = Issue.CreateForSeed(issueId, 1,1, new DateTime(2025, 8, 8),
 			 new DateTime(2025, 8, 15), "TestUser", IssueStatus.New, null);
-			
-			var sourcePallet = new VirtualPallet
-			{
-				Pallet = pallet3,
-				//Location = pallet3.Location,
-				LocationId = 3,
-				DateMoved = new DateTime(2025, 9, 1),
-				InitialPalletQuantity = 10
-			};
+			var sourcePallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet3.Id, 10, 3, new DateTime(2025, 9, 1));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issueId, 2, PickingStatus.Allocated, product1.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, sourcePallet.Id, issueId, 2, PickingStatus.Allocated, product1.Id,
 				null, null, null, 0);
-			//var pickingTask = new PickingTask
-			//{
-			//	VirtualPallet = sourcePallet,
-			//	RequestedQuantity = 2,
-			//	PickingStatus = PickingStatus.Allocated,
-			//	Issue = oldIssue
-			//};
-			sourcePallet.PickingTasks = new List<PickingTask> { pickingTask };
+			//sourcePallet.PickingTasks = new List<PickingTask> { pickingTask };
 			DbContext.Addresses.Add(address);
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.AddRange(initialCategory1, initialCategory2);

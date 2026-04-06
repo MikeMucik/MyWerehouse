@@ -39,16 +39,17 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		public async Task ByVirtualPalletAndDatePicking_GetPickingTaskListAsync_ReturnList()
 		{
 			//Arrange
+			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			var virtualPalletId = 1;
 			var date = DateTime.UtcNow;
 			//Act
-			var result = await _pickingTaskRepo.GetPickingTaskListAsync(virtualPalletId, date);
+			var result = await _pickingTaskRepo.GetPickingTaskListAsync(vpId1, date);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result); // coś zostało znalezione
 
 			// wszystkie alokacje mają właściwy VirtualPallet
-			Assert.All(result, a => Assert.Equal(virtualPalletId, a.VirtualPalletId));
+			Assert.All(result, a => Assert.Equal(vpId1, a.VirtualPalletId));
 
 			// wszystkie alokacje mają status Allocated
 			Assert.All(result, a => Assert.Equal(PickingStatus.Allocated, a.PickingStatus));

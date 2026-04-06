@@ -14,16 +14,44 @@ namespace MyWerehouse.Domain.Picking.Models
 {
 	public class VirtualPallet
 	{
-		public int Id { get; set; }
-		public Guid PalletId { get; set; }
-		public Pallet Pallet { get; set; }
-		public int InitialPalletQuantity { get; set; }
-		public int LocationId { get; set; }//needed??
-		public Location Location { get; set; }//needed??
-		public DateTime DateMoved { get; set; }
-		public virtual ICollection<PickingTask> PickingTasks { get; set; } //= new List<PickingTask>();
-		public virtual ICollection<HistoryPicking> HistoryPicking { get; set; } = new List<HistoryPicking>();
+		public Guid Id { get; private set; }
+		//public int Id { get; set; }
+		public Guid PalletId { get; private set; }
+		public Pallet Pallet { get;private set; }
+		public int InitialPalletQuantity { get; private set; }
+		public int LocationId { get; private set; }//needed??
+		public Location Location { get; private set; }//needed??
+		public DateTime DateMoved { get;private set; }
+		public ICollection<PickingTask> PickingTasks { get; private set; } //= new List<PickingTask>();
+		public ICollection<HistoryPicking> HistoryPicking { get;private set; } = new List<HistoryPicking>();
 		[NotMapped]
-		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a=>a.RequestedQuantity) ?? 0);		
+		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a=>a.RequestedQuantity) ?? 0);
+		private VirtualPallet() { }
+
+		private VirtualPallet(Guid palletId, int initialQuantity, int locationId)
+		{
+			Id = Guid.NewGuid();
+			PalletId = palletId;
+			InitialPalletQuantity = initialQuantity;
+			LocationId = locationId;
+			DateMoved = DateTime.UtcNow;
+		}
+
+		public static VirtualPallet Create(Guid palletId, int initialQuantity, int locationId)
+			=> new VirtualPallet(palletId, initialQuantity, locationId);
+
+
+		private VirtualPallet(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime date)
+		{
+			Id = id;
+			PalletId = palletId;
+			InitialPalletQuantity = initialQuantity;
+			LocationId = locationId;
+			DateMoved = date;
+		}
+
+		public static VirtualPallet CreateForSeed(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime dateMoved)
+			=> new VirtualPallet(id, palletId, initialQuantity, locationId, dateMoved);
+				
 	}
 }

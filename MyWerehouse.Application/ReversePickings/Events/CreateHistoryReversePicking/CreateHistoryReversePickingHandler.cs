@@ -13,14 +13,11 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking
 {
 	public class CreateHistoryReversePickingHandler : INotificationHandler<CreateHistoryReversePickingNotification>
-	{
-		private readonly WerehouseDbContext _werehouseDbContext;
+	{		
 		private readonly IHistoryReversePickingRepo _historyReversePickingRepo;
 		private readonly IPalletRepo _palletRepo;
-		public CreateHistoryReversePickingHandler(WerehouseDbContext werehouseDbContext,
-			IHistoryReversePickingRepo historyReversePickingRepo, IPalletRepo pallet)
+		public CreateHistoryReversePickingHandler(IHistoryReversePickingRepo historyReversePickingRepo, IPalletRepo pallet)
 		{
-			_werehouseDbContext = werehouseDbContext;
 			_historyReversePickingRepo = historyReversePickingRepo;
 			_palletRepo = pallet;
 		}
@@ -36,10 +33,13 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 			{
 				destinationPallet = await _palletRepo.GetPalletByIdAsync(notification.PalletDestinationId.Value);
 			}
+			Pallet pickingPallet = await _palletRepo.GetPalletByIdAsync(notification.PickingPalletId);
 			
 				var history = new HistoryReversePicking
 				{
 					ReversePickingId = notification.ReversePickingId,
+					PickingPalletId = notification.PickingPalletId,
+					PickingPalletNumber = pickingPallet.PalletNumber,
 					PalletSourceId = notification.PalletSourceId,
 					PalletSourceNumber = sourcePallet?.PalletNumber,
 					PalletDestinationId = notification.PalletDestinationId,

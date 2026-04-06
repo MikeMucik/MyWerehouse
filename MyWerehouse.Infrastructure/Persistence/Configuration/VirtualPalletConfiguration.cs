@@ -14,7 +14,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 		public void Configure(EntityTypeBuilder<VirtualPallet> entity)
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(entity => entity.Id).ValueGeneratedOnAdd();
+			entity.Property(entity => entity.Id).ValueGeneratedNever();
+			//entity.Property(entity => entity.Id).ValueGeneratedOnAdd();
 
 			entity.HasMany(p => p.PickingTasks)
 					.WithOne(a => a.VirtualPallet)//tu był błąd jendokierunkowy

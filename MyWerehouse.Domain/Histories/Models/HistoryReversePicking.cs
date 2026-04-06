@@ -10,7 +10,10 @@ namespace MyWerehouse.Domain.Histories.Models
 	public class HistoryReversePicking
 	{
 		public int Id { get; set; }
+
 		public Guid ReversePickingId { get; set; }
+		public required Guid PickingPalletId {  get; set; }
+		public string PickingPalletNumber { get; set; }
 		public Guid? PalletSourceId { get; set; }
 		public string? PalletSourceNumber { get; set; }
 		public Guid? PalletDestinationId { get; set; }

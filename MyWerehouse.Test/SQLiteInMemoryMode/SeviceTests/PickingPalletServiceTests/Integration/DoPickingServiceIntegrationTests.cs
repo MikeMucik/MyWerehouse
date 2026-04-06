@@ -85,25 +85,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet = new VirtualPallet
-			{
-				Pallet = sourcePallet,
-				InitialPalletQuantity = 40,
-				LocationId = location.Id,
-				//Location = sourcePallet.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-			};
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet.Id, 40, sourcePallet.LocationId,new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 30, PickingStatus.Allocated, product.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 30, PickingStatus.Allocated, product.Id,
 				null, null, null, 0);
-			//var pickingTask = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 30,
-			//	PickingStatus = PickingStatus.Allocated,
-			//	VirtualPallet = virtualPallet,
-			//};
-			virtualPallet.PickingTasks = new List<PickingTask> { pickingTask };
+			//virtualPallet.PickingTasks = new List<PickingTask> { pickingTask };
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
@@ -213,25 +199,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet = new VirtualPallet
-			{
-				Pallet = sourcePallet,
-				InitialPalletQuantity = 40,
-				LocationId = location.Id,
-				//Location = sourcePallet.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-			};
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet.Id, 40, sourcePallet.LocationId, new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 40, PickingStatus.Allocated, product.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 40, PickingStatus.Allocated, product.Id,
 				null, null, null, 0);
-			//var pickingTask = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 40,
-			//	PickingStatus = PickingStatus.Allocated,
-			//	VirtualPallet = virtualPallet,
-			//};
-			virtualPallet.PickingTasks = new List<PickingTask> { pickingTask };
+			//virtualPallet.PickingTasks = new List<PickingTask> { pickingTask };
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
@@ -345,25 +317,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, oldPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet1 = new VirtualPallet
-			{
-				Pallet = sourcePallet1,
-				InitialPalletQuantity = 10,
-				LocationId = location1.Id,
-				//Location = sourcePallet1.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-			};
+			var virtualPallet1 = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 10, location1.Id, new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Allocated, product.Id,
+			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product.Id,
 				null, null, null, 0);
-			//var pickingTask1 = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 10,
-			//	PickingStatus = PickingStatus.Allocated,
-			//	VirtualPallet = virtualPallet1,				
-			//};
-			virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
+			//virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
 			DbContext.PickingTasks.AddRange(pickingTask1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
@@ -477,25 +435,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, oldPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet1 = new VirtualPallet
-			{
-				Pallet = sourcePallet1,
-				InitialPalletQuantity = 10,
-				LocationId = location1.Id,
-				//Location = sourcePallet1.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-			};
+			var virtualPallet1 = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 10, location1.Id, new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Allocated, product2.Id,
+			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
 				null, null, null, 0);
-			//var pickingTask1 = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 10,
-			//	PickingStatus = PickingStatus.Allocated,
-			//	VirtualPallet = virtualPallet1,
-			//};
-			virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
+			//virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
 			DbContext.PickingTasks.AddRange(pickingTask1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
@@ -608,26 +552,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, oldPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet1 = new VirtualPallet
-			{
-				Pallet = sourcePallet1,
-				InitialPalletQuantity = 10,
-				LocationId = location1.Id,
-				//Location = sourcePallet1.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-			};
+			var virtualPallet1 = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 10, location1.Id, new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Allocated, product2.Id,
+			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
 				null, null, null, 0);
-			//var pickingTask1 = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 10,
-			//	PickingStatus = PickingStatus.Allocated,
-			//	ProductId = product2.Id,
-			//	VirtualPallet = virtualPallet1,
-			//};
-			virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
+			//virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
 			DbContext.PickingTasks.AddRange(pickingTask1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
@@ -763,28 +692,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, oldPallet, sourcePallet2);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet1 = new VirtualPallet
-			{
-				Pallet = sourcePallet1,
-				InitialPalletQuantity = 10,
-				LocationId = location1.Id,
-				//Location = sourcePallet1.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-			};
+			var virtualPallet1 = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 10, location1.Id, new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Allocated, product2.Id,
+			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
 			 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), 0);
-			//var pickingTask1 = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 10,
-			//	ProductId = product2.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-			//	PickingStatus = PickingStatus.Allocated,
-			//	VirtualPallet = virtualPallet1,
-			//	PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))
-			//};
-			virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
+			//virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
 			DbContext.PickingTasks.AddRange(pickingTask1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();
@@ -882,26 +794,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet1, oldPallet, sourcePallet2);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			var virtualPallet1 = new VirtualPallet
-			{
-				Pallet = sourcePallet1,
-				InitialPalletQuantity = 10,
-				Location = sourcePallet1.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-			};
+			var virtualPallet1 = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 10, location1.Id, new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Allocated, product2.Id,
+			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
 			 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), null, null, 0);
-			//var pickingTask1 = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 10,
-			//	ProductId = product2.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-			//	PickingStatus = PickingStatus.Allocated,
-			//	VirtualPallet = virtualPallet1,
-			//};
-			virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
+			//virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
 			DbContext.PickingTasks.AddRange(pickingTask1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
 			await DbContext.SaveChangesAsync();

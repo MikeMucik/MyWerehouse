@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Interfaces
 		void AddPickingTask(PickingTask pickingTask);
 		Task AddPickingTaskAsync(PickingTask pickingTask);
 		void DeletePickingTask(PickingTask pickingTask);
-		Task<List<PickingTask>> GetPickingTaskListAsync(int palletPickingId, DateTime pickingDate);
+		Task<List<PickingTask>> GetPickingTaskListAsync(Guid palletPickingId, DateTime pickingDate);
 		//Task<PickingTask?> GetPickingTaskAsync(int pickinigTaskNumber);
 		Task<PickingTask?> GetPickingTaskAsync(Guid guid);
 		Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId);

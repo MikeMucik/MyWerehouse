@@ -78,31 +78,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			DbContext.Pallets.AddRange(sourcePallet, pickingPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
+			
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet.Id, 100, sourcePallet.Location.Id, new DateTime(2025, 8, 12));
+			
 			var pickinTaskGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickinTaskGuid, 1, issueId, 40,
+			var pickingTask = PickingTask.CreateForSeed(pickinTaskGuid, virtualPallet.Id, issueId, 40,
 				PickingStatus.Picked, product.Id, DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
 				pickingPallet.Id, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)), 40);
-			//var pickingTask = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 40,
-			//	PickingStatus = PickingStatus.Picked,
-			//	ProductId = product.Id,
-			//	PickedQuantity = 40,
-			//	PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
-			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
-			//	PickingPalletId = pickingPallet.Id,
-			//};
-			var virtualPallet = new VirtualPallet
-			{
-				Pallet = sourcePallet,
-				InitialPalletQuantity = 100,
-				Location = sourcePallet.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-				PickingTasks = new List<PickingTask> { pickingTask }
-			};
-			//pickingTask.VirtualPallet = virtualPallet;
-
+			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.AddRange(virtualPallet);
 			DbContext.SaveChanges();
 			//Act

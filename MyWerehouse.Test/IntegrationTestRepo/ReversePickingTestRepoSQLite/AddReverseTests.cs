@@ -79,28 +79,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow.AddDays(-7),
 			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
-			
-			var virtualPallet = new VirtualPallet
-			{
-				PalletId = pallet2.Id,
-				InitialPalletQuantity = 20,
-				LocationId = location1.Id,
-				DateMoved = DateTime.UtcNow.AddDays(-7),			
-			};
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 20, location1.Id, DateTime.UtcNow.AddDays(-7));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Picked, product.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 10, PickingStatus.Picked, product.Id,
 				DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 10);
-			//var pickingTask = new PickingTask
-			//{
-			//	Issue = issue,
-			//	PickingStatus = PickingStatus.Picked,
-			//	RequestedQuantity = 10,
-			//	VirtualPallet = virtualPallet,
-			//	ProductId = product.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12))
-			//};
-
-			virtualPallet.PickingTasks = [pickingTask];
+			//virtualPallet.PickingTasks = [pickingTask];
 			var pickingPallet = Pallet.CreateForTests("Q5000", DateTime.Now, 1, PalletStatus.ToIssue, null, null);
 			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			

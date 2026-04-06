@@ -32,11 +32,9 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 					case IssueStatus.New:
 						_issueRepo.DeleteIssue(issueToDelete);
 						break;
-
 					case IssueStatus.Pending:
 					case IssueStatus.NotComplete:
 						issueToDelete.CancelIssue(request.UserId);
-
 						break;
 					default:
 						return AppResult<Unit>.Fail($"Zlecenia {issueToDelete.Id} nie można anulować.", ErrorType.Conflict);

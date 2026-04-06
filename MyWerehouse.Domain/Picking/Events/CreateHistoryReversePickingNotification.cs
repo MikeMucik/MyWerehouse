@@ -9,7 +9,9 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Domain.Picking.Events
 {
-	public record CreateHistoryReversePickingNotification(Guid ReversePickingId,
+	public record CreateHistoryReversePickingNotification(
+		Guid ReversePickingId,
+		Guid PickingPalletId,
 		Guid? PalletSourceId,
 		//string? PalletSourceNumber,
 		Guid? PalletDestinationId,

@@ -61,15 +61,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			DbContext.Categories.Add(newCategory);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
-			var virtualPallet = new VirtualPallet
-			{
-				Pallet = pallet,
-				LocationId = pallet.LocationId,
-				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
-				DateMoved = DateTime.Now,
-				PickingTasks = new List<PickingTask>()
-
-			};
+			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
 				, new DateTime(2025, 5, 6), "U002",IssueStatus.Pending, null);
 			
@@ -77,15 +69,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.SaveChanges();
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Allocated, product.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 10, PickingStatus.Allocated, product.Id,
 				null, null, null, 0);
-			//var pickingTask = new PickingTask
-			//{
-			//	Issue = issue,
-			//	VirtualPallet = virtualPallet,
-			//	RequestedQuantity = 10,
-			//	PickingStatus = PickingStatus.Allocated,
-			//};
 			var pickingTaskRepo = new PickingTaskRepo(DbContext);
 			//Act
 			pickingTaskRepo.AddPickingTask(pickingTask);
@@ -140,15 +125,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			DbContext.Categories.Add(newCategory);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
-			var virtualPallet = new VirtualPallet
-			{
-				Pallet = pallet,
-				LocationId = pallet.LocationId,
-				InitialPalletQuantity = pallet.ProductsOnPallet.First().Quantity,
-				DateMoved = DateTime.Now,
-				PickingTasks = new List<PickingTask>()
-
-			};
+			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 2, 1, new DateTime(2025, 5, 5)
 				, new DateTime(2025, 5, 6), "U002", IssueStatus.Pending, null);
 		
@@ -156,15 +133,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.SaveChanges();
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 10, PickingStatus.Allocated, product.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 10, PickingStatus.Allocated, product.Id,
 				null, null, null, 0);
-			//var pickingTask = new PickingTask
-			//{
-			//	Issue = issue,
-			//	VirtualPallet = virtualPallet,
-			//	RequestedQuantity = 10,
-			//	PickingStatus = PickingStatus.Allocated,
-			//};
 			var pickingTaskRepo = new PickingTaskRepo(DbContext);
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.SaveChanges();

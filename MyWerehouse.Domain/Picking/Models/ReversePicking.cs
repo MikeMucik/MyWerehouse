@@ -29,10 +29,11 @@ namespace MyWerehouse.Domain.Picking.Models
 		public PickingTask PickingTask {  get; set; }
 		public DateOnly DateMade { get; set; }
 		public string UserId { get; set; }
-		public void AddHistory(string userId, Guid issueId, int issueNumber, ReversePickingStatus before, ReversePickingStatus after)
+		public void AddHistory(Guid pickingPalletId, string userId, Guid issueId, int issueNumber, ReversePickingStatus before, ReversePickingStatus after)
 		{
 			this.AddDomainEvent(new CreateHistoryReversePickingNotification(
 				Id,
+				PickingPalletId,
 				SourcePalletId,					
 				DestinationPalletId,
 				issueId,

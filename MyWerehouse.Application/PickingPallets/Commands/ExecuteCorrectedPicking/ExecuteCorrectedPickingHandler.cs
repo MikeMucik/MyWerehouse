@@ -47,7 +47,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 			try
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
-				if (pallet  == null)
+				if (pallet == null)
 				{
 					return AppResult<Unit>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
 				}
@@ -65,7 +65,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 				{
 					return AppResult<Unit>.Fail($"Paleta {request.PalletId} jest pusta.", ErrorType.Conflict);
 				}
-				
+
 				// Oblicz, ile faktycznie można/trzeba skompletować
 				var pickingTasksForIssue = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(request.IssueId, product.ProductId);
 				if (pickingTasksForIssue == null) return AppResult<Unit>.Fail($"Zadanie do kompletacji nie istnieje", ErrorType.NotFound);
@@ -78,28 +78,21 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 				}
 				VirtualPallet virtualPallet;
 				var vpId = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(request.PalletId);
-				if (vpId != 0)
+				if (vpId != Guid.Empty)
 				{
-					int virtualPalletId = vpId;
+					Guid virtualPalletId = vpId;
 					virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(virtualPalletId);
 				}
 				// dodanie do palety virtualPallet - można obęjść przez zmianę statusu, osobna akcja
 				else
 				{
 					pallet.ChangeStatus(PalletStatus.ToPicking);
-					virtualPallet = new VirtualPallet
-					{
-						Pallet = pallet,
-						PalletId = pallet.Id,
-						DateMoved = DateTime.UtcNow,
-						LocationId = pallet.LocationId,
-						InitialPalletQuantity = pallet.ProductsOnPallet.Single(p => p.PalletId == pallet.Id).Quantity,//zakładam że jest jeden towar
-						PickingTasks = new List<PickingTask>()
-					};
+					virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.Single(p => p.PalletId == pallet.Id).Quantity, pallet.LocationId);
+					
 					_pickingPalletRepo.AddPalletToPicking(virtualPallet);  // Dodaj do repo
 				}
 				await _reduceAllocationService.ReduceAllocation(issue, product.ProductId, quantityToPick, request.UserId);
-				var newPickingTaskInfo =await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, product.ProductId, quantityToPick, product.BestBefore, request.UserId);
+				var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, product.ProductId, quantityToPick, product.BestBefore, request.UserId);
 				var newPickingTask = newPickingTaskInfo.OnePickingTask;
 				await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, quantityToPick, request.UserId, newPickingTask, PickingCompletion.Full, request.RampNumber);
 
@@ -107,8 +100,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPickin
 
 				await transaction.CommitAsync(ct);
 
-				return AppResult<Unit>.Success(Unit.Value,"Towar dołączono do zlecenia");
-			}			
+				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia");
+			}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

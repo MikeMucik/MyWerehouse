@@ -54,17 +54,9 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 					}).ToList();
 				foreach (var task in listByProductAndDate)
 				{
-					var taskToDo = PickingTask.Create(null, issue.Id, task.TotalQuantity, PickingStatus.Allocated, task.ProductId,
+					var taskToDo = PickingTask.Create(null, issue.Id, task.TotalQuantity, PickingStatus.Available, task.ProductId,
 						task.BestBefore, null, DateOnly.FromDateTime(DateTime.UtcNow), 0);
-					//var taskToDo = new PickingTask
-					//{
-					//	IssueId = issue.Id,
-					//	//IssueNumber = issue.IssueNumber,
-					//	ProductId = task.ProductId,
-					//	RequestedQuantity = task.TotalQuantity,
-					//	PickingStatus = PickingStatus.Allocated,
-					//	BestBefore = task.BestBefore,						
-					//};					 
+									 
 					 _pickingTaskRepo.AddPickingTask(taskToDo);
 					var handTaskDTO = _mapper.Map<PickingTaskDTO>(taskToDo);
 					
@@ -73,7 +65,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 				foreach (var task in listOfPickTasks)
 				{
 					task.Cancel(command.UserId, issue.IssueNumber);
-					//task.PickingStatus = PickingStatus.Cancelled;
 				}
 			}
 			await _werehouseDbContext.SaveChangesAsync(ct);

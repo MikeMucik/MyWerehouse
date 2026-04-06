@@ -274,7 +274,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			//Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.PickingTasks);
 			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;

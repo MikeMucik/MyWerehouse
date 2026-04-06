@@ -56,7 +56,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			}
 			foreach (var task in listTasks)
 			{
-				task.AddHistory(userId, issue.Id, issue.IssueNumber, ReversePickingStatus.Pending, ReversePickingStatus.Pending);
+				task.AddHistory(task.PickingPalletId, userId, issue.Id, issue.IssueNumber, ReversePickingStatus.Pending, ReversePickingStatus.Pending);
 			}
 			return ReversePickingResult.Ok();
 		}

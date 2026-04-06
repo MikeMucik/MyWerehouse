@@ -44,8 +44,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
-			{
-				//var newPickingTask = new PickingTask();
+			{				
 				var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.Id);
 				var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(pickingTaskToChange.VirtualPalletId);
 				var issueId = pickingTaskToChange.IssueId;
@@ -54,7 +53,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 				{
 					return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 				}
-				//if
+				
 				var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId.Value);
 				if (sourcePallet == null) return AppResult<Unit>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
 				if (issue.IssueStatus == IssueStatus.Pending) 
@@ -76,10 +75,9 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 
 				await _processPickingActionService.ProcessPicking(sourcePallet, issue, request.PickingTaskDTO.ProductId,
 						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion, request.PickingTaskDTO.RampNumber);
-				//var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
+				
 				pickingTaskToChange.AddHistory(request.UserId, sourcePallet.Id, sourcePallet.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
 
-				//pickingTaskToChange.AddHistory(request.UserId, PickingStatus.Allocated, pickingTaskToChange.PickingStatus, request.PickingTaskDTO.PickedQuantity);
 				if (neededQuantity == pickedQuantity)
 				{
 					await _werehouseDbContext.SaveChangesAsync(ct);

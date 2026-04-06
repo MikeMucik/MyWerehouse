@@ -82,30 +82,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.Pallets.AddRange(sourcePallet, pickingPallet);
 			DbContext.Issues.AddRange(issue);
 			DbContext.SaveChanges();
-			var virtualPallet = new VirtualPallet
-			{
-				Pallet = sourcePallet,
-				InitialPalletQuantity = 40,
-				Location = sourcePallet.Location,
-				DateMoved = DateTime.UtcNow.AddDays(-8),
-			};
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet.Id, 40, sourcePallet.LocationId, DateTime.UtcNow.AddDays(-8));
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, 1, issue.Id, 30, PickingStatus.Picked, product.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 30, PickingStatus.Picked, product.Id,
 				 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), pickingPallet.Id, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)), 30);
-			//var pickingTask = new PickingTask
-			//{
-			//	Issue = issue,
-			//	RequestedQuantity = 30,
-			//	PickingStatus = PickingStatus.Picked,
-			//	VirtualPallet = virtualPallet,
-			//	PickedQuantity = 30,
-			//	PickingPalletId = pickingPallet.Id,
-			//	PickingDay = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
-			//	ProductId = product.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
-
-			//};
-			virtualPallet.PickingTasks = [pickingTask];
+			//virtualPallet.PickingTasks = [pickingTask];
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();

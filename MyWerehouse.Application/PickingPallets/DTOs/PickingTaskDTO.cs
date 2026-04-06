@@ -25,10 +25,8 @@ namespace MyWerehouse.Application.PickingPallets.DTOs
 		public int RampNumber { get; set; } //lokalizacja pickingu
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<PickingTask, PickingTaskDTO>();
-			
-			profile.CreateMap<PickingTaskDTO, PickingTask>();			
-
+			profile.CreateMap<PickingTask, PickingTaskDTO>()
+				.ForMember(dest => dest.IssueNumber, opt => opt.MapFrom(src => src.Issue.IssueNumber));			
 		}
 	}
 }

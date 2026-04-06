@@ -84,15 +84,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
 			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 0);
-			//var handPicknigTask = new PickingTask
-			//{
-			//	IssueId = issue.Id,
-			//	//CreateDate = DateTime.UtcNow.AddDays(0),				
-			//	PickingStatus = PickingStatus.Available,
-			//	RequestedQuantity = 20,
-			//	ProductId = product1.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
-			//};
+			
 			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
 			//Act
@@ -194,6 +186,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				Height = 1,
 				Position = 1
 			};
+			DbContext.Addresses.Add(address);
+			DbContext.Categories.Add(category);
+			DbContext.Locations.AddRange(location1, locationPickingZone);
+			DbContext.Clients.AddRange(client);
+			DbContext.Products.AddRange(product1);
+			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
@@ -204,35 +202,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
 			
-			DbContext.Addresses.Add(address);
-			DbContext.Categories.Add(category);
-			DbContext.Locations.AddRange(location1, locationPickingZone);
-			DbContext.Clients.AddRange(client);
-			DbContext.Products.AddRange(product1);
+			
 			DbContext.Pallets.AddRange(sourcePallet1, pallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
 			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 0);
-			//var handPicknigTask = new PickingTask
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 100,sourcePallet1.LocationId, new DateTime(2025, 8, 12));
+			//var virtualPallet = new VirtualPallet
 			//{
-			//	IssueId = issue.Id,
-			//	//CreateDate = DateTime.UtcNow.AddDays(-1),
-			//	RequestedQuantity = 20,
-			//	ProductId = product1.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
-			//	PickingStatus = PickingStatus.Available,
+			//	Pallet = sourcePallet1,
+			//	InitialPalletQuantity = 100,
+			//	Location = sourcePallet1.Location,
+			//	DateMoved = new DateTime(2025, 8, 12),
+			//	PickingTasks = []
 			//};
-
-			var virtualPallet = new VirtualPallet
-			{
-				Pallet = sourcePallet1,
-				InitialPalletQuantity = 100,
-				Location = sourcePallet1.Location,
-				DateMoved = new DateTime(2025, 8, 12),
-				PickingTasks = []
-			};
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
@@ -356,15 +341,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
 			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 0);
-			//var handPicknigTask = new PickingTask
-			//{
-			//	IssueId = issue.Id,
-			//	PickingStatus = PickingStatus.Available,
-			//	//CreateDate = DateTime.UtcNow.AddDays(-1),
-			//	RequestedQuantity = 20,
-			//	ProductId = product1.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
-			//};
+			
 			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
 			//Act
@@ -489,16 +466,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
 			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 10);
-			//var handPicknigTask = new PickingTask
-			//{
-			//	IssueId = issue.Id,
-			//	//CreateDate = DateTime.UtcNow.AddDays(-1),
-			//	PickingStatus = PickingStatus.Available,
-			//	RequestedQuantity = 20,
-			//	PickedQuantity = 10,
-			//	ProductId = product1.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.Now.AddDays(300)),
-			//};
+			
 			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
 			//Act

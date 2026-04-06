@@ -234,6 +234,10 @@ namespace MyWerehouse.Domain.Issuing.Models
 			this.AddDomainEvent(new AddHistoryForIssueNotification(
 				Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
 		}
+		public void RemovePickingTask(PickingTask pickingTask)
+		{
+			PickingTasks.Remove(pickingTask);
+		}
 		//*
 		public void AddHistory(string userId)
 		{

@@ -76,7 +76,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 				var category = new Category { Id = 1, Name = "Cat", IsDeleted = false };
 				var product = Product.Create("TestFull", "123", 1, 10);
-
+				db.Clients.Add(client);
+				db.Categories.Add(category);
+				db.Products.Add(product);
+				db.Locations.Add(location);
+				db.SaveChanges();
 				var pallets = new List<Pallet>();
 				var issueId = Guid.NewGuid();
 				var issueItem = new List<IssueItem> { IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)) };
@@ -89,37 +93,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet2);
 				// Dodaj przykładową alokację
-				var virtualPallet = new VirtualPallet
-				{
-					Id = 1,
-					Pallet = pallet2,
-					InitialPalletQuantity = 10,
-					Location = pallet2.Location,
-					//DateMoved = new DateTime(2025, 8, 12),
-					//PickingTasks = new List<PickingTask> { pickingTask3 }
-				};
-				var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), 1, issue.Id, qty, PickingStatus.Allocated, product.Id,
+				var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 10,pallet2.LocationId, new DateTime(2025, 8, 12));
+				var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, qty, PickingStatus.Allocated, product.Id,
 					null, null, null, 0);
-				//new PickingTask
-				//{
-				//	Issue = issue,
-				//	RequestedQuantity = qty,
-				//	PickingStatus = PickingStatus.Allocated,
-				//	VirtualPallet = new VirtualPallet
-				//	{
-				//		PalletId = pallets[1].Id,
-				//		InitialPalletQuantity = qty,
-				//		Location = location,
-				//	}
-				//});
-				db.Clients.Add(client);
-				db.Categories.Add(category);
-				db.Products.Add(product);
-				db.Locations.Add(location);
-				db.VirtualPallets.Add(virtualPallet);
-				db.PickingTasks.Add(pickingTask);
 				db.Issues.Add(issue);
 				db.Pallets.AddRange(pallet1, pallet2);
+				//await db.SaveChangesAsync();
+				db.VirtualPallets.Add(virtualPallet);
+				db.PickingTasks.Add(pickingTask);
 				await db.SaveChangesAsync();
 				return (issue, pallets);
 			}
@@ -149,7 +130,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var setup = await TestHelper.SetupBasicIssue(
 				DbContext,
 				issueStatus: status,
-				qty: 12);
+				qty: 10);//12
 			var issueId = setup.issue.Id;
 			// Act
 			var result = await Mediator.Send(new DeleteIssueCommand(issueId, "UserX"));

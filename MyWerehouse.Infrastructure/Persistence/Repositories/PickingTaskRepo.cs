@@ -28,7 +28,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.PickingTasks.Remove(pickingTask);
 		}
-		public async Task<List<PickingTask>> GetPickingTaskListAsync(int palletPickingId, DateTime pickingDate)
+		public async Task<List<PickingTask>> GetPickingTaskListAsync(Guid palletPickingId, DateTime pickingDate)
 		{
 			var pickingTask = await _werehouseDbContext.PickingTasks
 				.Include(a => a.VirtualPallet)

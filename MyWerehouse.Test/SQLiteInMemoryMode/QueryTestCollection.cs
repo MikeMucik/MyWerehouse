@@ -353,31 +353,33 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.ReversePickings.Any())
 			{
 				context.ReversePickings.AddRange(
-					new ReversePicking
-					{
-						Id = reversePickingTaskId1,
-						PickingTaskId = pickingId2,
-						ProductId = productId1,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-						//PickingPalletId = "Q5000",
-						PickingPalletId = palletGuid9,
-						Quantity = 10,
-						Status = ReversePickingStatus.Pending,
-						UserId = "UserR"
+					ReversePicking.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),10,pickingId2,"UserR"),
+					ReversePicking.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), 10, pickingId5, "UserR")
+				//new ReversePicking
+				//	{
+				//		Id = reversePickingTaskId1,
+				//		PickingTaskId = pickingId2,
+				//		ProductId = productId1,
+				//		BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
+				//		//PickingPalletId = "Q5000",
+				//		PickingPalletId = palletGuid9,
+				//		Quantity = 10,
+				//		Status = ReversePickingStatus.Pending,
+				//		UserId = "UserR"
 
-					},
-					new ReversePicking
-					{
-						Id = reversePickingTaskId2,
-						PickingTaskId = pickingId5,
-						ProductId = productId1,
-						BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-						//PickingPalletId = "Q5000",
-						PickingPalletId = palletGuid9,
-						Quantity = 10,
-						Status = ReversePickingStatus.Pending,
-						UserId = "UserR"
-					}
+				//	},
+				//	new ReversePicking
+				//	{
+				//		Id = reversePickingTaskId2,
+				//		PickingTaskId = pickingId5,
+				//		ProductId = productId1,
+				//		BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
+				//		//PickingPalletId = "Q5000",
+				//		PickingPalletId = palletGuid9,
+				//		Quantity = 10,
+				//		Status = ReversePickingStatus.Pending,
+				//		UserId = "UserR"
+				//	}
 				);
 			}
 			context.SaveChanges();

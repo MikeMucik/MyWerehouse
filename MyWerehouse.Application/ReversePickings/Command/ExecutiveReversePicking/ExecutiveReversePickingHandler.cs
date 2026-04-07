@@ -53,7 +53,8 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				}
 
 				var productOnPallet = pickingPallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == reversePicking.ProductId);//
-				reversePicking.Status = ReversePickingStatus.InProgress;
+				reversePicking.ChangeStatus(ReversePickingStatus.InProgress);
+				//reversePicking.Status = ReversePickingStatus.InProgress;
 				string? sourcePalletId = null;
 				string? destinationPalletId = null;
 				//Do zmiany
@@ -104,7 +105,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				{
 					pickingPallet.ChangeStatus(PalletStatus.ReversePicking);//do przemyślenia
 				}
-				reversePicking.Status = ReversePickingStatus.Completed;
+				reversePicking.ChangeStatus(ReversePickingStatus.Completed);
 				reversePicking.AddHistory(pickingPallet.Id, command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);

@@ -37,18 +37,21 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				return ReversePickingResult.Fail("Brak alokacji dla palety. Paleta nie do dekompletacji.");
 			foreach (var pickingTaskToReverse in pickingTasksOfPickingPallet)
 			{
-				listTasks.Add(new ReversePicking
-				{
-					PickingPalletId = palletId,
-					Quantity = pickingTaskToReverse.RequestedQuantity,
-					ProductId = pickingTaskToReverse.ProductId,
-					BestBefore = pickingTaskToReverse.BestBefore,
-					Status = ReversePickingStatus.Pending,
-					PickingTaskId = pickingTaskToReverse.Id,
-					SourcePalletId = pickingTaskToReverse.VirtualPallet.PalletId,
-					UserId = userId,
-					DateMade = DateOnly.FromDateTime(DateTime.UtcNow)
-				});
+				listTasks.Add(
+					ReversePicking.Create(palletId, pickingTaskToReverse.VirtualPallet.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
+					pickingTaskToReverse.RequestedQuantity, pickingTaskToReverse.Id, userId));
+					//new ReversePicking
+					//{
+					//	PickingPalletId = palletId,
+					//	Quantity = pickingTaskToReverse.RequestedQuantity,
+					//	ProductId = pickingTaskToReverse.ProductId,
+					//	BestBefore = pickingTaskToReverse.BestBefore,
+					//	Status = ReversePickingStatus.Pending,
+					//	PickingTaskId = pickingTaskToReverse.Id,
+					//	SourcePalletId = pickingTaskToReverse.VirtualPallet.PalletId,
+					//	UserId = userId,
+					//	DateMade = DateOnly.FromDateTime(DateTime.UtcNow)
+					//}); ;
 			}
 			foreach (var task in listTasks)
 			{

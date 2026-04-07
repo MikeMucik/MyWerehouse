@@ -35,7 +35,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 						return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
 				}
 				var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
-				var pallet = Pallet.Create(newIdForPallet);
+				var pallet = Pallet.Create(newIdForPallet, request.RampNumber);
 
 				var productOnPallet = new List<ProductOnPallet>();
 
@@ -44,18 +44,14 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 					pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
 				}
 
-				//var listProducts = request.DTO.ProductsOnPallet
-				//	.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
-				//	.ToList();
-
-				
-				//pallet.ApplyProductChanges(listProducts);
-				//var pallet = new Pallet(newIdForPallet, DateTime.UtcNow, listProducts);
-				
-
 				_palletRepo.AddPallet(pallet);
 				var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
-				pallet.AssignToWarehouse(location, request.UserId);
+				if (location == null)
+				{
+					return AppResult<Unit>.Fail($"Brak lokalizacji o numerze {request.RampNumber}.", ErrorType.NotFound);
+				}
+				var snapShot = location.ToSnopShot();
+				pallet.AssignToWarehouse(location.Id, snapShot, request.UserId);
 
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);

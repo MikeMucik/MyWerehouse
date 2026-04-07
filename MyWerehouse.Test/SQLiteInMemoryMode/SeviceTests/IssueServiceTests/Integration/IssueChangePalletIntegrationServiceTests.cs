@@ -40,22 +40,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, null);
-			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
 			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));			
 			
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			pallet.MoveToLocation(location, "user");
-			pallet.AssignToIssue(issue, "user1");
+			
 			// Act
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 
@@ -98,24 +97,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Products.Add(product);
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, null);
-			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
 			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));			
 			
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			pallet.MoveToLocation(location, "user");
-			pallet.AssignToIssue(issue, "user1");
+			//pallet.MoveToLocation(location, "user");
+			//pallet.AssignToIssue(issue, "user1");
 			//&Act
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId1, pallet.Id, pallet.Id, "tester"));
@@ -156,7 +154,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			//DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			pallet.MoveToLocation(location, "user");
+			//pallet.MoveToLocation(location, "user");
 			// Act
 			var receiptId9 = Guid.Parse("91111111-1111-1111-1111-111111111111");
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId9, pallet.Id, pallet1.Id, "tester"));
@@ -189,22 +187,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Products.AddRange(product, productA);
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, null);
-			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(productA.Id, 10, new DateOnly(2026, 1, 1));
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
 			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet1.AddProduct(productA.Id, 10, new DateOnly(2026, 1, 1));			
 			
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			pallet.MoveToLocation(location, "user");
-			pallet.AssignToIssue(issue, "user1");
+			//pallet.MoveToLocation(location, "user");
+			//pallet.AssignToIssue(issue, "user1");
 			// Act
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 
@@ -236,24 +234,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, location.Id, PalletStatus.ToIssue, null, null);
-			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, location.Id, PalletStatus.ToIssue, null, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow.AddDays(-7),
 			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, location.Id, PalletStatus.ToIssue, null, issueId);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			
+			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, location.Id, PalletStatus.ToIssue, null, null);
+			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));		
 			
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			pallet.MoveToLocation(location, "user");
-			pallet.AssignToIssue(issue, "user1");
+			//pallet.MoveToLocation(location, "user");
+			//pallet.AssignToIssue(issue, "user1");
 			//Act
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 			//Assert

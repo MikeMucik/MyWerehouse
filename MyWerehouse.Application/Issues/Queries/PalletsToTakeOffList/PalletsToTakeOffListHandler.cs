@@ -13,7 +13,7 @@ using MyWerehouse.Domain.Issuing.Models;
 namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 {
 	public class PalletsToTakeOffListHandler(IIssueRepo issueRepo
-		,ILocationRepo locationRepo) : IRequestHandler<PalletsToTakeOffListQuery, AppResult<IssuePalletsWithLocationDTO>>
+		, ILocationRepo locationRepo) : IRequestHandler<PalletsToTakeOffListQuery, AppResult<IssuePalletsWithLocationDTO>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
@@ -23,7 +23,11 @@ namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 			var listDTO = new List<PalletWithLocationDTO>();
 			foreach (var item in list)
 			{
-				var location =await _locationRepo.GetLocationByIdAsync(item.LocationId);
+				var location = await _locationRepo.GetLocationByIdAsync(item.LocationId);
+				if (location == null)
+				{
+					return AppResult<IssuePalletsWithLocationDTO>.Fail($"Brak lokalizacji o numerze {item.LocationId}", ErrorType.NotFound);
+				}
 				var row = new PalletWithLocationDTO
 				{
 					PalletId = item.PalletId,
@@ -34,7 +38,7 @@ namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 				listDTO.Add(row);
 			}
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
-				if(issue == null)
+			if (issue == null)
 			{
 				return AppResult<IssuePalletsWithLocationDTO>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
 			}

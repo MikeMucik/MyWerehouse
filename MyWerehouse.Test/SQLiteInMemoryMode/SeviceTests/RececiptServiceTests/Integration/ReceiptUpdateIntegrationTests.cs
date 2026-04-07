@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			//	ReceiptDateTime = new DateTime(2025, 6, 6),
 			//	RampNumber = 9
 			//};
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
+			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Receiving, initialReceipt.Id, null);
 			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
 			//var initialPallet = new Pallet
 			//{

@@ -108,9 +108,9 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 				.DistinctBy(p => p.Id)
 				.Take(amount)];			
 			foreach (var pallet in allAvailablePallets)
-			{
-				//issue.AssignPallet(pallet, issue.PerformedBy);				
-				issue.ReservePallet(pallet, issue.PerformedBy);				
+			{			
+				issue.ReservePallet(pallet, issue.PerformedBy);		
+				pallet.ReserveToIssue(issue, issue.PerformedBy);
 			}
 			return allAvailablePallets;
 		}

@@ -41,6 +41,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Height = 1,
 				Position = 1
 			};
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product1, product2);
+			DbContext.Locations.AddRange(location1, location2);
+			DbContext.SaveChanges();
 			//var productOnPallet1 = new ProductOnPallet
 			//{
 			//	//PalletId = "Q2000",
@@ -57,7 +61,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//	DateAdded = DateTime.Now,
 			//	BestBefore = new DateOnly(2027, 3, 4)
 			//};
-			var pallet = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), 1, PalletStatus.Available, null, null);
+			var pallet = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), location1.Id, PalletStatus.Available, null, null);
 			pallet.AddProductForTests(product1.Id, 100, new DateTime(2025, 4, 4, 8, 8, 8), new DateOnly(2027, 3, 3));
 			pallet.AddProduct(product2.Id, 10, new DateOnly(2027, 3, 4));
 			//var pallet = new Pallet
@@ -68,9 +72,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//	Status = PalletStatus.Available,
 			//	ProductsOnPallet = new List<ProductOnPallet> { productOnPallet1, productOnPallet2 }
 			//};			
-			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(product1, product2);			
-			DbContext.Locations.AddRange(location1, location2);
+			
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 

@@ -56,14 +56,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Height = 1,
 				Position = 1
 			};
-			var pallet = Pallet.CreateForTests("PAL001", DateTime.UtcNow, 1, PalletStatus.New, null, null);
-			pallet.AddProduct(product.Id, 10, new DateOnly(2027, 3, 3));
-			
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
 				new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
-			receipt.AttachPallet(pallet, location, "001");
-			
+			var pallet = Pallet.CreateForTests("PAL001", DateTime.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
+			pallet.AddProduct(product.Id, 10, new DateOnly(2027, 3, 3));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);

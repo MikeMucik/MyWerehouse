@@ -9,7 +9,6 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Invetories.Events;
-using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Receviving.Models;
@@ -22,8 +21,9 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public Guid Id { get; private set; }
 		public string PalletNumber { get; private set; }
 		public DateTime DateReceived { get; private set; }
+		private readonly string _locationSnapshot;
 		public int LocationId { get; private set; }
-		public virtual Location Location { get; private set; }
+		public virtual Location Location { get; private set; }		
 		public PalletStatus Status { get; private set; } = 0;
 		public ICollection<ProductOnPallet> ProductsOnPallet { get; private set; } = new List<ProductOnPallet>();
 		public ICollection<PalletMovement> PalletMovements { get; private set; } = new List<PalletMovement>();
@@ -38,15 +38,16 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		private Pallet() { }
 
-		private Pallet(string palletNumber, DateTime dateReceived)
+		private Pallet(string palletNumber,int locationId, DateTime dateReceived)
 		{
 			Id = Guid.NewGuid();
 			PalletNumber = palletNumber;
+			LocationId = locationId;
 			DateReceived = dateReceived;
 		}
 
-		public static Pallet Create(string palletNumber)
-			=> new Pallet(palletNumber, DateTime.Now);
+		public static Pallet Create(string palletNumber, int locationId)
+			=> new Pallet(palletNumber, locationId, DateTime.Now);
 
 
 		private Pallet(Guid id, string palletNumber, DateTime dateReceived, int locationId, PalletStatus status, Guid? receiptId, Guid? issueId)
@@ -74,14 +75,20 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public static Pallet CreateForTests(string palletNumber, DateTime dateReceived, int locationId, PalletStatus status, Guid? receiptId, Guid? issueId)
 		=> new Pallet(palletNumber, dateReceived, locationId, status, receiptId, issueId);
 
-		public void AssignToWarehouse(Location location, string userId)
+		public void CreatePalletFromReservePicking(int locationId, string snapShot, string userId)
+		{
+			Status = PalletStatus.InStock;
+
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
+				locationId, snapShot, locationId, snapShot, ReasonMovement.Received, userId, this.Status, BuildMovementDetails()));
+		}
+		public void AssignToWarehouse(int locationId , string snapShot, string userId)
 		{
 			var listProducts = this.CreateStockItem();
 			Status = PalletStatus.InStock;
-			Location = location;
 
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
-				location.Id, location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.Received, userId, this.Status, BuildMovementDetails()));
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
+				locationId, snapShot, locationId, snapShot, ReasonMovement.Received, userId, this.Status, BuildMovementDetails()));
 			this.AddDomainEvent(new ChangeStockNotification(listProducts));
 		}
 		
@@ -89,7 +96,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			Status = palletStatus;
 			this.UpdateProductChanges(products);
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.Correction, userId, this.Status, BuildMovementDetails()));
 
 		}
@@ -115,9 +122,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				else
 				{
 					existing.SetQuantity(pop.Quantity);
-					//existing.Quantity = pop.Quantity;
-					existing.SetBestBefore(pop.BestBefore);					
-					//existing.BestBefore = pop.BestBefore;
+					existing.SetBestBefore(pop.BestBefore);	
 				}
 			}
 			this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
@@ -126,7 +131,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			if (ProductsOnPallet is null)
 				throw new DomainProductOnPalletException(Id, PalletNumber);
-			//("Paleta musi zawierać produkty.");
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, DateTime.UtcNow, bestBefore));
 
 		}
@@ -134,29 +138,21 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			if (ProductsOnPallet is null)
 				throw new DomainProductOnPalletException(Id, PalletNumber);
-			//("Paleta musi zawierać produkty.");
-			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, DateTime.UtcNow, bestBefore));
+			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, dateAdd, bestBefore));
 		}
-		//
-		public void RemoveProducts(List<Guid> ids)
-		{
-			foreach (var id in ids)
-			{
-				var pop = ProductsOnPallet.First(x => x.ProductId == id);
-				ProductsOnPallet.Remove(pop);
-			}
-		}
-		//
+		
 		public void ReserveToIssue(Issue issue, string userId)
 		{
 			if (issue == null) throw new DomainIssueException("Issue not exists.");
-			if(Status != PalletStatus.Picking) 
+			if (Status == PalletStatus.ToIssue)
+				throw new DomainException("Already reserved");
+			if (Status != PalletStatus.Picking) 
 			{
 				Status = PalletStatus.InTransit;
 			}
 			//żeby można było dalej kompletować na tą samą paletę
 			IssueId = issue.Id;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
 		}
 		public void AssignToIssue(Issue issue, string userId)
@@ -165,13 +161,15 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 			Status = PalletStatus.ToIssue;
 			IssueId = issue.Id;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
 		}
-		public void CancelFromReceipt(string userId)
+		public void DetachFromReceipt(string userId)
 		{
+			if (ReceiptId == null) throw new DomainReceiptException(this.Id, this.PalletNumber);
 			Status = PalletStatus.Cancelled;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			ReceiptId = null;
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
 		}
 		public void DetachToIssue(Guid issueId, string userId)
@@ -180,44 +178,41 @@ namespace MyWerehouse.Domain.Pallets.Models
 				throw new DomainIssueException("Niepoprawne wydanie dla palety");
 			IssueId = null;
 			Status = PalletStatus.Available;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				Location.Id, Location.ToSnopShot(), Location.Id, Location.ToSnopShot(), ReasonMovement.CancelIssue, userId, this.Status, BuildMovementDetails()));
 		}
 
 		public void AssignToPicking(string userId)
 		{
 			Status = PalletStatus.ToPicking;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.Picking, userId, this.Status, BuildMovementDetails()));
 		}
 
-		public void AssignToReceipt(Guid receiptId, Location location, string userId)
+		public void AssignToReceipt(Guid receiptId, string _locationSnapshot, string userId)
 		{
-			//if (ReceiptId == null) throw new DomainReceiptException(this.Id, this.PalletNumber);
-			if (ReceiptId != null) throw new DomainReceiptException(this.Id, this.PalletNumber);
+			if (ReceiptId != null) throw new DomainReceiptException(this.Id, this.PalletNumber);			
+			if (Status == PalletStatus.Receiving) throw new DomainException("Already assigned");
 			ReceiptId = receiptId;
-			Location = location;
 			Status = PalletStatus.Receiving;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
-				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.Received, userId, this.Status, BuildMovementDetails()));
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
+				LocationId, _locationSnapshot, LocationId, _locationSnapshot, ReasonMovement.Received, userId, this.Status, BuildMovementDetails()));
 		}		
 		public void ToArchive(string userId)
 		{
 			Status = PalletStatus.Archived;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), ReasonMovement.Received, userId, this.Status, BuildMovementDetails()));
-
 		}
-		public void MoveToLocation(Location location, string userId)
+		public void MoveToLocation(int newLocationId, string newLocationSnapShot, string userId)
 		{
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
-				LocationId, Location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.Moved, userId, this.Status, BuildMovementDetails()));
-			this.LocationId = location.Id;
+			var oldLocationId = this.LocationId;
+			var oldLocationSnapshot = this._locationSnapshot;
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
+				oldLocationId, oldLocationSnapshot,newLocationId, newLocationSnapShot, ReasonMovement.Moved, userId, this.Status, BuildMovementDetails()));
+			this.LocationId = newLocationId;
 		}
-		public void AddLocation(Location location)
-		{
-			Location = location;
-		}
+		
 		public List<StockItemChange> CalculateQuantityDelta(IEnumerable<ProductOnPallet> updatedProducts)//It must be done before update
 		{
 			var result = new List<StockItemChange>();
@@ -241,7 +236,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				throw new DomainPalletException(this.Id, PalletNumber);
 			Status = PalletStatus.ToIssue;
 			IssueId = issueId;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				location.Id, Location.ToSnopShot(), location.Id, Location.ToSnopShot(), ReasonMovement.ToLoad, userId, this.Status, BuildMovementDetails()));
 		}
 		public bool CanBeCancelled()
@@ -260,10 +255,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void AddHistory(PalletStatus status, ReasonMovement reason, string userId)
 		{
 			if (Status == PalletStatus.Archived) throw new InvalidOperationException("Pallet in archive.");
-			//if (status == PalletStatus.Archived) throw new InvalidOperationException("Pallet in archive.");
-
 			this.Status = status;
-			this.AddDomainEvent(new ChangeStatusOfPalletNotification(this.Id, PalletNumber,
+			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, Location.ToSnopShot(), LocationId, Location.ToSnopShot(), reason, userId, this.Status, BuildMovementDetails()));
 		}
 

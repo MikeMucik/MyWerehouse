@@ -29,8 +29,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 				if (issue == null)
 					return AppResult<Unit>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
-				// chyba do domeny		
-				//if (pallet.Status != PalletStatus.Picking)
+				
 				//	return AppResult<Unit>.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet");
 				//to powyżej można rozszerzyć na konkretne przypadki				
 				pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location);
@@ -38,16 +37,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 				await transaction.CommitAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, $"Zamknięto paletę, dołączono do zlecenia {issue.Id}.");
 			}
-			//catch (NotFoundPalletException exp)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return PickingResult.Fail(exp.Message);
-			//}
-			//catch (NotFoundIssueException exo)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return PickingResult.Fail(exo.Message);
-			//}
+			
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

@@ -48,7 +48,8 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				{
 					if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko  palety z przyjęcia
 					{
-						issue.DetachPallet(pallet, request.UserId);
+						//issue.DetachPallet(pallet, request.UserId);
+						pallet.DetachToIssue(issue.Id, request.UserId);
 						listPallet.Add(pallet);
 					}
 				}
@@ -79,7 +80,6 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 					{
 						_pickingPalletRepo.DeleteVirtualPalletPicking(vp);
 						vp.Pallet.ChangeStatus(PalletStatus.Available);
-						//vp.Pallet.Status = PalletStatus.Available;
 					}
 				}
 				issue.Cancel(request.UserId);

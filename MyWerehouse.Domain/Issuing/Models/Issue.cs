@@ -18,7 +18,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 {
 	public class Issue : AggregateRoots
 	{
-		//public Guid Id { get; set; } = Guid.NewGuid();
 		public Guid Id { get; private set; } = Guid.NewGuid();
 		public int IssueNumber { get; private set; }
 		public int ClientId { get; private set; }
@@ -31,20 +30,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public ICollection<PickingTask> PickingTasks { get; private set; } = new List<PickingTask>();
 		public string PerformedBy { get; private set; }
 		public IssueStatus IssueStatus { get; private set; }
-		public ICollection<IssueItem> IssueItems { get; private set; } = new List<IssueItem>();//nowe powiązanie		
-																							   //public Issue() { }
+		public ICollection<IssueItem> IssueItems { get; private set; } = new List<IssueItem>();
 		private Issue() { }
-		//public Issue(int clientId, string performedBy, DateTime dateToSend)
-		//{
-		//	ClientId = clientId;
-		//	if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
-		//	PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
-		//	IssueDateTimeSend = dateToSend;
-		//	if (dateToSend < DateTime.UtcNow) throw new DomainException("Data wysyłki nie może być w przeszłości");
-		//	IssueStatus = IssueStatus.New;
-		//	IssueDateTimeCreate = DateTime.UtcNow;
-		//}
-
 		private Issue(int issueNumber, int clientId, DateTime dateToSend, string performedBy)
 		{
 			Id = Guid.NewGuid();
@@ -139,20 +126,20 @@ namespace MyWerehouse.Domain.Issuing.Models
 			if (pallet.Status == PalletStatus.ToIssue)
 				throw new DomainException("Already reserved");
 			this.Pallets.Add(pallet);
-			pallet.ReserveToIssue(this, userId);
+			//pallet.ReserveToIssue(this, userId);
 		}
 
 
-		public void DetachPallet(Pallet pallet, string userId)
+		public void DetachPallet(Pallet pallet)
 		{
 			this.Pallets.Remove(pallet);
-			pallet.DetachToIssue(this.Id, userId);
+			//pallet.DetachToIssue(this.Id, userId);
 		}
 
-		public void AssignPallet(Pallet pallet, string userId)
+		public void AttachPallet(Pallet pallet)
 		{
-			this.Pallets.Add(pallet);
-			pallet.AssignToIssue(this, userId);
+			if (!Pallets.Contains(pallet))
+				this.Pallets.Add(pallet);			
 		}
 		public void AttachPickingTask(PickingTask task)
 		{
@@ -167,7 +154,11 @@ namespace MyWerehouse.Domain.Issuing.Models
 			foreach (var pallet in Pallets)
 			{
 				pallet.AssignToIssue(this, userId);
-				//pallet.IssueId = Id;
+				if(pallet.IssueId == null)
+				{
+					throw new InvalidDataException("Pallet have no IssueId.");
+					//pallet.IssueId = Id;
+				}
 				pallet.AddHistory(PalletStatus.ToIssue, ReasonMovement.ToLoad, userId);
 			}
 			this.AddDomainEvent(new AddHistoryForIssueNotification(

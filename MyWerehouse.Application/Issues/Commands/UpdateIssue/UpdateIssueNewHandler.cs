@@ -46,11 +46,10 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					var oldListPallets = new List<Pallet>();//
 					var listOldPallets = issue.Pallets.ToList();//
 					foreach (var pallet in listOldPallets)
-					{
-						//pallet.DetachToIssue(issue.Id, request.DTO.PerformedBy);
-						issue.DetachPallet(pallet, request.DTO.PerformedBy);
-						pallet.ChangeStatus(PalletStatus.InTransit);//chyba zbędne
-						//pallet.Status = PalletStatus.InTransit;
+					{						
+						issue.DetachPallet(pallet);
+						pallet.DetachToIssue(issue.Id, request.DTO.PerformedBy);
+						pallet.ChangeStatus(PalletStatus.InTransit);//potrzebne by palety nie były dostępne w innych miejscach
 						oldListPallets.Add(pallet);
 					}
 					var listOldPickingTask = issue.PickingTasks.ToList();

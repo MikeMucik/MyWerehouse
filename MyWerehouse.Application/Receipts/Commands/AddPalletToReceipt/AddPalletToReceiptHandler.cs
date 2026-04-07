@@ -35,10 +35,11 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 				{
 					receipt.StartReceiving(DateTime.UtcNow, request.DTO.UserId);
 					var newId = await _palletRepo.GetNextPalletIdAsync();
+
 					var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 					if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {rampNumber} nie została znaleziona", ErrorType.NotFound);
 
-					var pallet = Pallet.Create(newId);	
+					var pallet = Pallet.Create(newId, rampNumber);	
 					//Jest dla wielu choć początkowe założenia mówiły o jednym produkcie na palecie
 					foreach (var dto in request.DTO.ProductsOnPallet)
 					{
@@ -46,7 +47,8 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 							return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
 						pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
 					}
-					receipt.AttachPallet(pallet,location, request.DTO.UserId);
+					var snapShot = location.ToSnopShot();
+					pallet.AssignToReceipt(receipt.Id, snapShot, request.DTO.UserId);
 					_palletRepo.AddPallet(pallet);
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);

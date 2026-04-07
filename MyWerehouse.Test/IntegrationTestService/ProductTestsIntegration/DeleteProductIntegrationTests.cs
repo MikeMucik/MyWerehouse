@@ -50,12 +50,10 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			_context.Locations.Add(location);
 			_context.SaveChanges();
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var pallet = Pallet.CreateForTests("Q1234", DateTime.Now, location.Id, PalletStatus.Available, null, null);
-			pallet.AddProduct(product1.Id, 100, new DateOnly(2027, 3, 3));		
-			
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, client.Id, "U005",
-			DateTime.UtcNow, ReceiptStatus.Verified, location.Id);	
-			receipt.AttachPallet(pallet, location, "U0005");
+			DateTime.UtcNow, ReceiptStatus.Verified, location.Id);
+			var pallet = Pallet.CreateForTests("Q1234", DateTime.Now, location.Id, PalletStatus.Receiving, receipt.Id, null);
+			pallet.AddProduct(product1.Id, 100, new DateOnly(2027, 3, 3));	
 			_context.Receipts.Add(receipt);
 			_context.Pallets.Add(pallet);
 			_context.SaveChanges();			
@@ -67,35 +65,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			Assert.NotNull(result);
 			Assert.True(result.IsDeleted);
 		}
-		//var pallet = new Pallet
-		//{
-		//	PalletNumber = "Q1234",
-		//	DateReceived = DateTime.Now,
-		//	LocationId = 1,
-		//	Status = PalletStatus.Available,
-		//	//ReceiptId = 10,
-		//};
-		//var product = new ProductOnPallet
-		//{
-		//	//PalletId = "Q1234",
-		//	Pallet = pallet,
-		//	//ProductId = 10,
-		//	Product = product1,
-		//	Quantity = 100,
-		//	DateAdded = DateTime.Now,
-		//	BestBefore = new DateOnly(2027, 3, 3)
-		//};
-		//var receipt = new Receipt
-		//{
-		//	Id = receiptId1,
-		//	ReceiptDateTime = DateTime.Now,
-		//	ClientId = 1,
-		//	Pallets = new List<Pallet> { pallet },
-		//	PerformedBy = "U005"
-
-		//};
-
-		//_context.ProductOnPallet.Add(product);
+		
 		[Fact]
 		public async Task Product_DeleteProductAsync_DeleteFromList()
 		{

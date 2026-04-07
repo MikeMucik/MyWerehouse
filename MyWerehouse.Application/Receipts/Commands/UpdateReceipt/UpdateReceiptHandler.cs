@@ -76,10 +76,10 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				//Usuwanie z bazy danych niepotrzebnych pallet
 				foreach (var pallet in palletToDelete)
 				{
-					existingReceipt.DetachPallet(pallet);
+					existingReceipt.DetachPallet(pallet);//musi być żeby stworzyć dobrą historię
 					//_palletRepo.DeletePallet(pallet);
 					//czy może jednak
-					pallet.CancelFromReceipt(request.UserId);
+					pallet.DetachFromReceipt(request.UserId);
 				}
 				var existingPallets = existingReceipt.Pallets.ToDictionary(p => p.Id);
 				//Aktualizacja palet
@@ -123,7 +123,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 					var newId = await _palletRepo.GetNextPalletIdAsync();
 					var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber);
 						if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {request.DTO.RampNumber} nie została znaleziona", ErrorType.NotFound);
-					var pallet = Pallet.Create(newId);
+					var pallet = Pallet.Create(newId, request.DTO.RampNumber);
 					//var pallet = Pallet.CreateForReceipt(newId, request.DTO.RampNumber, request.DTO.ReceiptId);
 					//var pallet = new Pallet(newId, DateTime.UtcNow, request.DTO.RampNumber, location);
 					//pallet.ApplyProductChanges
@@ -133,30 +133,18 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 							return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound); 
 						pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
 					}
-					
+					var snapShot = location.ToSnopShot();
 					_palletRepo.AddPallet(pallet);
-					existingReceipt.AttachPallet(pallet,location,  request.UserId);
+
+					pallet.AssignToReceipt(existingReceipt.Id, snapShot, request.UserId);
+					existingReceipt.AttachPallet(pallet);
 				}
 				existingReceipt.UpdateReceipt(request.UserId, request.DTO.ClientId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, $"Przyjęcie o numerze {existingReceipt.ReceiptNumber} zostało zaktualizowane");
 			}
-			//catch (NotFoundReceiptException exr)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return AppResult<Unit>.Fail(exr.Message);
-			//}
-			//catch (NotFoundPalletException expal)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return AppResult<Unit>.Fail(expal.Message);
-			//}
-			//catch (NotFoundProductException epr)
-			//{
-			//	await transaction.RollbackAsync(ct);
-			//	return AppResult<Unit>.Fail(epr.Message);
-			//}
+			
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
+using MediatR;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
@@ -32,34 +34,20 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			{
 				var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
 				var sourcePalletBB = bestBefore;
-				var pallet = Pallet.Create(newIdPallet);
+				var pallet = Pallet.Create(newIdPallet, rampNumber);
 				pallet.ChangeStatus(PalletStatus.Picking);//Bo paleta kompletacyjna
 				var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
-				pallet.AddLocation(location);
-				//var pallet = Pallet.CreateForPicking(newIdPallet, issue.Id);
-				pallet.AddProduct(productId, quantity, sourcePalletBB);
-				//pallet.ReserveToIssue(issue, userId);//
-				//var pallet = new Pallet
+				//if (location == null)
 				//{
-				//	PalletNumber = newIdPallet,
-				//	Status = PalletStatus.Picking,
-				//	IssueId = issue.Id,
-				//	LocationId = 100100,//pickingzone location
-				//	DateReceived = DateTime.UtcNow,
-				//	ProductsOnPallet = new List<ProductOnPallet>
-				//		{
-				//			new ProductOnPallet
-				//			{
-				//				//PalletNumber = pallet.PalletNumber,
-				//				ProductId =productId,
-				//				Quantity =quantity,
-				//				DateAdded = DateTime.UtcNow,
-				//				BestBefore = sourcePalletBB
-				//			}
-				//		},
-				//};
+				//	return Task<CreatePalletResult>.Fail($"Brak lokalizacji o numerze {rampNumber}.", ErrorType.NotFound);
+				//}
+				//pallet.AddLocation(location);
+				var snapShot = location.ToSnopShot();
+				pallet.AddProduct(productId, quantity, sourcePalletBB);
+				
 				var palletId =	_palletRepo.AddPallet(pallet);
 				issue.ReservePallet(pallet, userId);//
+				pallet.ReserveToIssue(issue, userId);
 				//pallet.AddHistory(PalletStatus.Picking, ReasonMovement.Picking, userId);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
@@ -77,21 +65,12 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				var existingProduct = pickingPallet.ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId);
 				if (existingProduct != null)
 				{
-					//sourcePallet.ProductsOnPallet.Single().AddQuantity(reversePicking.Quantity);
 					existingProduct.AddQuantity(quantity);
-					//existingProduct.Quantity += quantity;
 				}
 				else
 				{
-					pickingPallet.ProductsOnPallet.Add(ProductOnPallet.Create(productId,pickingPallet.Id, quantity, DateTime.UtcNow, bestBefore));
-
-						//new ProductOnPallet
-						//{
-						//	ProductId = productId,
-						//	Quantity = quantity,
-						//	DateAdded = DateTime.UtcNow,
-						//	BestBefore = bestBefore
-						//});
+					pickingPallet.AddProduct(productId, quantity, bestBefore);
+					//pickingPallet.ProductsOnPallet.Add(ProductOnPallet.Create(productId,pickingPallet.Id, quantity, DateTime.UtcNow, bestBefore));
 				}
 				if (pickingCompletion == PickingCompletion.Full)
 				{

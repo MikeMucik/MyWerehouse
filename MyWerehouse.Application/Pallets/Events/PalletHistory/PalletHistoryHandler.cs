@@ -11,11 +11,11 @@ using MyWerehouse.Domain.Pallets.Events;
 
 namespace MyWerehouse.Application.Pallets.Events.CreateMovement
 {
-	public class PalletChangeStatusHandler(IPalletMovementRepo palletMovementRepo) : INotificationHandler<ChangeStatusOfPalletNotification>
+	public class PalletHistoryHandler(IPalletMovementRepo palletMovementRepo) : INotificationHandler<PalletHistoryNotification>
 	{
 		private readonly IPalletMovementRepo _palletMovementRepo = palletMovementRepo;
 
-		public async Task Handle(ChangeStatusOfPalletNotification notification, CancellationToken cancellationToken)
+		public async Task Handle(PalletHistoryNotification notification, CancellationToken cancellationToken)
 		{			
 			var movement = new PalletMovement
 			{

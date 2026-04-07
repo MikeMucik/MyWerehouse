@@ -58,91 +58,16 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);			
 			
 			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 2, PalletStatus.Available, null, null);
-			//var pallet2 = new Pallet
-			//{
-			//	PalletNumber = "Q1011",
-			//	DateReceived = DateTime.Now,
-			//	LocationId = 2,
-			//	Status = PalletStatus.Available,
-			//	//ReceiptId = 10,
-			//};
-			//var initialCategory = new Category
-			//{
-			//	Name = "name",
-			//	IsDeleted = false
-			//};
-			//var product = Product.Create("TestFull","123",1,10);
-			//var product = new Product
-			//{
-			//	Name = "TestFull",
-			//	SKU = "123",
-			//	AddedItemAd = new DateTime(2024, 1, 1),
-			//	Category = initialCategory,
-			//	IsDeleted = false,
-			//	CartonsPerPallet = 10,
-			//};
 			
-			//var availablePallets = new List<Pallet>
-			//{
-			//	new Pallet
-			//	{
-			//		PalletNumber = "P1",
-			//		DateReceived = new DateTime(2025, 3, 3),
-			//		Location = location1,
-			//		Status = PalletStatus.Available,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{
-			//		new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-			//	}
-			//},
-			//	new Pallet
-			//	{
-			//		PalletNumber = "P2",
-			//		DateReceived = new DateTime(2025, 3, 3),
-			//		Location = location2,
-			//		Status = PalletStatus.Available,
-			//		ProductsOnPallet = new List<ProductOnPallet>
-			//		{
-			//			new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1), DateAdded = new DateTime(2025,4,4) }
-			//		}
-			//	},
-			//	new Pallet
-			//	{
-			//		PalletNumber = "P3",
-			//		DateReceived = new DateTime(2025, 3, 3),
-			//		Location = location3,
-			//		Status = PalletStatus.Available,
-			//		ProductsOnPallet = new List<ProductOnPallet>
-			//		{
-			//			new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1),DateAdded = new DateTime(2025,4,4) }
-			//		}
-			//	}
-			//};
-			//DbContext.Addresses.Add(address);
-			DbContext.Clients.Add(initailClient);
-			//DbContext.Categories.Add(initialCategory);
-			//DbContext.Products.Add(product);
+			DbContext.Clients.Add(initailClient);			
 			DbContext.Locations.AddRange(location1, location2);
-			//DbContext.Pallets.AddRange(availablePallets);
 			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.SaveChanges();
 			var issueRepo = new IssueRepo(DbContext);
 			//Act	
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
 				, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
-			//var issue = new Issue
-			//{
-			//	Id = Guid.NewGuid(),
-			//	IssueNumber = 1,
-			//	IssueDateTimeSend = new DateTime(2025, 12, 15),
-			//	Client = initailClient,
-			//	Pallets = new List<Pallet>
-			//{
-			//	pallet1,
-			//	pallet2
-			//},
-			//	PerformedBy = "U003"
-			//};
+			
 			issueRepo.AddIssue(issue);
 			issue.ReservePallet(pallet1, "U003");
 			issue.ReservePallet(pallet2, "U003");
@@ -201,72 +126,21 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			//var location3 = new Location
-			//{
-			//	Aisle = 3,
-			//	Bay = 1,
-			//	Height = 1,
-			//	Position = 1
-			//};
-			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);
-			//var pallet1 = new Pallet
-			//{
-			//	PalletNumber = "Q1010",
-			//	DateReceived = DateTime.Now,
-			//	LocationId = 1,
-			//	Status = PalletStatus.Available,
-			//	//ReceiptId = 10,
-			//};
-			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 2, PalletStatus.Available, null, null);
-			//var pallet2 = new Pallet
-			//{
-			//	PalletNumber = "Q1011",
-			//	DateReceived = DateTime.Now,
-			//	LocationId = 2,
-			//	Status = PalletStatus.Available,
-			//	//ReceiptId = 10,
-			//};
 			
-			//var initialCategory = new Category
-			//{
-			//	Name = "name",
-			//	IsDeleted = false
-			//};
-			//var product = Product.Create("TestFull", "123", 1, 10);
-			//var product = new Product
-			//{
-			//	Name = "TestFull",
-			//	SKU = "123",
-			//	AddedItemAd = new DateTime(2024, 1, 1),
-			//	Category = initialCategory,
-			//	IsDeleted = false,
-			//	CartonsPerPallet = 10,
-			//};
+			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);
+			
+			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 2, PalletStatus.Available, null, null);
+			
 			DbContext.Clients.Add(initailClient);
-			//DbContext.Categories.Add(initialCategory);
-			//DbContext.Products.Add(product);
+			
 			DbContext.Locations.AddRange(location1, location2);			
 			DbContext.Pallets.AddRange(pallet1, pallet2);			
 			var issueRepo = new IssueRepo(DbContext);
 			//Act		
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
 			, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
-			//var issue = new Issue
-			//{
-			//	Id = Guid.NewGuid(),
-			//	IssueNumber = 1,
-			//	IssueDateTimeSend = new DateTime(2025, 12, 15),
-			//	Client = initailClient,
-			//	Pallets = new List<Pallet>
-			//{
-			//	pallet1,
-			//	pallet2
-			//},
-			//	PerformedBy = "U003"
-			//};
+			
 			issueRepo.AddIssue(issue);
-			pallet1.AddLocation(location1);
-			pallet2.AddLocation(location2);
 			issue.ReservePallet(pallet1, "U003");
 			issue.ReservePallet(pallet2, "U003");
 			DbContext.SaveChanges();

@@ -84,33 +84,12 @@ namespace MyWerehouse.Domain.Receviving.Models
 			string performedBy, DateTime dateTime, ReceiptStatus receiptStatus, int rampNumber)
 			=> new Receipt(id, receiptNumber, clientId, performedBy, dateTime, receiptStatus, rampNumber);
 
-		public void VerifiedReceipt(string userId)
+		
+		
+		public void Create(string userId)
 		{
-			if (ReceiptStatus != ReceiptStatus.PhysicallyCompleted)
-			{
-				throw new DomainReceiptException("Nie można zweryfikować przyjęcia");
-			}
-			var toReturn = Pallets.Where(p => p.Status == PalletStatus.Receiving).ToList();
-			foreach (var pallet in toReturn)
-			{
-				pallet.ChangeStatus(PalletStatus.InStock);
-				//pallet.Status = PalletStatus.InStock;
-				pallet.AddHistory(PalletStatus.InStock, ReasonMovement.Received, userId);
-			}
-			ReceiptStatus = ReceiptStatus.Verified;
-
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
-			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));
-			//return toReturn;
-		}
-		public void AddHistory(string userId)
-		{
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
-		}
-		public void ChangeStatus(ReceiptStatus receiptStatus, string userId)
-		{
-			ReceiptStatus = receiptStatus;
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			ReceiptStatus = ReceiptStatus.Planned;
+			AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
 		public bool Delete(string userId)
 		{
@@ -145,17 +124,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			ReceiptDateTime = now;
 			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
-		public void AttachPallet(Pallet pallet, Location location, string userId)
-		{
-			if (pallet.Status == PalletStatus.Receiving)
-				throw new DomainException("Already assigned");
-			Pallets.Add(pallet);
-			pallet.AssignToReceipt(Id, location, userId);
-		}
-		public void DetachPallet(Pallet pallet)
-		{
-			Pallets.Remove(pallet);
-		}
+		
 		public void UpdateReceipt(string userId, int clientId)
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
@@ -172,7 +141,35 @@ namespace MyWerehouse.Domain.Receviving.Models
 			ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
 			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
+		public void VerifiedReceipt(string userId)
+		{
+			if (ReceiptStatus != ReceiptStatus.PhysicallyCompleted)
+			{
+				throw new DomainReceiptException("Nie można zweryfikować przyjęcia");
+			}
+			var toReturn = Pallets.Where(p => p.Status == PalletStatus.Receiving).ToList();
+			foreach (var pallet in toReturn)
+			{
+				pallet.ChangeStatus(PalletStatus.InStock);				
+				pallet.AddHistory(PalletStatus.InStock, ReasonMovement.Received, userId);
+			}
+			ReceiptStatus = ReceiptStatus.Verified;
 
+			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));			
+		}
+
+		//Detach i Attach tylko dla update i tworzenia palety z palca - bo porawiam agregat recipti tworzę nowy agregat pallet
+		public void AttachPallet(Pallet pallet)
+		{
+			if (!Pallets.Contains(pallet))
+				Pallets.Add(pallet);
+		}
+		public void DetachPallet(Pallet pallet)
+		{
+			Pallets.Remove(pallet);
+		}
+		//metody pomocnicze
 		private IReadOnlyCollection<HistoryReceiptIssueDetailDto> BuildListPalletsForReceipt()
 		{
 			return Pallets

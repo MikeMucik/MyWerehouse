@@ -37,9 +37,12 @@ i wydaniu towaru, w tym zawiera się kompletacja(wybór policy jak dobierane są
 z naciskiem na wydanie towaru (Issue), picking oraz zarządzanie paletami. 
 
 System wspiera pracę magazynu, w którym towary są składowane na paletach,
- wydawane w kartonach oraz kontrolowane pod kątem daty przydatności (BestBefore).
+ wydawane w kartonach oraz kontrolowane pod kątem daty przydatności (BestBefore). 
 
 Aplikacja została zaprojektowana w sposób umożliwiający precyzyjne planowanie pracy pickerów oraz bezpieczną alokację zasobów magazynowych.
+
+Model uproszczony – emergency flow powoduje rozdzielenie logiki między VirtualPallet i PickingTask - dwa agregaty zmiast jednego, w innym wypadku
+całkiem nowy flow dla emergency picking.
 
 Key Business Concepts:
 

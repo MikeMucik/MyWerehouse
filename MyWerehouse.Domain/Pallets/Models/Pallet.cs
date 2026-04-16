@@ -261,7 +261,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 		}
 
 
-
 		//metody pomocnicze
 		private IReadOnlyCollection<PalletMovementDetail> BuildMovementDetails()
 		{

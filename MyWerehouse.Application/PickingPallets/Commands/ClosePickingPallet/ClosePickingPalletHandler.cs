@@ -49,14 +49,3 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 		}
 	}
 }
-//_pickingPalletRepo.ClosePickingPallet(request.PalletId, request.IssueId);
-//await _mediator.Publish(new ChangeStatusOfPalletNotification(
-//			pallet.Id,
-//			pallet.LocationId,
-//			pallet.LocationId,
-//			ReasonMovement.Picking,
-//			request.UserId,
-//			PalletStatus.ToIssue,
-//			null
-//		), ct);
-//await _mediator.Publish(new AddHistoryForIssueNotification(issue.Id, request.UserId),ct);

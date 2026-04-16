@@ -35,12 +35,8 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 			try
 			{
 				var issueNumber =  await _issueRepo.GetNextNumberOfIssue();
-				//var issue = new Issue(request.DTO.ClientId, request.DTO.PerformedBy, request.Date);
 				var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.Date, request.DTO.PerformedBy);
 				_issueRepo.AddIssue(issue);
-				//issue.IssueNumber = await _issueRepo.GetNextNumberOfIssue();
-
-				//issue.IssueItems = new List<IssueItem>();
 				foreach (var item in request.DTO.Items)
 				{
 					IssueResult addingProducts;
@@ -55,19 +51,11 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 					}
 					addedProducts.Add(addingProducts);
 					issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);
-					//var newItem = new IssueItem
-					//{
-					//	ProductId = item.ProductId,
-					//	IssueNumber = issue.IssueNumber,
-					//	Quantity = item.Quantity,
-					//	BestBefore = item.BestBefore,
-					//};
-					//issue.IssueItems.Add(newItem);
+					
 				}
 				if (addedProducts.Any(r => r.Success == false))
 				{
 					issue.ChangeStatus(IssueStatus.NotComplete);	
-					//issue.IssueStatus = IssueStatus.NotComplete;
 				}
 				issue.AddHistory(request.DTO.PerformedBy);
 				await transaction.CommitAsync(ct);

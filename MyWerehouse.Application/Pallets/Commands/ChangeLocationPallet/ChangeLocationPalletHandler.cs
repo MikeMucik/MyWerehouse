@@ -27,10 +27,6 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 				if (pallet == null) return AppResult<ChangeLocationResults>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
 				//location is occupied?
-				//var oldDestiantion = pallet.Location;
-				//var oldDestiantionId= oldDestiantion.Id;
-				//var oldSnapShot = oldDestiantion.ToSnopShot();
-				//tu front musi przy pomocy backanedu wyliczyć locationId, frontend must find locationdId by data from a form
 				if (request.DestinationLocationId <= 0)
 					return AppResult<ChangeLocationResults>.Fail("niprawidłowa lokalizacja.", ErrorType.NotFound);
 
@@ -52,11 +48,6 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 					};
 					return AppResult<ChangeLocationResults>.Success(answerWhenOccupied, answerWhenOccupied.Message);
 				}
-				//var destLocation = await _locationRepo.GetLocationByIdAsync(request.DestinationLocationId);
-				//if (location == null)
-				//{
-				//	return AppResult<ChangeLocationResults>.Fail($"Brak lokalizacji o numerze {request.DestinationLocationId}.", ErrorType.NotFound);
-				//}
 				var snapShot = location.ToSnopShot();
 				pallet.MoveToLocation(location.Id,snapShot, request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);

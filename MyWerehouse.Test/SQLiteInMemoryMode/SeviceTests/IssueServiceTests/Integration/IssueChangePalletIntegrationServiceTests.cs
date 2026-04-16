@@ -112,8 +112,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			//pallet.MoveToLocation(location, "user");
-			//pallet.AssignToIssue(issue, "user1");
 			//&Act
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId1, pallet.Id, pallet.Id, "tester"));
@@ -201,8 +199,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			//pallet.MoveToLocation(location, "user");
-			//pallet.AssignToIssue(issue, "user1");
 			// Act
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 
@@ -249,8 +245,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			//pallet.MoveToLocation(location, "user");
-			//pallet.AssignToIssue(issue, "user1");
 			//Act
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 			//Assert

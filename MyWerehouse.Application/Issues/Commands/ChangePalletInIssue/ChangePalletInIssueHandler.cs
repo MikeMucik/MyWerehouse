@@ -25,11 +25,9 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 			try
 			{
 				if (_palletRepo.GetPalletByIdAsync(request.NewPalletId) is null)
-					return AppResult<IssueResult>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
-				//throw new NotFoundPalletException(request.NewPalletId);
+					return AppResult<IssueResult>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);				
 				if (_palletRepo.GetPalletByIdAsync(request.OldPalletId) is null)
 					return AppResult<IssueResult>.Fail($"Paleta którą chcesz podmienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
-				//throw new NotFoundPalletException(request.OldPalletId);
 				if (request.OldPalletId == request.NewPalletId)
 					return AppResult<IssueResult>.Fail("Nie można podmienić paletę na tą samą", ErrorType.Conflict);
 				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
@@ -54,8 +52,6 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				if (productOnOldPallet != productOnNewPallet)
 					return AppResult<IssueResult>.Fail("Nie można podmienić palet z różnymi produktami.", ErrorType.Conflict);
 
-				//issue.AssignPallet(palletToAddingIssue, request.UserId);
-				//issue.ReservePallet(palletToAddingIssue, request.UserId);
 				palletToAddingIssue.ReserveToIssue(issue , request.UserId);
 				issue.AttachPallet(palletToAddingIssue);
 				palletToRemoveFromIssue.DetachToIssue(issue.Id, request.UserId);

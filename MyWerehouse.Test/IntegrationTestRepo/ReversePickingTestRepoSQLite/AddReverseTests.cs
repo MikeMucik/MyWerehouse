@@ -100,15 +100,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var reversePickingRepo = new ReversePickingRepo(DbContext);
 			var reversePicking = ReversePicking.Create(pickingPallet.Id, null, product.Id, pickingPallet.ProductsOnPallet.FirstOrDefault().BestBefore,
 				pickingPallet.ProductsOnPallet.FirstOrDefault().Quantity, pickingTask.Id, "UserR");
-			//var reversePicking = new ReversePicking
-			//{
-			//	PickingPalletId = pickingPallet.Id,
-			//	PickingTaskId = pickingTask.Id,
-			//	ProductId = product.Id,
-			//	BestBefore = pickingPallet.ProductsOnPallet.FirstOrDefault().BestBefore,
-			//	Quantity = pickingPallet.ProductsOnPallet.FirstOrDefault().Quantity,
-			//	UserId = "UserR"
-			//};
+			//może zmienić na żródło
 			//Act
 			reversePickingRepo.AddReversePicking(reversePicking);
 			DbContext.SaveChanges();

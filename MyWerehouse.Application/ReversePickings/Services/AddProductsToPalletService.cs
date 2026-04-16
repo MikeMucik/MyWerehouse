@@ -73,24 +73,6 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			newPallet.ChangeStatus(PalletStatus.InStock);
 			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 			var snapShot = location.ToSnopShot();
-			//newPallet.
-			//newPallet.AddLocation(location);
-			//var newPallet = new Pallet
-			//{
-			//	PalletNumber = newNumber,
-			//	DateReceived = DateTime.UtcNow,
-			//	LocationId = 100100,
-			//	Status = PalletStatus.InStock,				
-			//	//ReceiptId = 1000,//to trzeba poprawić żeby taka nowa paleta miała jakieś przyjęcie tylko palety kompletacyjne nie mają ReceiptId
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//	{new ProductOnPallet
-			//		{
-			//			ProductId = task.ProductId,
-			//			DateAdded = DateTime.UtcNow,
-			//			Quantity = task.Quantity,
-			//		 },
-			//	},
-			//};
 			_palletRepo.AddPallet(newPallet);
 			newPallet.CreatePalletFromReservePicking(location.Id, snapShot, userId);
 			//newPallet.AddHistory(PalletStatus.InStock, ReasonMovement.ReversePicking, userId);

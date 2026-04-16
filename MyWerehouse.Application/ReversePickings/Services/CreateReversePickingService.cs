@@ -39,19 +39,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			{
 				listTasks.Add(
 					ReversePicking.Create(palletId, pickingTaskToReverse.VirtualPallet.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
-					pickingTaskToReverse.RequestedQuantity, pickingTaskToReverse.Id, userId));
-					//new ReversePicking
-					//{
-					//	PickingPalletId = palletId,
-					//	Quantity = pickingTaskToReverse.RequestedQuantity,
-					//	ProductId = pickingTaskToReverse.ProductId,
-					//	BestBefore = pickingTaskToReverse.BestBefore,
-					//	Status = ReversePickingStatus.Pending,
-					//	PickingTaskId = pickingTaskToReverse.Id,
-					//	SourcePalletId = pickingTaskToReverse.VirtualPallet.PalletId,
-					//	UserId = userId,
-					//	DateMade = DateOnly.FromDateTime(DateTime.UtcNow)
-					//}); ;
+					pickingTaskToReverse.RequestedQuantity, pickingTaskToReverse.Id, userId));					
 			}
 			foreach (var task in listTasks)
 			{

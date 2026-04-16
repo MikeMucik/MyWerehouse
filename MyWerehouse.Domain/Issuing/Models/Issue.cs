@@ -86,9 +86,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 			foreach (var task in PickingTasks)
 			{
 				task.Cancel(userId, IssueNumber);
-				//task.PickingStatus = PickingStatus.Cancelled;
-				//task.RequestedQuantity = 0;
-				//task.AddHistory(userId, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
 			}
 		}
 		public int GetQuantityForProduct(Guid productId)
@@ -145,8 +142,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			this.PickingTasks.Add(task);
 		}
-
-
 
 		public void ConfirmToLoad(string userId)
 		{

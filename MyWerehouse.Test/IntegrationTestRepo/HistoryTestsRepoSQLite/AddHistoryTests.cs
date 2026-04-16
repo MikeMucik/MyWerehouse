@@ -431,21 +431,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			//DbContext.Clients.Add(initailClient);
 			var reverseTask = ReversePicking.Create(pickingPallet.Id,pallet1.Id,product.Id,DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), 10, pickingTask.Id,"UserReserve");
-			//var reverseTask = new ReversePicking
-			//{
-			//	Id = Guid.NewGuid(),
-			//	PickingPalletId = pickingPallet.Id,
-			//	SourcePalletId = pallet1.Id,
-			//	ProductId = product.Id,
-			//	BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
-			//	Quantity = 10,
-			//	Status = ReversePickingStatus.Pending,
-			//	PickingTaskId = pickingTask.Id,
-			//	DateMade = DateOnly.FromDateTime(DateTime.UtcNow),
-			//	UserId = "UserReserve"
-
-			//};
-
+			
 			var historyReversePicking = new HistoryReversePicking
 			{
 				ReversePickingId = reverseTask.Id,

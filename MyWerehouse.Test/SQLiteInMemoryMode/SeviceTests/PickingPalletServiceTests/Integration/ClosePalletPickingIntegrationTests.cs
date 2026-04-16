@@ -86,7 +86,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 30, PickingStatus.Picked, product.Id,
 				 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), pickingPallet.Id, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)), 30);
-			//virtualPallet.PickingTasks = [pickingTask];
+			
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();

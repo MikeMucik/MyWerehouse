@@ -461,8 +461,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("VirtualPalletId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("VirtualPalletId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -575,6 +575,13 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PerformedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PickingPalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PickingPalletNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -740,9 +747,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<Guid>("IssueId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IssueNumber")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
@@ -845,9 +849,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<Guid>("IssueId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IssueNumber")
-                        .HasColumnType("int");
-
                     b.Property<int>("PickedQuantity")
                         .HasColumnType("int");
 
@@ -867,8 +868,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("RequestedQuantity")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VirtualPalletId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("VirtualPalletId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -926,11 +927,8 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.VirtualPallet", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateMoved")
                         .HasColumnType("datetime2");
@@ -980,7 +978,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("AddedItemAd")
+                    b.Property<DateTime>("AddedAd")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CartonsPerPallet")

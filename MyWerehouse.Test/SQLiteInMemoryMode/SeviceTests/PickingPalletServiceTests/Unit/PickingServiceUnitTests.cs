@@ -135,22 +135,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var a11 = PickingTask.CreateForSeed(pickingGuid11, virtualPallet1.Id, issue1Id, 10, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),0);
 			var pickingGuid12 = Guid.NewGuid();
 			var a12 = PickingTask.CreateForSeed(pickingGuid12, virtualPallet1.Id, issue2Id, 15, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),0);
-			//virtualPallet1.PickingTasks = new List<PickingTask> { a11, a12 };
+			
 			var virtualPallet2 = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 50, location2.Id, new DateTime(2025, 8, 12));			
 			var pickingGuid21 = Guid.NewGuid();
 			var a21 = PickingTask.CreateForSeed(pickingGuid21, virtualPallet2.Id, issue1Id, 20, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
 			var pickingGuid22 = Guid.NewGuid();
 			var a22 = PickingTask.CreateForSeed(pickingGuid22, virtualPallet2.Id, issue3Id, 25, PickingStatus.Allocated, product1.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
-			//virtualPallet2.PickingTasks = new List<PickingTask> { a21, a22 };
+			
 			var virtualPallet3 = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet3.Id, 50, location3.Id, new DateTime(2025, 8, 12));
 			var pickingGuid31 = Guid.NewGuid();
 			var a31 = PickingTask.CreateForSeed(pickingGuid31, virtualPallet3.Id, issue2Id, 15, PickingStatus.Allocated, product2.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
-			//virtualPallet3.PickingTasks = new List<PickingTask> { a31 };
+			
 			var virtualPallet4 = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet4.Id, 40, location4.Id, new DateTime(2025, 8, 12));
 			var pickingGuid41 = Guid.NewGuid();
 			var a41 = PickingTask.CreateForSeed(pickingGuid41, virtualPallet4.Id, issue1Id, 10, PickingStatus.Allocated, product2.Id, null, null, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), 0);
-			//virtualPallet4.PickingTasks = new List<PickingTask> { a41 };
-
+			
 			DbContext.PickingTasks.AddRange(a11, a12, a21, a22, a31, a41);
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3, virtualPallet4);
 			await DbContext.SaveChangesAsync();

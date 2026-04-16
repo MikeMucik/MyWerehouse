@@ -160,35 +160,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			{
 				context.VirtualPallets.AddRange(
 					VirtualPallet.CreateForSeed(vpId1, palletGuid5, 200, 3, DateTime.UtcNow.AddDays(-1)),
-					//new VirtualPallet
-					//{
-					//	Id = 1,
-					//	//PalletId = "Q1100",
-					//	PalletId = palletGuid5,
-					//	InitialPalletQuantity = 200,
-					//	LocationId = 3,
-					//	DateMoved = DateTime.UtcNow.AddDays(-1)
-					//},
 					VirtualPallet.CreateForSeed(vpId2, palletGuid6, 150, 3, new DateTime(2024, 6, 6)),
-					//new VirtualPallet
-					//{
-					//	Id = 2,
-					//	//PalletId = "Q1101",
-					//	PalletId = palletGuid6,
-					//	InitialPalletQuantity = 150,
-					//	LocationId = 3,
-					//	DateMoved = new DateTime(2024, 6, 6),
-					//},
-					VirtualPallet.CreateForSeed(vpId3, palletGuid8, 300, 3, DateTime.UtcNow.AddDays(-1)));
-					//new VirtualPallet
-					//{
-					//	Id = 3,
-					//	//PalletId = "Q1200",
-					//	PalletId = palletGuid8,
-					//	InitialPalletQuantity = 300,
-					//	LocationId = 3,
-					//	DateMoved = DateTime.UtcNow.AddDays(-1)
-					//});
+					VirtualPallet.CreateForSeed(vpId3, palletGuid8, 300, 3, DateTime.UtcNow.AddDays(-1)));					
 			}
 			var pickingId1 = Guid.Parse("11111111-1111-2222-1111-111111111111");
 			var pickingId2 = Guid.Parse("11111111-2222-2222-1111-111111111111");
@@ -355,31 +328,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.ReversePickings.AddRange(
 					ReversePicking.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),10,pickingId2,"UserR"),
 					ReversePicking.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), 10, pickingId5, "UserR")
-				//new ReversePicking
-				//	{
-				//		Id = reversePickingTaskId1,
-				//		PickingTaskId = pickingId2,
-				//		ProductId = productId1,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-				//		//PickingPalletId = "Q5000",
-				//		PickingPalletId = palletGuid9,
-				//		Quantity = 10,
-				//		Status = ReversePickingStatus.Pending,
-				//		UserId = "UserR"
-
-				//	},
-				//	new ReversePicking
-				//	{
-				//		Id = reversePickingTaskId2,
-				//		PickingTaskId = pickingId5,
-				//		ProductId = productId1,
-				//		BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)),
-				//		//PickingPalletId = "Q5000",
-				//		PickingPalletId = palletGuid9,
-				//		Quantity = 10,
-				//		Status = ReversePickingStatus.Pending,
-				//		UserId = "UserR"
-				//	}
+				
 				);
 			}
 			context.SaveChanges();

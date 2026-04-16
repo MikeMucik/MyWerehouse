@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MyWerehouse.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class WarehouseDataBase : Migration
+    public partial class InitialDataBase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -88,6 +88,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ReversePickingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PickingPalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PickingPalletNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PalletSourceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PalletSourceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PalletDestinationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -235,7 +237,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
                     SKU = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, collation: "SQL_Latin1_General_CP1_CI_AS"),
-                    AddedItemAd = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AddedAd = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CartonsPerPallet = table.Column<int>(type: "int", nullable: false)
@@ -408,7 +410,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IssueNumber = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     BestBefore = table.Column<DateOnly>(type: "date", nullable: false),
@@ -620,8 +621,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                 name: "VirtualPallets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     InitialPalletQuantity = table.Column<int>(type: "int", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
@@ -683,7 +683,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     StatusAfter = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    VirtualPalletId = table.Column<int>(type: "int", nullable: true)
+                    VirtualPalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -706,9 +706,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VirtualPalletId = table.Column<int>(type: "int", nullable: true),
+                    VirtualPalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IssueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IssueNumber = table.Column<int>(type: "int", nullable: false),
                     RequestedQuantity = table.Column<int>(type: "int", nullable: false),
                     PickingStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),

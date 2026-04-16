@@ -51,7 +51,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 		}
 		public void AddQuantity(int quantity)
 		{
-			//if (quantity < 0) throw new InvalidDataException("Value can't be below zero.");
 			Quantity += quantity;
 			if (Quantity < 0) throw new InvalidDataException("Value can't be below zero.");
 		}

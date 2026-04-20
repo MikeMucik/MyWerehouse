@@ -115,7 +115,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			//Act 2 - wykonanie pickingu
 			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);
 			var toPicking = new PickingTaskDTO
@@ -270,7 +270,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			//Act 2 - wykonanie pickingu
 			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);
 			var toPicking = new PickingTaskDTO
@@ -372,66 +372,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			//var pallet1 = new Pallet
-			//{
-			//	PalletNumber = "P1",
-			//	Location = location,
-			//	Status = PalletStatus.Available,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//			{
-			//				new ProductOnPallet { Product = product, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
-			//			}
-			//};
+			
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
 			pallet2.AddProduct(product.Id, 8, new DateOnly(2026, 1, 1));
-			//var pallet2 = new Pallet
-			//{
-			//	PalletNumber = "P2",
-			//	Location = location2,
-			//	Status = PalletStatus.Available,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//			{
-			//				new ProductOnPallet { Product = product, Quantity = 8, BestBefore = new DateOnly(2026,1,1) }
-			//			}
-			//};
+			
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
 			pallet3.AddProduct(product.Id, 7, new DateOnly(2026, 1, 1));
-			//var pallet3 = new Pallet
-			//{
-			//	PalletNumber = "P3",
-			//	Location = location3,
-			//	Status = PalletStatus.Available,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//			{
-			//				new ProductOnPallet { Product = product, Quantity = 7, BestBefore = new DateOnly(2026,1,1) }
-			//			}
-			//};
+			
 			var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
 			pallet4.AddProduct(product.Id, 5, new DateOnly(2026, 1, 1));
-			//var pallet4 = new Pallet
-			//{
-			//	PalletNumber = "P4",
-			//	Location = location4,
-			//	Status = PalletStatus.Available,
-			//	ProductsOnPallet = new List<ProductOnPallet>
-			//			{
-			//				new ProductOnPallet { Product = product, Quantity = 5, BestBefore = new DateOnly(2026,1,1) }
-			//			}
-			//};
 			
-			//receipt.AttachPallet(pallet1, location, "UserMakae");
-			//receipt.AttachPallet(pallet2, location2, "UserMakae");
-			//receipt.AttachPallet(pallet3, location3, "UserMakae");
-			//receipt.AttachPallet(pallet4, location4, "UserMakae");
-			//var recipt = new Receipt
-			//{
-			//	ReceiptNumber = 1,
-			//	ReceiptDateTime = DateTime.UtcNow.AddDays(-1),
-			//	ReceiptStatus = ReceiptStatus.Verified,
-			//	PerformedBy = "UserMakae",
-			//	Client = client,
-			//	Pallets = [pallet1, pallet2, pallet3, pallet4]
-			//};
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -455,7 +405,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			//Act 2 - wykonanie pickingu
 			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);
 			var toPicking = new PickingTaskDTO

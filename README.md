@@ -61,6 +61,7 @@ BestBefore – data przydatności, brana pod uwagę przy alokacji palet
 Pallet Movements – rejestr zmian lokalizacji palet oraz jej historia
 
 HistoryReceipt, HistoryIssue, HistoryPicking, HistoryReversePicking - zapis historii operacji
+Lokalizacja w historii to uproszczony wersja jako string - docelowo powinno być obiekt uproszczony klasy location
 
 Architecture"
 

@@ -22,7 +22,7 @@ namespace MyWerehouse.Server.Controllers
 			_mediator = mediator;
 		}
 		// stworzenie palety
-		[HttpPost]
+		[HttpPost("add")]
 		public async Task<IActionResult> Create(CreateNewPalletCommand command)
 		{
 			var result = await _mediator.Send(command);
@@ -47,7 +47,7 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new GetPalletToEditQuery(id))).ToActionResult();		
 
 		// update palety
-		[HttpPut]
+		[HttpPut("update")]
 		public async Task<IActionResult> Update(UpdatePalletCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 

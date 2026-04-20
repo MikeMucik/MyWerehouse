@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Contains(updatedIssue.Pallets, p => p.PalletNumber == "P2");
 
 			Assert.Equal(PalletStatus.Available, p1.Status);
-			Assert.Equal(PalletStatus.InTransit, p2.Status);
+			Assert.Equal(PalletStatus.LockedForIssue, p2.Status);
 			Assert.Equal(IssueStatus.ChangingPallet, updatedIssue.IssueStatus);
 		}
 

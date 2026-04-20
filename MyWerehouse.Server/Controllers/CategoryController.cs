@@ -17,7 +17,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Dodaj kategorię
-		[HttpPost]
+		[HttpPost("add")]
 		public async Task<IActionResult> Add(CategoryDTO category)
 		{
 			var result = await _categoryService.AddCategoryAsync(category);
@@ -41,7 +41,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _categoryService.DeleteCategoryAsync(id);
 			return Ok(result);
 		}
-		[HttpGet]
+		[HttpGet("all")]
 		public async Task<IActionResult> GetAll(int page, int size)//można zamienić na [FromQuery] +DTO
 		{
 			var result = await _categoryService.GetCategoriesAsync(page,size);

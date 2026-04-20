@@ -112,7 +112,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(issue);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
-			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
+			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			// Picking pallet
 			var palletToPicking = DbContext.Pallets.FirstOrDefault(p => p.PalletNumber == "P2");
 			var pickingPallet = DbContext.VirtualPallets.Include(pp => pp.PickingTasks).SingleOrDefault();
@@ -242,7 +242,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(issue);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
-			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
+			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			//Picking pallet
 			var palletToPickingP2 = DbContext.Pallets.FirstOrDefault(p => p.PalletNumber == "P2");
 			var pickingPalletP2 = DbContext.VirtualPallets.Include(pp => pp.PickingTasks).FirstOrDefault(x => x.PalletId == pallet2.Id);
@@ -400,7 +400,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var issue = DbContext.Issues.First();
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
-			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
+			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			// Picking pallet
 			var partialPallets = DbContext.Pallets.Where(p => p.Status == PalletStatus.ToPicking).ToList();
 			Assert.Equal(2, partialPallets.Count); // P3, P5
@@ -571,7 +571,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var issue = DbContext.Issues.FirstOrDefault(i => i.IssueNumber == 2);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
-			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.InTransit, p.Status));
+			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			// Picking pallet
 			var partialPallets = DbContext.Pallets.Where(p => p.Status == PalletStatus.ToPicking).ToList();
 			Assert.Equal(2, partialPallets.Count); // P3, P5

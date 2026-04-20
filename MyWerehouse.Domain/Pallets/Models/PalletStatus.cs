@@ -17,7 +17,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		Archived = 6,
 		Receiving = 7,
 		InStock = 8,
-		InTransit = 9,//do zlecenia ale jeszcze nie zatwierdzona
+		LockedForIssue = 9,//do zlecenia ale jeszcze nie zatwierdzona
 		Picking = 10, //destination	
 		Cancelled = 11, //anulowana				  
 		ReversePicking = 12,//stworzona z pickingu

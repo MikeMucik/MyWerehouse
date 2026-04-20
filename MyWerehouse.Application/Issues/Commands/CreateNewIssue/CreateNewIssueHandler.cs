@@ -50,8 +50,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 						addingProducts = IssueResult.Ok(result.Message, item.ProductId);
 					}
 					addedProducts.Add(addingProducts);
-					issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);
-					
+					issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);					
 				}
 				if (addedProducts.Any(r => r.Success == false))
 				{
@@ -65,7 +64,6 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 			catch (DomainException ex)
 			{
 				await transaction.RollbackAsync(ct);
-
 				//addedProducts.Add(IssueResult.Fail(ex.Message));
 				return AppResult<List<IssueResult>>.Fail(ex.Message, ErrorType.Technical);
 			}

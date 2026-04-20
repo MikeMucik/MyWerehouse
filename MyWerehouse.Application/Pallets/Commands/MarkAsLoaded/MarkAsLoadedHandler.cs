@@ -35,13 +35,14 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 				var allowedStatuses = new[]
 				{
 					PalletStatus.ToIssue,
-					PalletStatus.InTransit,
+					PalletStatus.LockedForIssue,
 					PalletStatus.Available,
 					PalletStatus.InStock
 				};
 				if (!allowedStatuses.Contains(pallet.Status))
 					return AppResult<Unit>.Fail("Paleta nie ma statusu do załadowania");
-				pallet.AddHistory(PalletStatus.Loaded, ReasonMovement.Loaded, request.UserId);
+				pallet.ChangeStatus(PalletStatus.Loaded);//
+				pallet.AddHistory(ReasonMovement.Loaded, request.UserId, pallet.Location.ToSnopShot());
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, $"Paleta {request.PalletId} została załadowana.");

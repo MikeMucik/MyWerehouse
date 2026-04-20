@@ -47,6 +47,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingDay = pickingDay;
 			PickedQuantity = pickedQuantity;
 		}
+
 		public static PickingTask Create(Guid? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore, Guid? pickingPalletId,
 			DateOnly? pickingDay, int pickedQuantity) =>
@@ -85,21 +86,17 @@ namespace MyWerehouse.Domain.Picking.Models
 			if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
 			this.VirtualPalletId = virtualPalletId;
 		}
-		//public void SetVirtualPalletEntity(VirtualPallet virtualPallet)
-		//{
-		//	//if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
-		//	this.VirtualPallet = virtualPallet;
-		//}
+		
 		public void ReduceQuantity(int quantity)
 		{
 			RequestedQuantity -= quantity;
 		}
+
 		public void MarkPicked(Guid pickingPalletId)
 		{
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
 				throw new InvalidOperationException("PickingTask already picked.");
 			if (pickingPalletId == Guid.Empty)
-				//if (pickingPalletId == null)
 				throw new ArgumentException("Picking pallet id is required.");
 			//czy dołączyć do Issue?
 			PickedQuantity = RequestedQuantity;
@@ -111,12 +108,12 @@ namespace MyWerehouse.Domain.Picking.Models
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
 				throw new InvalidOperationException("PickingTask already picked.");
 			if (pickingPalletId == Guid.Empty)
-				//if (pickingPalletId == null)
 				throw new ArgumentException("Picking pallet id is required.");
 			PickedQuantity = pickedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.PickedPartially;
 		}
+
 		public void AddHistory(string userId, Guid palletId, string palletNumber,int issueNumber, PickingStatus statusBefore, PickingStatus statusAfter, int quantityPicked)
 		{
 			this.AddDomainEvent(new CreateHistoryPickingNotification(

@@ -86,7 +86,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				var issueItem = new List<IssueItem> { IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)) };
 				var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-7),
 				DateTime.UtcNow.AddDays(7), "UserInit", issueStatus, issueItem);
-				var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.InTransit, null, issue.Id);
+				var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
 				pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet1);
 				var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToPicking, null, issue.Id);

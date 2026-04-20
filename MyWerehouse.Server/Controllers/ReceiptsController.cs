@@ -23,7 +23,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Stworzenie pustego przyjęcia
-		[HttpPost]
+		[HttpPost("new")]
 		public async Task<IActionResult> Create(CreateReceiptPlanCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 

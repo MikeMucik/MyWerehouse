@@ -45,7 +45,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
 					}
 					foreach (var pallet in listPalletsOfReceipt)
 					{
-						pallet.DetachFromReceipt(request.UserId);
+						pallet.DetachFromReceipt(request.UserId, pallet.Location.ToSnopShot());
 					}
 					receipt.Cancel(request.UserId);
 					await _werehouseDbContext.SaveChangesAsync(ct);

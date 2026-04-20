@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.DomainExceptions
 {
-	public class InvalidUserIdException : DomainException
+	public class WrongDataException :DomainException
 	{
-		public InvalidUserIdException(string userId)
-			: base($"Invalid {userId} or missing user ID.") { }
+		public WrongDataException()
+		:base("Wrong data, date can't be from past."){ }
 	}
 }

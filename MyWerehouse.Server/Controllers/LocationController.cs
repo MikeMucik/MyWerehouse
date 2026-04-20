@@ -20,7 +20,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _locationService.GetLocationServiceAsync(id);
 			return Ok(result);
 		}
-		[HttpPost]
+		[HttpPost("add")]
 		public async Task<IActionResult> Add(LocationDTO locationDTO)
 		{
 			var result = await _locationService.AddLocationServiceAsync(locationDTO);
@@ -44,7 +44,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = _locationService.PrepareLocationsAsync(bay, startAisle, endAisle, amountPosition, amountHeigt);
 			return Ok(result);
 		}
-		[HttpGet]
+		[HttpGet("byFilter")]
 		public async Task<IActionResult> GetByFilter(int bay, int aisle, int position, int height)
 		{
 			var result = await _locationService.FindLocationAsync(bay, aisle, position, height);

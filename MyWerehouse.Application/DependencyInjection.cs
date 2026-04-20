@@ -30,7 +30,7 @@ namespace MyWerehouse.Application
 			services.AddTransient<IInventoryService, InventoryService>();//do wywalenia??
 			services.AddTransient<ILocationService, LocationService>();
 			services.AddTransient<IProductService, ProductService>();
-																				   //services.AddAutoMapper(Assembly.GetExecutingAssembly());
+			 //services.AddAutoMapper(Assembly.GetExecutingAssembly());
 			services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
 			services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 			services.AddMediatR(cfg =>
@@ -40,10 +40,7 @@ namespace MyWerehouse.Application
 			});
 			//new services
 			services.AddScoped<IAddPickingTaskToIssueService, AddPickingTaskToIssueService>();
-			services.AddScoped<ICreatePalletOrAddToPalletService, CreatePalletOrAddToPalletService>();
 			services.AddScoped<IProcessPickingActionService, ProcessPickingActionService>();
-			services.AddScoped<IReduceAllocationService, ReduceAllocationService>();
-			services.AddScoped<IGetVirtualPalletsService, GetVirtualPalletsService>();
 			services.AddScoped<IGetProductCountService, GetProductCountService>();
 			services.AddScoped<IGetNumberPalletsAndRestService, GetNumberPalletsAndRestService>();
 			services.AddScoped<IGetAvailablePalletsByProductService, GetAvailablePalletsByProductService>();

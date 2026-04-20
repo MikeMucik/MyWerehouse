@@ -9,7 +9,7 @@ namespace MyWerehouse.Application.Products.Services
 {
 	public interface IGetNumberPalletsAndRestService
 	{
-		Task<AssignPallestResult> GetNumbers(Guid productId, int AmountUnits);
+		//Task<AssignPallestResult> GetNumbers(Guid productId, int AmountUnits);
 		Task<int> GetBackOnlyFullPallets(Guid productId, int amountUnits);
 	}
 }

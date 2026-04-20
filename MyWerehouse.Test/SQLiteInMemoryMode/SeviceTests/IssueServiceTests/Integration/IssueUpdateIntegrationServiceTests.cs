@@ -75,7 +75,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var updateDto = new UpdateIssueDTO
@@ -97,7 +97,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			//Assert.Equal("User2", updatedIssue.PerformedBy);
 			Assert.Single(updatedIssue.Pallets);
-			Assert.Equal(PalletStatus.InTransit, updatedIssue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, updatedIssue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
@@ -188,7 +188,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 										  //czy jakaś inna też Transit?? nie do końca !!
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
@@ -230,7 +230,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 			Assert.Single(updatedIssue.Pallets);
-			Assert.Equal(PalletStatus.InTransit, updatedIssue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, updatedIssue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
@@ -343,7 +343,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.IssueNumber == 2);
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var updateDto = new UpdateIssueDTO
@@ -368,7 +368,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 			Assert.Single(updatedIssue.Pallets);
-			Assert.Equal(PalletStatus.InTransit, updatedIssue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, updatedIssue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
@@ -468,7 +468,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			//issue.IssueStatus = IssueStatus.ConfirmedToLoad;
 			//Assert
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var updateDto = new UpdateIssueDTO
@@ -598,7 +598,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
@@ -712,7 +712,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
@@ -860,7 +860,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Equal(2, issue.Pallets.Count); // powinien być przypisany P1 p2
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
@@ -1005,7 +1005,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
@@ -1111,7 +1111,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
@@ -1208,7 +1208,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var updateDto = new UpdateIssueDTO
@@ -1290,7 +1290,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 		var issue = DbContext.Issues.Include(i => i.Pallets).First();
 		Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: inny numer id
 			var updateDto = new UpdateIssueDTO

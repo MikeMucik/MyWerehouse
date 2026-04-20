@@ -13,14 +13,11 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
 	public class CreateNewPalletHandler(WerehouseDbContext werehouseDbContext,
-		IPalletRepo palletRepo,
-		IMapper mapper,
-		IProductRepo productRepo,
+		IPalletRepo palletRepo,	IProductRepo productRepo,
 		ILocationRepo locationRepo) : IRequestHandler<CreateNewPalletCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
-		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IMapper _mapper = mapper;
+		private readonly IPalletRepo _palletRepo = palletRepo;		
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 
@@ -36,14 +33,11 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 				}
 				var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
 				var pallet = Pallet.Create(newIdForPallet, request.RampNumber);
-
 				var productOnPallet = new List<ProductOnPallet>();
-
 				foreach(var product in request.DTO.ProductsOnPallet)
 				{
 					pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
 				}
-
 				_palletRepo.AddPallet(pallet);
 				var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
 				if (location == null)
@@ -52,7 +46,6 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 				}
 				var snapShot = location.ToSnopShot();
 				pallet.AssignToWarehouse(location.Id, snapShot, request.UserId);
-
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				

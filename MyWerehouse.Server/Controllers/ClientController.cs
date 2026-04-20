@@ -16,7 +16,7 @@ namespace MyWerehouse.Server.Controllers
 		{
 			_clientService = clientService;
 		}
-		[HttpPost]
+		[HttpPost("add")]
 		public async Task<IActionResult> Add(ClientDTO clientDTO)
 		{
 			var result = await _clientService.AddClientAsync(clientDTO);
@@ -40,7 +40,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _clientService.GetClientToEditAsync(id);
 			return Ok(result);
 		}
-		[HttpGet]
+		[HttpGet("all")]
 		public async Task<IActionResult> GetAll(int page, int size)//można zamienić na [FromQuery] +DTO
 		{
 			var result = await _clientService.GetAllClientsAsync(page, size);

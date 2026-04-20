@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ReversePickings.Services;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -30,20 +31,19 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			try
 			{
-				if(command.Strategy == ReversePickingStrategy.AddToExistingPallet)
+				//walidacja
+				if (command.Strategy == ReversePickingStrategy.AddToExistingPallet)
 				{
 					if (command.Pallets.Count == 0)
 					{
-						return AppResult< ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.");
+						return AppResult<ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.");
 					}
 				}
-
 				var reversePicking = await _reversePickingRepo.GetReversePickingAsync(command.TaskReversedId);
 				if (reversePicking is null)
 				{
 					return AppResult<ReversePickingResult>.Fail("Brak zadania do dekompletacji", ErrorType.NotFound);
 				}
-				
 				if (!await _productRepo.IsExistProduct(reversePicking.ProductId))
 					return AppResult<ReversePickingResult>.Fail($"Produkt o numerze {reversePicking.ProductId} nie istnieje.", ErrorType.NotFound);
 				var pickingPallet = await _palletRepo.GetPalletByIdAsync(command.PickingPalletId);
@@ -51,19 +51,20 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				{
 					return AppResult<ReversePickingResult>.Fail("Brak palety do dekompletacji", ErrorType.NotFound);
 				}
-
-				var productOnPallet = pickingPallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == reversePicking.ProductId);//
-				reversePicking.ChangeStatus(ReversePickingStatus.InProgress);
-				//reversePicking.Status = ReversePickingStatus.InProgress;
-				string? sourcePalletId = null;
-				string? destinationPalletId = null;
+				
 				//Do zmiany
 				var issueId = reversePicking.PickingTask.IssueId;
 				var issueNumber = reversePicking.PickingTask.Issue.IssueNumber;
-				if (issueId == null)
+				if (issueId == Guid.Empty)
 				{
 					return AppResult<ReversePickingResult>.Fail($"Zamówienie o numerze {issueId} nie zostało znalezione.", ErrorType.NotFound);
 				}
+				//
+				//produkt
+				var productOnPallet = pickingPallet.ProductsOnPallet.SingleOrDefault(p => p.ProductId == reversePicking.ProductId);//
+				reversePicking.ChangeStatus(ReversePickingStatus.InProgress);
+				//string? sourcePalletId = null;
+				//string? destinationPalletId = null;
 				switch (command.Strategy)
 				{
 					case ReversePickingStrategy.ReturnToSource:
@@ -98,8 +99,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				productOnPallet.SetQuantity(0);
 				if (pickingPallet.ProductsOnPallet.All(x => x.Quantity == 0))
 				{
-					//pickingPallet.Status = PalletStatus.Archived;
-					pickingPallet.ToArchive(command.UserId);
+					pickingPallet.ToArchive(command.UserId, ReasonMovement.ReversePicking, pickingPallet.Location.ToSnopShot());
 				}
 				else
 				{
@@ -110,7 +110,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return AppResult<ReversePickingResult>.Success(result);
-			}			
+			}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync(ct);

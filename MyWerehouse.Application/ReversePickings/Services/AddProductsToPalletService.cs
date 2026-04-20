@@ -11,33 +11,28 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Services
 {
-	public class AddProductsToPalletService : IAddProductsToPalletService
+	public class AddProductsToPalletService(
+		IPalletRepo palletRepo,
+		IProductRepo productRepo,
+		ILocationRepo locationRepo) : IAddProductsToPalletService
 	{
-		private readonly IPalletRepo _palletRepo;
-		private readonly IProductRepo _productRepo;
-		private readonly ILocationRepo _locationRepo;
-		public AddProductsToPalletService(
-			IPalletRepo palletRepo,
-			IProductRepo productRepo,
-			ILocationRepo locationRepo)
-		{			
-			_palletRepo = palletRepo;
-			_productRepo = productRepo;
-			_locationRepo = locationRepo;
-		}
-					
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IProductRepo _productRepo = productRepo;
+		private readonly ILocationRepo _locationRepo = locationRepo;
+
 		public ReversePickingResult AddProductsToSourcePallet(ReversePicking reversePicking, string userId)
 		{
 			var sourcePallet = reversePicking.PickingTask.VirtualPallet.Pallet;
 			if (sourcePallet.Status == PalletStatus.Available || sourcePallet.Status == PalletStatus.ToPicking)
 			{
-				sourcePallet.ProductsOnPallet.Single().AddQuantity(reversePicking.Quantity);
-				//sourcePallet.ProductsOnPallet.Single().Quantity += reversePicking.Quantity;
+				sourcePallet.ProductsOnPallet.Single().IncreaseQuantity(reversePicking.Quantity);
 			}
 			else
+			{
 				return ReversePickingResult.Fail("Paleta źródłowa ma nieprawidłowy status.");
-			sourcePallet.AddHistory(sourcePallet.Status, ReasonMovement.ReversePicking, userId);
-			
+			}
+			sourcePallet.AddHistory(ReasonMovement.ReversePicking, userId, sourcePallet.Location.ToSnopShot());
+
 			return ReversePickingResult.Ok("Dodano towar do palety źródłowej", reversePicking.ProductId, reversePicking.SourcePalletId);
 		}
 		public async Task<ReversePickingResult> AddToExistingPallet(ReversePicking task, List<Pallet> pallets, string userId)
@@ -48,7 +43,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			if (pallets.Count == 0)
 				return ReversePickingResult.Fail("Brak palet do uzupełnienia");
 			if (pallets.Any(p => p.ProductsOnPallet.Single().Quantity >= cartonsOnPallet))
-				return ReversePickingResult.Fail("Próba uzupełnienia pełnej palety");				
+				return ReversePickingResult.Fail("Próba uzupełnienia pełnej palety");
 			foreach (var pallet in pallets)
 			{
 				if (quantityToAdded <= 0)
@@ -57,11 +52,10 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				var freeSpace = cartonsOnPallet - quantityOnPallet;
 				if (freeSpace <= 0) continue;
 				var addedAmount = Math.Min(quantityToAdded, freeSpace);
-				pallet.ProductsOnPallet.Single().AddQuantity(addedAmount);
-				//pallet.ProductsOnPallet.Single().Quantity += addedAmount;
+				pallet.ProductsOnPallet.Single().IncreaseQuantity(addedAmount);
 				quantityToAdded -= addedAmount;
-				pallet.AddHistory(pallet.Status, ReasonMovement.ReversePicking, userId);				
-			}			
+				pallet.AddHistory(ReasonMovement.ReversePicking, userId, pallet.Location.ToSnopShot());
+			}
 			return ReversePickingResult.Ok("Dodano towar.", pallets);
 		}
 
@@ -74,8 +68,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 			var snapShot = location.ToSnopShot();
 			_palletRepo.AddPallet(newPallet);
-			newPallet.CreatePalletFromReservePicking(location.Id, snapShot, userId);
-			//newPallet.AddHistory(PalletStatus.InStock, ReasonMovement.ReversePicking, userId);
+			newPallet.CreateNewPalletFromReservePicking(location.Id, snapShot, userId);
 			return ReversePickingResult.Ok("Dodano towar do nowej palety.", task.ProductId, newPallet.Id, newPallet.PalletNumber);
 		}
 	}

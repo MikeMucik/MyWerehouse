@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.DomainExceptions.PalletExceptions;
 using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Domain.Pallets.Models
@@ -46,13 +47,26 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void SetQuantity(int quantity)
 		{
-			if (quantity < 0) throw new InvalidDataException("Value can't be below zero.");
+			if (quantity < 0) throw new InsufficientQunatityException(PalletId);
 			Quantity = quantity;
 		}
-		public void AddQuantity(int quantity)
+		public void ChangeQuantity(int quantity)
 		{
+			var newQuantity = Quantity + quantity;
+			if (newQuantity <= 0) throw new InvalidQunatityException(PalletId);
+			Quantity = newQuantity;
+		}
+		public void IncreaseQuantity(int quantity)
+		{			
+			if (quantity <= 0) throw new InvalidQunatityException(PalletId);
 			Quantity += quantity;
-			if (Quantity < 0) throw new InvalidDataException("Value can't be below zero.");
+		}
+		public void DecreaseQuantity(int quantity)
+		{
+			if (quantity <= 0) throw new InvalidQunatityException(PalletId);
+			var newQuantity = Quantity - quantity;
+			if (newQuantity < 0) throw new InsufficientQunatityException(PalletId);
+			Quantity = newQuantity;
 		}
 		public void SetBestBefore(DateOnly? bestBefore)
 		{

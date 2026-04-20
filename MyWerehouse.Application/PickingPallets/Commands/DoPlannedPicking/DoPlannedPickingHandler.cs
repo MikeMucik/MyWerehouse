@@ -15,31 +15,22 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 {
-	public class DoPlannedPickingHandler : IRequestHandler<DoPlannedPickingCommand, AppResult<Unit>>
+	public class DoPlannedPickingHandler(IPickingTaskRepo pickingTaskRepo,
+		IPalletRepo palletRepo,
+		IIssueRepo issueRepo,
+		IPickingPalletRepo pickingPalletRepo,
+		WerehouseDbContext werehouseDbContext,
+		IAddPickingTaskToIssueService addPickingTaskToIssueService,
+		IProcessPickingActionService processPickingActionService) : IRequestHandler<DoPlannedPickingCommand, AppResult<Unit>>
 	{
-		private readonly IPickingTaskRepo _pickingTaskRepo;
-		private readonly IPalletRepo _palletRepo;
-		private readonly IIssueRepo _issueRepo;
-		private readonly IPickingPalletRepo _pickingPalletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService;
-		private readonly IProcessPickingActionService _processPickingActionService;
-		public DoPlannedPickingHandler(IPickingTaskRepo pickingTaskRepo,
-			IPalletRepo palletRepo,
-			IIssueRepo issueRepo,
-			IPickingPalletRepo pickingPalletRepo,
-			WerehouseDbContext werehouseDbContext,
-			IAddPickingTaskToIssueService addPickingTaskToIssueService,
-			IProcessPickingActionService processPickingActionService)
-		{
-			_pickingTaskRepo = pickingTaskRepo;
-			_palletRepo = palletRepo;
-			_issueRepo = issueRepo;
-			_pickingPalletRepo = pickingPalletRepo;
-			_werehouseDbContext = werehouseDbContext;
-			_addPickingTaskToIssueService = addPickingTaskToIssueService;
-			_processPickingActionService = processPickingActionService;
-		}
+		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
+		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
+
 		public async Task<AppResult<Unit>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
 		{
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
@@ -96,7 +87,8 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 						return AppResult<Unit>.Fail(newVirtualPallet.Message, ErrorType.Conflict);
 					}
 					//pallet lock with non-conformity
-					sourcePallet.AddHistory(PalletStatus.OnHold, ReasonMovement.Correction, request.UserId);
+					sourcePallet.ChangeStatus(PalletStatus.OnHold);
+					sourcePallet.AddHistory(ReasonMovement.Correction, request.UserId, sourcePallet.Location.ToSnopShot());
 					await _werehouseDbContext.SaveChangesAsync(ct);
 					await transaction.CommitAsync(ct);
 					return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety do kompletacji.");

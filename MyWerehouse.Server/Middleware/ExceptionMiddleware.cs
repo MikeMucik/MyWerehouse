@@ -19,8 +19,9 @@ namespace MyWerehouse.Server.Middleware
 			}					
 			catch (DomainException ex)
 			{
-				context.Response.StatusCode = StatusCodes.Status400BadRequest;
-				await context.Response.WriteAsJsonAsync(ex.Message);
+				await HandleDomainException(context, ex);
+				//context.Response.StatusCode = StatusCodes.Status400BadRequest;
+				//await context.Response.WriteAsJsonAsync(ex.Message);
 			}
 			catch (ValidationException ex)
 			{
@@ -39,6 +40,16 @@ namespace MyWerehouse.Server.Middleware
 			{
 				await HandleExceptionAsync(context, ex);				
 			}
+		}
+		private static Task HandleDomainException(HttpContext context, Exception ex)
+		{
+			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			var respone = new
+			{
+				error = ex.GetType().Name,
+				message = ex.Message,
+			};
+			return context.Response.WriteAsJsonAsync(respone);
 		}
 		private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
 		{

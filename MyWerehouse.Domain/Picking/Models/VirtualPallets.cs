@@ -15,7 +15,6 @@ namespace MyWerehouse.Domain.Picking.Models
 	public class VirtualPallet
 	{
 		public Guid Id { get; private set; }
-		//public int Id { get; set; }
 		public Guid PalletId { get; private set; }
 		public Pallet Pallet { get;private set; }
 		public int InitialPalletQuantity { get; private set; }
@@ -40,7 +39,6 @@ namespace MyWerehouse.Domain.Picking.Models
 		public static VirtualPallet Create(Guid palletId, int initialQuantity, int locationId)
 			=> new VirtualPallet(palletId, initialQuantity, locationId);
 
-
 		private VirtualPallet(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime date)
 		{
 			Id = id;
@@ -51,7 +49,6 @@ namespace MyWerehouse.Domain.Picking.Models
 		}
 
 		public static VirtualPallet CreateForSeed(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime dateMoved)
-			=> new VirtualPallet(id, palletId, initialQuantity, locationId, dateMoved);
-				
+			=> new VirtualPallet(id, palletId, initialQuantity, locationId, dateMoved);				
 	}
 }

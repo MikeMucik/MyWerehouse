@@ -56,19 +56,19 @@ namespace MyWerehouse.Server.Controllers
 		//Pokaż zadania do wykonania
 
 		//Podaj listę zadań dla palety - kompletacja planowana
-		[HttpGet("Planned")]
+		[HttpGet("plannedList")]
 		public async Task<IActionResult> ShowPlanned(ShowTaskToDoQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Podaj listę zadań dla palety - kompletacja skorygowana
-		[HttpGet("Corrected")]
+		[HttpGet("correctedList")]
 		public async Task<IActionResult> ShowCorrected(PrepareCorrectedPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista poglądowa klient -> zamówienie -> produkt -> ilośc		
 
 		//Lista
-		[HttpGet("Lista")]
+		[HttpGet("List")]
 		public async Task<IActionResult> GetList(GetListIssueToPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
@@ -78,7 +78,7 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista palet dla wózkowego- palety do przekazania do pickingu
-		[HttpGet("ForkliftList")]
+		[HttpGet("forkliftList")]
 		public async Task<IActionResult> GetListToPicking(GetListPickingPalletQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}

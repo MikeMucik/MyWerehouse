@@ -23,12 +23,12 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Wykonaj dekompletacje
-		[HttpPost]
+		[HttpPost("execute")]
 		public async Task<IActionResult> Disassembly(ExecutiveReversePickingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Pokaż zadania dekompletacyjne listę
-		[HttpGet]
+		[HttpGet("list")]
 		public async Task<IActionResult> Tasks ([FromQuery] GetListReversePickingToDoQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
@@ -37,8 +37,8 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> TaskOption(Guid id)
 			=> (await _mediator.Send(new GetReversePickingToDoQuery(id))).ToActionResult();
 
-		//Lista palet do dekompletacji z localizacją
-		[HttpGet("Localization")]
+		//Lista palet do dekompletacji z lokalizacją
+		[HttpGet("listPalletToUnpicking")]
 		public async Task<IActionResult> PalletsForReservePicking([FromQuery] ListPalletsToReservePickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}

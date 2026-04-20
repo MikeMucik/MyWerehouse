@@ -29,7 +29,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Stworzenie zlecenia wydania
-		[HttpPost]
+		[HttpPost("add")]
 		public async Task<IActionResult> Create(CreateNewIssueCommand command)
 		{
 			var result = await _mediator.Send(command);
@@ -53,7 +53,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Przypadek szczególny, gdy zlecenie "świeże"
-		[HttpDelete]
+		[HttpDelete("delete")]
 		public async Task<IActionResult> Delete(DeleteIssueCommand command)
 			=> (await  _mediator.Send(command)).ToActionResult();
 

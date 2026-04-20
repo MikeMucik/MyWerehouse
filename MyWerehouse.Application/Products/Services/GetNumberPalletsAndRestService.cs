@@ -15,20 +15,21 @@ namespace MyWerehouse.Application.Products.Services
 		{
 			_repo = productRepo;
 		}
-		public async Task<AssignPallestResult> GetNumbers(Guid productId, int amountUnits)
-		{
-			var product = await _repo.GetProductByIdAsync(productId);
-			if (product.CartonsPerPallet == 0)
-				return AssignPallestResult.Fail($"Produkt {productId} nie ma ustawionej liczby kartonów na paletę. Popraw produkt.");
-			var amountCarOnPallet = product.CartonsPerPallet;
-			var amountPallets = amountUnits/ amountCarOnPallet;
-			var rest = amountUnits% amountCarOnPallet;
-			return AssignPallestResult.Ok(amountPallets, rest);
-		}
+		//zostawiam do rozwoju innych polityk
+		//public async Task<AssignPallestResult> GetNumbers(Guid productId, int amountUnits)
+		//{
+		//	var product = await _repo.GetProductByIdAsync(productId);
+		//	if (product.CartonsPerPallet == 0)
+		//		return AssignPallestResult.Fail($"Produkt {productId} nie ma ustawionej liczby kartonów na paletę. Popraw produkt.");
+		//	var amountCarOnPallet = product.CartonsPerPallet;
+		//	var amountPallets = amountUnits/ amountCarOnPallet;
+		//	var rest = amountUnits% amountCarOnPallet;
+		//	return AssignPallestResult.Ok(amountPallets, rest);
+		//}
 		public async Task<int> GetBackOnlyFullPallets(Guid productId, int amountUnits)
 		{
 			var product = await _repo.GetProductByIdAsync(productId);
-			var amountCarOnPallet = product.CartonsPerPallet;
+			var amountCarOnPallet = product.CartonsPerPallet;//product sprawdzony w metodzie wyżej
 			var amountPallets = amountUnits / amountCarOnPallet;			
 			return amountPallets;
 		}

@@ -11,5 +11,4 @@ namespace MyWerehouse.Domain.Picking.Models
 		Full,
 		Partial
 	}
-
 }

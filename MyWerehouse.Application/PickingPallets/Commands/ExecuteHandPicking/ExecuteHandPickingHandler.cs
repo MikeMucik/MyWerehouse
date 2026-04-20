@@ -94,8 +94,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking
 				else
 				{
 					virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First(p => p.PalletId == pallet.Id).Quantity, pallet.LocationId);
-					
-					pallet.AssignToPicking(command.UserId);
+					pallet.AssignToPicking(command.UserId, pallet.Location.ToSnopShot());
 					_pickingPalletRepo.AddPalletToPicking(virtualPallet);
 				}
 				if (command.Quanitity > virtualPallet.RemainingQuantity)

@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			_palletRepo = palletRepo;
 			_pickingTaskRepo = pickingTaskRepo;
 		}
-		
+
 		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet vp, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
 		{
 			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated,
@@ -52,9 +52,10 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId, bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
 				_pickingTaskRepo.AddPickingTask(pickingTask);
 				pickingTasks.Add(pickingTask);
-				
+
 				pickingTask.AddHistory(userId, vp.Pallet.Id, vp.Pallet.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0); quantity -= taken; if (quantity <= 0) break;
-			} //nowe palety do pickingu
+			}
+			//nowe palety do pickingu
 			var availablePallets = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
 			var usedPalletsId = pallets?
 				.Select(p => p.Id)
@@ -66,87 +67,28 @@ namespace MyWerehouse.Application.PickingPallets.Services
 			{
 				if (quantity <= 0) break;
 				var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.First().Quantity, palletToPicking.LocationId);
-				palletToPicking.AssignToPicking(userId); //z nowych palet do pickingu
+				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnopShot()); //z nowych palet do pickingu
 				var vp = _pickingPalletRepo.AddPalletToPicking(virtualPallet);
 
 				var taken = Math.Min(quantity, vp.RemainingQuantity);
 				if (taken <= 0) continue;
-				var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId, bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
+				var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId, bestBefore, null,
+					DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);  //na razie ustalone na sztywno 
 				_pickingTaskRepo.AddPickingTask(pickingTask);
 				pickingTasks.Add(pickingTask);
 
 				pickingTask.AddHistory(userId, palletToPicking.Id, palletToPicking.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
 				quantity -= taken;
 				if (quantity <= 0) break;
-			} //jeśli za mało towaru to komunikat dla użytkownika i rollback w handlerze
-			if (quantity > 0) { var productFull = await _productRepo.GetProductByIdAsync(productId); return AddPickingTaskToIssueResult.Fail($"Nie ma więcej asortymentu {productId}, {productFull.SKU} - nie można utworzyć zadania pickingu."); }
+			}
+			//jeśli za mało towaru to komunikat dla użytkownika i rollback w handlerze
+			if (quantity > 0)
+			{
+				var productFull = await _productRepo.GetProductByIdAsync(productId);
+				return AddPickingTaskToIssueResult.Fail($"Nie ma więcej asortymentu {productId}, {productFull.SKU} - nie można utworzyć zadania pickingu.");
+			}
 			return AddPickingTaskToIssueResult.Ok(pickingTasks);
 		}
 
 	}
 }
-//public async Task<AddPickingTaskToIssueResult> AddNewPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets, Issue issue, Guid productId, int rest, DateOnly? bestBefore, string userId)
-//{
-//	var pickingTasks = new List<PickingTask>();
-//	var quantity = rest;
-//	void AllocateFromVirtualPallet(VirtualPallet vp)
-//	{
-//		if (quantity <= 0 || vp.RemainingQuantity <= 0) return;
-//		var taken = Math.Min(quantity, vp.RemainingQuantity);
-//		var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId, bestBefore,
-//			null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
-//		//var pickingTask = CreatePickingTask(issue,					
-//		//	taken, vp, productId, bestBefore);
-//		pickingTasks.Add(pickingTask);
-//		//vp.AddTask(pickingTask);
-//		//vp.PickingTasks.Add(pickingTask);
-//		//pickingTask.SetVirtualPalletEntity(vp);// taka zaślepka żeby działało - zmiana Id na Guid dla virtualPallet
-//		//pickingTask.VirtualPallet = vp;
-//		quantity -= taken;
-//	}
-//	foreach (var vp in virtualPallets)
-//	{
-//		AllocateFromVirtualPallet(vp);
-//		if (quantity <= 0) break;
-//	}
-//	if (quantity > 0)
-//	{
-//		//czy potrzeba pobierać drugi raz dostępne palety - tak bo od dostępnych odejmuje już przyłączone do zlecenia
-//		var availablePallets = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
-//		var usedPalletsId = pallets?
-//			.Select(p => p.Id)
-//			.ToHashSet()
-//			?? new HashSet<Guid>();
-//		var availablePalletsReduced = availablePallets
-//			.Where(p => !usedPalletsId.Contains(p.Id))
-//			.ToList();
-
-//		foreach (var palletToPicking in availablePalletsReduced)
-//		{
-//			if (quantity <= 0) break;
-//			var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.First().Quantity, palletToPicking.LocationId);
-//			//var virtualPallet = new VirtualPallet
-//			//{
-//			//	Pallet = palletToPicking,
-//			//	PickingTasks = [],
-//			//	DateMoved = DateTime.UtcNow,
-//			//	Location = palletToPicking.Location,
-//			//	InitialPalletQuantity = palletToPicking.ProductsOnPallet.First().Quantity,
-//			//};
-//			palletToPicking.AssignToPicking(userId);
-//			_pickingPalletRepo.AddPalletToPicking(virtualPallet);
-//			AllocateFromVirtualPallet(virtualPallet);
-//		}
-//	}
-//	if (quantity > 0)
-//	{
-//		var productFull = await _productRepo.GetProductByIdAsync(productId);
-//		return AddPickingTaskToIssueResult.Fail($"Nie ma więcej asortymentu {productId}, {productFull.SKU} - nie można utworzyć zadania pickingu.");
-//	}
-//	foreach (var pickingTask in pickingTasks)
-//	{
-//		var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
-//		pickingTask.AddHistory(userId, sourcePallet.Id, sourcePallet.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
-//	}
-//	return AddPickingTaskToIssueResult.Ok(pickingTasks);
-//}

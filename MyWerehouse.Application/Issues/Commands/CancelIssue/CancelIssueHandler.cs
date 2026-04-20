@@ -13,26 +13,19 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 {
-	public class CancelIssueHandler : IRequestHandler<CancelIssueCommand, AppResult<Unit>>
+	public class CancelIssueHandler(IIssueRepo issueRepo,
+		IPickingTaskRepo pickingTaskRepo,
+		IPickingPalletRepo pickingPalletRepo,
+		WerehouseDbContext werehouseDbContext,
+		ICreateReversePickingService createReversePickingService
+			) : IRequestHandler<CancelIssueCommand, AppResult<Unit>>
 	{
-		private readonly IIssueRepo _issueRepo;
-		private readonly IPickingTaskRepo _pickingTaskRepo;
-		private readonly IPickingPalletRepo _pickingPalletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly ICreateReversePickingService _createReversePickingService;
-		public CancelIssueHandler(IIssueRepo issueRepo,
-			IPickingTaskRepo pickingTaskRepo,
-			IPickingPalletRepo pickingPalletRepo,
-			WerehouseDbContext werehouseDbContext,
-			ICreateReversePickingService createReversePickingService
-			)
-		{
-			_issueRepo = issueRepo;
-			_pickingTaskRepo = pickingTaskRepo;
-			_pickingPalletRepo = pickingPalletRepo;
-			_werehouseDbContext = werehouseDbContext;
-			_createReversePickingService = createReversePickingService;
-		}
+		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
+		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly ICreateReversePickingService _createReversePickingService = createReversePickingService;
+
 		public async Task<AppResult<Unit>> Handle(CancelIssueCommand request, CancellationToken ct)
 		{
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
@@ -46,10 +39,10 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				var listPalletsOfIssue = issue.Pallets.ToList();
 				foreach (var pallet in listPalletsOfIssue)
 				{
-					if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko  palety z przyjęcia
+					if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko palety z przyjęcia
 					{
-						//issue.DetachPallet(pallet, request.UserId);
-						pallet.DetachToIssue(issue.Id, request.UserId);
+						//issue.DetachPallet(pallet, request.UserId); // nie odłączam by mieć spis palet dla anulowanego zlecenia do historii
+						pallet.DetachToIssue(issue.Id, request.UserId, pallet.Location.ToSnopShot(), Domain.Histories.Models.ReasonMovement.CancelIssue);
 						listPallet.Add(pallet);
 					}
 				}

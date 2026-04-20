@@ -75,7 +75,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
@@ -141,7 +141,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			//Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
@@ -208,7 +208,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Single(issue.PickingTasks);
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
@@ -304,7 +304,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Single(issue.Pallets); // powinien być przypisany P1 
 			Assert.Equal(issue.Pallets.First().PalletNumber, "P1");
 			//Assert.Equal(issue.Pallets.First().PalletNumber, "P1");
-			Assert.Equal(PalletStatus.InTransit, issue.Pallets.First().Status);
+			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			//Act 2 - wykonanie pickingu
 			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);

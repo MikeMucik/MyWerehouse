@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 				ClientName = issue.Client.Name,
 				Pallets = issue.Pallets
 				.Where(p =>
-				p.Status == PalletStatus.InTransit ||
+				p.Status == PalletStatus.LockedForIssue ||
 				p.Status == PalletStatus.InStock ||
 				p.Status == PalletStatus.Available ||
 				p.Status == PalletStatus.ToIssue

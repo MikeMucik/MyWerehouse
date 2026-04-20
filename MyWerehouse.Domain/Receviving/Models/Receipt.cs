@@ -18,7 +18,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 {
 	public class Receipt : AggregateRoots
 	{
-		public Guid Id { get; private set; }// = Guid.NewGuid();  //gdyby nie testy to private set
+		public Guid Id { get; private set; }
 		public int ReceiptNumber { get; private set; }
 		public int ClientId { get; private set; }
 		public virtual Client Client { get; private set; }
@@ -28,27 +28,27 @@ namespace MyWerehouse.Domain.Receviving.Models
 		public string PerformedBy { get; private set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; private set; }
 		public int RampNumber { get; private set; }
-		//public Receipt() { }
+		
 		private Receipt() { }
-		public Receipt(int clientId, string performedBy, int rampNumber)
-		{
-			//if (clientId <= 0) throw new InvalidClientNumberException(clientId);
-			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
+		//public Receipt(int clientId, string performedBy, int rampNumber)
+		//{
+		//	if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
 
-			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
-			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
-			ClientId = clientId;
-			PerformedBy = performedBy;
-			ReceiptDateTime = DateTime.UtcNow;
-			ReceiptStatus = ReceiptStatus.Planned;
-			RampNumber = rampNumber;
-			Pallets = new List<Pallet>();
-		}
+		//	if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
+		//	//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
+		//	ClientId = clientId;
+		//	PerformedBy = performedBy;
+		//	ReceiptDateTime = DateTime.UtcNow;
+		//	ReceiptStatus = ReceiptStatus.Planned;
+		//	RampNumber = rampNumber;
+		//	Pallets = new List<Pallet>();
+		//}
 
 		private Receipt(int receiptNumber, int clientId, string performedBy, int rampNumber)
 		{
 			Id = Guid.NewGuid();
 			ReceiptNumber = receiptNumber;
+			if (clientId <= 0) throw new ArgumentException("ClientId must be more than zero.");
 			//if (clientId <= 0) throw new InvalidClientNumberException(clientId);
 			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
 			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
@@ -69,7 +69,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 		{
 			Id = id;
 			ReceiptNumber = receiptNumber;
-			//if (clientId <= 0) throw new InvalidClientNumberException(clientId);
+			if (clientId <= 0) throw new ArgumentException("ClientId must be more than zero.");
 			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
 			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
 			ClientId = clientId;
@@ -82,15 +82,14 @@ namespace MyWerehouse.Domain.Receviving.Models
 
 		public static Receipt CreateForSeed(Guid id, int receiptNumber, int clientId,
 			string performedBy, DateTime dateTime, ReceiptStatus receiptStatus, int rampNumber)
-			=> new Receipt(id, receiptNumber, clientId, performedBy, dateTime, receiptStatus, rampNumber);
-
-		
+			=> new Receipt(id, receiptNumber, clientId, performedBy, dateTime, receiptStatus, rampNumber);	
 		
 		public void Create(string userId)
 		{
 			ReceiptStatus = ReceiptStatus.Planned;
 			AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
+
 		public bool Delete(string userId)
 		{
 			if (ReceiptStatus == ReceiptStatus.Planned)
@@ -101,6 +100,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			}
 			return false;
 		}
+
 		public void Cancel(string userId)
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
@@ -115,6 +115,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			ReceiptStatus = ReceiptStatus.Cancelled;
 			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
+
 		public void StartReceiving(DateTime now, string userId)
 		{
 			if (ReceiptStatus == ReceiptStatus.InProgress) return;
@@ -134,6 +135,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			ClientId = clientId;
 			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
+
 		public void CompletePhysicalReceipt(string userId)
 		{
 			if (ReceiptStatus != ReceiptStatus.InProgress)
@@ -141,6 +143,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
 			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
+
 		public void VerifiedReceipt(string userId)
 		{
 			if (ReceiptStatus != ReceiptStatus.PhysicallyCompleted)
@@ -151,7 +154,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			foreach (var pallet in toReturn)
 			{
 				pallet.ChangeStatus(PalletStatus.InStock);				
-				pallet.AddHistory(PalletStatus.InStock, ReasonMovement.Received, userId);
+				pallet.AddHistory(ReasonMovement.Received, userId,pallet.Location.ToSnopShot());
 			}
 			ReceiptStatus = ReceiptStatus.Verified;
 
@@ -159,16 +162,18 @@ namespace MyWerehouse.Domain.Receviving.Models
 			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));			
 		}
 
-		//Detach i Attach tylko dla update i tworzenia palety z palca - bo porawiam agregat recipti tworzę nowy agregat pallet
+		//Detach i Attach tylko dla update i tworzenia palety z palca - bo porawiam agregat receipt tworzę nowy agregat pallet
 		public void AttachPallet(Pallet pallet)
 		{
 			if (!Pallets.Contains(pallet))
 				Pallets.Add(pallet);
 		}
+
 		public void DetachPallet(Pallet pallet)
 		{
 			Pallets.Remove(pallet);
 		}
+
 		//metody pomocnicze
 		private IReadOnlyCollection<HistoryReceiptIssueDetailDto> BuildListPalletsForReceipt()
 		{

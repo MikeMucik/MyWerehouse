@@ -8,8 +8,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 {
 	public enum IssueAllocationPolicy
 	{
-		FullPalletFirst,
-		//FefoStrict,
-		//FefoWithFullPalletPreference
+		FullPalletFirst, //pełne palety 
+		//FefoStrict, //najpierw data później pełne palety TODO
+		//FefoWithFullPalletPreference //najpierw pełne palety ale jeśli brak to zbiórka po dacie TODO
 	}
 }

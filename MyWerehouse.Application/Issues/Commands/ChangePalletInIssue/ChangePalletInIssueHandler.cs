@@ -50,13 +50,11 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				if (productOnNewPallet is null)
 					return AppResult<IssueResult>.Fail("Nowa paleta nie zawiera produktów.", ErrorType.NotFound);
 				if (productOnOldPallet != productOnNewPallet)
-					return AppResult<IssueResult>.Fail("Nie można podmienić palet z różnymi produktami.", ErrorType.Conflict);
-
-				palletToAddingIssue.ReserveToIssue(issue , request.UserId);
+					return AppResult<IssueResult>.Fail("Nie można podmienić palet z różnymi produktami.", ErrorType.Conflict);				
+				palletToAddingIssue.ReserveToIssue(issue , request.UserId, palletToAddingIssue.Location.ToSnopShot());
 				issue.AttachPallet(palletToAddingIssue);
-				palletToRemoveFromIssue.DetachToIssue(issue.Id, request.UserId);
+				palletToRemoveFromIssue.DetachToIssue(issue.Id, request.UserId, palletToRemoveFromIssue.Location.ToSnopShot(), Domain.Histories.Models.ReasonMovement.Correction);
 				issue.DetachPallet(palletToRemoveFromIssue);
-
 				issue.ChangePalletInIssue(request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);

@@ -8,8 +8,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 namespace MyWerehouse.Application.ViewModels.ProductModels
 {
 	public class ProductQunatityLocationsDTO
-	{
-		
+	{		
 		public int ProductId { get; set; }			
 		public List<QuantityLocation> ListLocation { get; set; }
 	}

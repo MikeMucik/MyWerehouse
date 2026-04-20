@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 				if (pallet == null) return AppResult<ChangeLocationResults>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
 				//location is occupied?
-				if (request.DestinationLocationId <= 0)
+				if (request.DestinationLocationId <= 0)//można ustalić dla danego magazynu
 					return AppResult<ChangeLocationResults>.Fail("niprawidłowa lokalizacja.", ErrorType.NotFound);
 
 				var existingPalletInDestination = await _palletRepo.CheckOccupancyAsync(request.DestinationLocationId);
@@ -37,19 +37,23 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 					return AppResult<ChangeLocationResults>.Fail($"Brak lokalizacji o numerze {request.DestinationLocationId}.", ErrorType.NotFound);
 				}
 				var fullNameLocation = $" Bay = {location.Bay} Aisle = {location.Aisle} Position = {location.Position} Height ={location.Height}";
-				if (existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id && !request.Force)
+
+				bool isLocationOccupiedByDifferentPallet = existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id;
+				if (isLocationOccupiedByDifferentPallet && !request.Force)
 				{
 					var answerWhenOccupied = new ChangeLocationResults
 					{
 						Success = false,
 						RequiresConfirmation = true,
-						Message = $"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}."
+						Message = $"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}. Użyj Force=true aby wymusić."
 						//OccupiedByPalletId = existingPalletInDestination.Id // Opcjonalnie: Dodaj pole do Results (frontend pokaże)
 					};
 					return AppResult<ChangeLocationResults>.Success(answerWhenOccupied, answerWhenOccupied.Message);
-				}
+				}	
+				//location do factory
+				var oldSnapShot = pallet.Location.ToSnopShot();
 				var snapShot = location.ToSnopShot();
-				pallet.MoveToLocation(location.Id,snapShot, request.UserId);
+				pallet.MoveToLocation(location.Id,snapShot,pallet.LocationId, oldSnapShot, request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 

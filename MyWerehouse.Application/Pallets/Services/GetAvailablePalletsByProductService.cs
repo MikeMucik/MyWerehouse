@@ -9,15 +9,11 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.Services
 {
-	public class GetAvailablePalletsByProductService : IGetAvailablePalletsByProductService
+	public class GetAvailablePalletsByProductService(IPalletRepo palletRepo, IProductRepo productRepo) : IGetAvailablePalletsByProductService
 	{
-		private readonly IPalletRepo _palletRepo;
-		private readonly IProductRepo _productRepo;
-		public GetAvailablePalletsByProductService(IPalletRepo palletRepo, IProductRepo productRepo)
-		{
-			_palletRepo = palletRepo;
-			_productRepo = productRepo;
-		}
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IProductRepo _productRepo = productRepo;
+
 		public async Task<List<Pallet>> GetPallets(Guid productId, DateOnly? bestBefore, int amountFullPallet)
 		{
 			var product = await _productRepo.GetProductByIdAsync(productId);
@@ -43,8 +39,8 @@ namespace MyWerehouse.Application.Pallets.Services
 				.Take(amountFullPallet)
 				.Select(x=>x.Pallet)
 				.ToList();
-			foreach (var pallet in fullPallets)         //chyba tu jest błąd
-				pallet.ChangeStatus(PalletStatus.InTransit);
+			foreach (var pallet in fullPallets)         //do zastanowienia
+				pallet.ChangeStatus(PalletStatus.LockedForIssue);
 			return fullPallets;			
 		}
 	}

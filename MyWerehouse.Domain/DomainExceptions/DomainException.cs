@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.DomainExceptions
 {
-	public class DomainException : Exception
+	public abstract class DomainException : Exception
 	{
-		public string Message { get; set; }
-		public DomainException(string message) { Message = message; }
+		//public string Message { get; set; }
+		//public string Code { get; }
+		protected DomainException(string message) : base(message) { }
+		//public DomainException(string message) { Message = message; }
 	}
 }

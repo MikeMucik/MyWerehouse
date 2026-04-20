@@ -20,6 +20,5 @@ namespace MyWerehouse.Domain.DomainExceptions
 			: base($"Błąd przy zapisie do bazy.")
 		{			
 		}
-
 	}
 }

@@ -22,7 +22,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _productService.GetProductToEditAsync(id);
 			return Ok(result);
 		}
-		[HttpPost]
+		[HttpPost("add")]
 		public async Task<IActionResult> Add(AddProductDTO productDTO)
 		{
 			var result = await _productService.AddProductAsync(productDTO);
@@ -46,7 +46,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _productService.DetailsOfProductAsync(id);
 			return Ok(result);
 		}
-		[HttpGet]
+		[HttpGet("all")]
 		public async Task<IActionResult> GetAll(int page, int size)
 		{
 			var result = await _productService.GetProductsAsync(page, size);

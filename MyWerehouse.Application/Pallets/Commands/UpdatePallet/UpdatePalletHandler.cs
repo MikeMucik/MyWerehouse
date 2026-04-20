@@ -53,8 +53,8 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 					//};
 					updatedProducts1.Add(updatetedProduct);
 				}
-
-				existingPallet.Update(request.UserId, updatedProducts1, request.UpdatingPallet.Status);
+				var snapShot = existingPallet.Location.ToSnopShot();
+				existingPallet.Update(request.UserId, updatedProducts1, request.UpdatingPallet.Status, snapShot);
 				
 				await _werehouseDbContext.SaveChangesAsync(ct);
 

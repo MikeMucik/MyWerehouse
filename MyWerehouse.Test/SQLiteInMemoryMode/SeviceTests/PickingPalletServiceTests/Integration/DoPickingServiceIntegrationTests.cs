@@ -106,7 +106,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id,
 				SourcePalletNumber = sourcePallet.PalletNumber,
-				RampNumber = 100100
+				RampNumber = 100100,
+				BestBefore = pickingTask.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -221,7 +222,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id,
 				SourcePalletNumber = sourcePallet.PalletNumber,
-				RampNumber = 100100
+				RampNumber = 100100,
+				BestBefore = pickingTask.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -320,7 +322,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var virtualPallet1 = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 10, location1.Id, new DateTime(2025, 8, 12));
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product.Id,
-				null, null, null, 0);
+				DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), null, null, 0);
 			//virtualPallet1.PickingTasks = new List<PickingTask> { pickingTask1 };
 			DbContext.PickingTasks.AddRange(pickingTask1);
 			DbContext.VirtualPallets.AddRange(virtualPallet1);
@@ -330,7 +332,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
-				//Id = pickingTask1.PickingTaskNumber,
+				IssueNumber = pickingTask1.Issue.IssueNumber,
 				IssueId = issue.Id,
 				ProductId = product.Id,
 				RequestedQuantity = pickingTask1.RequestedQuantity,
@@ -338,7 +340,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100
+				RampNumber = 100100,
+				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -456,7 +459,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100
+				RampNumber = 100100,
+				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -572,7 +576,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100
+				RampNumber = 100100,
+				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 
@@ -712,7 +717,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100
+				RampNumber = 100100,
+				BestBefore = pickingTask1.BestBefore,
 				//BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
@@ -814,8 +820,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100
-				//BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
+				RampNumber = 100100,
+				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
 

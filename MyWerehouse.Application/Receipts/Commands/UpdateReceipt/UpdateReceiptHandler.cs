@@ -20,8 +20,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		private readonly IPalletRepo _palletRepo;
 		private readonly IProductRepo _productRepo;
 		private readonly IClientRepo _clientRepo;
-		private readonly ILocationRepo _locationRepo;
-		//private readonly IMapper _mapper;
+		private readonly ILocationRepo _locationRepo;		
 
 		public UpdateReceiptHandler(WerehouseDbContext werehouseDbContext,
 			IReceiptRepo receiptRepo,
@@ -29,18 +28,14 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			IPalletRepo palletRepo,
 			IProductRepo productRepo,
 			IClientRepo clientRepo,
-			ILocationRepo locationRepo
-			//,
-			//IMapper mapper
-			)
+			ILocationRepo locationRepo)
 		{
 			_werehouseDbContext = werehouseDbContext;
 			_receiptRepo = receiptRepo;
 			_palletRepo = palletRepo;
 			_productRepo = productRepo;
 			_clientRepo = clientRepo;
-			_locationRepo = locationRepo;
-			//_mapper = mapper;
+			_locationRepo = locationRepo;		
 		}
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
@@ -76,10 +71,8 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				//Usuwanie z bazy danych niepotrzebnych pallet
 				foreach (var pallet in palletToDelete)
 				{
-					existingReceipt.DetachPallet(pallet);//musi być żeby stworzyć dobrą historię
-					//_palletRepo.DeletePallet(pallet);
-					//czy może jednak
-					pallet.DetachFromReceipt(request.UserId);
+					existingReceipt.DetachPallet(pallet);//musi być żeby stworzyć dobrą historię					
+					pallet.DetachFromReceipt(request.UserId, pallet.Location.ToSnopShot());
 				}
 				var existingPallets = existingReceipt.Pallets.ToDictionary(p => p.Id);
 				//Aktualizacja palet
@@ -93,26 +86,13 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 					foreach (var product in dto.ProductsOnPallet) //możliwość na kilka produktów na razie zbędne
 					{
 						var productForPallet = ProductOnPallet.Create(product.ProductId,
-							product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);
-							
-						//	new ProductOnPallet
-						//{
-						//	ProductId = product.ProductId,
-						//	PalletId = product.PalletId,
-						//	Quantity = product.Quantity,
-						//	DateAdded = product.DateAdded,
-						//	BestBefore = product.BestBefore
-						//};
+							product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);						
 						productsForPallet.Add(productForPallet);
 					}
 
-					//var	listOfProducts = dto.ProductsOnPallet
-					//	.Select(p => _mapper.Map<ProductOnPallet>(p)).ToList()
-					//	.ToList();
-					
-					//pallet.UpdateProductChanges(listOfProducts);
 					pallet.UpdateProductChanges(productsForPallet);
-					pallet.AddHistory(PalletStatus.Receiving, ReasonMovement.Correction, request.UserId);
+					pallet.ChangeStatus(PalletStatus.Receiving);
+					pallet.AddHistory(ReasonMovement.Correction, request.UserId, pallet.Location.ToSnopShot());
 				}
 				//Dodanie nowych palet
 				var palletsAdded = request.DTO.Pallets
@@ -124,9 +104,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 					var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber);
 						if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {request.DTO.RampNumber} nie została znaleziona", ErrorType.NotFound);
 					var pallet = Pallet.Create(newId, request.DTO.RampNumber);
-					//var pallet = Pallet.CreateForReceipt(newId, request.DTO.RampNumber, request.DTO.ReceiptId);
-					//var pallet = new Pallet(newId, DateTime.UtcNow, request.DTO.RampNumber, location);
-					//pallet.ApplyProductChanges
 					foreach (var dto in palletToAdd.ProductsOnPallet)
 					{
 						if (!await _productRepo.IsExistProduct(dto.ProductId))

@@ -4,14 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Invetories.InventoryExceptions;
 using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Issuing.IssueExceptions;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
 {
@@ -32,7 +34,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category {Id =1, Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
 			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
@@ -51,10 +53,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DateTime.Now.AddDays(1), "user1", IssueStatus.IsShipped, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -127,7 +129,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category {Id = 1, Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
 			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
@@ -146,10 +148,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DateTime.Now.AddDays(1), "user1", IssueStatus.IsShipped, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -164,18 +166,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 5
 			};
-			
+
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 
-			//Act
-			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest"));
-			//Assert
-			Assert.NotNull(result);
-			Assert.False(result.IsSuccess);
-			Assert.Equal($"Stan producktu {product.Id} pniżej zera - stan niedozwolony.", result.Error);
+			//Act&Assert
+			//var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest"));
+			var ex = await Assert.ThrowsAsync<DomainInventoryException>(() => Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest")));
+			//
+			//Assert.NotNull(result);
+			//Assert.False(result.IsSuccess);
+			Assert.Equal($"Product {product.Id} quantity below zero - prohibited condition", ex.Message);
+
 		}
 		[Fact]
 		public async Task VerifyIssueAfterLoadingAsync_IssueNotFound_ReturnFail()
@@ -203,7 +207,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category {Id =1, Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
 			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
@@ -222,10 +226,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DateTime.Now.AddDays(1), "user1", IssueStatus.InProgress, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -240,18 +244,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
-			
+
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
+			//var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
+			var ex = await Assert.ThrowsAsync<NotEndedLoadingException>(() => Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest")));
 
 			//Assert
-			Assert.NotNull(result);
-			Assert.False(result.IsSuccess);
-			Assert.Equal("Nie wszystkie palety mają status Loaded.", result.Error);
+			//Assert.NotNull(result);
+			//Assert.False(result.IsSuccess);
+			Assert.Equal($"Issue {issueId} has pallets not fully loaded.", ex.Message);
 		}
 		[Fact]
 		public async Task VerifyIssueAfterLoadingAsync_IssueNotShipped_ThrowException_ReturnFail()
@@ -268,7 +273,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category {Id = 1, Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
 			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
@@ -287,10 +292,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DateTime.Now.AddDays(1), "user1", IssueStatus.InProgress, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			//Inventory
 			//dla dwóch produktów
 			var inventory = new Inventory
@@ -305,17 +310,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				LastUpdated = DateTime.Now.AddDays(-7),
 				Quantity = 100
 			};
-			
+
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
-			//var ex =await Assert.ThrowsAsync<DomainIssueException>(async ()=> await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX")));
-			Assert.NotNull(result);
-			Assert.False(result.IsSuccess);
-			Assert.Equal("Nie zakończono załadunku.", result.Error);
+			//var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
+			var ex =await Assert.ThrowsAsync<NotAllowedOperationException>(async ()=> await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX")));
+			//Assert.NotNull(result);
+			//Assert.False(result.IsSuccess);
+			Assert.Equal($"Operation forbidden for {issueId}, wrong status.", ex.Message);
 		}
 		[Fact]
 		public async Task VerifyIssueAfterLoading_ShouldUpdateStatusAndHistory_HappyPath()
@@ -332,7 +337,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				StreetNumber = "23/3"
 			};
 			var client = new Client { Name = "TestCompany", Email = "123@op.pl", Description = "Description", FullName = "FullNameCompany", Addresses = new List<Address> { address } };
-			var category = new Category {Id = 1, Name = "Cat" };
+			var category = new Category { Id = 1, Name = "Cat" };
 			var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 			var product = Product.Create("Prod1", "SKU1", 1, 10);
 			var product1 = Product.Create("Prod2", "SKU1", 1, 10);
@@ -351,10 +356,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DateTime.Now.AddDays(1), "user1", IssueStatus.IsShipped, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
-			
+
 			var inventory = new Inventory
 			{
 				Product = product,

@@ -105,9 +105,8 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 				.Take(requiredFullPallets)];
 			foreach (var pallet in allAvailablePallets)
 			{
-				issue.ReservePallet(pallet, issue.PerformedBy);
 				var snapShot = pallet.Location.ToSnopShot();
-				pallet.ReserveToIssue(issue, issue.PerformedBy, snapShot);
+				pallet.ReserveToIssue(issue.Id, issue.PerformedBy, snapShot);
 			}
 			return allAvailablePallets;
 		}

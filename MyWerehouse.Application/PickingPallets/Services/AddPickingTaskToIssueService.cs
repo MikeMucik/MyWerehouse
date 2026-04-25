@@ -36,10 +36,13 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				productId, bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
 			_pickingTaskRepo.AddPickingTask(pickingTask);
 			var sourcePallet = await _palletRepo.GetPalletByIdAsync(vp.PalletId);
-			pickingTask.AddHistory(userId, sourcePallet.Id, sourcePallet.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
+			if (sourcePallet == null)
+				return AddPickingTaskToIssueResult.Fail("Brak palety źródłowej.");
+			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);// PickingStatus.Allocated, sourcePallet.Id, sourcePallet.PalletNumber
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
-		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets, Issue issue, Guid productId, int rest, DateOnly? bestBefore, string userId)
+		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets,
+			Issue issue, Guid productId, int rest, DateOnly? bestBefore, string userId)
 		{
 			// pallets - palety używane w danym issue - potrzebne bo jeszcze nie zapisane w bazie - jeden handler - brak saveChanges
 			var quantity = rest;
@@ -53,10 +56,16 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				_pickingTaskRepo.AddPickingTask(pickingTask);
 				pickingTasks.Add(pickingTask);
 
-				pickingTask.AddHistory(userId, vp.Pallet.Id, vp.Pallet.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0); quantity -= taken; if (quantity <= 0) break;
+				pickingTask.AddHistoryPicking(userId,
+					null, null, PickingStatus.Available, 0);// PickingStatus.Allocated, vp.Pallet.Id, vp.Pallet.PalletNumber,
+				quantity -= taken;
+				if (quantity <= 0)
+					break;
 			}
 			//nowe palety do pickingu
+			//TODO weź tylko tyle palet ile potrzebujesz zwiększysz performance na razie Take
 			var availablePallets = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
+			//Do wyciągnięcia logika ale gdzie najlepiej - albo inna metoda pozyskania albo serwis aplikacyjny
 			var usedPalletsId = pallets?
 				.Select(p => p.Id)
 				.ToHashSet() ?? new HashSet<Guid>();
@@ -72,12 +81,13 @@ namespace MyWerehouse.Application.PickingPallets.Services
 
 				var taken = Math.Min(quantity, vp.RemainingQuantity);
 				if (taken <= 0) continue;
-				var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId, bestBefore, null,
-					DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);  //na razie ustalone na sztywno 
+				var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId,
+					bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);  //na razie ustalone na sztywno 
 				_pickingTaskRepo.AddPickingTask(pickingTask);
 				pickingTasks.Add(pickingTask);
 
-				pickingTask.AddHistory(userId, palletToPicking.Id, palletToPicking.PalletNumber, issue.IssueNumber, PickingStatus.Available, PickingStatus.Allocated, 0);
+				pickingTask.AddHistoryPicking(userId, 
+					null, null, PickingStatus.Available, 0);//PickingStatus.Allocated,palletToPicking.Id, palletToPicking.PalletNumber,
 				quantity -= taken;
 				if (quantity <= 0) break;
 			}

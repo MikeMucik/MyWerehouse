@@ -1,9 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyWerehouse.Application.Receipts.Commands.CancelReceipt;
 using MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt;
 using MyWerehouse.Application.Receipts.Commands.CreateReceipt;
-using MyWerehouse.Application.Receipts.Commands.DeleteReceipt;
+using MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
 using MyWerehouse.Application.Receipts.Queries.GetReceipt;
@@ -11,7 +12,7 @@ using MyWerehouse.Application.Receipts.Queries.GetReceipts;
 using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers
-{	
+{
 	[ApiController]
 	[Route("api/recipe")]
 	public class ReceiptsController : ControllerBase
@@ -37,16 +38,21 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> Update(UpdateReceiptCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
-		//Anulowanie przyjęcia, nie kasacja - zostaje ślad - nie ma wpływu na stan
+		//Anulowanie przyjęcia, kasacja - nie ma wpływu na stan -> zatwierdzone nie można cofnąć
+
+		[HttpDelete("delete")]
+		public async Task<IActionResult> Delete(DeleteDraftReceiptCommand command)
+			=> (await _mediator.Send(command)).ToActionResult();
+
 		[HttpPost("cancel")]
-		public async Task<IActionResult> Cancel(DeleteReceiptCommand command)
+		public async Task<IActionResult> Cancel(CancelReceiptCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Zatwierdzenie skończenia rozładunku - magazyn
 		[HttpPost("confirmEnd")]
 		public async Task<IActionResult> ConfirmEndReceipt(CompletePhysicalReceiptCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
-		
+
 		//Zatwierdzenie rozładunku biuro - zmiana stanu magazynowego, palety w obiekgu
 		[HttpPost("finalize")]
 		public async Task<IActionResult> FinalizeReceipt(VerifyAndFinalizeReceiptCommand command)

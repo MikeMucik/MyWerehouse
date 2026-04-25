@@ -7,66 +7,53 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.IssuesServices;
-using MyWerehouse.Domain.DomainExceptions;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 {
-	public class CreateNewIssueHandler : IRequestHandler<CreateNewIssueCommand, AppResult<List<IssueResult>>>
+	public class CreateNewIssueHandler(WerehouseDbContext werehouseDbContext,
+		IIssueRepo issueRepo,
+		IAssignProductToIssueService assignProductToIssueService) : IRequestHandler<CreateNewIssueCommand, AppResult<List<IssueResult>>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IIssueRepo _issueRepo;
-		private readonly IAssignProductToIssueService _assignProductToIssueService;
-		public CreateNewIssueHandler(WerehouseDbContext werehouseDbContext,
-			IIssueRepo issueRepo,
-			IAssignProductToIssueService assignProductToIssueService)
-		{
-			_werehouseDbContext = werehouseDbContext;
-			_issueRepo = issueRepo;
-			_assignProductToIssueService = assignProductToIssueService;
-		}
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly IAssignProductToIssueService _assignProductToIssueService = assignProductToIssueService;
+
 		public async Task<AppResult<List<IssueResult>>> Handle(CreateNewIssueCommand request, CancellationToken ct)
 		{
 			var addedProducts = new List<IssueResult>();
 			var results = new List<IssueResult>();
 			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-			try
+
+			var issueNumber = await _issueRepo.GetNextNumberOfIssue();
+			var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.Date, request.DTO.PerformedBy);
+			_issueRepo.AddIssue(issue);
+			foreach (var item in request.DTO.Items)
 			{
-				var issueNumber =  await _issueRepo.GetNextNumberOfIssue();
-				var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.Date, request.DTO.PerformedBy);
-				_issueRepo.AddIssue(issue);
-				foreach (var item in request.DTO.Items)
+				IssueResult addingProducts;
+				var result = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
+				if (result.Success == false)
 				{
-					IssueResult addingProducts;
-					var result = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
-					if (result.Success == false)
-					{
-						addingProducts = IssueResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
-					}
-					else
-					{
-						addingProducts = IssueResult.Ok(result.Message, item.ProductId);
-					}
-					addedProducts.Add(addingProducts);
-					issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);					
+					addingProducts = IssueResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
 				}
-				if (addedProducts.Any(r => r.Success == false))
+				else
 				{
-					issue.ChangeStatus(IssueStatus.NotComplete);	
+					addingProducts = IssueResult.Ok(result.Message, item.ProductId);
 				}
-				issue.AddHistory(request.DTO.PerformedBy);
-				await transaction.CommitAsync(ct);
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				return AppResult<List<IssueResult>>.Success(addedProducts);
+				addedProducts.Add(addingProducts);
+				issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);
 			}
-			catch (DomainException ex)
+			if (addedProducts.Any(r => r.Success == false))
 			{
-				await transaction.RollbackAsync(ct);
-				//addedProducts.Add(IssueResult.Fail(ex.Message));
-				return AppResult<List<IssueResult>>.Fail(ex.Message, ErrorType.Technical);
+				issue.ChangeStatus(IssueStatus.NotComplete);
 			}
+			issue.AddHistory(request.DTO.PerformedBy);
+			await transaction.CommitAsync(ct);
+			await _werehouseDbContext.SaveChangesAsync(ct);
+			return AppResult<List<IssueResult>>.Success(addedProducts);
 		}
 	}
 }

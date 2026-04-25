@@ -15,23 +15,17 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPrepareToHandPicking
 {
-	public class FinishPlannedPickingPrepareToHandPickingHandle : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, AppResult< List<PickingTaskDTO>>>
+	public class FinishPlannedPickingPrepareToHandPickingHandle(
+		WerehouseDbContext werehouseDbContext,
+		IPickingTaskRepo pickingTaskRepo,
+		IIssueRepo issueRepo,
+		IMapper mapper) : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, AppResult< List<PickingTaskDTO>>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IPickingTaskRepo _pickingTaskRepo;
-		private readonly IIssueRepo _issueRepo;
-		private readonly IMapper _mapper;
-		public FinishPlannedPickingPrepareToHandPickingHandle(
-			WerehouseDbContext werehouseDbContext,
-			IPickingTaskRepo pickingTaskRepo,
-			IIssueRepo issueRepo,
-			IMapper mapper)
-		{
-			_werehouseDbContext = werehouseDbContext;
-			_pickingTaskRepo = pickingTaskRepo;
-			_issueRepo = issueRepo;
-			_mapper = mapper;
-		}
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
+		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly IMapper _mapper = mapper;
+
 		public async Task<AppResult<List<PickingTaskDTO>>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
 		{
 			var listToDoTasks = new List<PickingTaskDTO>();
@@ -44,7 +38,9 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 			foreach (var issue in listOfIssues)
 			{
 				var listOfPickTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issue.Id);
-				var listByProductAndDate = listOfPickTasks
+				var reducedList = listOfPickTasks.Where(t => t.PickingStatus == PickingStatus.Allocated ||
+				t.PickingStatus == PickingStatus.Correction).ToList(); //biorę pod uwagę tylko aktywne taski do wykonania
+				var listByProductAndDate = reducedList
 					.GroupBy(p => new {p.IssueId, p.ProductId, p.BestBefore })
 					.Select(g => new
 					{
@@ -62,7 +58,7 @@ namespace MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPr
 					
 					listToDoTasks.Add(handTaskDTO);
 				}
-				foreach (var task in listOfPickTasks)
+				foreach (var task in reducedList)
 				{
 					task.Cancel(command.UserId, issue.IssueNumber);
 				}

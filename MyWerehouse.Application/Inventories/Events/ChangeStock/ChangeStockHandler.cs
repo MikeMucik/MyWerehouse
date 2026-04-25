@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Invetories.Events;
+using MyWerehouse.Domain.Invetories.InventoryExceptions;
 using MyWerehouse.Domain.Invetories.Models;
 
 namespace MyWerehouse.Application.Inventories.Events.ChangeStock

@@ -21,7 +21,6 @@ namespace MyWerehouse.Domain.Picking.Models
 		public DateOnly? BestBefore { get; private set; }
 		public int Quantity { get; private set; }
 		public ReversePickingStatus Status { get; private set; }
-		//public int PickingTaskId { get; set; }
 		public Guid PickingTaskId { get; private set; }
 		public PickingTask PickingTask { get; private set; }
 		public DateOnly DateMade { get; private set; }

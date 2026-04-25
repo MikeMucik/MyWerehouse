@@ -69,8 +69,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 				, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
 			
 			issueRepo.AddIssue(issue);
-			issue.ReservePallet(pallet1, "U003");
-			issue.ReservePallet(pallet2, "U003");
+			issue.ReservePallet(pallet1);
+			issue.ReservePallet(pallet2);
 			DbContext.SaveChanges();
 			//Assert
 			var result = DbContext.Issues
@@ -141,8 +141,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
 			
 			issueRepo.AddIssue(issue);
-			issue.ReservePallet(pallet1, "U003");
-			issue.ReservePallet(pallet2, "U003");
+			issue.ReservePallet(pallet1);
+			issue.ReservePallet(pallet2);
 			DbContext.SaveChanges();
 			//Act
 			issueRepo.DeleteIssue(issue);

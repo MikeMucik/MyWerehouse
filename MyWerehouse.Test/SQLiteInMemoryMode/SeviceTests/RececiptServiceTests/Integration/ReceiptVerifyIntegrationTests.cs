@@ -9,10 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receviving.ReceivingExceptions;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.Integration
@@ -144,13 +144,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();			
 			
-			// Act
-			var result = await Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001"));
-
-			// Assert
-			Assert.NotNull(result);
-			Assert.False(result.IsSuccess);
-			Assert.Contains("Nie można zweryfikować przyjęcia", result.Error);
+			// Act&Assert		
+			var ex = await Assert.ThrowsAsync<ReceiptAlreadyVerifyException>(() => Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001")));
+			Assert.Equal($"Receipt {receipt.Id} already verified. Operation prohibited.", ex.Message);
+			
 		}
 	}
 }

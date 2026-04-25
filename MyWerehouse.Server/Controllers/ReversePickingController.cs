@@ -39,7 +39,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Lista palet do dekompletacji z lokalizacją
 		[HttpGet("listPalletToUnpicking")]
-		public async Task<IActionResult> PalletsForReservePicking([FromQuery] ListPalletsToReservePickingQuery query)
+		public async Task<IActionResult> PalletsForReservePicking([FromQuery] ListPalletsForForkLifterReservePickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 }

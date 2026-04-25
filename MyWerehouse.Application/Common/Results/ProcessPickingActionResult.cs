@@ -11,7 +11,6 @@ namespace MyWerehouse.Application.Common.Results
 		public bool Success { get; set; }
 		public string Message { get; set; }
 		public Guid PalletId { get; set; }
-		//public string PalletNumber { get; set; }
 		public ProcessPickingActionResult() { }
 		public static ProcessPickingActionResult Ok(Guid palletId
 			//, string palletNumber
@@ -21,7 +20,6 @@ namespace MyWerehouse.Application.Common.Results
 			{
 				Success = true,
 				PalletId = palletId
-				//, PalletNumber = palletNumber
 			};
 		}
 		public static ProcessPickingActionResult Fail(string message)

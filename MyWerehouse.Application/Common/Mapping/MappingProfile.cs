@@ -10,7 +10,7 @@ namespace MyWerehouse.Application.Common.Mapping
 {
 	public class MappingProfile : Profile
 	{
-		public MappingProfile() 
+		public MappingProfile()
 		{
 			ApplyMappingsProfile(typeof(MappingProfile).Assembly);
 		}
@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Common.Mapping
 			var types = assembly.GetExportedTypes()
 				.Where(t => t.GetInterfaces().Any(i =>
 				i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IMapFrom<>)))
-				.ToList();			
+				.ToList();
 			foreach (var type in types)
 			{
 				var instance = Activator.CreateInstance(type);

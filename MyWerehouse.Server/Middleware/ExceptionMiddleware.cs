@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Exceptions;
-using MyWerehouse.Domain.DomainExceptions;
+using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Server.Middleware
 {

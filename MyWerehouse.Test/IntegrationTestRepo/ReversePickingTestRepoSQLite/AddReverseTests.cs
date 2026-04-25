@@ -87,8 +87,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var pickingPallet = Pallet.CreateForTests("Q5000", DateTime.Now, 1, PalletStatus.ToIssue, null, null);
 			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
-			issue.ReservePallet(pallet1, "User");
-			issue.ReservePallet(pallet2, "User");
+			issue.ReservePallet(pallet1);
+			issue.ReservePallet(pallet2);
 			issue.AttachPickingTask(pickingTask);
 			
 			DbContext.VirtualPallets.Add(virtualPallet);

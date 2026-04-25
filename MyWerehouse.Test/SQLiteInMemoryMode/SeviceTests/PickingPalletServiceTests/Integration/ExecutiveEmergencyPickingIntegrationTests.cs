@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPicking;
+using MyWerehouse.Application.PickingPallets.Commands.ExecuteEmergencyPicking;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
@@ -16,11 +16,11 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTests.Integration
 {
-	public class ExecutiveCorrectedPickingIntegrationTests : TestBase
+	public class ExecutiveEmergencyPickingIntegrationTests : TestBase
 	{
-		//Metoda ExecutiveCorrectedPicking
+		//Metoda ExecutiveEmergencyPicking
 		[Fact]
-		public async Task ExecutiveCorrectedPicking_WithIssueIdNewPallet_AssignsProductAndCommits()
+		public async Task ExecutiveEmergencyPicking_WithIssueIdNewPallet_AssignsProductAndCommits()
 		{
 			// Arrange
 			var category = new Category
@@ -98,7 +98,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.PickingTasks.Add(pickingTask2);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await Mediator.Send(new ExecuteCorrectedPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
+			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
 			// Assert		
 			Assert.True(result.IsSuccess);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
@@ -145,7 +145,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.False(DbContext.ChangeTracker.HasChanges());
 		}
 		[Fact]
-		public async Task ExecutiveCorrectedPicking_WithIssueIdAddToOldPallet_AssignsProductAndCommits()
+		public async Task ExecutiveEmergencyPicking_WithIssueIdAddToOldPallet_AssignsProductAndCommits()
 		{
 			// Arrange
 			var category = new Category
@@ -226,7 +226,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			await DbContext.SaveChangesAsync();
 			// Act
 
-			var result = await Mediator.Send(new ExecuteCorrectedPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
+			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
 
 			// Assert
 
@@ -289,7 +289,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.False(DbContext.ChangeTracker.HasChanges());
 		}
 		[Fact]
-		public async Task ExecutiveCorrectedPicking_WithIssueIdNewPalletNewVirtualPallet_AssignsProductAndCommits()
+		public async Task ExecutiveEmergencyPicking_WithIssueIdNewPalletNewVirtualPallet_AssignsProductAndCommits()
 		{
 			// Arrange
 			var category = new Category
@@ -365,7 +365,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.PickingTasks.Add(pickingTask2);
 			await DbContext.SaveChangesAsync();
 			// Act
-			var result = await Mediator.Send(new ExecuteCorrectedPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
+			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
 			// Assert		
 			Assert.True(result.IsSuccess);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
@@ -412,7 +412,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.False(DbContext.ChangeTracker.HasChanges());
 		}
 		[Fact]
-		public async Task ExecutiveCorrectedPicking_WithIssueIdDeleteIssue_ThrowException()
+		public async Task ExecutiveEmergencyPicking_WithIssueIdDeleteIssue_ThrowException()
 		{
 			// Arrange
 			var category = new Category
@@ -490,7 +490,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			await DbContext.SaveChangesAsync();
 
 			// Act
-			var result = await Mediator.Send(new ExecuteCorrectedPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
+			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
 			// Assert
 			Assert.False(result.IsSuccess);
 			Assert.Equal($"Zamówienie o numerze {issue.Id} nie zostało znalezione.", result.Error);

@@ -9,10 +9,9 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Invetories.Events;
-using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Receviving.Events;
-using MyWerehouse.Domain.Warehouse.Models;
+using MyWerehouse.Domain.Receviving.ReceivingExceptions;
 
 namespace MyWerehouse.Domain.Receviving.Models
 {
@@ -28,21 +27,9 @@ namespace MyWerehouse.Domain.Receviving.Models
 		public string PerformedBy { get; private set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; private set; }
 		public int RampNumber { get; private set; }
-		
-		private Receipt() { }
-		//public Receipt(int clientId, string performedBy, int rampNumber)
-		//{
-		//	if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
 
-		//	if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
-		//	//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
-		//	ClientId = clientId;
-		//	PerformedBy = performedBy;
-		//	ReceiptDateTime = DateTime.UtcNow;
-		//	ReceiptStatus = ReceiptStatus.Planned;
-		//	RampNumber = rampNumber;
-		//	Pallets = new List<Pallet>();
-		//}
+		private Receipt() { }
+
 
 		private Receipt(int receiptNumber, int clientId, string performedBy, int rampNumber)
 		{
@@ -53,7 +40,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
 			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
 			ClientId = clientId;
-			PerformedBy = performedBy;
+			PerformedBy = performedBy ?? throw new InvalidUserIdException(performedBy);
 			ReceiptDateTime = DateTime.UtcNow;
 			ReceiptStatus = ReceiptStatus.Planned;
 			RampNumber = rampNumber;
@@ -82,87 +69,89 @@ namespace MyWerehouse.Domain.Receviving.Models
 
 		public static Receipt CreateForSeed(Guid id, int receiptNumber, int clientId,
 			string performedBy, DateTime dateTime, ReceiptStatus receiptStatus, int rampNumber)
-			=> new Receipt(id, receiptNumber, clientId, performedBy, dateTime, receiptStatus, rampNumber);	
-		
+			=> new Receipt(id, receiptNumber, clientId, performedBy, dateTime, receiptStatus, rampNumber);
+
 		public void Create(string userId)
 		{
 			ReceiptStatus = ReceiptStatus.Planned;
-			AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			AddHistory(userId);
 		}
 
-		public bool Delete(string userId)
+		public void Delete(string userId)
 		{
-			if (ReceiptStatus == ReceiptStatus.Planned)
+			if (ReceiptStatus != ReceiptStatus.Planned)
 			{
-				ReceiptStatus = ReceiptStatus.Deleted;
-				this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
-				return true;
+				throw new InvalidReceiptStateException(Id, ReceiptStatus);
 			}
-			return false;
+			ReceiptStatus = ReceiptStatus.Deleted;
+			AddHistory(userId);
 		}
 
 		public void Cancel(string userId)
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
 			{
-				throw new DomainReceiptException("Nie można usunąć zweryfikowanego przyjęcia", ReceiptNumber);
+				throw new ReceiptAlreadyVerifyException(Id);
 			}
 			if (!(ReceiptStatus == ReceiptStatus.InProgress
 			|| ReceiptStatus == ReceiptStatus.PhysicallyCompleted))
 			{
-				throw new DomainReceiptException("Nieprawidłowy status przyjęcia");
+				throw new InvalidReceiptStateException(Id, ReceiptStatus);
 			}
 			ReceiptStatus = ReceiptStatus.Cancelled;
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			AddHistory(userId);
 		}
 
 		public void StartReceiving(DateTime now, string userId)
 		{
 			if (ReceiptStatus == ReceiptStatus.InProgress) return;
 			if (ReceiptStatus != ReceiptStatus.Planned && ReceiptStatus != ReceiptStatus.InProgress)
-				throw new DomainReceiptException("Nie można dodać palety zły status przyjęcia lub brak utworzenia przyjęcia");
+				throw new InvalidReceiptStateException(Id, ReceiptStatus);
 			ReceiptStatus = ReceiptStatus.InProgress;
 			ReceiptDateTime = now;
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			AddHistory(userId);
 		}
-		
+
 		public void UpdateReceipt(string userId, int clientId)
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
-				throw new DomainReceiptException("Zatwierdzone przyjęcie nie może być modyfikowane.");
+				throw new ReceiptAlreadyVerifyException(Id);
 			PerformedBy = userId;
 			ReceiptStatus = ReceiptStatus.Correction;
 			ClientId = clientId;
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			AddHistory(userId);
 		}
 
 		public void CompletePhysicalReceipt(string userId)
 		{
 			if (ReceiptStatus != ReceiptStatus.InProgress)
-				throw new DomainReceiptException("Nie można zakończyć przyjęcia - błędny status zlecenia");
+				throw new InvalidReceiptStateException(Id, ReceiptStatus);
 			ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			AddHistory(userId);
 		}
 
 		public void VerifiedReceipt(string userId)
 		{
+			if (ReceiptStatus == ReceiptStatus.Verified)
+			{
+				throw new ReceiptAlreadyVerifyException(Id);
+			}
 			if (ReceiptStatus != ReceiptStatus.PhysicallyCompleted)
 			{
-				throw new DomainReceiptException("Nie można zweryfikować przyjęcia");
+				throw new InvalidReceiptStateException(Id, ReceiptStatus);
 			}
 			var toReturn = Pallets.Where(p => p.Status == PalletStatus.Receiving).ToList();
 			foreach (var pallet in toReturn)
 			{
-				pallet.ChangeStatus(PalletStatus.InStock);				
-				pallet.AddHistory(ReasonMovement.Received, userId,pallet.Location.ToSnopShot());
+				pallet.ChangeStatus(PalletStatus.InStock);
+				pallet.AddHistory(ReasonMovement.Received, userId, pallet.Location.ToSnopShot());
 			}
 			ReceiptStatus = ReceiptStatus.Verified;
-
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
-			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));			
+			AddHistory(userId);
+			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));
 		}
 
-		//Detach i Attach tylko dla update i tworzenia palety z palca - bo porawiam agregat receipt tworzę nowy agregat pallet
+		//Detach i Attach tylko dla update - dla historii
 		public void AttachPallet(Pallet pallet)
 		{
 			if (!Pallets.Contains(pallet))
@@ -172,6 +161,11 @@ namespace MyWerehouse.Domain.Receviving.Models
 		public void DetachPallet(Pallet pallet)
 		{
 			Pallets.Remove(pallet);
+		}
+
+		public void AddHistory(string userId)
+		{
+			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
 
 		//metody pomocnicze

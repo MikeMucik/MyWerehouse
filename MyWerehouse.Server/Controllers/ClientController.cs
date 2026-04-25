@@ -22,7 +22,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _clientService.AddClientAsync(clientDTO);
 			return Ok(result);
 		}
-		[HttpPost("{id}")]
+		[HttpPost("{id}delete")]
 		public async Task<IActionResult> Delete(int id)
 		{
 			var result = await _clientService.DeleteClientAsync(id);

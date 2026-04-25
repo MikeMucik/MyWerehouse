@@ -39,7 +39,7 @@ namespace MyWerehouse.Application.Pallets.Services
 				.Take(amountFullPallet)
 				.Select(x=>x.Pallet)
 				.ToList();
-			foreach (var pallet in fullPallets)         //do zastanowienia
+			foreach (var pallet in fullPallets)         
 				pallet.ChangeStatus(PalletStatus.LockedForIssue);
 			return fullPallets;			
 		}

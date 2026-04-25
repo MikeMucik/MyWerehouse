@@ -23,10 +23,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			 _werehouseDbContext.Pallets.Add(pallet);
 			return pallet.Id;
 		}
-		//public void DeletePallet(Pallet pallet)
-		//{			
-		//		_werehouseDbContext.Pallets.Remove(pallet);			
-		//}
+		
 		public async Task<Pallet?> GetPalletByIdAsync(Guid palletId)
 		{
 			return await _werehouseDbContext.Pallets
@@ -43,9 +40,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(a => a.ProductsOnPallet)
 				.Where(p => p.Status != PalletStatus.Archived);
 
-
-			//if dla receiptNumber
-			//if (filter.ProductId != null)
 			if (filter.ProductId.HasValue)
 			{
 				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
@@ -97,6 +91,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return result;
 		}
+		//może powinno być pobierz dostępne palety ale tylko tyle ile potrzebuje, zwracaj ProductOnPallet wraz z Pallet
 		public IQueryable<Pallet> GetAvailablePallets(Guid productId, DateOnly? minBestBefore)
 		{
 			var pallets = _werehouseDbContext.Pallets
@@ -112,46 +107,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.Where(pp => pp.ProductId == productId)
 					.Min(pp => pp.BestBefore))
 				.ThenBy(p => p.LocationId)
-				.ThenBy(p => p.DateReceived);
+				.ThenBy(p => p.DateReceived)
+				.Take(10);//nie bierz wszystkich
+			
 			return pallets;
 		}
-		
-		//public void ClearPalletFromListIssue(Pallet pallet)
-		//{			
-		//	if (pallet is null) return;
-		//	pallet.IssueId = null;
-		//	pallet.Status = PalletStatus.Available;					
-		//}
-
-		//public void ChangePalletStatus(Guid palletId, PalletStatus palletStatus)
-		//{
-		//	var pallet =_werehouseDbContext.Pallets
-		//		.Find(palletId);
-		//	switch (palletStatus)
-		//	{
-		//		case PalletStatus.ToIssue:
-		//			pallet.Status = PalletStatus.ToIssue;
-		//			break;
-		//		case PalletStatus.Damaged:
-		//			pallet.Status = PalletStatus.Damaged;
-		//			break;
-		//		case PalletStatus.OnHold:
-		//			pallet.Status = PalletStatus.OnHold;
-		//			break;
-		//		case PalletStatus.Loaded:
-		//			pallet.Status = PalletStatus.Loaded;
-		//			break;
-		//		case PalletStatus.ToPicking:
-		//			pallet.Status = PalletStatus.ToPicking;
-		//			break;
-		//		case PalletStatus.Archived:
-		//			pallet.Status = PalletStatus.Archived;
-		//			break;
-		//		default:
-		//			pallet.Status = PalletStatus.Available;
-		//			break;
-		//	}
-		//}
+				
 		public async Task<string> GetNextPalletIdAsync()
 		{
 			var lastPallet = await _werehouseDbContext.Pallets
@@ -193,12 +154,15 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 		}
 
-
+		//public void DeletePallet(Pallet pallet)
+		//{			
+		//		_werehouseDbContext.Pallets.Remove(pallet);			
+		//}
 		//public async Task<bool> ExistsAsync(string palletId, int productId)
 		//{
 
 		//	return await _werehouseDbContext.ProductOnPallet
 		//		.AnyAsync(p => p.PalletId == palletId && p.ProductId == productId);
 		//}
-	}	
+	}
 }

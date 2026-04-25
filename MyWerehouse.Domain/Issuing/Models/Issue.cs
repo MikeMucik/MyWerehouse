@@ -7,11 +7,12 @@ using MediatR;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
-using MyWerehouse.Domain.DomainExceptions.PalletExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Invetories.Events;
 using MyWerehouse.Domain.Issuing.Events;
+using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Receviving.Events;
 
@@ -39,11 +40,10 @@ namespace MyWerehouse.Domain.Issuing.Models
 			IssueNumber = issueNumber;
 			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
 			ClientId = clientId;
-			//if (dateToSend < DateTime.UtcNow) throw new DomainException("Data wysyłki nie może być w przeszłości");
 			if (dateToSend < DateTime.UtcNow) throw new WrongDataException();
 			IssueDateTimeSend = dateToSend;
 			IssueDateTimeCreate = DateTime.UtcNow;
-			PerformedBy = performedBy ?? throw new ArgumentNullException(nameof(performedBy));
+			PerformedBy = performedBy ?? throw new InvalidUserIdException(performedBy);
 			IssueStatus = IssueStatus.New;
 		}
 
@@ -78,17 +78,20 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void ChangeStatus(IssueStatus issueStatus)
 		{
-			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived) throw new InvalidOperationException("Operation forbidden.");
+			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived)
+				throw new NotAllowedOperationException(Id);
 			IssueStatus = issueStatus;
 		}
 
 		public void CancelIssue(string userId)
 		{
+			if (IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.Archived)
+				throw new NotAllowedOperationException(Id);
 			IssueStatus = IssueStatus.Cancelled;
 			AddHistory(userId);
 			foreach (var pallet in Pallets)
 			{
-				pallet.DetachToIssue(Id, userId, pallet.Location.ToSnopShot(), ReasonMovement.CancelIssue);
+				pallet.DetachToIssue(userId, pallet.Location.ToSnopShot(), ReasonMovement.CancelIssue);
 			}
 			foreach (var task in PickingTasks)
 			{
@@ -108,9 +111,10 @@ namespace MyWerehouse.Domain.Issuing.Models
 			var existing = IssueItems.FirstOrDefault(x => x.ProductId == productId);
 			if (existing != null)
 			{
+				//TODO ?? jeśli zdecydujemy na zmianę Item a nie jak teraz nowa wartość
 				//existing.IncreaseQuantity(quantity);
 				//return;
-				throw new InvalidOperationException("IssueItem exist.");
+				throw new ProductAlreadyExistException(productId);
 			}
 			if (quantity <= 0) throw new InvalidDataException("Quantity must be grater than zero.");
 			var item = new IssueItem(Id, productId, quantity, bestBefore);
@@ -122,95 +126,69 @@ namespace MyWerehouse.Domain.Issuing.Models
 			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
 			foreach (var pallet in toReturn)
 			{
-				pallet.DetachToIssue(Id, userId, pallet.Location.ToSnopShot(), ReasonMovement.Correction);
+				pallet.DetachToIssue(userId, pallet.Location.ToSnopShot(), ReasonMovement.Correction);
 				Pallets.Remove(pallet);
 			}
 			return toReturn;
-		}
-
-		public void ReservePallet(Pallet pallet, string userId)
-		{
-			if (pallet.Status == PalletStatus.ToIssue)
-				//throw new DomainException("Already reserved");
-				throw new AlreadyAssignedException(pallet.Id);
-			this.Pallets.Add(pallet);			
-		}
-
-		public void DetachPallet(Pallet pallet)
-		{
-			this.Pallets.Remove(pallet);			
-		}
-
-		public void AttachPallet(Pallet pallet)
-		{
-			if (!Pallets.Contains(pallet))
-				this.Pallets.Add(pallet);			
-		}
-
-		public void AttachPickingTask(PickingTask task)
-		{
-			this.PickingTasks.Add(task);
-		}
-
+		}		
+				
 		public void ConfirmToLoad(string userId)
 		{
+			//invarianty status
 			IssueStatus = IssueStatus.ConfirmedToLoad;
 			foreach (var pallet in Pallets)
 			{				
-				pallet.AssignToIssue(this, userId, pallet.Location.ToSnopShot());				
-				pallet.AddHistory(ReasonMovement.ToLoad, userId, pallet.Location.ToSnopShot());
+				pallet.AssignToIssue(Id, userId, pallet.Location.ToSnopShot());				
 			}
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
-				Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
+			AddHistory(userId);
 		}
 
 		public void VeryfiedAfterLoading(string userId)
 		{
 			if (Pallets.Any(p => p.Status != PalletStatus.Loaded))
 			{
-				throw new DomainIssueException("Nie wszystkie palety mają status Loaded.");
+				throw new NotEndedLoadingException(Id); //może dodać jakie nie są ale to nie w domenie				
 			}
 			PerformedBy = userId;
 			if (IssueStatus != IssueStatus.IsShipped)
 			{
-				throw new DomainIssueException("Nie zakończono załadunku.");
+				throw new NotAllowedOperationException(Id);
 			}
 			foreach (var pallet in Pallets)
 			{
 				pallet.ToArchive(userId, ReasonMovement.Loaded, pallet.Location.ToSnopShot());
 			}
 			IssueStatus = IssueStatus.Archived;
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
-				Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
+			AddHistory(userId);
 			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(Pallets.ToList())));
 		}
 
 		public void FinishIssueNotCompleted(string userId)
 		{
+			//invarianty dla status
 			PerformedBy = userId;
 			foreach (var pallet in Pallets)
 			{
 				pallet.AddHistory(ReasonMovement.Loaded, userId, pallet.Location.ToSnopShot());
 			}
 			IssueStatus = IssueStatus.IsShipped;
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
-				Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
+			AddHistory(userId);
 		}
 
 		public void Cancel(string userId)
 		{
+			//invarianty dla status
 			IssueStatus = IssueStatus.Cancelled;
 			PerformedBy = userId;
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
-				Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
+			AddHistory(userId);
 		}
 
 		public void ChangePalletInIssue(string userId)
 		{
+			//invarianty dla status
 			IssueStatus = IssueStatus.ChangingPallet;
 			PerformedBy = userId;
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
-				Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
+			AddHistory(userId);
 		}
 
 		public void CompletedLoad(string userId)
@@ -219,20 +197,41 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				if (pallet.Status != PalletStatus.Loaded)
 				{
-					throw new DomainIssueException("Nie załadowano wszystkich palet.");
+					throw new NotEndedLoadingException(Id);
 				}
 			}
 			IssueStatus = IssueStatus.IsShipped;
 			PerformedBy = userId;
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
-				Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
+			AddHistory(userId);			
 		}
 
 		public void RemovePickingTask(PickingTask pickingTask)
 		{
 			PickingTasks.Remove(pickingTask);
 		}
+		//Detach i Attach tylko dla update - dla historii
+		public void DetachPallet(Pallet pallet)
+		{
+			this.Pallets.Remove(pallet);
+		}
+
+		public void AttachPallet(Pallet pallet)
+		{
+			if (!Pallets.Contains(pallet))
+				this.Pallets.Add(pallet);
+		}
 		//*
+		public void AttachPickingTask(PickingTask task) //do testów
+		{
+			this.PickingTasks.Add(task);
+		}
+
+		public void ReservePallet(Pallet pallet) //do testów
+		{
+			if (pallet.Status == PalletStatus.ToIssue)
+				throw new AlreadyAssignedException(pallet.Id);
+			this.Pallets.Add(pallet);
+		}
 		public void AddHistory(string userId)
 		{
 			this.AddDomainEvent(new AddHistoryForIssueNotification(

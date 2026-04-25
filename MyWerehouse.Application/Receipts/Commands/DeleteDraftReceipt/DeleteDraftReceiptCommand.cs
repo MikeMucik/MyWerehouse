@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 
-namespace MyWerehouse.Application.Receipts.Commands.DeleteReceipt
+namespace MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt
 {
-	public record DeleteReceiptCommand(Guid ReceiptId, string UserId):IRequest<AppResult<Unit>>;	
+	public record DeleteDraftReceiptCommand(Guid ReceiptId, string UserId):IRequest<AppResult<Unit>>;	
 }

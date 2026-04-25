@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet;
 using MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking;
-using MyWerehouse.Application.PickingPallets.Commands.ExecuteCorrectedPicking;
+using MyWerehouse.Application.PickingPallets.Commands.ExecuteEmergencyPicking;
 using MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking;
 using MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPrepareToHandPicking;
 using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
@@ -40,7 +40,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Wykonaj skorygowane zadanie kompletacyjne
 		[HttpPost("corrected")]
-		public async Task<IActionResult> CorrectedPicking(ExecuteCorrectedPickingCommand command)
+		public async Task<IActionResult> CorrectedPicking(ExecuteEmergencyPickingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Wykonaj awaryjne zadanie kompletacyjne

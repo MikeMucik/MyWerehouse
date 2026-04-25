@@ -18,36 +18,36 @@ namespace MyWerehouse.Application.PickingPallets.Services
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
-
+		//TODO - podziel metodę na główną i trzy pomocnicze
+		//HandleSourcePallet
+		//HandlePickingPallet
+		//HandlePickingTask
 		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, Guid productId,
 			int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion, int rampNumber)
-		{
+		{			
 			var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId);
 			if (productOnSourcePallet is null)
 				return ProcessPickingActionResult.Fail($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
+			
 			var bestBefore = pickingTask.BestBefore;
-			var pickingPallet = await CreatePalletOrAddToPallet(issue, productId,
-				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion, rampNumber);
-			//Usuwanie towaru z palety źródłowej
+			var pickingPallet = await CreatePalletOrAddToPallet(issue.Id, productId,
+				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion, rampNumber, sourcePallet);
+			//Usuwanie towaru z palety źródłowej -> do nowej metody pomocnicznej
 			productOnSourcePallet.DecreaseQuantity(quantityToPick);
 			if (productOnSourcePallet.Quantity == 0)
-			{				
-				sourcePallet.AddHistory(ReasonMovement.Picking, userId, sourcePallet.Location.ToSnopShot());
-				sourcePallet.ChangeStatus(PalletStatus.Archived);
-			}
-			else
 			{
+				sourcePallet.ChangeStatus(PalletStatus.Archived);
+			}			
 				sourcePallet.AddHistory(ReasonMovement.Picking, userId, sourcePallet.Location.ToSnopShot());
-			}
 			return ProcessPickingActionResult.Ok(pickingPallet.PalletId);
 		}
-		private async Task<CreatePalletResult> CreatePalletOrAddToPallet(Issue issue, Guid productId,
+		private async Task<CreatePalletResult> CreatePalletOrAddToPallet(Guid issueId, Guid productId,
 			int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask,
-			PickingCompletion pickingCompletion, int rampNumber)
+			PickingCompletion pickingCompletion, int rampNumber, Pallet paletSource)
 		{
-			//Tworzę nową paletę		
-			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issue.Id);
-			if (oldPallet == null)
+
+			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(pickingTask.IssueId);
+			if (oldPallet == null)//Tworzę nową paletę	
 			{
 				var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
 				var sourcePalletBB = bestBefore;
@@ -57,29 +57,27 @@ namespace MyWerehouse.Application.PickingPallets.Services
 				var snapShot = location.ToSnopShot();
 				pallet.AddProduct(productId, quantity, sourcePalletBB);
 				var palletId = _palletRepo.AddPallet(pallet);
-				issue.ReservePallet(pallet, userId);//
-				pallet.ReserveToIssue(issue, userId, snapShot);
+				pallet.ReserveToIssue(issueId, userId, snapShot);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
-					pickingTask.MarkPicked(palletId); //
+					pickingTask.MarkPicked(palletId, pallet.PalletNumber, paletSource.Id, paletSource.PalletNumber, userId); //
 				}
 				else
 				{
-					pickingTask.MarkPartiallyPicked(palletId, quantity);
+					pickingTask.MarkPartiallyPicked(palletId, pallet.PalletNumber, paletSource.Id, paletSource.PalletNumber, quantity, userId);
 				}
 				return new CreatePalletResult(true, palletId); //pokaż komunikat weź nową paletę
 			}
 			else
 			{
-				var pickingPallet = oldPallet;
-				pickingPallet.AddOrIncreaseProductQuantity(productId, quantity,bestBefore);				
+				oldPallet.AddOrIncreaseProductQuantity(productId, quantity, bestBefore);
 				if (pickingCompletion == PickingCompletion.Full)
 				{
-					pickingTask.MarkPicked(oldPallet.Id); //
+					pickingTask.MarkPicked(oldPallet.Id, oldPallet.PalletNumber, paletSource.Id, paletSource.PalletNumber, userId); //
 				}
 				else
 				{
-					pickingTask.MarkPartiallyPicked(oldPallet.Id, quantity);
+					pickingTask.MarkPartiallyPicked(oldPallet.Id, oldPallet.PalletNumber, paletSource.Id, paletSource.PalletNumber, quantity, userId);
 				}
 				oldPallet.AddHistory(ReasonMovement.Picking, userId, oldPallet.Location.ToSnopShot());
 				return new CreatePalletResult(false, oldPallet.Id);

@@ -10,14 +10,14 @@ using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePicking
 {
-	public class ListPalletsToReservePickingHandler(IReversePickingRepo reversePickingRepo,
+	public class ListPalletsForForkLifterReservePickingHandler(IReversePickingRepo reversePickingRepo,
 		IPalletRepo palletRepo)
-		: IRequestHandler<ListPalletsToReservePickingQuery, AppResult<List<PalletWithLocationDTO>>>
+		: IRequestHandler<ListPalletsForForkLifterReservePickingQuery, AppResult<List<PalletWithLocationDTO>>>
 	{
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 
-		public async Task<AppResult<List<PalletWithLocationDTO>>> Handle(ListPalletsToReservePickingQuery query, CancellationToken ct)
+		public async Task<AppResult<List<PalletWithLocationDTO>>> Handle(ListPalletsForForkLifterReservePickingQuery query, CancellationToken ct)
 		{
 			var list = new List<PalletWithLocationDTO>();
 			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(query.Start, query.End);

@@ -222,7 +222,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
 			//Assert
 			Assert.NotNull(result);
-			Assert.Contains("Nieprawidłowy lub brak numeru użytkownika", result.Error);
+			Assert.Contains("Invalid  or missing user ID.", result.Error);
 		}
 		[Fact]
 		public async Task CreateReceiptPlanAsync_NoProperData_NotAddToBase()

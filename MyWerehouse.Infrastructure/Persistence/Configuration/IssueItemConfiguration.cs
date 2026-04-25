@@ -19,7 +19,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 			entity.HasOne(e => e.Issue)
 				.WithMany(a => a.IssueItems)
 				.HasForeignKey(a => a.IssueId)
-				.OnDelete(DeleteBehavior.Restrict);
+				.OnDelete(DeleteBehavior.Cascade);
 
 			entity.HasOne(e => e.Product)
 				.WithMany()

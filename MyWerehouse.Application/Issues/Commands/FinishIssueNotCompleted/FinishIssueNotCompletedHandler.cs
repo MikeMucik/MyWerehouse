@@ -10,7 +10,7 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 {
-	public class FinishIssueNotCompletedHandler : IRequestHandler<FinishIssueNotCompletedCommand, AppResult< Unit>>
+	public class FinishIssueNotCompletedHandler : IRequestHandler<FinishIssueNotCompletedCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IIssueRepo _issueRepo;
@@ -23,48 +23,15 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 		public async Task<AppResult<Unit>> Handle(FinishIssueNotCompletedCommand request, CancellationToken ct)
 		{
 			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
-			try
-			{
-				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
-				if (issue == null)
-					return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
-					
-				var palletsReturn =	issue.RemoveNotLoadedPallets(request.UserId);				
-				issue.FinishIssueNotCompleted(request.UserId);				
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);				
-				return AppResult< Unit>.Success(Unit.Value, $"Zamknięto wydanie {request.IssueId}.");
-			}			
-			catch (Exception ex)
-			{
-				await transaction.RollbackAsync(ct);
-				// Loguj ex dla developera!
-				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
-				throw new InvalidOperationException("Wystąpił błąd podczas zatwierdzania niekompletnego zlecenia.", ex);
-			}
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			if (issue == null)
+				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+
+			var palletsReturn = issue.RemoveNotLoadedPallets(request.UserId);
+			issue.FinishIssueNotCompleted(request.UserId);
+			await _werehouseDbContext.SaveChangesAsync(ct);
+			await transaction.CommitAsync(ct);
+			return AppResult<Unit>.Success(Unit.Value, $"Zamknięto wydanie {request.IssueId}.");
 		}
 	}
 }
-
-
-//var stockChanges = issue.Pallets
-//	.SelectMany(p => p.ProductsOnPallet)
-//	.GroupBy(p => p.ProductId)
-//	.Select(g => new StockItemChange(g.Key, g.Sum(x => x.Quantity)))
-//	.ToList();
-//var notifications = new List<INotification>();
-
-//if (stockChanges.Count != 0)
-//{
-//	notifications.Add(
-//		new ChangeStockNotification(
-//			StockChangeType.Decrease,
-//			stockChanges
-//		)
-//	);
-//}
-
-//foreach (var notification in notifications)
-//{
-//	await _mediator.Publish(notification, ct);
-//}

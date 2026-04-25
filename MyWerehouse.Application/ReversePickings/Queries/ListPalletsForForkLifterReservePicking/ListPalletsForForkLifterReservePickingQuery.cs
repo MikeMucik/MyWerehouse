@@ -9,5 +9,5 @@ using MyWerehouse.Application.Pallets.DTOs;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePicking
 {
-	public record ListPalletsToReservePickingQuery(DateOnly Start, DateOnly End):IRequest<AppResult<List<PalletWithLocationDTO>>>;
+	public record ListPalletsForForkLifterReservePickingQuery(DateOnly Start, DateOnly End):IRequest<AppResult<List<PalletWithLocationDTO>>>;
 }

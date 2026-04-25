@@ -4,13 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Domain.DomainExceptions
+namespace MyWerehouse.Domain.Common
 {
 	public abstract class DomainException : Exception
 	{
-		//public string Message { get; set; }
 		//public string Code { get; }
 		protected DomainException(string message) : base(message) { }
-		//public DomainException(string message) { Message = message; }
 	}
 }

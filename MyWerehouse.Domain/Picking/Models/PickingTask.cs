@@ -7,12 +7,13 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Events;
+using MyWerehouse.Domain.Picking.PickingExceptions;
 
 namespace MyWerehouse.Domain.Picking.Models
 {
 	public class PickingTask : AggregateRoots
 	{
-		public Guid Id { get; private set; }		
+		public Guid Id { get; private set; }
 		public Guid? VirtualPalletId { get; private set; }
 		public VirtualPallet? VirtualPallet { get; private set; }
 		public Guid IssueId { get; private set; }
@@ -51,12 +52,13 @@ namespace MyWerehouse.Domain.Picking.Models
 		public static PickingTask Create(Guid? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore, Guid? pickingPalletId,
 			DateOnly? pickingDay, int pickedQuantity) =>
-			new PickingTask(virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
+			new PickingTask(virtualPalletId, issueId, requestedQuantity, pickingStatus, productId,
+				bestBefore, pickingPalletId, pickingDay, pickedQuantity);
 
 		private PickingTask(Guid id, Guid? virtualPalletId, Guid issueId, int requestedQuantity,
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore, Guid? pickingPalletId,
 			DateOnly? pickingDay, int pickedQuantity)
-		{			
+		{
 			Id = id;
 			VirtualPalletId = virtualPalletId;
 			IssueId = issueId;
@@ -73,60 +75,92 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore,
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
-		
-		public void Cancel(string userId,int issueNumber)
+		//TODO docelowo przejśc na 3 strategie i klasy rozwiązań
+		public void Cancel(string userId, int issueNumber)
 		{
-			this.PickingStatus = PickingStatus.Cancelled;
-			AddHistory(userId, VirtualPallet.PalletId, VirtualPallet.Pallet.PalletNumber,issueNumber, PickingStatus.Allocated, PickingStatus.Cancelled, 0);
-			this.RequestedQuantity = 0;
-		}
-		
-		public void SetVirtualPallet(Guid virtualPalletId)
-		{
-			if (VirtualPalletId != null) throw new InvalidOperationException("Task already have virtualPallet.");
-			this.VirtualPalletId = virtualPalletId;
-		}
-		
-		public void ReduceQuantity(int quantity)
-		{
-			RequestedQuantity -= quantity;
+			var oldStatus = PickingStatus;
+			if (PickingStatus == PickingStatus.PickedPartially || PickingStatus == PickingStatus.Picked)
+				throw new CannotCancelPickingTaskInCurrentStatusException(Id, IssueId, PickingStatus);
+			this.PickingStatus = PickingStatus.Cancelled;			
+			AddHistoryPicking(userId, null,null, oldStatus, 0);			
+			this.RequestedQuantity = 0;//tu czy przed history raczej tu
 		}
 
-		public void MarkPicked(Guid pickingPalletId)
+		public void SetVirtualPallet(Guid virtualPalletId)//to mogłoby być w virtualPallet
 		{
+			if (VirtualPalletId != null)
+				throw new CannotSetVirtualPalletException(Id);
+			this.VirtualPalletId = virtualPalletId;
+		}
+
+		public void ReduceQuantity(int quantity, string userId)
+		{
+			var oldStatus = PickingStatus;
+			RequestedQuantity -= quantity;
+			PickingStatus = PickingStatus.Correction;
+			AddHistoryPicking(userId, null, null, oldStatus, 0);
+		}
+		// do ujednolicenia MarkPicked MarkPartiallyPicked
+		public void MarkPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, string userId)
+		{
+			var	oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
-				throw new InvalidOperationException("PickingTask already picked.");
+				throw new CannotMakeOperationForStatusException(Id, PickingStatus);
 			if (pickingPalletId == Guid.Empty)
-				throw new ArgumentException("Picking pallet id is required.");
-			//czy dołączyć do Issue?
+				throw new RequiredPickingPalletException();
 			PickedQuantity = RequestedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.Picked;
+			AddHistoryPicking(userId,sourcePalletId,sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, PickedQuantity);
 		}
-		public void MarkPartiallyPicked(Guid pickingPalletId, int pickedQuantity)
+		public void MarkPartiallyPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, int pickedQuantity, string userId)
 		{
+			var oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
-				throw new InvalidOperationException("PickingTask already picked.");
+				throw new CannotMakeOperationForStatusException(Id, PickingStatus);
 			if (pickingPalletId == Guid.Empty)
-				throw new ArgumentException("Picking pallet id is required.");
+				throw new RequiredPickingPalletException();
 			PickedQuantity = pickedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.PickedPartially;
+			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, pickedQuantity);
 		}
-
-		public void AddHistory(string userId, Guid palletId, string palletNumber,int issueNumber, PickingStatus statusBefore, PickingStatus statusAfter, int quantityPicked)
+		//Różne źródła prawdy dlatego przeciążenie
+		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
 		{
+
 			this.AddDomainEvent(new CreateHistoryPickingNotification(
 				Id,
-				palletId,
-				palletNumber,
+				VirtualPallet?.PalletId,
+				VirtualPallet?.Pallet.PalletNumber,
+				pickingPalletId,
+				pickingPalletNumber,
 				IssueId,
-				issueNumber,
+				Issue.IssueNumber,
 				ProductId,
 				RequestedQuantity,
 				quantityPicked,
 				statusBefore,
-				statusAfter,
+				PickingStatus,
+				userId,
+				DateTime.UtcNow));
+		}
+		public void AddHistoryPicking(string userId, Guid? sourcePalletId, string? sourcePalletNumber, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
+		{
+
+			this.AddDomainEvent(new CreateHistoryPickingNotification(
+				Id,
+				sourcePalletId,
+				sourcePalletNumber,
+				pickingPalletId,
+				pickingPalletNumber,
+				IssueId,
+				Issue.IssueNumber,
+				ProductId,
+				RequestedQuantity,
+				quantityPicked,
+				statusBefore,
+				PickingStatus,
 				userId,
 				DateTime.UtcNow));
 		}

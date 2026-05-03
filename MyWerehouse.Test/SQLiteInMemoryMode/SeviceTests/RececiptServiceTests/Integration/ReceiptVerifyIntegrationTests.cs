@@ -73,7 +73,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Palety z przyjęcia zweryfikowano, gotowe do działania", result.Message);
+			Assert.Contains("Palety z przyjęcia zweryfikowano, gotowe do użycia.", result.Message);
 
 			var receiptVeryfying = await DbContext.Receipts.FindAsync(receipt.Id);
 			Assert.NotNull(receiptVeryfying);

@@ -47,15 +47,15 @@ namespace MyWerehouse.Server.Controllers
 			return Ok(result);
 		}
 		[HttpGet("all")]
-		public async Task<IActionResult> GetAll(int page, int size)
+		public async Task<IActionResult> GetAll(int page, int size, CancellationToken ct)
 		{
-			var result = await _productService.GetProductsAsync(page, size);
+			var result = await _productService.GetProductsAsync(page, size, ct);
 			return Ok(result);
 		}
 		[HttpGet("byFilter")]
-		public async Task<IActionResult> GetByFilter(int page, int size, ProductSearchFilter filtr)
+		public async Task<IActionResult> GetByFilter(int page, int size, ProductSearchFilter filtr, CancellationToken ct)
 		{
-			var result = await _productService.FindProductsByFilterAsync(page, size, filtr);
+			var result = await _productService.FindProductsByFilterAsync(page, size, filtr, ct);
 			return Ok(result);
 		}
 	}

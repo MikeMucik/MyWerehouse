@@ -27,11 +27,12 @@ namespace MyWerehouse.Test.IntegrationTestService.CategoryTestsIntegration
 			//Arrange
 			var pageSize = 5;
 			var pagenumber = 1;
+			var ct = CancellationToken.None;
 			//Act
-			var result = await _categoryService.GetCategoriesAsync(pageSize, pagenumber);
+			var result = await _categoryService.GetCategoriesAsync(pageSize, pagenumber, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Result.Categories.Count);
+			Assert.Equal(3, result.Result.Dtos.Count);
 		}
 	}
 }

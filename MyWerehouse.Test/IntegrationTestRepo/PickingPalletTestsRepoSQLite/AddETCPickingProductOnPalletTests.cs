@@ -45,9 +45,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			DbContext.SaveChanges();
 			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
 			DbContext.SaveChanges();
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
+			var virtualPalletRepo = new VirtualPalletRepo(DbContext);
 			//Act
-			pickingPalletRepo.AddPalletToPicking(virtualPallet);
+			virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			DbContext.SaveChanges();
 			//Assert
 			var createdVirtualPallet = DbContext.VirtualPallets
@@ -106,9 +106,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.SaveChanges();
-			var pickingPalletRepo = new PickingPalletRepo(DbContext);
+			var virtualPalletRepo = new VirtualPalletRepo(DbContext);
 			//Act
-			pickingPalletRepo.DeleteVirtualPalletPicking(virtualPallet);
+			virtualPalletRepo.DeleteVirtualPalletPicking(virtualPallet);
 			DbContext.SaveChanges();
 			//Assert
 			var result = DbContext.VirtualPallets.Find(virtualPallet.Id);
@@ -184,9 +184,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 		//	DbContext.Pallets.Add(pickingPallettoClose);
 		//	DbContext.SaveChanges();
 		//	//var issueId = 1;
-		//	var pickingPalletRepo = new PickingPalletRepo(DbContext);
+		//	var virtualPalletRepo = new virtualPalletRepo(DbContext);
 		//	//Act
-		//	pickingPalletRepo.ClosePickingPallet(pickingPallettoClose.Id, issue.Id);
+		//	virtualPalletRepo.ClosePickingPallet(pickingPallettoClose.Id, issue.Id);
 		//	DbContext.SaveChanges();
 		//	//Assert
 		//	var result = DbContext.Pallets.Find(pickingPallettoClose.Id);

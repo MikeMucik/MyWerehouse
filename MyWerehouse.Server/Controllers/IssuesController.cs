@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
 using MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading;
 using MyWerehouse.Application.Issues.Commands.CompletedIssue;
-using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
+using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.Commands.DeleteIssue;
 using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Application.Issues.Commands.UpdateIssue;
@@ -30,7 +30,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Stworzenie zlecenia wydania
 		[HttpPost("add")]
-		public async Task<IActionResult> Create(CreateNewIssueCommand command)
+		public async Task<IActionResult> Create(CreateIssueCommand command)
 		{
 			var result = await _mediator.Send(command);
 			return result.ToActionResult();
@@ -46,7 +46,7 @@ namespace MyWerehouse.Server.Controllers
 
 		// Update - wiele rozwiązań więc POST
 		[HttpPost("update")]
-		public async Task<IActionResult> Update(UpdateIssueNewCommand command)
+		public async Task<IActionResult> Update(UpdateIssueCommand command)
 		{
 			var result = await _mediator.Send(command);
 			return result.ToActionResult();

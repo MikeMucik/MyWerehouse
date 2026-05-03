@@ -3,7 +3,7 @@ using System.Linq;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
+using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.IssuesServices;
 using MyWerehouse.Domain.Interfaces;
@@ -13,19 +13,19 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 {
-	public class UpdateIssueNewHandler(
+	public class UpdateIssueHandler(
 		IIssueRepo issueRepo,
 		IPalletRepo palletRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
-		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueNewCommand, AppResult<List<IssueResult>>>
+		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<UpdateIssueCommand, AppResult<List<IssueResult>>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
-		public async Task<AppResult<List<IssueResult>>> Handle(UpdateIssueNewCommand request, CancellationToken ct)
+		public async Task<AppResult<List<IssueResult>>> Handle(UpdateIssueCommand request, CancellationToken ct)
 		{
 			var resultList = new List<IssueResult>();
 			var issue = await _issueRepo.GetIssueByIdAsync(request.DTO.Id);
@@ -45,12 +45,12 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 				foreach (var pallet in listOldPallets)
 				{
 					issue.DetachPallet(pallet);
-					pallet.DetachToIssue(request.DTO.PerformedBy, pallet.Location.ToSnopShot(), Domain.Histories.Models.ReasonMovement.Correction);
+					pallet.DetachToIssue(request.DTO.PerformedBy, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonMovement.Correction);
 					pallet.ChangeStatus(PalletStatus.LockedForIssue);//potrzebne by palety nie były dostępne w innych miejscach
 					reusablePallets.Add(pallet);
 				}
 				var listOldPickingTask = issue.PickingTasks.ToList();
-				//remove old PickingTask to Domain
+				//remove old PickingTask 
 				foreach (var pickingTask in listOldPickingTask)
 				{
 					var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
@@ -194,7 +194,7 @@ namespace MyWerehouse.Application.Issues.Commands.UpdateIssue
 					Items = newQuantities,
 					PerformedBy = request.DTO.PerformedBy,
 				};
-				var receiverFromCreate = await _mediator.Send(new CreateNewIssueCommand(dataForNewIssue, request.DateToSend), ct);
+				var receiverFromCreate = await _mediator.Send(new CreateIssueCommand(dataForNewIssue, request.DateToSend), ct);
 				if (receiverFromCreate.IsSuccess is false || receiverFromCreate is null)
 					return AppResult<List<IssueResult>>.Fail("Nie udało się utworzyć nowego zlecenia.", ErrorType.Conflict); //Technical??
 				resultList = receiverFromCreate.Result.ToList();

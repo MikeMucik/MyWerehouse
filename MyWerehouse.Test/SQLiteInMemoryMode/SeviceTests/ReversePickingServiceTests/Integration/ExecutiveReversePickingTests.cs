@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
-using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
+using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking;
 using MyWerehouse.Application.PickingPallets.DTOs;
@@ -23,6 +23,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 {
 	public class ExecutiveReversePickingTests : TestBase
 	{
+		//Zmiana strategii na pobieranie z palety z najmniejszą ilością produktu jeśli data BB ta sama
 		[Fact]
 		public async Task ReversePickingExecute_BackToSourcePallet_ShouldRestorePalletsAvailabilityAndDoneReversePicking()
 		{
@@ -78,7 +79,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -221,7 +222,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -354,13 +355,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
 			pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
+			//var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			//pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location, location1, location2, location3);
-			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3);
+			DbContext.Pallets.AddRange(pallet1, pallet2
+				//, pallet3
+				);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
@@ -375,26 +378,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			//Act 2 - wykonanie pickingu
 			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);
-			var toPicking = new PickingTaskDTO
-			{
-				Id = pickingFromBase.Id,
-				PickingStatus = PickingStatus.Allocated,
-				BestBefore = pickingFromBase.BestBefore,
-				RequestedQuantity = pickingFromBase.RequestedQuantity,
-				PickedQuantity = 8,
-				SourcePalletId = pallet2.Id,
-				SourcePalletNumber = "P2",
-				ProductId = product.Id,
-				RampNumber = 100100,
+			//foreach (var pickingFromBase in pickingsFromBase) {
+				var toPicking = new PickingTaskDTO
+				{
+					Id = pickingFromBase.Id,
+					PickingStatus = PickingStatus.Allocated,
+					BestBefore = pickingFromBase.BestBefore,
+					RequestedQuantity = pickingFromBase.RequestedQuantity,
+					PickedQuantity = 8,
+					SourcePalletId = pallet2.Id,
+					SourcePalletNumber = "P2",
+					ProductId = product.Id,
+					RampNumber = 100100,
 
-			};
+				}; 
 			var _DoPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
 			var resultPicking = await Mediator.Send(_DoPicking);
 			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
@@ -449,6 +453,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Equal(ReversePickingStatus.Pending, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
+			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
+			DbContext.Pallets.Add(pallet3);
+			DbContext.SaveChanges();
 			var list = new List<Pallet>();
 			var existingPallet = DbContext.Pallets.FirstOrDefault(x => x.PalletNumber == "P3");
 			list.Add(existingPallet);
@@ -507,15 +515,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
 			pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
+			//var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			//pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
 			var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
 			pallet4.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
 			DbContext.Locations.AddRange(location, location1, location2, location3, location4);
-			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
+			DbContext.Pallets.AddRange(pallet1, pallet2
+				//,pallet3
+				, pallet4);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
@@ -531,7 +541,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -612,6 +622,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
 			var list = new List<Pallet>();
+			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
+			DbContext.Pallets.Add(pallet3);
+			DbContext.SaveChanges();
 			var existingPallet = DbContext.Pallets.FirstOrDefault(x => x.PalletNumber == "P3");
 			list.Add(existingPallet);
 			var resultReversePicking = await Mediator.Send(
@@ -670,15 +684,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
 			pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
+			//var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			//pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
 			var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
 			pallet4.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
 			DbContext.Locations.AddRange(location, location1, location2, location3, location4);
-			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3, pallet4);
+			DbContext.Pallets.AddRange(pallet1, pallet2
+				//, pallet3
+				, pallet4);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
@@ -694,7 +710,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -790,6 +806,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.Equal(ReversePickingStatus.Pending, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
+			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			pallet3.AddProduct(product.Id, 1, new DateOnly(2026, 1, 1));
+			DbContext.Pallets.Add(pallet3);
+			DbContext.SaveChanges();
 			var list = new List<Pallet>();
 			var existingPallet = DbContext.Pallets.FirstOrDefault(x => x.PalletNumber == "P3");
 			list.Add(existingPallet);

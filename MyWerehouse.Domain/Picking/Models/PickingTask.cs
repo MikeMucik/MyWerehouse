@@ -125,6 +125,15 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus = PickingStatus.PickedPartially;
 			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, pickedQuantity);
 		}
+		public void ChangeToAvailable(string userId, string snapShot)
+		{
+			var pickingTasks = this.VirtualPallet.PickingTasks;
+			if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
+			{
+				VirtualPallet.Pallet.ChangeStatus(PalletStatus.Available);
+				VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonMovement.ReversePicking, userId, snapShot);
+			}
+		}
 		//Różne źródła prawdy dlatego przeciążenie
 		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
 		{

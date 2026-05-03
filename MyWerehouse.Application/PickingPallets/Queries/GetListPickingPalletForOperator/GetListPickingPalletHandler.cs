@@ -11,16 +11,16 @@ using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListPickingPalletForOperator
 {
-	public class GetListPickingPalletHandler(IPickingPalletRepo pickingPalletRepo,
+	public class GetListPickingPalletHandler(IVirtualPalletRepo virtualPalletRepo,
 		ILocationRepo locationRepo) : IRequestHandler<GetListPickingPalletQuery, AppResult<List<PickingPalletWithLocationDTO>>>
 	{
-		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
+		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 
 		public async Task<AppResult<List<PickingPalletWithLocationDTO>>> Handle(GetListPickingPalletQuery request, CancellationToken ct)
 		{
 			var pickingPallets = new List<PickingPalletWithLocationDTO>();
-			var palletsToPicking = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateMovedStart, request.DateMovedEnd);
+			var palletsToPicking = await _virtualPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateMovedStart, request.DateMovedEnd);
 			foreach (var pallet in palletsToPicking)
 			{
 				var locationName = await _locationRepo.GetLocationByIdAsync(pallet.LocationId);
@@ -30,11 +30,12 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListPickingPalletFor
 				{
 					PalletId = pallet.PalletId,
 					PalletNumber = pallet.Pallet.PalletNumber,
-					LocationName = locationName.ToSnopShot(),
+					LocationName = locationName.ToSnapshot(),
 					AddedToPicking = addedToPicking
 				};
 				pickingPallets.Add(palletInWarehouseDTO);
 			}
+		//await	pickingPallets.ToPagedResultAsync(1,1,ct);
 			return AppResult<List<PickingPalletWithLocationDTO>>.Success(pickingPallets);
 		}
 	}

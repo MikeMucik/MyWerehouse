@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.Products.Any())
 			{
 				context.Products.AddRange(Product.CreateForSeed(productId1, "Test", "0987654321", new DateTime(2025, 05, 01), 1, false, 56),
-					Product.CreateForSeed(productId2, "TestD", "fghtredfg", new DateTime(2025, 05, 01), 1, false, 44),
+					Product.CreateForSeed(productId2, "TestD", "fghtredfg", new DateTime(2025, 05, 01), 1, false, 50),
 					Product.CreateForSeed(productId989, "NotAdded", "fghtredfg", new DateTime(2025, 05, 01), 1, false, 112)
 
 				);
@@ -153,6 +153,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					Pallet.CreateForSeed(palletGuid9, "Q5000", new DateTime(2025, 2, 1), 3, PalletStatus.ToPicking, null, null)
 				);
 			}
+			if (!context.ProductOnPallet.Any())
+			{
+				context.ProductOnPallet.AddRange(
+					ProductOnPallet.CreateForSeed(1, productId1, palletGuid1, 50, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(2, productId1, palletGuid2, 100, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(3, productId2, palletGuid1, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(4, productId2, palletGuid4, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(5, productId2, palletGuid3, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(6, productId2, palletGuid5, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(7, productId2, palletGuid7, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(8, productId2, palletGuid6, 150, new DateTime(2024, 3, 3), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(9, productId1, palletGuid8, 300, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(10, productId1, palletGuid9, 10, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(11, productId2, palletGuid9, 20, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366)))
+				);
+			}
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			var vpId2 = Guid.Parse("22222222-2222-2222-1111-111111111111");
 			var vpId3 = Guid.Parse("22222222-3333-2222-1111-111111111111");
@@ -186,22 +202,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 10)					
 					);
 			}
-			if (!context.ProductOnPallet.Any())
-			{
-				context.ProductOnPallet.AddRange(
-					ProductOnPallet.CreateForSeed(1, productId1, palletGuid1, 50, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(2, productId1, palletGuid2, 100, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(3, productId2, palletGuid1, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(4, productId2, palletGuid4, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(5, productId2, palletGuid3, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(6, productId2, palletGuid5, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(7, productId2, palletGuid7, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(8, productId2, palletGuid6, 150, new DateTime(2024, 3, 3), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(9, productId1, palletGuid8, 300, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(10, productId1, palletGuid9, 10, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),					
-					ProductOnPallet.CreateForSeed(11, productId2, palletGuid9, 20, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366)))				
-				);
-			}
+			
 
 			if (!context.PalletMovements.Any())
 			{

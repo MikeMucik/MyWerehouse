@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Products.Filters;
@@ -17,7 +18,7 @@ namespace MyWerehouse.Application.Interfaces
 		Task<AppResult<AddProductDTO>> GetProductToEditAsync(Guid id);
 		Task<AppResult<Unit>> UpdateProductAsync(AddProductDTO product);
 		Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id);
-		Task<AppResult<ListProductsDTO>> GetProductsAsync(int pageSize, int PageNumber);
-		Task<AppResult<ListProductsDTO>> FindProductsByFilterAsync(int pageSize, int PageNumber, ProductSearchFilter filter);
+		Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageSize, int PageNumber,CancellationToken ct);
+		Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageSize, int PageNumber, ProductSearchFilter filter, CancellationToken ct);
 	}
 }

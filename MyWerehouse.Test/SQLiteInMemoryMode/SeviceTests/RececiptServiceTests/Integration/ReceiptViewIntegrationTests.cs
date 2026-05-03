@@ -112,22 +112,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ProductId = Guid.Parse("00000000-0000-0000-0001-000000000000")
 			};
 			//var result = await _receiptService.GetReceiptDTOsAsync(filter);
-			var query = new GetReceiptsQuery(filter);
+			var query = new GetReceiptsQuery(filter,1,2);
 
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
-			Assert.NotEmpty(result.Result); // should return some data
+			Assert.NotEmpty(result.Result.Dtos); // should return some data
 
 			// Verify that receipts 1 and 2 are included
-			var receiptIds = result.Result.Select(r => r.ReceiptId).ToList();
+			var receiptIds = result.Result.Dtos.Select(r => r.ReceiptId).ToList();
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receiptId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
 			Assert.Contains(receiptId1, receiptIds);
-			Assert.Contains(receiptId2, receiptIds);
-
+			Assert.Contains(receiptId2, receiptIds);			
 			// Optionally: ensure no duplicates and correct client mapping
-			Assert.All(result.Result, r =>
+			Assert.All(result.Result.Dtos, r =>
 			{
 				Assert.True(r.ClientId == 10 || r.ClientId == 11);
 				//Assert.True(r.ReceiptId > 0);

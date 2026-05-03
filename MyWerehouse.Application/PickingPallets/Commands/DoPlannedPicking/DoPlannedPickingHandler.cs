@@ -19,7 +19,6 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 	public class DoPlannedPickingHandler(IPickingTaskRepo pickingTaskRepo,
 		IPalletRepo palletRepo,
 		IIssueRepo issueRepo,
-		IPickingPalletRepo pickingPalletRepo,
 		WerehouseDbContext werehouseDbContext,
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
 		IProcessPickingActionService processPickingActionService) : IRequestHandler<DoPlannedPickingCommand, AppResult<Unit>>
@@ -27,18 +26,13 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
 
 		public async Task<AppResult<Unit>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
-
 			var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.Id);
-			var oldStatus = pickingTaskToChange.PickingStatus;
-			var virtualPallet = await _pickingPalletRepo.GetVirtualPalletByIdAsync(pickingTaskToChange.VirtualPalletId);
 			var issueId = pickingTaskToChange.IssueId;
 			var issue = await _issueRepo.GetIssueByIdAsync(issueId);
 			if (issue == null)
@@ -51,28 +45,30 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 			{
 				return AppResult<Unit>.Fail("Nie możesz pobrać ujemnej wartości.", ErrorType.Conflict);
 			}
-			if (issue.IssueStatus == IssueStatus.Pending)
-			{
-				issue.ChangeStatus(IssueStatus.InProgress);
-			}
 			var neededQuantity = request.PickingTaskDTO.RequestedQuantity;
 			var pickedQuantity = request.PickingTaskDTO.PickedQuantity;
 			var completion = PickingCompletion.Full;
 			if (pickedQuantity <= 0 || pickedQuantity > neededQuantity)
 			{
-				await transaction.RollbackAsync(ct);
-				return AppResult<Unit>.Fail("Operacja nie dozwolona", ErrorType.Conflict);//Technical
+				return AppResult<Unit>.Fail("Ilosć musi być większa od zera i mniejsza od zapotrzebowania", ErrorType.Conflict);//Technical
 			}
 			if (neededQuantity > pickedQuantity)
 			{
 				completion = PickingCompletion.Partial;
 			}
+			if (issue.IssueStatus == IssueStatus.Pending)
+			{
+				issue.ChangeStatus(IssueStatus.InProgress);
+			}
 			var resultProccesPicking = await _processPickingActionService.ProcessPicking(sourcePallet, issue, request.PickingTaskDTO.ProductId,
 						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion, request.PickingTaskDTO.RampNumber);
+			if (!resultProccesPicking.Success)
+			{
+				return AppResult<Unit>.Fail(resultProccesPicking.Message, ErrorType.Conflict);
+			}
 			if (neededQuantity == pickedQuantity)
 			{
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia");
 			}
 			else
@@ -84,15 +80,13 @@ namespace MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking
 
 				if (newVirtualPallet.Success == false)
 				{
-					await transaction.RollbackAsync(ct);
 					return AppResult<Unit>.Fail(newVirtualPallet.Message, ErrorType.Conflict);
 				}
 				//pallet lock with non-conformity
 				sourcePallet.ChangeStatus(PalletStatus.OnHold);
-				sourcePallet.AddHistory(ReasonMovement.Correction, request.UserId, sourcePallet.Location.ToSnopShot());
+				sourcePallet.AddHistory(ReasonMovement.Correction, request.UserId, sourcePallet.Location.ToSnapshot());
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety do kompletacji.");
+				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety źródło do kompletacji.");
 			}
 		}
 	}

@@ -10,7 +10,7 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 {
-	public class CancelReceiptCommandHandler(IReceiptRepo receiptRepo,
+	public class CancelReceiptHandler(IReceiptRepo receiptRepo,
 		WerehouseDbContext werehouseDbContext,
 		IPalletRepo palletRepo) : IRequestHandler<CancelReceiptCommand, AppResult<Unit>>
 	{
@@ -21,8 +21,6 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 
 		public async Task<AppResult<Unit>> Handle(CancelReceiptCommand request, CancellationToken ct)
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
-
 			var receipt = await _receiptRepo.GetReceiptOnlyByIdAsync(request.ReceiptId);
 			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 
@@ -38,11 +36,10 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 			}
 			foreach (var pallet in listPalletsOfReceipt)
 			{
-				pallet.DetachFromReceipt(request.UserId, pallet.Location.ToSnopShot());
+				pallet.DetachFromReceipt(request.UserId, pallet.Location.ToSnapshot());
 			}
 			receipt.Cancel(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			await transaction.CommitAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Anulowano przyjęcie wraz z paletami z bazy");
 		}
 	}

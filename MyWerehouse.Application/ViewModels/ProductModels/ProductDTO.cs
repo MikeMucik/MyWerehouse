@@ -9,7 +9,7 @@ using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.ViewModels.ProductModels
 {
-	public class ProductToListDTO : IMapFrom<Product>
+	public class ProductDTO : IMapFrom<Product>
 	{
 		public Guid Id { get; set; }
 		public string Name { get; set; }
@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		//public bool IsDeleted { get; set; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Product,  ProductToListDTO>()
+			profile.CreateMap<Product,  ProductDTO>()
 				.ForMember(dest=>dest.Category, opt=>opt.MapFrom(src=>src.Category.Name));
 		}
 	}

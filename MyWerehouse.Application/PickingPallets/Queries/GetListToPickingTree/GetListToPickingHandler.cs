@@ -11,15 +11,15 @@ using MyWerehouse.Domain.Interfaces;
 namespace MyWerehouse.Application.PickingPallets.Queries.GetListToPicking
 {//Lista ile danego towaru dla danej alokacji Product's list by pickingTasks
  //klient -> zamówienie -> produkt -> ilośc - Dictionary - płasko
-	public class GetListToPickingHandler(IPickingPalletRepo pickingPalletRepo,
+	public class GetListToPickingHandler(IVirtualPalletRepo virtualPalletRepo,
 		IIssueRepo issueRepo) : IRequestHandler<GetListToPickingQuery, AppResult<List<ProductToIssueDTO>>>
 	{
-		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
+		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
 		public async Task<AppResult<List<ProductToIssueDTO>>> Handle(GetListToPickingQuery request, CancellationToken ct)
 		{
-			var virtualPallets = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
+			var virtualPallets = await _virtualPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
 			if (virtualPallets.Count == 0)
 			{
 				return AppResult<List<ProductToIssueDTO>>.Fail("Brak elementów do wyświelenia", ErrorType.NotFound);

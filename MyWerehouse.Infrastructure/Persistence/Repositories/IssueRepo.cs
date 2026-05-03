@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Receviving.Filters;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
@@ -113,5 +114,15 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			var number = await _werehouseDbContext.Issues.MaxAsync(x=>(int?)x.IssueNumber) ?? 0;
 			return number +1;
 		}
+
+		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id)
+		{
+			return await _werehouseDbContext.PickingTasks
+				.Where(x => x.IssueId == id)
+				.Select(x => x.VirtualPallet)
+				.Where(x=>x != null)
+				.Distinct()
+				.ToListAsync();
+		}		
 	}
 }

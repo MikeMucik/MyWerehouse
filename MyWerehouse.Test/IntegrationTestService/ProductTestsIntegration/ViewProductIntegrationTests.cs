@@ -63,12 +63,13 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Arrange
 			var pageSize = 2;
 			var pageNumber = 1;
+			var ct = CancellationToken.None;
 			//Act
-			var result = await _productService.GetProductsAsync(pageSize, pageNumber);
+			var result = await _productService.GetProductsAsync(pageSize, pageNumber, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Result.Products.Count);
-			Assert.Equal("Test", result.Result.Products.First().Name);
+			Assert.Equal(2, result.Result.Dtos.Count);
+			Assert.Equal("Test", result.Result.Dtos.First().Name);
 		}
 		[Fact]
 		public async Task ShowProducts_FindProductsByFilterAsync_ReturnList()
@@ -76,16 +77,17 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Arrange
 			var pageSize = 3;
 			var pageNumber = 1;
+			var ct = CancellationToken.None;
 			var filter = new ProductSearchFilter
 			{
 				ProductName = "Test",
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter);
+			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Result.Products.Count);
-			Assert.Equal("Test", result.Result.Products.First().Name);
+			Assert.Equal(2, result.Result.Dtos.Count);
+			Assert.Equal("Test", result.Result.Dtos.First().Name);
 		}
 		[Fact]
 		public async Task ShowNoProducts_FindProductsByFilterAsync_ReturnEmptyList()
@@ -93,15 +95,16 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			//Arrange
 			var pageSize = 3;
 			var pageNumber = 1;
+			var ct = CancellationToken.None;
 			var filter = new ProductSearchFilter
 			{
 				Length = 1000,
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter);
+			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter,ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Empty(result.Result.Products);
+			Assert.Empty(result.Result.Dtos);
 		}
 	}
 }

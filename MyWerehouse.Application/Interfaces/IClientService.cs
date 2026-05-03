@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Domain.Clients.Filters;
@@ -17,7 +18,7 @@ namespace MyWerehouse.Application.Interfaces
 		Task<AppResult<ClientDTO>> GetClientToEditAsync(int id);
 		Task<AppResult<Unit>> UpdateClientAsync(UpdateClientDTO updatedClient);
 		Task<AppResult<DetailsOfClientDTO>> DetailsOfClientAsync(int id);
-		Task<AppResult<ListClientsDTO>> GetClientsByFilterAsync(int pageSize, int PageNumber, ClientSearchFilter filter);		
-		Task<AppResult<ListClientsDTO>> GetAllClientsAsync(int pageSize, int PageNumber);
+		Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageSize, int PageNumber, ClientSearchFilter filter, CancellationToken ct);		
+		Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageSize, int PageNumber, CancellationToken ct);
 	}
 }

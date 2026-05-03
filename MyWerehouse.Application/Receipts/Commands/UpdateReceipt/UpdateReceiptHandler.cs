@@ -39,8 +39,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		}
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
-
 			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
 			// Pallets don't change warehouse's stock until receipt is confirmed
 			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.DTO.ReceiptId);
@@ -71,7 +69,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			foreach (var pallet in palletToDelete)
 			{
 				existingReceipt.DetachPallet(pallet);//musi być żeby stworzyć dobrą historię					
-				pallet.DetachFromReceipt(request.UserId, pallet.Location.ToSnopShot());
+				pallet.DetachFromReceipt(request.UserId, pallet.Location.ToSnapshot());
 			}
 			var existingPallets = existingReceipt.Pallets.ToDictionary(p => p.Id);
 			//Aktualizacja palet
@@ -91,7 +89,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 
 				pallet.UpdateProductChanges(productsForPallet);
 				pallet.ChangeStatus(PalletStatus.Receiving);
-				pallet.AddHistory(ReasonMovement.Correction, request.UserId, pallet.Location.ToSnopShot());
+				pallet.AddHistory(ReasonMovement.Correction, request.UserId, pallet.Location.ToSnapshot());
 			}
 			//Dodanie nowych palet - Adding new palets
 			var palletsAdded = request.DTO.Pallets
@@ -109,7 +107,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 						return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
 					pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
 				}
-				var snapShot = location.ToSnopShot();
+				var snapShot = location.ToSnapshot();
 				_palletRepo.AddPallet(pallet);
 
 				pallet.AssignToReceipt(existingReceipt.Id, snapShot, request.UserId);
@@ -117,7 +115,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			}
 			existingReceipt.UpdateReceipt(request.UserId, request.DTO.ClientId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			await transaction.CommitAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Przyjęcie o numerze {existingReceipt.ReceiptNumber} zostało zaktualizowane");
 		}
 	}

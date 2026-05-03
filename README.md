@@ -216,3 +216,5 @@ rozbudowa planowania pickingu
 inne polityki dobierania palet
 
 dalsze testy integracyjne
+
+Pobieranie palet do kompletacji od najmniejszej ilości z palet o tej samej dacie BB - policy

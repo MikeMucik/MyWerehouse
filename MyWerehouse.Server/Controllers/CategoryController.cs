@@ -42,9 +42,9 @@ namespace MyWerehouse.Server.Controllers
 			return Ok(result);
 		}
 		[HttpGet("all")]
-		public async Task<IActionResult> GetAll(int page, int size)//można zamienić na [FromQuery] +DTO
+		public async Task<IActionResult> GetAll(int page, int size, CancellationToken ct)//można zamienić na [FromQuery] +DTO
 		{
-			var result = await _categoryService.GetCategoriesAsync(page,size);
+			var result = await _categoryService.GetCategoriesAsync(page,size, ct);
 			return Ok(result);
 		}
 	}

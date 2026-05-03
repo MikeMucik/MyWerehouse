@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {
@@ -20,10 +21,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public Guid AddPallet(Pallet pallet)
 		{
-			 _werehouseDbContext.Pallets.Add(pallet);
+			_werehouseDbContext.Pallets.Add(pallet);
 			return pallet.Id;
 		}
-		
+
 		public async Task<Pallet?> GetPalletByIdAsync(Guid palletId)
 		{
 			return await _werehouseDbContext.Pallets
@@ -92,27 +93,28 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return result;
 		}
 		//może powinno być pobierz dostępne palety ale tylko tyle ile potrzebuje, zwracaj ProductOnPallet wraz z Pallet
-		public IQueryable<Pallet> GetAvailablePallets(Guid productId, DateOnly? minBestBefore)
-		{
-			var pallets = _werehouseDbContext.Pallets
-				.Include(p => p.ProductsOnPallet)
-				.Where(p =>
-					(p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
-					p.ProductsOnPallet.Any(pp =>
-						pp.ProductId == productId &&
-						pp.BestBefore >= minBestBefore
-					)
-				)
-				.OrderBy(p => p.ProductsOnPallet
-					.Where(pp => pp.ProductId == productId)
-					.Min(pp => pp.BestBefore))
-				.ThenBy(p => p.LocationId)
-				.ThenBy(p => p.DateReceived)
-				.Take(10);//nie bierz wszystkich
-			
-			return pallets;
-		}
-				
+		//public IQueryable<Pallet> GetAvailablePallets(Guid productId, DateOnly? minBestBefore)
+		//{
+		//	var pallets = _werehouseDbContext.Pallets
+		//		.Include(p => p.ProductsOnPallet)
+		//		.Where(p =>
+		//			(p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
+		//			p.ProductsOnPallet.Any(pp =>
+		//				pp.ProductId == productId &&
+		//				pp.BestBefore >= minBestBefore
+		//			)
+		//		)
+		//		.OrderBy(p => p.ProductsOnPallet
+		//			.Where(pp => pp.ProductId == productId)
+		//			.Min(pp => pp.BestBefore))
+		//		.ThenBy(p => p.LocationId)
+		//		.ThenBy(p => p.DateReceived)
+		//		.Take(10);
+		//	//nie bierz wszystkich
+
+		//	return pallets;
+		//}
+
 		public async Task<string> GetNextPalletIdAsync()
 		{
 			var lastPallet = await _werehouseDbContext.Pallets
@@ -139,19 +141,63 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public async Task<Pallet?> GetPickingPalletByIssueId(Guid issueId)
 		{
-		return	await _werehouseDbContext.Pallets
-				.Include(p => p.ProductsOnPallet)
-				.Where(p => p.IssueId == issueId && p.Status == PalletStatus.Picking)
-				.FirstOrDefaultAsync();
+			return await _werehouseDbContext.Pallets
+					.Include(p => p.ProductsOnPallet)
+					.Where(p => p.IssueId == issueId && p.Status == PalletStatus.Picking)
+					.FirstOrDefaultAsync();
 		}
 
 		public async Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId)
 		{
 			return await _werehouseDbContext.Pallets
-				.Include(p=>p.ProductsOnPallet)
-				.Include(m=>m.PalletMovements)
-				.Where(p=>p.ReceiptId == reciptId)
+				.Include(p => p.ProductsOnPallet)
+				.Include(m => m.PalletMovements)
+				.Where(p => p.ReceiptId == reciptId)
 				.ToListAsync();
+		}
+
+		public async Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId)
+		{
+			var pallets = await _werehouseDbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.Where(p => !excludedId.Contains(p.Id))
+				.Where(p =>
+					(p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
+					p.ProductsOnPallet.Any(pp =>
+						pp.ProductId == productId &&
+					(bestBefore == null || pp.BestBefore >= bestBefore)
+					)
+				)
+				.OrderBy(p => p.ProductsOnPallet
+					.Where(pp => pp.ProductId == productId)					
+					.Min(pp => pp.BestBefore ??DateOnly.MaxValue))
+				
+				.ThenBy(p => p.ProductsOnPallet//ThenBy
+					.Where(pp => pp.ProductId == productId)
+					.Min(pp => pp.Quantity))
+				.ThenBy(p => p.LocationId)
+				.ThenBy(p => p.DateReceived)
+				.Take(10)//nie bierz wszystkich
+				.ToListAsync();
+			return pallets;
+		}
+
+		public async Task<List<Pallet>> GetAvailableFullPallets(Guid productId, int fullPallet, DateOnly? minBestBefore, int neededPallets)
+		{
+			var pallets = await _werehouseDbContext.Pallets
+				.Where(p => (p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
+					p.ProductsOnPallet.Any(pp => pp.ProductId == productId &&
+					(minBestBefore == null || pp.BestBefore >= minBestBefore) && pp.Quantity == fullPallet
+				))
+				.OrderBy(p => p.ProductsOnPallet
+					.Where(x => x.ProductId == productId)
+					.Select(x => x.BestBefore)
+					.FirstOrDefault() ?? DateOnly.MaxValue)
+				.ThenBy(x => x.Location)
+				.Take(neededPallets)
+				.Include(p => p.ProductsOnPallet)
+				.ToListAsync();
+			return pallets;
 		}
 
 		//public void DeletePallet(Pallet pallet)
@@ -166,3 +212,32 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		//}
 	}
 }
+//.OrderBy(p => p.ProductsOnPallet
+//	.Where(pp => pp.ProductId == productId)
+//	.Min(pp => pp.BestBefore))
+//.ThenBy(p => p.LocationId)
+//.ThenBy(p => p.DateReceived)
+//.Take(neededPallets)
+//.ToList();//nie bierz wszystkich
+
+//.Select(p => new
+//{
+//	Pallet = p,
+//	Qty = p.ProductsOnPallet
+//		.Where(x => x.ProductId == productId)
+//		.Select(x => x.Quantity)
+//		.FirstOrDefault(),
+//	BestBefore = p.ProductsOnPallet
+//		.Where(x => x.ProductId == productId)
+//		.Select(x => x.BestBefore)
+//		.FirstOrDefault(),
+//});
+//var palletList = await pallets
+//	.OrderBy(x => x.BestBefore ?? DateOnly.MaxValue)
+//	.ThenBy(x => x.Pallet.Location)
+//	.ToListAsync();
+//var fullPallets = palletList
+//	.Where(x => x.Qty == fullPallet)
+//	.Take(neededPallets)
+//	.Select(x => x.Pallet)
+//	.ToList();

@@ -49,6 +49,15 @@ namespace MyWerehouse.Domain.Picking.Models
 		}
 
 		public static VirtualPallet CreateForSeed(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime dateMoved)
-			=> new VirtualPallet(id, palletId, initialQuantity, locationId, dateMoved);				
+			=> new VirtualPallet(id, palletId, initialQuantity, locationId, dateMoved);
+		public void ChangeToAvailable(string userId, string snapShot)
+		{
+			var pickingTasks = this.PickingTasks;
+			if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
+			{
+				Pallet.ChangeStatus(PalletStatus.Available);
+				Pallet.AddHistory(Histories.Models.ReasonMovement.ReversePicking, userId, snapShot);
+			}
+		}
 	}
 }

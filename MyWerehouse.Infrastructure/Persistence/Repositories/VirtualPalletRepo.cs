@@ -11,10 +11,10 @@ using MyWerehouse.Domain.Picking.Models;
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {
 
-	public class PickingPalletRepo : IPickingPalletRepo
+	public class VirtualPalletRepo : IVirtualPalletRepo
 	{
 		private readonly WerehouseDbContext _werehouseDbContext;
-		public PickingPalletRepo(WerehouseDbContext werehouseDbContext)
+		public VirtualPalletRepo(WerehouseDbContext werehouseDbContext)
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
@@ -22,11 +22,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public VirtualPallet AddPalletToPicking(VirtualPallet newVirtualPicking)
 		{			
 			_werehouseDbContext.VirtualPallets.Add(newVirtualPicking);
-			return newVirtualPicking;
-		}
-		public async Task<VirtualPallet> AddPalletToPickingAsync(VirtualPallet newVirtualPicking)
-		{
-			await _werehouseDbContext.VirtualPallets.AddAsync(newVirtualPicking);
 			return newVirtualPicking;
 		}
 		public void DeleteVirtualPalletPicking(VirtualPallet virtualPallet)
@@ -73,20 +68,21 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			if (palletPicking == null) { return Guid.Empty; }
 			return palletPicking.Id;
 		}
-		public async Task<VirtualPallet> GetVirtualPalletByIdAsync(Guid? palletId)
+		public async Task<VirtualPallet?> GetVirtualPalletByIdAsync(Guid? palletId)
 		{
 			return await _werehouseDbContext.VirtualPallets.FirstAsync(p => p.Id == palletId);
 		}
-		//public void ClosePickingPallet(Guid palletId, Guid issueId)
-		//{
-		//	var pallet = _werehouseDbContext.Pallets.Find(palletId);
-		//	pallet.Status = PalletStatus.ToIssue;
-		//	pallet.IssueId = issueId;
-		//}
-
+		
 		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly bestBefore)
 		{
 			return await _werehouseDbContext.VirtualPallets.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId).ToListAsync();
 		}
+
+		public async Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId)
+		{
+			return await _werehouseDbContext.VirtualPallets.FirstOrDefaultAsync(v=>v.PalletId == palletId);
+		}
+
+		
 	}
 }

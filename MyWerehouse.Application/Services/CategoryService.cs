@@ -8,6 +8,7 @@ using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
@@ -113,23 +114,15 @@ namespace MyWerehouse.Application.Services
 			}
 			else return AppResult<Unit>.Fail($"Brak kategori o numerze {existingCategory.Id}", ErrorType.NotFound);
 		}
-		public async Task<AppResult<ListCategoriesDTO>> GetCategoriesAsync(int pageSize, int pageNumber)
+		public async Task<AppResult<PagedResult<CategoryDTO>>> GetCategoriesAsync(int pageSize, int pageNumber, CancellationToken ct)
 		{
-			var categories = _categoryRepo.GetAllCategories()
-				.OrderBy(c => c.Name)
-				.ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider);
-			var categoriesToShow = await categories
-				.Skip(pageSize * (pageNumber - 1))
-				.Take(pageSize)
-				.ToListAsync();
-			var categoriesList = new ListCategoriesDTO()
-			{
-				Categories = categoriesToShow,
-				PageSize = pageSize,
-				CurrentPage = pageNumber,
-				Count = await categories.CountAsync()
-			};
-			return AppResult<ListCategoriesDTO>.Success(categoriesList);
+			var categories = _categoryRepo.GetAllCategories();
+			var orderedCategories = categories
+				.OrderBy(c => c.Name);
+			var result = await orderedCategories.ToPagedResultAsync<Category, CategoryDTO>(
+				_mapper.ConfigurationProvider,
+				pageNumber, pageSize, ct);			
+			return AppResult<PagedResult<CategoryDTO>>.Success(result);
 		}
 
 		public async Task<AppResult<CategoryDTO>> GetCategoryByIdAsync(int id)

@@ -13,6 +13,7 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 		public List<Pallet> ListPalletsToAdd {  get; set; } = new List<Pallet>();
 		public bool CanReturnToSource { get; set; }
 		public bool CanAddToExistingPallet { get; set; }
+		public bool PickingPalletCompletlyUnpicking { get; set; }
 		public bool AddToNewPallet { get; set; } = true;
 
 	}

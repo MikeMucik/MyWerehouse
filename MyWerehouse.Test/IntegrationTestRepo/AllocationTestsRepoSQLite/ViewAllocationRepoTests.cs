@@ -36,14 +36,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			Assert.Equal(3, result.VirtualPallet.LocationId);
 		}
 		[Fact]
-		public async Task ByVirtualPalletAndDatePicking_GetPickingTaskListAsync_ReturnList()
+		public void ByVirtualPalletAndDatePicking_GetPickingTaskListAsync_ReturnList()
 		{
 			//Arrange
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			var virtualPalletId = 1;
 			var date = DateTime.UtcNow;
 			//Act
-			var result = await _pickingTaskRepo.GetPickingTaskListAsync(vpId1, date);
+			var result =  _pickingTaskRepo.GetPickingTaskList(vpId1, date);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result); // coś zostało znalezione

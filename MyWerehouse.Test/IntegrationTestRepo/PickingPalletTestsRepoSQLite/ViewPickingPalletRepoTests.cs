@@ -10,14 +10,14 @@ using MyWerehouse.Test.SQLiteInMemoryMode;
 namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 {
 	[Collection("QueryCollection")]
-	public class ViewPickingPalletRepoTests
+	public class ViewVirtualPalletRepoTests
 	{
-		private readonly PickingPalletRepo _pickingPalletRepo;
+		private readonly VirtualPalletRepo _virtualPalletRepo;
 		private readonly QueryTestFixture _fixture;	
-		public ViewPickingPalletRepoTests(QueryTestFixture fixture)
+		public ViewVirtualPalletRepoTests(QueryTestFixture fixture)
 		{
 			_fixture = fixture;
-			_pickingPalletRepo = new PickingPalletRepo(_fixture.DbContext);
+			_virtualPalletRepo = new VirtualPalletRepo(_fixture.DbContext);
 		}
 		[Fact]
 		public async Task TakeVirtualPallets_GetVirtualPalletsAsync_ReturnList()
@@ -27,7 +27,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
 
 			//Act
-			var result = await _pickingPalletRepo.GetVirtualPalletsAsync(productId2);			
+			var result = await _virtualPalletRepo.GetVirtualPalletsAsync(productId2);			
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			var startDate = DateTime.UtcNow.AddDays(-2);
 			var endDate = DateTime.UtcNow.AddDays(1);
 			//Act
-			var result = await _pickingPalletRepo.GetVirtualPalletsByTimeAsync(startDate, endDate);
+			var result = await _virtualPalletRepo.GetVirtualPalletsByTimeAsync(startDate, endDate);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -97,7 +97,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			var startDate =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(-2));
 			var endDate =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(1));
 			//Act
-			var result = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(startDate, endDate);
+			var result = await _virtualPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(startDate, endDate);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -126,7 +126,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			//var palletId = "Q1100";
 			var palletId = palletGuid5;
 			//Act
-			var result = await _pickingPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletId);
+			var result = await _virtualPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletId);
 			//Assert
 			Assert.NotEqual(Guid.Empty, result);
 			Assert.Equal(vpId1, result);
@@ -138,7 +138,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingPalletTestsRepoSQLite
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			var virtualPalletId = 1;
 			//Act
-			var result = await _pickingPalletRepo.GetVirtualPalletByIdAsync(vpId1);
+			var result = await _virtualPalletRepo.GetVirtualPalletByIdAsync(vpId1);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<VirtualPallet>(result);

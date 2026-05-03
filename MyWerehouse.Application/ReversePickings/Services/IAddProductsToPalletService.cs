@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 {
 	public interface IAddProductsToPalletService
 	{
-		ReversePickingResult AddProductsToSourcePallet(ReversePicking task, string userId);
+		Task<ReversePickingResult> AddProductsToSourcePallet(ReversePicking task, string userId);
 		Task<ReversePickingResult> AddToExistingPallet(ReversePicking task, List<Pallet> pallets, string userId);
 		Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId, int rampNumber);
 	}

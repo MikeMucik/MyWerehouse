@@ -174,13 +174,13 @@ namespace MyWerehouse.Domain.Pallets.Models
 			else
 			{
 				throw new InvalidPalletStatusException(Id);
-			}			
+			}
 			IssueId = issueId;
 			AddHistory(ReasonMovement.ToLoad, userId, snapShot);
 		}
 
 		public void AssignToIssue(Guid issueId, string userId, string snapShot)
-		{			
+		{
 			//może invarianty !!
 			Status = PalletStatus.ToIssue;
 			IssueId = issueId;
@@ -223,8 +223,12 @@ namespace MyWerehouse.Domain.Pallets.Models
 			AddHistory(reason, userId, snapShot);
 		}
 
-		public void MoveToLocation(int newLocationId, string newLocationSnapShot,int oldLocationId, string oldLocationSnapShot, string userId)
+		public void MoveToLocation(int newLocationId, string newLocationSnapShot, int oldLocationId, string oldLocationSnapShot, string userId)
 		{
+			if(this.Status == PalletStatus.InStock)
+			{
+				Status = PalletStatus.Available;
+			}
 			//var oldLocationId = this.LocationId;
 			//var oldLocationSnapshot = this.Location.ToSnopShot();
 			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
@@ -265,7 +269,37 @@ namespace MyWerehouse.Domain.Pallets.Models
 				return false;
 			return true;
 		}
+		public void CkeckIfToArchive(string userId, ReasonMovement reason, string snapShot)
+		{
+			if (ProductsOnPallet.All(p => p.Quantity == 0))
+			{
+				this.ToArchive(userId, reason, snapShot);
+			}
+			else
+			{
+				this.ChangeStatus(PalletStatus.ReversePicking);
+			}
+		}
+		public ProductOnPallet GetProductAggregate(Guid productId)
+		{
+			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId);
+			if (product.Count() > 1)
+			{
+				throw new MultipleProductsOnPalletException(Id, PalletNumber, productId);
+			}
+			if (product == null) throw new ProductNotFoundOnPalletException(Id, PalletNumber, productId);
 
+			return product.First();
+		}
+		//public void ChangeToAvailable(string userId, string snapShot)
+		//{
+		//	var pickingTasks = this.VirtualPallet.PickingTasks;
+		//	if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
+		//	{
+		//		VirtualPallet.Pallet.ChangeStatus(PalletStatus.Available);
+		//		VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonMovement.ReversePicking, userId, snapShot);
+		//	}
+		//}
 		public void ChangeStatus(PalletStatus status)
 		{
 			//invarianty!!

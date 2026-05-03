@@ -28,9 +28,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.PickingTasks.Remove(pickingTask);
 		}
-		public async Task<List<PickingTask>> GetPickingTaskListAsync(Guid palletPickingId, DateTime pickingDate)
+		public IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateTime pickingDate)
 		{
-			var pickingTask = await _werehouseDbContext.PickingTasks
+			var pickingTask = _werehouseDbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
 					.ThenInclude(b => b.Pallet)
 						.ThenInclude(c => c.ProductsOnPallet)
@@ -40,14 +40,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					p.Issue.IssueDateTimeCreate >= pickingDate.AddDays(-7) &&
 					p.Issue.IssueDateTimeSend >= pickingDate &&
 					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2) &&
-					p.PickingStatus == PickingStatus.Allocated)
-				.ToListAsync();
+					p.PickingStatus == PickingStatus.Allocated);				
 			return pickingTask;
 		}
-		//public async Task<PickingTask?> GetPickingTaskAsync(int pickingTaskNumber)
-		//{
-		//	return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.PickingTaskNumber == pickingTaskNumber);
-		//}
+		
 		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid)
 		{
 			return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.Id == guid);
@@ -78,16 +74,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(a => a.IssueId == issueId)
 				.ToListAsync();
 			return result;
-		}
-
-		public async Task<List<VirtualPallet>> GetVirtualPalletsByIssue(Guid issueId)
-		{
-			return await _werehouseDbContext.PickingTasks
-				.Where(x => x.IssueId == issueId)
-				.Select(x => x.VirtualPallet)
-				.Distinct()
-				.ToListAsync();
-		}
+		}		
 
 		public async Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId)
 		{
@@ -96,13 +83,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 		}
 
-		//public async Task<int> GetNextNumberOfPickingTask()
-		//{
-		//	var number = await _werehouseDbContext.PickingTasks.MaxAsync(t => (int?)t.PickingTaskNumber) ?? 0;
-		//	return number + 1;
-		//}
-
-
+		
 		//public async Task<List<PickingTask>> GetPickingTaskListAsync(int palletPickingId, DateTime pickingDate)
 		//{
 		//	var pickingTask = await _werehouseDbContext.PickingTasks

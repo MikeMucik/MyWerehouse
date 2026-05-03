@@ -12,11 +12,11 @@ using MyWerehouse.Application.Common.Behaviors;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.IssuesServices;
-using MyWerehouse.Application.Pallets.Services;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Application.Services;
+using MyWerehouse.Domain.Services;
 
 namespace MyWerehouse.Application
 {
@@ -43,10 +43,11 @@ namespace MyWerehouse.Application
 			services.AddScoped<IProcessPickingActionService, ProcessPickingActionService>();
 			services.AddScoped<IGetProductCountService, GetProductCountService>();
 			services.AddScoped<IGetNumberPalletsAndRestService, GetNumberPalletsAndRestService>();
-			services.AddScoped<IGetAvailablePalletsByProductService, GetAvailablePalletsByProductService>();
 			services.AddScoped<IAssignProductToIssueService, AssignProductToIssueAsyncService>();
 			services.AddScoped<IAddProductsToPalletService, AddProductsToPalletService>();
 			services.AddScoped<ICreateReversePickingService, CreateReversePickingService>();
+			//domain services
+			services.AddScoped<IPickingDomainService, PickingDomainService>();
 			return services;
 		}
 	}

@@ -4,34 +4,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;//odejście od CleanArchitecture dla wydajności, mniej kodu
 using MediatR;
-using Microsoft.EntityFrameworkCore;//odejście od CleanArchitecture dla wydajności, mniej kodu
 using MyWerehouse.Application.Common.Exceptions;
+using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
-/// QueryService zamiast Repository dla operacji Read.
-/// Świadome odejście od czystego Repository Pattern na rzecz wydajności.
-/// ProjectTo() generuje zoptymalizowane SQL SELECT tylko potrzebnych kolumn.
+using MyWerehouse.Domain.Pallets.Models;
+
 namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
 {
-	public class FindPalletsByFiltrHandler:IRequestHandler<FindPalletsByFiltrQuery, AppResult< List<PalletDTO>>>
+	public class FindPalletsByFiltrHandler(IPalletRepo palletRepo,
+		IMapper mapper) : IRequestHandler<FindPalletsByFiltrQuery, AppResult<PagedResult<PalletDTO>>>
 	{
-		private readonly IPalletRepo _palletRepo;
-		private readonly IMapper _mapper;
-		public FindPalletsByFiltrHandler(IPalletRepo palletRepo,
-			IMapper mapper)
-		{
-			_palletRepo = palletRepo;
-			_mapper  = mapper;
-		}
-		public async Task<AppResult<List<PalletDTO>>> Handle (FindPalletsByFiltrQuery request, CancellationToken ct)
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IMapper _mapper = mapper;
+
+		public async Task<AppResult<PagedResult<PalletDTO>>> Handle(FindPalletsByFiltrQuery request, CancellationToken ct)
 		{
 			var pallets = _palletRepo.GetPalletsByFilter(request.Filter);
-			if (pallets == null) return AppResult<List<PalletDTO>>.Fail("Brak palety/palet o zadanych parametrach", ErrorType.NotFound);
-			var palletDTO = await pallets.ProjectTo<PalletDTO>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken: ct);
-			return AppResult<List<PalletDTO>>.Success(palletDTO);
+			var palletsOrdered = pallets.OrderBy(p => p.Id);
+			var result = await palletsOrdered.ToPagedResultAsync<Pallet, PalletDTO>(
+				_mapper.ConfigurationProvider,
+				request.CurrentPage,
+				request.PageSize,
+				ct);
+			if (result.TotalCount == 0) return AppResult<PagedResult<PalletDTO>>.Fail("Brak palety/palet o zadanych parametrach", ErrorType.NotFound);
+			return AppResult<PagedResult<PalletDTO>>.Success(result);
 		}
 	}
 }

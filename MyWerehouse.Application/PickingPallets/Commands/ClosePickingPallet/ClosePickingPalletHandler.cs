@@ -20,32 +20,18 @@ namespace MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet
 
 		public async Task<AppResult<Unit>> Handle(ClosePickingPalletCommand request, CancellationToken ct)
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
-			try
-			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
-				if (pallet == null)
-					return AppResult<Unit>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
-				var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
-				if (issue == null)
-					return AppResult<Unit>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
-				if(pallet.Status != Domain.Pallets.Models.PalletStatus.Picking)
-					return AppResult<Unit>.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet");
-				//to powyżej można rozszerzyć na inne przypadki				
-				pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location.ToSnopShot());
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, $"Zamknięto paletę, dołączono do zlecenia {issue.Id}.");
-			}
-			
-			catch (Exception ex)
-			{
-				await transaction.RollbackAsync(ct);
-				// Loguj ex dla developera!
-				//_logger.LogError(ex, "Błąd podczas ręcznej kompletacji");	
-				//return PickingResult.Fail("Nastąpił nieoczekiwany błąd");
-				throw;
-			}
+			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
+			if (pallet == null)
+				return AppResult<Unit>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			if (issue == null)
+				return AppResult<Unit>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
+			if (pallet.Status != Domain.Pallets.Models.PalletStatus.Picking)
+				return AppResult<Unit>.Fail($"Palety {pallet.Id} nie można zamknąć. Błędny status palet");
+			//to powyżej można rozszerzyć na inne przypadki				
+			pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location.ToSnapshot());
+			await _werehouseDbContext.SaveChangesAsync(ct);
+			return AppResult<Unit>.Success(Unit.Value, $"Zamknięto paletę, dołączono do zlecenia {issue.Id}.");
 		}
 	}
 }

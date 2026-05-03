@@ -19,8 +19,6 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 
 		public async Task<AppResult<Unit>> Handle(VerifyAndFinalizeReceiptCommand request, CancellationToken cancellationToken)
 		{
-
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(cancellationToken);
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
 			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 
@@ -28,8 +26,7 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 			
 			receipt.VerifiedReceipt(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(cancellationToken);
-			await transaction.CommitAsync(cancellationToken);
-			return AppResult<Unit>.Success(Unit.Value, "Palety z przyjęcia zweryfikowano, gotowe do działania");
+			return AppResult<Unit>.Success(Unit.Value, "Palety z przyjęcia zweryfikowano, gotowe do użycia.");
 		}
 	}
 }

@@ -21,7 +21,6 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 
 		public async Task<AppResult<IssueResult>> Handle(ChangePalletInIssueCommand request, CancellationToken ct)
 		{
-			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			if (_palletRepo.GetPalletByIdAsync(request.NewPalletId) is null)
 				return AppResult<IssueResult>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
 			if (_palletRepo.GetPalletByIdAsync(request.OldPalletId) is null)
@@ -49,13 +48,12 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				return AppResult<IssueResult>.Fail("Nowa paleta nie zawiera produktów.", ErrorType.NotFound);
 			if (productOnOldPallet != productOnNewPallet)
 				return AppResult<IssueResult>.Fail("Nie można podmienić palet z różnymi produktami.", ErrorType.Conflict);
-			palletToAddingIssue.ReserveToIssue(issue.Id, request.UserId, palletToAddingIssue.Location.ToSnopShot());
+			palletToAddingIssue.ReserveToIssue(issue.Id, request.UserId, palletToAddingIssue.Location.ToSnapshot());
 			issue.AttachPallet(palletToAddingIssue);
-			palletToRemoveFromIssue.DetachToIssue(request.UserId, palletToRemoveFromIssue.Location.ToSnopShot(), Domain.Histories.Models.ReasonMovement.Correction);
+			palletToRemoveFromIssue.DetachToIssue(request.UserId, palletToRemoveFromIssue.Location.ToSnapshot(), Domain.Histories.Models.ReasonMovement.Correction);
 			issue.DetachPallet(palletToRemoveFromIssue);
 			issue.ChangePalletInIssue(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			await transaction.CommitAsync(ct);
 			return AppResult<IssueResult>.Success(IssueResult.Ok("Podmieniono palety.", productOnOldPallet.Value));
 		}
 	}

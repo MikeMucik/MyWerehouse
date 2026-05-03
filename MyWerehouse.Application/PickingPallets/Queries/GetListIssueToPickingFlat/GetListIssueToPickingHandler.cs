@@ -15,15 +15,15 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPickingBY
 {
 	//Lista produkt ilość
 	//Lista ile danego towaru dla danego zlecenia posegregowane i zgrupowane po kliencie Product's list by issue&client
-	public class GetListIssueToPickingHandler(IPickingPalletRepo pickingPalletRepo,
+	public class GetListIssueToPickingHandler(IVirtualPalletRepo virtualPalletRepo,
 		IIssueRepo issueRepo) : IRequestHandler<GetListIssueToPickingQuery, AppResult< List<PickingGuideLineDTO>>>
 	{
-		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
+		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
 		public async Task<AppResult<List<PickingGuideLineDTO>>> Handle(GetListIssueToPickingQuery request, CancellationToken ct)
 		{
-			var pickingPallets = await _pickingPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
+			var pickingPallets = await _virtualPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(request.DateIssueStart, request.DateIssueEnd);
 			if (pickingPallets.Count == 0)
 			{
 				return  AppResult< List<PickingGuideLineDTO>>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);	
@@ -66,7 +66,6 @@ namespace MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPickingBY
 				})
 				.OrderBy(c => c.ClientIdOut));
 			return AppResult<List<PickingGuideLineDTO>>.Success( result);
-		}
-		
+		}		
 	}
 }

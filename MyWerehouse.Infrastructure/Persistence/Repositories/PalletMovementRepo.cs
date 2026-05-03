@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Histories.Filters;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {
@@ -21,59 +22,42 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.PalletMovements.Add(palletMovement);			
 		}
-		public IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter, string id)
+		public IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter, Guid id)
 		{
-			var result = _werehouseDbContext.PalletMovements				
-				.Include(md => md.PalletMovementDetails)
-					//.ThenInclude(m => m.Product)
-				.Where(p=>p.PalletNumber == id)
-				.AsQueryable();
+			var query = _werehouseDbContext.PalletMovements
+				.Where(p => p.PalletId == id);
 
-			//if (filter.ProductId != Guid.Empty)
-			//if (filter.ProductId != null)
-			if (filter.ProductId.HasValue)
-			{
-				result = result
-					.Where(p => p.PalletMovementDetails.Any(md => md.ProductId == filter.ProductId));
-			}
-			//if (!string.IsNullOrWhiteSpace(filter.ProductName))
-			//{
-			//	result = result
-			//		.Where(p => p.PalletMovementDetails
-			//		.Any(md => md.Product.Name != null && md.Product.Name
-			//		.Contains(filter.ProductName, StringComparison.CurrentCultureIgnoreCase)));
-			//}
-			if (filter.SourceLocationId > 0)
-			{
-				result = result.Where(p => p.SourceLocationId == filter.SourceLocationId);
-			}
-			if (filter.DestinationLocationId > 0)
-			{
-				result = result.Where(p => p.DestinationLocationId == filter.DestinationLocationId);
-			}
+			if (filter.SourceLocationId.HasValue)
+				query = query.Where(p => p.SourceLocationId == filter.SourceLocationId);
+
+			if (filter.DestinationLocationId.HasValue)
+				query = query.Where(p => p.DestinationLocationId == filter.DestinationLocationId);
+
 			if (filter.Reason != null)
-			{
-				result = result.Where(p => p.Reason == filter.Reason);
-			}
-			if (filter.PerformedBy != null)
-			{
-				result = result.Where(p => p.PerformedBy == filter.PerformedBy);
-			}
-			if (filter.Quantity != null)
-			{
-				result = result
-					.Where(p => p.PalletMovementDetails.Any(md => md.Quantity == filter.Quantity));
-			}
-			if (filter.MovementDateStart != null)
+				query = query.Where(p => p.Reason == filter.Reason);
+
+			if (!string.IsNullOrWhiteSpace(filter.PerformedBy))
+				query = query.Where(p => p.PerformedBy == filter.PerformedBy);
+
+			if (filter.MovementDateStart.HasValue)
 			{
 				var start = filter.MovementDateStart.Value;
-				var end = filter.MovementDateEnd ?? DateTime.Now;
+				var end = filter.MovementDateEnd ?? DateTime.UtcNow;
 
-				result = result.Where(p =>
-				p.MovementDate >= start && p.MovementDate <= end);
+				query = query.Where(p => p.MovementDate >= start && p.MovementDate <= end);
 			}
-			return result;
-		}		
+
+			if (filter.ProductId.HasValue || filter.Quantity != null)
+			{
+				query = query.Where(p => p.PalletMovementDetails.Any(md =>
+					(!filter.ProductId.HasValue || md.ProductId == filter.ProductId) &&
+					(filter.Quantity == null || md.Quantity == filter.Quantity)
+				));
+			}
+
+			return query;
+		}
+		
 		public async Task<bool> CanDeletePalletAsync(Guid id)
 		{
 			int movementCount = await _werehouseDbContext.PalletMovements
@@ -89,3 +73,55 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 	}
 }
+//public IQueryable<PalletMovement> GetDataByFilterOLd(PalletMovementSearchFilter filter, Guid id)
+//{
+//	var result = _werehouseDbContext.PalletMovements
+//		.Include(md => md.PalletMovementDetails)
+//		//.ThenInclude(m => m.Product)
+//		.Where(p => p.PalletId == id)
+//		.AsQueryable();
+
+//	if (filter.ProductId.HasValue)
+//	{
+//		result = result
+//			.Where(p => p.PalletMovementDetails.Any(md => md.ProductId == filter.ProductId));
+//	}
+//	//if (!string.IsNullOrWhiteSpace(filter.ProductName))
+//	//{
+//	//	result = result
+//	//		.Where(p => p.PalletMovementDetails
+//	//		.Any(md => md.Product.Name != null && md.Product.Name
+//	//		.Contains(filter.ProductName, StringComparison.CurrentCultureIgnoreCase)));
+//	//}
+//	if (filter.SourceLocationId > 0)
+//	{
+//		result = result.Where(p => p.SourceLocationId == filter.SourceLocationId);
+//	}
+//	if (filter.DestinationLocationId > 0)
+//	{
+//		result = result.Where(p => p.DestinationLocationId == filter.DestinationLocationId);
+//	}
+//	if (filter.Reason != null)
+//	{
+//		result = result.Where(p => p.Reason == filter.Reason);
+//	}
+//	if (filter.PerformedBy != null)
+//	{
+//		result = result.Where(p => p.PerformedBy == filter.PerformedBy);
+//	}
+//	if (filter.Quantity != null)
+//	{
+//		result = result
+//			.Where(p => p.PalletMovementDetails.Any(md => md.Quantity == filter.Quantity));
+//	}
+//	if (filter.MovementDateStart != null)
+//	{
+//		var start = filter.MovementDateStart.Value;
+//		var end = filter.MovementDateEnd ?? DateTime.Now;
+
+//		result = result.Where(p =>
+//		p.MovementDate >= start && p.MovementDate <= end);
+//	}
+
+//	return result;
+//}

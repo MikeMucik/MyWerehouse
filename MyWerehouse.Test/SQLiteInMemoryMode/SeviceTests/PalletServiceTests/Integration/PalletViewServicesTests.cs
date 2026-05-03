@@ -87,10 +87,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(3))
 			};
 			//Act
-			var query = new FindPalletsByFiltrQuery(filtr);
+			var query = new FindPalletsByFiltrQuery(filtr, 1, 1);
 			var result = _mediator.Send(query);
 			//Assert
-			Assert.NotEmpty(result.Result.Result);
+			Assert.NotEmpty(result.Result.Result.Dtos);
 		}
 		[Fact]
 		public void ShowPallets_FindPallets_ReturnCollectionEmpty()
@@ -101,10 +101,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(36))
 			};
 			//Act
-			var query = new FindPalletsByFiltrQuery(filtr);
+			var query = new FindPalletsByFiltrQuery(filtr, 1, 1);
 			var result = _mediator.Send(query);
 			//Assert
-			Assert.Empty(result.Result.Result);
+			Assert.False(result.Result.IsSuccess);
+			Assert.Contains("Brak", result.Result.Error);
 		}
 	}
 }

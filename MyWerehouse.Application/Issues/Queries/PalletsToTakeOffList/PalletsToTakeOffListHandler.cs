@@ -33,7 +33,7 @@ namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 					PalletId = item.PalletId,
 					PalletNumber = item.PalletNumber,
 					LocationId = item.LocationId,
-					LocationName = location.ToSnopShot()
+					LocationName = location.ToSnapshot()
 				};
 				listDTO.Add(row);
 			}

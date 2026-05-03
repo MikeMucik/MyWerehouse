@@ -91,7 +91,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			AddHistory(userId);
 			foreach (var pallet in Pallets)
 			{
-				pallet.DetachToIssue(userId, pallet.Location.ToSnopShot(), ReasonMovement.CancelIssue);
+				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonMovement.CancelIssue);
 			}
 			foreach (var task in PickingTasks)
 			{
@@ -126,7 +126,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
 			foreach (var pallet in toReturn)
 			{
-				pallet.DetachToIssue(userId, pallet.Location.ToSnopShot(), ReasonMovement.Correction);
+				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonMovement.Correction);
 				Pallets.Remove(pallet);
 			}
 			return toReturn;
@@ -138,7 +138,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			IssueStatus = IssueStatus.ConfirmedToLoad;
 			foreach (var pallet in Pallets)
 			{				
-				pallet.AssignToIssue(Id, userId, pallet.Location.ToSnopShot());				
+				pallet.AssignToIssue(Id, userId, pallet.Location.ToSnapshot());				
 			}
 			AddHistory(userId);
 		}
@@ -156,7 +156,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			foreach (var pallet in Pallets)
 			{
-				pallet.ToArchive(userId, ReasonMovement.Loaded, pallet.Location.ToSnopShot());
+				pallet.ToArchive(userId, ReasonMovement.Loaded, pallet.Location.ToSnapshot());
 			}
 			IssueStatus = IssueStatus.Archived;
 			AddHistory(userId);
@@ -169,7 +169,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			PerformedBy = userId;
 			foreach (var pallet in Pallets)
 			{
-				pallet.AddHistory(ReasonMovement.Loaded, userId, pallet.Location.ToSnopShot());
+				pallet.AddHistory(ReasonMovement.Loaded, userId, pallet.Location.ToSnapshot());
 			}
 			IssueStatus = IssueStatus.IsShipped;
 			AddHistory(userId);
@@ -245,7 +245,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 					p.Id,
 					p.PalletNumber,
 					p.LocationId,
-					p.Location.ToSnopShot()))
+					p.Location.ToSnapshot()))
 				.ToList();
 		}
 

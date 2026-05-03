@@ -31,7 +31,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				MovementDateStart = new DateTime(2025,1,1)				
 			};
 			//Act
-			var result = _palletMovementRepo.GetDataByFilter(filter, "Q1000");
+			var palletId = Guid.Parse("00000000-0001-1111-0000-000000000000");
+
+			var result = _palletMovementRepo.GetDataByFilter(filter, palletId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());
@@ -66,8 +68,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			{							
 				MovementDateStart = new DateTime(2025, 3, 3)
 			};
+			 var palletId = Guid.Parse("00000000-0002-1111-0000-000000000000");
+
 			//Act
-			var result = _palletMovementRepo.GetDataByFilter(filter, "Q1001");
+			var result = _palletMovementRepo.GetDataByFilter(filter, palletId);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(0, result.Count());

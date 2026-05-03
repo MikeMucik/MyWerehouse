@@ -24,8 +24,6 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 
 		public async Task<AppResult<Unit>> Handle(CreateReceiptPlanCommand request, CancellationToken ct)
 		{
-			try
-			{
 				if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
 					return AppResult<Unit>.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.", ErrorType.NotFound);
 				if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
@@ -36,18 +34,6 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 				receipt.Create(request.DTO.PerformedBy);
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, "Utworzono przyjęcie");
-			}
-			//to nie tu to chyba domena
-			catch (InvalidUserIdException eu)
-			{
-				return AppResult<Unit>.Fail(eu.Message);
-			}
-			catch (Exception ex)
-			{
-				//_logger.LogError(ex, "Błąd podczas operacji na przyjęciu");
-				//return ReceiptResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
-				throw;
-			}
 		}
 	}
 }

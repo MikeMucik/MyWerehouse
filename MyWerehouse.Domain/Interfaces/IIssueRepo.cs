@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Receviving.Filters;
 
 namespace MyWerehouse.Domain.Interfaces
@@ -19,5 +20,6 @@ namespace MyWerehouse.Domain.Interfaces
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
 		Task<List<PalletWithLocation>> GetPalletByIssueIdAsync(Guid id);
 		Task<int> GetNextNumberOfIssue();
+		Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id);
 	}
 }

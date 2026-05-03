@@ -41,15 +41,15 @@ namespace MyWerehouse.Server.Controllers
 			return Ok(result);
 		}
 		[HttpGet("all")]
-		public async Task<IActionResult> GetAll(int page, int size)//można zamienić na [FromQuery] +DTO
+		public async Task<IActionResult> GetAll(int page, int size, CancellationToken ct)//można zamienić na [FromQuery] +DTO
 		{
-			var result = await _clientService.GetAllClientsAsync(page, size);
+			var result = await _clientService.GetAllClientsAsync(page, size, ct);
 			return Ok(result);
 		}
 		[HttpGet("byFilter")]
-		public async Task<IActionResult> GetByFiltr(int page, int size, ClientSearchFilter filter)//można zamienić na [FromQuery] +DTO
+		public async Task<IActionResult> GetByFiltr(int page, int size, ClientSearchFilter filter, CancellationToken ct)//można zamienić na [FromQuery] +DTO
 		{
-			var result = await _clientService.GetClientsByFilterAsync(page, size, filter);
+			var result = await _clientService.GetClientsByFilterAsync(page, size, filter, ct);
 			return Ok(result);
 		}
 	}

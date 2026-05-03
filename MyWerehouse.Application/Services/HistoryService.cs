@@ -34,8 +34,7 @@ namespace MyWerehouse.Application.Services
 			var pallet = await _palletRepo.GetPalletByIdAsync(id);
 			var history = _mapper.Map<PalletHistoryDTO>(pallet);
 			var filter = new PalletMovementSearchFilter { };
-			//var details = await _palletMovementRepo.GetDataByFilter(filter, id)
-			var details = await _palletMovementRepo.GetDataByFilter(filter, pallet.PalletNumber)
+			var details = await _palletMovementRepo.GetDataByFilter(filter, id)
 				.OrderByDescending(a => a.MovementDate)
 			 .ProjectTo<PalletMovementDTO>(_mapper.ConfigurationProvider)
 			 .ToListAsync();

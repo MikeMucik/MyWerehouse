@@ -12,116 +12,36 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
-	public class UpdatePalletHandler(IPalletRepo palletRepo,
-		IMapper mapper,
+	public class UpdatePalletHandler(IPalletRepo palletRepo,		
 		WerehouseDbContext werehouseDbContext,
 		IProductRepo productRepo) : IRequestHandler<UpdatePalletCommand, AppResult<Unit>>
 	{
-		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IMapper _mapper = mapper;
+		private readonly IPalletRepo _palletRepo = palletRepo;		
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IProductRepo _productRepo = productRepo;
 
 		public async Task<AppResult<Unit>> Handle(UpdatePalletCommand request, CancellationToken ct)
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
-			try
+			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.UpdatingPallet.Id);
+			if (existingPallet == null)
+				return AppResult<Unit>.Fail($"Paleta o numerze {request.UpdatingPallet.PalletNumber} nie istnieje.", ErrorType.NotFound);
+			foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
 			{
-				var existingPallet = await _palletRepo.GetPalletByIdAsync(request.UpdatingPallet.Id);
-				if (existingPallet == null)
-					return AppResult<Unit>.Fail($"Paleta o numerze {request.UpdatingPallet.PalletNumber} nie istnieje.", ErrorType.NotFound);
-						
-				
-				foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
-				{
-					if (!await _productRepo.IsExistProduct(pop.ProductId))
-						return AppResult<Unit>.Fail($"Produkt o numerze {pop.ProductId} nie istnieje.", ErrorType.NotFound);
-				}
-
-				var updatedProducts1 =new List<ProductOnPallet>();
-				foreach (var product in request.UpdatingPallet.ProductsOnPallet)
-				{
-					var updatetedProduct = ProductOnPallet.Create(product.ProductId,
-						product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);						
-					//	new ProductOnPallet
-					//{
-					//	ProductId = product.ProductId,
-					//	PalletId = product.PalletId,
-					//	Quantity = product.Quantity,
-					//	DateAdded = product.DateAdded,
-					//	BestBefore = product.BestBefore,
-					//};
-					updatedProducts1.Add(updatetedProduct);
-				}
-				var snapShot = existingPallet.Location.ToSnopShot();
-				existingPallet.Update(request.UserId, updatedProducts1, request.UpdatingPallet.Status, snapShot);
-				
-				await _werehouseDbContext.SaveChangesAsync(ct);
-
-				await transaction.CommitAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, $"Paleta {request.UpdatingPallet.PalletNumber} została zaktualizowana.");
-				
+				if (!await _productRepo.IsExistProduct(pop.ProductId))
+					return AppResult<Unit>.Fail($"Produkt o numerze {pop.ProductId} nie istnieje.", ErrorType.NotFound);
 			}
-		
-			catch (Exception ex)
+			var updatedProducts1 = new List<ProductOnPallet>();
+			foreach (var product in request.UpdatingPallet.ProductsOnPallet)
 			{
-				await transaction.RollbackAsync(ct);
-				// Loguj ex dla developera!
-				//_logger.LogError(ex, "Błąd podczas aktualizaowania przyjęcia");	
-				//return PalletResult.Fail("Wystąpił nieoczekiwany błąd podczas operacji.");
-				throw;
-			}			
+				var updatetedProduct = ProductOnPallet.Create(product.ProductId,
+					product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);
+				updatedProducts1.Add(updatetedProduct);
+			}
+			var snapShot = existingPallet.Location.ToSnapshot();
+			existingPallet.Update(request.UserId, updatedProducts1, request.UpdatingPallet.Status, snapShot);
+			await _werehouseDbContext.SaveChangesAsync(ct);
+			return AppResult<Unit>.Success(Unit.Value, $"Paleta {request.UpdatingPallet.PalletNumber} została zaktualizowana.");
 		}
 	}
 }
-//_mapper.Map(request.UpdatingPallet, existingPallet);
-//CollectionSynchronizer.SynchronizeCollection(
-//	existingPallet.ProductsOnPallet,
-//	request.UpdatingPallet.ProductsOnPallet,
-//	a => a.Id,
-//	a => a.Id,
-//	dto =>
-//	{
-//		var newProduct = _mapper.Map<ProductOnPallet>(dto);
-//		newProduct.PalletId = existingPallet.Id;
-//		return newProduct;
-//	},
-//	(dto, entity) =>
-//	{
-//		var originalPalletId = entity.PalletId;  // Zapisz oryginalne FK przed mapowaniem
-//		_mapper.Map(dto, entity);  // Mapuj resztę
-//		entity.PalletId = originalPalletId;
-//	});
-//var oldProducts = existingPallet.ProductsOnPallet
-//	.GroupBy(p => p.ProductId)
-//	.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
-//var newProducts = request.UpdatingPallet.ProductsOnPallet
-//	.GroupBy(p => p.ProductId)
-//	.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
 
-//var allProductIds = oldProducts.Keys.Union(newProducts.Keys);
-//foreach (var productId in allProductIds)
-//{
-//	oldProducts.TryGetValue(productId, out var oldQty);
-//	newProducts.TryGetValue(productId, out var newQty);
-//	var delta = newQty - oldQty;
-//	if (delta > 0)
-//	{
-//		_eventCollector.Add(new ChangeStockNotification(
-//				StockChangeType.Increase,
-//				[new StockItemChange(productId, delta)]));
-//	}
-//	if (delta < 0)
-//	{
-//		_eventCollector.Add(new ChangeStockNotification(
-//				StockChangeType.Decrease,
-//				[new StockItemChange(productId, Math.Abs(delta))]
-//			));
-//	}
-//}
-
-//List<int> ids = updatedProducts.Select(a => a.ProductId).ToList();
-//if( await _productRepo.EnsureAllExist(ids)) { throw new NotFoundProductException("nieprawidłowy produkt"); }
-//var updatedProducts = request.UpdatingPallet.ProductsOnPallet
-//	.Select(p => (p.ProductId, p.Quantity, p.BestBefore))
-//	.ToList();

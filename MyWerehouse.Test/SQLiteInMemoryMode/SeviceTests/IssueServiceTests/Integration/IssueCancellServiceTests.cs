@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
-using MyWerehouse.Application.Issues.Commands.CreateNewIssue;
+using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking;
 using MyWerehouse.Application.PickingPallets.DTOs;
@@ -71,7 +71,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					new IssueItemDTO { ProductId = product.Id, Quantity = 10, BestBefore = new DateOnly(2026,1,1) }
 				}
 			};
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -137,7 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 					new IssueItemDTO { ProductId = product.Id, Quantity = 20, BestBefore = new DateOnly(2026,1,1) }
 				}
 			};
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			//Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -203,7 +203,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -298,7 +298,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				}
 			};
 
-			var created = await Mediator.Send(new CreateNewIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1 

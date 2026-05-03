@@ -9,7 +9,6 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Pallets.Services;
 using MyWerehouse.Application.PickingPallets.Services;
 using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Domain.Interfaces;
@@ -22,16 +21,16 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
 		IGetProductCountService getProductCountService,
 		IGetNumberPalletsAndRestService getNumberPalletsAndRestService,
-		IGetAvailablePalletsByProductService getAvailablePalletsByProductService,
-		IPickingPalletRepo pickingPalletRepo,
-		IProductRepo productRepo) : IAssignProductToIssueService
+		IVirtualPalletRepo virtualPalletRepo,
+		IProductRepo productRepo,
+		IPalletRepo palletRepo) : IAssignProductToIssueService
 	{
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IGetProductCountService _getProductCountService = getProductCountService;
 		private readonly IGetNumberPalletsAndRestService _getNumberPalletsAndRestService = getNumberPalletsAndRestService;
-		private readonly IGetAvailablePalletsByProductService _getAvailablePalletsByProductService = getAvailablePalletsByProductService;
-		private readonly IPickingPalletRepo _pickingPalletRepo = pickingPalletRepo;
+		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
+		IPalletRepo _palletRepo = palletRepo;
 
 		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO product, IssueAllocationPolicy policy,
 			List<Pallet> reusablePalletsForProduct, string userId)
@@ -77,7 +76,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			if (rest < 0)
 				return AssignProductToIssueResult.Fail("Allocated more product than requested.");
 			//3. pobierz dostępne virtualPallet;
-			var availableVirtualPalletsQuery = await _pickingPalletRepo.GetVirtualPalletsByBBAsync(product.ProductId, product.BestBefore);
+			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(product.ProductId, product.BestBefore);
 			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 			if (rest > 0)
 			{
@@ -97,7 +96,11 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			List<Pallet> availablePallets = [];
 			if (missingPalletsCount > 0)
 			{
-				availablePallets = await _getAvailablePalletsByProductService.GetPallets(product.ProductId, product.BestBefore, missingPalletsCount);
+				var productFullQuantity= await _productRepo.GetProductByIdAsync(product.ProductId);
+				//availablePallets = await _getAvailablePalletsByProductService.GetPallets(product.ProductId, product.BestBefore, missingPalletsCount);
+				availablePallets = await _palletRepo.GetAvailableFullPallets (product.ProductId, productFullQuantity.CartonsPerPallet, product.BestBefore, missingPalletsCount);
+				foreach (var pallet in availablePallets) 
+					pallet.ChangeStatus(PalletStatus.LockedForIssue);
 			}
 			List<Pallet> allAvailablePallets = [.. reusablePalletsForProduct
 				.Concat(availablePallets)
@@ -105,7 +108,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 				.Take(requiredFullPallets)];
 			foreach (var pallet in allAvailablePallets)
 			{
-				var snapShot = pallet.Location.ToSnopShot();
+				var snapShot = pallet.Location.ToSnapshot();
 				pallet.ReserveToIssue(issue.Id, issue.PerformedBy, snapShot);
 			}
 			return allAvailablePallets;

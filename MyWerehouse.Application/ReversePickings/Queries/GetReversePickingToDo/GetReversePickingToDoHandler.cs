@@ -55,13 +55,14 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				.Where(p =>
 				//p.ReceiptId != 0 || 
 				p.Receipt != null)
-				.Where(p => p.Status == PalletStatus.Available || p.Status == PalletStatus.ToPicking);			
+				.Where(p => p.Status == PalletStatus.Available);// || p.Status == PalletStatus.ToPicking);	- w idealnym świecie 		
 			var notFullPallets = await palletsWithProduct
 				.Where(p => p.ProductsOnPallet.Single().Quantity < product.CartonsPerPallet)
 				.OrderByDescending(p => p.ProductsOnPallet.Single().Quantity)
 				.ToListAsync(ct);
 			//lista palet do których dodamy
 			bool canAddedtoExist = false;
+			bool unpickComplete = false;
 			var listPalletsToAdd = new List<Pallet>();
 			foreach (var pallet in notFullPallets)
 			{
@@ -69,9 +70,10 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				var palletLackQuantity = product.CartonsPerPallet - pallet.ProductsOnPallet.Single().Quantity;
 				remainingQuantity -= palletLackQuantity;
 				listPalletsToAdd.Add(pallet);
+				canAddedtoExist = true;
 				if (remainingQuantity <= 0)
 				{
-					canAddedtoExist = true;
+					unpickComplete = true;
 					break;
 				}
 			}
@@ -81,6 +83,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				CanReturnToSource = addSource,
 				CanAddToExistingPallet = canAddedtoExist,//muszą być oba lub żadne
 				ListPalletsToAdd = listPalletsToAdd,//muszą być oba lub żadne
+				PickingPalletCompletlyUnpicking = unpickComplete,
 				ReversePickingDTO = reversePickingDTO
 			};
 			return AppResult<ReversePickingDetailsDTO>.Success(respone);

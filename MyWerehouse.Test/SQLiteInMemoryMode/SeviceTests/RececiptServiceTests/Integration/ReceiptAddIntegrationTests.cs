@@ -11,6 +11,7 @@ using MyWerehouse.Application.Receipts.Commands.CreateReceipt;
 using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
@@ -210,7 +211,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(location);
 			DbContext.Clients.Add(initialCLient);
 			DbContext.SaveChanges();
-			//Act
+			//Act&Assert
 			var newPalletDto = new CreateReceiptPlanDTO
 			{
 				ClientId = initialCLient.Id,
@@ -218,11 +219,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				//PerformedBy = "user",
 				RampNumber = 1
 			};
-			var result =
-				await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
-			//Assert
-			Assert.NotNull(result);
-			Assert.Contains("Invalid  or missing user ID.", result.Error);
+			var ex = await Assert.ThrowsAsync<InvalidUserIdException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
+			Assert.Contains("Invalid  or missing user ID.", ex.Message);
+			
+			
+		//	var result =
+		//		await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	Assert.Contains("Invalid  or missing user ID.", result.Error);
 		}
 		[Fact]
 		public async Task CreateReceiptPlanAsync_NoProperData_NotAddToBase()

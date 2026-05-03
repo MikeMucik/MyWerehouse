@@ -8,7 +8,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 {
 	public class ListProductsDTO
 	{
-		public List<ProductToListDTO> Products {  get; set; }
+		public List<ProductDTO> Products {  get; set; }
 		public int CurrentPage { get; set; }
 		public int PageSize { get; set; }		
 		public int Count { get; set; }

@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Interfaces
 	{		
 		void AddPalletMovement(PalletMovement palletMovement);
 		Task AddPalletMovementAsync(PalletMovement palletMovement, CancellationToken cancellationToken);
-		IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter, string PalletNumber);		
+		IQueryable<PalletMovement> GetDataByFilter(PalletMovementSearchFilter filter, Guid PalletId);		
 		Task<bool> CanDeletePalletAsync(Guid palletId);
 	}
 }

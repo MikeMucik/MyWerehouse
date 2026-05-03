@@ -19,6 +19,7 @@ using MyWerehouse.Application.Common.Utils;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
 using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Application.Common.Pagination;
 
 namespace MyWerehouse.Application.Services
 {
@@ -128,41 +129,42 @@ namespace MyWerehouse.Application.Services
 				return AppResult<DetailsOfClientDTO>.Fail($"Nieprawidłowy numer client {id}.", ErrorType.NotFound);
 			}
 		}
-		public async Task<AppResult<ListClientsDTO>> GetClientsByFilterAsync(int pageSize, int pageNumber, ClientSearchFilter filter)
+		public async Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageSize, int pageNumber, ClientSearchFilter filter, CancellationToken ct)
 		{
-			var products = _clientRepo.GetClients(filter)
-				.OrderBy(p => p.Id)
-				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider);
-			var clientsToShow = await products
-				.Skip(pageSize * (pageNumber - 1))
-				.Take(pageSize)
-				.ToListAsync();
-			var clientList = new ListClientsDTO()
-			{
-				AddClients = clientsToShow,
-				PageSize = pageSize,
-				CurrentPage = pageNumber,
-				Count = await products.CountAsync()
-			};
-			return AppResult<ListClientsDTO>.Success( clientList);
+
+			var clients = _clientRepo.GetClients(filter);
+			var clientsOrdered = clients
+				.OrderBy(p => p.Id);
+			var result = await clientsOrdered.ToPagedResultAsync<Client, ClientDTO>(
+				_mapper.ConfigurationProvider,
+				pageNumber,
+				pageSize,
+				ct);
+			//	.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider);
+			//var clientsToShow = await clients
+			//	.Skip(pageSize * (pageNumber - 1))
+			//	.Take(pageSize)
+			//	.ToListAsync();
+			//var clientList = new ListClientsDTO()
+			//{
+			//	AddClients = clientsToShow,
+			//	PageSize = pageSize,
+			//	CurrentPage = pageNumber,
+			//	Count = await clients.CountAsync()
+			//};
+			return AppResult<PagedResult<ClientDTO>>.Success( result);
 		}
-		public async Task<AppResult<ListClientsDTO>> GetAllClientsAsync(int pageSize, int PageNumber)
+		public async Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageSize, int pageNumber, CancellationToken ct)
 		{
-			var products = _clientRepo.GetAllClients()
-				.OrderBy(p => p.Id)
-				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider);
-			var clientsToShow = await products
-				.Skip(pageSize * (PageNumber - 1))
-				.Take(pageSize)
-				.ToListAsync();
-			var clientList = new ListClientsDTO()
-			{
-				AddClients = clientsToShow,
-				PageSize = pageSize,
-				CurrentPage = PageNumber,
-				Count = await products.CountAsync()
-			};
-			return AppResult<ListClientsDTO>.Success(clientList);
+			var clients = _clientRepo.GetAllClients();
+				var clientsOrdered = clients
+				.OrderBy(p => p.Id);
+			var result = await clientsOrdered.ToPagedResultAsync<Client, ClientDTO>(
+				_mapper.ConfigurationProvider,
+				pageNumber,
+				pageSize,
+				ct);
+			return AppResult<PagedResult<ClientDTO>>.Success(result);
 		}
 	}
 }

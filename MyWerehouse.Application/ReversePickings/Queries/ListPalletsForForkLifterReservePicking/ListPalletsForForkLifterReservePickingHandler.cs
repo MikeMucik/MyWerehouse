@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePi
 				if (pallet == null)
 					return AppResult<List<PalletWithLocationDTO>>.Fail($"Brak palety w systemie {id}.");	//		
 				var locationName = pallet.Location;
-				var fullLocation = locationName.ToSnopShot();
+				var fullLocation = locationName.ToSnapshot();
 				var item = new PalletWithLocationDTO
 				{
 					PalletId = id,

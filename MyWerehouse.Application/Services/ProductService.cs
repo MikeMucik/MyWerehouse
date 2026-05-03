@@ -18,6 +18,7 @@ using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
 using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Application.Common.Pagination;
 
 namespace MyWerehouse.Application.Services
 {
@@ -105,7 +106,7 @@ namespace MyWerehouse.Application.Services
 		{
 			var product = await _productRepo.GetProductByIdAsync(id);
 			var productDTO = _mapper.Map<AddProductDTO>(product);
-			return AppResult<AddProductDTO>.Success( productDTO);
+			return AppResult<AddProductDTO>.Success(productDTO);
 		}
 		public async Task<AppResult<Unit>> UpdateProductAsync(AddProductDTO productDTO)
 		{
@@ -129,50 +130,57 @@ namespace MyWerehouse.Application.Services
 			var product = await _productRepo.GetProductToEditAsync(id);
 			if (product == null) return AppResult<DetailsOfProductDTO>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
-			
+
 			return AppResult<DetailsOfProductDTO>.Success(productDTO);
 		}
-		public async Task<AppResult<ListProductsDTO>> GetProductsAsync(int pageSize, int PageNumber)
+		public async Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageSize, int pageNumber, CancellationToken ct)
 		{
-			var products = _productRepo.GetAllProducts()
-				.OrderBy(p => p.Id)
-				.ProjectTo<ProductToListDTO>(_mapper.ConfigurationProvider);
-			var productToShow = await products
-				.Skip(pageSize * (PageNumber - 1))
-				.Take(pageSize)
-				.ToListAsync();
-			var productList = new ListProductsDTO()
-			{
-				Products = productToShow,
-				PageSize = pageSize,
-				CurrentPage = PageNumber,
-				Count = await products.CountAsync()
-			};
-			return AppResult<ListProductsDTO>.Success(productList);
+			var products = _productRepo.GetAllProducts();
+			var productsOrdered = products
+			.OrderBy(p => p.Id);
+			var result = await productsOrdered.ToPagedResultAsync<Product, ProductDTO>(
+				_mapper.ConfigurationProvider, pageNumber, pageSize, ct);
+			//	.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider);
+			//var productToShow = await products
+			//	.Skip(pageSize * (PageNumber - 1))
+			//	.Take(pageSize)
+			//	.ToListAsync();
+			//var productList = new ListProductsDTO()
+			//{
+			//	Products = productToShow,
+			//	PageSize = pageSize,
+			//	CurrentPage = PageNumber,
+			//	Count = await products.CountAsync()
+			//};
+			return AppResult<PagedResult<ProductDTO>>.Success(result);
 		}
-		public async Task<AppResult<ListProductsDTO>> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter)
+		public async Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter, CancellationToken ct)
 		{
-			pageNumber = pageNumber <= 1 ? 1 : pageNumber;
-			var products = _productRepo.FindProducts(filter)
-				.OrderBy(p => p.Id)
-				.ProjectTo<ProductToListDTO>(_mapper.ConfigurationProvider);
+			//pageNumber = pageNumber <= 1 ? 1 : pageNumber;
+			var products = _productRepo.FindProducts(filter);
+			var productsOrdered = products
+				.OrderBy(p => p.Id);
 
-			var countProducts = products.CountAsync();
-			var productToShow = products
-				.Skip(pageSize * (pageNumber - 1))
-				.Take(pageSize)
-				.ToListAsync();
+			var result = await productsOrdered.ToPagedResultAsync<Product, ProductDTO>(
+				_mapper.ConfigurationProvider, pageNumber, pageSize, ct);
+			//.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider);
 
-			await Task.WhenAll(countProducts, productToShow);
+			//var countProducts = products.CountAsync();
+			//var productToShow = products
+			//	.Skip(pageSize * (pageNumber - 1))
+			//	.Take(pageSize)
+			//	.ToListAsync();
 
-			var productList = new ListProductsDTO()
-			{
-				Products = productToShow.Result,
-				PageSize = pageSize,
-				CurrentPage = pageNumber,
-				Count = countProducts.Result,
-			};
-			return AppResult<ListProductsDTO>.Success( productList);
+			//await Task.WhenAll(countProducts, productToShow);
+
+			//var productList = new ListProductsDTO()
+			//{
+			//	Products = productToShow.Result,
+			//	PageSize = pageSize,
+			//	CurrentPage = pageNumber,
+			//	Count = countProducts.Result,
+			//};
+			return AppResult<PagedResult<ProductDTO>>.Success(result);
 		}
 	}
 }

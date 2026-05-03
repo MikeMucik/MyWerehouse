@@ -144,7 +144,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			foreach (var pallet in toReturn)
 			{
 				pallet.ChangeStatus(PalletStatus.InStock);
-				pallet.AddHistory(ReasonMovement.Received, userId, pallet.Location.ToSnopShot());
+				pallet.AddHistory(ReasonMovement.Received, userId, pallet.Location.ToSnapshot());
 			}
 			ReceiptStatus = ReceiptStatus.Verified;
 			AddHistory(userId);
@@ -176,7 +176,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 					p.Id,
 					p.PalletNumber,
 					p.LocationId,
-					p.Location.ToSnopShot()))
+					p.Location.ToSnapshot()))
 				.ToList();
 		}
 		private IEnumerable<StockItemChange> CreateStockItem(List<Pallet> pallets)

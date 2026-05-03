@@ -41,10 +41,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 		public async Task ShowAllClient_First3_GetAllClientsAsync_ReturnList()
 		{
 			//Arrange&Act
-			var result = await _clientService.GetAllClientsAsync(3, 1);
+			var ct = CancellationToken.None;
+			var result = await _clientService.GetAllClientsAsync(3, 1, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Result.Count);
+			Assert.Equal(3, result.Result.Dtos.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilterName_GetClientsByFilterAsync_ReturnList()
@@ -54,11 +55,12 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			{
 				Name = "Client"
 			};
+			var ct = CancellationToken.None;
 			//Act
-			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter);
+			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Result.Count);
+			Assert.Equal(3, result.Result.Dtos.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilter_GetClientsByFilterAsync_ReturnList()
@@ -68,11 +70,12 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			{
 				FullName = "FullNameTestAddress1"
 			};
+			var ct = CancellationToken.None;
 			//Act
-			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter);
+			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(1, result.Result.Count);
+			Assert.Equal(1, result.Result.Dtos.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilterNotExist_GetClientsByFilterAsync_ReturnList()
@@ -82,11 +85,12 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			{
 				Name = "Test1111"
 			};
+			var ct = CancellationToken.None;
 			//Act
-			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter);
+			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(0, result.Result.Count);
+			Assert.Equal(0, result.Result.Dtos.Count);
 		}
 	}
 }

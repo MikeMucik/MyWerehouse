@@ -10,7 +10,7 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt
 {
-	public class DeleteDraftReceiptCommandHandler(WerehouseDbContext werehouseDbContext,
+	public class DeleteDraftReceiptHandler(WerehouseDbContext werehouseDbContext,
 		IReceiptRepo receiptRepo
 		) : IRequestHandler<DeleteDraftReceiptCommand, AppResult<Unit>>
 	{
@@ -19,14 +19,11 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt
 
 		public async Task<AppResult<Unit>> Handle(DeleteDraftReceiptCommand request, CancellationToken ct)
 		{
-			using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
-			{
 				var receipt = await _receiptRepo.GetReceiptOnlyByIdAsync(request.ReceiptId);
 				if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 				receipt.Delete(request.UserId);
 				_receiptRepo.DeleteReceipt(receipt);
-				return AppResult<Unit>.Success(Unit.Value, "Usunięto przyjęcie z bazy");
-			}
+				return AppResult<Unit>.Success(Unit.Value, "Usunięto przyjęcie z bazy");		
 		}
 	}
 }

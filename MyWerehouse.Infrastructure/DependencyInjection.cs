@@ -28,7 +28,7 @@ namespace MyWerehouse.Infrastructure
 			//services.AddTransient<ILocationRepo, LocationRepo>();
 			//services.AddTransient<IPalletMovementRepo, PalletMovementRepo>();
 			//services.AddTransient<IPalletRepo, PalletRepo>();
-			//services.AddTransient<IPickingPalletRepo, PickingPalletRepo>();			
+			//services.AddTransient<IvirtualPalletRepo, virtualPalletRepo>();			
 			//services.AddTransient<IProductRepo, ProductRepo>();
 			//services.AddTransient<IReceiptRepo, ReceiptRepo>();		
 			//services.AddTransient<IReversePickingRepo, ReversePickingRepo>();
@@ -49,7 +49,7 @@ namespace MyWerehouse.Infrastructure
 			services.AddScoped<ILocationRepo, LocationRepo>();
 			services.AddScoped<IPalletMovementRepo, PalletMovementRepo>();
 			services.AddScoped<IPalletRepo, PalletRepo>();
-			services.AddScoped<IPickingPalletRepo, PickingPalletRepo>();
+			services.AddScoped<IVirtualPalletRepo, VirtualPalletRepo>();
 			services.AddScoped<IProductRepo, ProductRepo>();
 			services.AddScoped<IReceiptRepo, ReceiptRepo>();
 			services.AddScoped<IReversePickingRepo, ReversePickingRepo>();

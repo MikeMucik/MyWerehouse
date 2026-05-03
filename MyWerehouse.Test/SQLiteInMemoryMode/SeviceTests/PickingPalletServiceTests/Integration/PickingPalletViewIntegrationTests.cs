@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.PickingPallets.DTOs;
 using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
@@ -61,13 +62,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			//var pallet = "Q1100";
 			var pallet = palletGuid5;
 			var date = DateTime.UtcNow;
-			var query = new ShowTaskToDoQuery(pallet, date);
+			var query = new ShowTaskToDoQuery(pallet, date,1,1);
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert
-			Assert.IsType<List<PickingTaskDTO>>(result.Result);
+			Assert.IsType<PagedResult<PickingTaskDTO>>(result.Result);
 			Assert.NotNull(result);
-			Assert.NotEmpty(result.Result);
+			Assert.NotEmpty(result.Result.Dtos);
 		}
 		[Fact]
 		public async Task GetListToPicking_GoodData_ReturnListForPickingTask()

@@ -9,23 +9,24 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.PickingPallets.Services
 {
 	public class AddPickingTaskToIssueService : IAddPickingTaskToIssueService
 	{
 		private readonly IProductRepo _productRepo;
-		private readonly IPickingPalletRepo _pickingPalletRepo;
+		private readonly IVirtualPalletRepo _virtualPalletRepo;
 		private readonly IPalletRepo _palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		public AddPickingTaskToIssueService(
 			IProductRepo productRepo,
-			IPickingPalletRepo pickingPalletRepo,
+			IVirtualPalletRepo virtualPalletRepo,
 			IPalletRepo palletRepo,
 			IPickingTaskRepo pickingTaskRepo)
 		{
 			_productRepo = productRepo;
-			_pickingPalletRepo = pickingPalletRepo;
+			_virtualPalletRepo = virtualPalletRepo;
 			_palletRepo = palletRepo;
 			_pickingTaskRepo = pickingTaskRepo;
 		}
@@ -46,52 +47,48 @@ namespace MyWerehouse.Application.PickingPallets.Services
 		{
 			// pallets - palety używane w danym issue - potrzebne bo jeszcze nie zapisane w bazie - jeden handler - brak saveChanges
 			var quantity = rest;
-			var pickingTasks = new List<PickingTask>(); //dla result 
-														//z dostępnych palet do pickingu
+			var pickingTasks = new List<PickingTask>(); //dla result 																											
+			void CreatePickingTask(VirtualPallet vp, Issue issue, int quantity, Guid productId, DateOnly? bestBefore, string userId)
+			{
+				var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated, productId,
+						bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);  //na razie ustalone na sztywno 
+				_pickingTaskRepo.AddPickingTask(pickingTask);
+				pickingTasks.Add(pickingTask);
+
+				pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);
+
+			}
+			//z dostępnych palet do pickingu	
 			foreach (var vp in virtualPallets)
 			{
 				var taken = Math.Min(quantity, vp.RemainingQuantity);
 				if (taken <= 0) continue;
-				var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId, bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
-				_pickingTaskRepo.AddPickingTask(pickingTask);
-				pickingTasks.Add(pickingTask);
-
-				pickingTask.AddHistoryPicking(userId,
-					null, null, PickingStatus.Available, 0);// PickingStatus.Allocated, vp.Pallet.Id, vp.Pallet.PalletNumber,
+				CreatePickingTask(vp, issue, taken, productId, bestBefore, userId);
 				quantity -= taken;
 				if (quantity <= 0)
 					break;
 			}
 			//nowe palety do pickingu
-			//TODO weź tylko tyle palet ile potrzebujesz zwiększysz performance na razie Take
-			var availablePallets = await _palletRepo.GetAvailablePallets(productId, bestBefore).ToListAsync();
-			//Do wyciągnięcia logika ale gdzie najlepiej - albo inna metoda pozyskania albo serwis aplikacyjny
+			//TODO weź tylko tyle palet ile potrzebujesz zwiększysz performance na razie Take 10			
 			var usedPalletsId = pallets?
 				.Select(p => p.Id)
 				.ToHashSet() ?? new HashSet<Guid>();
-			var availablePalletsReduced = availablePallets
-				.Where(p => !usedPalletsId.Contains(p.Id))
-				.ToList();
-			foreach (var palletToPicking in availablePalletsReduced)
+			var availablePallets = await _palletRepo.GetAvailablePalletsExcluding(productId, bestBefore, usedPalletsId);//.ToListAsync();
+			
+			foreach (var palletToPicking in availablePallets)
 			{
 				if (quantity <= 0) break;
 				var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.First().Quantity, palletToPicking.LocationId);
-				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnopShot()); //z nowych palet do pickingu
-				var vp = _pickingPalletRepo.AddPalletToPicking(virtualPallet);
+				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //z nowych palet do pickingu
+				var vp = _virtualPalletRepo.AddPalletToPicking(virtualPallet);
 
 				var taken = Math.Min(quantity, vp.RemainingQuantity);
 				if (taken <= 0) continue;
-				var pickingTask = PickingTask.Create(vp.Id, issue.Id, taken, PickingStatus.Allocated, productId,
-					bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);  //na razie ustalone na sztywno 
-				_pickingTaskRepo.AddPickingTask(pickingTask);
-				pickingTasks.Add(pickingTask);
-
-				pickingTask.AddHistoryPicking(userId, 
-					null, null, PickingStatus.Available, 0);//PickingStatus.Allocated,palletToPicking.Id, palletToPicking.PalletNumber,
+				CreatePickingTask(vp, issue, taken, productId, bestBefore, userId);
 				quantity -= taken;
 				if (quantity <= 0) break;
 			}
-			//jeśli za mało towaru to komunikat dla użytkownika i rollback w handlerze
+			//jeśli za mało towaru to komunikat dla użytkownika 
 			if (quantity > 0)
 			{
 				var productFull = await _productRepo.GetProductByIdAsync(productId);

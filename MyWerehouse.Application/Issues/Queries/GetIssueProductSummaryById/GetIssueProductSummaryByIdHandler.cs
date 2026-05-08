@@ -12,23 +12,23 @@ using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 {
-	public class GetIssueProductSummaryByIdHandler : IRequestHandler<GetIssueProductSummaryByIdQuery, AppResult<UpdateIssueDTO>>
+	public class GetIssueProductSummaryByIdHandler : IRequestHandler<GetIssueProductSummaryByIdQuery, AppResult<ModifyIssueDTO>>
 	{
 		private readonly IIssueRepo _issueRepo;
 		public GetIssueProductSummaryByIdHandler(IIssueRepo issueRepo)
 		{
 			_issueRepo = issueRepo;
 		}
-		public async Task<AppResult<UpdateIssueDTO>> Handle(GetIssueProductSummaryByIdQuery query, CancellationToken ct)
+		public async Task<AppResult<ModifyIssueDTO>> Handle(GetIssueProductSummaryByIdQuery query, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(query.IssueId);// ?? throw new NotFoundIssueException(query.IssueId);
-			if (issue == null) { return AppResult<UpdateIssueDTO>.Fail($"Zamówienie o numerze {query.IssueId} nie zostało znalezione.", ErrorType.NotFound); }
-			var dto = new UpdateIssueDTO
+			var issue = await _issueRepo.GetIssueByIdAsync(query.IssueId);
+			if (issue == null) { return AppResult<ModifyIssueDTO>.Fail($"Zamówienie o numerze {query.IssueId} nie zostało znalezione.", ErrorType.NotFound); }
+			var dto = new ModifyIssueDTO
 			{
 				Id = issue.Id,
 				ClientId = issue.ClientId,
 				PerformedBy = issue.PerformedBy,
-				Items = issue.IssueItems
+				IssueItems = issue.IssueItems
 				 .Select(ii => new IssueItemDTO
 				 {
 					 ProductId = ii.ProductId,
@@ -36,7 +36,7 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 				 }).ToList(),
 				DateToSend = issue.IssueDateTimeSend
 			};
-			return AppResult<UpdateIssueDTO>.Success(dto);
+			return AppResult<ModifyIssueDTO>.Success(dto);
 		}
 	}
 }

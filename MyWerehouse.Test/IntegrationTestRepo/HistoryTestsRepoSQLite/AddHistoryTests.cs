@@ -61,15 +61,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			DbContext.Locations.AddRange(location1, location2, location3);
 			DbContext.Pallets.AddRange(pallet1);
 			DbContext.SaveChanges();
-			var pallletMovement = new PalletMovement
+			var pallletMovement = new HistoryPallet
 			{
 				PalletId = pallet1.Id,
 				PalletNumber = pallet1.PalletNumber,
 				SourceLocationId = location1.Id,
 				DestinationLocationId = location2.Id,
-				PalletMovementDetails = new List<PalletMovementDetail>
+				HistoryPalletDetails = new List<HistoryPalletDetail>
 				{
-					new PalletMovementDetail
+					new HistoryPalletDetail
 					{
 						Quantity = -1,
 						ProductId =product.Id,
@@ -77,23 +77,23 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				},
 				PalletStatus = PalletStatus.Available,
 				PerformedBy = "U001",
-				Reason = ReasonMovement.Correction,
+				Reason = ReasonForPallet.Correction,
 				MovementDate = DateTime.Now,
 			};
-			var palletMovementRepo = new PalletMovementRepo(DbContext);
+			var palletMovementRepo = new HistoryPalletRepo(DbContext);
 
 			//Act
-			palletMovementRepo.AddPalletMovement(pallletMovement);
+			palletMovementRepo.AddHistoryPallet(pallletMovement);
 			DbContext.SaveChanges();
 			//Assert			
-			var resultList = DbContext.PalletMovements.Where(m => m.PalletNumber == "Q1000");
+			var resultList = DbContext.HistoryPallet.Where(m => m.PalletNumber == "Q1000");
 			var result = resultList
 				//.OrderByDescending(p => p.MovementDate)
 				.FirstOrDefault();
 			Assert.NotNull(result);
-			Assert.Equal(-1, resultList.First(p => p.PerformedBy == "U001").PalletMovementDetails.First().Quantity);
+			Assert.Equal(-1, resultList.First(p => p.PerformedBy == "U001").HistoryPalletDetails.First().Quantity);
 			Assert.Equal("U001", result.PerformedBy);
-			Assert.Equal(ReasonMovement.Correction, result.Reason);
+			Assert.Equal(ReasonForPallet.Correction, result.Reason);
 		}
 		[Fact]
 		public void AddRecord_AddHistoryIssue_AddToList()
@@ -452,7 +452,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			var historyReversePickingRepo = new HistoryReversePickingRepo(DbContext);
 			var ct = CancellationToken.None;
 			//Act
-			await historyReversePickingRepo.AddHistoryReversePickingAsync(historyReversePicking, ct);
+			historyReversePickingRepo.AddHistoryReversePicking(historyReversePicking);
 			DbContext.SaveChanges();
 			//Assert
 			var resultList = DbContext.HistoryReversePickings.Where(m => m.PickingPalletId == pickingPallet.Id);

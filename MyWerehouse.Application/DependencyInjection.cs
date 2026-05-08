@@ -12,7 +12,7 @@ using MyWerehouse.Application.Common.Behaviors;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.IssuesServices;
-using MyWerehouse.Application.PickingPallets.Services;
+using MyWerehouse.Application.Picking.Services;
 using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Application.Services;

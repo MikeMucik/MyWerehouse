@@ -33,7 +33,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			{
 				return ReversePickingResult.Fail("Paleta źródłowa ma nieprawidłowy status.");
 			}
-			sourcePallet.AddHistory(ReasonMovement.ReversePicking, userId, sourcePallet.Location.ToSnapshot());
+			sourcePallet.AddHistory(ReasonForPallet.ReversePicking, userId, sourcePallet.Location.ToSnapshot());
 			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(sourcePallet.Id);
 			virtualPallet?.ChangeToAvailable(userId, sourcePallet.Location.ToSnapshot());
 			return ReversePickingResult.Ok("Dodano towar do palety źródłowej", reversePicking.ProductId, reversePicking.SourcePalletId);
@@ -57,7 +57,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				var addedAmount = Math.Min(quantityToAdded, freeSpace);
 				pallet.ProductsOnPallet.Single().IncreaseQuantity(addedAmount);
 				quantityToAdded -= addedAmount;
-				pallet.AddHistory(ReasonMovement.ReversePicking, userId, pallet.Location.ToSnapshot());
+				pallet.AddHistory(ReasonForPallet.ReversePicking, userId, pallet.Location.ToSnapshot());
 			}
 			return ReversePickingResult.Ok("Dodano towar.", pallets); //tu potrzebna pełna rozpiska ile towaru na daną paletę
 		}

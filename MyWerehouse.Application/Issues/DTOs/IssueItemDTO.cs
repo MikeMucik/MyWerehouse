@@ -10,13 +10,15 @@ using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.DTOs
 {
-	public record IssueItemDTO :IMapFrom<IssueItem>
-	{
-		//public int IssueId { get; set; }
-		//public Guid IssueId { get; set; }
+	public record IssueItemDTO : IMapFrom<IssueItem> //TODO Update/Read
+	{		
 		public int IssueNumber { get; set; }
 		public Guid ProductId { get; set; }
 		public int Quantity { get; set; }
-		public DateOnly BestBefore { get; set; }		
+		public DateOnly BestBefore { get; set; }	
+		public void Mapping(Profile profile)
+		{
+			profile.CreateMap<IssueItem, IssueItemDTO>();
+		}
 	}
 }

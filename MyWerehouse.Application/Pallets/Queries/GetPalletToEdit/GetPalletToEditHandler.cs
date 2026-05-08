@@ -11,18 +11,18 @@ using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 {
-	public class GetPalletToEditHandler(IPalletRepo palletRepo, IMapper mapper) : IRequestHandler<GetPalletToEditQuery, AppResult< UpdatePalletDTO>>
+	public class GetPalletToEditHandler(IPalletRepo palletRepo, IMapper mapper) : IRequestHandler<GetPalletToEditQuery, AppResult<EditPalletDTO>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMapper _mapper = mapper;
 
-		public async Task<AppResult<UpdatePalletDTO>> Handle(GetPalletToEditQuery request, CancellationToken ct)
+		public async Task<AppResult<EditPalletDTO>> Handle(GetPalletToEditQuery request, CancellationToken ct)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
-			if (pallet == null) return AppResult<UpdatePalletDTO>.Fail("Brak palety do update", ErrorType.NotFound);
-			
-			var palletDTO = _mapper.Map<UpdatePalletDTO>(pallet);
-			return AppResult<UpdatePalletDTO>.Success(palletDTO);
+			if (pallet == null) return AppResult<EditPalletDTO>.Fail("Brak palety do update", ErrorType.NotFound);
+
+			var palletDTO = _mapper.Map<EditPalletDTO>(pallet);
+			return AppResult<EditPalletDTO>.Success(palletDTO);
 		}
 	}
 }

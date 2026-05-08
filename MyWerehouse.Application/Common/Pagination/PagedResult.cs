@@ -9,7 +9,7 @@ namespace MyWerehouse.Application.Common.Pagination
 {
 	public class PagedResult<T>
 	{
-		public IReadOnlyList<T> Dtos { get; init; } = new List<T>();
+		public IReadOnlyList<T> Items { get; init; } = new List<T>();
 		public int CurrentPage { get; init; }
 		public int PageSize { get; init; }
 		public int TotalCount { get; init; }

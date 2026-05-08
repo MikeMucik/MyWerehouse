@@ -21,6 +21,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 		public readonly ClientService _clientService;
 		public readonly IClientRepo _clientRepo;
 		public readonly IReceiptRepo _receiptRepo;
+		protected readonly IIssueRepo _issueRepo;
 		protected readonly IValidator<AddressDTO> _addressValidator; // Zadeklaruj
 		protected readonly IValidator<UpdateClientDTO> _updateClientValidator; // Zadeklaruj
 		protected readonly IValidator<ClientDTO> _addClientValidator; // Zadeklaruj
@@ -31,10 +32,11 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 				.Options;
 			_clientRepo = new ClientRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
+			_issueRepo = new IssueRepo(_context);
 			_addressValidator = new AddressDTOValidation();
 			_addClientValidator = new AddClientDTOValidation(_addressValidator);	
 			_updateClientValidator = new UpdateClientDTOValidation(_addressValidator);
-			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo, _context,
+			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo,_issueRepo, _context,
 				_addClientValidator, _updateClientValidator
 								   );
 		}

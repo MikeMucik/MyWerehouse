@@ -6,7 +6,7 @@ using MyWerehouse.Application.Issues.Commands.CompletedIssue;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.Commands.DeleteIssue;
 using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
-using MyWerehouse.Application.Issues.Commands.UpdateIssue;
+using MyWerehouse.Application.Issues.Commands.ModifyIssue;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
@@ -46,7 +46,7 @@ namespace MyWerehouse.Server.Controllers
 
 		// Update - wiele rozwiązań więc POST
 		[HttpPost("update")]
-		public async Task<IActionResult> Update(UpdateIssueCommand command)
+		public async Task<IActionResult> Update(ModifyIssueCommand command)
 		{
 			var result = await _mediator.Send(command);
 			return result.ToActionResult();
@@ -106,7 +106,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Lista palet do "zdjęcia" dla operatora wózka
 		[HttpGet("{id}/forOperator")]
-		public async Task<IActionResult> ListPalletsForTheForklift(Guid id)
-			 => (await _mediator.Send(new PalletsToTakeOffListQuery(id))).ToActionResult();	
+		public async Task<IActionResult> ListPalletsForTheForklift(PalletsToTakeOffListQuery query)
+			 => (await _mediator.Send(query)).ToActionResult();	
 	}
 }

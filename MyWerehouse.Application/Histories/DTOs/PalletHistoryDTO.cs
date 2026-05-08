@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 	{
 		public string Id { get; set; }
 		public DateTime DateReceived { get; set; }
-		public ICollection<PalletMovementDTO> PalletMovementsDTO { get; set; } = new List<PalletMovementDTO>();
+		public ICollection<HistoryPalletDTO> PalletMovementsDTO { get; set; } = new List<HistoryPalletDTO>();
 		public int? ReceiptId { get; set; }
 		public int? IssueId { get; set; }
 		public void Mapping(Profile profile)

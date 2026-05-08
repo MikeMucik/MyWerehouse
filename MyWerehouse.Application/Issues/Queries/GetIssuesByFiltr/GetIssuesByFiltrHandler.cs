@@ -10,10 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr
 {
@@ -23,16 +20,13 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr
 		private readonly IMapper _mapper = mapper;
 		public async Task<AppResult<PagedResult<IssueDTO>>> Handle(GetIssuesByFiltrQuery request, CancellationToken ct)
 		{
-			var issues = _issueRepo.GetIssuesByFilter(request.Filtr);
+			var issues = _issueRepo.GetIssuesByFilter(request.Filtr)
+				.AsNoTracking();
 			var issueOrdered = issues.OrderBy(i => i.Id);
-			var result = await issueOrdered.ToPagedResultAsync<Issue, IssueDTO>(
-				_mapper.ConfigurationProvider,
-				request.CurrentPage,
-				request.PageSize,
-				ct);
-			
+			var result = await issueOrdered
+				.ProjectTo<IssueDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync(request.CurrentPage,request.PageSize,ct);			
 			if (result.TotalCount == 0) return AppResult<PagedResult<IssueDTO>>.Fail("Brak zleceń o zadanych parametrach", ErrorType.NotFound);
-
 			return AppResult<PagedResult<IssueDTO>>.Success(result);
 		}
 	}

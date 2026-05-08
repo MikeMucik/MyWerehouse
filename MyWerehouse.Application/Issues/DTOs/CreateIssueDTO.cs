@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.DTOs
 {
-	public class CreateIssueDTO : IMapFrom<Issue>
+	public class CreateIssueDTO
 	{
 		public Guid Id { get; set; }
 		public int IssueNumber { get; set; }

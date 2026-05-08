@@ -31,22 +31,25 @@ namespace MyWerehouse.Application.Services
 		private readonly IValidator<ClientDTO> _addClientValidator;
 		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
 		private readonly WerehouseDbContext _werehouseDbContext;
+		private readonly IIssueRepo _issueRepo;
 		public ClientService(
 			IClientRepo clientRepo,
 			IMapper mapper,
 			IReceiptRepo receiptRepo,
+			IIssueRepo issueRepo,
 			WerehouseDbContext werehouseDbContext,
 			IValidator<ClientDTO>? addClientValidator = null
-			,IValidator<UpdateClientDTO>? updateClientValidator = null
+			, IValidator<UpdateClientDTO>? updateClientValidator = null
 			)
 		{
 			_clientRepo = clientRepo;
 			_mapper = mapper;
 			_receiptRepo = receiptRepo;
+			_issueRepo = issueRepo;
 			_werehouseDbContext = werehouseDbContext;
 			_addClientValidator = addClientValidator;
 			_updateClientValidator = updateClientValidator;
-		}		
+		}
 		public ClientService(
 			IClientRepo clientRepo,
 			IMapper mapper)
@@ -69,14 +72,19 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<AppResult<Unit>> DeleteClientAsync(int id)
 		{
-			var filter = new IssueReceiptSearchFilter
+			var filter = new ClientSearchFilter
 			{
-				ClientId = id
+				Id = id
 			};
-			var client = await _clientRepo.GetClientByIdAsync(id);// ?? throw new DomainException($"Klient o numerze {id} nie istnieje.");
+			var client = await _clientRepo.GetClientByIdAsync(id);
 			if (client == null) return AppResult<Unit>.Fail($"Klient o numerze {id} nie istnieje.", ErrorType.NotFound);
-			var receipt = _receiptRepo.GetReceiptByFilter(filter);
-			if (!await receipt.AnyAsync())
+			var filterReceipt = new IssueReceiptSearchFilter
+			{
+				ClientId = filter.Id
+			};
+			var receipt = _receiptRepo.GetReceiptByFilter(filterReceipt);
+			var issue = _issueRepo.GetIssuesByFilter(filterReceipt);
+			if (!await receipt.AnyAsync() && !await issue.AnyAsync())
 			{
 				_clientRepo.DeleteClient(client);
 			}
@@ -92,12 +100,12 @@ namespace MyWerehouse.Application.Services
 			var client = await _clientRepo.GetClientByIdAsync(id);
 			if (client == null) throw new ArgumentException($"Brak klienta o numerze {id}");
 			var clientDTO = _mapper.Map<ClientDTO>(client);
-			return AppResult<ClientDTO>.Success( clientDTO);
+			return AppResult<ClientDTO>.Success(clientDTO);
 		}
 		public async Task<AppResult<Unit>> UpdateClientAsync(UpdateClientDTO updatedClient)
 		{
 			var existingClient = await _clientRepo.GetClientByIdAsync(updatedClient.Id);
-			if(existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.");
+			if (existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.");
 			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);//do testów
 			if (!validationResult.IsValid)
 			{
@@ -116,54 +124,41 @@ namespace MyWerehouse.Application.Services
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);
 		}
+
 		public async Task<AppResult<DetailsOfClientDTO>> DetailsOfClientAsync(int id)
 		{
 			var client = await _clientRepo.GetClientByIdAsync(id);
 			if (client != null)
 			{
 				var clientToShow = _mapper.Map<DetailsOfClientDTO>(client);
-				return AppResult<DetailsOfClientDTO>.Success( clientToShow);
+				return AppResult<DetailsOfClientDTO>.Success(clientToShow);
 			}
 			else
 			{
 				return AppResult<DetailsOfClientDTO>.Fail($"Nieprawidłowy numer client {id}.", ErrorType.NotFound);
 			}
 		}
+
 		public async Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageSize, int pageNumber, ClientSearchFilter filter, CancellationToken ct)
 		{
 
 			var clients = _clientRepo.GetClients(filter);
 			var clientsOrdered = clients
 				.OrderBy(p => p.Id);
-			var result = await clientsOrdered.ToPagedResultAsync<Client, ClientDTO>(
-				_mapper.ConfigurationProvider,
-				pageNumber,
-				pageSize,
-				ct);
-			//	.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider);
-			//var clientsToShow = await clients
-			//	.Skip(pageSize * (pageNumber - 1))
-			//	.Take(pageSize)
-			//	.ToListAsync();
-			//var clientList = new ListClientsDTO()
-			//{
-			//	AddClients = clientsToShow,
-			//	PageSize = pageSize,
-			//	CurrentPage = pageNumber,
-			//	Count = await clients.CountAsync()
-			//};
-			return AppResult<PagedResult<ClientDTO>>.Success( result);
+			var result = await clientsOrdered
+				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync(pageNumber, pageSize, ct);
+
+			return AppResult<PagedResult<ClientDTO>>.Success(result);
 		}
 		public async Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageSize, int pageNumber, CancellationToken ct)
 		{
 			var clients = _clientRepo.GetAllClients();
-				var clientsOrdered = clients
-				.OrderBy(p => p.Id);
-			var result = await clientsOrdered.ToPagedResultAsync<Client, ClientDTO>(
-				_mapper.ConfigurationProvider,
-				pageNumber,
-				pageSize,
-				ct);
+			var clientsOrdered = clients
+			.OrderBy(p => p.Id);
+			var result = await clientsOrdered
+				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync(pageNumber, pageSize, ct);
 			return AppResult<PagedResult<ClientDTO>>.Success(result);
 		}
 	}

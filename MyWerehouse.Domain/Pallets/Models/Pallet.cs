@@ -31,7 +31,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public Location Location { get; private set; }//dodać kiedyś factory
 		public PalletStatus Status { get; private set; } = 0;
 		public ICollection<ProductOnPallet> ProductsOnPallet { get; private set; } = new List<ProductOnPallet>();
-		public ICollection<PalletMovement> PalletMovements { get; private set; } = new List<PalletMovement>();
+		public ICollection<HistoryPallet> PalletMovements { get; private set; } = new List<HistoryPallet>();
 		public Guid? ReceiptId { get; private set; }
 		public Receipt? Receipt { get; private set; }
 		public Guid? IssueId { get; private set; }
@@ -83,14 +83,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void CreateNewPalletFromReservePicking(int locationId, string snapShot, string userId)
 		{
 			Status = PalletStatus.InStock;
-			AddHistory(ReasonMovement.ReversePicking, userId, snapShot);
+			AddHistory(ReasonForPallet.ReversePicking, userId, snapShot);
 		}
 
 		public void AssignToWarehouse(int locationId, string snapShot, string userId)
 		{
 			var listProducts = this.CreateStockItem();
 			Status = PalletStatus.InStock;
-			AddHistory(ReasonMovement.New, userId, snapShot);
+			AddHistory(ReasonForPallet.New, userId, snapShot);
 			this.AddDomainEvent(new ChangeStockNotification(listProducts));
 		}
 
@@ -98,7 +98,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			Status = palletStatus;
 			this.UpdateProductChanges(products);
-			AddHistory(ReasonMovement.Correction, userId, snapShot);
+			AddHistory(ReasonForPallet.Correction, userId, snapShot);
 		}
 
 		public void UpdateProductChanges(List<ProductOnPallet> updatedProducts)
@@ -176,7 +176,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				throw new InvalidPalletStatusException(Id);
 			}
 			IssueId = issueId;
-			AddHistory(ReasonMovement.ToLoad, userId, snapShot);
+			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
 		}
 
 		public void AssignToIssue(Guid issueId, string userId, string snapShot)
@@ -184,17 +184,17 @@ namespace MyWerehouse.Domain.Pallets.Models
 			//może invarianty !!
 			Status = PalletStatus.ToIssue;
 			IssueId = issueId;
-			AddHistory(ReasonMovement.ToLoad, userId, snapShot);
+			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
 		}
 
 		public void DetachFromReceipt(string userId, string snapShot)
 		{
 			Status = PalletStatus.Cancelled;
 			ReceiptId = null;
-			AddHistory(ReasonMovement.ToLoad, userId, snapShot);
+			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
 		}
 
-		public void DetachToIssue(string userId, string snapShot, ReasonMovement reason)
+		public void DetachToIssue(string userId, string snapShot, ReasonForPallet reason)
 		{
 			IssueId = null;
 			Status = PalletStatus.Available;
@@ -204,7 +204,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void AssignToPicking(string userId, string snapShot)
 		{
 			Status = PalletStatus.ToPicking;
-			AddHistory(ReasonMovement.Picking, userId, snapShot);
+			AddHistory(ReasonForPallet.Picking, userId, snapShot);
 		}
 
 		public void AssignToReceipt(Guid receiptId, string snapshot, string userId)
@@ -212,10 +212,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 			if (Status == PalletStatus.Receiving) throw new AlreadyAssignedException(Id);
 			ReceiptId = receiptId;
 			Status = PalletStatus.Receiving;
-			AddHistory(ReasonMovement.Received, userId, snapshot);
+			AddHistory(ReasonForPallet.Received, userId, snapshot);
 		}
 
-		public void ToArchive(string userId, ReasonMovement reason, string snapShot)
+		public void ToArchive(string userId, ReasonForPallet reason, string snapShot)
 		{
 			//invarianty ?? 
 			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusException(Id);
@@ -232,7 +232,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			//var oldLocationId = this.LocationId;
 			//var oldLocationSnapshot = this.Location.ToSnopShot();
 			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
-				oldLocationId, oldLocationSnapShot, newLocationId, newLocationSnapShot, ReasonMovement.Moved, userId, this.Status, BuildMovementDetails()));
+				oldLocationId, oldLocationSnapShot, newLocationId, newLocationSnapShot, ReasonForPallet.Moved, userId, this.Status, BuildMovementDetails()));
 			this.LocationId = newLocationId;
 		}
 
@@ -242,10 +242,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 				throw new InvalidPalletStatusException(Id);
 			Status = PalletStatus.ToIssue;
 			IssueId = issueId;
-			AddHistory(ReasonMovement.ToLoad, userId, snapShot);
+			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
 		}
 
-		public void AddHistory(ReasonMovement reason, string userId, string snapShot)
+		public void AddHistory(ReasonForPallet reason, string userId, string snapShot)
 		{
 			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				LocationId, snapShot, LocationId, snapShot, reason, userId, this.Status, BuildMovementDetails()));
@@ -269,7 +269,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				return false;
 			return true;
 		}
-		public void CkeckIfToArchive(string userId, ReasonMovement reason, string snapShot)
+		public void CkeckIfToArchive(string userId, ReasonForPallet reason, string snapShot)
 		{
 			if (ProductsOnPallet.All(p => p.Quantity == 0))
 			{
@@ -325,10 +325,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 			return result;
 		}
 
-		private IReadOnlyCollection<PalletMovementDetail> BuildMovementDetails()
+		private IReadOnlyCollection<HistoryPalletDetail> BuildMovementDetails()
 		{
 			return ProductsOnPallet
-				.Select(p => new PalletMovementDetail
+				.Select(p => new HistoryPalletDetail
 				(
 					p.ProductId,
 					p.Quantity

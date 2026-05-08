@@ -15,7 +15,7 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 	{	
 		private readonly IHistoryIssueRepo _historyIssueRepo = historyIssueRepo;
 
-		public async Task Handle(AddHistoryForIssueNotification request, CancellationToken cancellationToken)
+		public Task Handle(AddHistoryForIssueNotification request, CancellationToken cancellationToken)
 		{		
 			var details = request.DetailDtos;
 			var history = new HistoryIssue
@@ -26,7 +26,6 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 				StatusAfter = request.IssueStatus,
 				PerformedBy = request.UserId,
 				DateTime = DateTime.UtcNow,
-				//??issue.PerformedBy,
 				Details = details
 				.Select(d=> new HistoryIssueDetail
 				{
@@ -46,7 +45,8 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 				})
 				.ToList(),				
 			};
-			await _historyIssueRepo.AddHistoryIssueAsync(history, cancellationToken);			
+			_historyIssueRepo.AddHistoryIssue(history);
+			return Task.CompletedTask;
 		}
 	}
 }

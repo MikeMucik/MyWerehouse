@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="PickingPallets\Commands\AddPickingTaskToIssue\**" />
-    <EmbeddedResource Remove="PickingPallets\Commands\AddPickingTaskToIssue\**" />
-    <None Remove="PickingPallets\Commands\AddPickingTaskToIssue\**" />
+    <Compile Remove="Picking\Commands\AddPickingTaskToIssue\**" />
+    <EmbeddedResource Remove="Picking\Commands\AddPickingTaskToIssue\**" />
+    <None Remove="Picking\Commands\AddPickingTaskToIssue\**" />
   </ItemGroup>
 
 	<ItemGroup>
@@ -41,7 +41,6 @@
 
   <ItemGroup>
     <Folder Include="Inventories\Commands\ChangeQuantity\" />
-    <Folder Include="Products\Queries\" />
   </ItemGroup>
 
 </Project>

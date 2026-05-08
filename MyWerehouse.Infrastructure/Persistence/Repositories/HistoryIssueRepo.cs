@@ -22,11 +22,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			_werehouseDbContext.HistoryIssues.Add(issue);
 		}
 
-		public async Task AddHistoryIssueAsync(HistoryIssue issue, CancellationToken cancellationToken)
-		{
-			await _werehouseDbContext.HistoryIssues.AddAsync(issue, cancellationToken);
-		}
-
 		public IQueryable<HistoryIssue> GetAllHistoryIssues()
 		{
 			return _werehouseDbContext.HistoryIssues

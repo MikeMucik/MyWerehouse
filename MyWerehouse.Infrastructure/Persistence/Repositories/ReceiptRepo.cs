@@ -40,12 +40,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)
 		{
-			var result = _werehouseDbContext.Receipts
-				//.AsNoTracking()
-				//.Include(r => r.Client)
-				//.Include(r => r.Pallets)
-				//	.ThenInclude(rp => rp.ProductsOnPallet)
-				//		.ThenInclude(rpp => rpp.Product)
+			var result = _werehouseDbContext.Receipts				
 				.AsQueryable();
 			if (filter.ClientId > 0)
 			{

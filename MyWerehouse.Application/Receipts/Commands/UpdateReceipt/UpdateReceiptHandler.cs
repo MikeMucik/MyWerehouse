@@ -50,13 +50,13 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			}
 			if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
 				return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
-			foreach (var item in request.DTO.Pallets)
-			{
-				if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
-				{
-					return AppResult<Unit>.Fail($"Paleta o numerze {item.PalletNumber} należy do innego przyjęcia.", ErrorType.Conflict);
-				}
-			}
+			//foreach (var item in request.DTO.Pallets)
+			//{
+			//	if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
+			//	{
+			//		return AppResult<Unit>.Fail($"Paleta o numerze {item.PalletNumber} należy do innego przyjęcia.", ErrorType.Conflict);
+			//	}
+			//}
 			//List palet do usunięcia z bazy danych 
 			var incomingPalletsIds = request.DTO.Pallets
 				.Select(p => p.Id)
@@ -89,7 +89,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 
 				pallet.UpdateProductChanges(productsForPallet);
 				pallet.ChangeStatus(PalletStatus.Receiving);
-				pallet.AddHistory(ReasonMovement.Correction, request.UserId, pallet.Location.ToSnapshot());
+				pallet.AddHistory(ReasonForPallet.Correction, request.UserId, pallet.Location.ToSnapshot());
 			}
 			//Dodanie nowych palet - Adding new palets
 			var palletsAdded = request.DTO.Pallets

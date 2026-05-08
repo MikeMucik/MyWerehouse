@@ -14,7 +14,7 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 	{		
 		private readonly IHistoryReceiptRepo _historyReceiptRepo = historyReceiptRepo;
 
-		public async Task Handle(AddHistoryReceiptNotification request, CancellationToken ct)
+		public Task Handle(AddHistoryReceiptNotification request, CancellationToken ct)
 		{			
 			var details = request.DetailDtos ?? Enumerable.Empty<HistoryReceiptIssueDetailDto>();
 			var history = new HistoryReceipt
@@ -35,7 +35,8 @@ namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 				})
 				.ToList() ?? new List<HistoryReceiptDetail>()
 			};
-			await _historyReceiptRepo.AddHistoryReceiptAsync(history, ct);
+			_historyReceiptRepo.AddHistoryReceipt(history);
+			return Task.CompletedTask;
 		}
 	}
 }

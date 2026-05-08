@@ -9,9 +9,9 @@ using MyWerehouse.Domain.Histories.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Configuration
 {
-	public class PalletMovementConfiguration : IEntityTypeConfiguration<PalletMovement>
+	public class PalletMovementConfiguration : IEntityTypeConfiguration<HistoryPallet>
 	{
-		public void Configure(EntityTypeBuilder<PalletMovement> entity)
+		public void Configure(EntityTypeBuilder<HistoryPallet> entity)
 		{
 			entity.HasKey(e => e.Id);
 			entity.Property(x => x.Id).ValueGeneratedOnAdd();

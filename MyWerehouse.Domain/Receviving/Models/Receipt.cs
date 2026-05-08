@@ -144,7 +144,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			foreach (var pallet in toReturn)
 			{
 				pallet.ChangeStatus(PalletStatus.InStock);
-				pallet.AddHistory(ReasonMovement.Received, userId, pallet.Location.ToSnapshot());
+				pallet.AddHistory(ReasonForPallet.Received, userId, pallet.Location.ToSnapshot());
 			}
 			ReceiptStatus = ReceiptStatus.Verified;
 			AddHistory(userId);

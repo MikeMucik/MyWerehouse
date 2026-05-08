@@ -11,15 +11,14 @@ using MyWerehouse.Domain.Pallets.Events;
 
 namespace MyWerehouse.Application.Pallets.Events.CreateMovement
 {
-	public class PalletHistoryHandler(IPalletMovementRepo palletMovementRepo) : INotificationHandler<PalletHistoryNotification>
+	public class PalletHistoryHandler(IHistoryPalletRepo palletMovementRepo) : INotificationHandler<PalletHistoryNotification>
 	{
-		private readonly IPalletMovementRepo _palletMovementRepo = palletMovementRepo;
+		private readonly IHistoryPalletRepo _palletMovementRepo = palletMovementRepo;
 
-		public async Task Handle(PalletHistoryNotification notification, CancellationToken cancellationToken)
+		public Task Handle(PalletHistoryNotification notification, CancellationToken cancellationToken)
 		{			
-			var movement = new PalletMovement
+			var movement = new HistoryPallet
 			{
-				//Id = notification.PalletId,
 				PalletId = notification.PalletId,
 				PalletNumber = notification.PalletNumber,
 				SourceLocationId = notification.SourceLocationId,
@@ -31,15 +30,16 @@ namespace MyWerehouse.Application.Pallets.Events.CreateMovement
 				MovementDate = DateTime.UtcNow,
 				PalletStatus = notification.PalletStatus,
 				
-				PalletMovementDetails = notification.Details
-				.Select(d => new PalletMovementDetail
+				HistoryPalletDetails = notification.Details
+				.Select(d => new HistoryPalletDetail
 				 {
 					 ProductId = d.ProductId,
 					 Quantity = d.Quantity,
 				 })
 				.ToList(),
 			};
-			await _palletMovementRepo.AddPalletMovementAsync(movement, cancellationToken);
+			_palletMovementRepo.AddHistoryPallet(movement);
+			return Task.CompletedTask;
 		}
 	}
 }

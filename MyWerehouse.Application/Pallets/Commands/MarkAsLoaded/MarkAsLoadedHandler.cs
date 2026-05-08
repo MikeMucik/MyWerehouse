@@ -35,7 +35,7 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 			if (!allowedStatuses.Contains(pallet.Status))
 				return AppResult<Unit>.Fail("Paleta nie ma statusu do załadowania");
 			pallet.ChangeStatus(PalletStatus.Loaded);
-			pallet.AddHistory(ReasonMovement.Loaded, request.UserId, pallet.Location.ToSnapshot());
+			pallet.AddHistory(ReasonForPallet.Loaded, request.UserId, pallet.Location.ToSnapshot());
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Paleta {request.PalletId} została załadowana.");
 		}

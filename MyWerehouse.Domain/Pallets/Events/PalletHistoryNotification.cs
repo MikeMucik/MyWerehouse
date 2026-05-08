@@ -17,8 +17,8 @@ namespace MyWerehouse.Domain.Pallets.Events
 	string SourceSnapshot,
 	int DestinationLocationId,
 	string DestinationSnapshot,
-	ReasonMovement ReasonMovement,
+	ReasonForPallet ReasonMovement,
 	string UserId,
 	PalletStatus PalletStatus,
-	IReadOnlyCollection<PalletMovementDetail> Details) : IDomainEvent;
+	IReadOnlyCollection<HistoryPalletDetail> Details) : IDomainEvent;
 }

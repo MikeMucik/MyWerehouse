@@ -20,7 +20,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public int InitialPalletQuantity { get; private set; }
 		public int LocationId { get; private set; }//needed??
 		public Location Location { get; private set; }//needed??
-		public DateTime DateMoved { get;private set; }
+		public DateTime DateMoved { get;private set; }//utworzenie
 		public ICollection<PickingTask> PickingTasks { get; private set; } //= new List<PickingTask>();
 		public ICollection<HistoryPicking> HistoryPicking { get;private set; } = new List<HistoryPicking>();
 		[NotMapped]
@@ -56,7 +56,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
 			{
 				Pallet.ChangeStatus(PalletStatus.Available);
-				Pallet.AddHistory(Histories.Models.ReasonMovement.ReversePicking, userId, snapShot);
+				Pallet.AddHistory(Histories.Models.ReasonForPallet.ReversePicking, userId, snapShot);
 			}
 		}
 	}

@@ -11,6 +11,6 @@ using MyWerehouse.Domain.Histories.Filters;
 
 namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 {
-	public record GetPalletHistoryQuery(PalletMovementSearchFilter Filter, Guid PalletId, int Page = 1, int PageSize = 50,
-		DateTime? From = null, DateTime? To = null) : IRequest<AppResult<PagedResult<PalletHistoryDTO>>>;
+	public record GetPalletHistoryQuery(HistoryPalletSearchFilter Filter, Guid PalletId, int Page = 1, int PageSize = 50
+		) : IRequest<AppResult<PagedResult<PalletHistoryDTO>>>;
 }

@@ -55,10 +55,6 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			//if (string.IsNullOrEmpty(categoryDTO.Name))
-			//{
-			//	throw new NotFoundCategoryException("Brak nazwy kategorii.");
-			//}
 			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) != null)
 			{
 				return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);				
@@ -68,6 +64,7 @@ namespace MyWerehouse.Application.Services
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value, "Dodano kategorię.");
 		}
+
 		public async Task<AppResult<Unit>> DeleteCategoryAsync(int id)
 		{
 			var category = await _categoryRepo.GetCategoryByIdAsync(id);
@@ -96,10 +93,6 @@ namespace MyWerehouse.Application.Services
 				{
 					throw new ValidationException(validationResult.Errors);
 				}
-			//if (string.IsNullOrEmpty(categoryDTO.Name))
-			//{
-			//	throw new NotFoundCategoryException("Brak nazwy kategorii - proszę podać");
-			//}
 			var existingCategory = await _categoryRepo.GetCategoryByIdAsync(categoryDTO.Id);
 			if (existingCategory != null)
 			{
@@ -114,14 +107,15 @@ namespace MyWerehouse.Application.Services
 			}
 			else return AppResult<Unit>.Fail($"Brak kategori o numerze {existingCategory.Id}", ErrorType.NotFound);
 		}
+
 		public async Task<AppResult<PagedResult<CategoryDTO>>> GetCategoriesAsync(int pageSize, int pageNumber, CancellationToken ct)
 		{
 			var categories = _categoryRepo.GetAllCategories();
 			var orderedCategories = categories
 				.OrderBy(c => c.Name);
-			var result = await orderedCategories.ToPagedResultAsync<Category, CategoryDTO>(
-				_mapper.ConfigurationProvider,
-				pageNumber, pageSize, ct);			
+			var result = await orderedCategories
+				.ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync(pageNumber, pageSize, ct);			
 			return AppResult<PagedResult<CategoryDTO>>.Success(result);
 		}
 

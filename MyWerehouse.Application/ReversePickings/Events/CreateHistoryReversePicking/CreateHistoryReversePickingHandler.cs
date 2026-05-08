@@ -23,18 +23,28 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 		}
 		public async Task Handle(CreateHistoryReversePickingNotification notification, CancellationToken ct)
 		{
-			Pallet? sourcePallet = null;
-			if (notification.PalletSourceId != null)
-			{
-				sourcePallet = await _palletRepo.GetPalletByIdAsync(notification.PalletSourceId.Value);
-			}
-			Pallet? destinationPallet = null;
-			if (notification.PalletDestinationId != null)
-			{
-				destinationPallet = await _palletRepo.GetPalletByIdAsync(notification.PalletDestinationId.Value);
-			}
-			Pallet pickingPallet = await _palletRepo.GetPalletByIdAsync(notification.PickingPalletId);
-			
+			var sourceTask = notification.PalletSourceId != null
+				? _palletRepo.GetPalletByIdAsync(notification.PalletSourceId.Value)
+				: Task.FromResult<Pallet?>(null);
+			var destinationTask = notification.PalletDestinationId != null
+				? _palletRepo.GetPalletByIdAsync(notification.PalletDestinationId.Value)
+				: Task.FromResult<Pallet?>(null);
+			var pickingTask = _palletRepo.GetPalletByIdAsync(notification.PickingPalletId);
+			await Task.WhenAll(sourceTask, destinationTask, pickingTask);
+			//Pallet? sourcePallet = null;
+			//if (notification.PalletSourceId != null)
+			//{
+			//	sourcePallet = await _palletRepo.GetPalletByIdAsync(notification.PalletSourceId.Value);
+			//}
+			//Pallet? destinationPallet = null;
+			//if (notification.PalletDestinationId != null)
+			//{
+			//	destinationPallet = await _palletRepo.GetPalletByIdAsync(notification.PalletDestinationId.Value);
+			//}
+			//Pallet pickingPallet = await _palletRepo.GetPalletByIdAsync(notification.PickingPalletId);
+			var sourcePallet = sourceTask.Result;
+			var destinationPallet = destinationTask.Result;
+			var pickingPallet = pickingTask.Result;
 				var history = new HistoryReversePicking
 				{
 					ReversePickingId = notification.ReversePickingId,
@@ -53,7 +63,7 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 					StatusBefore = notification.StatusBefore,
 					StatusAfter = notification.StatusAfter,
 				};
-			await _historyReversePickingRepo.AddHistoryReversePickingAsync(history, ct);
+			_historyReversePickingRepo.AddHistoryReversePicking(history);
 		}
 	}
 }

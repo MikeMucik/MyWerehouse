@@ -40,8 +40,8 @@ namespace MyWerehouse.Infrastructure.Persistence
 		public DbSet<IssueItem> IssueItems { get; set; }
 		public DbSet<Location> Locations { get; set; }
 		public DbSet<Pallet> Pallets { get; set; }
-		public DbSet<PalletMovement> PalletMovements { get; set; }
-		public DbSet<PalletMovementDetail> PalletMovementDetails { get; set; }
+		public DbSet<HistoryPallet> HistoryPallet { get; set; }
+		public DbSet<HistoryPalletDetail> HistoryPalletDetails { get; set; }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<ProductDetail> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }

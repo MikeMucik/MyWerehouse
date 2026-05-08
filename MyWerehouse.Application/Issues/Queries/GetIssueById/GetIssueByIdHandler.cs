@@ -26,10 +26,8 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
 				return AppResult<IssueDTO>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
-			//if (issue == null) { throw new NotFoundIssueException(request.IssueId); }
 			var issueDTO = _mapper.Map<IssueDTO>(issue);
 			return AppResult<IssueDTO>.Success(issueDTO);
-			//return issueDTO;
 		}
 	}
 }

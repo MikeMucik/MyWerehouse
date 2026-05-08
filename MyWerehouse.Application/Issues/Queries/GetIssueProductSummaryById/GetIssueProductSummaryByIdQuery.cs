@@ -9,5 +9,5 @@ using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 {
-	public record GetIssueProductSummaryByIdQuery(Guid IssueId) : IRequest<AppResult<UpdateIssueDTO>>;
+	public record GetIssueProductSummaryByIdQuery(Guid IssueId) : IRequest<AppResult<ModifyIssueDTO>>;
 }

@@ -34,15 +34,25 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 
 			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 			if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {rampNumber} nie została znaleziona", ErrorType.NotFound);
-
+			//Dla jednego produktu
 			var pallet = Pallet.Create(newId, rampNumber);
-			//Jest dla wielu choć początkowe założenia mówiły o jednym produkcie na palecie - szerszse podejście
-			foreach (var dto in request.DTO.ProductsOnPallet)
+			if (request.DTO.ProductsOnPallet.Count != 1)
 			{
-				if (!await _productRepo.IsExistProduct(dto.ProductId))
-					return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
-				pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
+				return AppResult<Unit>.Fail($"Paleta przyjmowana może mieć tylko jeden produkt", ErrorType.Conflict);
 			}
+			var product = request.DTO.ProductsOnPallet.Single();
+
+			if (!await _productRepo.IsExistProduct(product.ProductId))
+				return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
+
+			pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
+			//Dla wielu - szerszse podejście
+			//foreach (var dto in request.DTO.ProductsOnPallet)
+			//{
+			//	if (!await _productRepo.IsExistProduct(dto.ProductId))
+			//		return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
+			//	pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
+			//}
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToReceipt(receipt.Id, snapShot, request.DTO.UserId);
 			_palletRepo.AddPallet(pallet);

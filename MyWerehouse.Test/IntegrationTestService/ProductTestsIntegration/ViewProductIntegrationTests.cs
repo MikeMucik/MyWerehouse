@@ -68,8 +68,8 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			var result = await _productService.GetProductsAsync(pageSize, pageNumber, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Result.Dtos.Count);
-			Assert.Equal("Test", result.Result.Dtos.First().Name);
+			Assert.Equal(2, result.Result.Items.Count);
+			Assert.Equal("Test", result.Result.Items.First().Name);
 		}
 		[Fact]
 		public async Task ShowProducts_FindProductsByFilterAsync_ReturnList()
@@ -86,8 +86,8 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Result.Dtos.Count);
-			Assert.Equal("Test", result.Result.Dtos.First().Name);
+			Assert.Equal(2, result.Result.Items.Count);
+			Assert.Equal("Test", result.Result.Items.First().Name);
 		}
 		[Fact]
 		public async Task ShowNoProducts_FindProductsByFilterAsync_ReturnEmptyList()
@@ -104,7 +104,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ProductTestsIntegration
 			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter,ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Empty(result.Result.Dtos);
+			Assert.Empty(result.Result.Items);
 		}
 	}
 }

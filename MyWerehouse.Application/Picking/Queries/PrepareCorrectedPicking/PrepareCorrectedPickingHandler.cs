@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MediatR;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
+
+namespace MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking
+{
+	public class PrepareCorrectedPickingHandler(IPalletRepo palletRepo,
+		IPickingTaskRepo pickingTaskRepo) : IRequestHandler<PrepareCorrectedPickingQuery, AppResult<PrepareCorrectedPickingResult>>
+	{
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
+
+		public async Task<AppResult<PrepareCorrectedPickingResult>> Handle(PrepareCorrectedPickingQuery request, CancellationToken ct)
+		{
+			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
+			//Nie wyjątek bo to częsta sytuacja w rzeczywistości
+			if (pallet == null || pallet.Status == PalletStatus.Archived)
+			{
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Brak palety {request.PalletId} na stanie.");
+			}
+
+			if (pallet.Status != PalletStatus.ToPicking)
+			{
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Paleta {request.PalletId} nie jest w pickingu, zmień status.");
+			}
+
+			if (pallet.Status == PalletStatus.Archived || pallet.Status == PalletStatus.OnHold)
+			{
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Paleta {request.PalletId} jest zablokowona, brak możliwości operacji.");
+			}
+
+			var product = pallet.ProductsOnPallet.FirstOrDefault();
+			if (product == null)
+			{
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Paleta {request.PalletId} jest pusta.");
+			}
+
+			// Logika wyszukiwania pasujących zleceń			
+			var timeFrom = DateTime.UtcNow;
+			var timeTo = DateTime.UtcNow.AddDays(1);
+			var pickingTasksAll = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);
+			var pickingTasks = pickingTasksAll.Where(p => p.PickingStatus == PickingStatus.Allocated);
+			var grouped = pickingTasks
+				.GroupBy(a => a.IssueId)
+				.Select(g => new IssueOptions
+				{
+					IssueId = g.Key,
+					QunatityToDo = g.Sum(a => a.RequestedQuantity)
+				})
+				.ToList();
+			var result = PrepareCorrectedPickingResult.RequiresOrder(
+				productInfo: $"{product.PalletId} : {product.Quantity}",
+				//productInfo: new ProductInfoDto(product.PalletId, product.Quantity)
+				issueOptions: grouped,
+				message: "Podaj numer zamówienia by kontynuować");
+			return AppResult<PrepareCorrectedPickingResult>.Success(result);
+		}
+	}
+}

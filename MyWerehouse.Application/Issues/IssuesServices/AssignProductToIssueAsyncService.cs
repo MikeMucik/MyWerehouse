@@ -9,7 +9,7 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.PickingPallets.Services;
+using MyWerehouse.Application.Picking.Services;
 using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;

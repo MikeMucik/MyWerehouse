@@ -9,14 +9,14 @@ using MyWerehouse.Domain.Histories.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Configuration
 {
-	public class PalletMovementDetailConfiguration : IEntityTypeConfiguration<PalletMovementDetail>
+	public class PalletMovementDetailConfiguration : IEntityTypeConfiguration<HistoryPalletDetail>
 	{
-		public void Configure(EntityTypeBuilder<PalletMovementDetail> entity)
+		public void Configure(EntityTypeBuilder<HistoryPalletDetail> entity)
 		{
 
-			entity.HasOne(md => md.PalletMovement)
-			.WithMany(pm => pm.PalletMovementDetails)
-			.HasForeignKey(md => md.PalletMovementId);
+			entity.HasOne(md => md.HistoryPallet)
+			.WithMany(pm => pm.HistoryPalletDetails)
+			.HasForeignKey(md => md.HistoryPalletId);
 		}
 	}
 }

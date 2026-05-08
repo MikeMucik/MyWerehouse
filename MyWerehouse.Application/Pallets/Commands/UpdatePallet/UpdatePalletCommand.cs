@@ -9,5 +9,5 @@ using MyWerehouse.Application.Pallets.DTOs;
 
 namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
-	public record UpdatePalletCommand(UpdatePalletDTO UpdatingPallet, string UserId):IRequest<AppResult<Unit>>;
+	public record UpdatePalletCommand(EditPalletDTO UpdatingPallet, string UserId):IRequest<AppResult<Unit>>;
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Models;
@@ -83,26 +84,39 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 		}
 
-		
-		//public async Task<List<PickingTask>> GetPickingTaskListAsync(int palletPickingId, DateTime pickingDate)
-		//{
-		//	var pickingTask = await _werehouseDbContext.PickingTasks
-		//		.Include(a => a.PickingPallet)
-		//			.ThenInclude(b => b.Pallet)
-		//				.ThenInclude(c => c.ProductsOnPallet)
-		//		.Where(p =>
-		//			p.PickingPalletId == palletPickingId &&
-		//			p.Issue.IssueDateTimeCreate > pickingDate.AddDays(-7) &&
-		//			p.Issue.IssueDateTimeSend != null &&
-		//			(
-		//				p.Issue.IssueDateTimeSend.Value.Date == pickingDate.Date ||
-		//				p.Issue.IssueDateTimeSend.Value.Date == pickingDate.AddDays(-1).Date
-		//			) &&
-		//			p.PickingStatus == PickingStatus.Allocated)
-		//		.ToListAsync();
-		//	return pickingTask;
-		//}
-
-
+		public IQueryable<PickingTaskFlat> GetPickingTaskFlats(DateOnly start, DateOnly end)
+		{
+			var list = _werehouseDbContext.PickingTasks
+				.AsNoTracking()
+				.Where(x => x.PickingDay <= end &&
+				x.PickingDay >= start &&
+				(x.PickingStatus == PickingStatus.Allocated ||
+				x.PickingStatus == PickingStatus.Available))
+				.Select(q=> new
+				{					
+					q.Issue.ClientId,
+					q.IssueId,
+					q.Issue.IssueNumber,
+					q.ProductId,
+					q.RequestedQuantity
+				})
+				.Where(p=>p.ProductId != Guid.Empty)
+				.GroupBy(p=> new
+				{
+					p.ClientId,
+					p.IssueId,
+					p.IssueNumber,
+					p.ProductId,
+				})
+				.Select(p=> new PickingTaskFlat
+				{
+					ClientId = p.Key.ClientId,
+					IssueId = p.Key.IssueId,
+					IssueNumber = p.Key.IssueNumber,
+					ProductId = p.Key.ProductId,
+					Quantity = p.Sum(q=>q.RequestedQuantity)
+				});
+			return list;
+		}		
 	}
 }

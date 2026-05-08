@@ -91,11 +91,11 @@ namespace MyWerehouse.Domain.Issuing.Models
 			AddHistory(userId);
 			foreach (var pallet in Pallets)
 			{
-				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonMovement.CancelIssue);
+				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
 			}
 			foreach (var task in PickingTasks)
 			{
-				task.Cancel(userId, IssueNumber);
+				task.Cancel(userId);
 			}
 		}
 
@@ -126,7 +126,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
 			foreach (var pallet in toReturn)
 			{
-				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonMovement.Correction);
+				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.Correction);
 				Pallets.Remove(pallet);
 			}
 			return toReturn;
@@ -156,7 +156,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			foreach (var pallet in Pallets)
 			{
-				pallet.ToArchive(userId, ReasonMovement.Loaded, pallet.Location.ToSnapshot());
+				pallet.ToArchive(userId, ReasonForPallet.Loaded, pallet.Location.ToSnapshot());
 			}
 			IssueStatus = IssueStatus.Archived;
 			AddHistory(userId);
@@ -169,7 +169,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			PerformedBy = userId;
 			foreach (var pallet in Pallets)
 			{
-				pallet.AddHistory(ReasonMovement.Loaded, userId, pallet.Location.ToSnapshot());
+				pallet.AddHistory(ReasonForPallet.Loaded, userId, pallet.Location.ToSnapshot());
 			}
 			IssueStatus = IssueStatus.IsShipped;
 			AddHistory(userId);

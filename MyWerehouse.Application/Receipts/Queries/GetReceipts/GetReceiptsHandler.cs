@@ -15,24 +15,20 @@ using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceipts
 {
-	public class GetReceiptsHandler(IMapper mapper, IReceiptRepo receiptRepo) : IRequestHandler<GetReceiptsQuery, AppResult<PagedResult<ReceiptDTO>>>
+	public class GetReceiptsHandler(IMapper mapper, IReceiptRepo receiptRepo) : IRequestHandler<GetReceiptsByFiltrQuery, AppResult<PagedResult<ReceiptDTO>>>
 	{
 		private readonly IMapper _mapper = mapper;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
 
-		public async Task<AppResult<PagedResult<ReceiptDTO>>> Handle(GetReceiptsQuery request, CancellationToken ct)
+		public async Task<AppResult<PagedResult<ReceiptDTO>>> Handle(GetReceiptsByFiltrQuery request, CancellationToken ct)
 		{
-			var receipts = _receiptRepo.GetReceiptByFilter(request.Filter);
+			var receipts = _receiptRepo.GetReceiptByFilter(request.Filter)
+				.AsNoTracking();
 			var receiptsOrdered = receipts.OrderBy(r => r.Id);
-
-			var result = await receiptsOrdered.ToPagedResultAsync<Receipt, ReceiptDTO>(
-				_mapper.ConfigurationProvider,
-				request.CurrentPage,
-				request.PageSize,
-				ct);
-
+			var result = await receiptsOrdered
+				.ProjectTo<ReceiptDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync(request.CurrentPage,request.PageSize,ct);
 			if (result.TotalCount == 0) return AppResult<PagedResult<ReceiptDTO>>.Fail($"Brak przyjęć do wyświetlenia.", ErrorType.NotFound);
-
 			return AppResult<PagedResult<ReceiptDTO>>.Success(result);
 		}
 	}

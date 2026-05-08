@@ -1,16 +1,16 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyWerehouse.Application.PickingPallets.Commands.ClosePickingPallet;
-using MyWerehouse.Application.PickingPallets.Commands.DoPlannedPicking;
-using MyWerehouse.Application.PickingPallets.Commands.ExecuteEmergencyPicking;
-using MyWerehouse.Application.PickingPallets.Commands.ExecuteHandPicking;
-using MyWerehouse.Application.PickingPallets.Commands.FinishPlannedPickingPrepareToHandPicking;
-using MyWerehouse.Application.PickingPallets.Queries.GetListIssueToPicking;
-using MyWerehouse.Application.PickingPallets.Queries.GetListPickingPallet;
-using MyWerehouse.Application.PickingPallets.Queries.GetListToPicking;
-using MyWerehouse.Application.PickingPallets.Queries.PrepareCorrectedPicking;
-using MyWerehouse.Application.PickingPallets.Queries.ShowTaskToDo;
+using MyWerehouse.Application.Picking.Commands.ClosePickingPallet;
+using MyWerehouse.Application.Picking.Commands.DoPlannedPicking;
+using MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking;
+using MyWerehouse.Application.Picking.Commands.ExecuteHandPicking;
+using MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareToHandPicking;
+using MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree;
+using MyWerehouse.Application.Picking.Queries.GetListPickingPallet;
+using MyWerehouse.Application.Picking.Queries.GetListToPickingFlat;
+using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
+using MyWerehouse.Application.Picking.Queries.ShowTaskToDo;
 using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers

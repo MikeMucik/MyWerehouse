@@ -93,7 +93,6 @@ namespace MyWerehouse.Application.Services
 			if (await receipt.AnyAsync())
 			{
 				product.Hide();
-				//_productRepo.SwitchOffProduct(product);
 			}
 			else
 			{
@@ -119,7 +118,6 @@ namespace MyWerehouse.Application.Services
 			if (existingProduct == null)
 			{
 				return AppResult<Unit>.Fail($"Produkt o numerze {productDTO.Id} nie istnieje", ErrorType.NotFound);
-				//throw new NotFoundProductException($"Produkt o numerze {productDTO.Id} nie istnieje");
 			}
 			_mapper.Map(productDTO, existingProduct);
 			await _werehouseDbContext.SaveChangesAsync();
@@ -138,48 +136,19 @@ namespace MyWerehouse.Application.Services
 			var products = _productRepo.GetAllProducts();
 			var productsOrdered = products
 			.OrderBy(p => p.Id);
-			var result = await productsOrdered.ToPagedResultAsync<Product, ProductDTO>(
-				_mapper.ConfigurationProvider, pageNumber, pageSize, ct);
-			//	.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider);
-			//var productToShow = await products
-			//	.Skip(pageSize * (PageNumber - 1))
-			//	.Take(pageSize)
-			//	.ToListAsync();
-			//var productList = new ListProductsDTO()
-			//{
-			//	Products = productToShow,
-			//	PageSize = pageSize,
-			//	CurrentPage = PageNumber,
-			//	Count = await products.CountAsync()
-			//};
+			var result = await productsOrdered
+				.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync( pageNumber, pageSize, ct);
 			return AppResult<PagedResult<ProductDTO>>.Success(result);
 		}
 		public async Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter, CancellationToken ct)
 		{
-			//pageNumber = pageNumber <= 1 ? 1 : pageNumber;
 			var products = _productRepo.FindProducts(filter);
 			var productsOrdered = products
 				.OrderBy(p => p.Id);
-
-			var result = await productsOrdered.ToPagedResultAsync<Product, ProductDTO>(
-				_mapper.ConfigurationProvider, pageNumber, pageSize, ct);
-			//.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider);
-
-			//var countProducts = products.CountAsync();
-			//var productToShow = products
-			//	.Skip(pageSize * (pageNumber - 1))
-			//	.Take(pageSize)
-			//	.ToListAsync();
-
-			//await Task.WhenAll(countProducts, productToShow);
-
-			//var productList = new ListProductsDTO()
-			//{
-			//	Products = productToShow.Result,
-			//	PageSize = pageSize,
-			//	CurrentPage = pageNumber,
-			//	Count = countProducts.Result,
-			//};
+			var result = await productsOrdered
+				.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync( pageNumber, pageSize, ct);			
 			return AppResult<PagedResult<ProductDTO>>.Success(result);
 		}
 	}

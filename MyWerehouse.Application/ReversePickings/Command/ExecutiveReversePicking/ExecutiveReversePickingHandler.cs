@@ -88,7 +88,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			}
 			//paleta dekompletowana
 			productOnPallet.SetQuantity(0);
-			pickingPallet.CkeckIfToArchive(command.UserId, ReasonMovement.ReversePicking, pickingPallet.Location.ToSnapshot());
+			pickingPallet.CkeckIfToArchive(command.UserId, ReasonForPallet.ReversePicking, pickingPallet.Location.ToSnapshot());
 			//zadanie dekompletacyjne
 			reversePicking.ChangeStatus(ReversePickingStatus.Completed);
 			reversePicking.AddHistory(pickingPallet.Id, command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);

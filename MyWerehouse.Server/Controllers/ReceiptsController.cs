@@ -65,7 +65,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Pobranie przyjęć 
 		[HttpGet("ReceiptsByFiltr")]
-		public async Task<IActionResult> GetByFiltr(GetReceiptsQuery query)
+		public async Task<IActionResult> GetByFiltr(GetReceiptsByFiltrQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 

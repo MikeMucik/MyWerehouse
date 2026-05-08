@@ -7,11 +7,12 @@ using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Receipts.DTOs;
+using MyWerehouse.Application.Receipts.Queries.GetReceipt;
 using MyWerehouse.Domain.Interfaces;
 
-namespace MyWerehouse.Application.Receipts.Queries.GetReceipt
+namespace MyWerehouse.Application.Receipts.Queries.GetReceiptById
 {
-	public class GetReceiptByIdHandler(IMapper mapper, IReceiptRepo receiptRepo) : IRequestHandler<GetReceiptByIdQuery, AppResult< ReceiptDTO>>
+	public class GetReceiptByIdHandler(IMapper mapper, IReceiptRepo receiptRepo) : IRequestHandler<GetReceiptByIdQuery, AppResult<ReceiptDTO>>
 	{
 		private readonly IMapper _mapper = mapper;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;

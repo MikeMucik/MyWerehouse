@@ -15,12 +15,12 @@ namespace MyWerehouse.Application.Services
 {
 	public class HistoryService : IHistoryService
 	{
-		private readonly IPalletMovementRepo _palletMovementRepo;		
+		private readonly IHistoryPalletRepo _palletMovementRepo;		
 		private readonly IPalletRepo _palletRepo;
 		private readonly IMapper _mapper;
 
 		public HistoryService(
-			IPalletMovementRepo palletMovementRepo		
+			IHistoryPalletRepo palletMovementRepo		
 			, IPalletRepo palletRepo
 			, IMapper mapper)
 		{
@@ -33,10 +33,10 @@ namespace MyWerehouse.Application.Services
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(id);
 			var history = _mapper.Map<PalletHistoryDTO>(pallet);
-			var filter = new PalletMovementSearchFilter { };
+			var filter = new HistoryPalletSearchFilter { };
 			var details = await _palletMovementRepo.GetDataByFilter(filter, id)
 				.OrderByDescending(a => a.MovementDate)
-			 .ProjectTo<PalletMovementDTO>(_mapper.ConfigurationProvider)
+			 .ProjectTo<HistoryPalletDTO>(_mapper.ConfigurationProvider)
 			 .ToListAsync();
 			foreach (var item in details)
 			{

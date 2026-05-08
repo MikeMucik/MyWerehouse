@@ -75,18 +75,18 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore,
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
-		//TODO docelowo przejśc na 3 strategie i klasy rozwiązań
-		public void Cancel(string userId, int issueNumber)
+		//TODO można przejśc na 3 strategie i klasy rozwiązań
+		public void Cancel(string userId)
 		{
 			var oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.PickedPartially || PickingStatus == PickingStatus.Picked)
 				throw new CannotCancelPickingTaskInCurrentStatusException(Id, IssueId, PickingStatus);
 			this.PickingStatus = PickingStatus.Cancelled;			
 			AddHistoryPicking(userId, null,null, oldStatus, 0);			
-			this.RequestedQuantity = 0;//tu czy przed history raczej tu
+			this.RequestedQuantity = 0;
 		}
 
-		public void SetVirtualPallet(Guid virtualPalletId)//to mogłoby być w virtualPallet
+		public void SetVirtualPallet(Guid virtualPalletId)
 		{
 			if (VirtualPalletId != null)
 				throw new CannotSetVirtualPalletException(Id);
@@ -131,10 +131,10 @@ namespace MyWerehouse.Domain.Picking.Models
 			if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
 			{
 				VirtualPallet.Pallet.ChangeStatus(PalletStatus.Available);
-				VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonMovement.ReversePicking, userId, snapShot);
+				VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonForPallet.ReversePicking, userId, snapShot);
 			}
 		}
-		//Różne źródła prawdy dlatego przeciążenie
+		//Różne źródła prawdy dlatego przeciążenie - nie jest to najlepsze rozwiązanie
 		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
 		{
 

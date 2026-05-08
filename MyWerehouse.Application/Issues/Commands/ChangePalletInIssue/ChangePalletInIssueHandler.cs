@@ -50,7 +50,7 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				return AppResult<IssueResult>.Fail("Nie można podmienić palet z różnymi produktami.", ErrorType.Conflict);
 			palletToAddingIssue.ReserveToIssue(issue.Id, request.UserId, palletToAddingIssue.Location.ToSnapshot());
 			issue.AttachPallet(palletToAddingIssue);
-			palletToRemoveFromIssue.DetachToIssue(request.UserId, palletToRemoveFromIssue.Location.ToSnapshot(), Domain.Histories.Models.ReasonMovement.Correction);
+			palletToRemoveFromIssue.DetachToIssue(request.UserId, palletToRemoveFromIssue.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.Correction);
 			issue.DetachPallet(palletToRemoveFromIssue);
 			issue.ChangePalletInIssue(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);

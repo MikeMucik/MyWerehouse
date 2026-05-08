@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.Receipts.Validators
 {
 	public class UpdateReceiptCommandValidation : AbstractValidator<UpdateReceiptCommand>
 	{
-		public UpdateReceiptCommandValidation(IValidator<UpdatePalletDTO> palletValidator)
+		public UpdateReceiptCommandValidation(IValidator<EditPalletDTO> palletValidator)
 		{
 			RuleFor(r => r.DTO.ReceiptNumber)
 				.GreaterThan(0)

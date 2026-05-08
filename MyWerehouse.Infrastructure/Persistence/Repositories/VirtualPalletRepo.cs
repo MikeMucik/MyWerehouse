@@ -49,16 +49,16 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 			return list;
 		}
-		public async Task<List<VirtualPallet>> GetVirtualPalletsByTimePickingTaskAsync(DateOnly start, DateOnly end)
+		
+		public IQueryable<VirtualPallet> GetVirtualPalletsByTimePickingTask(DateOnly start, DateOnly end)
 		{
-			var list = await _werehouseDbContext.VirtualPallets
+			var list = _werehouseDbContext.VirtualPallets
 				.Include(a => a.PickingTasks)
 				.Include(p => p.Pallet)
 					.ThenInclude(pp => pp.ProductsOnPallet)
-				.Where(vp=> 
-				vp.PickingTasks.Any(pt=> 
-				pt.PickingDay <= end && pt.PickingDay >= start && pt.PickingStatus == PickingStatus.Allocated))
-				.ToListAsync();
+				.Where(vp =>
+				vp.PickingTasks.Any(pt =>
+				pt.PickingDay <= end && pt.PickingDay >= start && pt.PickingStatus == PickingStatus.Allocated));				
 			return list;
 		}
 		public async Task<Guid> GetVirtualPalletIdFromPalletIdAsync(Guid palletId)
@@ -81,8 +81,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId)
 		{
 			return await _werehouseDbContext.VirtualPallets.FirstOrDefaultAsync(v=>v.PalletId == palletId);
-		}
-
-		
+		}		
 	}
 }

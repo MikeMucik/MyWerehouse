@@ -45,7 +45,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			var result = await _clientService.GetAllClientsAsync(3, 1, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Result.Dtos.Count);
+			Assert.Equal(3, result.Result.Items.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilterName_GetClientsByFilterAsync_ReturnList()
@@ -60,7 +60,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Result.Dtos.Count);
+			Assert.Equal(3, result.Result.Items.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilter_GetClientsByFilterAsync_ReturnList()
@@ -75,7 +75,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(1, result.Result.Dtos.Count);
+			Assert.Equal(1, result.Result.Items.Count);
 		}
 		[Fact]
 		public async Task ShowClientByFilterNotExist_GetClientsByFilterAsync_ReturnList()
@@ -90,7 +90,7 @@ namespace MyWerehouse.Test.IntegrationTestService.ClientTestsIntegration
 			var result = await _clientService.GetClientsByFilterAsync(3, 1, filter, ct);
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(0, result.Result.Dtos.Count);
+			Assert.Equal(0, result.Result.Items.Count);
 		}
 	}
 }

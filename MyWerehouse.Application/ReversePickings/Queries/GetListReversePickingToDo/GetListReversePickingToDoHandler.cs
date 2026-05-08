@@ -24,15 +24,12 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingT
 		public async Task<AppResult<PagedResult<ReversePickingDTO>>> Handle (GetListReversePickingToDoQuery query, CancellationToken ct)
 		{
 			var listReversePickingTasks = _reversePickingRepo.GetReversePickings()
-				.Where(r => r.Status == ReversePickingStatus.Pending && r.DateMade >= query.Start && r.DateMade <= query.End);
+				.Where(r => r.Status == ReversePickingStatus.Pending && r.DateMade >= query.Start && r.DateMade <= query.End)
+				.AsNoTracking();
 			var reversePickingOrdered = listReversePickingTasks.OrderBy(r => r.Id);
-
-			var result = await reversePickingOrdered.ToPagedResultAsync<ReversePicking, ReversePickingDTO>(
-				_mapper.ConfigurationProvider,
-				query.PageNumber,
-				query.PageSize,
-				ct);
-
+			var result = await reversePickingOrdered
+				.ProjectTo<ReversePickingDTO>(_mapper.ConfigurationProvider)
+				.ToPagedResultAsync(query.PageNumber,query.PageSize,ct);
 			if(result.TotalCount == 0)return AppResult<PagedResult<ReversePickingDTO>>.Fail("Nie ma zadań dekompletacji", ErrorType.NotFound);
 			return AppResult<PagedResult<ReversePickingDTO>>.Success(result); 
 		}

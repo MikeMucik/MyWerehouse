@@ -110,11 +110,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			var issueId = receiptId2;
 
 			//Act
-			var result =await _issueRepo.GetPalletByIssueIdAsync(issueId);
+			var result = _issueRepo.GetPalletsByIssueId(issueId).ToList();
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.All(result, p => Assert.False(p.PalletId == Guid.Empty));
+			Assert.All(result, p => Assert.False(p.Id == Guid.Empty));
 			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 			Assert.Contains(result, p => p.PalletNumber == "Q1000"&&p.LocationId ==1);
 			Assert.Contains(result, p => p.PalletNumber == "Q1001"&&p.LocationId ==1);

@@ -15,8 +15,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 	public class ViewProductTests
 	{
 		private readonly ProductRepo _productRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewProductTests(QueryTestFixture fixture)		
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewProductTests(QueryTestSQLFixture fixture)		
 		{
 			_fixture = fixture;
 			_productRepo = new ProductRepo(_fixture.DbContext);

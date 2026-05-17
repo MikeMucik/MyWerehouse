@@ -53,7 +53,7 @@ namespace MyWerehouse.Server.Controllers
 			return Ok(result);
 		}
 		[HttpGet("byFilter")]
-		public async Task<IActionResult> GetByFilter(int page, int size, ProductSearchFilter filtr, CancellationToken ct)
+		public async Task<IActionResult> GetByFilter(int page, int size, [FromQuery] ProductSearchFilter filtr, CancellationToken ct)
 		{
 			var result = await _productService.FindProductsByFilterAsync(page, size, filtr, ct);
 			return Ok(result);

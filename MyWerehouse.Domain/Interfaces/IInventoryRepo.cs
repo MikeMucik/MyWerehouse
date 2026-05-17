@@ -10,7 +10,7 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IInventoryRepo
 	{		
 		void AddInventory (Inventory inventory);	
-		Task<Inventory?> GetInventoryForProductAsync(Guid productId);
+		Task<Inventory> GetInventoryForProductAsync(Guid productId);
 		Task<List<Inventory>> GetInventoriesForProductsAsync(List<Guid> productIds);//Do Dictionary
 		IQueryable<Inventory> GetAllInventory();		
 		Task <bool> HasStockAsync(Guid productId, int quantity);

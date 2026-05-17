@@ -39,7 +39,7 @@ namespace MyWerehouse.Application.Picking.Services
 			var sourcePallet = await _palletRepo.GetPalletByIdAsync(vp.PalletId);
 			if (sourcePallet == null)
 				return AddPickingTaskToIssueResult.Fail("Brak palety źródłowej.");
-			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);// PickingStatus.Allocated, sourcePallet.Id, sourcePallet.PalletNumber
+			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
 		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets,

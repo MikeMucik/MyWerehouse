@@ -15,8 +15,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 	public class ViewPalletTests
 	{
 		private readonly PalletRepo _palletRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewPalletTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewPalletTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_palletRepo = new PalletRepo(_fixture.DbContext);

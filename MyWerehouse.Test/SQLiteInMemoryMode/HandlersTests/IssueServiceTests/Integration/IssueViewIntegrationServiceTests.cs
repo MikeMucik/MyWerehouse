@@ -8,20 +8,22 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
+using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
 using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Receviving.Filters;
 
-namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueServiceTests.Integration
 {
 	[Collection("QueryCollection")]
 	public class IssueViewIntegrationServiceTests
-	{		
-		private readonly QueryTestFixture _fixture;
+	{
+		private readonly QueryTestSQLFixture _fixture;
 		private readonly IMediator _mediator;
-		public IssueViewIntegrationServiceTests(QueryTestFixture fixture)
+		public IssueViewIntegrationServiceTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
-			_mediator = _fixture.Mediator;			
+			_mediator = _fixture.Mediator;
 		}
 		[Fact]
 		public async Task GetIssueById_GetData_ReturnDTO()
@@ -35,7 +37,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.NotNull(result);
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal("U002", result.Result.PerformedBy);
-			Assert.Equal(DateTime.UtcNow.AddHours(23), result.Result.IssueDateTimeSend, precision :TimeSpan.FromMinutes(1));
+			Assert.Equal(DateTime.UtcNow.AddHours(23), result.Result.IssueDateTimeSend, precision: TimeSpan.FromMinutes(1));
 
 			Assert.NotNull(result.Result.Pallets);
 			Assert.Equal(3, result.Result.Pallets.Count);
@@ -56,10 +58,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal(2, result.Result.IssueItems.Count);
 			Assert.Equal("U002", result.Result.PerformedBy);
-			Assert.Equal(DateTime.UtcNow.AddHours(23), result.Result.DateToSend,  precision: TimeSpan.FromMinutes(1));
+			Assert.Equal(DateTime.UtcNow.AddHours(23), result.Result.DateToSend, precision: TimeSpan.FromMinutes(1));
 
 			Assert.NotNull(result.Result.IssueItems);
-			Assert.Equal(400, result.Result	.IssueItems.FirstOrDefault(x => x.ProductId == productId2).Quantity);
+			Assert.Equal(400, result.Result.IssueItems.FirstOrDefault(x => x.ProductId == productId2).Quantity);
 			Assert.Equal(150, result.Result.IssueItems.FirstOrDefault(x => x.ProductId == productId1).Quantity);
 		}
 		[Fact]
@@ -116,5 +118,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			Assert.Equal(200, prod11_Q2000.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), prod11_Q2000.BestBefore);
 		}
+		[Fact]
+		public async Task GetIssueByFilter_ShouldReturnItems_WhenFilterEmpty()
+		{
+			//Arrange
+			var filter = new IssueReceiptSearchFilter
+			{
+
+			};
+			//Act
+			var query = new GetIssuesByFilterQuery
+			{
+				Filter = filter,
+				CurrentPage = 1,
+				PageSize = 1
+			};
+			//(filter, 1, 1);
+			var result = await _mediator.Send(query);
+			//Asser
+			Assert.NotNull(result);
+		}
+
+
 	}
 }

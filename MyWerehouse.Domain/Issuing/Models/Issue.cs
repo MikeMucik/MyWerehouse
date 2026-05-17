@@ -114,9 +114,9 @@ namespace MyWerehouse.Domain.Issuing.Models
 				//TODO ?? jeśli zdecydujemy na zmianę Item a nie jak teraz nowa wartość
 				//existing.IncreaseQuantity(quantity);
 				//return;
-				throw new ProductAlreadyExistException(productId);
+				throw new ProductAlreadyExistDomainException(productId);
 			}
-			if (quantity <= 0) throw new InvalidDataException("Quantity must be grater than zero.");
+			if (quantity <= 0) throw new InvalidQuantityDomainException(quantity, Id, IssueNumber);
 			var item = new IssueItem(Id, productId, quantity, bestBefore);
 			this.IssueItems.Add(item);
 		}

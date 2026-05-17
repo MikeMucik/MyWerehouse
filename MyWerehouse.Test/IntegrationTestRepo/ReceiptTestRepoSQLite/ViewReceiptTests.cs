@@ -15,8 +15,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 
 	{		
 		private readonly ReceiptRepo _receiptRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewReceiptTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewReceiptTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;			
 			_receiptRepo = new ReceiptRepo(_fixture.DbContext);

@@ -12,8 +12,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 	public class ViewReverseTests
 	{
 		private readonly ReversePickingRepo _reversePickingRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewReverseTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewReverseTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_reversePickingRepo = new ReversePickingRepo(_fixture.DbContext);

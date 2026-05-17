@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt;
 using MyWerehouse.Application.Receipts.Commands.CancelReceipt;
 using MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt;
 using MyWerehouse.Application.Receipts.Commands.CreateReceipt;
@@ -30,7 +32,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Przyjęcie palety dla Receipt
 		[HttpPost("addPallet")]
-		public async Task<IActionResult> CreatePalletForReceipt(CreateReceiptPlanCommand command)
+		public async Task<IActionResult> CreatePalletForReceipt(AddPalletToReceiptCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Aktualizacja przyjęcia, poprawa palet -> Post
@@ -64,8 +66,8 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new GetReceiptByIdQuery(id))).ToActionResult();
 
 		//Pobranie przyjęć 
-		[HttpGet("ReceiptsByFiltr")]
-		public async Task<IActionResult> GetByFiltr(GetReceiptsByFiltrQuery query)
+		[HttpPost("ReceiptsByFilter")]
+		public async Task<IActionResult> GetByFilter([FromQuery] GetReceiptsByFilterQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 

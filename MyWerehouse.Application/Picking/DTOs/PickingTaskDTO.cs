@@ -20,7 +20,9 @@ namespace MyWerehouse.Application.Picking.DTOs
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<PickingTask, PickingTaskDTO>()
-				.ForMember(dest => dest.IssueNumber, opt => opt.MapFrom(src => src.Issue.IssueNumber));			
+				.ForMember(dest => dest.IssueNumber, opt => opt.MapFrom(src => src.Issue.IssueNumber))
+				.ForMember(dest=>dest.SourcePalletId, opt=> opt.MapFrom(static src => src.VirtualPallet.PalletId))		
+				.ForMember(dest=>dest.SourcePalletNumber, opt=> opt.MapFrom(static src => src.VirtualPallet.Pallet.PalletNumber));			
 		}
 	}
 }

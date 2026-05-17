@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using MyWerehouse.Domain.Histories.Filters;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
-using MyWerehouse.Test.Common;
+using MyWerehouse.Test.InMemoryDatabase.Common;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 {
-	[Collection("QuerryCollection")]
-	public class ViewHistoryTests : CommandTestBase
+	[Collection("QueryCollectionInMemory")]
+	public class ViewHistoryTests
 	{
 		private readonly HistoryPalletRepo _palletMovementRepo;
-		public ViewHistoryTests(QuerryTestFixture fixture)
+		public ViewHistoryTests(InMemoryDatabaseFixtureExecutive fixture)
 		{
 			var _context = fixture.Context;
 			_palletMovementRepo = new HistoryPalletRepo(_context);

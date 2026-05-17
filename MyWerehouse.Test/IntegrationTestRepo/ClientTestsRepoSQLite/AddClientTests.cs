@@ -8,7 +8,7 @@ using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
-namespace MyWerehouse.Test.UnitTestRepo.ClientTestsRepo
+namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite
 {
 	public class AddClientTests : TestBase
 	{

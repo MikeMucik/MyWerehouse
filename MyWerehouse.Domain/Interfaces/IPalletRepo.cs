@@ -11,7 +11,7 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IPalletRepo
 	{		
 		Guid AddPallet(Pallet pallet);				
-		Task<Pallet?> GetPalletByIdAsync(Guid palletId);
+		Task<Pallet?> GetPalletByIdAsync(Guid palletId);	
 		Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId);
 		Task<List<Pallet>> GetAvailableFullPallets(Guid productId,int fullPallet, DateOnly? minBestBefore, int neededPallets);
 		Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId);

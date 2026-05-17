@@ -9,7 +9,7 @@ using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Events;
 
-namespace MyWerehouse.Application.Pallets.Events.CreateMovement
+namespace MyWerehouse.Application.Pallets.Events.PalletHistory
 {
 	public class PalletHistoryHandler(IHistoryPalletRepo palletMovementRepo) : INotificationHandler<PalletHistoryNotification>
 	{

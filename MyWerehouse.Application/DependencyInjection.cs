@@ -26,8 +26,7 @@ namespace MyWerehouse.Application
 		{
 			services.AddTransient<ICategoryService, CategoryService>();
 			services.AddTransient<IClientService, ClientService>();
-			services.AddTransient<IHistoryService, HistoryService>();//do wywalenia??
-			services.AddTransient<IInventoryService, InventoryService>();//do wywalenia??
+			services.AddTransient<IInventoryService, InventoryService>();//do wywalenia w przyszłości
 			services.AddTransient<ILocationService, LocationService>();
 			services.AddTransient<IProductService, ProductService>();
 			 //services.AddAutoMapper(Assembly.GetExecutingAssembly());

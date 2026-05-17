@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
-using MyWerehouse.Test.Common;
+using MyWerehouse.Test.InMemoryDatabase.Common;
 
 namespace MyWerehouse.Test.UnitTestRepo.InventoryTestsRepo
 {

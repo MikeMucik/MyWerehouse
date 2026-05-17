@@ -413,6 +413,78 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.ToTable("HistoryIssueItems");
                 });
 
+            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPallet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("DestinationLocationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DestinationLocationSnapShot")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("MovementDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PalletNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PalletStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PerformedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SourceLocationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SourceLocationSnapShot")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PalletId");
+
+                    b.ToTable("HistoryPallet");
+                });
+
+            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPalletDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("HistoryPalletId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HistoryPalletId");
+
+                    b.ToTable("HistoryPalletDetails");
+                });
+
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPicking", b =>
                 {
                     b.Property<int>("Id")
@@ -430,15 +502,20 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<int>("IssueNumber")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("PalletId")
+                    b.Property<Guid?>("PalletId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PalletNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PerformedBy")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("PickingPalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PickingPalletNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PickingTaskId")
@@ -606,78 +683,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.ToTable("HistoryReversePickings");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.PalletMovement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("DestinationLocationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DestinationLocationSnapShot")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("MovementDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("PalletId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("PalletNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PalletStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PerformedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("SourceLocationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SourceLocationSnapShot")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PalletId");
-
-                    b.ToTable("PalletMovements");
-                });
-
-            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.PalletMovementDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PalletMovementId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PalletMovementId");
-
-                    b.ToTable("PalletMovementDetails");
-                });
-
             modelBuilder.Entity("MyWerehouse.Domain.Invetories.Models.Inventory", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -718,14 +723,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("ProductId");
 
                     b.ToTable("Issues");
                 });
@@ -1047,9 +1047,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("RampNumber")
                         .HasColumnType("int");
 
@@ -1065,8 +1062,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("ProductId");
 
                     b.ToTable("Receipts");
                 });
@@ -1189,6 +1184,26 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("HistoryIssue");
                 });
 
+            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPallet", b =>
+                {
+                    b.HasOne("MyWerehouse.Domain.Pallets.Models.Pallet", null)
+                        .WithMany("PalletMovements")
+                        .HasForeignKey("PalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPalletDetail", b =>
+                {
+                    b.HasOne("MyWerehouse.Domain.Histories.Models.HistoryPallet", "HistoryPallet")
+                        .WithMany("HistoryPalletDetails")
+                        .HasForeignKey("HistoryPalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HistoryPallet");
+                });
+
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPicking", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Issuing.Models.Issue", null)
@@ -1222,26 +1237,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("HistoryReceipt");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.PalletMovement", b =>
-                {
-                    b.HasOne("MyWerehouse.Domain.Pallets.Models.Pallet", null)
-                        .WithMany("PalletMovements")
-                        .HasForeignKey("PalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.PalletMovementDetail", b =>
-                {
-                    b.HasOne("MyWerehouse.Domain.Histories.Models.PalletMovement", "PalletMovement")
-                        .WithMany("PalletMovementDetails")
-                        .HasForeignKey("PalletMovementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PalletMovement");
-                });
-
             modelBuilder.Entity("MyWerehouse.Domain.Invetories.Models.Inventory", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Products.Models.Product", "Product")
@@ -1261,10 +1256,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MyWerehouse.Domain.Products.Models.Product", null)
-                        .WithMany("IssueList")
-                        .HasForeignKey("ProductId");
-
                     b.Navigation("Client");
                 });
 
@@ -1273,7 +1264,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.HasOne("MyWerehouse.Domain.Issuing.Models.Issue", "Issue")
                         .WithMany("IssueItems")
                         .HasForeignKey("IssueId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MyWerehouse.Domain.Products.Models.Product", "Product")
@@ -1416,10 +1407,6 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MyWerehouse.Domain.Products.Models.Product", null)
-                        .WithMany("ReceiptList")
-                        .HasForeignKey("ProductId");
-
                     b.Navigation("Client");
                 });
 
@@ -1439,14 +1426,14 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPallet", b =>
+                {
+                    b.Navigation("HistoryPalletDetails");
+                });
+
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryReceipt", b =>
                 {
                     b.Navigation("Details");
-                });
-
-            modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.PalletMovement", b =>
-                {
-                    b.Navigation("PalletMovementDetails");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Issuing.Models.Issue", b =>
@@ -1488,10 +1475,6 @@ namespace MyWerehouse.Infrastructure.Migrations
 
                     b.Navigation("InventoryItem")
                         .IsRequired();
-
-                    b.Navigation("IssueList");
-
-                    b.Navigation("ReceiptList");
                 });
 
             modelBuilder.Entity("MyWerehouse.Domain.Receviving.Models.Receipt", b =>

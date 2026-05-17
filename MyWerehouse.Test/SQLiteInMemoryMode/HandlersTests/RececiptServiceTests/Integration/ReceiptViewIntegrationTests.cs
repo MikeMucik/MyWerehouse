@@ -17,10 +17,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 	[Collection("QueryCollection")]
 	public class ReceiptViewIntegrationTests
 	{		
-		private readonly QueryTestFixture _fixture;
+		private readonly QueryTestSQLFixture _fixture;
 		private readonly IMediator _mediator;
 
-		public ReceiptViewIntegrationTests(QueryTestFixture fixture)
+		public ReceiptViewIntegrationTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;			
 			_mediator = _fixture.Mediator;			
@@ -112,7 +112,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				ProductId = Guid.Parse("00000000-0000-0000-0001-000000000000")
 			};
 			//var result = await _receiptService.GetReceiptDTOsAsync(filter);
-			var query = new GetReceiptsByFiltrQuery(filter,1,2);
+			var q = new GetReceiptsByFilterQuery();
+			var query = new GetReceiptsByFilterQuery
+			{
+				Filter = filter,
+				CurrentPage = 1,
+				PageSize = 2,
+			};
+				//(filter,1,2);
 
 			var result = await _mediator.Send(query);
 			//Assert

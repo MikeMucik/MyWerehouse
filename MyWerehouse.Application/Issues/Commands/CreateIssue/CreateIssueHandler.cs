@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 			var addedProducts = new List<IssueResult>();
 			var results = new List<IssueResult>();
 			var issueNumber = await _issueRepo.GetNextNumberOfIssue();
-			var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.Date, request.DTO.PerformedBy);
+			var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.SendDate, request.DTO.PerformedBy);
 			_issueRepo.AddIssue(issue);
 			foreach (var item in request.DTO.Items)
 			{
@@ -40,10 +40,10 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 				}
 				else
 				{
-					addingProducts = IssueResult.Ok(result.Message, item.ProductId);
+					addingProducts = IssueResult.Ok(result.Message, item.ProductId);					
+					issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);
 				}
 				addedProducts.Add(addingProducts);
-				issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);
 			}
 			if (addedProducts.Any(r => r.Success == false))
 			{

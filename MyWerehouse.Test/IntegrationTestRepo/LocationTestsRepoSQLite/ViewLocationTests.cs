@@ -7,14 +7,14 @@ using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
 
-namespace MyWerehouse.Test.UnitTestRepo.LocationTestsRepo
+namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 {
 	[Collection("QueryCollection")]
 	public class ViewLocationTests
 	{
 		private readonly LocationRepo _locationRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewLocationTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewLocationTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_locationRepo = new LocationRepo(_fixture.DbContext);

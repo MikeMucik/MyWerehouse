@@ -57,29 +57,29 @@ namespace MyWerehouse.Server.Controllers
 
 		//Podaj listę zadań dla palety - kompletacja planowana
 		[HttpGet("plannedList")]
-		public async Task<IActionResult> ShowPlanned(ShowTaskToDoQuery query)
+		public async Task<IActionResult> ShowPlanned([FromQuery]ShowTaskToDoQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Podaj listę zadań dla palety - kompletacja skorygowana
 		[HttpGet("correctedList")]
-		public async Task<IActionResult> ShowCorrected(PrepareCorrectedPickingQuery query)
+		public async Task<IActionResult> ShowCorrected([FromQuery]PrepareCorrectedPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista poglądowa klient -> zamówienie -> produkt -> ilośc		
 
 		//Lista
 		[HttpGet("List")]
-		public async Task<IActionResult> GetList(GetListIssueToPickingQuery query)
+		public async Task<IActionResult> GetList([FromQuery]GetListIssueToPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Drzewo
 		[HttpGet("Tree")]
-		public async Task<IActionResult> GetTree(GetListToPickingQuery query)
+		public async Task<IActionResult> GetTree([FromQuery]GetListToPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista palet dla wózkowego- palety do przekazania do pickingu
-		[HttpGet("forkliftList")]
-		public async Task<IActionResult> GetListToPicking(GetListPickingPalletQuery query)
+		[HttpPost("forkliftList")]
+		public async Task<IActionResult> GetListToPicking([FromQuery]GetListPickingPalletQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 }

@@ -13,8 +13,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 	public class ViewIssueTests 
 	{
 		private readonly IssueRepo _issueRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewIssueTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewIssueTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;			
 			_issueRepo = new IssueRepo(_fixture.DbContext);

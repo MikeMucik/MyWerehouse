@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FluentValidation;
+using MyWerehouse.Application.Services;
+using MyWerehouse.Application.ViewModels.ProductModels;
+using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
+using MyWerehouse.Test.InMemoryDatabase.Common;
+
+namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsIntegration
+{
+	public class ProductIntegrationCommand : CommandTestBase
+	{
+		protected readonly ProductService _productService;
+		protected readonly IValidator<AddProductDTO> _productValidator;
+		protected readonly IInventoryRepo _inventoryRepo;
+		protected readonly IProductRepo _productRepo;
+		protected readonly IReceiptRepo _receiptRepo;
+		public ProductIntegrationCommand() : base()
+		{	
+			_productRepo = new ProductRepo(_context);
+			_receiptRepo = new ReceiptRepo(_context);
+			_productValidator = new AddProductDTOValidation();	
+			_inventoryRepo = new InventoryRepo(_context);
+			_productService = new ProductService(_productRepo, _mapper,_context,_inventoryRepo, _receiptRepo, _productValidator);
+		}
+	}
+}

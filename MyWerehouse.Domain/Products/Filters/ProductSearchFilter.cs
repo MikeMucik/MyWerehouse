@@ -8,13 +8,13 @@ namespace MyWerehouse.Domain.Products.Filters;
 public class ProductSearchFilter
 {
 	//public Guid ProductId { get; set; }//
-	public string ProductName { get; set; }
-	public string SKU { get; set; }
-	public string Category { get; set; }
-	public int CategoryId { get; set; }
-	public int Length { get; set; }
-	public int Height { get; set; }
-	public int Width { get; set; }
-	public int Weight { get; set; }
+	public string? ProductName { get; set; }
+	public string? SKU { get; set; }
+	public string? Category { get; set; }
+	public int? CategoryId { get; set; }
+	public int? Length { get; set; }
+	public int? Height { get; set; }
+	public int? Width { get; set; }
+	public int? Weight { get; set; }
 }
 

@@ -9,7 +9,6 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Receviving.Filters;
@@ -138,7 +137,7 @@ namespace MyWerehouse.Application.Services
 			.OrderBy(p => p.Id);
 			var result = await productsOrdered
 				.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync( pageNumber, pageSize, ct);
+				.ToPagedResultAsync(pageNumber, pageSize, ct);
 			return AppResult<PagedResult<ProductDTO>>.Success(result);
 		}
 		public async Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter, CancellationToken ct)
@@ -148,7 +147,7 @@ namespace MyWerehouse.Application.Services
 				.OrderBy(p => p.Id);
 			var result = await productsOrdered
 				.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync( pageNumber, pageSize, ct);			
+				.ToPagedResultAsync(pageNumber, pageSize, ct);
 			return AppResult<PagedResult<ProductDTO>>.Success(result);
 		}
 	}

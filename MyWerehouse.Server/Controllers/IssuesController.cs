@@ -10,7 +10,7 @@ using MyWerehouse.Application.Issues.Commands.ModifyIssue;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
-using MyWerehouse.Application.Issues.Queries.GetIssuesByFiltr;
+using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
 using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
 using MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList;
 using MyWerehouse.Server.Extensions;
@@ -95,8 +95,8 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new GetIssueProductSummaryByIdQuery(id))).ToActionResult();
 
 		//Lista dla Issue według filtra
-		[HttpGet("IssuesByFiltr")]
-		public async Task<IActionResult> ListIssuesByFiltr(GetIssuesByFiltrQuery query)
+		[HttpPost("IssuesByFiltr")]
+		public async Task<IActionResult> ListIssuesByFiltr([FromQuery]GetIssuesByFilterQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista dla Issue ile jakiego towaru

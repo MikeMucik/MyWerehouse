@@ -21,8 +21,8 @@ namespace MyWerehouse.Server.Controllers
 		[HttpGet("{id}")]
 		public async Task<IActionResult> Get(Guid id)
 		{
-			var resut = await _mediator.Send(new GetInventoryQuery(id));
-			return Ok(resut);
+			var result = await _mediator.Send(new GetInventoryQuery(id));
+			return Ok(result);
 		}
 		//[HttpGet]
 		//public async Task<IActionResult> GetByProduct(int id, DateOnly date)

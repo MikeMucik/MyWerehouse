@@ -21,9 +21,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 	[Collection("QueryCollection")]
 	public class PickingPalletViewIntegrationTests
 	{
-		private readonly QueryTestFixture _fixture;
+		private readonly QueryTestSQLFixture _fixture;
 		private readonly IMediator _mediator;
-		public PickingPalletViewIntegrationTests(QueryTestFixture fixture)
+		public PickingPalletViewIntegrationTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_mediator = _fixture.Mediator;

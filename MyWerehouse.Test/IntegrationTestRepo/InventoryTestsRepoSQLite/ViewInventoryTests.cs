@@ -12,8 +12,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 	public class ViewInventoryTests: TestBase
 	{
 		public readonly InventoryRepo _inventoryRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewInventoryTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewInventoryTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_inventoryRepo = new InventoryRepo(_fixture.DbContext);

@@ -14,8 +14,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 	public class ViewVirtualPalletRepoTests
 	{
 		private readonly VirtualPalletRepo _virtualPalletRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewVirtualPalletRepoTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewVirtualPalletRepoTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_virtualPalletRepo = new VirtualPalletRepo(_fixture.DbContext);
@@ -64,8 +64,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 
 			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
 
-			//var startDate = new DateTime(2025, 5, 5);
-			//var endDate = new DateTime(2025, 10, 10);
 			var startDate = DateTime.UtcNow.AddDays(-2);
 			var endDate = DateTime.UtcNow.AddDays(1);
 			//Act

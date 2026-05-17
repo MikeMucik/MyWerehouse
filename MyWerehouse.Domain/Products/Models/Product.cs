@@ -15,8 +15,6 @@ namespace MyWerehouse.Domain.Products.Models
 		public Category Category { get; private set; }
 		public bool IsDeleted { get; private set; } = false;
 		public int CartonsPerPallet { get; private set; }
-		public ICollection<Receipt> ReceiptList { get; private set; } = new List<Receipt>();
-		public ICollection<Issue> IssueList { get; private set; } = new List<Issue>();
 		public ProductDetail Details { get; private set; }
 		public Inventory InventoryItem { get; private set; }
 		private Product() { } //EF

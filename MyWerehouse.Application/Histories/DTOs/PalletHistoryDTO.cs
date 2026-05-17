@@ -3,24 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Application.Common.Pagination;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {
-	public class PalletHistoryDTO : IMapFrom<Pallet>
+	public class PalletHistoryDTO 
 	{
-		public string Id { get; set; }
-		public DateTime DateReceived { get; set; }
-		public ICollection<HistoryPalletDTO> PalletMovementsDTO { get; set; } = new List<HistoryPalletDTO>();
-		public int? ReceiptId { get; set; }
-		public int? IssueId { get; set; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Pallet, PalletHistoryDTO>()
-				.ForMember(dest => dest.PalletMovementsDTO, opt => opt.Ignore());
-		}
+		public Guid Id { get; set; }
+		public string PalletNumber { get; set; }
+		public DateTime DateReceived { get; set; }		
+		public Guid? ReceiptId { get; set; }
+		public int? ReceiptNumber { get; set; }
+		public Guid? IssueId { get; set; }
+		public int? IssueNumber { get; set; }
+		public PagedResult<HistoryPalletDTO> PalletMovementsDTO { get; set; } = new PagedResult<HistoryPalletDTO>();
 	}
 }
 

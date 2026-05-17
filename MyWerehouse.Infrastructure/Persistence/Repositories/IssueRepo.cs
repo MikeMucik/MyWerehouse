@@ -30,6 +30,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
+					.ThenInclude(l=>l.Location)
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}
 		public async Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids)
@@ -79,6 +80,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public IQueryable<Pallet> GetPalletsByIssueId(Guid id)
 		{
 			var list = _werehouseDbContext.Pallets
+				.Include(l=>l.Location)
 				.AsNoTracking()
 				.Where(p => p.IssueId == id);				
 			return list;

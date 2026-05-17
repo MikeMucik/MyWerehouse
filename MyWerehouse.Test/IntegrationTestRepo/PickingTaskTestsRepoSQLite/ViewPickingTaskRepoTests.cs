@@ -14,8 +14,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 	public class ViewPickingTaskRepoTests
 	{
 		private readonly PickingTaskRepo _pickingTaskRepo;
-		private readonly QueryTestFixture _fixture;
-		public ViewPickingTaskRepoTests(QueryTestFixture fixture)
+		private readonly QueryTestSQLFixture _fixture;
+		public ViewPickingTaskRepoTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_pickingTaskRepo = new PickingTaskRepo(_fixture.DbContext);

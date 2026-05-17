@@ -25,7 +25,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public int? IssueNumber { get; set; }//
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Pallet, PalletDTO>();
+			profile.CreateMap<Pallet, PalletDTO>()
+				.ForMember(dest=>dest.PalletNumber, opt=>opt.MapFrom(src=>src.PalletNumber));//do swaggera test
 		}
 	}
 }

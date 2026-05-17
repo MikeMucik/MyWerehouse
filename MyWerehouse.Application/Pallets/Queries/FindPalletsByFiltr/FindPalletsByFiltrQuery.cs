@@ -11,6 +11,10 @@ using MyWerehouse.Domain.Pallets.Filters;
 
 namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
 {
-	public record FindPalletsByFiltrQuery(PalletSearchFilter Filter, int CurrentPage, int PageSize)
-		:IRequest<AppResult<PagedResult<PalletDTO>>>;	
+	public class FindPalletsByFiltrQuery : IRequest<AppResult<PagedResult<PalletDTO>>>
+	{
+		public PalletSearchFilter Filter { get; set; } = new();
+		public int CurrentPage { get; set; }
+		public int PageSize { get; set; }
+	};	
 }

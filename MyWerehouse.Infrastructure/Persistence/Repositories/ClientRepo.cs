@@ -90,7 +90,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				result = result.Where(c => c.Addresses.Any(a => a.Region != null && a.Region.StartsWith(clientFilter.Region)));				
 			}
 
-			if (clientFilter.Phone != 0)
+			if (clientFilter.Phone != 0 && clientFilter.Phone != null)
 			{
 				result = result.Where(c => c.Addresses.Any(a => a.Phone == clientFilter.Phone));
 			}

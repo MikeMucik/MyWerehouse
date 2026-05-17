@@ -14,9 +14,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletServiceTests.I
 	[Collection("QueryCollection")]
 	public class PalletViewServicesTests
 	{
-		private readonly QueryTestFixture _fixture;
+		private readonly QueryTestSQLFixture _fixture;
 		private readonly IMediator _mediator;
-		public PalletViewServicesTests(QueryTestFixture fixture)
+		public PalletViewServicesTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_mediator = _fixture.Mediator;
@@ -49,7 +49,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletServiceTests.I
 		}
 
 		[Fact]
-		public async Task ShowDataToEdit_GetPalletToEdit_ReturnData()
+		public async Task GetPalletToEdit_ShowDataToEdit_ReturnData()
 		{
 			//Arrange
 			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
@@ -79,7 +79,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletServiceTests.I
 			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product2.BestBefore);
 		}
 		[Fact]
-		public void ShowPallets_FindPallets_ReturnCollection()
+		public void FindPallets_ShowPallets_ReturnCollection()
 		{
 			//Arrange
 			var filtr = new PalletSearchFilter
@@ -87,13 +87,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletServiceTests.I
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(3))
 			};
 			//Act
-			var query = new FindPalletsByFiltrQuery(filtr, 1, 1);
+			var query = new FindPalletsByFiltrQuery
+			//(filtr, 1, 1);
+			{
+				Filter = filtr,
+				PageSize = 1,
+				CurrentPage = 1
+			};
 			var result = _mediator.Send(query);
 			//Assert
 			Assert.NotEmpty(result.Result.Result.Items);
 		}
 		[Fact]
-		public void ShowPallets_FindPallets_ReturnCollectionEmpty()
+		public void FindPallets_ShowPallets_ReturnCollectionEmpty()
 		{
 			//Arrange
 			var filtr = new PalletSearchFilter
@@ -101,7 +107,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletServiceTests.I
 				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(36))
 			};
 			//Act
-			var query = new FindPalletsByFiltrQuery(filtr, 1, 1);
+			var query = new FindPalletsByFiltrQuery
+			{
+				Filter = filtr,
+				PageSize = 1,
+				CurrentPage = 1
+			};
 			var result = _mediator.Send(query);
 			//Assert
 			Assert.False(result.Result.IsSuccess);

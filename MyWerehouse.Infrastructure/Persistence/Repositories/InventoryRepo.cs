@@ -22,7 +22,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{	
 			_werehouseDbContext.Inventories.Add(inventory);
 		}		
-		public async Task<Inventory?> GetInventoryForProductAsync(Guid productId)//pobranie danych/ilość dla produktu z ostatniej aktualizacji
+		public async Task<Inventory> GetInventoryForProductAsync(Guid productId)//pobranie danych/ilość dla produktu z ostatniej aktualizacji
 		{
 			var result = await _werehouseDbContext.Inventories
 				.Include(i => i.Product)

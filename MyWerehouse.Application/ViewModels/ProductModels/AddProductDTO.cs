@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public string SKU { get; set; }
 		//public string Category { get; set; }
 		public int CategoryId { get; set; }
-		public bool? IsDeleted { get; set; }
+		public bool? IsDeleted { get; set; } = false;
 		public int CartonsPerPallet { get; set; }
 		//public int? DetailsId { get; set; }// Update !!!
 		public int Length { get; set; } //cm

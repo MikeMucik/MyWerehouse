@@ -11,7 +11,10 @@ using MyWerehouse.Server.Middleware;
 Environment.SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "");
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<WerehouseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<WerehouseDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+//.LogTo(Console.WriteLine, LogLevel.Information)//
+);
 // Add services to the container.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 		.AddEntityFrameworkStores<WerehouseDbContext>()
@@ -22,7 +25,7 @@ builder.Services.AddInfrastructure();
 builder.Services.AddControllers();
 
 builder.Services.AddValidatorsFromAssemblyContaining<AddressDTOValidation>();
-//builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
 	c.MapType<DateOnly>(() => new Microsoft.OpenApi.Models.OpenApiSchema
@@ -37,26 +40,13 @@ WebApplication app;
 app = builder.Build();
 Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-	app.UseSwagger();
-	app.UseSwaggerUI(c =>
-	{
-		c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
-		c.RoutePrefix = "swagger";
-	});
-	app.UseSwaggerUI(c =>
-	{
-		c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
-		c.RoutePrefix = "swagger";
-		c.HeadContent = "<!-- Swagger UI clean -->";
-		//c.EnableTryItOutByDefault();
-		//c.ConfigObject = new Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIOptions
-		//{
-		//	DocExpansion = Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None
-		//};
-	});
-}
+	c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
+	c.RoutePrefix = "swagger";
+});
+
 app.UseStaticFiles();
 
 app.UseMiddleware<ExceptionMiddleware>();

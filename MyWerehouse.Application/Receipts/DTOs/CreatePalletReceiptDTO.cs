@@ -13,6 +13,7 @@ namespace MyWerehouse.Application.Receipts.DTOs
 {
 	public class CreatePalletReceiptDTO
 	{		
+		public Guid Id { get; set ; }
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();	
 		public Guid ReceiptId { get; set; }		
 		public int ReceiptNumber { get; set; }		

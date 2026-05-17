@@ -22,7 +22,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 		{
 			entity.HasKey(e => e.Id);
 			entity.Property(e=>e.Id).ValueGeneratedNever();
-			//entity.Property(e => e.Id).ValueGeneratedOnAdd();
 			if (_providerName == "Microsoft.EntityFrameworkCore.SqlServer")
 			{
 				entity.Property(e => e.Name)
@@ -36,9 +35,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 			entity.HasOne(pm => pm.InventoryItem)
 			.WithOne(i => i.Product)
 			.HasForeignKey<Inventory>(i => i.ProductId);
-
-			//entity.OwnsOne(p=>p.Details)
-
 
 			entity.HasOne(p => p.Details)
 			.WithOne(p => p.Product)

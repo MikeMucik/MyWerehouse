@@ -27,19 +27,6 @@ namespace MyWerehouse.Server.Controllers
 		{
 			var result = await _mediator.Send(command);
 			return result.ToActionResult();
-
-			//if (!result.IsSuccess)
-			//{
-			//	return result.ErrorType switch
-			//	{
-			//		ErrorType.NotFound => NotFound(result.Error),
-			//		ErrorType.Conflict => Conflict(result.Error),
-			//		ErrorType.Validation => BadRequest(result.Error),
-			//		_ => BadRequest(result.Error)
-			//	};
-			//}
-			//return result.ToActionResult();
-			//return Ok(result.Value);
 		}
 		// paleta do edycji
 		[HttpGet("{id}")]

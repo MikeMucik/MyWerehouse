@@ -138,6 +138,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId)
 		{
 			var pallets = await _werehouseDbContext.Pallets
+				.Include(l=>l.Location)//bo snapShot
 				.Include(p => p.ProductsOnPallet)
 				.Where(p => !excludedId.Contains(p.Id))
 				.Where(p =>

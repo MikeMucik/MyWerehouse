@@ -32,19 +32,24 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateTime pickingDate)
 		{
 			var pickingTask = _werehouseDbContext.PickingTasks
+				
 				.Include(a => a.VirtualPallet)
 					.ThenInclude(b => b.Pallet)
 						.ThenInclude(c => c.ProductsOnPallet)
 				.Include(i => i.Issue)
 				.Where(p =>
 					p.VirtualPalletId == palletPickingId &&
-					p.Issue.IssueDateTimeCreate >= pickingDate.AddDays(-7) &&
+					p.Issue.IssueDateTimeCreate >= pickingDate.AddDays(-14) &&//ustalenie biznesowe
 					p.Issue.IssueDateTimeSend >= pickingDate &&
 					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2) &&
-					p.PickingStatus == PickingStatus.Allocated);				
+					p.PickingStatus == PickingStatus.Allocated);
 			return pickingTask;
 		}
-		
+		//.Include(a => a.VirtualPallet)//
+		//			.ThenInclude(p => p.Pallet)//
+		//				.ThenInclude(l => l.Location)//
+
+
 		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid)
 		{
 			return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.Id == guid);
@@ -75,7 +80,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(a => a.IssueId == issueId)
 				.ToListAsync();
 			return result;
-		}		
+		}
 
 		public async Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId)
 		{
@@ -92,31 +97,31 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				x.PickingDay >= start &&
 				(x.PickingStatus == PickingStatus.Allocated ||
 				x.PickingStatus == PickingStatus.Available))
-				.Select(q=> new
-				{					
+				.Select(q => new
+				{
 					q.Issue.ClientId,
 					q.IssueId,
 					q.Issue.IssueNumber,
 					q.ProductId,
 					q.RequestedQuantity
 				})
-				.Where(p=>p.ProductId != Guid.Empty)
-				.GroupBy(p=> new
+				.Where(p => p.ProductId != Guid.Empty)
+				.GroupBy(p => new
 				{
 					p.ClientId,
 					p.IssueId,
 					p.IssueNumber,
 					p.ProductId,
 				})
-				.Select(p=> new PickingTaskFlat
+				.Select(p => new PickingTaskFlat
 				{
 					ClientId = p.Key.ClientId,
 					IssueId = p.Key.IssueId,
 					IssueNumber = p.Key.IssueNumber,
 					ProductId = p.Key.ProductId,
-					Quantity = p.Sum(q=>q.RequestedQuantity)
+					Quantity = p.Sum(q => q.RequestedQuantity)
 				});
 			return list;
-		}		
+		}
 	}
 }

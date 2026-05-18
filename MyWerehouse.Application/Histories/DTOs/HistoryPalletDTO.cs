@@ -24,7 +24,9 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<HistoryPallet, HistoryPalletDTO>()
-				.ForMember(dest => dest.HistoryPalletDetailsDTO, opt => opt.MapFrom(src => src.HistoryPalletDetails));
+				.ForMember(dest => dest.HistoryPalletDetailsDTO, opt => opt.MapFrom(src => src.HistoryPalletDetails))
+				.ForMember(dest=>dest.LocationSnapShotSource, opt=>opt.MapFrom(src => src.SourceLocationSnapShot))
+				.ForMember(dest => dest.LocationSnapShotDestination, opt=>opt.MapFrom(src=>src.DestinationLocationSnapShot));
 		}
 	}
 }

@@ -26,17 +26,20 @@ namespace MyWerehouse.Application
 		{
 			services.AddTransient<ICategoryService, CategoryService>();
 			services.AddTransient<IClientService, ClientService>();
-			services.AddTransient<IInventoryService, InventoryService>();//do wywalenia w przyszłości
 			services.AddTransient<ILocationService, LocationService>();
 			services.AddTransient<IProductService, ProductService>();
-			 //services.AddAutoMapper(Assembly.GetExecutingAssembly());
-			services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
+			services.AddAutoMapper(Assembly.GetExecutingAssembly());
+			//konfiguracja dla 16
+			//services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
 			services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-			services.AddMediatR(cfg =>
-			{
-				cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
-				cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-			});
+			services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);
+			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+			//konfiguracja dla 12+
+			//services.AddMediatR(cfg =>
+			//{
+			//	cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
+			//	cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+			//});
 			//new services
 			services.AddScoped<IAddPickingTaskToIssueService, AddPickingTaskToIssueService>();
 			services.AddScoped<IProcessPickingActionService, ProcessPickingActionService>();

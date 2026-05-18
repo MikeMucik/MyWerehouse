@@ -10,16 +10,12 @@ using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventory
 {
-	public class GetInventoryHandler : IRequestHandler<GetInventoryQuery, InventoryDTO>
+	public class GetInventoryHandler(IInventoryRepo inventoryRepo,
+		IMapper mapper) : IRequestHandler<GetInventoryQuery, InventoryDTO>
 	{
-		public readonly IInventoryRepo _inventoryRepo;
-		public readonly IMapper _mapper;
-		public GetInventoryHandler(IInventoryRepo inventoryRepo,
-			IMapper mapper)
-		{
-			_inventoryRepo = inventoryRepo;
-			_mapper = mapper;
-		}
+		public readonly IInventoryRepo _inventoryRepo = inventoryRepo;
+		public readonly IMapper _mapper = mapper;
+
 		public async Task<InventoryDTO> Handle (GetInventoryQuery request, CancellationToken ct)
 		{
 			var inventory = await _inventoryRepo.GetInventoryForProductAsync(request.ProductId);

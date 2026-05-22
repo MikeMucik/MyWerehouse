@@ -39,17 +39,14 @@ WebApplication app;
 
 app = builder.Build();
 Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
-
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
 	c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWerehouse API v1");
 	c.RoutePrefix = "swagger";
 });
-
 app.UseStaticFiles();
-
-app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

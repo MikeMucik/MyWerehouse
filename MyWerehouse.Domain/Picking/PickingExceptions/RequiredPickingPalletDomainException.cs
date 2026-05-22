@@ -8,9 +8,9 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Domain.Picking.PickingExceptions
 {
-	public class RequiredPickingPalletException : DomainException
+	public class RequiredPickingPalletDomainException : DomainException
 	{
-		public RequiredPickingPalletException()
+		public RequiredPickingPalletDomainException()
 			:base ("Picking pallet id is required.") { }
 	}
 }

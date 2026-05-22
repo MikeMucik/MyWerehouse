@@ -23,7 +23,7 @@ namespace MyWerehouse.Server.Middleware
 				//context.Response.StatusCode = StatusCodes.Status400BadRequest;
 				//await context.Response.WriteAsJsonAsync(ex.Message);
 			}
-			catch (ValidationException ex)
+			catch (FluentValidation.ValidationException ex)
 			{
 				context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
 				await context.Response.WriteAsJsonAsync(new
@@ -38,6 +38,8 @@ namespace MyWerehouse.Server.Middleware
 			}
 			catch (Exception ex)
 			{
+				Console.WriteLine(ex.GetType().FullName);
+
 				await HandleExceptionAsync(context, ex);				
 			}
 		}

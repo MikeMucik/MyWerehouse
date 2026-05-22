@@ -28,6 +28,7 @@ namespace MyWerehouse.Application.Services
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IInventoryRepo _inventoryRepo;
+		private readonly ICategoryRepo _categoryRepo;
 		private readonly IValidator<AddProductDTO> _productValidator;
 
 		public ProductService(
@@ -35,6 +36,7 @@ namespace MyWerehouse.Application.Services
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IInventoryRepo inventoryRepo,
+			ICategoryRepo categoryRepo,
 			IReceiptRepo? receiptRepo = null,
 			IValidator<AddProductDTO>? productValidator = null)
 		{
@@ -42,6 +44,7 @@ namespace MyWerehouse.Application.Services
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
 			_inventoryRepo = inventoryRepo;
+			_categoryRepo = categoryRepo;
 			_receiptRepo = receiptRepo;
 			_productValidator = productValidator;
 		}
@@ -64,6 +67,11 @@ namespace MyWerehouse.Application.Services
 			if (await existingProduct.AnyAsync())
 			{
 				return AppResult<Guid>.Fail("Produkt o tej nazwie już istnieje.", ErrorType.NotFound);
+			}
+			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
+			if (existCategory == null)
+			{
+				return AppResult<Guid>.Fail($"Kateogria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
 			}
 			var productNew = _mapper.Map<Product>(productDTO);
 			var product = _productRepo.AddProduct(productNew);
@@ -101,8 +109,8 @@ namespace MyWerehouse.Application.Services
 			return AppResult<Unit>.Success(Unit.Value);
 		}
 		public async Task<AppResult<AddProductDTO>> GetProductToEditAsync(Guid id)
-		{
-			var product = await _productRepo.GetProductByIdAsync(id);
+		{			
+			var product = await _productRepo.GetProductToEditAsync(id);
 			var productDTO = _mapper.Map<AddProductDTO>(product);
 			return AppResult<AddProductDTO>.Success(productDTO);
 		}
@@ -118,7 +126,13 @@ namespace MyWerehouse.Application.Services
 			{
 				return AppResult<Unit>.Fail($"Produkt o numerze {productDTO.Id} nie istnieje", ErrorType.NotFound);
 			}
-			_mapper.Map(productDTO, existingProduct);
+			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
+			if (existCategory == null)
+			{
+				return AppResult<Unit>.Fail($"Kateogria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
+			}
+			var changes =  _mapper.Map(productDTO, existingProduct);
+			existingProduct.ApplyChanges(changes);
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);
 		}

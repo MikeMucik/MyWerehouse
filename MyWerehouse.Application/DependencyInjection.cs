@@ -31,8 +31,11 @@ namespace MyWerehouse.Application
 			services.AddAutoMapper(Assembly.GetExecutingAssembly());
 			//konfiguracja dla 16
 			//services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
-			services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+			//services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 			services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);
+			services.AddValidatorsFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
+			
 			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 			//konfiguracja dla 12+
 			//services.AddMediatR(cfg =>

@@ -7,10 +7,10 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Picking.PickingExceptions
 {
-	public class CannotSetVirtualPalletException :DomainException
+	public class CannotSetVirtualPalletDomainException : DomainException
 	{
 		public Guid PickingTaskId { get; }
-		public CannotSetVirtualPalletException(Guid id)
+		public CannotSetVirtualPalletDomainException(Guid id)
 			: base($"Task {id} has already virtualPallet.")
 		{
 			PickingTaskId = id;

@@ -26,12 +26,13 @@ namespace MyWerehouse.Test.ValidationTest
 				Width = 300,
 				Weight = 400,
 				Description = "500",
+				CartonsPerPallet =56
 			};
 			//Act&Assert
 			validator.TestValidate(product).ShouldNotHaveAnyValidationErrors();
 		}
 		[Fact]
-		public void AddProductNotProperData_ShouldNotReturnValidationError()
+		public void AddProductNotProperData_ShouldReturnValidationError()
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();
@@ -45,12 +46,13 @@ namespace MyWerehouse.Test.ValidationTest
 				Width = 300,
 				Weight = 400,
 				Description = "500",
+				CartonsPerPallet =56
 			};
 			//Act&Assert
 			validator.TestValidate(product).ShouldHaveValidationErrorFor(nameof(AddProductDTO.Name));
 		}
 		[Fact]
-		public void AddProductNotProperDataWidth_ShouldNotReturnValidationError()
+		public void AddProductNotProperDataWidth_ShouldReturnValidationError()
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();
@@ -64,6 +66,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Width = 300,
 				Weight = 400,
 				Description = "500",
+				CartonsPerPallet= 56
 			};
 			//Act&Assert
 			validator.TestValidate(product).ShouldHaveValidationErrorFor(nameof(AddProductDTO.Length));

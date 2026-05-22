@@ -15,7 +15,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public string Name { get; set; }
 		public string SKU { get; set; }
 		public string Category { get; set; }
-		//public bool IsDeleted { get; set; }
+		public bool IsDeleted { get; set; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Product,  ProductDTO>()

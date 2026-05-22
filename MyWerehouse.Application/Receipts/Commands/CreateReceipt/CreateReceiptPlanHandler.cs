@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Infrastructure.Persistence;
@@ -24,11 +23,11 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 
 		public async Task<AppResult<Unit>> Handle(CreateReceiptPlanCommand request, CancellationToken ct)
 		{
-				if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
-					return AppResult<Unit>.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.", ErrorType.NotFound);
-				if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
-					return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
-				var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
+			//if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
+			//	return AppResult<Unit>.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.", ErrorType.NotFound);
+			//if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
+			//	return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
+			var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
 				var receipt = Receipt.Create(receiptNumber, request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
 				_receiptRepo.AddReceipt(receipt);
 				receipt.Create(request.DTO.PerformedBy);

@@ -32,13 +32,13 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public async Task<Product?> GetProductByIdAsync(Guid id)
 		{
-			if (id != Guid.Empty || id != null)//
+			if (id == Guid.Empty)
 			{
-				var product = await _werehouseDbContext.Products
-					.FirstOrDefaultAsync(p => p.Id == id);
-				return product;
+				return null;
 			}
-			return null;
+			var product = await _werehouseDbContext.Products
+				.FirstOrDefaultAsync(p => p.Id == id);
+			return product;
 		}
 		public async Task<Product?> GetProductToEditAsync(Guid id)
 		{
@@ -58,7 +58,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public IQueryable<Product> FindProducts(ProductSearchFilter filter)
 		{
 			var result = _werehouseDbContext.Products
-				.Where(p => p.IsDeleted == false);
+				.AsQueryable();
+			//.Where(p => p.IsDeleted == false);
 			//if (filter.ProductId > 0)
 			//{
 			//	result = result.Where(p => p.ProductId == filter.ProductId);

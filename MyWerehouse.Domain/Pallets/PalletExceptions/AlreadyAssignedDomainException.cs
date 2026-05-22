@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Pallets.PalletExceptions
 {
-	public class TwoDateOneProductOnPalletException :DomainException
+	public class AlreadyAssignedDomainException :DomainException
 	{
 		public Guid PalletId { get; }
-		public TwoDateOneProductOnPalletException(Guid palletId)
-			: base("Cannot mix different expiration dates on same pallet.")
+		public AlreadyAssignedDomainException(Guid palletId):
+			base("Pallet already assigned.")
 		{
 			PalletId = palletId;
 		}

@@ -8,11 +8,11 @@ using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Domain.Receviving.ReceivingExceptions
 {
-	public class InvalidReceiptStateException : DomainException
+	public class InvalidReceiptStateDomainException : DomainException
 	{
 		public Guid ReceiptId { get; }
 		public ReceiptStatus ReceiptStatus { get; }
-		public InvalidReceiptStateException(Guid receiptId, ReceiptStatus receiptStatus)
+		public InvalidReceiptStateDomainException(Guid receiptId, ReceiptStatus receiptStatus)
 			: base($"Operation prohibited for {receiptId}. Incorrect status {receiptStatus}.")
 		{
 			ReceiptId = receiptId;

@@ -7,10 +7,10 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Receviving.ReceivingExceptions
 {
-	public class ReceiptAlreadyVerifyException : DomainException
+	public class ReceiptAlreadyVerifyDomainException : DomainException
 	{
 		public Guid ReceiptId {get;}
-		public ReceiptAlreadyVerifyException(Guid receiptId)
+		public ReceiptAlreadyVerifyDomainException(Guid receiptId)
 			: base($"Receipt {receiptId} already verified. Operation prohibited.")
 		{
 			ReceiptId = receiptId;

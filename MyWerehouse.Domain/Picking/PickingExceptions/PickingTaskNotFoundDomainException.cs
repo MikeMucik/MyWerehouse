@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Picking.PickingExceptions
 {
-	public class PickingTaskNotFoundException : DomainException
+	public class PickingTaskNotFoundDomainException : DomainException
 	{
 		public Guid IssueId { get; }
 		public Guid ProductId { get; }
-		public PickingTaskNotFoundException(Guid issueId, Guid productId)
+		public PickingTaskNotFoundDomainException(Guid issueId, Guid productId)
 			: base($"Not found task.")
 		{
 			IssueId = issueId;

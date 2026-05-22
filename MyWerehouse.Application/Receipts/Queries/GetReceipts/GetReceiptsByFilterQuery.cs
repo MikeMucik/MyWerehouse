@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Receviving.Filters;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceipts
 {
-	public class GetReceiptsByFilterQuery : IRequest<AppResult<PagedResult<ReceiptDTO>>>
+	public class GetReceiptsByFilterQuery : IRequest<AppResult<PagedResult<ReceiptSimplyDTO>>>
 	{
 		public IssueReceiptSearchFilter Filter { get; set; } = new();
 		public int CurrentPage { get; set; }

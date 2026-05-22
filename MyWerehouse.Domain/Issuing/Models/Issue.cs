@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Clients.ClientsExceptions;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
@@ -38,12 +39,12 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			Id = Guid.NewGuid();
 			IssueNumber = issueNumber;
-			if (clientId <= 0) throw new ArgumentException("ClientId musi być dodatni");
+			if (clientId <= 0) throw new ClientDomainException();
 			ClientId = clientId;
-			if (dateToSend < DateTime.UtcNow) throw new WrongDataException();
+			if (dateToSend < DateTime.UtcNow) throw new WrongDateDomainException();
 			IssueDateTimeSend = dateToSend;
 			IssueDateTimeCreate = DateTime.UtcNow;
-			PerformedBy = performedBy ?? throw new InvalidUserIdException(performedBy);
+			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException(performedBy);
 			IssueStatus = IssueStatus.New;
 		}
 
@@ -71,7 +72,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			if (userId == null || userId.Length == 0)
 			{
-				new InvalidUserIdException(userId);
+				new InvalidUserIdDomainException(userId);
 			}			
 			PerformedBy = userId;
 		}
@@ -79,14 +80,14 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void ChangeStatus(IssueStatus issueStatus)
 		{
 			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived)
-				throw new NotAllowedOperationException(Id);
+				throw new NotAllowedOperationDomainException(Id);
 			IssueStatus = issueStatus;
 		}
 
 		public void CancelIssue(string userId)
 		{
 			if (IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.Archived)
-				throw new NotAllowedOperationException(Id);
+				throw new NotAllowedOperationDomainException(Id);
 			IssueStatus = IssueStatus.Cancelled;
 			AddHistory(userId);
 			foreach (var pallet in Pallets)
@@ -147,12 +148,12 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			if (Pallets.Any(p => p.Status != PalletStatus.Loaded))
 			{
-				throw new NotEndedLoadingException(Id); //może dodać jakie nie są ale to nie w domenie				
+				throw new NotEndedLoadingDomainException(Id); //może dodać jakie nie są ale to nie w domenie				
 			}
 			PerformedBy = userId;
 			if (IssueStatus != IssueStatus.IsShipped)
 			{
-				throw new NotAllowedOperationException(Id);
+				throw new NotAllowedOperationDomainException(Id);
 			}
 			foreach (var pallet in Pallets)
 			{
@@ -197,7 +198,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				if (pallet.Status != PalletStatus.Loaded)
 				{
-					throw new NotEndedLoadingException(Id);
+					throw new NotEndedLoadingDomainException(Id);
 				}
 			}
 			IssueStatus = IssueStatus.IsShipped;
@@ -229,9 +230,10 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void ReservePallet(Pallet pallet) //do testów
 		{
 			if (pallet.Status == PalletStatus.ToIssue)
-				throw new AlreadyAssignedException(pallet.Id);
+				throw new AlreadyAssignedDomainException(pallet.Id);
 			this.Pallets.Add(pallet);
 		}
+
 		public void AddHistory(string userId)
 		{
 			this.AddDomainEvent(new AddHistoryForIssueNotification(
@@ -251,7 +253,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		private IReadOnlyCollection<AddListItemsOfIssueDetailsDto> BuildListItems()
 		{
-			if (IssueItems is null) throw new ArgumentNullException("No data for items.");
 			return IssueItems
 				.Select(i => new AddListItemsOfIssueDetailsDto(
 					i.Id,

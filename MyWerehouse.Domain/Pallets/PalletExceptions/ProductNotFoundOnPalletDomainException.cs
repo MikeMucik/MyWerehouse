@@ -7,12 +7,12 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Pallets.PalletExceptions
 {
-	public class ProductNotFoundOnPalletException :DomainException
+	public class ProductNotFoundOnPalletDomainException :DomainException
 	{
 		public Guid PalletId { get; }
 		public string PalletNumber { get; }
 		public Guid ProductId { get; }
-		public ProductNotFoundOnPalletException(Guid palletId, string palletNumber, Guid productId)
+		public ProductNotFoundOnPalletDomainException(Guid palletId, string palletNumber, Guid productId)
 			:base($"Not found product{productId} on Pallet. Expected one. ")
 		{
 			PalletId = palletId;

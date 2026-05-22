@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Pallets.PalletExceptions
 {
-	public class InsufficientQunatityException :DomainException
+	public class InvalidQunatityDomainException : DomainException
 	{
 		public Guid PalletId { get; }
-		public InsufficientQunatityException(Guid palletId)
-			: base("Insufficient/wrong quantity.")
+		public InvalidQunatityDomainException(Guid palletId)
+			: base("Quantity must be greater than zero.")
 		{
 			PalletId = palletId;
 		}

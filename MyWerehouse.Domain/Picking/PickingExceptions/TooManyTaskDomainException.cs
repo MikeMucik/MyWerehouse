@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Picking.PickingExceptions
 {
-	public class TooManyTaskException :DomainException
+	public class TooManyTaskDomainException : DomainException
 	{
 		public Guid IssueId { get; }
 		public Guid ProductId { get; }
-		public TooManyTaskException(Guid issueId, Guid productId)
+		public TooManyTaskDomainException(Guid issueId, Guid productId)
 			: base($"Only one task has to be.")
 		{
 			IssueId = issueId;

@@ -6,6 +6,7 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.IssuesServices;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
@@ -96,7 +97,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 						resultList.Add(IssueResult.Ok("Towar dołączono do wydania", product.ProductId));
 						anySuccess = true;
 					}
-					catch (Exception ex) // Łapiemy tutaj wyjątki domenowe, żeby obsłużyć logikę czyszczenia, częsciowy wynik da odpowiedz co jest nie tak z załadunkiem  
+					catch (DomainException ex) // Łapiemy tutaj wyjątki domenowe, żeby obsłużyć logikę czyszczenia, częsciowy wynik da odpowiedz co jest nie tak z zleceniem wydania  
 					{
 						await transaction.RollbackToSavepointAsync(savepointName, ct);
 						await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
@@ -200,7 +201,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 					if (result.Success)
 					{
 						result.Message += " (Dodatkowe zlecenie na ostatnią chwilę - stare jest w realizacji).";
-						//dodatkowy towar do zlecenia w nowym zleceniu
+						//dodatkowy towar do zlecenia w nowym zleceniu - additional goods to be ordered in a new order
 					}
 				}
 				return AppResult<List<IssueResult>>.Success(resultList);

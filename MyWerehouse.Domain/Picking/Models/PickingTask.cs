@@ -35,7 +35,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			if (pickingStatus == PickingStatus.Allocated && virtualPalletId == null)
 			{
-				throw new ArgumentNullException(nameof(pickingStatus));
+				throw new TaskWithOutSourceDomainException();
 			}
 			Id = Guid.NewGuid();
 			VirtualPalletId = virtualPalletId;
@@ -80,7 +80,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			var oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.PickedPartially || PickingStatus == PickingStatus.Picked)
-				throw new CannotCancelPickingTaskInCurrentStatusException(Id, IssueId, PickingStatus);
+				throw new CannotCancelPickingTaskInCurrentStatusDomainException(Id, IssueId, PickingStatus);
 			this.PickingStatus = PickingStatus.Cancelled;			
 			AddHistoryPicking(userId, null,null, oldStatus, 0);			
 			this.RequestedQuantity = 0;
@@ -89,7 +89,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public void SetVirtualPallet(Guid virtualPalletId)
 		{
 			if (VirtualPalletId != null)
-				throw new CannotSetVirtualPalletException(Id);
+				throw new CannotSetVirtualPalletDomainException(Id);
 			this.VirtualPalletId = virtualPalletId;
 		}
 
@@ -105,9 +105,9 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			var	oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
-				throw new CannotMakeOperationForStatusException(Id, PickingStatus);
+				throw new CannotMakeOperationForStatusDomainException(Id, PickingStatus);
 			if (pickingPalletId == Guid.Empty)
-				throw new RequiredPickingPalletException();
+				throw new RequiredPickingPalletDomainException();
 			PickedQuantity = RequestedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.Picked;
@@ -117,23 +117,23 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			var oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
-				throw new CannotMakeOperationForStatusException(Id, PickingStatus);
+				throw new CannotMakeOperationForStatusDomainException(Id, PickingStatus);
 			if (pickingPalletId == Guid.Empty)
-				throw new RequiredPickingPalletException();
+				throw new RequiredPickingPalletDomainException();
 			PickedQuantity = pickedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.PickedPartially;
 			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, pickedQuantity);
 		}
-		public void ChangeToAvailable(string userId, string snapShot)
-		{
-			var pickingTasks = this.VirtualPallet.PickingTasks;
-			if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
-			{
-				VirtualPallet.Pallet.ChangeStatus(PalletStatus.Available);
-				VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonForPallet.ReversePicking, userId, snapShot);
-			}
-		}
+		//public void ChangeToAvailable(string userId, string snapShot)
+		//{
+		//	var pickingTasks = this.VirtualPallet?.PickingTasks;
+		//	if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
+		//	{
+		//		VirtualPallet.Pallet.ChangeStatus(PalletStatus.Available);
+		//		VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonForPallet.ReversePicking, userId, snapShot);
+		//	}
+		//}
 		//Różne źródła prawdy dlatego przeciążenie - nie jest to najlepsze rozwiązanie
 		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
 		{

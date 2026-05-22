@@ -56,10 +56,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 			DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -76,7 +76,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = new DateOnly(2026,1,1) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)) }
 				}
 			};
 
@@ -181,10 +181,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 			DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -201,7 +201,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = new DateOnly(2026,1,1) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)) }
 				}
 			};
 
@@ -311,16 +311,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 			DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 8, new DateOnly(2026, 1, 1));
+			pallet2.AddProduct(product.Id, 8, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 7, new DateOnly(2026, 1, 1));
+			pallet3.AddProduct(product.Id, 7, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
-			pallet4.AddProduct(product.Id, 5, new DateOnly(2026, 1, 1));
+			pallet4.AddProduct(product.Id, 5, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -337,7 +337,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = new DateOnly(2026,1,1) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)) }
 				}
 			};
 
@@ -447,25 +447,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 			DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 8, new DateOnly(2026, 1, 1));
+			pallet2.AddProduct(product.Id, 8, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 7, new DateOnly(2026, 1, 1));
-
-			//var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
-			//pallet4.AddProduct(product.Id, 5, new DateOnly(2026, 1, 1));
+			pallet3.AddProduct(product.Id, 7, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location, location1, location2, location3, location4);
-			DbContext.Pallets.AddRange(pallet1, pallet2
-				, pallet3
-				//, pallet4
-				);
+			DbContext.Pallets.AddRange(pallet1, pallet2	, pallet3);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
@@ -476,7 +470,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = new DateOnly(2026,1,1) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)) }
 				}
 			};
 

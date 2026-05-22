@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt;
@@ -219,8 +221,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				//PerformedBy = "user",
 				RampNumber = 1
 			};
-			var ex = await Assert.ThrowsAsync<InvalidUserIdException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
-			Assert.Contains("Invalid  or missing user ID.", ex.Message);
+			//var ex = await Assert.ThrowsAsync<InvalidUserIdDomainException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
+			var ex = await Assert.ThrowsAsync <ValidationException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
+			Assert.Contains("Użytkownik wymagany.", ex.Message);
 			
 			
 		//	var result =
@@ -251,6 +254,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
+			var location = new Location
+			{
+				Id =1,
+				Bay = 1,
+				Aisle = 0,
+				Position = 0,
+				Height = 0
+			};
+			DbContext.Locations.Add(location);
 			DbContext.Clients.Add(initialCLient);
 			DbContext.SaveChanges();
 			//Act
@@ -261,11 +273,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				PerformedBy = "user",
 				RampNumber = 1
 			};
-			var result =
-				await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
-			//Assert
-			Assert.NotNull(result);
-			Assert.Contains("Klient o numerze 2 nie istnieje.", result.Error);
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
+			Assert.Contains("Klient nie istnieje.", ex.Message);
+			//var result =
+			//	await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
+			////Assert
+			//Assert.NotNull(result);
+			//Assert.Contains("Klient o numerze 2 nie istnieje.", result.Error);
 		}
 		[Fact]
 			public async Task NotProperDataProductQunatityZero_AddPalletToReceiptAsync_ThrowValidateException()

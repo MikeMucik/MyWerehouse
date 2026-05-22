@@ -73,13 +73,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product = Product.Create("TestFull", "123", 1, 10);
 
 			var pallet1 = Pallet.CreateForTests("P1", new DateTime(2025, 3, 3), 1, PalletStatus.Available, null, null);
-			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 					
 			var pallet2 = Pallet.CreateForTests("P2", new DateTime(2025, 3, 3), 2, PalletStatus.Available, null, null);
-			pallet2.AddProductForTests(product.Id, 9, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet2.AddProductForTests(product.Id, 9, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet3.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			DbContext.Addresses.Add(address);
 			DbContext.Clients.Add(initailClient);
@@ -98,7 +98,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				{
 					ProductId = product.Id,
 					Quantity = 26, // 2 pełne palety + 5 do pickingu
-					BestBefore = new DateOnly(2025, 10, 10),
+					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))  // new DateOnly(2025, 10, 10),
 				}]
 			};
 			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
@@ -195,19 +195,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var product = Product.Create("TestFull", "123", 1, 10);
 			var pallet1 = Pallet.CreateForTests("P1", new DateTime(2025, 3, 3), 1, PalletStatus.Available, null, null);
-			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet2 = Pallet.CreateForTests("P2", new DateTime(2025, 3, 3), 2, PalletStatus.ToPicking, null, null);
-			pallet2.AddProductForTests(product.Id, 2, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet2.AddProductForTests(product.Id, 2, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet3.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet4 = Pallet.CreateForTests("P4", new DateTime(2025, 3, 3), 4, PalletStatus.Available, null, null);
-			pallet4.AddProductForTests(product.Id, 3, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet4.AddProductForTests(product.Id, 3, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet5 = Pallet.CreateForTests("P5", new DateTime(2025, 3, 3), 5, PalletStatus.Available, null, null);
-			pallet5.AddProductForTests(product.Id, 2, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet5.AddProductForTests(product.Id, 2, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			DbContext.Addresses.Add(address);
 			DbContext.Clients.Add(initailClient);
@@ -229,7 +229,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				{
 					ProductId = product.Id,
 					Quantity = 26, // 2 pełne palety + 5 do pickingu
-					BestBefore = new DateOnly(2025, 10, 10),
+				BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
 			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
@@ -663,13 +663,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			};
 			var product = Product.Create("TestFull", "123", 1, 10);
 			var pallet1 = Pallet.CreateForTests("P1", new DateTime(2025, 3, 3), 1, PalletStatus.Available, null, null);
-			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			var pallet2 = Pallet.CreateForTests("P2", new DateTime(2025, 3, 3), 2, PalletStatus.Available, null, null);
-			pallet2.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet2.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 						
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet3.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			
 			DbContext.Addresses.Add(address);
 			DbContext.Clients.Add(initailClient);
@@ -689,7 +689,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				{
 					ProductId = product.Id,
 					Quantity = 31, // 2 pełne palety + 5 do pickingu
-					BestBefore = new DateOnly(2025, 10, 10),
+				BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
 			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
@@ -757,9 +757,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			var product = Product.Create("TestFull", "123", 1, 10);
 
 			var pallet1 = Pallet.CreateForTests("P1", new DateTime(2025, 3, 3), 1, PalletStatus.Available, null, null);
-			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet1.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", new DateTime(2025, 3, 3), 2, PalletStatus.Available, null, null);
-			pallet2.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), new DateOnly(2026, 1, 1));
+			pallet2.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
 			pallet3.AddProduct(product.Id, 10, new DateOnly(2024, 1, 1));
 			
@@ -781,7 +781,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 				{
 					ProductId = product.Id,
 					Quantity = 25, // 2 pełne palety + 5 do pickingu
-					BestBefore = new DateOnly(2025, 10, 10),
+					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
 			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));

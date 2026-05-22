@@ -9,5 +9,6 @@ using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 {
-	public record CreateIssueCommand(CreateIssueDTO DTO, DateTime SendDate): IRequest<AppResult<List<IssueResult>>>;	
+	public record CreateIssueCommand(CreateIssueDTO DTO, DateTime SendDate)
+		: IRequest<AppResult<List<IssueResult>>>;	
 }

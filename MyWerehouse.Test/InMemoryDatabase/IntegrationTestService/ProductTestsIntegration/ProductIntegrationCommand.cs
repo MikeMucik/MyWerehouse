@@ -19,13 +19,15 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		protected readonly IInventoryRepo _inventoryRepo;
 		protected readonly IProductRepo _productRepo;
 		protected readonly IReceiptRepo _receiptRepo;
+		protected readonly ICategoryRepo _categoryRepo;
 		public ProductIntegrationCommand() : base()
 		{	
 			_productRepo = new ProductRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_productValidator = new AddProductDTOValidation();	
 			_inventoryRepo = new InventoryRepo(_context);
-			_productService = new ProductService(_productRepo, _mapper,_context,_inventoryRepo, _receiptRepo, _productValidator);
+			_categoryRepo = new CategoryRepo(_context);
+			_productService = new ProductService(_productRepo, _mapper,_context,_inventoryRepo,_categoryRepo, _receiptRepo, _productValidator);
 		}
 	}
 }

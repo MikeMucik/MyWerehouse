@@ -145,7 +145,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			await DbContext.SaveChangesAsync();			
 			
 			// Act&Assert		
-			var ex = await Assert.ThrowsAsync<ReceiptAlreadyVerifyException>(() => Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001")));
+			var ex = await Assert.ThrowsAsync<ReceiptAlreadyVerifyDomainException>(() => Mediator.Send(new VerifyAndFinalizeReceiptCommand(receipt.Id, "U001")));
 			Assert.Equal($"Receipt {receipt.Id} already verified. Operation prohibited.", ex.Message);
 			
 		}

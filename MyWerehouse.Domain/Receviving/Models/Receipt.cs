@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Clients.ClientsExceptions;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
@@ -35,12 +36,11 @@ namespace MyWerehouse.Domain.Receviving.Models
 		{
 			Id = Guid.NewGuid();
 			ReceiptNumber = receiptNumber;
-			if (clientId <= 0) throw new ArgumentException("ClientId must be more than zero.");
-			//if (clientId <= 0) throw new InvalidClientNumberException(clientId);
-			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
+			if (clientId <= 0) throw new ClientDomainException();
+			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException(performedBy);
 			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
 			ClientId = clientId;
-			PerformedBy = performedBy ?? throw new InvalidUserIdException(performedBy);
+			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException(performedBy);
 			ReceiptDateTime = DateTime.UtcNow;
 			ReceiptStatus = ReceiptStatus.Planned;
 			RampNumber = rampNumber;
@@ -56,8 +56,8 @@ namespace MyWerehouse.Domain.Receviving.Models
 		{
 			Id = id;
 			ReceiptNumber = receiptNumber;
-			if (clientId <= 0) throw new ArgumentException("ClientId must be more than zero.");
-			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdException(performedBy);
+			if (clientId <= 0) throw new ClientDomainException();
+			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException(performedBy);
 			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
 			ClientId = clientId;
 			PerformedBy = performedBy;
@@ -81,7 +81,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 		{
 			if (ReceiptStatus != ReceiptStatus.Planned)
 			{
-				throw new InvalidReceiptStateException(Id, ReceiptStatus);
+				throw new InvalidReceiptStateDomainException(Id, ReceiptStatus);
 			}
 			ReceiptStatus = ReceiptStatus.Deleted;
 			AddHistory(userId);
@@ -91,12 +91,12 @@ namespace MyWerehouse.Domain.Receviving.Models
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
 			{
-				throw new ReceiptAlreadyVerifyException(Id);
+				throw new ReceiptAlreadyVerifyDomainException(Id);
 			}
 			if (!(ReceiptStatus == ReceiptStatus.InProgress
 			|| ReceiptStatus == ReceiptStatus.PhysicallyCompleted))
 			{
-				throw new InvalidReceiptStateException(Id, ReceiptStatus);
+				throw new InvalidReceiptStateDomainException(Id, ReceiptStatus);
 			}
 			ReceiptStatus = ReceiptStatus.Cancelled;
 			AddHistory(userId);
@@ -106,7 +106,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 		{
 			if (ReceiptStatus == ReceiptStatus.InProgress) return;
 			if (ReceiptStatus != ReceiptStatus.Planned && ReceiptStatus != ReceiptStatus.InProgress)
-				throw new InvalidReceiptStateException(Id, ReceiptStatus);
+				throw new InvalidReceiptStateDomainException(Id, ReceiptStatus);
 			ReceiptStatus = ReceiptStatus.InProgress;
 			ReceiptDateTime = now;
 			AddHistory(userId);
@@ -115,7 +115,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 		public void UpdateReceipt(string userId, int clientId)
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
-				throw new ReceiptAlreadyVerifyException(Id);
+				throw new ReceiptAlreadyVerifyDomainException(Id);
 			PerformedBy = userId;
 			ReceiptStatus = ReceiptStatus.Correction;
 			ClientId = clientId;
@@ -125,7 +125,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 		public void CompletePhysicalReceipt(string userId)
 		{
 			if (ReceiptStatus != ReceiptStatus.InProgress)
-				throw new InvalidReceiptStateException(Id, ReceiptStatus);
+				throw new InvalidReceiptStateDomainException(Id, ReceiptStatus);
 			ReceiptStatus = ReceiptStatus.PhysicallyCompleted;
 			AddHistory(userId);
 		}
@@ -134,11 +134,11 @@ namespace MyWerehouse.Domain.Receviving.Models
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
 			{
-				throw new ReceiptAlreadyVerifyException(Id);
+				throw new ReceiptAlreadyVerifyDomainException(Id);
 			}
 			if (ReceiptStatus != ReceiptStatus.PhysicallyCompleted)
 			{
-				throw new InvalidReceiptStateException(Id, ReceiptStatus);
+				throw new InvalidReceiptStateDomainException(Id, ReceiptStatus);
 			}
 			var toReturn = Pallets.Where(p => p.Status == PalletStatus.Receiving).ToList();
 			foreach (var pallet in toReturn)

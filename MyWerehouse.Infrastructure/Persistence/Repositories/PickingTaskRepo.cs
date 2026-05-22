@@ -45,11 +45,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					p.PickingStatus == PickingStatus.Allocated);
 			return pickingTask;
 		}
-		//.Include(a => a.VirtualPallet)//
-		//			.ThenInclude(p => p.Pallet)//
-		//				.ThenInclude(l => l.Location)//
-
-
+		
 		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid)
 		{
 			return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.Id == guid);

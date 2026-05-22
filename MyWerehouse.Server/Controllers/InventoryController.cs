@@ -8,19 +8,15 @@ namespace MyWerehouse.Server.Controllers
 {
 	[ApiController]
 	[Route("api/inventory")]
-	public class InventoryController : ControllerBase
+	public class InventoryController(IMediator mediator) : ControllerBase
 	{		
-		private readonly IMediator _mediator;
-		public InventoryController(IMediator mediator)
-		{
-			_mediator = mediator;
-		}
+		private readonly IMediator _mediator = mediator;
+
 		[HttpGet("{id}")]
 		public async Task<IActionResult> Get(Guid id)
 		{
 			var result = await _mediator.Send(new GetInventoryQuery(id));
 			return Ok(result);
-		}
-		
+		}		
 	}
 }

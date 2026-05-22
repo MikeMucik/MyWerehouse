@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Pallets.PalletExceptions
 {
-	public class AlreadyAssignedException :DomainException
+	public class InsufficientQunatityDomainException :DomainException
 	{
 		public Guid PalletId { get; }
-		public AlreadyAssignedException(Guid palletId):
-			base("Pallet already assigned.")
+		public InsufficientQunatityDomainException(Guid palletId)
+			: base("Insufficient/wrong quantity.")
 		{
 			PalletId = palletId;
 		}

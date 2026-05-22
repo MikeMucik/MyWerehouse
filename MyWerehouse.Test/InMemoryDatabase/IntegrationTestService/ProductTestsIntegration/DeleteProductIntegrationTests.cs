@@ -16,7 +16,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 	public class DeleteProductIntegrationTests : ProductIntegrationCommand
 	{
 		[Fact]
-		public async Task HideProduct_DeleteProductAsync_ChangeNotActive()
+		public async Task DeleteProductAsync_ShouldHideProduct_WhenProductActive()
 		{
 			//Arrange
 			var address = new Address
@@ -67,7 +67,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		}
 		
 		[Fact]
-		public async Task Product_DeleteProductAsync_DeleteFromList()
+		public async Task DeleteProductAsync_ShouldDeleteFromList_WhenProductNotUsed()
 		{
 			//Arrange
 			var product1 = Product.Create("Test", "666666", 1, 56);
@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			Assert.Null(product);
 		}
 		[Fact]
-		public async Task NotProperIdProduct_DeleteProductAsync_ThrowException()
+		public async Task DeleteProductAsync_ThrowApplicationException_NotExistedProduct()
 		{
 			//Arrange
 			var productId =Guid.Parse("00000000-0000-0000-0000-000000000000");

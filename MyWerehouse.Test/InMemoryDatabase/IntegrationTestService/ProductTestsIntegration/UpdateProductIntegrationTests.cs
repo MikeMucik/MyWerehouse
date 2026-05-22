@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using FluentValidation;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.ViewModels.ProductModels;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Products.ProductsExceptions;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsIntegration
 {
@@ -15,32 +17,21 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		//private class SeedFor
 
 		[Fact]
-		public async Task ProperData_UpdateProductAsync_ChangeData()
+		public async Task UpdateProductAsync_ChangeData_WhenProperData()
 		{
-			// Arrange			
-
-			var updatingProduct = Product.Create("Test", "dede", 1, 56);
-			//{
-			//	//Id = 4,
-			//	Name = "Test",
-			//	CategoryId = 1,
-			//	SKU = "dede",
-			//	IsDeleted = false,
-			//	AddedItemAd = new DateTime(2024, 2, 2),
-			//	//Details = details
-			//};
-			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
-			//var details = new ProductDetail
-			//{
-			//	//Id = 4,
-			//	//ProductId = 4,
-			//	Product = updatingProduct,
-			//	Height = 1,
-			//	Width = 1,
-			//	Length = 1,
-			//	Weight = 1,
-			//	Description = "Test"
-			//};
+			// Arrange		
+			var category = new Category
+			{
+				Name = "qwe"
+			};
+			var category1 = new Category
+			{
+				Name = "qwe111"
+			};
+			_context.Categories.AddRange(category, category1);
+			_context.SaveChanges();
+			var updatingProduct = Product.Create("Test", "dede", 1, 56);			
+			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");			
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
@@ -58,6 +49,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Width = 10,
 				Length = 10,
 				Description = "TestOk",
+				CartonsPerPallet =56
 			};
 			await _productService.UpdateProductAsync(updatedProduct);
 			//Assert			
@@ -72,33 +64,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			Assert.Equal(updatedProduct.Height, result.Details.Height);
 		}
 		[Fact]
-		public async Task NotProperDataName_UpdateProductAsync_ThrowsException()
+		public async Task UpdateProductAsync_ThrowsException_WhenNotProperDataName()
 		{
 			// Arrange			
-			var updatingProduct = Product.Create("Test", "dede", 1, 56);
-			//var updatingProduct = new Product
-			//{
-			//	//Id = 5,
-			//	Name = "Test",
-			//	CategoryId = 1,
-			//	SKU = "dede",
-			//	IsDeleted = false,
-			//	AddedItemAd = new DateTime(2024, 2, 2),
-			//	//Details = details
-			//};
+			var updatingProduct = Product.Create("Test", "dede", 1, 56);			
 			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
-
-			//var details = new ProductDetail
-			//{
-			//	//Id = 5,
-			//	//ProductId = 5,
-			//	Product = updatingProduct,
-			//	Height = 1,
-			//	Width = 1,
-			//	Length = 1,
-			//	Weight = 1,
-			//	Description = "Test"
-			//};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
@@ -111,12 +81,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				SKU = "q1233",
 				IsDeleted = false,
 				AddedItemAd = DateTime.Now,
-				//DetailsId = 5,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
 				Length = 10,
 				Description = "TestOk",
+				CartonsPerPallet =56
 
 			};
 			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(updatedProduct));
@@ -124,33 +94,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 
 		}
 		[Fact]
-		public async Task NotProperDataLength_UpdateProductAsync_ThrowsException()
+		public async Task UpdateProductAsync_ThrowsValidationException_WhenNoDataLength()
 		{
 			// Arrange			
-			var updatingProduct = Product.Create("Test", "dede", 1, 56);
-			//var updatingProduct = new Product
-			//{
-			//	//Id = 6,
-			//	Name = "Test",
-			//	CategoryId = 1,
-			//	SKU = "dede",
-			//	IsDeleted = false,
-			//	AddedItemAd = new DateTime(2024, 2, 2),
-			//	//Details = details
-			//};
+			var updatingProduct = Product.Create("Test", "dede", 1, 56);			
 			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
 
-			//var details = new ProductDetail
-			//{
-			//	//Id = 6,
-			//	//ProductId = 6,
-			//	Product = updatingProduct,
-			//	Height = 1,
-			//	Width = 1,
-			//	Length = 1,
-			//	Weight = 1,
-			//	Description = "Test"
-			//};
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
@@ -163,16 +112,58 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				SKU = "q1233",
 				IsDeleted = false,
 				AddedItemAd = DateTime.Now,
-				//DetailsId = 6,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
 				//Length = 10,
 				Description = "TestOk",
+				CartonsPerPallet =56,
+				
 			};
 			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(updatedProduct));
 
 			Assert.Contains("Uzupełnij dane - długość", e.Message);
+		}
+		[Fact]
+		public async Task UpdateProductAsync_ThrowsDomainException_WhenNotProperDataLength()
+		{
+			// Arrange		
+			var category = new Category
+			{
+				Name = "qwe"
+			}
+			;
+			var category1 = new Category
+			{
+				Name = "qwe111"
+			};
+			_context.Categories.AddRange(category, category1);
+			_context.SaveChanges();
+			var updatingProduct = Product.Create("Test", "dede", 1, 56);
+			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
+
+			_context.ProductDetails.Add(details);
+			_context.Products.Add(updatingProduct);
+			_context.SaveChanges();
+			//Act&Assert
+			var updatedProduct = new AddProductDTO
+			{
+				Id = updatingProduct.Id,
+				Name = "Testqw",
+				CategoryId = 2,
+				SKU = "q1233",
+				IsDeleted = false,
+				AddedItemAd = DateTime.Now,
+				Height = 10,
+				Weight = 10,
+				Width = 10,
+				Length = 610,
+				Description = "TestOk",
+				CartonsPerPallet =56
+			};
+			var e = await Assert.ThrowsAsync<WrongLengthProductDomainException>(() => _productService.UpdateProductAsync(updatedProduct));
+
+			Assert.Contains("Not corect size of length(range: 1-120cm).", e.Message);
 		}
 	}
 }

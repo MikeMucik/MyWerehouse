@@ -171,7 +171,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 			//Act&Assert			
-			var ex = await Assert.ThrowsAsync<InvalidReceiptStateException>(async () => await Mediator.Send(new DeleteDraftReceiptCommand(receipt.Id, "user")));
+			var ex = await Assert.ThrowsAsync<InvalidReceiptStateDomainException>(async () => await Mediator.Send(new DeleteDraftReceiptCommand(receipt.Id, "user")));
 			Assert.NotNull(ex);
 			Assert.Contains($"Operation prohibited for {receipt.Id}. Incorrect status {receipt.ReceiptStatus}.", ex.Message);
 
@@ -227,7 +227,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(initialLocation);
 			await DbContext.SaveChangesAsync();
 			//Act&Assert		
-			var ex = await Assert.ThrowsAsync<ReceiptAlreadyVerifyException>(async()=> await Mediator.Send(new CancelReceiptCommand(initialReceipt.Id, "user")));
+			var ex = await Assert.ThrowsAsync<ReceiptAlreadyVerifyDomainException>(async()=> await Mediator.Send(new CancelReceiptCommand(initialReceipt.Id, "user")));
 			Assert.NotNull(ex);
 			Assert.Contains($"Receipt {initialReceipt.Id} already verified. Operation prohibited.", ex.Message);		
 		}
@@ -283,7 +283,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Locations.Add(initialLocation);
 			await DbContext.SaveChangesAsync();
 			//Act&Assert		
-			var ex = await Assert.ThrowsAsync<InvalidReceiptStateException>(async () => await Mediator.Send(new CancelReceiptCommand(receipt.Id, "user")));
+			var ex = await Assert.ThrowsAsync<InvalidReceiptStateDomainException>(async () => await Mediator.Send(new CancelReceiptCommand(receipt.Id, "user")));
 			Assert.NotNull(ex);
 			Assert.Contains($"Operation prohibited for {receipt.Id}. Incorrect status {receipt.ReceiptStatus}.", ex.Message);
 		}

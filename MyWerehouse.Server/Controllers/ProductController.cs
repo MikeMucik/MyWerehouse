@@ -16,8 +16,8 @@ namespace MyWerehouse.Server.Controllers
 		{
 			_productService = productService;
 		}
-		[HttpGet("{id}")]
-		public async Task<IActionResult> Get(Guid id)
+		[HttpGet("{id:guid}fullInfo")]
+		public async Task<IActionResult> GetFullInfo(Guid id)
 		{
 			var result = await _productService.GetProductToEditAsync(id);
 			return Ok(result);
@@ -40,7 +40,7 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _productService.DeleteProductAsync(id);
 			return Ok(result);
 		}
-		[HttpGet("{id}/details")]
+		[HttpGet("{id:guid}/details")]
 		public async Task<IActionResult> GetDetails(Guid id)
 		{
 			var result = await _productService.DetailsOfProductAsync(id);

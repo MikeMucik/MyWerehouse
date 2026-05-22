@@ -1,6 +1,7 @@
 ﻿using System.Xml.Linq;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Products.ProductsExceptions;
 using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Domain.Products.Models
@@ -20,7 +21,7 @@ namespace MyWerehouse.Domain.Products.Models
 		private Product() { } //EF
 		private Product(string name, string sku, DateTime addedAd, int categoryId, bool isDeleted, int cartonsPerPallets, ProductDetail? details = null)
 		{
-			if (cartonsPerPallets <= 0) throw new ArgumentException("Cartoons on pallet must be more than zero.");
+			if (cartonsPerPallets <= 0) throw new PalletCartonQuantityMustBePositiveDomainException();			
 			Id = Guid.NewGuid();
 			Name = name;
 			SKU = sku;
@@ -35,7 +36,7 @@ namespace MyWerehouse.Domain.Products.Models
 
 		private Product(Guid id, string name, string sku, DateTime addedAd, int categoryId, bool isDeleted, int cartonsPerPallet)
 		{
-			if (cartonsPerPallet <= 0) throw new ArgumentException("Cartoons on pallet must be more than zero.");
+			if (cartonsPerPallet <= 0) throw new PalletCartonQuantityMustBePositiveDomainException();
 			Id = id;
 			Name = name;
 			SKU = sku;
@@ -55,12 +56,23 @@ namespace MyWerehouse.Domain.Products.Models
 		}
 		public void SetDetails(ProductDetail details)
 		{
-			this.Details = details ?? throw new ArgumentNullException(nameof(details));
+			this.Details = details ??
+				throw new NoDataDetailsDomainException();
 		}
 		public void SetCategory(Category category)
 		{
 			Category = category;
 			CategoryId = category.Id;
+		}
+		public void ApplyChanges(Product product)
+		{
+			var newDetails = ProductDetail.CreateDetails(Id,
+				product.Details.Length,
+				product.Details.Height,
+				product.Details.Width,
+				product.Details.Weight,
+				product.Details.Description);
+			Details = newDetails;
 		}
 	}
 }

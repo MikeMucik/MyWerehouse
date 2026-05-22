@@ -84,7 +84,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					if (!result.Success) return Fail(result.Message);
 					break;
 				default:
-					throw new NotSupportedException($"Nieobsługiwana strategia: {command.Strategy}");//wyjątek własny
+					return AppResult<ReversePickingResult>.Fail($"Nieobsługiwana strategia: {command.Strategy}");					
 			}
 			//paleta dekompletowana
 			productOnPallet.SetQuantity(0);
@@ -97,12 +97,3 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 		}		
 	}
 }
-
-//jeśli virtualPallet nie ma żadnych tasków to zmień status palety
-//var snapShot = pickingPallet.Location.ToSnopShot();
-//reversePicking.PickingTask.ChangeToAvailable(command.UserId, snapShot);
-
-
-//paleta na która wraca towar
-//var snapShot = pickingPallet.Location.ToSnopShot();
-//reversePicking.PickingTask.ChangeToAvailable(command.UserId, snapShot);

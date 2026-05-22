@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Products.Models;
@@ -13,9 +14,15 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 	public class AddProductIntegrationTests : ProductIntegrationCommand
 	{
 		[Fact]
-		public async Task NewProductProperData_AddNewProductAsync_AddedToCollection()
+		public async Task AddNewProductAsync_ShouldAddToCollection_WhenProperData()
 		{
 			//Arrange
+			var category = new Category
+			{
+				Name = "qwe"
+			};
+			_context.Categories.Add(category);
+			_context.SaveChanges();
 			var productNew = new AddProductDTO
 			{
 				Name = "Apple",
@@ -26,16 +33,25 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Width = 300,
 				Weight = 400,
 				Description = "500",
+				CartonsPerPallet =56
 			};
 			//Act			
 			var result = await _productService.AddProductAsync(productNew);
 			//Assert
 			var product = _context.Products.Find(result.Result);
 			Assert.NotNull(product);
+			Assert.Equal(productNew.Name, product.Name);
+			Assert.Equal(productNew.SKU, product.SKU);
+			Assert.Equal(productNew.CategoryId, product.CategoryId);
+
+			Assert.Equal(productNew.Description, product.Details.Description);			
 			Assert.Equal(productNew.Length, product.Details.Length);
+			Assert.Equal(productNew.Height, product.Details.Height);
+			Assert.Equal(productNew.Weight, product.Details.Weight);
+			Assert.Equal(productNew.Width, product.Details.Width);
 		}
 		[Fact]
-		public async Task NewProductInvalidDataHeight_AddNewProductAsync_NoAddedToCollection()
+		public async Task AddNewProductAsync_ShouldThrowValidateException_WhenInvalidDataHeight()
 		{
 			//Arrange
 			var productNew = new AddProductDTO
@@ -54,18 +70,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			Assert.Contains("Uzupełnij dane - wysokość", ex.Message);
 		}
 		[Fact]
-		public async Task NewProductInvalidDataName_AddNewProductAsync_NoAddedToCollection()
+		public async Task AddNewProductAsync_ShouldReturnAppResultError_WhenDataNameExist()
 		{
 			//Arrange
 			var product = Product.Create( "Test", "666666", 1, 56);
-			//var product = new Product
-			//{
-
-			//	Name = "Test",
-			//	SKU = "666666",
-			//	CategoryId = 1,
-			//	IsDeleted = false,
-			//};
+			
 			_context.Products.Add(product);
 			_context.SaveChanges();
 			var productNew = new AddProductDTO
@@ -78,15 +87,13 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Width = 300,
 				Weight = 400,
 				Description = "500",
+				CartonsPerPallet =56
 			};
-			//Act&Assert
 			//Act
 			var result = await _productService.AddProductAsync(productNew);
 			//Assert
 			Assert.Contains("Produkt o tej nazwie już istnieje.", result.Error);
 			Assert.Equal(ErrorType.NotFound, result.ErrorType);
-			//var ex =await Assert.ThrowsAsync<NotFoundProductException>(() => _productService.AddProductAsync(productNew));
-			//Assert.Contains("Produkt o tej nazwie już istnieje.", ex.Message);
 		}
 		[Fact]
 		public async Task NewProductInvalidDataSKU_AddNewProductAsync_NoAddedToCollection()

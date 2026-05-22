@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Products.ProductsExceptions;
 
 namespace MyWerehouse.Domain.Products.Models
 {
@@ -21,13 +22,13 @@ namespace MyWerehouse.Domain.Products.Models
 		private ProductDetail(Guid productId,int length, int height, int width, int weight, string description)
 		{			
 			ProductId = productId;
-			if (length < 0 || length > 120) throw new ArgumentException("Not corect size of length");//cm
+			if (length <= 0 || length > 120) throw new WrongLengthProductDomainException();//cm
 			Length = length;
-			if (height < 0 || height > 220) throw new ArgumentException("Not corect size of height");//cm
+			if (height <= 0 || height > 220) throw new WrongHeightProductDomainException();//cm
 			Height = height;
-			if (width < 0 || width > 120) throw new ArgumentException("Not corect size of width");//cm
+			if (width <= 0 || width > 120) throw new WrongWidthProductDomainException();//cm
 			Width = width;
-			if (weight < 0 || weight > 50000) throw new ArgumentException("Not corect weight"); //grams
+			if (weight <= 0 || weight > 50000) throw new WrongWeightProductDomainException(); //grams
 			Weight = weight;
 			Description = description;
 		}

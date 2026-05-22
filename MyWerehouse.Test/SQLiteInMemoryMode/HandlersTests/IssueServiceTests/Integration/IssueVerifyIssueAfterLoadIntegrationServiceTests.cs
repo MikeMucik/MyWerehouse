@@ -174,7 +174,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 
 			//Act&Assert
 			//var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest"));
-			var ex = await Assert.ThrowsAsync<DomainInventoryException>(() => Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest")));
+			var ex = await Assert.ThrowsAsync<DomainInventoryDomainException>(() => Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest")));
 			//
 			//Assert.NotNull(result);
 			//Assert.False(result.IsSuccess);
@@ -251,7 +251,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			await DbContext.SaveChangesAsync();
 			//Act
 			//var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
-			var ex = await Assert.ThrowsAsync<NotEndedLoadingException>(() => Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest")));
+			var ex = await Assert.ThrowsAsync<NotEndedLoadingDomainException>(() => Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "UserTest")));
 
 			//Assert
 			//Assert.NotNull(result);
@@ -317,7 +317,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			await DbContext.SaveChangesAsync();
 			//Act
 			//var result = await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX"));
-			var ex =await Assert.ThrowsAsync<NotAllowedOperationException>(async ()=> await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX")));
+			var ex =await Assert.ThrowsAsync<NotAllowedOperationDomainException>(async ()=> await Mediator.Send(new VerifyIssueAfterLoadingCommand(issue.Id, "userX")));
 			//Assert.NotNull(result);
 			//Assert.False(result.IsSuccess);
 			Assert.Equal($"Operation forbidden for {issueId}, wrong status.", ex.Message);

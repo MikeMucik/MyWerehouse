@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Picking.PickingExceptions
 {
-	internal class InvalidPickingStrategyException : DomainException
+	internal class InvalidPickingStrategyDomainException : DomainException
 	{
 		public Guid IssueId { get; }
 		public Guid ProductId { get; }
-		public InvalidPickingStrategyException(Guid issueId, Guid productId)
+		public InvalidPickingStrategyDomainException(Guid issueId, Guid productId)
 			: base($"Not proper picking strategy.")
 		{
 			IssueId = issueId;

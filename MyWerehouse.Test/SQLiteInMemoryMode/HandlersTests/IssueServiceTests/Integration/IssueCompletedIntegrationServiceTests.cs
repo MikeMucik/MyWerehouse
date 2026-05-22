@@ -155,7 +155,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Inte
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act&Assert
-			var ex = await Assert.ThrowsAsync<NotEndedLoadingException>(() => Mediator.Send(new CompletedLoadIssueCommand(issue.Id, "UserLoader")));
+			var ex = await Assert.ThrowsAsync<NotEndedLoadingDomainException>(() => Mediator.Send(new CompletedLoadIssueCommand(issue.Id, "UserLoader")));
 			
 			Assert.Equal($"Issue {issueId} has pallets not fully loaded.", ex.Message);
 			

@@ -129,7 +129,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			await DbContext.SaveChangesAsync();
 			// Act&Assert
 			//var result = await Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user"));
-			var ex = await Assert.ThrowsAsync<InvalidReceiptStateException>(() => Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user")));
+			var ex = await Assert.ThrowsAsync<InvalidReceiptStateDomainException>(() => Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user")));
 			Assert.Equal($"Operation prohibited for {receipt.Id}. Incorrect status {receipt.ReceiptStatus}.", ex.Message);
 		}
 	}

@@ -7,14 +7,13 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Issuing.IssueExceptions
 {
-	public class NotEndedLoadingException : DomainException
+	public class NotAllowedOperationDomainException : DomainException
 	{
 		public Guid IssueId { get; }
-		public NotEndedLoadingException(Guid issueId)
-			: base($"Issue {issueId} has pallets not fully loaded.")
-		{
+		public NotAllowedOperationDomainException(Guid issueId)
+			: base($"Operation forbidden for {issueId}, wrong status.")
+		{ 
 			IssueId = issueId;
-
 		}
 	}
 }

@@ -7,9 +7,9 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.DomainExceptions
 {
-	public class InvalidUserIdException : DomainException
+	public class InvalidUserIdDomainException : DomainException
 	{
-		public InvalidUserIdException(string userId)
+		public InvalidUserIdDomainException(string userId)
 			: base($"Invalid {userId} or missing user ID.") { }
 	}
 }

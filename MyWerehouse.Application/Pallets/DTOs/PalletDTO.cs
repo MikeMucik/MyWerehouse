@@ -26,7 +26,9 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Pallet, PalletDTO>()
-				.ForMember(dest=>dest.PalletNumber, opt=>opt.MapFrom(src=>src.PalletNumber));//do swaggera test
+				.ForMember(dest=>dest.PalletNumber, opt=>opt.MapFrom(src=>src.PalletNumber))
+				.ForMember(dest=>dest.IssueNumber, opt=>opt.MapFrom(static src=> src.Issue.IssueNumber))
+				.ForMember(dest=>dest.ProductsOnPallet, opt=>opt.MapFrom(static src=>src.ProductsOnPallet));//do swaggera test
 		}
 	}
 }

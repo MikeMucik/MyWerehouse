@@ -41,7 +41,7 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 					inventory.Quantity += change.Quantity;
 					if (inventory.Quantity < 0)
 					{
-						throw new DomainInventoryException(change.ProductId);
+						throw new DomainInventoryDomainException(change.ProductId);
 					}
 					inventory.LastUpdated = DateTime.UtcNow;
 				}				

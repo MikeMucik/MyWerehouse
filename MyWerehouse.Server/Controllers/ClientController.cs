@@ -34,8 +34,8 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _clientService.UpdateClientAsync(clientDTO);
 			return Ok(result);
 		}
-		[HttpGet("{id}")]
-		public async Task<IActionResult> Get(int id)
+		[HttpGet("{id}fullInfo")]
+		public async Task<IActionResult> GetFullInfo(int id)
 		{
 			var result = await _clientService.GetClientToEditAsync(id);
 			return Ok(result);

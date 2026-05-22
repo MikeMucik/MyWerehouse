@@ -7,9 +7,9 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Issuing.IssueExceptions
 {
-	public class WrongDataException :DomainException
+	public class WrongDateDomainException :DomainException
 	{
-		public WrongDataException()
+		public WrongDateDomainException()
 		:base("Wrong data, date can't be from past."){ }
 	}
 }

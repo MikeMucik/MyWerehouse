@@ -61,15 +61,7 @@ namespace MyWerehouse.Test.MappingTest
 			
 			var productNew = Product.Create("Apple", "666666", 1, 56);
 			var details = ProductDetail.CreateDetails(productNew.Id, 100, 200, 120, 400, "500");
-			//var details = new ProductDetail
-			//{
-			//	ProductId = 
-			//	Length = 100,
-			//	Height = 200,
-			//	Width = 300,
-			//	Weight = 400,
-			//	Description = "500",
-			//};
+			
 			productNew.SetDetails(details);
 			productNew.SetCategory(category);
 			//Act

@@ -6,13 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Invetories.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
-using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
@@ -132,7 +130,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void AddProduct(Guid productId, int quantity, DateOnly? bestBefore)
 		{
 			if (quantity <= 0)
-				throw new InvalidQunatityException(Id);
+				throw new InvalidQunatityDomainException(Id);
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, DateTime.UtcNow, bestBefore));
 		}
 
@@ -142,7 +140,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			if (existingProduct != null)
 			{
 				if (existingProduct.BestBefore != bestBefore)
-					throw new TwoDateOneProductOnPalletException(Id);
+					throw new TwoDateOneProductOnPalletDomainException(Id);
 				existingProduct.IncreaseQuantity(quantity);
 				return;
 			}
@@ -152,7 +150,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void AddProductForTests(Guid productId, int quantity, DateTime dateAdd, DateOnly? bestBefore)
 		{
 			if (quantity <= 0)
-				throw new InvalidQunatityException(Id);
+				throw new InvalidQunatityDomainException(Id);
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, dateAdd, bestBefore));
 		}
 
@@ -160,7 +158,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void ReserveToIssue(Guid issueId, string userId, string snapShot)
 		{
 			if (Status == PalletStatus.ToIssue)
-				throw new AlreadyAssignedException(Id);
+				throw new AlreadyAssignedDomainException(Id);
 
 			if (Status == PalletStatus.Available || Status == PalletStatus.InStock)
 			{
@@ -173,7 +171,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			}
 			else
 			{
-				throw new InvalidPalletStatusException(Id);
+				throw new InvalidPalletStatusDomainException(Id);
 			}
 			IssueId = issueId;
 			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
@@ -209,7 +207,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void AssignToReceipt(Guid receiptId, string snapshot, string userId)
 		{
-			if (Status == PalletStatus.Receiving) throw new AlreadyAssignedException(Id);
+			if (Status == PalletStatus.Receiving) throw new AlreadyAssignedDomainException(Id);
 			ReceiptId = receiptId;
 			Status = PalletStatus.Receiving;
 			AddHistory(ReasonForPallet.Received, userId, snapshot);
@@ -218,7 +216,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void ToArchive(string userId, ReasonForPallet reason, string snapShot)
 		{
 			//invarianty ?? 
-			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusException(Id);
+			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id);
 			Status = PalletStatus.Archived;
 			AddHistory(reason, userId, snapShot);
 		}
@@ -239,7 +237,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void CloseAndAddPickingPallet(Guid issueId, string userId, string snapShot)
 		{
 			if (Status != PalletStatus.Picking)
-				throw new InvalidPalletStatusException(Id);
+				throw new InvalidPalletStatusDomainException(Id);
 			Status = PalletStatus.ToIssue;
 			IssueId = issueId;
 			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
@@ -285,25 +283,17 @@ namespace MyWerehouse.Domain.Pallets.Models
 			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId);
 			if (product.Count() > 1)
 			{
-				throw new MultipleProductsOnPalletException(Id, PalletNumber, productId);
+				throw new MultipleProductsOnPalletDomainException(Id, PalletNumber, productId);
 			}
-			if (product == null) throw new ProductNotFoundOnPalletException(Id, PalletNumber, productId);
+			if (product == null) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
 
 			return product.First();
 		}
-		//public void ChangeToAvailable(string userId, string snapShot)
-		//{
-		//	var pickingTasks = this.VirtualPallet.PickingTasks;
-		//	if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
-		//	{
-		//		VirtualPallet.Pallet.ChangeStatus(PalletStatus.Available);
-		//		VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonMovement.ReversePicking, userId, snapShot);
-		//	}
-		//}
+		
 		public void ChangeStatus(PalletStatus status)
 		{
 			//invarianty!!
-			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusException(Id);
+			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id);
 			this.Status = status;
 		}
 		//metody pomocnicze

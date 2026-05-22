@@ -98,7 +98,10 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<ClientDTO>> GetClientToEditAsync(int id)
 		{
 			var client = await _clientRepo.GetClientByIdAsync(id);
-			if (client == null) throw new ArgumentException($"Brak klienta o numerze {id}");
+			if (client == null)
+			{
+				return AppResult<ClientDTO>.Fail($"Brak klienta o numerze {id}");
+			}
 			var clientDTO = _mapper.Map<ClientDTO>(client);
 			return AppResult<ClientDTO>.Success(clientDTO);
 		}
@@ -111,8 +114,8 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			_mapper.Map(updatedClient, existingClient);
-			CollectionSynchronizer.SynchronizeCollection(
+		var newDataClient =	_mapper.Map(updatedClient, existingClient);
+				CollectionSynchronizer.SynchronizeCollection(
 				 existingClient.Addresses,
 				 updatedClient.Addresses,
 				 a => a.Id, // Klucz dla adresu

@@ -16,6 +16,7 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public string PalletNumber { get; set; }
 		public DateTime DateReceived { get; set; }
 		public int LocationId { get; set; }
+		public string LocationSnapShot { get; set; }
 		public PalletStatus Status { get; set; } = 0; //np "Available", "To issue"
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new HashSet<ProductOnPalletDTO>();
 		public ICollection<HistoryPalletDTO> PalletMovements { get; set; } = new List<HistoryPalletDTO>();
@@ -28,7 +29,9 @@ namespace MyWerehouse.Application.Pallets.DTOs
 			profile.CreateMap<Pallet, PalletDTO>()
 				.ForMember(dest=>dest.PalletNumber, opt=>opt.MapFrom(src=>src.PalletNumber))
 				.ForMember(dest=>dest.IssueNumber, opt=>opt.MapFrom(static src=> src.Issue.IssueNumber))
-				.ForMember(dest=>dest.ProductsOnPallet, opt=>opt.MapFrom(static src=>src.ProductsOnPallet));//do swaggera test
+				.ForMember(dest=>dest.ProductsOnPallet, opt=>opt.MapFrom(static src=>src.ProductsOnPallet))
+				.ForMember(dest => dest.LocationSnapShot, opt => opt.MapFrom(src => src.Location.Bay + " " +
+				src.Location.Aisle + " " + src.Location.Position + " " + src.Location.Height));			
 		}
 	}
 }

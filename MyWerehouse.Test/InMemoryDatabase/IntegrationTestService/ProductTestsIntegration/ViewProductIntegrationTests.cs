@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			var result = await _productService.GetProductToEditAsync(productId1);
 			//Assert
 			Assert.NotNull(result);
-			Assert.IsType<AppResult<AddProductDTO>>(result);
+			Assert.IsType<AppResult<EditProductDTO>>(result);
 		}
 		[Fact]
 		public async Task ShowProducts_GetProductsAsync_ReturnList()

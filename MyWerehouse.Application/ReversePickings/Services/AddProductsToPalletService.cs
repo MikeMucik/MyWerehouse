@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -47,6 +48,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				return ReversePickingResult.Fail("Brak palet do uzupełnienia");
 			if (pallets.Any(p => p.ProductsOnPallet.Single().Quantity >= cartonsOnPallet))
 				return ReversePickingResult.Fail("Próba uzupełnienia pełnej palety");
+			var listPalletToAddProduct = new List<PalletProductQuantityDTO>();
 			foreach (var pallet in pallets)
 			{
 				if (quantityToAdded <= 0)
@@ -58,8 +60,18 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				pallet.ProductsOnPallet.Single().IncreaseQuantity(addedAmount);
 				quantityToAdded -= addedAmount;
 				pallet.AddHistory(ReasonForPallet.ReversePicking, userId, pallet.Location.ToSnapshot());
+				var productToAdd = new PalletProductQuantityDTO
+				{
+					PalletId = pallet.Id,
+					PalletNumber = pallet.PalletNumber,
+					ProductId = product.Id,
+					ProductName = product.Name,
+					ProductSKU = product.SKU,
+					Quantity = quantityToAdded,
+				};
+				listPalletToAddProduct.Add(productToAdd);
 			}
-			return ReversePickingResult.Ok("Dodano towar.", pallets); //tu potrzebna pełna rozpiska ile towaru na daną paletę
+			return ReversePickingResult.Ok("Dodano towar.", listPalletToAddProduct); 
 		}
 
 		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId, int rampNumber)

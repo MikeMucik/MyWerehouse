@@ -468,7 +468,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.True(resultReversePicking.Result.Success);
 			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.PalletNumber == "P3");
-			Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
+			var listPalletIdsToAdd = resultReversePicking.Result.PalletWithAddedProduct
+				.Select(x => x.PalletId)
+				.ToList();
+			//Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
+			Assert.Contains(palletAfterreversePicking.Id, listPalletIdsToAdd);
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(9, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(PalletStatus.Available, palletAfterreversePicking.Status);
@@ -634,7 +638,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.True(resultReversePicking.Result.Success);
 			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.PalletNumber == "P3");
-			Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
+			var listPalletIdsToAdd = resultReversePicking.Result.PalletWithAddedProduct
+				.Select(x => x.PalletId)
+				.ToList();
+			//Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
+			Assert.Contains(palletAfterreversePicking.Id, listPalletIdsToAdd);
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(9, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(PalletStatus.Available, palletAfterreversePicking.Status);
@@ -817,7 +825,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			Assert.True(resultReversePicking.Result.Success);
 			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
 			var palletAfterreversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.PalletNumber == "P3");
-			Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
+			var listPalletIdsToAdd = resultReversePicking.Result.PalletWithAddedProduct
+				.Select(x => x.PalletId)
+				.ToList();
+			//Assert.Contains(palletAfterreversePicking, resultReversePicking.Result.PalletWithAddedProduct);
+			Assert.Contains(palletAfterreversePicking.Id, listPalletIdsToAdd);
 			Assert.NotNull(palletAfterreversePicking);
 			Assert.Equal(9, palletAfterreversePicking.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(PalletStatus.Available, palletAfterreversePicking.Status);

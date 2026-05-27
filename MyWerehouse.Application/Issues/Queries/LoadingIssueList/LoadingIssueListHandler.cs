@@ -4,32 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 {
-	public class LoadingIssueListHandler(IIssueRepo issueRepo) : IRequestHandler<LoadingIssueListQuery, AppResult< ListPalletsToLoadDTO>>
+	public class LoadingIssueListHandler(WerehouseDbContext werehouseDbContext) : IRequestHandler<LoadingIssueListQuery, AppResult<ListPalletsToLoadDTO>>
 	{
-		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 
-		public async Task<AppResult<ListPalletsToLoadDTO>> Handle (LoadingIssueListQuery request, CancellationToken ct)
+		public async Task<AppResult<ListPalletsToLoadDTO>> Handle(LoadingIssueListQuery request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
-				if (issue == null)
-			{
-				return AppResult<ListPalletsToLoadDTO>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
-			}
-			//zebrać palety po wysyłki 		trzeba się zastanowić czy status tylko ToIssue					 
-			var dto = new ListPalletsToLoadDTO
-			{
-				IssueId = issue.Id,
-				IssueNumber =issue.IssueNumber,
-				ClientId = issue.ClientId,
-				ClientName = issue.Client.Name,
-				Pallets = issue.Pallets
+			var dto = await _werehouseDbContext.Issues
+				.AsNoTracking()
+				.Where(i => i.Id == request.IssueId)
+				.Select(x => new ListPalletsToLoadDTO
+				{
+					IssueId = x.Id,
+					IssueNumber = x.IssueNumber,
+					ClientId = x.ClientId,
+					ClientName = x.Client.Name,
+					Pallets = x.Pallets
 				.Where(p =>
 				p.Status == PalletStatus.LockedForIssue ||
 				p.Status == PalletStatus.InStock ||
@@ -53,7 +51,11 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 					}).ToList()
 				}).OrderBy(p => p.LocationId)
 				.ToList()
-			};
+				}).FirstOrDefaultAsync(ct);
+			if (dto == null)
+			{
+				return AppResult<ListPalletsToLoadDTO>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
+			}
 			return AppResult<ListPalletsToLoadDTO>.Success(dto);
 		}
 	}

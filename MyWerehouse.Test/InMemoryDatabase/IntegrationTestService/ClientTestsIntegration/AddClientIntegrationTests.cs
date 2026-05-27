@@ -13,10 +13,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 	public class AddClientIntegrationTests : ClientIntegrationCommand
 	{
 		[Fact]
-		public async Task AddClientAsync_ShouldAddClient_WhenValidData()
+		public async Task AddClient_ShouldAddClient_WhenValidData()
 		{
 			//Arrange
-			var address = new AddressDTO
+			var address = new AddAddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -26,12 +26,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new ClientDTO
+			var client = new AddClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddressDTO> { address },
+				Addresses = new List<AddAddressDTO> { address },
 				Description = "description",
 			};
 			//Act
@@ -45,10 +45,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			Assert.Equal("Wiejska", resultAddress.First().StreetName);
 		}
 		[Fact]
-		public async Task AddClientAsync_ShouldAddClinet_WhenValidDataTwoAdresses()
+		public async Task AddClient_ShouldAddClinet_WhenValidDataTwoAdresses()
 		{
 			//Arrange
-			var address = new AddressDTO
+			var address = new AddAddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -58,7 +58,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var address1 = new AddressDTO
+			var address1 = new AddAddressDTO
 			{
 				City = "Warsaw",
 				Country = "USA",
@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new ClientDTO
+			var client = new AddClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
@@ -88,10 +88,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			Assert.Contains(resultClient.Addresses, a => a.StreetName == address1.StreetName);
 		}
 		[Fact]
-		public async Task AddClientAsync_ShouldThrowValidationException_WhenPostalCodeIsInvalid()
+		public async Task AddClient_ShouldThrowValidationException_WhenPostalCodeIsInvalid()
 		{
 			//Arrange
-			var address = new AddressDTO
+			var address = new AddAddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -101,12 +101,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new ClientDTO
+			var client = new AddClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddressDTO> { address },
+				Addresses = new List<AddAddressDTO> { address },
 				Description = "description",
 			};
 			//Act&Assert
@@ -114,10 +114,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			Assert.Contains("numer pocztowy", exceptionMessage.Message);
 		}
 		[Fact]
-		public async Task AddClientAsync_ShouldThrowValidationException_WhenNameIsInvalid()
+		public async Task AddClient_ShouldThrowValidationException_WhenNameIsInvalid()
 		{
 			//Arrange
-			var address = new AddressDTO
+			var address = new AddAddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -127,12 +127,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new ClientDTO
+			var client = new AddClientDTO
 			{
 				//Name = "name",
 				FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddressDTO> { address },
+				Addresses = new List<AddAddressDTO> { address },
 				Description = "description",
 			};
 			//Act&Assert

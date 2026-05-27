@@ -24,14 +24,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("Test", "666666", 1, 56);
-			//var product = new Product
-			//{
-			//	Name = "Test",
-			//	SKU = "666666",
-			//	Category = category,
-			//	IsDeleted = false,
-			//};
+			var product = Product.Create("Test", "666666", 1, 56);			
 			var location = new Location
 			{
 				Aisle = 0,

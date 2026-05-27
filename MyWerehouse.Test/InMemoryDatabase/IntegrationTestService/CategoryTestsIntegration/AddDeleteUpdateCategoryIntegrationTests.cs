@@ -15,7 +15,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 	public class AddDeleteUpdateCategoryIntegrationTests : CategoryIntegrationCommand
 	{		
 		[Fact]
-		public async Task AddCategoryAsync_ShouldAddCategory_WhenValidInput()
+		public async Task AddCategory_ShouldAddCategory_WhenValidInput()
 		{
 			//Arrange
 			var category = new Category
@@ -40,14 +40,13 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			Assert.NotNull(result);
 		}
 		[Fact]
-		public async Task AddCategoryAsync_ShouldNotAddCategory_WhenInvalidInput()
+		public async Task AddCategory_ShouldNotAddCategory_WhenEmptyInput()
 		{
 			//Arrange
 			var category = new Category
 			{
 				Id = 1,
 				Name = "TestCategory"
-
 			};
 			var product = Product.Create("fdsfd", "aaa", 1, 56);
 			
@@ -67,7 +66,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			Assert.Contains("Podaj nazwę kategorii.", ex.Message);
 		}
 		[Fact]
-		public async Task AddCategoryAsync_ShouldNotAddCategory_WhenRepeatedInput()
+		public async Task AddCategory_ShouldNotAddCategory_WhenRepeatedInput()
 		{
 			//Arrange
 			var category = new Category
@@ -95,14 +94,13 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			Assert.Equal(quantity, resultBase);
 		}
 		[Fact]
-		public async Task DeleteCategoryAsync_ShouldDeleteCategory_WhenCategoryExist()
+		public async Task DeleteCategoryAsync_ShouldDeleteCategory_WhenCategoryExistNoProduct()
 		{
 			//Arrange
 			var category = new Category
 			{
 				Id = 3,
 				Name = "TestCategory"
-
 			};
 			_context.Categories.Add(category);
 			_context.SaveChanges();
@@ -114,7 +112,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			Assert.Null(result);
 		}
 		[Fact]
-		public async Task DeleteCategoryAsync_ShouldHideCategory_WhenCategoryHasProduct()
+		public async Task DeleteCategory_ShouldHideCategory_WhenCategoryHasProduct()
 		{
 			//Arrange
 			var category = new Category
@@ -138,15 +136,16 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 		}
 
 		[Fact]
-		public async Task UpdateCategoryAsync_ShouldChangeName_WhenValidName()
+		public async Task UpdateCategory_ShouldChangeName_WhenValidName()
 		{
 			//Arrange			
 			var updatingCategory = new Category { Id = 66, Name = "ToUpdateCategoryAsync" };
 			_context.Categories.Add(updatingCategory);
 			_context.SaveChanges();
 			//Act
-			var updatedCategory = new CategoryDTO { Id = 66, Name = "NewTestCategoryAsync1" };
-			await _categoryService.UpdateCategoryAsync(updatedCategory);
+			var id = 66;
+			var updatedCategory = new CategoryDTO { Name = "NewTestCategoryAsync1" };
+			await _categoryService.UpdateCategoryAsync(id, updatedCategory);
 			//Assert
 			var result = _context.Categories.Find(updatingCategory.Id);
 			Assert.NotNull(result);
@@ -154,18 +153,18 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 		}
 		
 		[Fact]
-		public async Task UpdateCategoryAsync_ShouldThrowValidationException_WhenNameIsEMpty() {
+		public async Task UpdateCategory_ShouldThrowValidationException_WhenNameIsEMpty() {
 			//Arrange			
 			var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };
 			_context.Categories.Add(updatingCategory);
 			_context.SaveChanges();
 			//Act&Assert
-			var updatedCategory = new CategoryDTO { Id = 88, Name = "" };
-			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(updatedCategory));
+			var id = 88;
+			var updatedCategory = new CategoryDTO { Name = "" };
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(id,updatedCategory));
 			//Assert
 			Assert.NotNull(ex);	
-			Assert.Contains("Podaj nazwę kategorii.", ex.Message);
-			
+			Assert.Contains("Podaj nazwę kategorii.", ex.Message);			
 		}
 	}
 }

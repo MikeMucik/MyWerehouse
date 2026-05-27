@@ -18,15 +18,9 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
-		private readonly IClientRepo _clientRepo = clientRepo;
-		private readonly ILocationRepo _locationRepo = locationRepo;
 
 		public async Task<AppResult<Unit>> Handle(CreateReceiptPlanCommand request, CancellationToken ct)
 		{
-			//if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
-			//	return AppResult<Unit>.Fail($"Klient o numerze {request.DTO.ClientId} nie istnieje.", ErrorType.NotFound);
-			//if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
-			//	return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
 			var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
 				var receipt = Receipt.Create(receiptNumber, request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
 				_receiptRepo.AddReceipt(receipt);

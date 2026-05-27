@@ -210,7 +210,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			PickingTasks.Remove(pickingTask);
 		}
-		//Detach i Attach tylko dla update - dla historii
+		//Detach i Attach tylko dla update, changePallet - dla historii
 		public void DetachPallet(Pallet pallet)
 		{
 			this.Pallets.Remove(pallet);

@@ -85,7 +85,7 @@ namespace MyWerehouse.Application.Services
 				await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value, "Kategoria została usunięta.");
 		}
-		public async Task<AppResult<Unit>> UpdateCategoryAsync(CategoryDTO categoryDTO)
+		public async Task<AppResult<Unit>> UpdateCategoryAsync(int id,CategoryDTO categoryDTO)
 		{
 			var validationResult = await _validator.ValidateAsync(categoryDTO);
 			if (validationResult != null)
@@ -93,7 +93,7 @@ namespace MyWerehouse.Application.Services
 				{
 					throw new ValidationException(validationResult.Errors);
 				}
-			var existingCategory = await _categoryRepo.GetCategoryByIdAsync(categoryDTO.Id);
+			var existingCategory = await _categoryRepo.GetCategoryByIdAsync(id);
 			if (existingCategory != null)
 			{
 				var categoryWithSameName = await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name);
@@ -108,26 +108,26 @@ namespace MyWerehouse.Application.Services
 			else return AppResult<Unit>.Fail($"Brak kategori o numerze {existingCategory.Id}", ErrorType.NotFound);
 		}
 
-		public async Task<AppResult<PagedResult<CategoryDTO>>> GetCategoriesAsync(int pageSize, int pageNumber, CancellationToken ct)
+		public async Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageSize, int pageNumber, CancellationToken ct)
 		{
 			var categories = _categoryRepo.GetAllCategories();
 			var orderedCategories = categories
 				.OrderBy(c => c.Name);
 			var result = await orderedCategories
-				.ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider)
+				.ProjectTo<CategoryViewDTO>(_mapper.ConfigurationProvider)
 				.ToPagedResultAsync(pageNumber, pageSize, ct);			
-			return AppResult<PagedResult<CategoryDTO>>.Success(result);
+			return AppResult<PagedResult<CategoryViewDTO>>.Success(result);
 		}
 
-		public async Task<AppResult<CategoryDTO>> GetCategoryByIdAsync(int id)
+		public async Task<AppResult<CategoryViewDTO>> GetCategoryByIdAsync(int id)
 		{
 			var result = _categoryRepo.GetCategoryByIdAsync(id);
 			if (result == null)
 			{
-				return AppResult<CategoryDTO>.Fail("Nie znaleziono kategorii.");
+				return AppResult<CategoryViewDTO>.Fail("Nie znaleziono kategorii.");
 			}
-			var categoryDTO = _mapper.Map<CategoryDTO>(result);
-			return AppResult<CategoryDTO>.Success(categoryDTO);
+			var categoryDTO = _mapper.Map<CategoryViewDTO>(result);
+			return AppResult<CategoryViewDTO>.Success(categoryDTO);
 		}
 	}
 }

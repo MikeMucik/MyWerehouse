@@ -16,9 +16,9 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientProperData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var addressValidator = new AddressDTOValidation();
+			var addressValidator = new AddAddressDTOValidation();
 			var validator = new AddClientDTOValidation(addressValidator);
-			var address = new AddressDTO
+			var address = new AddAddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -28,12 +28,12 @@ namespace MyWerehouse.Test.ValidationTest
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new ClientDTO
+			var client = new AddClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddressDTO> { address },
+				Addresses = new List<AddAddressDTO> { address },
 				Description = "description",
 			};
 			//Act&Assert
@@ -43,9 +43,9 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientNotProperData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var addressValidator = new AddressDTOValidation();
+			var addressValidator = new AddAddressDTOValidation();
 			var validator = new AddClientDTOValidation(addressValidator);
-			var address = new AddressDTO
+			var address = new AddAddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -55,12 +55,12 @@ namespace MyWerehouse.Test.ValidationTest
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new ClientDTO
+			var client = new AddClientDTO
 			{
 				Name = "name",
 				//FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddressDTO> { address },
+				Addresses = new List<AddAddressDTO> { address },
 				Description = "description",
 			};
 			//Act&Assert
@@ -70,14 +70,14 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientNoAddressData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var addressValidator = new AddressDTOValidation();
+			var addressValidator = new AddAddressDTOValidation();
 			var validator = new AddClientDTOValidation(addressValidator);
-			var client = new ClientDTO
+			var client = new AddClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddressDTO> { },
+				Addresses = new List<AddAddressDTO> { },
 				Description = "description",
 			};
 			//Act&Assert

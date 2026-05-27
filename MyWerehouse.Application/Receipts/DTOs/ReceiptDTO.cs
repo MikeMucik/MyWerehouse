@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.Receipts.DTOs
 		public int ReceiptNumber { get; set; }
 		public int ClientId { get; set; }
 		public DateTime ReceiptDateTime { get; set; }
-		public ICollection<EditPalletDTO> Pallets { get; set; } = new List<EditPalletDTO>();
+		public ICollection<EditPalletInReceiptDTO> Pallets { get; set; } = new List<EditPalletInReceiptDTO>();
 		public string PerformedBy { get; set; } // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; set; }
 		public int RampNumber { get; set; }

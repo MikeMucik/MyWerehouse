@@ -35,7 +35,7 @@ namespace MyWerehouse.Test.MappingTest
 		public void ShouldMap_AddProductDTO_To_Product()
 		{
 			//Arrange
-			var productNew = new AddProductDTO
+			var productNew = new EditProductDTO
 			{
 				Name = "Apple",
 				SKU = "666666",

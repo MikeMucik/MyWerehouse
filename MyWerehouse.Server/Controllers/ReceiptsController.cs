@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt;
 using MyWerehouse.Application.Receipts.Commands.CancelReceipt;
 using MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt;
@@ -9,7 +8,8 @@ using MyWerehouse.Application.Receipts.Commands.CreateReceipt;
 using MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
-using MyWerehouse.Application.Receipts.Queries.GetReceipt;
+using MyWerehouse.Application.Receipts.DTOs;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
 using MyWerehouse.Server.Extensions;
 
@@ -36,9 +36,9 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Aktualizacja przyjęcia, poprawa palet -> Post
-		[HttpPost("update")]
-		public async Task<IActionResult> Update(UpdateReceiptCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id}update")]
+		public async Task<IActionResult> Update(Guid id, UpdateReceiptDTO dto)
+			=> (await _mediator.Send(new UpdateReceiptCommand(id, dto))).ToActionResult();
 
 		//Anulowanie przyjęcia, kasacja - nie ma wpływu na stan -> zatwierdzone nie można cofnąć
 

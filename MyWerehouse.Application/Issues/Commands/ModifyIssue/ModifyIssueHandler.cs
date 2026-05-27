@@ -29,10 +29,9 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 		public async Task<AppResult<List<IssueResult>>> Handle(ModifyIssueCommand request, CancellationToken ct)
 		{
 			var resultList = new List<IssueResult>();
-			var issue = await _issueRepo.GetIssueByIdAsync(request.DTO.Id);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.Id);
 			if (issue == null)
 				return AppResult<List<IssueResult>>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
-
 			// Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone, nie zaczęty picking
 			if (issue.IssueStatus == IssueStatus.New ||
 				issue.IssueStatus == IssueStatus.Pending ||
@@ -40,7 +39,6 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			{
 				await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
 				//Kasowanie starych palet, zatrzymanie palet do tego samego zlecenia, kasowanie pickingu
-				
 				var reusablePallets = new List<Pallet>();//
 				var listOldPallets = issue.Pallets.ToList();//
 				foreach (var pallet in listOldPallets)

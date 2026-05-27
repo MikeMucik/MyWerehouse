@@ -26,12 +26,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("Test", "666666", 1, 56);
-			
-			var product1 = Product.Create("Test11", "67777", 1, 56);
-			
-			var product2 = Product.Create("Test22", "667777", 1, 56);
-			
+			var product = Product.Create("Test", "666666", 1, 56);			
+			var product1 = Product.Create("Test11", "67777", 1, 56);			
+			var product2 = Product.Create("Test22", "667777", 1, 56);			
 			var product3 = Product.Create("Test33", "67777", 1, 56);
 			
 			var location = new Location
@@ -62,34 +59,34 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act
+			var id = pallet.Id;
 			var updatedPallet = new EditPalletDTO
 			{
-				Id = pallet.Id,
-				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
+				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
-				{					
+				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletDTO
-				{					
+				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), })
 					]
 			};
-			var resultHandler = await Mediator.Send(new UpdatePalletCommand(updatedPallet, "user"));
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
 			//Assert
 			Assert.NotNull(resultHandler);
 			Assert.True(resultHandler.IsSuccess);
-			Assert.Contains("Q1010", resultHandler.Message);
+			//Assert.Contains("Q1010", resultHandler.Message);
 
-			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+			Assert.Contains("Paleta została zaktualizowana.", resultHandler.Message);
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Single(x => x.Id == pallet.Id);
@@ -204,13 +201,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act
+			var id = pallet.Id;
 			var updatedPallet = new EditPalletDTO
 			{
-				Id = pallet.Id,
-				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
+				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{
 					//Id = pallet.ProductsOnPallet.FirstOrDefault(p=>p.Product == product).Id,
@@ -227,13 +224,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), })
 					]
 			};
-			var resultHandler = await Mediator.Send(new UpdatePalletCommand(updatedPallet, "user"));
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
 			//Assert
 			Assert.NotNull(resultHandler);
 			Assert.True(resultHandler.IsSuccess);
-			Assert.Contains("Q1010", resultHandler.Message);
+			//Assert.Contains("Q1010", resultHandler.Message);
 
-			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+			Assert.Contains("Paleta została zaktualizowana.", resultHandler.Message);
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Single(x => x.Id == pallet.Id);
@@ -340,13 +337,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act
+			var id = pallet.Id;
 			var updatedPallet = new EditPalletDTO
 			{
-				Id = pallet.Id,
-				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
+				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{					
 					ProductId = product.Id,
@@ -373,10 +370,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
-			var resultHandler = await Mediator.Send(new UpdatePalletCommand(updatedPallet, "user"));
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
 			//Assert
 			Assert.NotNull(resultHandler);
-			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+			Assert.Contains("Paleta została zaktualizowana.", resultHandler.Message);
 
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -421,13 +418,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act&Assert
+			var id = pallet.Id;
 			var updatedPallet = new EditPalletDTO
 			{
-				Id = pallet.Id,
-				PalletNumber = "Q1010",
 				DateReceived = new DateTime(2020, 1, 1, 0, 0, 0),
 				LocationId = 1,
 				Status = PalletStatus.ToPicking,
+				UserId = "usert",
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{					
 					ProductId = product.Id,
@@ -448,7 +445,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2024, 5, 4) })
 					]
 			};
-			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(updatedPallet, "user")));
+			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(id, updatedPallet)));
 			Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 			Assert.Contains("Data do spożycia musi być późniejsza niż data dzisiejsza", ex.Message);
@@ -487,11 +484,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act&Assert
+			var id = pallet.Id;
 			var updatedPallet = new EditPalletDTO
 			{
-				Id = pallet.Id,
-				PalletNumber = "Q1010",
-				
+				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletDTO
 				{					
 					ProductId = product.Id,
@@ -513,7 +509,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
-			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(updatedPallet, "user")));
+			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(id, updatedPallet)));
 			Assert.Contains("Paleta musi mieć status", ex.Message);
 			Assert.Contains("Paleta musi mieć datę utworzenia", ex.Message);
 			Assert.Contains("Paleta musi mieć lokalizację", ex.Message);

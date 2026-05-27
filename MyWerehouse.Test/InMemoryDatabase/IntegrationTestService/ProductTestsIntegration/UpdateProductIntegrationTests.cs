@@ -36,9 +36,9 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act
-			var updatedProduct = new AddProductDTO
+			var id = updatingProduct.Id;
+			var updatedProduct = new EditProductDTO
 			{
-				Id = updatingProduct.Id,
 				Name = "Testqw",
 				CategoryId = 2,
 				SKU = "q1233",
@@ -51,7 +51,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Description = "TestOk",
 				CartonsPerPallet =56
 			};
-			await _productService.UpdateProductAsync(updatedProduct);
+			await _productService.UpdateProductAsync(id, updatedProduct);
 			//Assert			
 			var result = _context.Products
 				.Include(d => d.Details)
@@ -73,9 +73,9 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act&Assert
-			var updatedProduct = new AddProductDTO
+			var id = updatingProduct.Id;
+			var updatedProduct = new EditProductDTO
 			{
-				Id = updatingProduct.Id,
 				//Name = "Testqw",
 				CategoryId = 2,
 				SKU = "q1233",
@@ -89,7 +89,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CartonsPerPallet =56
 
 			};
-			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(updatedProduct));
+			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct));
 			Assert.Contains("Uzupełnij dane - nazwa", e.Message);
 
 		}
@@ -104,9 +104,9 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act&Assert
-			var updatedProduct = new AddProductDTO
+			var id = updatingProduct.Id;
+			var updatedProduct = new EditProductDTO
 			{
-				Id = updatingProduct.Id,
 				Name = "Testqw",
 				CategoryId = 2,
 				SKU = "q1233",
@@ -120,7 +120,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CartonsPerPallet =56,
 				
 			};
-			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(updatedProduct));
+			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct));
 
 			Assert.Contains("Uzupełnij dane - długość", e.Message);
 		}
@@ -146,9 +146,9 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act&Assert
-			var updatedProduct = new AddProductDTO
+			var id = updatingProduct.Id;
+			var updatedProduct = new EditProductDTO
 			{
-				Id = updatingProduct.Id,
 				Name = "Testqw",
 				CategoryId = 2,
 				SKU = "q1233",
@@ -161,7 +161,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Description = "TestOk",
 				CartonsPerPallet =56
 			};
-			var e = await Assert.ThrowsAsync<WrongLengthProductDomainException>(() => _productService.UpdateProductAsync(updatedProduct));
+			var e = await Assert.ThrowsAsync<WrongLengthProductDomainException>(() => _productService.UpdateProductAsync(id, updatedProduct));
 
 			Assert.Contains("Not corect size of length(range: 1-120cm).", e.Message);
 		}

@@ -16,7 +16,7 @@ namespace MyWerehouse.Test.ValidationTest
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();			
-			var product = new AddProductDTO
+			var product = new EditProductDTO
 			{
 				Name = "Apple",
 				SKU = "666666",
@@ -36,7 +36,7 @@ namespace MyWerehouse.Test.ValidationTest
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();
-			var product = new AddProductDTO
+			var product = new EditProductDTO
 			{
 				//Name = "Apple",
 				SKU = "666666",
@@ -49,14 +49,14 @@ namespace MyWerehouse.Test.ValidationTest
 				CartonsPerPallet =56
 			};
 			//Act&Assert
-			validator.TestValidate(product).ShouldHaveValidationErrorFor(nameof(AddProductDTO.Name));
+			validator.TestValidate(product).ShouldHaveValidationErrorFor(nameof(EditProductDTO.Name));
 		}
 		[Fact]
 		public void AddProductNotProperDataWidth_ShouldReturnValidationError()
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();
-			var product = new AddProductDTO
+			var product = new EditProductDTO
 			{
 				Name = "Apple",
 				SKU = "666666",
@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.ValidationTest
 				CartonsPerPallet= 56
 			};
 			//Act&Assert
-			validator.TestValidate(product).ShouldHaveValidationErrorFor(nameof(AddProductDTO.Length));
+			validator.TestValidate(product).ShouldHaveValidationErrorFor(nameof(EditProductDTO.Length));
 		}
 	}
 }

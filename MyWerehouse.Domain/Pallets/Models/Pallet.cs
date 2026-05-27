@@ -154,7 +154,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, dateAdd, bestBefore));
 		}
 
-		//zmieniam sposób zapisywania historii dla rezerwacji bo nowa paleta
+		//zmiana sposób zapisywania historii dla rezerwacji bo nowa paleta
 		public void ReserveToIssue(Guid issueId, string userId, string snapShot)
 		{
 			if (Status == PalletStatus.ToIssue)
@@ -223,7 +223,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void MoveToLocation(int newLocationId, string newLocationSnapShot, int oldLocationId, string oldLocationSnapShot, string userId)
 		{
-			if(this.Status == PalletStatus.InStock)
+			if (this.Status == PalletStatus.InStock)
 			{
 				Status = PalletStatus.Available;
 			}
@@ -288,6 +288,17 @@ namespace MyWerehouse.Domain.Pallets.Models
 			if (product == null) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
 
 			return product.First();
+		}
+
+		public void MarkAsLoaded(string userId, string snapShot)
+		{
+			if (Status != PalletStatus.ToIssue
+				&& Status != PalletStatus.LockedForIssue)
+			{
+				throw new InvalidPalletStatusDomainException(Id);
+			}
+			this.Status = PalletStatus.Loaded;
+			this.AddHistory(ReasonForPallet.Loaded, userId, snapShot);
 		}
 		
 		public void ChangeStatus(PalletStatus status)

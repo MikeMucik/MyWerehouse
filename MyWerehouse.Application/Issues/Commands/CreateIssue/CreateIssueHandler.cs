@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.IssuesServices;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;

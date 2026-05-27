@@ -9,5 +9,5 @@ using MyWerehouse.Application.Receipts.DTOs;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
-	public record UpdateReceiptCommand(ReceiptDTO DTO, string UserId): IRequest<AppResult<Unit>>;	
+	public record UpdateReceiptCommand(Guid Id, UpdateReceiptDTO DTO): IRequest<AppResult<Unit>>;	
 }

@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.Services
 		private readonly IClientRepo _clientRepo;
 		private readonly IMapper _mapper;
 		private readonly IReceiptRepo _receiptRepo;
-		private readonly IValidator<ClientDTO> _addClientValidator;
+		private readonly IValidator<AddClientDTO> _addClientValidator;
 		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IIssueRepo _issueRepo;
@@ -38,7 +38,7 @@ namespace MyWerehouse.Application.Services
 			IReceiptRepo receiptRepo,
 			IIssueRepo issueRepo,
 			WerehouseDbContext werehouseDbContext,
-			IValidator<ClientDTO>? addClientValidator = null
+			IValidator<AddClientDTO>? addClientValidator = null
 			, IValidator<UpdateClientDTO>? updateClientValidator = null
 			)
 		{
@@ -58,7 +58,7 @@ namespace MyWerehouse.Application.Services
 			_mapper = mapper;
 		}
 
-		public async Task<AppResult<int>> AddClientAsync(ClientDTO addClient)
+		public async Task<AppResult<int>> AddClientAsync(AddClientDTO addClient)
 		{
 			var validationResult = await _addClientValidator.ValidateAsync(addClient);
 			if (!validationResult.IsValid)
@@ -97,7 +97,7 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<AppResult<ClientDTO>> GetClientToEditAsync(int id)
 		{
-			var client = await _clientRepo.GetClientByIdAsync(id);
+			var client = await _clientRepo.GetClientToEditAsync(id);
 			if (client == null)
 			{
 				return AppResult<ClientDTO>.Fail($"Brak klienta o numerze {id}");
@@ -105,25 +105,30 @@ namespace MyWerehouse.Application.Services
 			var clientDTO = _mapper.Map<ClientDTO>(client);
 			return AppResult<ClientDTO>.Success(clientDTO);
 		}
-		public async Task<AppResult<Unit>> UpdateClientAsync(UpdateClientDTO updatedClient)
+		public async Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient)
 		{
-			var existingClient = await _clientRepo.GetClientByIdAsync(updatedClient.Id);
+			var existingClient = await _clientRepo.GetClientToEditAsync(id);
 			if (existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.");
 			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);//do testów
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-		var newDataClient =	_mapper.Map(updatedClient, existingClient);
-				CollectionSynchronizer.SynchronizeCollection(
-				 existingClient.Addresses,
-				 updatedClient.Addresses,
-				 a => a.Id, // Klucz dla adresu
-				 a => a.Id, // Klucz dla AddressDTO
-				 dto => _mapper.Map<Address>(dto), // Jak dodać nowy
-				 (dto, entity) => _mapper.Map(dto, entity), // Jak aktualizować
-				entity => existingClient.Addresses.Remove(entity)//Jak usuwać adresy
-				 );
+			//var newDataClient = _mapper.Map(updatedClient, existingClient);
+			existingClient.Email = updatedClient.Email;
+			existingClient.Description = updatedClient.Description;
+			existingClient.FullName = updatedClient.FullName;
+			existingClient.Name = updatedClient.Name;
+			
+			CollectionSynchronizer.SynchronizeCollection(
+			 existingClient.Addresses,
+			 updatedClient.Addresses,
+			 a => a.Id, // Klucz dla adresu
+			 a => a.Id, // Klucz dla AddressDTO
+			 dto => _mapper.Map<Address>(dto), // Jak dodać nowy
+			 (dto, entity) => _mapper.Map(dto, entity), // Jak aktualizować
+			entity => existingClient.Addresses.Remove(entity)//Jak usuwać adresy
+			 );
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);
 		}

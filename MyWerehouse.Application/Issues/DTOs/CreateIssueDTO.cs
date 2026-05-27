@@ -11,9 +11,7 @@ using MyWerehouse.Domain.Issuing.Models;
 namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class CreateIssueDTO
-	{
-		public Guid Id { get; set; }
-		public int IssueNumber { get; set; }
+	{		
 		public int ClientId { get; set; }
 		public string PerformedBy { get; set; }
 		public IssueStatus IssueStatus { get; set; } = IssueStatus.New;

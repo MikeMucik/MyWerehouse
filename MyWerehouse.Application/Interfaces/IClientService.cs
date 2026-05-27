@@ -13,10 +13,10 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IClientService
 	{		
-		Task<AppResult<int>> AddClientAsync(ClientDTO addClient);		
+		Task<AppResult<int>> AddClientAsync(AddClientDTO addClient);		
 		Task<AppResult<Unit>> DeleteClientAsync(int id);
 		Task<AppResult<ClientDTO>> GetClientToEditAsync(int id);
-		Task<AppResult<Unit>> UpdateClientAsync(UpdateClientDTO updatedClient);
+		Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient);
 		Task<AppResult<DetailsOfClientDTO>> DetailsOfClientAsync(int id);
 		Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageSize, int PageNumber, ClientSearchFilter filter, CancellationToken ct);		
 		Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageSize, int PageNumber, CancellationToken ct);

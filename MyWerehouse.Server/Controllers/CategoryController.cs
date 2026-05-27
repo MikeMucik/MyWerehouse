@@ -29,10 +29,10 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _categoryService.GetCategoryByIdAsync(id);
 			return Ok(result);
 		}
-		[HttpPost("update")]
-		public async Task<IActionResult> Update(CategoryDTO category)
+		[HttpPut("{id}update")]
+		public async Task<IActionResult> Update(int id, CategoryDTO category)
 		{
-			var result = await _categoryService.UpdateCategoryAsync(category);
+			var result = await _categoryService.UpdateCategoryAsync(id, category);
 			return Ok(result);
 		}
 		[HttpPost("delete")]//bo może tylko tylko ukrycie przez historię

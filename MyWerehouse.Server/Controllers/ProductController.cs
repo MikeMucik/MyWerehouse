@@ -6,7 +6,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Products.Filters;
 
 namespace MyWerehouse.Server.Controllers
-{	
+{
 	[ApiController]
 	[Route("api/product")]
 	public class ProductController : ControllerBase
@@ -23,15 +23,15 @@ namespace MyWerehouse.Server.Controllers
 			return Ok(result);
 		}
 		[HttpPost("add")]
-		public async Task<IActionResult> Add(AddProductDTO productDTO)
+		public async Task<IActionResult> Add(EditProductDTO productDTO)
 		{
 			var result = await _productService.AddProductAsync(productDTO);
 			return Ok(result);
 		}
-		[HttpPost("update")]
-		public async Task<IActionResult> Update(AddProductDTO productDTO)
+		[HttpPut("{id}update")]
+		public async Task<IActionResult> Update(Guid id,EditProductDTO productDTO)
 		{
-			var result = await _productService.UpdateProductAsync(productDTO);
+			var result = await _productService.UpdateProductAsync(id,productDTO);
 			return Ok(result);
 		}
 		[HttpPost("delete")]

@@ -221,16 +221,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				//PerformedBy = "user",
 				RampNumber = 1
 			};
-			//var ex = await Assert.ThrowsAsync<InvalidUserIdDomainException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
 			var ex = await Assert.ThrowsAsync <ValidationException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
 			Assert.Contains("Użytkownik wymagany.", ex.Message);
 			
-			
-		//	var result =
-		//		await Mediator.Send(new CreateReceiptPlanCommand(newPalletDto));
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.Contains("Invalid  or missing user ID.", result.Error);
 		}
 		[Fact]
 		public async Task CreateReceiptPlanAsync_NoProperData_NotAddToBase()

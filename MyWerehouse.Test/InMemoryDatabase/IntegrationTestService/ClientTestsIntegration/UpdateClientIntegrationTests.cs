@@ -16,7 +16,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 	public class UpdateClientIntegrationTests : ClientIntegrationCommand
 	{	
 		[Fact]
-		public async Task UpdateProductAsync_ShouldChnageData_WhenDataValid()
+		public async Task UpdateClient_ShouldChangeData_WhenDataValid()
 		{
 			//Arrange			
 			var address = new Address
@@ -45,7 +45,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			_context.Clients.Add(updatingClient);
 			_context.SaveChanges();
 			//Act
-			var addressU = new AddressDTO
+			var addressU = new EditAddressDTO
 			{
 				Id = 10,
 				Country = "Silesia",
@@ -56,16 +56,16 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				StreetName = "test",
 				StreetNumber = "test",
 			};
+			var id = 10;
 			var updatedClient = new UpdateClientDTO
 			{
-				Id = 10,
 				Name = "test1",
 				Email = "test1",
 				Description = "test1",
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};			
-				await _clientService.UpdateClientAsync(updatedClient);			
+				await _clientService.UpdateClientAsync(id,updatedClient);			
 			//Assert			
 				var result = _context.Clients
 					.Include(x => x.Addresses)
@@ -76,7 +76,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Assert.Equal(updatedClient.Addresses.First().City, result.Addresses.First().City);			
 		}
 		[Fact]
-		public async Task UpdateProductAsync_ShouldThrowValidationException_WhenAddresHasNoPhoneNumber()
+		public async Task UpdateClient_ShouldThrowValidationException_WhenAddresHasNoPhoneNumber()
 		{
 			//Arrange
 			var address = new Address
@@ -106,7 +106,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			_context.Clients.Add(updatingClient);
 			_context.SaveChanges();
 			//Act&Assert
-			var addressU = new AddressDTO
+			var addressU = new EditAddressDTO
 			{
 				Id = 20,
 				Country = "Silesia",
@@ -117,20 +117,20 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				StreetName = "test",
 				StreetNumber = "test",
 			};
+			var id = 20;
 			var updatedClient = new UpdateClientDTO
 			{
-				Id = 20,
 				Name = "test1",
 				Email = "test1",
 				Description = "test1",
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};					
-				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(updatedClient));
+				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient));
 				Assert.Contains("tele", ex.Message);			
 		}
 		[Fact]
-		public async Task UpdateProductAsync_ShouldThrowValidationException_WhenAddresHasNoEmail()
+		public async Task UpdateClient_ShouldThrowValidationException_WhenAddresHasNoEmail()
 		{
 			//Arrange			
 			var address = new Address
@@ -160,7 +160,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			_context.Clients.Add(updatingClient);
 			_context.SaveChanges();
 			//Act&Assert
-			var addressU = new AddressDTO
+			var addressU = new EditAddressDTO
 			{
 				Id = 30,
 				Country = "Silesia",
@@ -171,16 +171,16 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				StreetName = "test",
 				StreetNumber = "test",
 			};
+			var id = 30;
 			var updatedClient = new UpdateClientDTO
 			{
-				Id = 30,
 				Name = "test1",
 				//Email = "test1",
 				Description = "test1",
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};
-				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(updatedClient));
+				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient));
 				Assert.Contains("email", ex.Message);			
 		}
 	}

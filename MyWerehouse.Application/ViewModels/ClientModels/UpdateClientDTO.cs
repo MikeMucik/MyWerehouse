@@ -13,23 +13,22 @@ using MyWerehouse.Domain.Clients.Models;
 namespace MyWerehouse.Application.ViewModels.ClientModels
 {
 	public class UpdateClientDTO : IMapFrom<Client>
-	{
-		public int Id { get; set; }
+	{		
 		public string Name { get; set; }
 		public string Email { get; set; }
 		public string Description { get; set; }
 		[MaxLength(250)]
 		public string FullName { get; set; }
-		public ICollection<AddressDTO> Addresses { get; set; } = new List<AddressDTO>();
+		public ICollection<EditAddressDTO> Addresses { get; set; } = new List<EditAddressDTO>();
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<UpdateClientDTO, Client >()
-				.ForMember(dest => dest.Addresses, opt => opt.Ignore());
+			profile.CreateMap<UpdateClientDTO, Client>()
+				.ForMember(dest => dest.Addresses, opt => opt.Ignore());//robię przez synchronizera
 		}
 	}
 	public class UpdateClientDTOValidation : AbstractValidator<UpdateClientDTO>
 	{
-		public UpdateClientDTOValidation(IValidator<AddressDTO> addressValidator)
+		public UpdateClientDTOValidation(IValidator<EditAddressDTO> addressValidator)
 		{
 			RuleFor(c => c.Name)
 				.NotNull()

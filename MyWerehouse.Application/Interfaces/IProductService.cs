@@ -13,10 +13,10 @@ namespace MyWerehouse.Application.Interfaces
 {
 	public interface IProductService
 	{
-		Task<AppResult<Guid>> AddProductAsync(AddProductDTO product);
+		Task<AppResult<Guid>> AddProductAsync(EditProductDTO product);
 		Task<AppResult<Unit>> DeleteProductAsync(Guid id);
-		Task<AppResult<AddProductDTO>> GetProductToEditAsync(Guid id);
-		Task<AppResult<Unit>> UpdateProductAsync(AddProductDTO product);
+		Task<AppResult<EditProductDTO>> GetProductToEditAsync(Guid id);
+		Task<AppResult<Unit>> UpdateProductAsync(Guid id, EditProductDTO product);
 		Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id);
 		Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageSize, int PageNumber,CancellationToken ct);
 		Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageSize, int PageNumber, ProductSearchFilter filter, CancellationToken ct);

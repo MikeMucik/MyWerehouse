@@ -12,11 +12,8 @@ namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class ModifyIssueDTO 
 	{
-		public Guid Id { get; set; }
-		public int IssueNumber { get; set; }
 		public int ClientId { get; set; }
 		public string PerformedBy { get; set; }
-		public DateTime DateToSend { get; set; }
 		public List<IssueItemDTO> IssueItems { get; set; } = new List<IssueItemDTO>();		
 	}
 }

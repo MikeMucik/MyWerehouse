@@ -203,7 +203,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var initailLocation = new Location
+			var location = new Location
 			{
 				Id = 1,
 				Aisle = 1,
@@ -211,7 +211,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 				Height = 1,
 				Position = 1
 			};
-			var initailCLient = new Client
+			var client = new Client
 			{
 				Id = 1,
 				Name = "TestCompany",
@@ -220,7 +220,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
-			var initailCLient1 = new Client
+			var client1 = new Client
 			{
 				Id = 2,
 				Name = "222TestCompany",
@@ -229,21 +229,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 				FullName = "FullNameCompany",
 				Addresses = [address1]
 			};
-			var initialCategory = new Category
+			var category = new Category
 			{
 				Id = 1,
 				Name = "name",
 				IsDeleted = false
 			};
-			var initialProduct = Product.Create("Test", "666666", 1, 56);
+			var product = Product.Create("Test", "666666", 1, 56);
 
-			var initialProduct1 = Product.Create("Test", "666666", 1, 56);
+			var product1 = Product.Create("Test", "666666", 1, 56);
 
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
-			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			var pallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
+			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
 			//var initialPallet = new Pallet
 			//{
 			//	PalletNumber = "Q1000",
@@ -279,13 +279,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 
 
 
-			DbContext.Categories.Add(initialCategory);
-			DbContext.Products.AddRange(initialProduct, initialProduct1);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1);
 			//DbContext.ProductOnPallet.Add(initialProductOnPallet);
-			DbContext.Pallets.Add(initialPallet);
-			DbContext.Clients.AddRange(initailCLient, initailCLient1);
+			DbContext.Pallets.Add(pallet);
+			DbContext.Clients.AddRange(client, client1);
 			DbContext.Receipts.Add(receipt);
-			DbContext.Locations.Add(initailLocation);
+			DbContext.Locations.Add(location);
 			await DbContext.SaveChangesAsync();
 
 			//var MapperConfig = new MapperConfiguration(cfg =>
@@ -293,32 +293,29 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 			//	cfg.AddProfile<MappingProfile>();
 			//});
 			//var mapper = MapperConfig.CreateMapper();
-			var updatingReceipt = new ReceiptDTO
-			{
-				ReceiptId = receipt.Id,
-				ReceiptNumber = receipt.ReceiptNumber,
+			var id = receipt.Id;
+			var updatingReceipt = new UpdateReceiptDTO
+			{			
 				ClientId = 2,
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 1,
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{
-						Id = initialPallet.Id,
+						Id = pallet.Id,
 						LocationId = 1,
-						//ReceiptId = receipt.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
 						{
 							new()
 							{
-								//Id = initialProductOnPallet.Id,
-								PalletId = initialPallet.Id,
-								ProductId = initialProduct1.Id,
+								PalletId = pallet.Id,
+								ProductId = product1.Id,
 								Quantity = 1,
 								DateAdded = DateTime.Now,
 							}
@@ -326,16 +323,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 					}
 				}
 			};
-			var userId = "U100";
 			//Act						
-			await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			await Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt));
 			//Assert
-			var result = DbContext.Receipts.SingleOrDefault(x => x.Id == updatingReceipt.ReceiptId);
+			var result = DbContext.Receipts.SingleOrDefault(x => x.Id == id);
 			Assert.NotNull(result);
 			Assert.Equal(2, result.ClientId);
-			var pallet = result.Pallets;
-			var product = pallet.First();
-			Assert.Equal(1, product.ProductsOnPallet.First(x => x.ProductId == initialProduct1.Id).Quantity);
+			var palletResult = result.Pallets;
+			var productResult = palletResult.First();
+			Assert.Equal(1, productResult.ProductsOnPallet.First(x => x.ProductId == product1.Id).Quantity);
 		}
 		//[Fact]
 		//public async Task NonProperDataWrongReceiptId_UpdatePalletToReceiptAsync_ThrowException()
@@ -525,23 +521,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 			DbContext.Receipts.Add(receipt);
 			DbContext.Pallets.AddRange(initialPallet);			
 			await DbContext.SaveChangesAsync();
-			
-			var updatingReceipt = new ReceiptDTO
+			var id = receipt.Id;
+			var updatingReceipt = new UpdateReceiptDTO
 			{
-				ReceiptId = receipt.Id,
-				ReceiptNumber = receipt.ReceiptNumber,
 				ClientId = initailCLient1.Id,
 				PerformedBy = "U002",
 				ReceiptStatus = ReceiptStatus.PhysicallyCompleted,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 1,
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{						
 						LocationId = initailLocation.Id,
-						//ReceiptId = receipt.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
@@ -556,12 +549,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptServiceTests
 					}
 				}
 			};
-			var userId = "U100";
 			//Act						
-			await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			await Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt));
 			//Assert
 
-			var result = DbContext.Receipts.Include(p => p.Pallets).ThenInclude(pp => pp.ProductsOnPallet).SingleOrDefault(x => x.Id == updatingReceipt.ReceiptId);
+			var result = DbContext.Receipts.Include(p => p.Pallets).ThenInclude(pp => pp.ProductsOnPallet).SingleOrDefault(x => x.Id == id);
 			Assert.NotNull(result);
 			Assert.Equal(2, result.ClientId);
 			Assert.Single(result.Pallets); // powinien zostać tylko jeden

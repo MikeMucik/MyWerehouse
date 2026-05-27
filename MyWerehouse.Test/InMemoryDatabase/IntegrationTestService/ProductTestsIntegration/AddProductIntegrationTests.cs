@@ -23,7 +23,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			_context.Categories.Add(category);
 			_context.SaveChanges();
-			var productNew = new AddProductDTO
+			var productNew = new EditProductDTO
 			{
 				Name = "Apple",
 				SKU = "666666",
@@ -54,7 +54,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task AddNewProductAsync_ShouldThrowValidateException_WhenInvalidDataHeight()
 		{
 			//Arrange
-			var productNew = new AddProductDTO
+			var productNew = new EditProductDTO
 			{
 				Name = "Apple",
 				SKU = "666666",
@@ -77,7 +77,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			
 			_context.Products.Add(product);
 			_context.SaveChanges();
-			var productNew = new AddProductDTO
+			var productNew = new EditProductDTO
 			{
 				Name = "Test",
 				SKU = "666666",
@@ -99,7 +99,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task NewProductInvalidDataSKU_AddNewProductAsync_NoAddedToCollection()
 		{
 			//Arrange
-			var productNew = new AddProductDTO
+			var productNew = new EditProductDTO
 			{
 				Name = "Apple",
 				//SKU = "666666",

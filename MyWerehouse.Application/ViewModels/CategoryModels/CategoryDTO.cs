@@ -12,8 +12,7 @@ using MyWerehouse.Domain.Products.Models;
 namespace MyWerehouse.Application.ViewModels.CategoryModels
 {
 	public class CategoryDTO : IMapFrom<Category>
-	{
-		public int Id { get; set; }
+	{		
 		public required string Name { get; set; }
 		public void Mapping(Profile profile)
 		{

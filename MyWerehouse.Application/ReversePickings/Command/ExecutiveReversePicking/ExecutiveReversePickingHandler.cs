@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.IdentityModel.Tokens;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
@@ -32,7 +33,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			{
 				if (command.Pallets == null || command.Pallets.Count == 0)
 				{
-					return AppResult<ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.");
+					return AppResult<ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.", ErrorType.NotFound);
 				}
 			}
 			if (command.Strategy == ReversePickingStrategy.AddToNewPallet && command.RampNumber == null)
@@ -44,8 +45,6 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			{
 				return AppResult<ReversePickingResult>.Fail("Brak zadania do dekompletacji", ErrorType.NotFound);
 			}
-			//if (!await _productRepo.IsExistProduct(reversePicking.ProductId))
-			//	return AppResult<ReversePickingResult>.Fail($"Produkt o numerze {reversePicking.ProductId} nie istnieje.", ErrorType.NotFound);
 			var pickingPallet = await _palletRepo.GetPalletByIdAsync(command.PickingPalletId);
 			if (pickingPallet == null)
 			{
@@ -65,7 +64,8 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			var productOnPallet = pickingPallet.GetProductAggregate(reversePicking.ProductId);
 
 			reversePicking.ChangeStatus(ReversePickingStatus.InProgress);
-			var result = new ReversePickingResult();
+			//var result = new ReversePickingResult();
+			ReversePickingResult result;
 			static AppResult<ReversePickingResult> Fail(string message)
 			=> AppResult<ReversePickingResult>.Fail(message, ErrorType.Conflict);
 			switch (command.Strategy)

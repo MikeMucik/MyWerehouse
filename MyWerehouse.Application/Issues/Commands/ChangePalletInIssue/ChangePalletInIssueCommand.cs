@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 {

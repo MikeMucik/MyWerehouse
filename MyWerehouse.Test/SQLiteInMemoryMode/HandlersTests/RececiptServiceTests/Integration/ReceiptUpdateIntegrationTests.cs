@@ -39,7 +39,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Name = "Category",
 				IsDeleted = false,
 			};
-			var initailCLient = new Client
+			var client = new Client
 			{
 				Name = "TestCompany",
 				Email = "123@op.pl",
@@ -47,10 +47,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
-			var initialProduct = Product.Create("Test", "666666", 1, 10);
-			var initialProduct1 = Product.Create("Test22", "777777", 1, 10);
+			var product = Product.Create("Test", "666666", 1, 10);
+			var product1 = Product.Create("Test22", "777777", 1, 10);
 
-			var initailLocation = new Location
+			var location = new Location
 			{
 				Aisle = 1,
 				Bay = 1,
@@ -58,48 +58,43 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Position = 1
 			};
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var initialReceipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Receiving, initialReceipt.Id, null);
-			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
+			initialPallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
 			
-			DbContext.Clients.AddRange(initailCLient);
+			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			DbContext.Locations.Add(initailLocation);
-			DbContext.Receipts.Add(initialReceipt);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
 			DbContext.Pallets.AddRange(initialPallet
 				//, secondPallet
 				);
 			await DbContext.SaveChangesAsync();
 			//Act
-
-			var updatingReceipt = new ReceiptDTO
-			{
-				ReceiptId = initialReceipt.Id,
-				ReceiptNumber = initialReceipt.ReceiptNumber,
-				ClientId = initailCLient.Id,
-				PerformedBy = "U002",
+			var id = receipt.Id;
+			var updatingReceipt = new UpdateReceiptDTO
+			{				
+				ClientId = client.Id,
+				PerformedBy = "U100",
 				ReceiptStatus = ReceiptStatus.Correction,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 1,
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{
-						//Id = secondPallet.Id,
-						//PalletNumber = "Q2000",
-						LocationId = initailLocation.Id,
-						//ReceiptId = initialReceipt.Id,
+						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
 						{
 							new()
 							{
-								ProductId = initialProduct1.Id,
+								ProductId = product1.Id,
 								//PalletId = secondPallet.Id,
 								Quantity = 200,
 								DateAdded = DateTime.Now,
@@ -109,21 +104,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					}
 				}
 			};
-			var userId = "U100";
-			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			var result = await Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == initialReceipt.Id);
-			Assert.Equal(initailCLient.Id, updatedReceipt.ClientId); // zmiana klienta
+			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == receipt.Id);
+			Assert.Equal(client.Id, updatedReceipt.ClientId); // zmiana klienta
 																	 // Powinna być nowa paleta dodana do bazy (z innym Id niż Q1000)
-			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == initialReceipt.Id && p.Status == PalletStatus.Receiving);
+			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == receipt.Id && p.Status == PalletStatus.Receiving);
 			Assert.NotNull(newPallet);//
 			Assert.NotEqual(initialPallet.Id, newPallet.Id);
 
 			// Sprawdzenie czy na nowej palecie jest produkt o ProductId = 2 i Quantity = 200
 			var newProduct = await DbContext.ProductOnPallet
-				.FirstOrDefaultAsync(p => p.PalletId == newPallet.Id && p.ProductId == initialProduct1.Id);
+				.FirstOrDefaultAsync(p => p.PalletId == newPallet.Id && p.ProductId == product1.Id);
 			Assert.NotNull(newProduct);
 			Assert.Equal(200, newProduct.Quantity);
 
@@ -136,13 +130,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal("U100", movement.PerformedBy);
 
 			var historyRecipt = DbContext.HistoryReceipts
-				.FirstOrDefault(x => x.ReceiptId == initialReceipt.Id);
+				.FirstOrDefault(x => x.ReceiptId == receipt.Id);
 			Assert.NotNull(historyRecipt);
 			Assert.Equal(ReceiptStatus.Correction, historyRecipt.StatusAfter);
 
 			var receiptWithPallets = await DbContext.Receipts
 				.Include(r => r.Pallets)
-				.FirstOrDefaultAsync(r => r.Id == initialReceipt.Id);
+				.FirstOrDefaultAsync(r => r.Id == receipt.Id);
 
 			//Nie powinno tam być palety Q1000
 			Assert.DoesNotContain(receiptWithPallets.Pallets, p => p.PalletNumber == "Q1000");
@@ -180,7 +174,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Name = "Category",
 				IsDeleted = false,
 			};
-			var initailCLient = new Client
+			var client = new Client
 			{
 				Name = "TestCompany",
 				Email = "123@op.pl",
@@ -188,9 +182,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			}; 
-			var initialProduct = Product.Create("Test", "666666", 1, 10);
-			var initialProduct1 = Product.Create("Test22", "777777", 1, 10);
-			var initailLocation = new Location
+			var product = Product.Create("Test", "666666", 1, 10);
+			var product1 = Product.Create("Test22", "777777", 1, 10);
+			var location = new Location
 			{
 				Aisle = 1,
 				Bay = 1,
@@ -198,49 +192,46 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Position = 1
 			};
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var initialReceipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			var pallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
 			
-			var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-			secondPallet.AddProduct(initialProduct1.Id, 200, new DateOnly(2027, 3, 3));
+			var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			secondPallet.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
 			
-			DbContext.Clients.AddRange(initailCLient);
+			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			DbContext.Locations.Add(initailLocation);
-			DbContext.Receipts.Add(initialReceipt);
-			DbContext.Pallets.AddRange(initialPallet, secondPallet);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
+			DbContext.Pallets.AddRange(pallet, secondPallet);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var updatingReceipt = new ReceiptDTO
+			var id = receipt.Id;
+			var updatingReceipt = new UpdateReceiptDTO
 			{
-				ReceiptId = initialReceipt.Id,
-				ReceiptNumber = initialReceipt.ReceiptNumber,
-				ClientId = initailCLient.Id,
-				PerformedBy = "U002",
+				ClientId = client.Id,
+				PerformedBy = "U100",
 				ReceiptStatus = ReceiptStatus.Correction,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 1,
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{
 						Id = secondPallet.Id,
 						PalletNumber = "Q2000",
-						LocationId = initailLocation.Id,
-						//ReceiptId = initialReceipt.Id,
-						//ReceiptNumber = initialReceipt.ReceiptNumber,
+						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
 						{
 							new()
 							{
-								ProductId = initialProduct1.Id,
+								ProductId = product1.Id,
 								PalletId = secondPallet.Id,
 								Quantity = 50,
 								DateAdded = DateTime.Now,
@@ -249,21 +240,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					}
 				}
 			};
-			var userId = "U100";
-			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			var result = await Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == initialReceipt.Id);
-			Assert.Equal(initailCLient.Id, updatedReceipt.ClientId); // zmiana klienta
+			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == receipt.Id);
+			Assert.Equal(client.Id, updatedReceipt.ClientId); // zmiana klienta
 																	 // Powinna być nowa paleta dodana do bazy (z innym Id niż Q1000)
-			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == initialReceipt.Id && p.Status == PalletStatus.Receiving);
+			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == receipt.Id && p.Status == PalletStatus.Receiving);
 			Assert.NotNull(newPallet);//
-			Assert.NotEqual(initialPallet.Id, newPallet.Id);
+			Assert.NotEqual(pallet.Id, newPallet.Id);
 
 			// Sprawdzenie czy na nowej palecie jest produkt o ProductId = 2 i Quantity = 50
 			var newProduct = await DbContext.ProductOnPallet
-				.FirstOrDefaultAsync(p => p.PalletId == newPallet.Id && p.ProductId == initialProduct1.Id);
+				.FirstOrDefaultAsync(p => p.PalletId == newPallet.Id && p.ProductId == product1.Id);
 			Assert.NotNull(newProduct);
 			Assert.Equal(50, newProduct.Quantity);
 
@@ -274,13 +264,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal("U100", movement.PerformedBy);
 
 			var historyRecipt = DbContext.HistoryReceipts
-				.FirstOrDefault(x => x.ReceiptId == initialReceipt.Id);
+				.FirstOrDefault(x => x.ReceiptId == receipt.Id);
 			Assert.NotNull(historyRecipt);
 			Assert.Equal(ReceiptStatus.Correction, historyRecipt.StatusAfter);
 
 			var receiptWithPallets = await DbContext.Receipts
 				.Include(r => r.Pallets)
-				.FirstOrDefaultAsync(r => r.Id == initialReceipt.Id);
+				.FirstOrDefaultAsync(r => r.Id == receipt.Id);
 
 			using var arrangeContext = CreateNewContext();
 			//Stara paleta(Q1000) powinna być anulowana
@@ -333,17 +323,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Name = "Category",
 				IsDeleted = false,
 			};
-			var initailCLient = new Client
+			var client = new Client
 			{
 				Name = "TestCompany",
 				Email = "123@op.pl",
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = [address]
-			}; var initialProduct = Product.Create("Test", "666666", 1, 10);
-			var initialProduct1 = Product.Create("Test22", "777777", 1, 10);
+			};
+			var product = Product.Create("Test", "666666", 1, 10);
+			var product1 = Product.Create("Test22", "777777", 1, 10);
 
-			var initailLocation = new Location
+			var location = new Location
 			{
 				Aisle = 1,
 				Bay = 1,
@@ -351,56 +342,53 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Position = 1
 			};
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var initialReceipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			initialPallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
 			
-			var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-			secondPallet.AddProduct(initialProduct1.Id, 200, new DateOnly(2027, 3, 3));
+			var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			secondPallet.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
 			
-			DbContext.Clients.AddRange(initailCLient);
+			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			DbContext.Locations.Add(initailLocation);
-			DbContext.Receipts.Add(initialReceipt);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
 			DbContext.Pallets.AddRange(initialPallet, secondPallet);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var updatingReceipt = new ReceiptDTO
+			var id = receipt.Id;
+			var updatingReceipt = new UpdateReceiptDTO
 			{
-				ReceiptId = initialReceipt.Id,
-				ReceiptNumber = initialReceipt.ReceiptNumber,
-				ClientId = initailCLient.Id,
-				PerformedBy = "U002",
+				ClientId = client.Id,
+				PerformedBy = "U100",
 				ReceiptStatus = ReceiptStatus.Correction,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 1,
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{
 						Id = secondPallet.Id,
 						PalletNumber = "Q2000",
-						LocationId = initailLocation.Id,
-						//ReceiptId = initialReceipt.Id,
-						//ReceiptNumber = initialReceipt.RampNumber,
+						LocationId =location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
 						{
 							new()
 							{
-								ProductId = initialProduct1.Id,
+								ProductId = product1.Id,
 								PalletId = secondPallet.Id,
 								Quantity = 50,
 								DateAdded = DateTime.Now,
 							},
 							new()
 							{
-								ProductId = initialProduct.Id,
+								ProductId = product.Id,
 								PalletId = secondPallet.Id,
 								Quantity = 150,
 								DateAdded = DateTime.Now,
@@ -409,13 +397,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					}
 				}
 			};
-			var userId = "U100";
-			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			var result = await Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == initialReceipt.Id);
-			Assert.Equal(initailCLient.Id, updatedReceipt.ClientId); // zmiana klienta
+			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == receipt.Id);
+			Assert.Equal(client.Id, updatedReceipt.ClientId); // zmiana klienta
 
 			var updatedPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -426,13 +413,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 
 			// produkt 1: initialProduct1 z ilością 50
 			var existingProduct = updatedPallet.ProductsOnPallet
-				.FirstOrDefault(p => p.ProductId == initialProduct1.Id);
+				.FirstOrDefault(p => p.ProductId == product1.Id);
 			Assert.NotNull(existingProduct);
 			Assert.Equal(50, existingProduct.Quantity);
 
 			// produkt 2: initialProduct (nowy) z ilością 150
 			var addedProduct = updatedPallet.ProductsOnPallet
-				.FirstOrDefault(p => p.ProductId == initialProduct.Id);
+				.FirstOrDefault(p => p.ProductId == product.Id);
 			Assert.NotNull(addedProduct);
 			Assert.Equal(150, addedProduct.Quantity);
 
@@ -443,7 +430,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			// opcjonalnie: upewnij się, że oba produkty są przypisane do tej samej palety
 			Assert.All(allProducts, p => Assert.Equal(secondPallet.Id, p.PalletId));
 
-			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == initialReceipt.Id && p.Status == PalletStatus.Receiving);
+			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == receipt.Id && p.Status == PalletStatus.Receiving);
 			Assert.NotNull(newPallet);//
 			Assert.NotEqual("Q1000", newPallet.PalletNumber);
 
@@ -454,13 +441,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.Equal("U100", movement.PerformedBy);
 
 			var historyRecipt = DbContext.HistoryReceipts
-				.FirstOrDefault(x => x.ReceiptId == initialReceipt.Id);
+				.FirstOrDefault(x => x.ReceiptId == receipt.Id);
 			Assert.NotNull(historyRecipt);
 			Assert.Equal(ReceiptStatus.Correction, historyRecipt.StatusAfter);
 
 			var receiptWithPallets = await DbContext.Receipts
 				.Include(r => r.Pallets)
-				.FirstOrDefaultAsync(r => r.Id == initialReceipt.Id);
+				.FirstOrDefaultAsync(r => r.Id == receipt.Id);
 
 			using var arrangeContext = CreateNewContext();
 			//Stara paleta(Q1000) powinna być anulowana
@@ -494,7 +481,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Name = "Category",
 				IsDeleted = false,
 			};
-			var cLient = new Client
+			var client = new Client
 			{
 				Name = "TestCompany",
 				Email = "123@op.pl",
@@ -517,39 +504,36 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			initialPallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			var pallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
 			
 			var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
 			secondPallet.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
 			
-			DbContext.Clients.AddRange(cLient);
+			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
 			DbContext.Locations.Add(location);
 			DbContext.Receipts.AddRange(receipt);
-			DbContext.Pallets.AddRange(initialPallet, secondPallet);
+			DbContext.Pallets.AddRange(pallet, secondPallet);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var updatingReceipt = new ReceiptDTO
+			var id = receipt.Id;
+			var updatingReceipt = new UpdateReceiptDTO
 			{
-				ReceiptId = receipt.Id,
-				ReceiptNumber = receipt.ReceiptNumber,
-				ClientId = cLient.Id,
-				PerformedBy = "U002",
+				ClientId = client.Id,
+				PerformedBy = "U100",
 				ReceiptStatus = ReceiptStatus.Correction,
 				RampNumber = 1,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{
-						Id = initialPallet.Id,
+						Id = pallet.Id,
 						PalletNumber = "Q1000",
 						LocationId = location.Id,
-						//ReceiptId = receipt.Id,
-						//ReceiptNumber = receipt.ReceiptNumber,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
@@ -565,8 +549,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					}
 				}
 			};
-			var userId = "U100";
-			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			var result = await Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -594,7 +577,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Name = "Category",
 				IsDeleted = false,
 			};
-			var initailCLient = new Client
+			var client = new Client
 			{
 				Name = "TestCompany",
 				Email = "123@op.pl",
@@ -602,10 +585,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				FullName = "FullNameCompany",
 				Addresses = [address]
 			};
-			var initialProduct = Product.Create("Test", "666666", 1, 10);
-			var initialProduct1 = Product.Create("Test22", "777777", 1, 10);
+			var product = Product.Create("Test", "666666", 1, 10);
+			var product1 = Product.Create("Test22", "777777", 1, 10);
 
-			var initailLocation = new Location
+			var location = new Location
 			{
 				Aisle = 1,
 				Bay = 1,
@@ -613,49 +596,46 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 				Position = 1
 			};
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var initialReceipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned,1);
 			
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			var pallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
 			
-			var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-			secondPallet.AddProduct(initialProduct1.Id, 200, new DateOnly(2027, 3, 3));
+			var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			secondPallet.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
 			
-			DbContext.Clients.AddRange(initailCLient);
+			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(initialProduct, initialProduct1);
-			DbContext.Locations.Add(initailLocation);
-			DbContext.Receipts.Add(initialReceipt);
-			DbContext.Pallets.AddRange(initialPallet, secondPallet);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
+			DbContext.Pallets.AddRange(pallet, secondPallet);
 			await DbContext.SaveChangesAsync();
 			//Act
 			var receiptId9 = Guid.Parse("22111111-1111-1111-1111-111111111111");
-			var updatingReceipt = new ReceiptDTO
-			{
-				ReceiptId = receiptId9,
-				ReceiptNumber = 999,
-				ClientId = initailCLient.Id,
-				PerformedBy = "U002",
+			var updatingReceipt = new UpdateReceiptDTO
+			{				
+				ClientId = client.Id,
+				PerformedBy = "U100",
 				ReceiptStatus = ReceiptStatus.Correction,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 1,
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{
 						Id = secondPallet.Id,
 						PalletNumber = "Q2000",
-						LocationId = initailLocation.Id,
-						//ReceiptId = initialReceipt.Id,
+						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
 						{
 							new()
 							{
-								ProductId = initialProduct1.Id,
+								ProductId = product1.Id,
 								PalletId = secondPallet.Id,
 								Quantity = 200,
 								DateAdded = DateTime.Now,
@@ -664,12 +644,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					}
 				}
 			};
-			var userId = "U100";
-			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			var result = await Mediator.Send(new UpdateReceiptCommand(receiptId9, updatingReceipt));
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains($"Przyjęcie o numerze 999 nie zostało znalezione.", result.Error);
+			Assert.Contains($" nie zostało znalezione.", result.Error);
 		}
 		//[Fact]
 		//public async Task UpdatePalletToReceiptAsync_NonProperDataInvalidPallet_ReturnInfo()
@@ -829,24 +808,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			await DbContext.SaveChangesAsync();
 			//Act
-			var updatingReceipt = new ReceiptDTO
+			var id = receipt.Id;
+			var updatingReceipt = new UpdateReceiptDTO
 			{
-				ReceiptId = receipt.Id,
-				ReceiptNumber = receipt.ReceiptNumber,
 				ClientId = client.Id,
 				PerformedBy = "U100",
 				ReceiptStatus = ReceiptStatus.Correction,
 				ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 9,
 				Pallets =
-				new List<EditPalletDTO>
+				new List<EditPalletInReceiptDTO>
 				{
 					new()
 					{
 						Id = pallet.Id,
 						PalletNumber = "Q1000",
 						LocationId = 9,
-						//ReceiptId = receipt.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
@@ -861,9 +838,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					},
 					new()
 					{
-						//Id = "Q1001",
 						LocationId = 9,
-						//ReceiptId = receipt.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
 						ProductsOnPallet = new List<ProductOnPalletDTO>
@@ -878,9 +853,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 					}
 				}
 			};
-			var userId = "U100";
-
-			var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
+			var result = await Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt));
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);

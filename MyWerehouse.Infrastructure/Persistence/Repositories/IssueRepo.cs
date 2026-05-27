@@ -29,6 +29,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<Issue?> GetIssueByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Issues
+				//.Include(c=>c.Client)
 				.Include(i => i.Pallets)
 					.ThenInclude(l=>l.Location)
 				.Include(i => i.Pallets)

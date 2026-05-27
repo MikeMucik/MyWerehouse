@@ -11,11 +11,10 @@ namespace MyWerehouse.Application.Pallets.DTOs
 {
 	public class EditPalletDTO : IMapFrom<Pallet>
 	{
-		public Guid Id { get; set; }
-		public string PalletNumber { get; set; }//
 		public DateTime DateReceived { get; set; }
 		public int LocationId { get; set; }
 		public PalletStatus Status { get; set; } = 0;
+		public string UserId { get; set; }
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();
 		
 		public void Mapping(Profile profile)

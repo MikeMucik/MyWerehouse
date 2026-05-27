@@ -15,5 +15,6 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public string PalletNumber { get; set; }
 		public string LocationName { get; set; }
 		public int LocationId { get; set; }
+		public PalletStatus Status { get; set; }
 	}
 }

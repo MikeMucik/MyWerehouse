@@ -9,8 +9,10 @@ using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Application.Issues.Commands.ModifyIssue;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
+using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
+using MyWerehouse.Application.Issues.Queries.IssueProductsSummary;
 using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
 using MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList;
 using MyWerehouse.Server.Extensions;
@@ -45,10 +47,10 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		// Update - wiele rozwiązań więc POST
-		[HttpPost("update")]
-		public async Task<IActionResult> Update(ModifyIssueCommand command)
+		[HttpPost("{id}update")]
+		public async Task<IActionResult> Update(Guid id,ModifyIssueDTO dto, DateTime dateToSend)
 		{
-			var result = await _mediator.Send(command);
+			var result = await _mediator.Send(new ModifyIssueCommand(id, dto, dateToSend));
 			return result.ToActionResult();
 		}
 
@@ -92,7 +94,7 @@ namespace MyWerehouse.Server.Controllers
 		//Lista dla Issue ile jakiego towaru
 		[HttpGet("{id}/byProducts")]
 		public async Task<IActionResult> ListProductsForIssue(Guid id)
-			=> (await _mediator.Send(new GetIssueProductSummaryByIdQuery(id))).ToActionResult();
+			=> (await _mediator.Send(new IssueProductsSummaryQuery(id))).ToActionResult();
 
 		//Lista dla Issue według filtra
 		[HttpPost("IssuesByFiltr")]
@@ -106,7 +108,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Lista palet do "zdjęcia" dla operatora wózka
 		[HttpGet("{id}/forOperator")]
-		public async Task<IActionResult> ListPalletsForTheForklift(PalletsToTakeOffListQuery query)
-			 => (await _mediator.Send(query)).ToActionResult();	
+		public async Task<IActionResult> ListPalletsForTheForklift(Guid id)
+			 => (await _mediator.Send(new PalletsToTakeOffListQuery(id, 1, 30))).ToActionResult();	
 	}
 }

@@ -49,7 +49,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				}
 			}
 			return null;
-		}	
+		}
+		public async Task<Client> GetClientToEditAsync(int id)
+		{			
+				var client = await _werehouseDbContext.Clients
+						.Include(c => c.Addresses)
+						.SingleOrDefaultAsync(c => c.Id == id);				
+						return client;			
+		}
 		public IQueryable<Client> GetClients(ClientSearchFilter clientFilter)
 		{
 			var result = _werehouseDbContext.Clients

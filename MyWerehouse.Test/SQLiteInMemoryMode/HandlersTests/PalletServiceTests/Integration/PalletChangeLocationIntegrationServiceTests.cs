@@ -88,9 +88,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			//Act
 			var palletId = pallet.Id;
 			var destinationLocation = 2;
-			var userId = "U001";
-			//var result = await _palletService.ChangeLocationPalletAsync(palletId, destinationLocation, userId);
-			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
+			var userId = "U001";var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
 			//Assert
 			Assert.True(result.IsSuccess);
 			Assert.False(result.Result.RequiresConfirmation);

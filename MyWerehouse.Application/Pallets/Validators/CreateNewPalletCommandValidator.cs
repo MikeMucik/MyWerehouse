@@ -17,7 +17,6 @@ namespace MyWerehouse.Application.Pallets.Validators
 			RuleFor(p => p.DTO)
 				.NotNull()
 				.WithMessage("Dane palety są wymagane");
-
 			RuleFor(p => p.DTO.ProductsOnPallet)
 				.NotNull()
 				.WithMessage("Paleta musi zawierać produkty");

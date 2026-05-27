@@ -10,14 +10,12 @@ using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Application.Receipts.DTOs
 {
-	public class CreateReceiptPlanDTO :IMapFrom<Receipt>
+	public class CreateReceiptPlanDTO : IMapFrom<Receipt>
 	{
-		public Guid Id { get; set; }
-		public int ReceiptNumber { get; set; }
-		public int ClientId { get; set; }		
-		public DateTime ReceiptDateTime { get; set; }		
-		public string PerformedBy { get; set; } 
-		public ReceiptStatus ReceiptStatus { get; set; }		
-		public int RampNumber { get; set; }		
+		public int ClientId { get; set; }
+		public DateTime ReceiptDateTime { get; set; }
+		public string PerformedBy { get; set; }
+		public ReceiptStatus ReceiptStatus { get; set; }
+		public int RampNumber { get; set; }
 	}
 }

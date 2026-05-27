@@ -21,10 +21,8 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		private readonly IProductRepo _productRepo;
 		private readonly IClientRepo _clientRepo;
 		private readonly ILocationRepo _locationRepo;
-
 		public UpdateReceiptHandler(WerehouseDbContext werehouseDbContext,
 			IReceiptRepo receiptRepo,
-			IPublisher mediator,
 			IPalletRepo palletRepo,
 			IProductRepo productRepo,
 			IClientRepo clientRepo,
@@ -41,15 +39,15 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		{
 			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
 			// Pallets don't change warehouse's stock until receipt is confirmed
-			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.DTO.ReceiptId);
+			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.Id);
 			if (existingReceipt == null)
-				return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.DTO.ReceiptNumber} nie zostało znalezione.", ErrorType.NotFound);
-			if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
-			{
-				return AppResult<Unit>.Fail("Wybrany klient nie istnieje.", ErrorType.NotFound);
-			}
-			if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
-				return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Przyjęcie nie zostało znalezione.", ErrorType.NotFound);
+			//if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
+			//{
+			//	return AppResult<Unit>.Fail("Wybrany klient nie istnieje.", ErrorType.NotFound);
+			//}
+			//if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
+			//	return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
 			//foreach (var item in request.DTO.Pallets)
 			//{
 			//	if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
@@ -69,7 +67,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			foreach (var pallet in palletToDelete)
 			{
 				existingReceipt.DetachPallet(pallet);//musi być żeby stworzyć dobrą historię					
-				pallet.DetachFromReceipt(request.UserId, pallet.Location.ToSnapshot());
+				pallet.DetachFromReceipt(request.DTO.PerformedBy, pallet.Location.ToSnapshot());
 			}
 			var existingPallets = existingReceipt.Pallets.ToDictionary(p => p.Id);
 			//Aktualizacja palet
@@ -86,10 +84,9 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 						product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);
 					productsForPallet.Add(productForPallet);
 				}
-
 				pallet.UpdateProductChanges(productsForPallet);
 				pallet.ChangeStatus(PalletStatus.Receiving);
-				pallet.AddHistory(ReasonForPallet.Correction, request.UserId, pallet.Location.ToSnapshot());
+				pallet.AddHistory(ReasonForPallet.Correction, request.DTO.PerformedBy, pallet.Location.ToSnapshot());
 			}
 			//Dodanie nowych palet - Adding new palets
 			var palletsAdded = request.DTO.Pallets
@@ -99,7 +96,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			{
 				var newId = await _palletRepo.GetNextPalletIdAsync();
 				var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber);
-				if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {request.DTO.RampNumber} nie została znaleziona", ErrorType.NotFound);
+				//if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {request.DTO.RampNumber} nie została znaleziona", ErrorType.NotFound);
 				var pallet = Pallet.Create(newId, request.DTO.RampNumber);
 				foreach (var dto in palletToAdd.ProductsOnPallet)
 				{
@@ -109,11 +106,10 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				}
 				var snapShot = location.ToSnapshot();
 				_palletRepo.AddPallet(pallet);
-
-				pallet.AssignToReceipt(existingReceipt.Id, snapShot, request.UserId);
+				pallet.AssignToReceipt(existingReceipt.Id, snapShot, request.DTO.PerformedBy);
 				existingReceipt.AttachPallet(pallet);
 			}
-			existingReceipt.UpdateReceipt(request.UserId, request.DTO.ClientId);
+			existingReceipt.UpdateReceipt(request.DTO.PerformedBy, request.DTO.ClientId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Przyjęcie o numerze {existingReceipt.ReceiptNumber} zostało zaktualizowane");
 		}

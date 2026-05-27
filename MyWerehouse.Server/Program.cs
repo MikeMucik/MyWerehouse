@@ -24,7 +24,7 @@ builder.Services.AddInfrastructure();
 
 builder.Services.AddControllers();
 
-builder.Services.AddValidatorsFromAssemblyContaining<AddressDTOValidation>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddAddressDTOValidation>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

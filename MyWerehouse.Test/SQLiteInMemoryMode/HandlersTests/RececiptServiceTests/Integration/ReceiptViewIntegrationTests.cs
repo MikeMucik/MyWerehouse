@@ -7,7 +7,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MyWerehouse.Application.Receipts.Queries.GetReceipt;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 using MyWerehouse.Application.Receipts.Queries.GetReceipts;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Receviving.Filters;

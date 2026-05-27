@@ -17,14 +17,15 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 {
 	public class ClientIntegrationCommand : CommandTestBase
 	{
-		public readonly DbContextOptions<WerehouseDbContext> _contextOptions;
-		public readonly ClientService _clientService;
-		public readonly IClientRepo _clientRepo;
-		public readonly IReceiptRepo _receiptRepo;
+		protected readonly DbContextOptions<WerehouseDbContext> _contextOptions;
+		protected readonly ClientService _clientService;
+		protected readonly IClientRepo _clientRepo;
+		protected readonly IReceiptRepo _receiptRepo;
 		protected readonly IIssueRepo _issueRepo;
-		protected readonly IValidator<AddressDTO> _addressValidator; // Zadeklaruj
+		protected readonly IValidator<AddAddressDTO> _addressValidator; // Zadeklaruj
+		protected readonly IValidator<EditAddressDTO> _editAddressValidator; // Zadeklaruj
 		protected readonly IValidator<UpdateClientDTO> _updateClientValidator; // Zadeklaruj
-		protected readonly IValidator<ClientDTO> _addClientValidator; // Zadeklaruj
+		protected readonly IValidator<AddClientDTO> _addClientValidator; // Zadeklaruj
 		public ClientIntegrationCommand() : base()
 		{
 			_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
@@ -33,9 +34,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			_clientRepo = new ClientRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_issueRepo = new IssueRepo(_context);
-			_addressValidator = new AddressDTOValidation();
+			_addressValidator = new AddAddressDTOValidation();
+			_editAddressValidator = new EditAddressDTOValidation();
 			_addClientValidator = new AddClientDTOValidation(_addressValidator);	
-			_updateClientValidator = new UpdateClientDTOValidation(_addressValidator);
+			_updateClientValidator = new UpdateClientDTOValidation(_editAddressValidator);
 			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo,_issueRepo, _context,
 				_addClientValidator, _updateClientValidator
 								   );

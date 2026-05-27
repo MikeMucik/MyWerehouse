@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
-using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Picking.Services;
@@ -30,7 +29,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 		private readonly IGetNumberPalletsAndRestService _getNumberPalletsAndRestService = getNumberPalletsAndRestService;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
-		IPalletRepo _palletRepo = palletRepo;
+		private readonly IPalletRepo _palletRepo = palletRepo;
 
 		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO product, IssueAllocationPolicy policy,
 			List<Pallet> reusablePalletsForProduct, string userId)
@@ -42,12 +41,11 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			{
 				return AssignProductToIssueResult.Fail("Błąd statusu zlecenia");
 			}
-			if (!await _productRepo.IsExistProduct(product.ProductId))
-				return AssignProductToIssueResult.Fail($"Produkt o numerze {product.ProductId} nie istnieje.");
+			//if (!await _productRepo.IsExistProduct(product.ProductId))
+			//	return AssignProductToIssueResult.Fail($"Produkt o numerze {product.ProductId} nie istnieje.");
 			reusablePalletsForProduct ??= [];//zabezpieczenie null
 			var oldCount = reusablePalletsForProduct.Count();
-			var productToAdded = await _productRepo.GetProductByIdAsync(product.ProductId);
-			if (productToAdded is null) return AssignProductToIssueResult.Fail($"Produkt o numerze {product.ProductId} nie istnieje.");
+
 			//1. dostępność towaru	- walidacja
 			var totalAvailable = await _getProductCountService.GetProductCountAsync(product.ProductId, product.BestBefore);
 			if (product.Quantity > totalAvailable)//
@@ -63,7 +61,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			{
 				case IssueAllocationPolicy.FullPalletFirst:
 					requiredFullPallets = await _getNumberPalletsAndRestService.GetBackOnlyFullPallets(product.ProductId, product.Quantity);
-					missingPalletsCount = requiredFullPallets - oldCount;					
+					missingPalletsCount = requiredFullPallets - oldCount;
 					palletAssigned = await SelectAndAssignFullPallets(issue, product, reusablePalletsForProduct, requiredFullPallets, missingPalletsCount);
 					break;
 				//case IssueAllocationPolicy.FefoWithFullPalletPreference:
@@ -96,10 +94,9 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			List<Pallet> availablePallets = [];
 			if (missingPalletsCount > 0)
 			{
-				var productFullQuantity= await _productRepo.GetProductByIdAsync(product.ProductId);
-				//availablePallets = await _getAvailablePalletsByProductService.GetPallets(product.ProductId, product.BestBefore, missingPalletsCount);
-				availablePallets = await _palletRepo.GetAvailableFullPallets (product.ProductId, productFullQuantity.CartonsPerPallet, product.BestBefore, missingPalletsCount);
-				foreach (var pallet in availablePallets) 
+				var productFullQuantity = await _productRepo.GetProductByIdAsync(product.ProductId);
+				availablePallets = await _palletRepo.GetAvailableFullPallets(product.ProductId, productFullQuantity.CartonsPerPallet, product.BestBefore, missingPalletsCount);
+				foreach (var pallet in availablePallets)
 					pallet.ChangeStatus(PalletStatus.LockedForIssue);
 			}
 			List<Pallet> allAvailablePallets = [.. reusablePalletsForProduct

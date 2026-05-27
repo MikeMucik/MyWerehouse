@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.Services
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly ICategoryRepo _categoryRepo;
-		private readonly IValidator<AddProductDTO> _productValidator;
+		private readonly IValidator<EditProductDTO> _productValidator;
 
 		public ProductService(
 			IProductRepo repo,
@@ -38,7 +38,7 @@ namespace MyWerehouse.Application.Services
 			IInventoryRepo inventoryRepo,
 			ICategoryRepo categoryRepo,
 			IReceiptRepo? receiptRepo = null,
-			IValidator<AddProductDTO>? productValidator = null)
+			IValidator<EditProductDTO>? productValidator = null)
 		{
 			_productRepo = repo;
 			_mapper = mapper;
@@ -56,7 +56,7 @@ namespace MyWerehouse.Application.Services
 			_productRepo = repo;
 			_mapper = mapper;
 		}
-		public async Task<AppResult<Guid>> AddProductAsync(AddProductDTO productDTO)
+		public async Task<AppResult<Guid>> AddProductAsync(EditProductDTO productDTO)
 		{
 			var validationResult = _productValidator.Validate(productDTO);
 			if (!validationResult.IsValid)
@@ -108,30 +108,30 @@ namespace MyWerehouse.Application.Services
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<AppResult<AddProductDTO>> GetProductToEditAsync(Guid id)
-		{			
+		public async Task<AppResult<EditProductDTO>> GetProductToEditAsync(Guid id)
+		{
 			var product = await _productRepo.GetProductToEditAsync(id);
-			var productDTO = _mapper.Map<AddProductDTO>(product);
-			return AppResult<AddProductDTO>.Success(productDTO);
+			var productDTO = _mapper.Map<EditProductDTO>(product);
+			return AppResult<EditProductDTO>.Success(productDTO);
 		}
-		public async Task<AppResult<Unit>> UpdateProductAsync(AddProductDTO productDTO)
+		public async Task<AppResult<Unit>> UpdateProductAsync(Guid id, EditProductDTO productDTO)
 		{
 			var validationResult = _productValidator.Validate(productDTO);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var existingProduct = await _productRepo.GetProductToEditAsync(productDTO.Id);
+			var existingProduct = await _productRepo.GetProductToEditAsync(id);
 			if (existingProduct == null)
 			{
-				return AppResult<Unit>.Fail($"Produkt o numerze {productDTO.Id} nie istnieje", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Produkt o numerze {id} nie istnieje", ErrorType.NotFound);
 			}
 			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
 			if (existCategory == null)
 			{
 				return AppResult<Unit>.Fail($"Kateogria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
 			}
-			var changes =  _mapper.Map(productDTO, existingProduct);
+			var changes = _mapper.Map(productDTO, existingProduct);
 			existingProduct.ApplyChanges(changes);
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);

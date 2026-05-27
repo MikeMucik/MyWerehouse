@@ -15,7 +15,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 	public class ProductIntegrationCommand : CommandTestBase
 	{
 		protected readonly ProductService _productService;
-		protected readonly IValidator<AddProductDTO> _productValidator;
+		protected readonly IValidator<EditProductDTO> _productValidator;
 		protected readonly IInventoryRepo _inventoryRepo;
 		protected readonly IProductRepo _productRepo;
 		protected readonly IReceiptRepo _receiptRepo;

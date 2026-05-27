@@ -14,6 +14,7 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeleteClient(Client client);
 		void SwitchOffClient(Client client);		
 		Task<Client?> GetClientByIdAsync (int id); 				
+		Task<Client> GetClientToEditAsync (int id); 				
 		IQueryable<Client> GetAllClients();
 		IQueryable<Client> GetClients (ClientSearchFilter clientFilter);
 		Task<bool> IsClientExistAsync(int clientId);

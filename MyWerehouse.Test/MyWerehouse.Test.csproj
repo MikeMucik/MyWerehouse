@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="SQLiteInMemoryMode\HandlersTests\IssueServiceTests\Unit\" />
+    <Folder Include="SQLiteInMemoryMode\HandlersTests\IssueTests\Unit\" />
     <Folder Include="SQLiteInMemoryMode\HandlersTests\PalletServiceTests\Unit\" />
     <Folder Include="UnitTestService\" />
   </ItemGroup>

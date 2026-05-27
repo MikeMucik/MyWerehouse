@@ -33,7 +33,6 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 			{
 				return AppResult<Unit>.Fail($"Brak lokalizacji o numerze {request.RampNumber}.", ErrorType.NotFound);
 			}
-			//using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(ct);
 			var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
 			var pallet = Pallet.Create(newIdForPallet, request.RampNumber);
 			var productOnPallet = new List<ProductOnPallet>();
@@ -46,10 +45,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToWarehouse(location.Id, snapShot, request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			//await transaction.CommitAsync(ct);
-
 			return AppResult<Unit>.Success(Unit.Value, $"Dodano paletę {newIdForPallet} do stanu magazynowego, uaktualniono stan magazynowy.");
-			
 		}
 	}
 }

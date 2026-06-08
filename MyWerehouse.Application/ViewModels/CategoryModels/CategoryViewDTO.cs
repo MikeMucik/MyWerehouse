@@ -15,7 +15,9 @@ namespace MyWerehouse.Application.ViewModels.CategoryModels
 		public required string Name { get; set; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Category, CategoryViewDTO>();
+			profile.CreateMap<Category, CategoryViewDTO>()
+				.ForMember(dest=>dest.Id, opt=>opt.MapFrom(static src=>src.Id))
+				.ForMember(dest=>dest.Name, opt=>opt.MapFrom(static src=>src.Name));
 		}
 	}
 }

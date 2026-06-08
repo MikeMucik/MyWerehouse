@@ -6,7 +6,6 @@ using MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet;
 using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
-using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
 using MyWerehouse.Server.Extensions;

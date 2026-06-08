@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Pallets.DTOs;
 
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
-	public record CreateNewPalletCommand(CreatePalletDTO DTO, int RampNumber, string UserId) : IRequest<AppResult<Unit>>;
+	public record CreateNewPalletCommand(CreatePalletDTO DTO, int RampNumber, string UserId)
+		: IRequest<AppResult<Unit>>;
 }

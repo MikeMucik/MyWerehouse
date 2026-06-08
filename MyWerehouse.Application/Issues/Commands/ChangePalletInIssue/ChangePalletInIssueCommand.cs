@@ -9,5 +9,5 @@ using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 {
-	public record ChangePalletInIssueCommand(Guid IssueId, Guid OldPalletId, Guid NewPalletId, string UserId):IRequest<AppResult<IssueResult>>;
+	public record ChangePalletInIssueCommand(Guid IssueId, Guid OldPalletId, Guid NewPalletId, string UserId):IRequest<AppResult<Unit>>;
 }

@@ -41,9 +41,9 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			{
 				return AssignProductToIssueResult.Fail("Błąd statusu zlecenia");
 			}
-			//if (!await _productRepo.IsExistProduct(product.ProductId))
-			//	return AssignProductToIssueResult.Fail($"Produkt o numerze {product.ProductId} nie istnieje.");
-			reusablePalletsForProduct ??= [];//zabezpieczenie null
+			var productfull = await _productRepo.GetProductByIdAsync(product.ProductId);
+			var productSKU = productfull.SKU;//checked in handler
+			reusablePalletsForProduct ??= [];//protected null
 			var oldCount = reusablePalletsForProduct.Count();
 
 			//1. dostępność towaru	- walidacja
@@ -86,7 +86,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, product.ProductId, product.Quantity, totalAvailable);
 				}
 			}
-			return AssignProductToIssueResult.Ok($"Towar {product.ProductId} został dołączony do zlecenia.", palletAssigned);
+			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.", palletAssigned);
 		}
 		//pełne palety first
 		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO product, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)

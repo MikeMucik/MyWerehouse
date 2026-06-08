@@ -8,7 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
-using MyWerehouse.Application.Receipts.Queries.GetReceipts;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Receviving.Filters;
 
@@ -111,15 +111,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			{
 				ProductId = Guid.Parse("00000000-0000-0000-0001-000000000000")
 			};
-			//var result = await _receiptService.GetReceiptDTOsAsync(filter);
 			var q = new GetReceiptsByFilterQuery();
 			var query = new GetReceiptsByFilterQuery
 			{
 				Filter = filter,
 				CurrentPage = 1,
 				PageSize = 2,
-			};
-				//(filter,1,2);
+			};				
 
 			var result = await _mediator.Send(query);
 			//Assert

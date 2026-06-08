@@ -9,7 +9,6 @@ using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Application.Issues.Commands.ModifyIssue;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
-using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
 using MyWerehouse.Application.Issues.Queries.IssueProductsSummary;

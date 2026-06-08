@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 				_receiptRepo.AddReceipt(receipt);
 				receipt.Create(request.DTO.PerformedBy);
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, "Utworzono przyjęcie");
+				return AppResult<Unit>.Success(Unit.Value, "Utworzono przyjęcie.");
 		}
 	}
 }

@@ -696,8 +696,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(2, result.Result.Count);
 			Assert.True(result.Result.First().Success);
 			Assert.True(result.Result.Last().Success);
-			Assert.Contains("Towar dołączono do wydania", result.Result.First().Message);
-			Assert.Contains("Towar dołączono do wydania", result.Result.Last().Message);
+			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Result.First().Message);
+			Assert.Contains($"Towar {product1.SKU} został dołączony do zlecenia.", result.Result.Last().Message);
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 			Assert.Equal(product1.Id, result.Result.Last().ProductId);
 
@@ -825,8 +825,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(2, result.Result.Count);
 			Assert.True(result.Result.First().Success);
 			Assert.True(result.Result.Last().Success);
-			Assert.Contains("Towar dołączono do wydania", result.Result.First().Message);
-			Assert.Contains("Towar dołączono do wydania", result.Result.Last().Message);
+			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia", result.Result.First().Message);
+			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia", result.Result.Last().Message);
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 			Assert.Equal(product1.Id, result.Result.Last().ProductId);
 

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Picking.Queries.GetListToPickingFlat

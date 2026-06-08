@@ -26,10 +26,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Remove(product);
 		}
-		public void SwitchOffProduct(Product product)
-		{
-			//product.IsDeleted = true;
-		}
 		public async Task<Product?> GetProductByIdAsync(Guid id)
 		{
 			if (id == Guid.Empty)

@@ -19,20 +19,17 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IPalletRepo _palletRepo;
 		private readonly IProductRepo _productRepo;
-		private readonly IClientRepo _clientRepo;
 		private readonly ILocationRepo _locationRepo;
 		public UpdateReceiptHandler(WerehouseDbContext werehouseDbContext,
 			IReceiptRepo receiptRepo,
 			IPalletRepo palletRepo,
 			IProductRepo productRepo,
-			IClientRepo clientRepo,
 			ILocationRepo locationRepo)
 		{
 			_werehouseDbContext = werehouseDbContext;
 			_receiptRepo = receiptRepo;
 			_palletRepo = palletRepo;
 			_productRepo = productRepo;
-			_clientRepo = clientRepo;
 			_locationRepo = locationRepo;
 		}
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
@@ -42,12 +39,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.Id);
 			if (existingReceipt == null)
 				return AppResult<Unit>.Fail($"Przyjęcie nie zostało znalezione.", ErrorType.NotFound);
-			//if (!await _clientRepo.IsClientExistAsync(request.DTO.ClientId))
-			//{
-			//	return AppResult<Unit>.Fail("Wybrany klient nie istnieje.", ErrorType.NotFound);
-			//}
-			//if (!await _locationRepo.ReceivingRampExistsAsync(request.DTO.RampNumber))
-			//	return AppResult<Unit>.Fail("Wybrana rampa nie istnieje.", ErrorType.NotFound);
 			//foreach (var item in request.DTO.Pallets)
 			//{
 			//	if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
@@ -96,7 +87,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			{
 				var newId = await _palletRepo.GetNextPalletIdAsync();
 				var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber);
-				//if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {request.DTO.RampNumber} nie została znaleziona", ErrorType.NotFound);
 				var pallet = Pallet.Create(newId, request.DTO.RampNumber);
 				foreach (var dto in palletToAdd.ProductsOnPallet)
 				{

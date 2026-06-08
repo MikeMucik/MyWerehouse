@@ -13,35 +13,23 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
 	public class CreateNewPalletHandler(WerehouseDbContext werehouseDbContext,
-		IPalletRepo palletRepo, IProductRepo productRepo,
-		ILocationRepo locationRepo) : IRequestHandler<CreateNewPalletCommand, AppResult<Unit>>
+		IPalletRepo palletRepo, ILocationRepo locationRepo)
+		: IRequestHandler<CreateNewPalletCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IProductRepo _productRepo = productRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 
 		public async Task<AppResult<Unit>> Handle(CreateNewPalletCommand request, CancellationToken ct)
 		{
-			foreach (var product in request.DTO.ProductsOnPallet)
-			{
-				if (!await _productRepo.IsExistProduct(product.ProductId))
-					return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
-			}
-			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
-			if (location == null)
-			{
-				return AppResult<Unit>.Fail($"Brak lokalizacji o numerze {request.RampNumber}.", ErrorType.NotFound);
-			}
+			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);			
 			var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
 			var pallet = Pallet.Create(newIdForPallet, request.RampNumber);
-			var productOnPallet = new List<ProductOnPallet>();
 			foreach (var product in request.DTO.ProductsOnPallet)
 			{
 				pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
 			}
 			_palletRepo.AddPallet(pallet);
-
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToWarehouse(location.Id, snapShot, request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);

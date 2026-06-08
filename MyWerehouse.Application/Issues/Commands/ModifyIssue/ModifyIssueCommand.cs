@@ -9,5 +9,5 @@ using MyWerehouse.Application.Issues.DTOs;
 
 namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 {
-	public record ModifyIssueCommand(Guid Id, ModifyIssueDTO DTO, DateTime DateToSend) : IRequest<AppResult<List<IssueResult>>>;	
+	public record ModifyIssueCommand(Guid Id, ModifyIssueDTO DTO, DateTime DateToSend) : IRequest<AppResult<List<IssueItemAllocationResult>>>;	
 }

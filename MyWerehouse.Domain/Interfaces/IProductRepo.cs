@@ -12,9 +12,7 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IProductRepo
 	{		
 		Product AddProduct(Product product);		
-		void DeleteProduct(Product product);		
-		void SwitchOffProduct(Product product);					
-		//Task SwitchOffProductAsync(int id);					
+		void DeleteProduct(Product product);					
 		Task<Product?> GetProductByIdAsync(Guid id);		
 		Task<Product?> GetProductToEditAsync(Guid id);		
 		IQueryable<Product> GetAllProducts();		

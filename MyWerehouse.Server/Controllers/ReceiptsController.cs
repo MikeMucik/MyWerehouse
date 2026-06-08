@@ -8,9 +8,8 @@ using MyWerehouse.Application.Receipts.Commands.CreateReceipt;
 using MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
-using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
-using MyWerehouse.Application.Receipts.Queries.GetReceipts;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers

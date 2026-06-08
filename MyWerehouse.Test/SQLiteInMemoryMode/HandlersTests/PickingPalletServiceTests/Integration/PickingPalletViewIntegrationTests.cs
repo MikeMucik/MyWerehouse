@@ -12,6 +12,7 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree;
 using MyWerehouse.Application.Picking.Queries.GetListPickingPallet;
+using MyWerehouse.Application.Picking.Queries.GetListPickingPalletForOperator;
 using MyWerehouse.Application.Picking.Queries.GetListToPickingFlat;
 using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
 using MyWerehouse.Application.Picking.Queries.ShowTaskToDo;

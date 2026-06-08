@@ -109,7 +109,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert
 			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
-			Assert.Contains($"Towar {product.Id} został dołączony do zlecenia.", result.Message);
+			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			var issue = await DbContext.Issues.FirstOrDefaultAsync();
 			Assert.NotNull(issue);
@@ -188,7 +188,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert
 			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
-			Assert.Contains($"Towar {product.Id} został dołączony do zlecenia.", result.Message);
+			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			var issue = await DbContext.Issues.FirstOrDefaultAsync();
 			Assert.NotNull(issue);

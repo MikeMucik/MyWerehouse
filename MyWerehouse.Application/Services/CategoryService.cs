@@ -121,7 +121,7 @@ namespace MyWerehouse.Application.Services
 
 		public async Task<AppResult<CategoryViewDTO>> GetCategoryByIdAsync(int id)
 		{
-			var result = _categoryRepo.GetCategoryByIdAsync(id);
+			var result = await _categoryRepo.GetCategoryByIdAsync(id);
 			if (result == null)
 			{
 				return AppResult<CategoryViewDTO>.Fail("Nie znaleziono kategorii.");

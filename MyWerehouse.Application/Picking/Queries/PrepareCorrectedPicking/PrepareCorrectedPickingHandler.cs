@@ -44,7 +44,8 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking
 				return AppResult<PrepareCorrectedPickingResult>.Fail($"Paleta {request.PalletId} jest pusta.");
 			}
 
-			// Logika wyszukiwania pasujących zleceń			
+			// Logika wyszukiwania pasujących zleceń	
+			// //TODO - time		
 			var timeFrom = DateTime.UtcNow;
 			var timeTo = DateTime.UtcNow.AddDays(1);
 			var pickingTasksAll = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Issues.DTOs;
+using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
 
 namespace MyWerehouse.Application.Picking.DTOs
 {

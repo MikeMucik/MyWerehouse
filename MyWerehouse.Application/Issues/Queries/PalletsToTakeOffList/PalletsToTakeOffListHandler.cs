@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList

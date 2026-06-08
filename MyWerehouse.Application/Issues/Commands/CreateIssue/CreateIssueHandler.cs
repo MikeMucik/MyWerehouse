@@ -18,30 +18,30 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 {
 	public class CreateIssueHandler(WerehouseDbContext werehouseDbContext,
 		IIssueRepo issueRepo,
-		IAssignProductToIssueService assignProductToIssueService) : IRequestHandler<CreateIssueCommand, AppResult<List<IssueResult>>>
+		IAssignProductToIssueService assignProductToIssueService) : IRequestHandler<CreateIssueCommand, AppResult<List<IssueItemAllocationResult>>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IAssignProductToIssueService _assignProductToIssueService = assignProductToIssueService;
 
-		public async Task<AppResult<List<IssueResult>>> Handle(CreateIssueCommand request, CancellationToken ct)
+		public async Task<AppResult<List<IssueItemAllocationResult>>> Handle(CreateIssueCommand request, CancellationToken ct)
 		{
-			var addedProducts = new List<IssueResult>();
-			var results = new List<IssueResult>();
+			var addedProducts = new List<IssueItemAllocationResult>();
+			var results = new List<IssueItemAllocationResult>();
 			var issueNumber = await _issueRepo.GetNextNumberOfIssue();
 			var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.SendDate, request.DTO.PerformedBy);
 			_issueRepo.AddIssue(issue);
 			foreach (var item in request.DTO.Items)
 			{
-				IssueResult addingProducts;
+				IssueItemAllocationResult addingProducts;
 				var result = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
 				if (result.Success == false)
 				{
-					addingProducts = IssueResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
+					addingProducts = IssueItemAllocationResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
 				}
 				else
 				{
-					addingProducts = IssueResult.Ok(result.Message, item.ProductId);					
+					addingProducts = IssueItemAllocationResult.Ok(result.Message, item.ProductId);					
 					issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);
 				}
 				addedProducts.Add(addingProducts);
@@ -52,7 +52,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
 			}
 			issue.AddHistory(request.DTO.PerformedBy);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<List<IssueResult>>.Success(addedProducts);
+			return AppResult<List<IssueItemAllocationResult>>.Success(addedProducts);
 		}
 	}
 }

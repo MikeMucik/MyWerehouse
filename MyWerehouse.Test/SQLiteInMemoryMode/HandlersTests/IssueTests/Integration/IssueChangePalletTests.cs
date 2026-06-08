@@ -93,8 +93,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 
 			// Assert
-			Assert.True(result.Result.Success);
-			Assert.Equal("Podmieniono palety.", result.Result.Message);
+			Assert.True(result.IsSuccess);
+			Assert.Equal("Podmieniono palety.", result.Message);
 
 			var updatedIssue = await DbContext.Issues.Include(i => i.Pallets).FirstAsync(i => i.Id == issue.Id);
 			var p1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");

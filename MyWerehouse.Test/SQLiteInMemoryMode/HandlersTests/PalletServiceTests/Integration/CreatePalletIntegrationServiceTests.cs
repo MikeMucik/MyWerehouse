@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.DTOs;
@@ -15,7 +16,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 	public class CreatePalletIntegrationServiceTests :TestBase
 	{
 		[Fact]
-		public async Task PalletWithNoHistory_CreatePalletAsync_CreateToList()
+		public async Task CreatePallet_ShouldCreate_WhenValidData()
 		{
 			//Arrange
 			var category = new Category
@@ -66,8 +67,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				.Include(p => p.ProductsOnPallet)
 				.FirstOrDefaultAsync();
 
-			Assert.NotNull(palletInDb);
-			
+			Assert.NotNull(palletInDb);			
 
 			Assert.Single(palletInDb.ProductsOnPallet);
 			Assert.Equal(product.Id, palletInDb.ProductsOnPallet.First().ProductId);
@@ -85,7 +85,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.Equal(15, inventoryNew.Quantity);
 		}
 		[Fact]
-		public async Task PalletWithNoHistory_CreatePalletAsync_ThrowExcpetationValidation()
+		public async Task CreatePallet_ThrowExcpetationValidation_WhenQuantityIsZero()
 		{
 			//Arrange
 			var category = new Category
@@ -94,14 +94,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("Test", "666666", 1, 56);
-			//var product = new Product
-			//{
-			//	Name = "Test",
-			//	SKU = "666666",
-			//	Category = category,
-			//	IsDeleted = false,
-			//};
+			var product = Product.Create("Test", "666666", 1, 56);			
 			var location = new Location
 			{
 				Aisle = 0,
@@ -137,7 +130,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
 		}
 		[Fact]
-		public async Task PalletWithNoHistory_CreatePalletAsync_ThrowDomainExcpetion()
+		public async Task CreatePallet_ThrowExcpetationValidation_ProductNotExist()
 		{
 			//Arrange
 			var category = new Category
@@ -146,14 +139,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("Test", "666666", 1, 56);
-			//var product = new Product
-			//{
-			//	Name = "Test",
-			//	SKU = "666666",
-			//	Category = category,
-			//	IsDeleted = false,
-			//};
+			var product = Product.Create("Test", "666666", 1, 56);			
 			var location = new Location
 			{
 				Aisle = 0,
@@ -183,13 +169,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PalletServiceTests.Int
 						}
 				},
 			};
-			//Act
-			var result = await Mediator.Send(new CreateNewPalletCommand(newPallet,1, "user"));
-			
-			//Assert
-			Assert.NotNull(result);
-			Assert.False(result.IsSuccess);
-			Assert.Contains($"Produkt o numerze {product9Id} nie istnieje.", result.Error);
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<ValidationException>(()=> Mediator.Send(new CreateNewPalletCommand(newPallet, 1, "user")));
+			Assert.Contains("Wybrany product nie istnieje.", ex.Message);			
 		}
 	}
 }

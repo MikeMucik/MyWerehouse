@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Application.Common.Results;

@@ -7,6 +7,7 @@ using AutoMapper;
 using FluentValidation;
 using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Application.Receipts.DTOs

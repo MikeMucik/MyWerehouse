@@ -11,15 +11,15 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 {
 	public class ReversePickingDTO : IMapFrom<ReversePicking>
 	{
-		public Guid Id { get; set; }
-		public required string PickingPalletId { get; set; }
+		public Guid Id { get; init; }
+		public required string PickingPalletId { get; init; }
 		//tu trzeba się zastanowić czy to w ogóle potrzebne poniższe dwie pozycje 
-		public string? SourcePalletId { get; set; }//paleta źródłowa na nią wraca towar lub do której dodajemy
-		public string? DestinationPalletId { get; set; }//paleta nowa jeśli nie ma do czego dołaczyć ???
-		public Guid ProductId { get; set; }
-		public DateOnly? BestBefore { get; set; }
-		public int Quantity { get; set; }
-		public ReversePickingStatus Status { get; set; }
+		public string? SourcePalletId { get; init; }//paleta źródłowa na nią wraca towar lub do której dodajemy
+		public string? DestinationPalletId { get; init; }//paleta nowa jeśli nie ma do czego dołaczyć ???
+		public Guid ProductId { get; init; }
+		public DateOnly? BestBefore { get; init; }
+		public int Quantity { get; init; }
+		public ReversePickingStatus Status { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<ReversePicking,  ReversePickingDTO>();

@@ -18,7 +18,7 @@ using Xunit.Sdk;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integration
 {
-	public class IssueUpdateIntegrationServiceTests : TestBase
+	public class IssueModifyIntegrationServiceTests : TestBase
 	{
 		private Client CreateClient()
 		{
@@ -45,7 +45,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		{
 			return new Category
 			{
-				//Id = 1,
 				Name = name,
 				IsDeleted = false
 			};
@@ -66,7 +65,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 		//HappyPath
 		[Fact]
-		public async Task UpdateIssue_ShouldCreatePickingTasks_WhenNoneExistAtCreation()
+		public async Task ModifyIssue_ShouldCreatePickingTasks_WhenNoneExistAtCreation()
 		{
 			// Arrange – setup initial data
 			var client = CreateClient();
@@ -98,7 +97,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					new IssueItemDTO { ProductId = product.Id, Quantity = 10, BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))  }
 				}
 			};
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -106,7 +105,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(1);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(1));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -116,7 +115,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			new IssueItemDTO { ProductId = product.Id, Quantity = 15, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))  }
 		}
 			};
-			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, DateTime.UtcNow.AddDays(7)));
+			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7))));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
@@ -159,7 +158,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(PalletStatus.ToPicking, p2After.Status);
 		}
 		[Fact]
-		public async Task UpdateIssue_ShouldCreatePickingTasks_WhenExistAtCreation()
+		public async Task ModifyIssue_ShouldCreatePickingTasks_WhenExistAtCreation()
 		{
 			// Arrange – setup initial data
 			var client = CreateClient();
@@ -192,7 +191,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -221,7 +220,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(1, history.Count);
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = client.Id,
@@ -287,7 +286,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(pickingTask.Id, lastHistory.PickingTaskId);
 		}
 		[Fact]
-		public async Task UpdateIssue_ShouldCreatePickingTasks_WhenOtherPickingTasksExistOnSourcePallet()
+		public async Task ModifyIssue_ShouldCreatePickingTasks_WhenOtherPickingTasksExistOnSourcePallet()
 		{
 			// Arrange – setup initial data
 			var client = CreateClient();
@@ -304,7 +303,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 
 			var issueOld = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-10),
-			DateTime.Now.AddDays(2), "userS", IssueStatus.InProgress, null);
+			DateOnly.FromDateTime( DateTime.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
 
 			var sourcePallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2);
 			var pickingGuid = Guid.NewGuid();
@@ -331,7 +330,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.IssueNumber == 2);
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -339,7 +338,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = issue.ClientId,
@@ -390,7 +389,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 		}
 		[Fact]
-		public async Task UpdateIssue_ShouldMakeNewIssue_WhenIssueConfirmedToLoad()
+		public async Task ModifyIssue_ShouldMakeNewIssue_WhenIssueConfirmedToLoad()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -407,7 +406,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 
 			var issueOld = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-10),
-			DateTime.Now.AddDays(2), "userS", IssueStatus.InProgress, null);
+			DateOnly.FromDateTime(DateTime.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
 			var virtualPallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2);
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issueId, 4, PickingStatus.Allocated, product.Id,
@@ -434,7 +433,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.IssueNumber == 2);
 			issue.ChangeStatus(IssueStatus.ConfirmedToLoad);
@@ -445,7 +444,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = client.Id,
@@ -514,7 +513,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 
 		[Fact]
-		public async Task UpdateIssu_ShouldAddOneProductToIssue_WhenInsufficientForOneProduct()
+		public async Task ModifyIssue_ShouldAddOneProductToIssue_WhenInsufficientForOneProduct()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -548,7 +547,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -574,7 +573,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -605,7 +604,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 
 		[Fact]
-		public async Task UpdateIssue_ShouldUpdateIsuue_WhenSufficientStaffForBothProducts()
+		public async Task ModifyIssue_ShouldUpdateIsuue_WhenSufficientStaffForBothProducts()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -644,7 +643,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -670,7 +669,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 21 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -736,7 +735,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 
 		[Fact]
-		public async Task UpdateIssue_ShouldReduceProductQuantituty_WhenQuantityIsLowerThanOriginal()
+		public async Task ModifyIssue_ShouldReduceProductQuantituty_WhenQuantityIsLowerThanOriginal()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -774,7 +773,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Equal(2, issue.Pallets.Count); // powinien być przypisany P1 p2
@@ -800,7 +799,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 11 szt. 
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -867,7 +866,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 
 		[Fact]
-		public async Task UpdateIssueAsync_InsufficientStaff()
+		public async Task ModifyIssueAsync_InsufficientStaff()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -897,7 +896,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -919,7 +918,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -946,7 +945,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 		}
 		[Fact]
-		public async Task UpdateIssueAsync_WrongStatusPallet()
+		public async Task ModifyIssueAsync_WrongStatusPallet()
 		{
 			// Arrange – setup initial data
 			var client = CreateClient();
@@ -976,7 +975,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -984,7 +983,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -1011,7 +1010,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 		}
 		[Fact]
-		public async Task UpdateIssueAsync_NotIssue_ThrowsException()
+		public async Task ModifyIssueAsync_NotIssue_ThrowsException()
 		{
 			// Arrange – setup initial data
 			var client = CreateClient();
@@ -1041,7 +1040,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1049,7 +1048,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: inny numer id
 			var id = Guid.NewGuid();
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = client.Id,
@@ -1070,7 +1069,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 		//NotCompletedAfterUpdate
 		[Fact]
-		public async Task UpdateIssueAsync_OneProductEnoughSecondNot_IssueNotCompleted()
+		public async Task ModifyIssueAsync_OneProductEnoughSecondNot_IssueNotCompleted()
 		{
 			// Arrange – setup initial data
 			var client = CreateClient();
@@ -1110,7 +1109,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					new IssueItemDTO { ProductId = product1.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 				}
 			};
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1118,7 +1117,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -1136,7 +1135,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
-			Assert.Equal(IssueStatus.NotComplete, updatedIssue.IssueStatus);
+			Assert.Equal(IssueStatus.RequiresCorrection, updatedIssue.IssueStatus);
 			//Assert.Equal("User2", updatedIssue.PerformedBy);
 			//Assert.Single(updatedIssue.Pallets);
 			//Assert.Equal(PalletStatus.LockedForIssue, updatedIssue.Pallets.First().Status);
@@ -1179,7 +1178,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(PalletStatus.ToPicking, p3After.Status);
 		}
 		[Fact]
-		public async Task UpdateIssueAsync_InsufficientStaffForOne()
+		public async Task ModifyIssueAsync_InsufficientStaffForOne()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -1215,7 +1214,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1241,7 +1240,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend = DateTime.UtcNow.AddDays(7);
+			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",

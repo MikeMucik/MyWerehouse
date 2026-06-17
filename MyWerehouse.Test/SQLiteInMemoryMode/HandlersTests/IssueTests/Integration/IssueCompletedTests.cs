@@ -80,7 +80,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow).AddDays(7), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
@@ -119,7 +119,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow).AddDays(7), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
@@ -158,7 +158,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow).AddDays(7), "UserS", IssueStatus.Pending, issueItem);
 
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
@@ -171,7 +171,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			await DbContext.SaveChangesAsync();
 			//Act&Assert
 			var ex = await Assert.ThrowsAsync<NotEndedLoadingDomainException>(() => Mediator.Send(new CompletedLoadIssueCommand(issue.Id, "UserLoader")));
-			Assert.Equal($"Issue {issueId} has pallets not fully loaded.", ex.Message);
+			Assert.Equal($"Issue {issue.IssueNumber}({issueId}) has pallets not fully loaded.", ex.Message);
 		}
 	}
 }

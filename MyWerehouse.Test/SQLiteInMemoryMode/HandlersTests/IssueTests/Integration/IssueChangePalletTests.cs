@@ -79,7 +79,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "UserS", IssueStatus.Pending, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
@@ -126,7 +126,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "UserS", IssueStatus.Pending, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			
@@ -193,7 +193,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "UserS", IssueStatus.Pending, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
@@ -229,7 +229,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.Pending, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "UserS", IssueStatus.Pending, issueItem);
 			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, location.Id, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			

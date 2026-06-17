@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 {
-	public class MarkPalletAsLoadedResponeDTO
+	public sealed class MarkPalletAsLoadedResponeDTO
 	{
-		public Guid PalletId { get; set; }
-		public required string PalletNumber { get; set; }
-		public PalletStatus NewStatus { get; set; }
-		public DateTime LoadedAt { get; set; }
+		public Guid PalletId { get; init; }
+		public required string PalletNumber { get; init; }
+		public PalletStatus NewStatus { get; init; }
+		public DateTime LoadedAt { get; init; }
 	}
 }

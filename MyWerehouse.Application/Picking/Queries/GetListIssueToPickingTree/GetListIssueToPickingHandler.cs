@@ -46,6 +46,7 @@ namespace MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree
 						.Select(productItem => new ProductOnPalletPickingDTO
 						{
 							ProductId = productItem.ProductId,
+							SKU = productItem.SKU,
 							Quantity = productItem.Quantity,
 						}).ToList(),
 					}).ToList(),

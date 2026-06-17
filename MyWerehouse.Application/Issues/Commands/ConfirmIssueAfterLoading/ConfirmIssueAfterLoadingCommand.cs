@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 
-namespace MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading
+namespace MyWerehouse.Application.Issues.Commands.ConfirmIssueAfterLoading
 {
-	public record VerifyIssueAfterLoadingCommand(Guid IssueId, string VerifiedBy) : IRequest<AppResult<Unit>>;
+	public record ConfirmIssueAfterLoadingCommand(Guid IssueId, string ConfirmedBy) : IRequest<AppResult<Unit>>;
 	
 }

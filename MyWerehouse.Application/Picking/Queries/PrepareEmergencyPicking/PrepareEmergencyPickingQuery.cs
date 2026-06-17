@@ -9,5 +9,6 @@ using MyWerehouse.Application.Picking.DTOs;
 
 namespace MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking
 {
-	public record PrepareCorrectedPickingQuery(Guid PalletId):IRequest<AppResult<PrepareCorrectedPickingResult>>;	
+	public record PrepareEmergencyPickingQuery(Guid PalletId, DateOnly Start, DateOnly End)
+		:IRequest<AppResult<PrepareCorrectedPickingResult>>;	
 }

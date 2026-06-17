@@ -22,7 +22,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			_receiptRepo = new ReceiptRepo(_fixture.DbContext);
 		}		
 		[Fact]
-		public async Task ShowReceiptById_GetReceiptByIdAsync_ReturnList()
+		public async Task GetReceiptByIdAsync_ShowReceiptById()
 		{
 			//Arrange
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -33,6 +33,21 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			Assert.NotNull(result);
 			Assert.Equal(ReceiptId, result.Id);
 			Assert.Equal(10, result.ClientId);
+		}
+		[Fact]
+		public void GetReceiptByFilter_ShowReceiptByReceiptNumber()
+		{
+			//Arrange
+			var filter = new IssueReceiptSearchFilter
+			{
+				ReceiptNumber = 1
+			};
+			//Act
+			var result = _receiptRepo.GetReceiptByFilter(filter);
+			//Assert
+			Assert.NotNull(result);
+			Assert.NotEmpty(result);
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
 		}
 		[Fact]
 		public void ShowListReceiptsByClient_GetIssuesByFilter_ReturnList()
@@ -72,8 +87,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			//Arrange
 			var filter = new IssueReceiptSearchFilter
 			{
-				DateTimeEnd = new DateTime(2025, 6, 6),
-				DateTimeStart = new DateTime(2020, 1, 1),
+				DateTimeEnd =new DateTime(2025, 6, 6),
+				DateTimeStart =new DateTime(2020, 1, 1),
 			};
 
 			//Act

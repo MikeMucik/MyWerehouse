@@ -37,7 +37,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result);
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal("U002", result.Result.PerformedBy);
-			Assert.Equal(DateTime.UtcNow.AddHours(23), result.Result.IssueDateTimeSend, precision: TimeSpan.FromMinutes(1));
+			Assert.Equal(DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23)), result.Result.IssueDateTimeSend);
 
 			Assert.NotNull(result.Result.Pallets);
 			Assert.Equal(3, result.Result.Pallets.Count);
@@ -58,7 +58,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal(2, result.Result.IssueItems.Count);
 			Assert.Equal("U002", result.Result.PerformedBy);
-			Assert.Equal(DateTime.UtcNow.AddHours(23), result.Result.DateToSend, precision: TimeSpan.FromMinutes(1));
+			Assert.Equal(DateOnly.FromDateTime( DateTime.UtcNow.AddHours(25)), result.Result.DateToSend);
 
 			Assert.NotNull(result.Result.IssueItems);
 			Assert.Equal(400, result.Result.IssueItems.FirstOrDefault(x => x.ProductId == productId2).Quantity);

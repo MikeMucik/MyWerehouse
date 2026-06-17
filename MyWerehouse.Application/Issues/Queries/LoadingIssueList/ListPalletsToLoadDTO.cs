@@ -8,10 +8,10 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 {
 	public class ListPalletsToLoadDTO
 	{
-		public Guid IssueId { get; set; }
-		public int IssueNumber { get; set; }
-		public int ClientId { get; set; }
-		public string ClientName { get; set; }
-		public List<PalletToLoadDTO> Pallets { get; set; } = new List<PalletToLoadDTO>();
+		public Guid IssueId { get; init; }
+		public int IssueNumber { get; init; }
+		public int ClientId { get; init; }
+		public string ClientName { get; init; }
+		public List<PalletToLoadDTO> Pallets { get; init; } = new List<PalletToLoadDTO>();
 	}
 }

@@ -11,15 +11,15 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 {
 	public class ProductDTO : IMapFrom<Product>
 	{
-		public Guid Id { get; set; }
-		public string Name { get; set; }
-		public string SKU { get; set; }
-		public string Category { get; set; }
-		public bool IsDeleted { get; set; }
+		public Guid Id { get; init; }
+		public string Name { get; init; }
+		public string SKU { get; init; }
+		public string Category { get; init; }
+		public bool IsDeleted { get; init; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Product,  ProductDTO>()
-				.ForMember(dest=>dest.Category, opt=>opt.MapFrom(src=>src.Category.Name));
+			profile.CreateMap<Product, ProductDTO>()
+				.ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name));
 		}
 	}
 }

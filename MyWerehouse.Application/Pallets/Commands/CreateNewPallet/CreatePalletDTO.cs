@@ -14,9 +14,9 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
 	public class CreatePalletDTO
 	{
-		public DateTime DateReceived { get; set; }
-		public int LocationId { get; set; }		
-		public PalletStatus Status { get; set; } = 0; //może usunąć jeszcze trzeba sie zastanowić, decyzja biznesowa czy zawsze InStock
-		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new HashSet<ProductOnPalletDTO>();//tworzę paletę razem z towarem
+		public DateTime DateReceived { get; init; }
+		public int LocationId { get; init; }		
+		public PalletStatus Status { get; init; } = 0; //może usunąć jeszcze trzeba sie zastanowić, decyzja biznesowa czy zawsze InStock
+		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new HashSet<ProductOnPalletDTO>();//tworzę paletę razem z towarem
 	}
 }

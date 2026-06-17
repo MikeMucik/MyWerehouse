@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			RuleFor(x => x.DTO.PerformedBy)
 				.NotEmpty().WithMessage("Użytkownik wymagany");
 			RuleFor(x => x.DateToSend)
-				.GreaterThan(DateTime.MinValue).WithMessage("Nie prawidłowa data zamówienia");
+				.GreaterThan(DateOnly.FromDateTime(DateTime.MinValue)).WithMessage("Nie prawidłowa data zamówienia");
 			RuleForEach(x => x.DTO.IssueItems).SetValidator(itemValidator);
 			RuleFor(x => x.DTO.IssueItems)
 				.NotEmpty().WithMessage("Brak ilości i/lub towaru w zamówieniu");

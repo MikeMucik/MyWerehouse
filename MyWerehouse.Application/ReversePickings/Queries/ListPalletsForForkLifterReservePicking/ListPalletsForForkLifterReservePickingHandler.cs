@@ -5,34 +5,33 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList;
 using MyWerehouse.Domain.Interfaces;
 
-namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePicking
+namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking
 {
 	public class ListPalletsForForkLifterReservePickingHandler(IReversePickingRepo reversePickingRepo,
 		IPalletRepo palletRepo)
-		: IRequestHandler<ListPalletsForForkLifterReservePickingQuery, AppResult<List<PalletWithLocationDTO>>>
+		: IRequestHandler<ListPalletsForForkLifterReservePickingQuery, AppResult<List<PickingPalletWithLocationDTO>>>
 	{
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 
-		public async Task<AppResult<List<PalletWithLocationDTO>>> Handle(ListPalletsForForkLifterReservePickingQuery query, CancellationToken ct)
+		public async Task<AppResult<List<PickingPalletWithLocationDTO>>> Handle(ListPalletsForForkLifterReservePickingQuery query, CancellationToken ct)
 		{
-			var list = new List<PalletWithLocationDTO>();
+			var list = new List<PickingPalletWithLocationDTO>();
 			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(query.Start, query.End);
 			if (palletsIds.Count == 0)
 			{
-				return AppResult<List<PalletWithLocationDTO>>.Fail("Brak palet do wyświetlenia.");
+				return AppResult<List<PickingPalletWithLocationDTO>>.Fail("Brak palet do wyświetlenia.");
 			}
 			foreach (var id in palletsIds)
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(id);
 				if (pallet == null)
-					return AppResult<List<PalletWithLocationDTO>>.Fail($"Brak palety w systemie {id}.");	//		
+					return AppResult<List<PickingPalletWithLocationDTO>>.Fail($"Brak palety w systemie {id}.");	//		
 				var locationName = pallet.Location;
 				var fullLocation = locationName.ToSnapshot();
-				var item = new PalletWithLocationDTO
+				var item = new PickingPalletWithLocationDTO
 				{
 					PalletId = id,
 					PalletNumber = pallet.PalletNumber,
@@ -41,7 +40,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePi
 				};
 				list.Add(item);
 			}
-			return AppResult<List<PalletWithLocationDTO>>.Success(list);
+			return AppResult<List<PickingPalletWithLocationDTO>>.Success(list);
 		}
 	}
 }

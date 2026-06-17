@@ -8,10 +8,10 @@ namespace MyWerehouse.Application.Picking.Queries.GetListPickingPalletForOperato
 {
 	public class PickingPalletWithLocationDTO
 	{
-		public Guid PalletId { get; set;}
-		public string PalletNumber { get; set;}
-		public int LocationId { get; set;}
-		public string LocationName { get; set; }
-		public DateTime AddedToPicking { get; set; }		
+		public Guid PalletId { get; init;}
+		public string PalletNumber { get; init;}
+		public int LocationId { get; init;}
+		public string LocationName { get; init; }
+		public DateTime AddedToPicking { get; init; }		
 	}
 }

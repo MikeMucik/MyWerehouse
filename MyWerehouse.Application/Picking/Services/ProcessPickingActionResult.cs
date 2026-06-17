@@ -6,20 +6,22 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Application.Picking.Services
 {
-	public class ProcessPickingActionResult
+	public sealed class ProcessPickingActionResult
 	{
-		public bool Success { get; set; }
-		public string Message { get; set; }
-		public Guid PalletId { get; set; }
+		public bool Success { get; init; }
+		public string Message { get; init; }
+		public Guid PalletId { get; init; }
+		public string PalletNumber { get; init; }
 		public ProcessPickingActionResult() { }
 		public static ProcessPickingActionResult Ok(Guid palletId
-			//, string palletNumber
+			, string palletNumber
 			)
 		{
 			return new ProcessPickingActionResult
 			{
 				Success = true,
-				PalletId = palletId
+				PalletId = palletId,
+				PalletNumber = palletNumber
 			};
 		}
 		public static ProcessPickingActionResult Fail(string message)

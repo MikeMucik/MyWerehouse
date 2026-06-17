@@ -7,7 +7,7 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Picking.Services
 {
-	public class AddPickingTaskToIssueResult
+	public sealed class AddPickingTaskToIssueResult
 	{
 		public bool Success { get; set; }
 		public string Message { get; set; }

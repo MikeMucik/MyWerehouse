@@ -35,7 +35,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			ProductId = productId;
 			BestBefore = bestBefore;
 			Quantity = quantity;
-			Status = ReversePickingStatus.Pending;
+			Status = ReversePickingStatus.Ongoing;
 			PickingTaskId = pickingTaskId;
 			DateMade = DateOnly.FromDateTime(DateTime.UtcNow);
 			UserId = userId;
@@ -50,7 +50,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			ProductId = productId;
 			BestBefore = bestBefore;
 			Quantity = quantity;
-			Status = ReversePickingStatus.Pending;
+			Status = ReversePickingStatus.Ongoing;
 			PickingTaskId = pickingTaskId;
 			DateMade = DateOnly.FromDateTime(DateTime.UtcNow);
 			UserId = userId;

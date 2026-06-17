@@ -10,12 +10,12 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 {
 	public class ReversePickingDetailsDTO
 	{
-		public ReversePickingDTO ReversePickingDTO { get; set; }
-		public List<Pallet> ListPalletsToAdd {  get; set; } = new List<Pallet>();
-		public bool CanReturnToSource { get; set; }
-		public bool CanAddToExistingPallet { get; set; }
-		public bool PickingPalletCompletlyUnpicking { get; set; }
-		public bool AddToNewPallet { get; set; } = true;
+		public ReversePickingDTO ReversePickingDTO { get; init; }
+		public List<Pallet> ListPalletsToAdd {  get; init; } = new List<Pallet>();
+		public bool CanReturnToSource { get; init; }
+		public bool CanAddToExistingPallet { get; init; }
+		public bool PickingPalletCompletlyUnpicking { get; init; }
+		public bool AddToNewPallet { get; init; } = true;
 
 	}
 }

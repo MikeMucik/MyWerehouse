@@ -14,13 +14,13 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 {
 	public class DetailsOfClientDTO :IMapFrom<Client>
 	{
-		public int Id { get; set; }
-		public string Name { get; set; }
-		public string Email { get; set; }
-		public string Description { get; set; }
-		public virtual ICollection<Address> Address { get; set; }
-		public virtual ICollection<Receipt> Receipts { get; set; } 
-		public virtual ICollection<Issue> Issues { get; set; } 
+		public int Id { get; init; }
+		public string Name { get; init; }
+		public string Email { get; init; }
+		public string Description { get; init; }
+		public virtual ICollection<Address> Address { get; init; }
+		public virtual ICollection<Receipt> Receipts { get; init; } 
+		public virtual ICollection<Issue> Issues { get; init; } 
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Client, DetailsOfClientDTO>()

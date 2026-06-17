@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking;
 using MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingToDo;
 using MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo;
-using MyWerehouse.Application.ReversePickings.Queries.ListPalletsToReservePicking;
+using MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking;
 using MyWerehouse.Server.Extensions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;

@@ -66,7 +66,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			var issueRepo = new IssueRepo(DbContext);
 			//Act	
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
-				, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
+				, DateOnly.FromDateTime(new DateTime(2025, 12, 15)), "U003", IssueStatus.New, null);
 			
 			issueRepo.AddIssue(issue);
 			issue.ReservePallet(pallet1);
@@ -138,7 +138,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			var issueRepo = new IssueRepo(DbContext);
 			//Act		
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
-			, new DateTime(2025, 12, 15), "U003", IssueStatus.Pending, null);
+			, DateOnly.FromDateTime(new DateTime(2025, 12, 15)), "U003", IssueStatus.Pending, null);
 			
 			issueRepo.AddIssue(issue);
 			issue.ReservePallet(pallet1);

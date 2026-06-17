@@ -8,13 +8,18 @@ namespace MyWerehouse.Domain.Receviving.Filters
 {
 	public class IssueReceiptSearchFilter
 	{
+		public int? IssueNumber { get; set; }
+		public int? ReceiptNumber { get; set; }
 		public int? ClientId { get; set; }
 		public string? ClientName { get; set; }
 		public Guid? ProductId { get; set; }//
+		public string? SKU { get; set; } 
 		public string? ProductName { get; set; }		
-		public DateTime? DateTimeStart { get; set; } //zakres dat dla issue data wysyłki, receipt dzień przyjęcia
-		public DateTime? DateTimeEnd { get; set; } //zakres dat dla issue data wysyłki, receipt dzień przyjęcia
+		public DateOnly? DateTimeStartSend { get; set; } //issue data wysyłki,
+		public DateTime? DateTimeStart { get; set; } // receipt data przyjęcia, issue data utworzenia
+		public DateOnly? DateTimeEndSend { get; set; } //issue data wysyłki
+		public DateTime? DateTimeEnd { get; set; } // receipt data przyjęcia, issue data utworzenia
 		public string? UserId { get; set; }
-		public string? SKU { get; set; } //TODO
+		
 	}
 }

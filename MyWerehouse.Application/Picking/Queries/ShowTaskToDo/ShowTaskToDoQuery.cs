@@ -10,6 +10,6 @@ using MyWerehouse.Application.Picking.DTOs;
 
 namespace MyWerehouse.Application.Picking.Queries.ShowTaskToDo
 {
-	public record ShowTaskToDoQuery(Guid PalletSourceScannedId, DateTime PickingDate, int CurrentPage, int PageSize)
+	public record ShowTaskToDoQuery(Guid PalletSourceScannedId, DateOnly PickingDate, int CurrentPage, int PageSize)
 		:IRequest<AppResult<PagedResult<PickingTaskDTO>>>;	
 }

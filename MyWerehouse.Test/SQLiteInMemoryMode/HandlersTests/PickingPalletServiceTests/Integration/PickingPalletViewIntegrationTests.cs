@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Core;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.DTOs;
@@ -30,13 +29,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			_mediator = _fixture.Mediator;
 		}
 		[Fact]
-		public async Task PrepareCorrectedPicking_GoodData_ReturnList()
+		public async Task PrepareCorrectedPicking_ReturnValidInfo_WhenPalletHasOneProduct()
 		{
 			// Arrange
-			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");
-
-			//var query = new PrepareCorrectedPickingQuery("Q5000");			
-			var query = new PrepareCorrectedPickingQuery(palletGuid9);			
+			var palletGuid8 = Guid.Parse("00000000-0008-1111-0000-000000000000");
+			var query = new PrepareEmergencyPickingQuery(palletGuid8, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(0)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));
 			// Act			
 			var result = await _mediator.Send(query);
 			// Assert
@@ -44,18 +41,39 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal("Podaj numer zamówienia by kontynuować", result.Result.Message);
 			Assert.NotNull(result.Result.IssueOptions);
 			Assert.Equal(1, result.Result.IssueOptions.Count);
-			//Assert.Contains("20", result.ProductInfo);
 		}
 		[Fact]
-		public async Task ShowTaskToDo_GoodData_ReturnList()
+		public async Task PrepareCorrectedPicking_ReturnInfoDiffrentProducts_WhenPalletWithManyProducts()
+		{
+			// Arrange
+			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");		
+			var query = new PrepareEmergencyPickingQuery(palletGuid9, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(0)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));			
+			// Act			
+			var result = await _mediator.Send(query);
+			// Assert
+			Assert.False(result.IsSuccess);
+			Assert.Contains("nie jest do pickingu, zawiera rózne towary", result.Error);
+		}
+		[Fact]
+		public async Task PrepareCorrectedPicking_ReturnInfoChangeStatus_WhenPalletHasWrongStatus()
+		{
+			// Arrange
+			var palletGuid7 = Guid.Parse("00000000-0007-1111-0000-000000000000");
+			var query = new PrepareEmergencyPickingQuery(palletGuid7, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(0)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));
+			// Act			
+			var result = await _mediator.Send(query);
+			// Assert
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Paleta nie jest w pickingu, zmień status.", result.Error);
+		}
+		[Fact]
+		public async Task ShowTaskToDoQuery_ShouldReturnList_WhenProperPallet()
 		{
 			// Arrange
 			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
 
-
-			//var pallet = "Q1100";
 			var pallet = palletGuid5;
-			var date = DateTime.UtcNow;
+			var date =DateOnly.FromDateTime( DateTime.UtcNow);
 			var query = new ShowTaskToDoQuery(pallet, date,1,1);
 			// Act
 			var result = await _mediator.Send(query);
@@ -65,7 +83,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.NotEmpty(result.Result.Items);
 		}
 		[Fact]
-		public async Task GetListToPicking_GoodData_ReturnListForPickingTask()
+		public async Task GetListToPickingQuery_ReturnListForPickingTask()
 		{
 			// wytyczne - lista ile jakiego produktu do konkretnego zlecenia -zlecenia na daną chwilę, bierzemy zlecenia z danego okresu / dnia
 		// pojedyncze rekordy dla każdej alokacji
@@ -80,7 +98,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(2, result.Result.Count);
 		}	
 		[Fact]
-		public async Task GetListPickingPallet_GoodData_ReturnListOfPallets()
+		public async Task GetListPickingPalletQuery_ReturnListOfPallets()
 		{
 			//lista palet do zdjęcia przez wózkowego pallet's list for operator
 			// Arrange
@@ -94,7 +112,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			Assert.Equal(2, result.Result.Items.Count);
 		}
 		[Fact]
-		public async Task GetListIssueToPicking_GoodData_ReturnListByClientAndIssue()
+		public async Task GetListIssueToPicking_ReturnListByClientAndIssue()
 		{
 			//Lista ile danego towaru dla danego zlecenia posegregowane i zgrupowane po kliencie Product's list by issue&client
 			// Arrange

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
-using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt

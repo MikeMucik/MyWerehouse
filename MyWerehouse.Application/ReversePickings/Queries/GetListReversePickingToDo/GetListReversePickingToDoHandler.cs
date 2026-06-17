@@ -24,7 +24,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingT
 		public async Task<AppResult<PagedResult<ReversePickingDTO>>> Handle (GetListReversePickingToDoQuery query, CancellationToken ct)
 		{
 			var listReversePickingTasks = _reversePickingRepo.GetReversePickings()
-				.Where(r => r.Status == ReversePickingStatus.Pending && r.DateMade >= query.Start && r.DateMade <= query.End)
+				.Where(r => r.Status == ReversePickingStatus.Ongoing && r.DateMade >= query.Start && r.DateMade <= query.End)
 				.AsNoTracking();
 			var reversePickingOrdered = listReversePickingTasks.OrderBy(r => r.Id);
 			var result = await reversePickingOrdered

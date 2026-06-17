@@ -12,16 +12,10 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
 	public class EditPalletDTO : IMapFrom<Pallet>
 	{
-		public DateTime DateReceived { get; set; }
-		public int LocationId { get; set; }
-		public PalletStatus Status { get; set; } = 0;
-		public string UserId { get; set; }
-		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();
-		
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Pallet, EditPalletDTO>()
-				.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src => src.ProductsOnPallet));
-		}
+		public DateTime DateReceived { get; init; }
+		public int LocationId { get; init; }
+		public PalletStatus Status { get; init; } = 0;
+		public string UserId { get; init; }
+		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();				
 	}	
 }

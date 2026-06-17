@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.Picking.Services
 			}
 			//Historia zawsze
 			sourcePallet.AddHistory(ReasonForPallet.Picking, userId, sourcePallet.Location.ToSnapshot());
-			return ProcessPickingActionResult.Ok(pickingPallet.PalletId);
+			return ProcessPickingActionResult.Ok(pickingPallet.PalletId, pickingPallet.PalletNumber);
 		}
 		private async Task<CreatePalletResult> CreatePalletOrAddToPallet(Guid issueId, Guid productId,
 			int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask,
@@ -47,9 +47,9 @@ namespace MyWerehouse.Application.Picking.Services
 			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(pickingTask.IssueId);
 			if (oldPallet == null)//Tworzę nową paletę	
 			{
-				var newIdPallet = await _palletRepo.GetNextPalletIdAsync();
+				var newNumberPallet = await _palletRepo.GetNextPalletIdAsync();
 				var sourcePalletBB = bestBefore;
-				var pallet = Pallet.Create(newIdPallet, rampNumber);
+				var pallet = Pallet.Create(newNumberPallet, rampNumber);
 				pallet.ChangeStatus(PalletStatus.Picking);//Bo paleta kompletacyjna
 				var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 				var snapShot = location.ToSnapshot();
@@ -58,14 +58,14 @@ namespace MyWerehouse.Application.Picking.Services
 				pallet.ReserveToIssue(issueId, userId, snapShot);
 				//Obsługa pickingTask
 				MarkPickingTask(pickingTask, pickingCompletion, pallet, palletSource, userId, quantity);								
-				return new CreatePalletResult(true, palletId); //pokaż komunikat weź nową paletę
+				return new CreatePalletResult(true, palletId, newNumberPallet); //pokaż komunikat weź nową paletę
 			}
 			else//dodaje do już istniejącej
 			{
 				oldPallet.AddOrIncreaseProductQuantity(productId, quantity, bestBefore);
 				//Obsługa pickingTask	
 				MarkPickingTask(pickingTask, pickingCompletion, oldPallet, palletSource, userId, quantity);
-				return new CreatePalletResult(false, oldPallet.Id);
+				return new CreatePalletResult(false, oldPallet.Id, oldPallet.PalletNumber);
 			}
 		}
 		private static void MarkPickingTask(PickingTask pickingTask, PickingCompletion pickingCompletion, Pallet pickingPallet,

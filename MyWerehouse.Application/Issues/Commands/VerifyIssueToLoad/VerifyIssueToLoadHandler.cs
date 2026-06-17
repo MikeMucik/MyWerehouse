@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 			if (issue == null)
 				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 			//TODO check requested amount = prepered amount
-			issue.ConfirmToLoad(request.UserId);
+			issue.VerifyToLoad(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Wydanie zatwierdzono.");
 		}

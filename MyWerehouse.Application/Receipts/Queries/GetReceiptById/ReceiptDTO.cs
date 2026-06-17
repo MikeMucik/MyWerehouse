@@ -10,18 +10,18 @@ using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using MyWerehouse.Domain.Receviving.Models;
 
-namespace MyWerehouse.Application.Receipts.DTOs
+namespace MyWerehouse.Application.Receipts.Queries.GetReceiptById
 {
 	public class ReceiptDTO : IMapFrom<Receipt>
 	{
-		public Guid ReceiptId { get; set; }
-		public int ReceiptNumber { get; set; }
-		public int ClientId { get; set; }
-		public DateTime ReceiptDateTime { get; set; }
-		public ICollection<EditPalletInReceiptDTO> Pallets { get; set; } = new List<EditPalletInReceiptDTO>();
-		public string PerformedBy { get; set; } // opcjonalnie: user
-		public ReceiptStatus ReceiptStatus { get; set; }
-		public int RampNumber { get; set; }
+		public Guid ReceiptId { get; init; }
+		public int ReceiptNumber { get; init; }
+		public int ClientId { get; init; }
+		public DateTime ReceiptDateTime { get; init; }
+		public ICollection<EditPalletInReceiptDTO> Pallets { get; init; } = new List<EditPalletInReceiptDTO>();
+		public string PerformedBy { get; init; } 
+		public ReceiptStatus ReceiptStatus { get; init; }
+		public int RampNumber { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Receipt, ReceiptDTO>()

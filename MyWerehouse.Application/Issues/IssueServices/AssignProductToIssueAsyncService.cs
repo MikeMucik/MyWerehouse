@@ -14,7 +14,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 
-namespace MyWerehouse.Application.Issues.IssuesServices
+namespace MyWerehouse.Application.Issues.IssueServices
 {
 	public class AssignProductToIssueAsyncService(
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 			if (issue.IssueStatus == IssueStatus.New)
 				issue.ChangeStatus(IssueStatus.Pending);
 			if (issue.IssueStatus != IssueStatus.Pending && issue.IssueStatus != IssueStatus.New &&
-			issue.IssueStatus != IssueStatus.NotComplete)
+			issue.IssueStatus != IssueStatus.RequiresCorrection)
 			{
 				return AssignProductToIssueResult.Fail("Błąd statusu zlecenia");
 			}
@@ -86,7 +86,7 @@ namespace MyWerehouse.Application.Issues.IssuesServices
 					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, product.ProductId, product.Quantity, totalAvailable);
 				}
 			}
-			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.", palletAssigned);
+			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.",product.ProductId, palletAssigned);
 		}
 		//pełne palety first
 		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO product, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)

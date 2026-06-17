@@ -108,12 +108,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		public void SearchPallets_FindPalletsByLocationId_ReturnList()
 		{
 			//Arrange
-			var locationId = new PalletSearchFilter
+			var locationBay = new PalletSearchFilter
 			{
-				LocationId = 1
+				LocationBay = 2
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByFilter(locationId);
+			var result = _palletRepo.GetPalletsByFilter(locationBay);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());
@@ -124,12 +124,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		public void SearchPallets_FindPalletsByLocationId_ReturnNullList()
 		{
 			//Arrange
-			var locationId = new PalletSearchFilter
+			var locationAisle = new PalletSearchFilter
 			{
-				LocationId = 2
+				LocationAisle = 3
 			};
 			//Act
-			var result = _palletRepo.GetPalletsByFilter(locationId);
+			var result = _palletRepo.GetPalletsByFilter(locationAisle);
 			//Assert
 			Assert.Equal(0, result.Count());			
 		}

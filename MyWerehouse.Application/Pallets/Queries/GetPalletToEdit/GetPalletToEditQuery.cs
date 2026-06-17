@@ -9,5 +9,5 @@ using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
 
 namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 {
-	public record GetPalletToEditQuery(Guid PalletId):IRequest<AppResult<EditPalletDTO>>;
+	public record GetPalletToEditQuery(Guid PalletId):IRequest<AppResult<ShowPaletToEditDTO>>;
 }

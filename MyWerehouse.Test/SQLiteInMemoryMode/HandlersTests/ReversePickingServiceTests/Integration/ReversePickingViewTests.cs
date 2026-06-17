@@ -80,7 +80,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -99,8 +99,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var _DoPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
-			var resultPicking = await Mediator.Send(_DoPicking);
+			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var resultPicking = await Mediator.Send(doPicking);
 			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
 			//Assert
 			var pickingTaskDone = await DbContext.PickingTasks
@@ -143,7 +143,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.First();
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 
 			var resultGetView = await Mediator.Send(new GetListReversePickingToDoQuery(1, 1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))));
@@ -205,7 +205,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -268,7 +268,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.First();
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 
 			var resultGetView = await Mediator.Send(new GetReversePickingToDoQuery(task.Id));
@@ -341,7 +341,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -403,7 +403,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.FirstOrDefault(x=>x.Quantity ==5);
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 
 			var resultGetView = await Mediator.Send(new GetReversePickingToDoQuery(task.Id));
@@ -474,7 +474,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -536,7 +536,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.FirstOrDefault(x => x.Quantity == 7);
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 
 			var resultGetView = await Mediator.Send(new GetReversePickingToDoQuery(task.Id));

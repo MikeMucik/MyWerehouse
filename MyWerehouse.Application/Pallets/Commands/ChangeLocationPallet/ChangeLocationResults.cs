@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 {
-	public class ChangeLocationResults
+	public sealed class ChangeLocationResults
 	{
-		public bool Success { get; set; }
-		public bool RequiresConfirmation { get; set; }
-		public string Message { get; set; }
+		public bool Success { get; init; }
+		public bool RequiresConfirmation { get; init; }
+		public string Message { get; init; }
 	}
 }

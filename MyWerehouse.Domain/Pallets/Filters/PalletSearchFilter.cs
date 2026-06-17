@@ -9,9 +9,14 @@ namespace MyWerehouse.Domain.Pallets.Filters
 {
 	public class PalletSearchFilter
 	{
+		public string? PalletNumber { get; set; }
 		public Guid? ProductId { get; set; }//
 		public string? ProductName { get; set; }
-		public int? LocationId { get; set; }
+		public string? SKU { get; set; }
+		public int? LocationBay { get; set; }
+		public int? LocationAisle { get; set; }
+		public int? LocationPosition { get; set; }
+		public int? LocationHeight { get; set; }
 		public PalletStatus? PalletStatus { get; set; }
 		public int? ClientIdIn { get; set; }
 		public int? ClientIdOut { get; set; }

@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-5),
-			DateTime.UtcNow.AddDays(1), "TestUser", IssueStatus.Pending, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet.AddProductForTests(product.Id, 60, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
@@ -161,7 +161,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-5),
-			DateTime.UtcNow.AddDays(1), "TestUser", IssueStatus.Pending, null);
+			DateOnly.FromDateTime( DateTime.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
 			sourcePallet1.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
 			

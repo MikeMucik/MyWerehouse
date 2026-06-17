@@ -44,6 +44,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var result = _werehouseDbContext.Receipts				
 				.AsQueryable();
+			if (filter.ReceiptNumber != null && filter.ReceiptNumber != 0)
+			{
+				result = result.Where(i => i.ReceiptNumber == filter.ReceiptNumber);
+			}
 			if (filter.ClientId > 0)
 			{
 				result = result.Where(i => i.ClientId == filter.ClientId);
@@ -63,7 +67,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			if (filter.DateTimeStart != null)
 			{
 				var start = filter.DateTimeStart;
-				var end = filter.DateTimeEnd ?? DateTime.Now;
+				var end = filter.DateTimeEnd ?? DateTime.UtcNow;
 
 				result = result.Where(i => i.ReceiptDateTime >= start && i.ReceiptDateTime <= end);
 			}

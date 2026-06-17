@@ -29,7 +29,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.PickingTasks.Remove(pickingTask);
 		}
-		public IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateTime pickingDate)
+		public IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateOnly pickingDate)
 		{
 			var pickingTask = _werehouseDbContext.PickingTasks
 				
@@ -39,7 +39,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(i => i.Issue)
 				.Where(p =>
 					p.VirtualPalletId == palletPickingId &&
-					p.Issue.IssueDateTimeCreate >= pickingDate.AddDays(-14) &&//ustalenie biznesowe
+					DateOnly.FromDateTime( p.Issue.IssueDateTimeCreate) >= pickingDate.AddDays(-14) &&//ustalenie biznesowe
 					p.Issue.IssueDateTimeSend >= pickingDate &&
 					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2) &&
 					p.PickingStatus == PickingStatus.Allocated);
@@ -58,14 +58,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync();
 			return result;
 		}
-		public async Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateTime from, DateTime to)
+		public async Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
 				.Where(a => a.ProductId == productId &&
 				a.PickingStatus == PickingStatus.Allocated &&
 				a.RequestedQuantity > 0 &&
-				a.Issue.IssueDateTimeSend > from && a.Issue.IssueDateTimeSend < to)
+				a.Issue.IssueDateTimeSend >= from && a.Issue.IssueDateTimeSend <= to)
 				.ToListAsync();
 			return result;
 		}
@@ -99,6 +99,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					q.IssueId,
 					q.Issue.IssueNumber,
 					q.ProductId,
+					q.Product.SKU,
 					q.RequestedQuantity
 				})
 				.Where(p => p.ProductId != Guid.Empty)
@@ -108,6 +109,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					p.IssueId,
 					p.IssueNumber,
 					p.ProductId,
+					p.SKU,
 				})
 				.Select(p => new PickingTaskFlat
 				{
@@ -115,6 +117,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					IssueId = p.Key.IssueId,
 					IssueNumber = p.Key.IssueNumber,
 					ProductId = p.Key.ProductId,
+					SKU = p.Key.SKU,
 					Quantity = p.Sum(q => q.RequestedQuantity)
 				});
 			return list;

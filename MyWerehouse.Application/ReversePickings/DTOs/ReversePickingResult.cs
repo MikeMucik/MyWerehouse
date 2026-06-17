@@ -9,14 +9,14 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.ReversePickings.DTOs
 {
-	public class ReversePickingResult
+	public sealed class ReversePickingResult
 	{
-		public bool Success { get; set; }
-		public string Message { get; set; }
-		public Guid ProductId { get; set; }
-		public Guid? PalletId { get; set; }
-		public string? PalletNumber { get; set; }
-		public List<PalletProductQuantityDTO> PalletWithAddedProduct { get; set; }
+		public bool Success { get; init; }
+		public string Message { get; init; }
+		public Guid ProductId { get; init; }
+		public Guid? PalletId { get; init; }
+		public string? PalletNumber { get; init; }
+		public List<PalletProductQuantityDTO> PalletWithAddedProduct { get; init; }
 		public ReversePickingResult() { }
 		public static ReversePickingResult Ok(string message, Guid productId, Guid? palletId, string? palletNumber)
 		{

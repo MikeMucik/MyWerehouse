@@ -10,11 +10,12 @@ namespace MyWerehouse.Domain.Issuing.IssueExceptions
 	public class NotEndedLoadingDomainException : DomainException
 	{
 		public Guid IssueId { get; }
-		public NotEndedLoadingDomainException(Guid issueId)
-			: base($"Issue {issueId} has pallets not fully loaded.")
+		public int IssueNumber { get; }
+		public NotEndedLoadingDomainException(Guid issueId, int issueNumber)
+			: base($"Issue {issueNumber}({issueId}) has pallets not fully loaded.")
 		{
 			IssueId = issueId;
-
+			IssueNumber = issueNumber;
 		}
 	}
 }

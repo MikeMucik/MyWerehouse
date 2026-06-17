@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 					_issueRepo.DeleteIssue(issueToDelete);
 					break;
 				case IssueStatus.Pending:
-				case IssueStatus.NotComplete:
+				case IssueStatus.RequiresCorrection:
 					issueToDelete.CancelIssue(request.UserId);
 					break;
 				default:

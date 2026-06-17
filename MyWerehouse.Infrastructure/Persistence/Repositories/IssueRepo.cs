@@ -47,6 +47,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var result = _werehouseDbContext.Issues
 				.Where(i => i.IssueStatus != IssueStatus.Archived);//
+			if(filter.IssueNumber != null && filter.IssueNumber != 0)
+			{
+				result = result.Where(i=>i.IssueNumber == filter.IssueNumber);
+			}
 			if (filter.ClientId > 0)
 			{
 				result = result.Where(i => i.ClientId == filter.ClientId);
@@ -70,7 +74,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			if (filter.DateTimeStart != null)
 			{
 				var start = filter.DateTimeStart;
-				var end = filter.DateTimeEnd ?? DateTime.Now;
+				var end = filter.DateTimeEnd ?? DateTime.UtcNow;
+
+				result = result.Where(i => i.IssueDateTimeCreate >= start && i.IssueDateTimeCreate <= end);
+			}
+			if (filter.DateTimeStartSend != null)
+			{
+				var start = filter.DateTimeStartSend;
+				var end = filter.DateTimeEndSend ?? DateOnly.FromDateTime(DateTime.UtcNow);
 
 				result = result.Where(i => i.IssueDateTimeSend >= start && i.IssueDateTimeSend <= end);
 			}

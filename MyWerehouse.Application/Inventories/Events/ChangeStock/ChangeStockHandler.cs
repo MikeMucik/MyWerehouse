@@ -11,9 +11,10 @@ using MyWerehouse.Domain.Invetories.Models;
 
 namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 {
-	public class ChangeStockHandler(IInventoryRepo inventoryRepo) : INotificationHandler<ChangeStockNotification>
+	public class ChangeStockHandler(IInventoryRepo inventoryRepo, IProductRepo productRepo) : INotificationHandler<ChangeStockNotification>
 	{
-		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;		
+		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;
+		private readonly IProductRepo _productRepo = productRepo;//for better errorInfo
 		public async Task Handle(ChangeStockNotification notification, CancellationToken cancellationToken)
 		{
 			if (!notification.Changes.Any()) { return; }
@@ -21,7 +22,7 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 			var productIds = notification.Changes.Select(c => c.ProductId).ToList();
 			var inventories = await _inventoryRepo.GetInventoriesForProductsAsync(productIds);
 			var inventoryDict = inventories.ToDictionary(i => i.ProductId);
-
+			
 			foreach (var change in notification.Changes)
 			{
 				inventoryDict.TryGetValue(change.ProductId, out var inventory);
@@ -41,7 +42,8 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 					inventory.Quantity += change.Quantity;
 					if (inventory.Quantity < 0)
 					{
-						throw new DomainInventoryDomainException(change.ProductId);
+						var product = await _productRepo.GetProductByIdAsync(change.ProductId);
+						throw new DomainInventoryDomainException(change.ProductId, product.SKU);
 					}
 					inventory.LastUpdated = DateTime.UtcNow;
 				}				

@@ -8,15 +8,15 @@ namespace MyWerehouse.Domain.Issuing.Models
 {
 	public enum IssueStatus
 	{
-		New = 0,
+		New = 0,//można delete
 		InProgress = 1,//gdy pickowane
-		IsShipped = 2,
-		IsClosed = 3,
-		Archived = 4,
-		ConfirmedToLoad = 5,
-		ChangingPallet = 6,
-		NotComplete = 7,
-		Pending = 8,//gdy przetwarzane w trakcie tworzenia
-		Cancelled = 9,
+		IsShipped = 2,//załadowane
+		//IsClosed = 3,//zamknięte - niepotrzebne
+		Archived = 4,//w archiwum
+		ConfirmedToLoad = 5,//zatwierdzone do załadunku
+		ChangingPallet = 6,//nastąpiła podmiana palety
+		RequiresCorrection = 7,//niekompletne do poprawki
+		Pending = 8,//gdy jest modify
+		Cancelled = 9,//anulowane
 	}
 }

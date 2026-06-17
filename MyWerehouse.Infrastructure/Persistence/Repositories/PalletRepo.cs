@@ -29,11 +29,34 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				//.Include(p => p.PalletMovements)
 				.Include(p => p.Location)
 				.Include(p => p.Receipt)
 				.Include(p => p.Issue)
 				.FirstOrDefaultAsync(p => p.Id == palletId);
+		}
+
+		public async Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId)
+		{
+			return await _werehouseDbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+					.ThenInclude(pp => pp.Product)
+				.Include(p => p.PalletMovements)
+				.Include(p => p.Location)
+				.Include(p => p.Receipt)
+				.Include(p => p.Issue)
+				.FirstOrDefaultAsync(p => p.Id == palletId);
+		}
+
+		public async Task<Pallet?> GetPalletByPalletNumberFullInfoAsync(string palletNumber)
+		{
+			return await _werehouseDbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+					.ThenInclude(pp => pp.Product)
+				.Include(p => p.PalletMovements)
+				.Include(p => p.Location)
+				.Include(p => p.Receipt)
+				.Include(p => p.Issue)
+				.FirstOrDefaultAsync(p => p.PalletNumber == palletNumber);
 		}
 		public IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter)
 		{
@@ -41,6 +64,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(a => a.ProductsOnPallet)
 				.Where(p => p.Status != PalletStatus.Archived);
 
+			if (!string.IsNullOrEmpty(filter.PalletNumber))
+			{
+				result = result.Where(p => p.PalletNumber == filter.PalletNumber);
+			}
 			if (filter.ProductId.HasValue)
 			{
 				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
@@ -51,9 +78,26 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				pp.Product != null &&
 				EF.Functions.Like(pp.Product.Name.ToLower(), $"%{filter.ProductName.ToLower()}%")));
 			}
-			if (filter.LocationId > 0)
+			if (!string.IsNullOrWhiteSpace(filter.SKU))
 			{
-				result = result.Where(p => p.LocationId == filter.LocationId);
+				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
+				pp.Product.SKU == filter.SKU));
+			}
+			if (filter.LocationBay > 0)//drugi warunek w zależności od magazynu
+			{
+				result = result.Where(p => p.Location.Bay == filter.LocationBay);
+			}
+			if (filter.LocationAisle > 0)
+			{
+				result = result.Where(p => p.Location.Aisle == filter.LocationAisle);
+			}
+			if (filter.LocationPosition > 0)
+			{
+				result = result.Where(p => p.Location.Position == filter.LocationPosition);
+			}
+			if (filter.LocationHeight > 0)
+			{
+				result = result.Where(p => p.Location.Height == filter.LocationHeight);
 			}
 			if (filter.PalletStatus.HasValue)
 			{

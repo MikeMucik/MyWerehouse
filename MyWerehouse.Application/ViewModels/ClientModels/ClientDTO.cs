@@ -14,18 +14,16 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 {
 	public class ClientDTO : IMapFrom<Client>
 	{
-		public int Id { get; set; }
-		public string Name { get; set; }
-		public string Email { get; set; }
-		public string Description { get; set; }
-		public string FullName { get; set; }
-		public ICollection<AddAddressDTO> Addresses { get; set; }
+		public int Id { get; init; }
+		public string Name { get; init; }
+		public string Email { get; init; }
+		public string Description { get; init; }
+		public string FullName { get; init; }
+		public ICollection<AddAddressDTO> Addresses { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Client, ClientDTO>()
-				.ForMember(dest => dest.Addresses, opt => opt.MapFrom(src => src.Addresses))
-				;
-				//.ReverseMap();
+				.ForMember(dest => dest.Addresses, opt => opt.MapFrom(src => src.Addresses));
 		}
 	}	
 }

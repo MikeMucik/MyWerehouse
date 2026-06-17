@@ -148,7 +148,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, null);
 
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, DateTime.Now
-				, DateTime.Now.AddDays(7), "user", IssueStatus.NotComplete, null);
+				, DateOnly.FromDateTime( DateTime.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);
@@ -310,7 +310,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				Position = 1
 			};
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, DateTime.Now
-			, DateTime.Now.AddDays(7), "user", IssueStatus.NotComplete, null);
+			,DateOnly.FromDateTime( DateTime.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, issue.Id);
 			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
@@ -407,7 +407,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				Position = 1
 			};
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, DateTime.Now
-			, DateTime.Now.AddDays(7), "user", IssueStatus.NotComplete, null);
+			, DateOnly.FromDateTime(DateTime.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, issue.Id);
 			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
@@ -446,7 +446,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 				PerformedBy = reverseTask.UserId,
 				Quantity = reverseTask.Quantity,
 				//StatusBefore = notification.StatusBefore,
-				StatusAfter =ReversePickingStatus.Pending
+				StatusAfter =ReversePickingStatus.Ongoing
 			};
 
 			var historyReversePickingRepo = new HistoryReversePickingRepo(DbContext);
@@ -459,7 +459,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
 			var result1 = await resultList.FirstAsync();
 			var result = resultList.First();
 			Assert.NotNull(result1);
-			Assert.Equal(ReversePickingStatus.Pending, result1.StatusAfter);
+			Assert.Equal(ReversePickingStatus.Ongoing, result1.StatusAfter);
 			Assert.Equal(reverseTask.UserId, result1.PerformedBy);
 		}
 	}

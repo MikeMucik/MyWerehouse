@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
 using MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading;
 using MyWerehouse.Application.Issues.Commands.CompletedIssue;
+using MyWerehouse.Application.Issues.Commands.ConfirmIssueAfterLoading;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.Commands.DeleteIssue;
 using MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted;
 using MyWerehouse.Application.Issues.Commands.ModifyIssue;
-using MyWerehouse.Application.Issues.Commands.VerifyIssueAfterLoading;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
@@ -47,7 +47,7 @@ namespace MyWerehouse.Server.Controllers
 
 		// Update - wiele rozwiązań więc POST
 		[HttpPost("{id}update")]
-		public async Task<IActionResult> Update(Guid id,ModifyIssueDTO dto, DateTime dateToSend)
+		public async Task<IActionResult> Update(Guid id,ModifyIssueDTO dto, DateOnly dateToSend)
 		{
 			var result = await _mediator.Send(new ModifyIssueCommand(id, dto, dateToSend));
 			return result.ToActionResult();
@@ -80,7 +80,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Weryfikacja(biuro) po załadunku - aktualizacja stanów magazynowych
 		[HttpPost("confirmAfter")]
-		public async Task<IActionResult> VerificationAfterLoad(VerifyIssueAfterLoadingCommand command)
+		public async Task<IActionResult> VerificationAfterLoad(ConfirmIssueAfterLoadingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Weryfikacja załadunku przed załadunkiem - porównania co zamówino vs co przygotowano

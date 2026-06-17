@@ -10,10 +10,12 @@ namespace MyWerehouse.Domain.Issuing.IssueExceptions
 	public class NotAllowedOperationDomainException : DomainException
 	{
 		public Guid IssueId { get; }
-		public NotAllowedOperationDomainException(Guid issueId)
-			: base($"Operation forbidden for {issueId}, wrong status.")
+		public int IssueNumber { get; }
+		public NotAllowedOperationDomainException(Guid issueId, int issueNumber)
+			: base($"Operation forbidden for {issueNumber}({issueId}), wrong status.")
 		{ 
 			IssueId = issueId;
+			IssueNumber = issueNumber;
 		}
 	}
 }

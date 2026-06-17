@@ -13,8 +13,8 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 {
 	public class ModifyIssueDTO 
 	{
-		public int ClientId { get; set; }
-		public string PerformedBy { get; set; }
-		public List<IssueItemDTO> IssueItems { get; set; } = new List<IssueItemDTO>();		
+		public int ClientId { get; init; }
+		public string PerformedBy { get; init; }
+		public List<IssueItemDTO> IssueItems { get; init; } = new List<IssueItemDTO>();		
 	}
 }

@@ -13,10 +13,10 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 {
 	public class CreatePalletReceiptDTO
 	{		
-		public Guid Id { get; set ; }
-		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();	
-		public Guid ReceiptId { get; set; }		
-		public int ReceiptNumber { get; set; }		
-		public string UserId { get; set; }		
+		public Guid Id { get; init ; }
+		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();	
+		public Guid ReceiptId { get; init; }		
+		public int ReceiptNumber { get; init; }		
+		public string UserId { get; init; }		
 	}	
 }

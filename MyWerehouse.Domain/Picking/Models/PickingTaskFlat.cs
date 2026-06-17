@@ -12,6 +12,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public int IssueNumber { get; set; }
 		public int ClientId { get; set; }
 		public Guid ProductId { get; set; }
+		public string SKU { get; set; }
 		public int Quantity { get; set; }
 	}
 }

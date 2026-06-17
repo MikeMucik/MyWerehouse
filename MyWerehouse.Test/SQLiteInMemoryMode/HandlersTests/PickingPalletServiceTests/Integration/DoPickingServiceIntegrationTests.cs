@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueItem.CreateForSeed(1, issueId, product.Id, 30, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow,
-			DateTime.Now.AddDays(1), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "TestUser", IssueStatus.New, null);
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), location.Id, PalletStatus.ToPicking, null, null);
 			sourcePallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 
@@ -193,7 +193,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueItem.CreateForSeed(1, issueId, product.Id, 40, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.Now.AddDays(1), "TestUser", IssueStatus.Pending, null);
+			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "TestUser", IssueStatus.Pending, null);
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
@@ -309,7 +309,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow,
-			DateTime.Now.AddDays(1), "TestUser", IssueStatus.New, issueItem);
+			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "TestUser", IssueStatus.New, issueItem);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), location1.Id, PalletStatus.ToPicking, null, null);
 			sourcePallet1.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
@@ -428,7 +428,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueItem.CreateForSeed(2, issueId, product2.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.Now.AddDays(1), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
@@ -546,7 +546,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueItem.CreateForSeed(2, issueId, product2.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.Now.AddDays(1), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
@@ -683,7 +683,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueItem.CreateForSeed(2, issueId, product2.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.Now.AddDays(1), "TestUser", IssueStatus.New, issueItem);
+			DateOnly.FromDateTime( DateTime.Now.AddDays(1)), "TestUser", IssueStatus.New, issueItem);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
@@ -786,7 +786,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueItem.CreateForSeed(1, issueId, product1.Id, 30, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, issueItem);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, issueItem);
 
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));

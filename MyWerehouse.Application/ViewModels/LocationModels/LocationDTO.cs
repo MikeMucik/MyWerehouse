@@ -9,13 +9,13 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Application.ViewModels.LocationModels
 {
-	public class LocationDTO :IMapFrom<Location>
+	public class LocationDTO : IMapFrom<Location>
 	{
-		public int Id { get; set; }
-		public int Bay { get; set; }
-		public int Aisle { get; set; }
-		public int Position { get; set; }
-		public int Height { get; set; }
+		public int Id { get; init; }
+		public int Bay { get; init; }
+		public int Aisle { get; init; }
+		public int Position { get; init; }
+		public int Height { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<LocationDTO, Location>()

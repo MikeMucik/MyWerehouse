@@ -33,6 +33,7 @@ namespace MyWerehouse.Application.Picking.Queries.GetListToPickingFlat
 				IssueId = x.IssueId,
 				IssueNumber = x.IssueNumber,
 				ProductId = x.ProductId,
+				SKU = x.SKU,
 				Quantity = x.Quantity,
 			}).ToList();
 

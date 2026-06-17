@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Receipts.DTOs;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -650,105 +649,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.RececiptServiceTests.I
 			Assert.False(result.IsSuccess);
 			Assert.Contains($" nie zostało znalezione.", result.Error);
 		}
-		//[Fact]
-		//public async Task UpdatePalletToReceiptAsync_NonProperDataInvalidPallet_ReturnInfo()
-		//{
-		//	//Arrange
-		//	var address = new Address
-		//	{
-		//		City = "Warsaw",
-		//		Country = "Poland",
-		//		PostalCode = "00-999",
-		//		StreetName = "Wiejska",
-		//		Phone = 4444444,
-		//		Region = "Mazowieckie",
-		//		StreetNumber = "23/3"
-		//	};
-		//	var category = new Category
-		//	{
-		//		Name = "Category",
-		//		IsDeleted = false,
-		//	};
-		//	var initailCLient = new Client
-		//	{
-		//		Name = "TestCompany",
-		//		Email = "123@op.pl",
-		//		Description = "Description",
-		//		FullName = "FullNameCompany",
-		//		Addresses = [address]
-		//	};
-		//	var initialProduct = Product.Create("Test", "666666", 1, 10);			
-		//	var initialProduct1 = Product.Create("Test22", "777777", 1, 10);
-						
-		//	var initailLocation = new Location
-		//	{
-		//		Aisle = 1,
-		//		Bay = 1,
-		//		Height = 1,
-		//		Position = 1
-		//	};
-		//	var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-		//	var initialReceipt = Receipt.CreateForSeed(receiptId1, 1,1, "U002",
-		//		new DateTime(2025, 6, 6), ReceiptStatus.Planned, 9);
-			
-		//	var receiptId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
-		//	var initialReceipt1 = Receipt.CreateForSeed(receiptId2, 2, 1, "U003",
-		//		new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
-			
-		//	var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-		//	initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
-			
-		//	var secondPallet = Pallet.CreateForTests("Q2000", DateTime.UtcNow, 1, PalletStatus.Available, initialReceipt.Id, null);
-		//	secondPallet.AddProduct(initialProduct1.Id, 200, new DateOnly(2027, 3, 3));
-			
-		//	DbContext.Clients.AddRange(initailCLient);
-		//	DbContext.Categories.Add(category);
-		//	DbContext.Products.AddRange(initialProduct, initialProduct1);
-		//	DbContext.Locations.Add(initailLocation);
-		//	DbContext.Receipts.AddRange(initialReceipt, initialReceipt1);
-		//	DbContext.Pallets.AddRange(initialPallet, secondPallet);
-		//	await DbContext.SaveChangesAsync();
-		//	//Act
-		//	var updatingReceipt = new ReceiptDTO
-		//	{
-		//		ReceiptId = initialReceipt.Id,
-		//		ReceiptNumber = initialReceipt.ReceiptNumber,
-		//		ClientId = initailCLient.Id,
-		//		PerformedBy = "U002",
-		//		ReceiptStatus = ReceiptStatus.Correction,
-		//		ReceiptDateTime = new DateTime(2025, 6, 6),
-		//		RampNumber = 1,
-		//		Pallets =
-		//		new List<EditPalletDTO>
-		//		{
-		//			new()
-		//			{
-		//				Id = secondPallet.Id,
-		//				PalletNumber = "Q2000",
-		//				LocationId = initailLocation.Id,
-		//				//ReceiptId = initialReceipt1.Id,
-		//				Status = PalletStatus.Receiving,
-		//				DateReceived = DateTime.Now,
-		//				ProductsOnPallet = new List<ProductOnPalletDTO>
-		//				{
-		//					new()
-		//					{
-		//						ProductId = initialProduct1.Id,
-		//						PalletId = secondPallet.Id,
-		//						Quantity = 200,
-		//						DateAdded = DateTime.Now,
-		//					}
-		//				}
-		//			}
-		//		}
-		//	};
-		//	var userId = "U100";
-		//	var result = await Mediator.Send(new UpdateReceiptCommand(updatingReceipt, userId));
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.False(result.IsSuccess);
-		//	Assert.Contains($"Paleta o numerze {secondPallet.PalletNumber} należy do innego przyjęcia.", result.Error);
-		//}
 
 		//HappyPath
 		[Fact]

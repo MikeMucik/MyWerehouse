@@ -62,7 +62,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Podaj listę zadań dla palety - kompletacja skorygowana
 		[HttpGet("correctedList")]
-		public async Task<IActionResult> ShowCorrected([FromQuery]PrepareCorrectedPickingQuery query)
+		public async Task<IActionResult> ShowCorrected([FromQuery]PrepareEmergencyPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista poglądowa klient -> zamówienie -> produkt -> ilośc		

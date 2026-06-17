@@ -14,12 +14,12 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 {
 	public class UpdateClientDTO : IMapFrom<Client>
 	{		
-		public string Name { get; set; }
-		public string Email { get; set; }
-		public string Description { get; set; }
+		public string Name { get; init; }
+		public string Email { get; init; }
+		public string Description { get; init; }
 		[MaxLength(250)]
-		public string FullName { get; set; }
-		public ICollection<EditAddressDTO> Addresses { get; set; } = new List<EditAddressDTO>();
+		public string FullName { get; init; }
+		public ICollection<EditAddressDTO> Addresses { get; init; } = new List<EditAddressDTO>();
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<UpdateClientDTO, Client>()

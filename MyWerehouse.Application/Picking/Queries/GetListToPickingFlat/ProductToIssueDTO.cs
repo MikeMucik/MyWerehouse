@@ -9,11 +9,12 @@ namespace MyWerehouse.Application.Picking.Queries.GetListToPickingFlat
 	public class ProductToIssueDTO
 		//model dla listy task - pickingTask 
 	{
-		public int Id { get; set; }
-		public int ClientIdOut { get; set; }
-		public Guid IssueId { get; set; }
-		public int IssueNumber { get; set; }
-		public Guid ProductId { get; set; }
-		public int Quantity { get; set; }		
+		public int Id { get; init; }
+		public int ClientIdOut { get; init; }
+		public Guid IssueId { get; init; }
+		public int IssueNumber { get; init; }
+		public Guid ProductId { get; init; }
+		public string SKU { get; init; }
+		public int Quantity { get; init; }		
 	}
 }

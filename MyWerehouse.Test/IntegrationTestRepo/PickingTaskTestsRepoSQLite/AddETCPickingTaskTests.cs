@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			DbContext.Pallets.Add(pallet);
 			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
-				, new DateTime(2025, 5, 6), "U002",IssueStatus.Pending, null);
+				, DateOnly.FromDateTime(new DateTime(2025, 5, 6)), "U002",IssueStatus.Pending, null);
 			
 			DbContext.Issues.Add(issue);
 			DbContext.VirtualPallets.Add(virtualPallet);
@@ -127,7 +127,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			DbContext.Pallets.Add(pallet);
 			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 2, 1, new DateTime(2025, 5, 5)
-				, new DateTime(2025, 5, 6), "U002", IssueStatus.Pending, null);
+				, DateOnly.FromDateTime(new DateTime(2025, 5, 6)), "U002", IssueStatus.Pending, null);
 		
 			DbContext.Issues.Add(issue);
 			DbContext.VirtualPallets.Add(virtualPallet);

@@ -12,13 +12,13 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFilter
 {
 	public class IssueSimplyDTO : IMapFrom<Issue>
 	{
-		public Guid Id { get; set; }
-		public int IssueNumber { get; set; }
-		public int ClientId { get; set; }
-		public DateTime IssueDateTimeCreate { get; set; }
-		public DateTime IssueDateTimeSend { get; set; }
-		public string PerformedBy { get; set; }
-		public IssueStatus IssueStatus { get; set; }
+		public Guid Id { get; init; }
+		public int IssueNumber { get; init; }
+		public int ClientId { get; init; }
+		public DateTime IssueDateTimeCreate { get; init; }
+		public DateOnly IssueDateTimeSend { get; init; }
+		public string PerformedBy { get; init; }
+		public IssueStatus IssueStatus { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Issue, IssueSimplyDTO>();

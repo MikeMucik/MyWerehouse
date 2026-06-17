@@ -7,7 +7,7 @@ using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 
-namespace MyWerehouse.Application.Issues.IssuesServices
+namespace MyWerehouse.Application.Issues.IssueServices
 {
 	public interface IAssignProductToIssueService
 	{

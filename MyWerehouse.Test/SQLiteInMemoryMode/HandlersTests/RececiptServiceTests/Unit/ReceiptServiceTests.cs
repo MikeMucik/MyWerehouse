@@ -9,8 +9,6 @@ using AutoMapper;
 using FluentAssertions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Receipts.DTOs;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;

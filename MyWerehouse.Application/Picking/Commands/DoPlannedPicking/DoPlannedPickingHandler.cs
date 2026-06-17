@@ -12,7 +12,6 @@ using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure.Persistence;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 {
@@ -86,7 +85,7 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 				sourcePallet.ChangeStatus(PalletStatus.OnHold);
 				sourcePallet.AddHistory(ReasonForPallet.Correction, request.UserId, sourcePallet.Location.ToSnapshot());
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety źródło do kompletacji.");
+				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety źródłowe do kompletacji.");
 			}
 		}
 	}

@@ -12,17 +12,17 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 {
 	public class EditProductDTO :IMapFrom<Product>
 	{		
-		public string Name { get; set; }
-		public string SKU { get; set; }
-		public int CategoryId { get; set; }
-		public bool? IsDeleted { get; set; } = false;
-		public int CartonsPerPallet { get; set; }
-		public int Length { get; set; } //cm
-		public int Height { get; set; } //cm
-		public int Width { get; set; } //cm
-		public int Weight { get; set; } //kg
-		public string Description { get; set; }
-		public DateTime AddedItemAd { get; set; } = DateTime.Now;
+		public string Name { get; init; }
+		public string SKU { get; init; }
+		public int CategoryId { get; init; }
+		public bool? IsDeleted { get; init; } = false;
+		public int CartonsPerPallet { get; init; }
+		public int Length { get; init; } //cm
+		public int Height { get; init; } //cm
+		public int Width { get; init; } //cm
+		public int Weight { get; init; } //kg
+		public string Description { get; init; }
+		public DateTime AddedItemAd { get; init; } = DateTime.Now;
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Product, EditProductDTO >()

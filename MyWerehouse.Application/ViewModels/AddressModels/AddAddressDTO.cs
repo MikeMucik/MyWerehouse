@@ -12,13 +12,13 @@ namespace MyWerehouse.Application.ViewModels.AddressModels
 {
 	public class AddAddressDTO : IMapFrom<Address>
 	{
-		public string Country { get; set; }
-		public string City { get; set; }
-		public string Region { get; set; }
-		public int Phone { get; set; }
-		public string PostalCode { get; set; }
-		public string StreetName { get; set; }
-		public string StreetNumber { get; set; }
+		public string Country { get; init; }
+		public string City { get; init; }
+		public string Region { get; init; }
+		public int Phone { get; init; }
+		public string PostalCode { get; init; }
+		public string StreetName { get; init; }
+		public string StreetNumber { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Address, AddAddressDTO>()

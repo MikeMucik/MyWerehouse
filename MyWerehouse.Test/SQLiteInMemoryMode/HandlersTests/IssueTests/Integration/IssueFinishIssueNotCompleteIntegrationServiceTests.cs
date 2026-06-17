@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var cLient = new Client
+			var client = new Client
 			{
 				Id = 1,
 				Name = "TestCompany",
@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.AddRange(location1, location2);
-			DbContext.Clients.Add(cLient);
+			DbContext.Clients.Add(client);
 			DbContext.SaveChanges();
 			var issueId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var issueId = issueId1;
@@ -84,8 +84,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var notLoadedPallet = Pallet.CreateForTests("P2", DateTime.UtcNow, location2.Id, PalletStatus.ToIssue, null,issueId);
 			notLoadedPallet.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
-			var issue = Issue.CreateForSeed(issueId, 2, cLient.Id, new DateTime(2025, 6, 6, 2, 2, 2),
-			new DateTime(2025, 6, 12, 2, 2, 2), "TestUser", IssueStatus.Pending, issueItem);
+			var issue = Issue.CreateForSeed(issueId, 2, client.Id, new DateTime(2025, 6, 6, 2, 2, 2),
+			DateOnly.FromDateTime( new DateTime(2025, 6, 12, 2, 2, 2)), "TestUser", IssueStatus.Pending, issueItem);
 						
 			DbContext.Pallets.AddRange(notLoadedPallet, loadedPallet);
 			DbContext.Issues.Add(issue);

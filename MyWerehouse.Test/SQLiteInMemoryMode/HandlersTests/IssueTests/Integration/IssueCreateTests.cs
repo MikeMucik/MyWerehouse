@@ -104,7 +104,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
 
 			// Assert
 			var result = resultForIssue.Result.First();
@@ -184,7 +184,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
 			// Assert
 			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
@@ -293,7 +293,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					}
 				}
 			};
-			await Mediator.Send(new CreateIssueCommand(createIssue, DateTime.UtcNow.AddDays(7)));
+			await Mediator.Send(new CreateIssueCommand(createIssue, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			// Assert
 			var issue = DbContext.Issues.First();
@@ -368,7 +368,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 
 			var oldIssue = Issue.CreateForSeed(issueId, 1, 1, new DateTime(2025, 8, 8),
-			new DateTime(2025, 8, 15), "TestUser", IssueStatus.New, null);
+			new DateOnly(2025, 8, 15), "TestUser", IssueStatus.New, null);
 			var sourcePallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet3.Id, 10, 3, new DateTime(2025, 9, 1));
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, sourcePallet.Id, issueId, 2, PickingStatus.Allocated, product1.Id,
@@ -405,7 +405,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					issueItem1, issueItem2
 				}
 			};
-			var result = await Mediator.Send(new CreateIssueCommand(createIssue, DateTime.UtcNow.AddDays(7)));
+			var result = await Mediator.Send(new CreateIssueCommand(createIssue, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 			// Assert
 			Assert.NotNull(result);
 			//var issue = DbContext.Issues.FirstOrDefault(i => i.Id == createIssue.Id);
@@ -488,7 +488,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
 
 			// Assert
 			var result = resultForIssue.Result.First();
@@ -537,7 +537,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateTime.UtcNow.AddDays(2)));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
 			// Assert
 			var result = resultForIssue.Result.First();
 			// Assert

@@ -18,7 +18,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 	public class ClosePalletPickingIntegrationTests :TestBase
 	{
 		[Fact]
-		public async Task ClosePalletPicking_ProperPallet_ChangeStatus()
+		public async Task ClosePalletPicking_ChangeStatus_ProperPallet()
 		{
 			var category = new Category
 			{
@@ -72,7 +72,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 			
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-6),
-			DateTime.Now.AddDays(1), "user1", IssueStatus.Pending, null);
+			DateOnly.FromDateTime( DateTime.Now.AddDays(1)), "user1", IssueStatus.Pending, null);
 		
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);

@@ -12,11 +12,11 @@ namespace MyWerehouse.Application.Issues.DTOs
 {
 	public record IssueItemDTO : IMapFrom<IssueItem> 
 	{	
-		public Guid ProductId { get; set; }
-		public string ProductName { get; set; }
-		public string ProductSKU { get; set; }
-		public int Quantity { get; set; }
-		public DateOnly BestBefore { get; set; }	
+		public Guid ProductId { get; init; }
+		public string ProductName { get; init; }
+		public string ProductSKU { get; init; }
+		public int Quantity { get; init; }
+		public DateOnly BestBefore { get; init; }	
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<IssueItem, IssueItemDTO>()

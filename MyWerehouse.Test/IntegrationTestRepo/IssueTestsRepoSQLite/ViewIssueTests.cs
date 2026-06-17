@@ -10,15 +10,15 @@ using MyWerehouse.Test.SQLiteInMemoryMode;
 namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 {
 	[Collection("QueryCollection")]
-	public class ViewIssueTests 
+	public class ViewIssueTests
 	{
 		private readonly IssueRepo _issueRepo;
 		private readonly QueryTestSQLFixture _fixture;
 		public ViewIssueTests(QueryTestSQLFixture fixture)
 		{
-			_fixture = fixture;			
+			_fixture = fixture;
 			_issueRepo = new IssueRepo(_fixture.DbContext);
-		}		
+		}
 		[Fact]
 		public async Task ShowIssueById_GetIssueByIdAsync_ReturnIssue()
 		{
@@ -31,6 +31,22 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			Assert.NotNull(result);
 			Assert.Equal(id, result.Id);
 			Assert.Equal(11, result.ClientId);
+		}
+
+		[Fact]
+		public void ShowIssueByIssueNumber_GetIssueByIdAsync_ReturnIssue()
+		{
+			//Arrange
+			var filter = new IssueReceiptSearchFilter
+			{
+				IssueNumber = 2
+			};
+			//Act
+			var result = _issueRepo.GetIssuesByFilter(filter);
+			//Assert
+			Assert.NotNull(result);
+			Assert.NotEmpty(result);
+			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
 		}
 		[Fact]
 		public void ShowListIssuesByClient_GetIssuesByFilter_ReturnList()
@@ -70,8 +86,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Arrange
 			var filter = new IssueReceiptSearchFilter
 			{
-				DateTimeStart = DateTime.UtcNow,
-				DateTimeEnd = DateTime.UtcNow.AddDays(1)
+				DateTimeStartSend = DateOnly.FromDateTime(DateTime.UtcNow),
+				DateTimeEndSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
 			};
 
 			//Act
@@ -95,7 +111,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			};
 
 			//Act
-			var result =await _issueRepo.GetIssuesByIdsAsync(list);
+			var result = await _issueRepo.GetIssuesByIdsAsync(list);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -116,9 +132,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			Assert.NotEmpty(result);
 			Assert.All(result, p => Assert.False(p.Id == Guid.Empty));
 			Assert.Contains(result, p => p.PalletNumber == "Q1000");
-			Assert.Contains(result, p => p.PalletNumber == "Q1000"&&p.LocationId ==1);
-			Assert.Contains(result, p => p.PalletNumber == "Q1001"&&p.LocationId ==1);
-			Assert.Contains(result, p => p.PalletNumber == "Q2000"&&p.LocationId ==3);		
+			Assert.Contains(result, p => p.PalletNumber == "Q1000" && p.LocationId == 1);
+			Assert.Contains(result, p => p.PalletNumber == "Q1001" && p.LocationId == 1);
+			Assert.Contains(result, p => p.PalletNumber == "Q2000" && p.LocationId == 3);
 			//Assert.Contains(result, p => p.PalletId == "Q2000"&&p.LocationId ==3);		
 		}
 	}

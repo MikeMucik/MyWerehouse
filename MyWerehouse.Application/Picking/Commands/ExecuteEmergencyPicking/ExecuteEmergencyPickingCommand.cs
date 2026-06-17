@@ -8,5 +8,6 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 {
-	public record ExecuteEmergencyPickingCommand(Guid PalletId, Guid IssueId, string UserId, int RampNumber):IRequest<AppResult<Unit>>;	
+	public record ExecuteEmergencyPickingCommand(Guid PalletId, Guid IssueId, string UserId, int RampNumber)
+		: IRequest<AppResult<Unit>>;
 }

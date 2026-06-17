@@ -11,8 +11,8 @@ namespace MyWerehouse.Application.ViewModels.CategoryModels
 {
 	public class CategoryViewDTO :IMapFrom<Category>
 	{
-		public int Id { get; set; }
-		public required string Name { get; set; }
+		public int Id { get; init; }
+		public required string Name { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Category, CategoryViewDTO>()

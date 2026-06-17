@@ -8,7 +8,8 @@ namespace MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree
 {
 	public class ProductOnPalletPickingDTO
 	{
-		public Guid ProductId { get; set;}
-		public int Quantity {  get; set;}
+		public Guid ProductId { get; init;}
+		public string SKU {  get; init;}//
+		public int Quantity {  get; init;}
 	}
 }

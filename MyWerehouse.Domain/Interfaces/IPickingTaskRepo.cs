@@ -12,12 +12,12 @@ namespace MyWerehouse.Domain.Interfaces
 		void AddPickingTask(PickingTask pickingTask);
 		Task AddPickingTaskAsync(PickingTask pickingTask);
 		void DeletePickingTask(PickingTask pickingTask);
-		IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateTime pickingDate);
+		IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateOnly pickingDate);
 		Task<PickingTask?> GetPickingTaskAsync(Guid guid);
 		Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId);
 		Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId);
 		Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId);
-		Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateTime from, DateTime to);
+		Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to);
 		IQueryable<PickingTaskFlat> GetPickingTaskFlats(DateOnly start, DateOnly end);
 	}
 }

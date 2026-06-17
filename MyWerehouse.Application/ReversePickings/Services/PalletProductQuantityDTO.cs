@@ -8,11 +8,11 @@ namespace MyWerehouse.Application.ReversePickings.Services
 {
 	public class PalletProductQuantityDTO
 	{
-		public Guid PalletId { get; set; }
-		public string PalletNumber { get; set; }
-		public Guid ProductId { get; set; }
-		public string ProductName { get; set; }
-		public string ProductSKU { get; set; }
-		public int Quantity { get; set; }
+		public Guid PalletId { get; init; }
+		public string PalletNumber { get; init; }
+		public Guid ProductId { get; init; }
+		public string ProductName { get; init; }
+		public string ProductSKU { get; init; }
+		public int Quantity { get; init; }
 	}
 }

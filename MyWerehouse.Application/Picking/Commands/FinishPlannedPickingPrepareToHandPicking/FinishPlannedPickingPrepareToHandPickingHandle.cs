@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 		WerehouseDbContext werehouseDbContext,
 		IPickingTaskRepo pickingTaskRepo,
 		IIssueRepo issueRepo,
-		IMapper mapper) : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, AppResult< List<PickingTaskDTO>>>
+		IMapper mapper) : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, AppResult<List<PickingTaskDTO>>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
@@ -29,10 +29,11 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 		public async Task<AppResult<List<PickingTaskDTO>>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
 		{
 			var listToDoTasks = new List<PickingTaskDTO>();
+			
 			var filtr = new IssueReceiptSearchFilter
 			{
-				DateTimeStart = DateTime.UtcNow.AddDays(-1),
-				DateTimeEnd = DateTime.UtcNow,
+				DateTimeStartSend = command.Start ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
+				DateTimeEndSend = command.End ?? DateOnly.FromDateTime(DateTime.UtcNow)				
 			};
 			var listOfIssues = await _issueRepo.GetIssuesByFilter(filtr).ToListAsync(ct);
 			foreach (var issue in listOfIssues)
@@ -41,7 +42,7 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 				var reducedList = listOfPickTasks.Where(t => t.PickingStatus == PickingStatus.Allocated ||
 				t.PickingStatus == PickingStatus.Correction).ToList(); //biorę pod uwagę tylko aktywne taski do wykonania
 				var listByProductAndDate = reducedList
-					.GroupBy(p => new {p.IssueId, p.ProductId, p.BestBefore })
+					.GroupBy(p => new { p.IssueId, p.ProductId, p.BestBefore })
 					.Select(g => new
 					{
 						g.Key.ProductId,
@@ -52,10 +53,10 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 				{
 					var taskToDo = PickingTask.Create(null, issue.Id, task.TotalQuantity, PickingStatus.Available, task.ProductId,
 						task.BestBefore, null, DateOnly.FromDateTime(DateTime.UtcNow), 0);
-									 
-					 _pickingTaskRepo.AddPickingTask(taskToDo);
+
+					_pickingTaskRepo.AddPickingTask(taskToDo);
 					var handTaskDTO = _mapper.Map<PickingTaskDTO>(taskToDo);
-					
+
 					listToDoTasks.Add(handTaskDTO);
 				}
 				foreach (var task in reducedList)

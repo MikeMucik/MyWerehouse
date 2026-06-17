@@ -7,7 +7,7 @@ using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
 
 namespace MyWerehouse.Application.Picking.DTOs
 {
-	public class PrepareCorrectedPickingResult
+	public sealed class PrepareCorrectedPickingResult
 	{
 		public bool Success { get; init; }
 		public bool RequiresIssueSelection { get; init; }

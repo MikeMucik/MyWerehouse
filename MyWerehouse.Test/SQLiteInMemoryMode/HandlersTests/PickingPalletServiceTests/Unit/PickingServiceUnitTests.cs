@@ -112,15 +112,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			
 			var issue1Id = Guid.NewGuid();
 			var issue1 = Issue.CreateForSeed(issue1Id, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			
 			var issue2Id = Guid.NewGuid();
 			var issue2 = Issue.CreateForSeed(issue2Id, 2, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			
 			var issue3Id = Guid.NewGuid();
 			var issue3 = Issue.CreateForSeed(issue3Id, 3, 2, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			
 			DbContext.Addresses.AddRange(address1, address2);
 			DbContext.Categories.Add(category);
@@ -170,7 +170,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue1.Id,
 				IssueNumber = issue1.IssueNumber,
 				ProductId = product1.Id,
-				Quantity = 30
+				Quantity = 30,
+				SKU = "666"
 			});
 
 			result.Result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
@@ -179,7 +180,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue1.Id,
 				IssueNumber = issue1.IssueNumber,
 				ProductId = product2.Id,
-				Quantity = 10
+				Quantity = 10,
+				SKU = "667"
 			});
 			// Client1, Issue2, Product2 → 15
 			result.Result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
@@ -188,7 +190,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue2.Id,
 				IssueNumber = issue2.IssueNumber,
 				ProductId = product2.Id,
-				Quantity = 15
+				Quantity = 15,
+				SKU = "667"
 			});
 			result.Result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
 			{
@@ -196,7 +199,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue2.Id,
 				IssueNumber = issue2.IssueNumber,
 				ProductId = product1.Id,
-				Quantity = 15
+				Quantity = 15,
+				SKU = "666"
 			});
 			// Client2, Issue3, Product1 → 25
 			result.Result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
@@ -205,7 +209,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 				IssueId = issue3.Id,
 				IssueNumber = issue3.IssueNumber,
 				ProductId = product1.Id,
-				Quantity = 25
+				Quantity = 25,
+				SKU = "666"
 			});
 		}
 
@@ -297,13 +302,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			DbContext.SaveChanges();
 			var issue1Id = Guid.NewGuid();
 			var issue1 = Issue.CreateForSeed(issue1Id, 101, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var issue2Id = Guid.NewGuid();
 			var issue2 = Issue.CreateForSeed(issue2Id, 102, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var issue3Id = Guid.NewGuid();
 			var issue3 = Issue.CreateForSeed(issue3Id, 103, 2, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var pallet1 = Pallet.CreateForTests("Q10", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
 			pallet1.AddProductForTests(product1.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			var pallet2 = Pallet.CreateForTests("Q11", new DateTime(2025, 9, 9), 2, PalletStatus.ToPicking, null, null);

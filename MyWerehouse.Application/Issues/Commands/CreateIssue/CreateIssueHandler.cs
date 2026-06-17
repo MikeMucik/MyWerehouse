@@ -6,53 +6,45 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Issues.IssuesServices;
+using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
-namespace MyWerehouse.Application.Issues.Commands.CreateNewIssue
+namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 {
 	public class CreateIssueHandler(WerehouseDbContext werehouseDbContext,
 		IIssueRepo issueRepo,
-		IAssignProductToIssueService assignProductToIssueService) : IRequestHandler<CreateIssueCommand, AppResult<List<IssueItemAllocationResult>>>
+		IAssignProductToIssueService assignProductToIssueService) : IRequestHandler<CreateIssueCommand, AppResult<List<AssignProductToIssueResult>>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IAssignProductToIssueService _assignProductToIssueService = assignProductToIssueService;
 
-		public async Task<AppResult<List<IssueItemAllocationResult>>> Handle(CreateIssueCommand request, CancellationToken ct)
+		public async Task<AppResult<List<AssignProductToIssueResult>>> Handle(CreateIssueCommand request, CancellationToken ct)
 		{
-			var addedProducts = new List<IssueItemAllocationResult>();
-			var results = new List<IssueItemAllocationResult>();
+			var addedProducts = new List<AssignProductToIssueResult>();
 			var issueNumber = await _issueRepo.GetNextNumberOfIssue();
 			var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.SendDate, request.DTO.PerformedBy);
 			_issueRepo.AddIssue(issue);
 			foreach (var item in request.DTO.Items)
 			{
-				IssueItemAllocationResult addingProducts;
 				var result = await _assignProductToIssueService.AssignProductToIssue(issue, item, IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
-				if (result.Success == false)
+				if (result.Success != false)
 				{
-					addingProducts = IssueItemAllocationResult.Fail(result.Message, item.ProductId, result.QuantityRequest, result.QuantityOnStock);
-				}
-				else
-				{
-					addingProducts = IssueItemAllocationResult.Ok(result.Message, item.ProductId);					
 					issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore);
-				}
-				addedProducts.Add(addingProducts);
+				}				
+				addedProducts.Add(result);
 			}
 			if (addedProducts.Any(r => r.Success == false))
 			{
-				issue.ChangeStatus(IssueStatus.NotComplete);
+				issue.ChangeStatus(IssueStatus.RequiresCorrection);
 			}
 			issue.AddHistory(request.DTO.PerformedBy);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<List<IssueItemAllocationResult>>.Success(addedProducts);
+			return AppResult<List<AssignProductToIssueResult>>.Success(addedProducts);
 		}
 	}
 }

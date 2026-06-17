@@ -8,6 +8,7 @@ using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Events;
 using MyWerehouse.Domain.Picking.PickingExceptions;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Domain.Picking.Models
 {
@@ -21,6 +22,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public int RequestedQuantity { get; private set; }
 		public PickingStatus PickingStatus { get; private set; }
 		public Guid ProductId { get; private set; } //
+		public Product Product { get; private set; }// potrzebne by wyświetlać SKU dla prodktu w DTO
 		public DateOnly? BestBefore { get; private set; }
 		public Guid? PickingPalletId { get; private set; }
 		public Pallet? PickingPallet { get; private set; }

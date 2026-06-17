@@ -79,7 +79,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(	DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 
 
 			DbContext.Pallets.AddRange(sourcePallet1, newToPickPallet);
@@ -195,7 +195,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 
@@ -345,7 +345,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 
 			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
@@ -472,7 +472,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			DbContext.Pallets.AddRange(sourcePallet1, newToPickPallet);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();

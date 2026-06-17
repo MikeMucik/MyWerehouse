@@ -12,10 +12,10 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {
 	public class CreateReceiptPlanDTO : IMapFrom<Receipt>
 	{
-		public int ClientId { get; set; }
-		public DateTime ReceiptDateTime { get; set; }
-		public string PerformedBy { get; set; }
-		public ReceiptStatus ReceiptStatus { get; set; }
-		public int RampNumber { get; set; }
+		public int ClientId { get; init; }
+		public DateTime ReceiptDateTime { get; init; }
+		public string PerformedBy { get; init; }
+		public ReceiptStatus ReceiptStatus { get; init; }
+		public int RampNumber { get; init; }
 	}
 }

@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Domain.Pallets.Filters;
 
 namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
 {
-	public class FindPalletsByFiltrQuery : IRequest<AppResult<PagedResult<PalletDTO>>>
+	public class FindPalletsByFiltrQuery : IRequest<AppResult<PagedResult<PalletSimplyDTO>>>
 	{
 		public PalletSearchFilter Filter { get; set; } = new();
 		public int CurrentPage { get; set; }

@@ -19,14 +19,14 @@ using MyWerehouse.Domain.Receviving.Events;
 
 namespace MyWerehouse.Domain.Issuing.Models
 {
-	public class Issue : AggregateRoots
+	public class  Issue : AggregateRoots
 	{
 		public Guid Id { get; private set; } = Guid.NewGuid();
 		public int IssueNumber { get; private set; }
 		public int ClientId { get; private set; }
 		public Client Client { get; private set; }
 		public DateTime IssueDateTimeCreate { get; private set; }
-		public DateTime IssueDateTimeSend { get; private set; }
+		public DateOnly IssueDateTimeSend { get; private set; }
 		public ICollection<Pallet> Pallets { get; private set; } = new List<Pallet>();
 		public ICollection<HistoryIssue> HistoryIssues { get; private set; } = new List<HistoryIssue>();
 		public ICollection<HistoryPicking> HistoryPickings { get; private set; } = new List<HistoryPicking>();
@@ -35,24 +35,24 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public IssueStatus IssueStatus { get; private set; }
 		public ICollection<IssueItem> IssueItems { get; private set; } = new List<IssueItem>();
 		private Issue() { }
-		private Issue(int issueNumber, int clientId, DateTime dateToSend, string performedBy)
+		private Issue(int issueNumber, int clientId, DateOnly dateToSend, string performedBy)
 		{
 			Id = Guid.NewGuid();
 			IssueNumber = issueNumber;
 			if (clientId <= 0) throw new ClientDomainException();
 			ClientId = clientId;
-			if (dateToSend < DateTime.UtcNow) throw new WrongDateDomainException();
+			if (dateToSend < DateOnly.FromDateTime( DateTime.UtcNow)) throw new WrongDateDomainException();
 			IssueDateTimeSend = dateToSend;
 			IssueDateTimeCreate = DateTime.UtcNow;
 			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException(performedBy);
 			IssueStatus = IssueStatus.New;
 		}
 
-		public static Issue Create(int issueNumber, int clientId, DateTime dateToSend, string performedBy)
+		public static Issue Create(int issueNumber, int clientId, DateOnly dateToSend, string performedBy)
 			=> new Issue(issueNumber, clientId, dateToSend, performedBy);
 
 		private Issue(Guid id, int issueNumber, int clientId, DateTime issueDateTimeCreate,
-			DateTime issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems)
+			DateOnly issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems)
 		{
 			Id = id;
 			IssueNumber = issueNumber;
@@ -64,7 +64,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			IssueItems = issueItems;
 		}
 		public static Issue CreateForSeed(Guid id, int issueNumber, int clientId, DateTime issueDateTimeCreate,
-			DateTime issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems) =>
+			DateOnly issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems) =>
 			new Issue(id, issueNumber, clientId, issueDateTimeCreate, issueDateTimeSend,
 				performedBy, issueStatus, issueItems);
 
@@ -80,14 +80,14 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void ChangeStatus(IssueStatus issueStatus)
 		{
 			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived)
-				throw new NotAllowedOperationDomainException(Id);
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			IssueStatus = issueStatus;
 		}
 
 		public void CancelIssue(string userId)
 		{
 			if (IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.Archived)
-				throw new NotAllowedOperationDomainException(Id);
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			IssueStatus = IssueStatus.Cancelled;
 			AddHistory(userId);
 			foreach (var pallet in Pallets)
@@ -133,9 +133,11 @@ namespace MyWerehouse.Domain.Issuing.Models
 			return toReturn;
 		}		
 				
-		public void ConfirmToLoad(string userId)
+		public void VerifyToLoad(string userId)
 		{
 			//invarianty status
+			if (!(IssueStatus == IssueStatus.InProgress || IssueStatus == IssueStatus.ChangingPallet || IssueStatus == IssueStatus.Pending))
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			IssueStatus = IssueStatus.ConfirmedToLoad;
 			foreach (var pallet in Pallets)
 			{				
@@ -144,16 +146,16 @@ namespace MyWerehouse.Domain.Issuing.Models
 			AddHistory(userId);
 		}
 
-		public void VeryfiedAfterLoading(string userId)
+		public void ConfirmAfterLoading(string userId)
 		{
 			if (Pallets.Any(p => p.Status != PalletStatus.Loaded))
 			{
-				throw new NotEndedLoadingDomainException(Id); //może dodać jakie nie są ale to nie w domenie				
+				throw new NotEndedLoadingDomainException(Id, IssueNumber); //może dodać jakie nie są ale to nie w domenie				
 			}
 			PerformedBy = userId;
 			if (IssueStatus != IssueStatus.IsShipped)
 			{
-				throw new NotAllowedOperationDomainException(Id);
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
 			foreach (var pallet in Pallets)
 			{
@@ -198,7 +200,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				if (pallet.Status != PalletStatus.Loaded)
 				{
-					throw new NotEndedLoadingDomainException(Id);
+					throw new NotEndedLoadingDomainException(Id, IssueNumber);
 				}
 			}
 			IssueStatus = IssueStatus.IsShipped;

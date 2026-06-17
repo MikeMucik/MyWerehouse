@@ -66,7 +66,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
 			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
 			
@@ -195,7 +195,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
 			
@@ -315,7 +315,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
 			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
 			
@@ -440,7 +440,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.PickingPalletServiceTe
 			var issueId = Guid.NewGuid();
 
 			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateTime.UtcNow.AddDays(7), "TestUser", IssueStatus.New, null);
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
 			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
 			

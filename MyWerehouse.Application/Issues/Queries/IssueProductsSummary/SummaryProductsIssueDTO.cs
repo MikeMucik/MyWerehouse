@@ -9,12 +9,12 @@ namespace MyWerehouse.Application.Issues.Queries.IssueProductsSummary
 {
 	public class SummaryProductsIssueDTO
 	{
-		public Guid Id { get; set; }
-		public int IssueNumber { get; set; }
-		public int ClientId { get; set; }
-		public string PerformedBy { get; set; }
-		public DateTime DateToSend { get; set; }
-		public List<IssueItemDTO> IssueItems { get; set; } = new List<IssueItemDTO>();
+		public Guid Id { get; init; }
+		public int IssueNumber { get; init; }
+		public int ClientId { get; init; }
+		public string PerformedBy { get; init; }
+		public DateOnly DateToSend { get; init; }
+		public List<IssueItemDTO> IssueItems { get; init; } = new List<IssueItemDTO>();
 
 	}
 }

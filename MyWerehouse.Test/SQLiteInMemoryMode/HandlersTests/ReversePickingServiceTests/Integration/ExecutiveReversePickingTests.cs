@@ -79,7 +79,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -148,7 +148,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.First();
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
@@ -222,7 +222,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -292,7 +292,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.First();
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
@@ -378,7 +378,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -450,7 +450,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.First();
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
@@ -543,7 +543,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -620,7 +620,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.First();
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
 			var list = new List<Pallet>();
@@ -714,7 +714,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateTime.UtcNow.AddDays(7)));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -807,7 +807,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.ReversePickingServiceT
 
 			var task = reverseTasks.First();
 			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
-			Assert.Equal(ReversePickingStatus.Pending, task.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);

@@ -13,13 +13,13 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
 	public class EditPalletInReceiptDTO :IMapFrom<Pallet>
 	{
-		public Guid Id { get; set; }
-		public string PalletNumber { get; set; }//
-		public DateTime DateReceived { get; set; }
-		public int LocationId { get; set; }
-		public PalletStatus Status { get; set; } = 0;
-		public string UserId { get; set; }
-		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; set; } = new List<ProductOnPalletDTO>();
+		public Guid Id { get; init; }
+		public string PalletNumber { get; init; }//
+		public DateTime DateReceived { get; init; }
+		public int LocationId { get; init; }
+		public PalletStatus Status { get; init; } = 0;
+		public string UserId { get; init; }
+		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();
 
 		public void Mapping(Profile profile)
 		{

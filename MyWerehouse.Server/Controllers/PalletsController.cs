@@ -7,6 +7,8 @@ using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
+using MyWerehouse.Application.Pallets.Queries.GetPallet;
+using MyWerehouse.Application.Pallets.Queries.GetPalletBySKU;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
 using MyWerehouse.Server.Extensions;
 
@@ -28,6 +30,14 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _mediator.Send(command);
 			return result.ToActionResult();
 		}
+		// dane palety Guid
+		[HttpGet("{id}getInfo")]
+		public async Task<IActionResult> Get(Guid id)
+			=> (await _mediator.Send(new GetPalletQuery(id))).ToActionResult();
+		// dane palety Palletnumber
+		[HttpGet("{palletId}getInfoPalletnumber")]
+		public async Task<IActionResult> GetByPalletNumber(string palletId)
+			=> (await _mediator.Send(new GetPalletByPalletNumberQuery(palletId))).ToActionResult();
 		// paleta do edycji
 		[HttpGet("{id}toEdit")]
 		public async Task<IActionResult> GetForEdit(Guid id)
@@ -35,7 +45,7 @@ namespace MyWerehouse.Server.Controllers
 
 		// update palety
 		[HttpPut("{id}update")]
-		public async Task<IActionResult> Update(Guid id, EditPalletDTO dto)
+		public async Task<IActionResult> Update(Guid id, Application.Pallets.Commands.UpdatePallet.EditPalletDTO dto)
 			=> (await _mediator.Send(new UpdatePalletCommand(id, dto))).ToActionResult();
 
 		// zmiana lokacji

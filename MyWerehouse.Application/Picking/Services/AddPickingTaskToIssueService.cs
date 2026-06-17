@@ -33,7 +33,7 @@ namespace MyWerehouse.Application.Picking.Services
 		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet vp, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
 		{
 			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated,
-				productId, bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);
+				productId, bestBefore, null, issue.IssueDateTimeSend.AddDays(-2), 0);
 			_pickingTaskRepo.AddPickingTask(pickingTask);
 			var sourcePallet = await _palletRepo.GetPalletByIdAsync(vp.PalletId);
 			if (sourcePallet == null)
@@ -50,7 +50,7 @@ namespace MyWerehouse.Application.Picking.Services
 			void CreatePickingTask(VirtualPallet vp, Issue issue, int quantity, Guid productId, DateOnly? bestBefore, string userId)
 			{
 				var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated, productId,
-						bestBefore, null, DateOnly.FromDateTime(issue.IssueDateTimeSend.AddDays(-2)), 0);  //na razie ustalone na sztywno 
+						bestBefore, null, issue.IssueDateTimeSend.AddDays(-2), 0);  //na razie ustalone na sztywno 
 				_pickingTaskRepo.AddPickingTask(pickingTask);
 				pickingTasks.Add(pickingTask);
 

@@ -9,5 +9,6 @@ using MyWerehouse.Application.Picking.DTOs;
 
 namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareToHandPicking
 {
-	public record FinishPlannedPickingPrepareToHandPickingCommand(string UserId)	:IRequest<AppResult<List<PickingTaskDTO>>>;
+	public record FinishPlannedPickingPrepareToHandPickingCommand(string UserId, DateOnly? Start, DateOnly? End)
+		:IRequest<AppResult<List<PickingTaskDTO>>>;
 }

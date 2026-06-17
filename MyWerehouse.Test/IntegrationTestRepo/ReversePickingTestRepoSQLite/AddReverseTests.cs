@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				IssueItem.CreateForSeed(1, issueId, product.Id,18, DateOnly.FromDateTime ( DateTime.UtcNow.AddDays(365)), DateTime.UtcNow.AddDays(-7))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateTime.UtcNow.AddDays(7), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
+			DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7)), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
 			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 20, location1.Id, DateTime.UtcNow.AddDays(-7));
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 10, PickingStatus.Picked, product.Id,
@@ -128,7 +128,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			);
 
 			// --- status ReversePicking ---
-			Assert.Equal(ReversePickingStatus.Pending, result.Status);
+			Assert.Equal(ReversePickingStatus.Ongoing, result.Status);
 
 			// --- palety źródłowe / docelowe ---
 			Assert.Null(result.SourcePalletId);

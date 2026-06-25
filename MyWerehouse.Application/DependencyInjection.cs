@@ -50,6 +50,7 @@ namespace MyWerehouse.Application
 			services.AddScoped<IGetProductCountService, GetProductCountService>();
 			services.AddScoped<IGetNumberPalletsAndRestService, GetNumberPalletsAndRestService>();
 			services.AddScoped<IAssignProductToIssueService, AssignProductToIssueAsyncService>();
+			services.AddScoped<IComparePlanToPreparedService, ComparePlanToPreparedService>();
 			services.AddScoped<IAddProductsToPalletService, AddProductsToPalletService>();
 			services.AddScoped<ICreateReversePickingService, CreateReversePickingService>();
 			//domain services

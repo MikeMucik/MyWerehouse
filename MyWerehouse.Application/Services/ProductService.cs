@@ -26,9 +26,9 @@ namespace MyWerehouse.Application.Services
 		private readonly IProductRepo _productRepo;
 		private readonly IMapper _mapper;
 		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IReceiptRepo _receiptRepo;
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly ICategoryRepo _categoryRepo;
+		private readonly IReceiptRepo _receiptRepo;		
 		private readonly IValidator<EditProductDTO> _productValidator;
 
 		public ProductService(
@@ -49,13 +49,6 @@ namespace MyWerehouse.Application.Services
 			_productValidator = productValidator;
 		}
 
-		public ProductService(
-			IProductRepo repo,
-			IMapper mapper)
-		{
-			_productRepo = repo;
-			_mapper = mapper;
-		}
 		public async Task<AppResult<Guid>> AddProductAsync(EditProductDTO productDTO)
 		{
 			var validationResult = _productValidator.Validate(productDTO);
@@ -73,8 +66,22 @@ namespace MyWerehouse.Application.Services
 			{
 				return AppResult<Guid>.Fail($"Kateogria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
 			}
-			var productNew = _mapper.Map<Product>(productDTO);
-			var product = _productRepo.AddProduct(productNew);
+			if (existCategory.IsDeleted)
+			{
+				return AppResult<Guid>.Fail($"Kateogria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
+			}
+			var productPrepare = Product.Create(
+				productDTO.Name,
+				productDTO.SKU,
+				productDTO.CategoryId,
+				productDTO.CartonsPerPallet);
+			productPrepare.AddDetails(
+				productDTO.Length,
+				productDTO.Height,
+				productDTO.Width,
+				productDTO.Weight,
+				productDTO.Description);
+			var product = _productRepo.AddProduct(productPrepare);
 			var inventory = new Inventory
 			{
 				Product = product,
@@ -131,14 +138,26 @@ namespace MyWerehouse.Application.Services
 			{
 				return AppResult<Unit>.Fail($"Kateogria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
 			}
-			var changes = _mapper.Map(productDTO, existingProduct);
-			existingProduct.ApplyChanges(changes);
+			if (existCategory.IsDeleted)
+			{
+				return AppResult<Unit>.Fail($"Kateogria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
+			}
+			existingProduct.ApplyChangesForProduct(
+				productDTO.Name,
+				productDTO.SKU,
+				productDTO.CategoryId,
+				productDTO.CartonsPerPallet,
+				productDTO.Length,
+				productDTO.Height,
+				productDTO.Width,
+				productDTO.Weight,
+				productDTO.Description);
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);
 		}
 		public async Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id)
 		{
-			var product = await _productRepo.GetProductToEditAsync(id);
+			var product = await _productRepo.GetProductDetailsAsync(id);
 			if (product == null) return AppResult<DetailsOfProductDTO>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
 

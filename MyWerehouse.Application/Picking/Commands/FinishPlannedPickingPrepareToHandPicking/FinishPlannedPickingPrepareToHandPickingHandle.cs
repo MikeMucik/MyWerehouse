@@ -32,8 +32,8 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 			
 			var filtr = new IssueReceiptSearchFilter
 			{
-				DateTimeStartSend = command.Start ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
-				DateTimeEndSend = command.End ?? DateOnly.FromDateTime(DateTime.UtcNow)				
+				SendDateStart = command.Start ?? DateOnly.FromDateTime(DateTime.UtcNow),
+				SendDateEnd = command.End ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))				
 			};
 			var listOfIssues = await _issueRepo.GetIssuesByFilter(filtr).ToListAsync(ct);
 			foreach (var issue in listOfIssues)

@@ -28,19 +28,19 @@ namespace MyWerehouse.Application.Services
 		private readonly IClientRepo _clientRepo;
 		private readonly IMapper _mapper;
 		private readonly IReceiptRepo _receiptRepo;
-		private readonly IValidator<AddClientDTO> _addClientValidator;
-		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
-		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IIssueRepo _issueRepo;
+		private readonly WerehouseDbContext _werehouseDbContext;
+		private readonly IValidator<AddClientDTO> _addClientValidator;
+		private readonly IValidator<UpdateClientDTO> _updateClientValidator;		
+		
 		public ClientService(
 			IClientRepo clientRepo,
 			IMapper mapper,
 			IReceiptRepo receiptRepo,
 			IIssueRepo issueRepo,
 			WerehouseDbContext werehouseDbContext,
-			IValidator<AddClientDTO>? addClientValidator = null
-			, IValidator<UpdateClientDTO>? updateClientValidator = null
-			)
+			IValidator<AddClientDTO>? addClientValidator = null,
+			IValidator<UpdateClientDTO>? updateClientValidator = null)
 		{
 			_clientRepo = clientRepo;
 			_mapper = mapper;
@@ -50,14 +50,7 @@ namespace MyWerehouse.Application.Services
 			_addClientValidator = addClientValidator;
 			_updateClientValidator = updateClientValidator;
 		}
-		public ClientService(
-			IClientRepo clientRepo,
-			IMapper mapper)
-		{
-			_clientRepo = clientRepo;
-			_mapper = mapper;
-		}
-
+		
 		public async Task<AppResult<int>> AddClientAsync(AddClientDTO addClient)
 		{
 			var validationResult = await _addClientValidator.ValidateAsync(addClient);

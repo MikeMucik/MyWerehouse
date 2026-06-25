@@ -19,7 +19,10 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLift
 		public async Task<AppResult<List<PickingPalletWithLocationDTO>>> Handle(ListPalletsForForkLifterReservePickingQuery query, CancellationToken ct)
 		{
 			var list = new List<PickingPalletWithLocationDTO>();
-			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(query.Start, query.End);
+			var dateStart = query.Start ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
+			var dateEnd = query.End ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(dateStart, dateEnd);
 			if (palletsIds.Count == 0)
 			{
 				return AppResult<List<PickingPalletWithLocationDTO>>.Fail("Brak palet do wyświetlenia.");

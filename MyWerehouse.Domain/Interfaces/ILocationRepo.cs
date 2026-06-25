@@ -16,5 +16,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt);
 		IEnumerable<Location> CreateListLocationForBayRangeAisle(int Bay, int StartAisle, int EndAisle, int AmountPosition, int AmountHeigt);
 		Task<bool> ReceivingRampExistsAsync(int locationId);
+		Task<bool> ExistsByCoordinatesAsync(int bay, int aisle, int position, int height);
 	}
 }

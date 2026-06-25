@@ -1,0 +1,191 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integration
+{
+	public class PalletChangeLocationIntegrationServiceTests : TestBase// PalletIntegrationCommandService
+	{
+		private Product CreateProduct(string name, string sku)
+		{
+			return Product.Create(name, sku, 1, 100);
+		}
+		private Category CreateCategory()
+		{
+			return new Category
+			{
+				Id = 1,
+				Name = "TestC",
+				IsDeleted = false
+			};
+		}
+		private Location CreateLocation(int position)
+		{
+			return new Location
+			{
+				Bay = 1,
+				Aisle = 1,
+				Height = 1,
+				Position = position
+			};
+		}
+		[Fact]
+		public async Task ChangeLocationPallet_Shuold_ChangeData()
+		{
+			//Arange	
+			var category = CreateCategory();
+			var product1 = CreateProduct("TestP", "qwerty123");
+			var product2 = CreateProduct("TestP", "qwerty456");
+			var location1 = CreateLocation(0);
+			var location2 = CreateLocation(1);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product1, product2);
+			DbContext.Locations.AddRange(location1, location2);
+			DbContext.SaveChanges();
+			var pallet = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), location1.Id, PalletStatus.Available, null, null);
+			pallet.AddProductForTests(product1.Id, 100, new DateTime(2025, 4, 4, 8, 8, 8), new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product2.Id, 10, new DateOnly(2027, 3, 4));
+			DbContext.Pallets.Add(pallet);
+			DbContext.SaveChanges();
+
+			var movement = new HistoryPallet
+			{
+				DestinationLocationId = location1.Id,
+				MovementDate = DateTime.UtcNow.AddDays(-2),
+				PalletId = pallet.Id,
+				PalletNumber = pallet.PalletNumber,
+				Reason = ReasonForPallet.Moved,
+				PerformedBy = "TestUser",
+			};
+			var movement2 = new HistoryPallet
+			{
+				SourceLocationId = location1.Id,
+				DestinationLocationId = location2.Id,
+				MovementDate = DateTime.UtcNow.AddDays(-1),
+				PalletId = pallet.Id,
+				PalletNumber = pallet.PalletNumber,
+				Reason = ReasonForPallet.Moved,
+				PerformedBy = "TestUser",
+			};
+			var movementDetails1 = new HistoryPalletDetail
+			{
+				HistoryPallet = movement,
+				ProductId = product1.Id,
+				Quantity = 1,
+			};
+			var movementDetails2 = new HistoryPalletDetail
+			{
+				HistoryPallet = movement2,
+				ProductId = product1.Id,
+				Quantity = 1,
+			};
+			DbContext.HistoryPalletDetails.AddRange(movementDetails1, movementDetails2);
+			DbContext.HistoryPallet.AddRange(movement, movement2);
+			DbContext.SaveChanges();
+			//Act
+			var palletId = pallet.Id;
+			var destinationLocation = 2;
+			var userId = "U001"; var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
+			//Assert
+			Assert.True(result.IsSuccess);
+			Assert.False(result.Result.RequiresConfirmation);
+			Assert.Contains($"Paleta {pallet.Id} została umieszczona w lokalizacji. ", result.Message);
+			var resultPallet = DbContext.Pallets.First(x => x.Id == palletId);
+			Assert.Equal(location2.Id, resultPallet.LocationId);
+
+			var moments = DbContext.HistoryPallet.Where(a => a.PalletId == palletId)
+				.OrderByDescending(a => a.MovementDate)
+				.ToList();
+			Assert.Equal(3, moments.Count);
+			var lastMovement = moments.First();
+			Assert.Equal(destinationLocation, lastMovement.DestinationLocationId);
+			Assert.Equal(userId, lastMovement.PerformedBy);
+		}
+		[Fact]
+		public async Task ChangeLocationPallet_ShouldGiveBackInformation_WhenLocationOccupied()
+		{
+			//Arange	
+			var category = CreateCategory();
+			var product1 = CreateProduct("TestP", "qwerty123");
+			var product2 = CreateProduct("TestP", "qwerty456");
+			var location1 = CreateLocation(0);
+			var location2 = CreateLocation(1);
+			var pallet1 = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), 1, PalletStatus.Available, null, null);
+			pallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 4, 4, 8, 8, 8), new DateOnly(2027, 3, 3));
+			var pallet2 = Pallet.CreateForTests("Q2001", new DateTime(2020, 1, 1, 0, 0, 0), 2, PalletStatus.Available, null, null);
+			pallet2.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 4));
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product1, product2);
+
+			DbContext.Locations.AddRange(location1, location2);
+			DbContext.Pallets.AddRange(pallet1, pallet2);
+			DbContext.SaveChanges();
+			//Act
+			var palletId = pallet1.Id;
+			var destinationLocation = 2;
+			var userId = "U001";
+			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
+
+			//Assert
+			Assert.True(result.IsSuccess);
+			Assert.False(result.Result.Success);
+			Assert.True(result.Result.RequiresConfirmation);
+			var fullNameLocation = $" Bay = {location2.Bay} Aisle = {location2.Aisle} Position = {location2.Position} Height ={location2.Height}";
+			Assert.Contains($"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {pallet2.Id}.", result.Message);
+		}
+		[Fact]
+		public async Task ChangeLocationPallet_GiveBackInformationAndPutAnotherPallet_WhenLocationOccupiedAndConfirmedToTakeThisLocation()
+		{
+			//Arange	
+			var category = CreateCategory();
+			var product1 = CreateProduct("TestP", "qwerty123");
+			var product2 = CreateProduct("TestP", "qwerty456");
+			var location1 = CreateLocation(0);
+			var location2 = CreateLocation(1);			
+			var pallet1 = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), 1, PalletStatus.Available, null, null);
+			pallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 4, 4, 8, 8, 8), new DateOnly(2027, 3, 3));
+			var pallet2 = Pallet.CreateForTests("Q2001", new DateTime(2020, 1, 1, 0, 0, 0), 2, PalletStatus.Available, null, null);
+			pallet2.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 4));
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product1, product2);
+
+			DbContext.Locations.AddRange(location1, location2);
+			DbContext.Pallets.AddRange(pallet1, pallet2);
+			DbContext.SaveChanges();
+			//Act
+			var palletId = pallet1.Id;
+			var destinationLocation = 2;
+			var userId = "U001";
+
+			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId, true));
+			//Assert
+			Assert.True(result.IsSuccess);
+			Assert.False(result.Result.RequiresConfirmation);
+			Assert.Contains($"Paleta {pallet1.Id} została umieszczona w lokalizacji. ", result.Message);
+
+			// sprawdzamy, że obie palety siedzą w tej samej lokalizacji
+			var movedPallet = DbContext.Pallets.First(x => x.Id == palletId);
+			var existingPallet = DbContext.Pallets.First(x => x.Id == pallet2.Id);
+
+			Assert.Equal(destinationLocation, movedPallet.LocationId);
+			Assert.Equal(destinationLocation, existingPallet.LocationId);
+
+			// sprawdzamy, że ruch został zapisany poprawnie			
+			var moments = DbContext.HistoryPallet.Where(a => a.PalletId == palletId)
+				.OrderByDescending(a => a.MovementDate)
+				.ToList();
+			var lastMovement = moments.First();
+			Assert.Equal(destinationLocation, lastMovement.DestinationLocationId);
+			Assert.Equal(userId, lastMovement.PerformedBy);
+			Assert.Equal(ReasonForPallet.Moved, lastMovement.Reason);
+		}
+	}
+}

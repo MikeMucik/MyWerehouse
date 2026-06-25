@@ -13,9 +13,8 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 	{
 		public Guid Id { get; init; }
 		public required string PickingPalletId { get; init; }
-		//tu trzeba się zastanowić czy to w ogóle potrzebne poniższe dwie pozycje 
-		public string? SourcePalletId { get; init; }//paleta źródłowa na nią wraca towar lub do której dodajemy
-		public string? DestinationPalletId { get; init; }//paleta nowa jeśli nie ma do czego dołaczyć ???
+		public string? SourcePalletId { get; init; }
+		public string? DestinationPalletId { get; init; }
 		public Guid ProductId { get; init; }
 		public DateOnly? BestBefore { get; init; }
 		public int Quantity { get; init; }

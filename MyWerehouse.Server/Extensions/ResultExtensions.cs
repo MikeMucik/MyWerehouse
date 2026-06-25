@@ -10,23 +10,24 @@ namespace MyWerehouse.Server.Extensions
 		{
 			if (result.IsSuccess)
 			{
-				if (typeof(T) == typeof(Unit)) return new OkResult();
+				if (typeof(T) == typeof(Unit)) 
+				{
+					return new OkObjectResult(new
+					{
+						result.IsSuccess,
+						result.Message
+					});
+				}
 				return new OkObjectResult(result.Result);
 			}
 			return result.ErrorType switch
 			{
+				//ErrorType.NotFound => new NotFoundObjectResult(new { result.ErrorType, result.Error }),
 				ErrorType.NotFound => new NotFoundObjectResult(result.Error),
 				ErrorType.Conflict => new ConflictObjectResult(result.Error),
 				ErrorType.Validation => new BadRequestObjectResult(result.Error),
 				_ => new BadRequestObjectResult(result.Error)
 			};
-
-
-			//if (result.IsSuccess)
-			//	return new OkResult();
-
-			//return new BadRequestObjectResult(result.Error);
-
 		}
 	}
 }

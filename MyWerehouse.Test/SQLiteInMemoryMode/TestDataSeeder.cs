@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			{
 				context.Products.AddRange(Product.CreateForSeed(productId1, "Test", "0987654321", new DateTime(2025, 05, 01), 1, false, 56),
 					Product.CreateForSeed(productId2, "TestD", "fghtredfg", new DateTime(2025, 05, 01), 1, false, 50),
-					Product.CreateForSeed(productId989, "NotAdded", "fghtredfg", new DateTime(2025, 05, 01), 1, false, 112)
+					Product.CreateForSeed(productId989, "NotAdded", "fghtredfg1", new DateTime(2025, 05, 01), 1, false, 112)
 
 				);
 			}

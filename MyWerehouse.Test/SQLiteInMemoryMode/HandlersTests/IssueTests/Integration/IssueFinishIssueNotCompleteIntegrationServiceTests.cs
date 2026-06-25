@@ -53,7 +53,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Aisle = 1,
 				Bay = 1,
 				Height = 1,
-				Position = 1
+				Position = 2
 			};
 			var category = new Category
 			{
@@ -91,8 +91,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
 			//Act			
-			await Mediator.Send(new FinishIssueNotCompletedCommand(issueId, performedBy));
+			var result =  await Mediator.Send(new FinishIssueNotCompletedCommand(issueId, performedBy));
 			// Assert
+			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
 			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
 			Assert.Equal(PalletStatus.Available, notLoadedPallet.Status);
 			Assert.Null(notLoadedPallet.IssueId);

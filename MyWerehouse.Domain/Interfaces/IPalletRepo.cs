@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Interfaces
 		Guid AddPallet(Pallet pallet);				
 		Task<Pallet?> GetPalletByIdAsync(Guid palletId);	
 		Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId);
-		Task<Pallet?> GetPalletByPalletNumberFullInfoAsync(string palletNumber);
+		Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber);
 		Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId);
 		Task<List<Pallet>> GetAvailableFullPallets(Guid productId,int fullPallet, DateOnly? minBestBefore, int neededPallets);
 		Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId);

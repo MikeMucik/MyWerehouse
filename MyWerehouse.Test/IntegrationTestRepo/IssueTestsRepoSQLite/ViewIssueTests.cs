@@ -86,8 +86,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Arrange
 			var filter = new IssueReceiptSearchFilter
 			{
-				DateTimeStartSend = DateOnly.FromDateTime(DateTime.UtcNow),
-				DateTimeEndSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
+				SendDateStart = DateOnly.FromDateTime(DateTime.UtcNow),
+				SendDateEnd = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
 			};
 
 			//Act

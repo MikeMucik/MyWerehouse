@@ -21,13 +21,13 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 			if (pallet == null)
-				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail($"Wskazana paleta nie istnieje.", ErrorType.NotFound);
 			if (pallet.Status == PalletStatus.Loaded)
-				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail($"Paleta {request.PalletId} jest już załadowana.", ErrorType.Conflict);
+				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail($"Paleta {pallet.PalletNumber} jest już załadowana.", ErrorType.Conflict);
 			var allowedStatuses = new[]
 				{
 					PalletStatus.ToIssue,
-					PalletStatus.LockedForIssue,
+					PalletStatus.LockedForIssue,//changing pallets
 				};
 			if (!allowedStatuses.Contains(pallet.Status))
 				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail("Paleta nie ma statusu do załadowania");
@@ -38,9 +38,9 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 				PalletId = pallet.Id,
 				PalletNumber = pallet.PalletNumber,
 				NewStatus = pallet.Status,
-				LoadedAt = DateTime.UtcNow,				
+				LoadedAt = DateTime.UtcNow,
 			};
-			return AppResult<MarkPalletAsLoadedResponeDTO>.Success(respone, "Paleta załadowana.");
+			return AppResult<MarkPalletAsLoadedResponeDTO>.Success(respone, $"Paleta {pallet.PalletNumber} załadowana.");
 		}
 	}
 }

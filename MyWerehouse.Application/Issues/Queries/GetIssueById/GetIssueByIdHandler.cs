@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 		}
 		public async Task<AppResult<IssueDTO>> Handle(GetIssueByIdQuery request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueAllIncludedByIdAsync(request.IssueId);
 			if (issue == null)
 				return AppResult<IssueDTO>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 			var issueDTO = _mapper.Map<IssueDTO>(issue);

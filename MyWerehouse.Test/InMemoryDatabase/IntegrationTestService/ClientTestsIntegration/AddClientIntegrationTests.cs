@@ -35,7 +35,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act
-			var result =await _clientService.AddClientAsync(client);
+			var result = await _clientService.AddClientAsync(client);
 			//Assert			
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
@@ -77,7 +77,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act
-			var result =await _clientService.AddClientAsync(client);
+			var result = await _clientService.AddClientAsync(client);
 			//Assert			
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			Assert.Contains(resultClient.Addresses, a => a.StreetName == address1.StreetName);
 		}
 		[Fact]
-		public async Task AddClient_ShouldThrowValidationException_WhenPostalCodeIsInvalid()
+		public async Task AddClient_ShouldThrowValidationException_WhenNoPostalCode()
 		{
 			//Arrange
 			var address = new AddAddressDTO
@@ -110,11 +110,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act&Assert
-			var exceptionMessage =await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
+			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
 			Assert.Contains("numer pocztowy", exceptionMessage.Message);
 		}
 		[Fact]
-		public async Task AddClient_ShouldThrowValidationException_WhenNameIsInvalid()
+		public async Task AddClient_ShouldThrowValidationException_WhenNoName()
 		{
 			//Arrange
 			var address = new AddAddressDTO
@@ -136,7 +136,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act&Assert
-			var exceptionMessage =await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
+			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
 			Assert.Contains("nazwa", exceptionMessage.Message);
 		}
 	}

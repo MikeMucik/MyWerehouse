@@ -23,9 +23,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			RuleFor(r => r.DTO.ClientId)
 				.GreaterThan(0)
 				.WithMessage("Przyjęcie musi mieć numer klienta.");
-			RuleFor(r => r.DTO.ReceiptDateTime)
-				.NotEqual(default(DateTime))
-				.WithMessage("Przyjęcie musi mieć datę.");
 			RuleFor(p => p.DTO.RampNumber)
 				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć lokalizację.");

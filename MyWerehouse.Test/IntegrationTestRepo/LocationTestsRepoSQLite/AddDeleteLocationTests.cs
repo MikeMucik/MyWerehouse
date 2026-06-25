@@ -7,7 +7,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
-namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepo
+namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 {
 	public class AddDeleteLocationTests : TestBase
 	{		
@@ -27,6 +27,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepo
 			var result = locationRepo.AddLocation(location);
 			DbContext.SaveChanges();
 			//Arrange
+			Assert.NotNull(result);
 			var existingLocation = DbContext.Locations
 				.FirstOrDefault(l => l.Id == location.Id);
 			Assert.NotNull(existingLocation);

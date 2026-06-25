@@ -20,7 +20,8 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 		IIssueRepo issueRepo,
 		WerehouseDbContext werehouseDbContext,
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
-		IProcessPickingActionService processPickingActionService) : IRequestHandler<DoPlannedPickingCommand, AppResult<Unit>>
+		IProcessPickingActionService processPickingActionService)
+		: IRequestHandler<DoPlannedPickingCommand, AppResult<ProcessPickingActionResult>>
 	{
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
@@ -29,27 +30,27 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
 
-		public async Task<AppResult<Unit>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
+		public async Task<AppResult<ProcessPickingActionResult>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
 		{
 			var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.Id);
 			var issueId = pickingTaskToChange.IssueId;
 			var issue = await _issueRepo.GetIssueByIdAsync(issueId);
 			if (issue == null)
 			{
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<ProcessPickingActionResult>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 			}
 			var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId.Value);
-			if (sourcePallet == null) return AppResult<Unit>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
+			if (sourcePallet == null) return AppResult<ProcessPickingActionResult>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
 			if (request.PickingTaskDTO.PickedQuantity <= 0)
 			{
-				return AppResult<Unit>.Fail("Nie możesz pobrać ujemnej wartości.", ErrorType.Conflict);
+				return AppResult<ProcessPickingActionResult>.Fail("Nie możesz pobrać ujemnej wartości.", ErrorType.Conflict);
 			}
 			var neededQuantity = request.PickingTaskDTO.RequestedQuantity;
 			var pickedQuantity = request.PickingTaskDTO.PickedQuantity;
 			var completion = PickingCompletion.Full;
 			if (pickedQuantity <= 0 || pickedQuantity > neededQuantity)
 			{
-				return AppResult<Unit>.Fail("Ilosć musi być większa od zera i mniejsza od zapotrzebowania", ErrorType.Conflict);//Technical
+				return AppResult<ProcessPickingActionResult>.Fail("Ilosć musi być większa od zera i mniejsza od zapotrzebowania", ErrorType.Conflict);//Technical
 			}
 			if (neededQuantity > pickedQuantity)
 			{
@@ -63,29 +64,56 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 						request.PickingTaskDTO.PickedQuantity, request.UserId, pickingTaskToChange, completion, request.PickingTaskDTO.RampNumber);
 			if (!resultProccesPicking.Success)
 			{
-				return AppResult<Unit>.Fail(resultProccesPicking.Message, ErrorType.Conflict);
+				return AppResult<ProcessPickingActionResult>.Fail(resultProccesPicking.Message, ErrorType.Conflict);
 			}
 			if (neededQuantity == pickedQuantity)
 			{
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia");
+				return AppResult<ProcessPickingActionResult>.Success(resultProccesPicking);
 			}
 			else
 			{
-				var oldListVirtualPallet = new List<VirtualPallet>(); //TODO pobierz dostępne virtualPallet
+				var oldListVirtualPallet = new List<VirtualPallet>(); //TODO pobierz dostępne virtualPallet lub usuń opcję czy wyszukiwać inne palety do kompletacji, nie powinno być ale życie sobie
 				var newQuantityToPickingTask = neededQuantity - pickedQuantity;
 				var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, oldListVirtualPallet,
 					issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId);
-
+				var partialResult = new ProcessPickingActionResult
+				{
+					Success = true,
+					NewPalletCreated = resultProccesPicking.NewPalletCreated,
+					PalletId = resultProccesPicking.PalletId,
+					PalletNumber = resultProccesPicking.PalletNumber,
+					RequestedQuantity = neededQuantity,
+					PickedQuantity = pickedQuantity,
+					MissingQuantity = newQuantityToPickingTask,
+				};
 				if (newVirtualPallet.Success == false)
 				{
-					return AppResult<Unit>.Fail(newVirtualPallet.Message, ErrorType.Conflict);
+					issue.ChangeStatus(IssueStatus.PickingShortage);
+					sourcePallet.ChangeStatus(PalletStatus.OnHold);
+					sourcePallet.AddHistory(ReasonForPallet.Correction, request.UserId, sourcePallet.Location.ToSnapshot());
+					await _werehouseDbContext.SaveChangesAsync(ct);
+
+					partialResult.Message =
+					$"Wykonano częściową kompletację. Pobrano {pickedQuantity} z {neededQuantity}. " +
+					$"Brakuje {newQuantityToPickingTask}. Brak towaru na magazynie. " +
+					$"Zlecenie zmieniono na status {IssueStatus.PickingShortage}.";
+
+					return AppResult<ProcessPickingActionResult>.Success(
+						partialResult,
+						newVirtualPallet.Message);
 				}
 				//pallet lock with non-conformity
 				sourcePallet.ChangeStatus(PalletStatus.OnHold);
 				sourcePallet.AddHistory(ReasonForPallet.Correction, request.UserId, sourcePallet.Location.ToSnapshot());
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				return AppResult<Unit>.Success(Unit.Value, "Towar dołączono do zlecenia, wykonano nie pełne zadanie kompletacyjne, stworzono dodatkowe zadanie do pickingu. Poproś o nowe palety źródłowe do kompletacji.");
+				partialResult.Message =
+				$"Wykonano częściową kompletację. Pobrano {pickedQuantity} z {neededQuantity}. " +
+				$"Brakuje {newQuantityToPickingTask}. Utworzono dodatkowe zadanie do pickingu.";
+
+				return AppResult<ProcessPickingActionResult>.Success(
+					partialResult,
+					"Wykonano niepełne zadanie kompletacyjne.Poproś o nowe palety źródłowe do kompletacji.");
 			}
 		}
 	}

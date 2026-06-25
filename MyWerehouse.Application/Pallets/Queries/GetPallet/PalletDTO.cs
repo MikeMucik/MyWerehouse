@@ -20,7 +20,7 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPallet
 		public string LocationSnapShot { get; init; }
 		public PalletStatus Status { get; init; } = 0; //np "Available", "To issue"
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new HashSet<ProductOnPalletDTO>();
-		public ICollection<HistoryPalletDTO> PalletMovements { get; init; } = new List<HistoryPalletDTO>();
+		public ICollection<HistoryPalletDTO> PalletHistory { get; init; } = new List<HistoryPalletDTO>();
 		public Guid? ReceiptId { get; init; }
 		public int? ReceiptNumber { get; init; }     //
 		public Guid? IssueId { get; init; }
@@ -30,6 +30,8 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPallet
 			profile.CreateMap<Pallet, PalletDTO>()
 				.ForMember(dest=>dest.PalletNumber, opt=>opt.MapFrom(src=>src.PalletNumber))
 				.ForMember(dest=>dest.IssueNumber, opt=>opt.MapFrom(static src=> src.Issue.IssueNumber))
+				.ForMember(dest=>dest.ReceiptNumber, opt=>opt.MapFrom(static src=> src.Receipt.ReceiptNumber))
+				.ForMember(dest=>dest.PalletHistory, opt=>opt.MapFrom(static src=> src.PalletHistory))
 				.ForMember(dest=>dest.ProductsOnPallet, opt=>opt.MapFrom(static src=>src.ProductsOnPallet))
 				.ForMember(dest => dest.LocationSnapShot, opt => opt.MapFrom(src => src.Location.Bay + " " +
 				src.Location.Aisle + " " + src.Location.Position + " " + src.Location.Height));			

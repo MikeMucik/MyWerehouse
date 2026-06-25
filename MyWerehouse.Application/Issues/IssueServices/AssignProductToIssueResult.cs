@@ -12,9 +12,10 @@ namespace MyWerehouse.Application.Issues.IssueServices
 		public bool Success { get; init; }
 		public string Message { get; set; }
 		public Guid ProductId { get; init; }		
+		public string SKU { get; init; } //?
 		public IReadOnlyList<Pallet> AssignedPallets { get; init; }
-		public int QuantityRequest { get; set; }
-		public int QuantityOnStock { get; set; }
+		public int QuantityRequest { get; init; }
+		public int QuantityOnStock { get; init; }
 		public AssignProductToIssueResult(){}
 		public static AssignProductToIssueResult Ok(string message, Guid productId, IReadOnlyList<Pallet> pallets)
 		{

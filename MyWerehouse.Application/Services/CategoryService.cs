@@ -24,28 +24,20 @@ namespace MyWerehouse.Application.Services
 		private readonly ICategoryRepo _categoryRepo;
 		private readonly IProductRepo _productRepo;
 		private readonly IMapper _mapper;
-		private readonly IValidator<CategoryDTO> _validator;//
+		private readonly IValidator<CategoryDTO> _validator;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		public CategoryService(
 			ICategoryRepo categoryRepo,
 			IMapper mapper,
 			WerehouseDbContext werehouseDbContext,
 			IProductRepo? productRepo = null,
-			IValidator<CategoryDTO>? validator = null)//
+			IValidator<CategoryDTO>? validator = null)
 		{
 			_categoryRepo = categoryRepo;
 			_mapper = mapper;
 			_werehouseDbContext = werehouseDbContext;
 			_productRepo = productRepo;
-			_validator = validator;//
-		}
-		public CategoryService(
-			ICategoryRepo categoryRepo,
-			IMapper mapper
-			)
-		{
-			_categoryRepo = categoryRepo;
-			_mapper = mapper;
+			_validator = validator;
 		}
 
 		public async Task<AppResult<Unit>> AddCategoryAsync(CategoryDTO categoryDTO)
@@ -57,7 +49,7 @@ namespace MyWerehouse.Application.Services
 			}
 			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) != null)
 			{
-				return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);				
+				return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);
 			}
 			var category = _mapper.Map<Category>(categoryDTO);
 			_categoryRepo.AddCategory(category);
@@ -69,23 +61,26 @@ namespace MyWerehouse.Application.Services
 		{
 			var category = await _categoryRepo.GetCategoryByIdAsync(id);
 			if (category == null) return AppResult<Unit>.Fail($"Kategoria o ID {id} nie została znalezniona", ErrorType.NotFound);
-				var filter = new ProductSearchFilter
-				{
-					CategoryId = id,
-				};
-				var products = _productRepo.FindProducts(filter);
-				if (await products.AnyAsync())
-				{
-					await _categoryRepo.SwitchOffCategoryAsync(id);
-				}
-				else
-				{
-					 _categoryRepo.DeleteCategory(category);
-				}
+			var filter = new ProductSearchFilter
+			{
+				CategoryId = id,
+			};
+			var products = _productRepo.FindProducts(filter);
+			if (await products.AnyAsync())
+			{
+				await _categoryRepo.SwitchOffCategoryAsync(id);
 				await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<Unit>.Success(Unit.Value, "Kategoria została usunięta.");
+				return AppResult<Unit>.Success(Unit.Value, "Kategoria została wyłączona.");
+			}
+			else
+			{
+				_categoryRepo.DeleteCategory(category);
+
+				await _werehouseDbContext.SaveChangesAsync();
+				return AppResult<Unit>.Success(Unit.Value, "Kategoria została usunięta.");
+			}
 		}
-		public async Task<AppResult<Unit>> UpdateCategoryAsync(int id,CategoryDTO categoryDTO)
+		public async Task<AppResult<Unit>> UpdateCategoryAsync(int id, CategoryDTO categoryDTO)
 		{
 			var validationResult = await _validator.ValidateAsync(categoryDTO);
 			if (validationResult != null)
@@ -115,7 +110,7 @@ namespace MyWerehouse.Application.Services
 				.OrderBy(c => c.Name);
 			var result = await orderedCategories
 				.ProjectTo<CategoryViewDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync(pageNumber, pageSize, ct);			
+				.ToPagedResultAsync(pageNumber, pageSize, ct);
 			return AppResult<PagedResult<CategoryViewDTO>>.Success(result);
 		}
 

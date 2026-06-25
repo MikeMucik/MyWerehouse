@@ -18,7 +18,6 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
-		public string UserId { get; init; }
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();
 
 		public void Mapping(Profile profile)

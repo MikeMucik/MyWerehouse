@@ -46,13 +46,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 				return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
 
 			pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
-			//Dla wielu - szerszse podejście
-			//foreach (var dto in request.DTO.ProductsOnPallet)
-			//{
-			//	if (!await _productRepo.IsExistProduct(dto.ProductId))
-			//		return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
-			//	pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
-			//}
+			
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToReceipt(receipt.Id, snapShot, request.DTO.UserId);
 			_palletRepo.AddPallet(pallet);
@@ -61,3 +55,10 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		}
 	}
 }
+//Dla wielu - szerszse podejście
+			//foreach (var dto in request.DTO.ProductsOnPallet)
+			//{
+			//	if (!await _productRepo.IsExistProduct(dto.ProductId))
+			//		return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
+			//	pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
+			//}

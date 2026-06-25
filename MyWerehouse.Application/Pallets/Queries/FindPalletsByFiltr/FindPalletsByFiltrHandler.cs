@@ -9,17 +9,18 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
 {
 	public class FindPalletsByFiltrHandler(IPalletRepo palletRepo,
-		IMapper mapper) : IRequestHandler<FindPalletsByFiltrQuery, AppResult<PagedResult<PalletSimplyDTO>>>
+		IMapper mapper) : IRequestHandler<FindPalletsByFilterQuery, AppResult<PagedResult<PalletSimplyDTO>>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMapper _mapper = mapper;
-		public async Task<AppResult<PagedResult<PalletSimplyDTO>>> Handle(FindPalletsByFiltrQuery request, CancellationToken ct)
+		public async Task<AppResult<PagedResult<PalletSimplyDTO>>> Handle(FindPalletsByFilterQuery request, CancellationToken ct)
 		{
 			var pallets = _palletRepo.GetPalletsByFilter(request.Filter)
 				.AsNoTracking();

@@ -15,7 +15,7 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
-namespace MyWerehouse.Test.SQLiteInMemoryMode.SeviceTests.IssueServiceTests.Integration
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integration
 {
 	public class IssueDeleteIntegrationServiceTests : TestBase
 	{

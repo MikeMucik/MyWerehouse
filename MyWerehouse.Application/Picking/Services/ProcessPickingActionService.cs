@@ -13,11 +13,12 @@ using MyWerehouse.Domain.Picking.Models;
 namespace MyWerehouse.Application.Picking.Services
 {
 	public class ProcessPickingActionService(IPalletRepo palletRepo,
-		ILocationRepo locationRepo) : IProcessPickingActionService
+		ILocationRepo locationRepo, IProductRepo productRepo) : IProcessPickingActionService
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
-	
+		private readonly IProductRepo _productRepo = productRepo;
+
 		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, Guid productId,
 			int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion, int rampNumber)
 		{
@@ -26,20 +27,29 @@ namespace MyWerehouse.Application.Picking.Services
 				return ProcessPickingActionResult.Fail($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
 			var bestBefore = pickingTask.BestBefore;
 			//Utwórz nową lub dodaj do starej
-			var pickingPallet = await CreatePalletOrAddToPallet(issue.Id, productId,
+			var pickingPallet = await CreateNewPalletOrAddToOldPickingPallet(issue.Id, productId,
 				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion, rampNumber, sourcePallet);
-
+			var product = await _productRepo.GetProductByIdAsync(productId);
 			//Usuwanie towaru z palety źródłowej -> do nowej metody pomocnicznej
 			productOnSourcePallet.DecreaseQuantity(quantityToPick);
 			if (productOnSourcePallet.Quantity == 0)//archiwizuj jeśli pusta
 			{
 				sourcePallet.ChangeStatus(PalletStatus.Archived);
 			}
-			//Historia zawsze
-			sourcePallet.AddHistory(ReasonForPallet.Picking, userId, sourcePallet.Location.ToSnapshot());
-			return ProcessPickingActionResult.Ok(pickingPallet.PalletId, pickingPallet.PalletNumber);
+			if (pickingPallet.NewPalletCreated)
+			{
+				sourcePallet.AddHistory(ReasonForPallet.Picking, userId, sourcePallet.Location.ToSnapshot());
+				return ProcessPickingActionResult.OkWithNewPallet(pickingPallet.PalletId, pickingPallet.PalletNumber,
+					$"Weź nową paletę dla zlecenia. Towar: {product.SKU} ilość:{quantityToPick}");
+			}
+			else
+			{
+				sourcePallet.AddHistory(ReasonForPallet.Picking, userId, sourcePallet.Location.ToSnapshot());
+				return ProcessPickingActionResult.Ok(pickingPallet.PalletId, pickingPallet.PalletNumber,
+					$"Dołącz towar do starej palety kompletacyjnej. Towar: {product.SKU} ilość:{quantityToPick}");
+			}
 		}
-		private async Task<CreatePalletResult> CreatePalletOrAddToPallet(Guid issueId, Guid productId,
+		private async Task<CreateNewPickingPalletResult> CreateNewPalletOrAddToOldPickingPallet(Guid issueId, Guid productId,
 			int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask,
 			PickingCompletion pickingCompletion, int rampNumber, Pallet palletSource)
 		{
@@ -57,15 +67,15 @@ namespace MyWerehouse.Application.Picking.Services
 				var palletId = _palletRepo.AddPallet(pallet);
 				pallet.ReserveToIssue(issueId, userId, snapShot);
 				//Obsługa pickingTask
-				MarkPickingTask(pickingTask, pickingCompletion, pallet, palletSource, userId, quantity);								
-				return new CreatePalletResult(true, palletId, newNumberPallet); //pokaż komunikat weź nową paletę
+				MarkPickingTask(pickingTask, pickingCompletion, pallet, palletSource, userId, quantity);
+				return new CreateNewPickingPalletResult(true, palletId, newNumberPallet); //pokaż komunikat weź nową paletę
 			}
 			else//dodaje do już istniejącej
 			{
 				oldPallet.AddOrIncreaseProductQuantity(productId, quantity, bestBefore);
 				//Obsługa pickingTask	
 				MarkPickingTask(pickingTask, pickingCompletion, oldPallet, palletSource, userId, quantity);
-				return new CreatePalletResult(false, oldPallet.Id, oldPallet.PalletNumber);
+				return new CreateNewPickingPalletResult(false, oldPallet.Id, oldPallet.PalletNumber);
 			}
 		}
 		private static void MarkPickingTask(PickingTask pickingTask, PickingCompletion pickingCompletion, Pallet pickingPallet,

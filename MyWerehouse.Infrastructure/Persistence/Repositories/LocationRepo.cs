@@ -71,7 +71,18 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public async Task<bool> ReceivingRampExistsAsync(int locationId)
 		{
-			if (await _werehouseDbContext.Locations.FindAsync(locationId) != null) { return true; } return false;
+			if (await _werehouseDbContext.Locations.FindAsync(locationId) != null) { return true; }
+			return false;
+		}
+
+		public async Task<bool> ExistsByCoordinatesAsync(int bay, int aisle, int position, int height)
+		{
+			return await _werehouseDbContext.Locations.AnyAsync(x =>
+			x.Bay == bay &&
+			x.Aisle == aisle &&
+			x.Position == position &&
+			x.Height == height
+			);			
 		}
 	}
 }

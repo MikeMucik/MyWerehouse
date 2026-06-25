@@ -12,7 +12,6 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
 	public class EditPalletDTO : IMapFrom<Pallet>
 	{
-		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
 		public string UserId { get; init; }

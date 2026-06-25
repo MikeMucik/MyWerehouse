@@ -710,8 +710,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Property<DateTime>("IssueDateTimeCreate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("IssueDateTimeSend")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("IssueDateTimeSend")
+                        .HasColumnType("date");
 
                     b.Property<int>("IssueNumber")
                         .HasColumnType("int");
@@ -876,6 +876,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.HasIndex("IssueId");
 
                     b.HasIndex("PickingPalletId");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("VirtualPalletId");
 
@@ -1187,7 +1189,7 @@ namespace MyWerehouse.Infrastructure.Migrations
             modelBuilder.Entity("MyWerehouse.Domain.Histories.Models.HistoryPallet", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Pallets.Models.Pallet", null)
-                        .WithMany("PalletMovements")
+                        .WithMany("PalletHistory")
                         .HasForeignKey("PalletId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1335,6 +1337,12 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .HasForeignKey("PickingPalletId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("MyWerehouse.Domain.Products.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MyWerehouse.Domain.Picking.Models.VirtualPallet", "VirtualPallet")
                         .WithMany("PickingTasks")
                         .HasForeignKey("VirtualPalletId")
@@ -1343,6 +1351,8 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("Issue");
 
                     b.Navigation("PickingPallet");
+
+                    b.Navigation("Product");
 
                     b.Navigation("VirtualPallet");
                 });
@@ -1451,7 +1461,7 @@ namespace MyWerehouse.Infrastructure.Migrations
 
             modelBuilder.Entity("MyWerehouse.Domain.Pallets.Models.Pallet", b =>
                 {
-                    b.Navigation("PalletMovements");
+                    b.Navigation("PalletHistory");
 
                     b.Navigation("ProductsOnPallet");
                 });

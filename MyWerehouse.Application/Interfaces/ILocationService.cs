@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.Interfaces
 		Task<AppResult<LocationDTO>> GetLocationServiceAsync(int id);
 		Task<AppResult<Location>> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt);
 		//Nie wiem po co to ale czuje że będzie potrzebne
-		AppResult<List<LocationDTO>> PrepareLocationsAsync(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt);
+		AppResult<List<LocationDTO>> PrepareLocations(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt);
 		Task<AppResult<Unit>> CreateManyLocation(List<LocationDTO> locations);
 	}
 }

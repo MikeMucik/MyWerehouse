@@ -45,7 +45,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		{
 			return new Category
 			{
-				//Id = 1,
 				Name = name,
 				IsDeleted = false
 			};

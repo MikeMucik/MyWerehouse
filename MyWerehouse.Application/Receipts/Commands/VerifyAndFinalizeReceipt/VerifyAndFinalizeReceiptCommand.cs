@@ -9,5 +9,4 @@ using MyWerehouse.Application.Common.Results;
 namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 {
 	public record VerifyAndFinalizeReceiptCommand(Guid ReceiptId, string UserId) : IRequest<AppResult<Unit>>;
-
 }

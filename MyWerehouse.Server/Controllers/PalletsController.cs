@@ -8,7 +8,7 @@ using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
 using MyWerehouse.Application.Pallets.Queries.GetPallet;
-using MyWerehouse.Application.Pallets.Queries.GetPalletBySKU;
+using MyWerehouse.Application.Pallets.Queries.GetPalletByPalletNumber;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
 using MyWerehouse.Server.Extensions;
 
@@ -25,7 +25,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 		// stworzenie palety
 		[HttpPost("add")]
-		public async Task<IActionResult> Create(CreateNewPalletCommand command)
+		public async Task<IActionResult> Create(CreatePalletCommand command)
 		{
 			var result = await _mediator.Send(command);
 			return result.ToActionResult();
@@ -60,7 +60,7 @@ namespace MyWerehouse.Server.Controllers
 
 		// filtr / lista
 		[HttpGet("byFilter")]
-		public async Task<IActionResult> Find([FromQuery] FindPalletsByFiltrQuery query)
+		public async Task<IActionResult> Find([FromQuery] FindPalletsByFilterQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 }

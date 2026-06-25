@@ -21,7 +21,9 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFilter
 		public IssueStatus IssueStatus { get; init; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Issue, IssueSimplyDTO>();
+			profile.CreateMap<Issue, IssueSimplyDTO>()
+				.ForMember(dest => dest.IssueDateTimeCreate, opt=>opt.MapFrom(src=>src.IssueDateTimeCreate))
+				.ForMember(dest => dest.IssueDateTimeSend, opt=>opt.MapFrom(src=>src.IssueDateTimeSend));
 		}
 	}
 }

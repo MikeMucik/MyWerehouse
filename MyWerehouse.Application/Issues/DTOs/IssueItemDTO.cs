@@ -13,15 +13,7 @@ namespace MyWerehouse.Application.Issues.DTOs
 	public record IssueItemDTO : IMapFrom<IssueItem> 
 	{	
 		public Guid ProductId { get; init; }
-		public string ProductName { get; init; }
-		public string ProductSKU { get; init; }
 		public int Quantity { get; init; }
-		public DateOnly BestBefore { get; init; }	
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<IssueItem, IssueItemDTO>()
-				.ForMember(dest=>dest.ProductName, opt=>opt.MapFrom(static src=> src.Product.Name))
-				.ForMember(dest=>dest.ProductSKU, opt=>opt.MapFrom(static src=> src.Product.SKU));
-		}
+		public DateOnly BestBefore { get; init; }			
 	}
 }

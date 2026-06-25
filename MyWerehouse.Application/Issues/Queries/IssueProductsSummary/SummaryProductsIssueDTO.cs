@@ -14,7 +14,7 @@ namespace MyWerehouse.Application.Issues.Queries.IssueProductsSummary
 		public int ClientId { get; init; }
 		public string PerformedBy { get; init; }
 		public DateOnly DateToSend { get; init; }
-		public List<IssueItemDTO> IssueItems { get; init; } = new List<IssueItemDTO>();
+		public List<IssueItemViewDTO> IssueItems { get; init; } = new List<IssueItemViewDTO>();
 
 	}
 }

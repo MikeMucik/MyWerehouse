@@ -15,6 +15,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 		{
 			entity.HasKey(e => e.Id);
 			entity.Property(x => x.Id).ValueGeneratedOnAdd();
+			entity.HasIndex(x=> new {x.Bay, x.Aisle, x.Position, x.Height})
+				.IsUnique();
 		}
 	}
 }

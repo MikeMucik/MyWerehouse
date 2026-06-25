@@ -35,7 +35,18 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.ThenInclude(l=>l.Location)//
 				.FirstOrDefaultAsync(r => r.Id == id);
 		}
-		public async Task<Receipt?> GetReceiptOnlyByIdAsync(Guid id)
+		public async Task<Receipt?> GetReceiptWithAllIncludesByIdAsync(Guid id)
+		{
+			return await _werehouseDbContext.Receipts
+				.Include(c=>c.Client)
+				.Include(r => r.Pallets)
+					.ThenInclude(pr => pr.ProductsOnPallet)
+						.ThenInclude(pro=>pro.Product)
+				.Include(l => l.Pallets)
+					.ThenInclude(l => l.Location)
+				.FirstOrDefaultAsync(r => r.Id == id);
+		}
+		public async Task<Receipt?> GetReceipForCanceltByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Receipts
 				.FirstOrDefaultAsync(r => r.Id == id);
@@ -64,10 +75,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				result = result.Where(i => i.Pallets.Any(ip => ip.ProductsOnPallet.Any(ipp => ipp.Product.Name == filter.ProductName)));
 			}
-			if (filter.DateTimeStart != null)
+			if (filter.CreateDateStart != null)
 			{
-				var start = filter.DateTimeStart;
-				var end = filter.DateTimeEnd ?? DateTime.UtcNow;
+				var start = filter.CreateDateStart;
+				var end = filter.CreateDateEnd ?? DateTime.UtcNow;
 
 				result = result.Where(i => i.ReceiptDateTime >= start && i.ReceiptDateTime <= end);
 			}

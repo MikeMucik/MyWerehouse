@@ -29,7 +29,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public Location Location { get; private set; }//dodać kiedyś factory
 		public PalletStatus Status { get; private set; } = 0;
 		public ICollection<ProductOnPallet> ProductsOnPallet { get; private set; } = new List<ProductOnPallet>();
-		public ICollection<HistoryPallet> PalletMovements { get; private set; } = new List<HistoryPallet>();
+		public ICollection<HistoryPallet> PalletHistory { get; private set; } = new List<HistoryPallet>();
 		public Guid? ReceiptId { get; private set; }
 		public Receipt? Receipt { get; private set; }
 		public Guid? IssueId { get; private set; }
@@ -263,7 +263,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public bool CanBeCancelled()
 		{
-			if (PalletMovements.Count > 1)
+			if (PalletHistory.Count > 1)
 				return false;
 			return true;
 		}

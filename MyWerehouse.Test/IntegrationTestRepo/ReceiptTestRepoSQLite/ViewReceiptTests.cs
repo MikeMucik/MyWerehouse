@@ -87,8 +87,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			//Arrange
 			var filter = new IssueReceiptSearchFilter
 			{
-				DateTimeEnd =new DateTime(2025, 6, 6),
-				DateTimeStart =new DateTime(2020, 1, 1),
+				CreateDateEnd =new DateTime(2025, 6, 6),
+				CreateDateStart =new DateTime(2020, 1, 1),
 			};
 
 			//Act

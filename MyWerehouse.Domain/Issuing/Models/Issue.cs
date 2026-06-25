@@ -136,7 +136,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void VerifyToLoad(string userId)
 		{
 			//invarianty status
-			if (!(IssueStatus == IssueStatus.InProgress || IssueStatus == IssueStatus.ChangingPallet || IssueStatus == IssueStatus.Pending))
+			if (!(IssueStatus == IssueStatus.InProgress || IssueStatus == IssueStatus.ChangingPallet
+				|| IssueStatus == IssueStatus.Pending || IssueStatus == IssueStatus.PickingShortage))
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			IssueStatus = IssueStatus.ConfirmedToLoad;
 			foreach (var pallet in Pallets)

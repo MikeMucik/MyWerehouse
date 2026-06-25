@@ -19,7 +19,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			var _context = fixture.Context;
 			_categoryRepo = new CategoryRepo(_context);
 			var _productRepo = new ProductRepo(_context);
-			_categoryService = new CategoryService(_categoryRepo, _mapper);
+			_categoryService = new CategoryService(_categoryRepo, _mapper, _context);
 		}
 		[Fact]
 		public async Task GetCategoriesAsync_ShouldReturnCategories_WhenDataExist()
@@ -32,6 +32,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			var result = await _categoryService.GetCategoriesAsync(pageSize, pagenumber, ct);
 			//Assert
 			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Equal(3, result.Result.Items.Count);
 		}
 	}

@@ -23,7 +23,10 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				.WithMessage("Paleta musi mieć lokalizację.");
 			RuleFor(p => p.ProductsOnPallet)
 				.NotEmpty()
-				.WithMessage("Paleta musi zawierać towar/y.");
+				.WithMessage("Paleta musi zawierać towar.");
+			RuleFor(p => p.ProductsOnPallet)
+				.Must(a => a.Count() == 1)
+				.WithMessage("Paleta w przyjęciu może mieć tylko jeden rodzaj towaru.");
 			RuleForEach(p => p.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)
 				.When(p => p.ProductsOnPallet != null && p.ProductsOnPallet.Count > 0);

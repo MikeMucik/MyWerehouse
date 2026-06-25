@@ -16,7 +16,7 @@ namespace MyWerehouse.Server.Controllers
 		{
 			_productService = productService;
 		}
-		[HttpGet("{id:guid}fullInfo")]
+		[HttpGet("{id:guid}toEdit")]
 		public async Task<IActionResult> GetFullInfo(Guid id)
 		{
 			var result = await _productService.GetProductToEditAsync(id);

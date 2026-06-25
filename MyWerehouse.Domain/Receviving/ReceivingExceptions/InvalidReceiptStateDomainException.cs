@@ -11,11 +11,13 @@ namespace MyWerehouse.Domain.Receviving.ReceivingExceptions
 	public class InvalidReceiptStateDomainException : DomainException
 	{
 		public Guid ReceiptId { get; }
+		public int ReceiptNumber { get; }
 		public ReceiptStatus ReceiptStatus { get; }
-		public InvalidReceiptStateDomainException(Guid receiptId, ReceiptStatus receiptStatus)
-			: base($"Operation prohibited for {receiptId}. Incorrect status {receiptStatus}.")
+		public InvalidReceiptStateDomainException(Guid receiptId,int receiptNumber, ReceiptStatus receiptStatus)
+			: base($"Operation prohibited for {receiptNumber} ({receiptId}). Incorrect status {receiptStatus}.")
 		{
 			ReceiptId = receiptId;
+			ReceiptNumber = receiptNumber;
 			ReceiptStatus = receiptStatus;
 		}
 	}

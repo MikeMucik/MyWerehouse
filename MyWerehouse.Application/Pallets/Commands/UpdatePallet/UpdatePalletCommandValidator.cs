@@ -15,9 +15,6 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			RuleFor(p => p.UpdatingPallet.Status)
 				.NotEmpty()
 				.WithMessage("Paleta musi mieć status.");
-			RuleFor(p => p.UpdatingPallet.DateReceived)
-				.NotEmpty()
-				.WithMessage("Paleta musi mieć datę utworzenia.");
 			RuleFor(p => p.UpdatingPallet.LocationId)
 				.GreaterThan(0)
 				.WithMessage("Paleta musi mieć lokalizację.");

@@ -41,7 +41,7 @@ namespace MyWerehouse.Server.Controllers
 		[HttpPost("prepare")] //ile regałów alejek etc
 		public  IActionResult PrepareLocation(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{
-			var result = _locationService.PrepareLocationsAsync(bay, startAisle, endAisle, amountPosition, amountHeigt);
+			var result = _locationService.PrepareLocations(bay, startAisle, endAisle, amountPosition, amountHeigt);
 			return Ok(result);
 		}
 		[HttpGet("byFilter")]

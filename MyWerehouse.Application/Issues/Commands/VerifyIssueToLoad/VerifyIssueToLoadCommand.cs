@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Issues.IssueServices;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 {
-	public record VerifyIssueToLoadCommand(Guid IssueId, string UserId) : IRequest<AppResult<Unit>>;
+	public record VerifyIssueToLoadCommand(Guid IssueId, string UserId) : IRequest<AppResult<List<ComparePlanToPreparedResult>>>;
 	
 }

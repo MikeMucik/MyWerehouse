@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.Issues.Queries.IssueProductsSummary
 					ClientId = x.ClientId,
 					PerformedBy = x.PerformedBy,
 					IssueItems = x.IssueItems
-					 .Select(ii => new IssueItemDTO
+					 .Select(ii => new IssueItemViewDTO
 					 {
 						 ProductId = ii.ProductId,
 						 ProductName = ii.Product.Name,

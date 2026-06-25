@@ -23,7 +23,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 {
 	public class IssueCancelTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -44,7 +44,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory()
+		private static Category CreateCategory()
 		{
 			return new Category
 			{
@@ -53,11 +53,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name)
+		private static Product CreateProduct(string name)
 		{
 			return Product.Create(name, "SKU1", 1, 10);
 		}
-		private Location CreateLocation(int position)
+		private static Location CreateLocation(int position)
 		{
 			return new Location
 			{
@@ -101,7 +101,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7))));
-
+			//Assert 1
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
@@ -148,9 +150,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7))));
-
+			//Assert 1
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			//Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Equal(2,issue.Pallets.Count); 
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
@@ -197,11 +201,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
-
+			//Assert 1
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Single(issue.PickingTasks);
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
+			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
+			Assert.NotEmpty(pickingTasksToDo);
+			Assert.Single(pickingTasksToDo);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
@@ -275,19 +284,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
-
+			//Assert 1
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1 
-			Assert.Equal(issue.Pallets.First().PalletNumber, "P1");
-			//Assert.Equal(issue.Pallets.First().PalletNumber, "P1");
+			Assert.Equal("P1", issue.Pallets.First().PalletNumber);
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
-
+			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
+			Assert.NotEmpty(pickingTasksToDo);
+			Assert.Single(pickingTasksToDo);
 			//Act 2 - wykonanie pickingu
-			var pickingFromBase = await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id);
+			var pickingFromBase = pickingTasksToDo.Single(t => t.IssueId == issue.Id);
 			var toPicking = new PickingTaskDTO
 			{
 				Id = pickingFromBase.Id,
-				PickingStatus = PickingStatus.Allocated,
+				PickingStatus = pickingFromBase.PickingStatus,
 				BestBefore = pickingFromBase.BestBefore,
 				RequestedQuantity = pickingFromBase.RequestedQuantity,
 				PickedQuantity = 8,
@@ -298,8 +310,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
+			//Assert 2
 			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
-			//Assert
+			Assert.NotNull(pickingPallet);
 			var pickingTaskDone = await DbContext.PickingTasks
 				.FirstOrDefaultAsync(x => x.Id == pickingFromBase.Id);
 			Assert.NotNull(pickingTaskDone);
@@ -307,7 +320,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Act 3 - cancel issue
 			var issueToCancelId = issue.Id;
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
-			//Assert
+			//Assert 3
+			Assert.True(result.IsSuccess);
+			Assert.Contains("Anulowano zlecenie", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -315,22 +330,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(IssueStatus.Cancelled, cancelledIssue.IssueStatus);
 			Assert.Equal("UserC", cancelledIssue.PerformedBy);
 
-			// Assert – Pallets restored
+			// Assert 3 – Pallets restored
 			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
 			Assert.Equal(PalletStatus.Available, palletP1.Status);
 			Assert.Null(palletP1.IssueId);
 			Assert.Equal(1, palletP1.LocationId);
 
-			// Assert – No pickingTasks left
+			// Assert 3 – pickingTasks 
 			var pickingTasks = await DbContext.PickingTasks
 				.Where(a => a.IssueId == issue.Id)
 				.ToListAsync();
 
 			Assert.Single(pickingTasks);
 
-			// Assert – Result
-			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			// Assert – reversePickingTask	
 
 			var reverseTasks = await DbContext.ReversePickings
 				.Where(rp => rp.SourcePalletId == pallet2.Id)
@@ -339,7 +352,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Single(reverseTasks);
 
 			var task = reverseTasks.First();
-			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
+			Assert.Equal(pickingPallet.Id, task.PickingPalletId);
 			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 		}

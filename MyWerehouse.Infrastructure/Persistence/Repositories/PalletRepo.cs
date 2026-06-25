@@ -40,22 +40,16 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 					.ThenInclude(pp => pp.Product)
-				.Include(p => p.PalletMovements)
+				.Include(p => p.PalletHistory)
 				.Include(p => p.Location)
 				.Include(p => p.Receipt)
 				.Include(p => p.Issue)
 				.FirstOrDefaultAsync(p => p.Id == palletId);
 		}
 
-		public async Task<Pallet?> GetPalletByPalletNumberFullInfoAsync(string palletNumber)
+		public async Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber)
 		{
 			return await _werehouseDbContext.Pallets
-				.Include(p => p.ProductsOnPallet)
-					.ThenInclude(pp => pp.Product)
-				.Include(p => p.PalletMovements)
-				.Include(p => p.Location)
-				.Include(p => p.Receipt)
-				.Include(p => p.Issue)
 				.FirstOrDefaultAsync(p => p.PalletNumber == palletNumber);
 		}
 		public IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter)
@@ -174,7 +168,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.Include(m => m.PalletMovements)
+				.Include(m => m.PalletHistory)
 				.Where(p => p.ReceiptId == reciptId)
 				.ToListAsync();
 		}

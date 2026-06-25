@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 1,
 				Length = 100,
 				Height = 200,
-				Width = 300,
+				Width = 30,
 				Weight = 400,
 				Description = "500",
 				CartonsPerPallet =56
@@ -38,6 +38,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Act			
 			var result = await _productService.AddProductAsync(productNew);
 			//Assert
+			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
 			var product = _context.Products.Find(result.Result);
 			Assert.NotNull(product);
 			Assert.Equal(productNew.Name, product.Name);
@@ -61,7 +63,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 1,
 				Length = 100,
 				//Height = 200,
-				Width = 300,
+				Width = 100,
 				Weight = 400,
 				Description = "500",
 			};
@@ -84,7 +86,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 1,
 				Length = 100,
 				Height = 200,
-				Width = 300,
+				Width = 100,
 				Weight = 400,
 				Description = "500",
 				CartonsPerPallet =56
@@ -92,6 +94,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Act
 			var result = await _productService.AddProductAsync(productNew);
 			//Assert
+			Assert.NotNull(result);
+			Assert.False(result.IsSuccess);
 			Assert.Contains("Produkt o tej nazwie już istnieje.", result.Error);
 			Assert.Equal(ErrorType.NotFound, result.ErrorType);
 		}
@@ -106,7 +110,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 1,
 				Length = 100,
 				Height = 200,
-				Width = 300,
+				Width = 100,
 				Weight = 400,
 				Description = "500",
 			};

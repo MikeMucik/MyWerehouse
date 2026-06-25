@@ -67,7 +67,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		}
 		
 		[Fact]
-		public async Task DeleteProductAsync_ShouldDeleteFromList_WhenProductNotUsed()
+		public async Task DeleteProductAsync_ShouldDeleteFrom_WhenProductNotUsed()
 		{
 			//Arrange
 			var product1 = Product.Create("Test", "666666", 1, 56);
@@ -87,8 +87,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var productId =Guid.Parse("00000000-0000-0000-0000-000000000000");
 			//Act&Assert
-			var result =await _productService.DeleteProductAsync(productId);
-			//Assert.NotNull(e);
+			var result =await _productService.DeleteProductAsync(productId);			
 			Assert.NotNull(result);
 			Assert.Contains("Brak produktu o tym numerze", result.Error);
 		}

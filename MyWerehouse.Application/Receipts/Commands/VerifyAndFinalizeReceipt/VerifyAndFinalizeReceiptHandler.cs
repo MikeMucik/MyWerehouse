@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 
 			//TODO :Dodać porównanie papierów z tym co rzeczywiście przyjęte, compare amount assignment to real receipt
-			
+			//Musiałoby być jakieś podsumowanie a jeśli nie to tak zostaje i tylko biurwa sprawdza z papierami
 			receipt.VerifiedReceipt(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(cancellationToken);
 			return AppResult<Unit>.Success(Unit.Value, "Palety z przyjęcia zweryfikowano, gotowe do użycia.");

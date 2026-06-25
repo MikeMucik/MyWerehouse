@@ -15,35 +15,33 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Services
 {
-	public class LocationService : ILocationService
+	public class LocationService(ILocationRepo locationRepo,
+		IMapper mapper,
+		IPalletRepo palletRepo,
+		WerehouseDbContext werehouseDbContext) : ILocationService
 	{
-		private readonly ILocationRepo _locationRepo;
-		private readonly IMapper _mapper;
-		private readonly IPalletRepo _palletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;
-
-		public LocationService(ILocationRepo locationRepo,
-			IMapper mapper,
-			IPalletRepo palletRepo,
-			WerehouseDbContext werehouseDbContext)
-		{
-			_locationRepo = locationRepo;
-			_mapper = mapper;
-			_palletRepo = palletRepo;
-			_werehouseDbContext = werehouseDbContext;
-		}
+		private readonly ILocationRepo _locationRepo = locationRepo;
+		private readonly IMapper _mapper = mapper;
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 
 		public async Task<AppResult<int>> AddLocationServiceAsync(LocationDTO locationDTO)
 		{
+			if (await _locationRepo.ExistsByCoordinatesAsync(locationDTO.Bay, locationDTO.Aisle, locationDTO.Position, locationDTO.Height))
+			{
+				return AppResult<int>.Fail("Lokalizacja o zadanych parametrach już istnieje.");
+			}
 			var location = _mapper.Map<Location>(locationDTO);
+
 			var result = _locationRepo.AddLocation(location);
+
 			await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<int>.Success(result.Id);
+			return AppResult<int>.Success(result.Id, "Dodano lokalizacje.");//"Dodano lokalizacje.",
 		}
 		public async Task<AppResult<Unit>> DeleteLocationServiceAsync(int id)
 		{
-			//TODO warunek czy jest puste
-			var isEmpty = _palletRepo.CheckOccupancyAsync(id);
+			//warunek czy jest puste
+			var isEmpty = await _palletRepo.CheckOccupancyAsync(id);
 			if (isEmpty != null)
 			{
 				return AppResult<Unit>.Fail("Miejsce paletowe nie jest puste nie można skasować", ErrorType.Conflict);
@@ -72,7 +70,7 @@ namespace MyWerehouse.Application.Services
 		}
 
 		//potrzebne do many 
-		public AppResult<List<LocationDTO>> PrepareLocationsAsync(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
+		public AppResult<List<LocationDTO>> PrepareLocations(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{
 			var list = new List<LocationDTO>();
 			var locations = _locationRepo.CreateListLocationForBayRangeAisle(bay, startAisle, endAisle, amountPosition, amountHeigt);
@@ -87,13 +85,20 @@ namespace MyWerehouse.Application.Services
 		}
 		public async Task<AppResult<Unit>> CreateManyLocation(List<LocationDTO> locations)
 		{
+			foreach (var location in locations)
+			{
+				if (await _locationRepo.ExistsByCoordinatesAsync(location.Bay, location.Aisle, location.Position, location.Height))
+				{
+					return AppResult<Unit>.Fail($"Lokalizacja o parametrach Bay = {location.Bay}, Aisle = {location.Aisle}, Position = {location.Position}, Height = {location.Height} już istnieje.");
+				}
+			}
 			foreach (var locationDTO in locations.ToList())
 			{
 				var location = _mapper.Map<Location>(locationDTO);
 				_locationRepo.AddLocation(location);
 			}
 			await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<Unit>.Success(Unit.Value);
+			return AppResult<Unit>.Success(Unit.Value, "Dodano zbiór lokalizacji.");
 		}
 	}
 }

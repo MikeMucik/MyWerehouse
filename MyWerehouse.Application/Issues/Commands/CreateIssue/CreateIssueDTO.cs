@@ -15,7 +15,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 	{		
 		public int ClientId { get; init; }
 		public string PerformedBy { get; init; }
-		public IssueStatus IssueStatus { get; init; } = IssueStatus.New;
+		//public IssueStatus IssueStatus { get; init; } = IssueStatus.New;
 		public List<IssueItemDTO> Items { get; init; } = new List<IssueItemDTO>();		
 	}
 }

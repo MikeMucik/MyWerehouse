@@ -21,7 +21,7 @@ namespace MyWerehouse.Domain.Products.Models
 		private Product() { } //EF
 		private Product(string name, string sku, DateTime addedAd, int categoryId, bool isDeleted, int cartonsPerPallets, ProductDetail? details = null)
 		{
-			if (cartonsPerPallets <= 0) throw new PalletCartonQuantityMustBePositiveDomainException();			
+			if (cartonsPerPallets <= 0) throw new PalletCartonQuantityMustBePositiveDomainException();
 			Id = Guid.NewGuid();
 			Name = name;
 			SKU = sku;
@@ -64,15 +64,21 @@ namespace MyWerehouse.Domain.Products.Models
 			Category = category;
 			CategoryId = category.Id;
 		}
-		public void ApplyChanges(Product product)
+		public void AddDetails(int length, int height, int width, int weight, string description)
 		{
-			var newDetails = ProductDetail.CreateDetails(Id,
-				product.Details.Length,
-				product.Details.Height,
-				product.Details.Width,
-				product.Details.Weight,
-				product.Details.Description);
-			Details = newDetails;
+			Details = ProductDetail.CreateDetails(Id, length, height, width, weight, description);
+		}		
+		public void ApplyChangesForProduct(
+			string name, string sku, int categoryId,
+			int cartonsPerPallet, int length, int height,
+			int width, int weight, string description)
+		{
+			if (cartonsPerPallet <= 0) throw new PalletCartonQuantityMustBePositiveDomainException();
+			Name = name;
+			SKU = sku;
+			CategoryId = categoryId;
+			CartonsPerPallet = cartonsPerPallet;
+			Details = ProductDetail.CreateDetails(Id, length, height, width, weight, description);
 		}
 	}
 }

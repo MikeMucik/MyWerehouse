@@ -13,7 +13,8 @@ namespace MyWerehouse.Domain.Interfaces
 		void AddReceipt(Receipt receipt);		
 		void DeleteReceipt(Receipt receipt); 
 		Task<Receipt?> GetReceiptByIdAsync(Guid id);
-		Task<Receipt?> GetReceiptOnlyByIdAsync(Guid id);
+		Task<Receipt?> GetReceiptWithAllIncludesByIdAsync(Guid id);
+		Task<Receipt?> GetReceipForCanceltByIdAsync(Guid id);
 		IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter);
 		Task<int> GetNextNumberOfReceipt();
 	}

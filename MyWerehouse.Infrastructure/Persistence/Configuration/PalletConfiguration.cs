@@ -27,7 +27,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 				.IsRequired()
 				.OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasMany(p => p.PalletMovements)
+			entity.HasMany(p => p.PalletHistory)
 				.WithOne()
 				.HasForeignKey(h => h.PalletId)
 				.OnDelete(DeleteBehavior.Cascade);

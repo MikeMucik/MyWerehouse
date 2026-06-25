@@ -29,5 +29,9 @@ namespace MyWerehouse.Application.Common.Results
 		//porażka
 		public static AppResult<T> Fail(string error, ErrorType errorType = ErrorType.Validation) =>
 			new AppResult<T> { IsSuccess = false, Error = error, ErrorType = errorType };
+
+		public static AppResult<T> Fail(string error,T value, ErrorType errorType = ErrorType.Validation) =>
+			new AppResult<T> { IsSuccess = false,Result = value, Error = error, ErrorType = errorType };
+
 	}
 }

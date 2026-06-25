@@ -37,6 +37,19 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(i=>i.IssueItems)
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}
+		public async Task<Issue?> GetIssueAllIncludedByIdAsync(Guid id)
+		{
+			return await _werehouseDbContext.Issues
+				.Include(c=>c.Client)
+				.Include(i => i.Pallets)
+					.ThenInclude(l => l.Location)
+				.Include(i => i.Pallets)
+					.ThenInclude(p => p.ProductsOnPallet)
+						.ThenInclude(pp=>pp.Product)
+				.Include(i => i.IssueItems)
+					.ThenInclude(pp=>pp.Product)
+				.FirstOrDefaultAsync(i => i.Id == id);
+		}
 		public async Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids)
 		{
 			return await _werehouseDbContext.Issues
@@ -71,17 +84,29 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				result = result.Where(i => i.Pallets.Any(ip => ip.ProductsOnPallet.Any(ipp => ipp.Product.SKU == filter.SKU)));
 			}
-			if (filter.DateTimeStart != null)
+			if (filter.CreateDateStart != null)
 			{
-				var start = filter.DateTimeStart;
-				var end = filter.DateTimeEnd ?? DateTime.UtcNow;
+				var start = filter.CreateDateStart;
+				var end = filter.CreateDateEnd ?? DateTime.UtcNow;
 
 				result = result.Where(i => i.IssueDateTimeCreate >= start && i.IssueDateTimeCreate <= end);
 			}
-			if (filter.DateTimeStartSend != null)
+			//if (filter.SendDateStart.HasValue)
+			//{
+			//	var start = DateOnly.FromDateTime(filter.SendDateStart.Value);
+
+			//	var end = filter.SendDateEnd.HasValue
+			//		? DateOnly.FromDateTime(filter.SendDateEnd.Value)
+			//		: DateOnly.FromDateTime(DateTime.UtcNow);
+
+			//	result = result.Where(i =>
+			//		i.IssueDateTimeSend >= start &&
+			//		i.IssueDateTimeSend <= end);
+			//}
+			if (filter.SendDateStart != null)
 			{
-				var start = filter.DateTimeStartSend;
-				var end = filter.DateTimeEndSend ?? DateOnly.FromDateTime(DateTime.UtcNow);
+				var start = filter.SendDateStart;
+				var end = filter.SendDateEnd ?? DateOnly.FromDateTime(DateTime.UtcNow);
 
 				result = result.Where(i => i.IssueDateTimeSend >= start && i.IssueDateTimeSend <= end);
 			}
@@ -115,6 +140,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(x => x != null)
 				.Distinct()
 				.ToListAsync();
-		}
+		}		
 	}
 }

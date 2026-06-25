@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 
 		public async Task<AppResult<Unit>> Handle(CancelReceiptCommand request, CancellationToken ct)
 		{
-			var receipt = await _receiptRepo.GetReceiptOnlyByIdAsync(request.ReceiptId);
+			var receipt = await _receiptRepo.GetReceipForCanceltByIdAsync(request.ReceiptId);
 			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 
 			var listPalletsOfReceipt = await _palletRepo.GetPalletsByReceiptId(request.ReceiptId);

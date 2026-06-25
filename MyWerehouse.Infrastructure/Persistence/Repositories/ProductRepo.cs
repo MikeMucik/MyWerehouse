@@ -33,9 +33,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				return null;
 			}
 			var product = await _werehouseDbContext.Products
-				.FirstOrDefaultAsync(p => p.Id == id);
+				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false);
 			return product;
 		}
+
 		public async Task<Product?> GetProductToEditAsync(Guid id)
 		{
 			if (id != Guid.Empty)
@@ -47,6 +48,19 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return null;
 		}
+		public async Task<Product?> GetProductDetailsAsync(Guid id)
+		{
+			if (id != Guid.Empty)
+			{
+				var product = await _werehouseDbContext.Products
+					.Include(p=>p.Category)
+					.Include(p => p.Details)
+					.FirstOrDefaultAsync(p => p.Id == id);
+				return product;
+			}
+			return null;
+		}
+		
 		public IQueryable<Product> GetAllProducts()
 		{
 			return _werehouseDbContext.Products.Where(p => p.IsDeleted == false);
@@ -101,7 +115,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			if (await _werehouseDbContext.Products.FindAsync(id) != null) { return true; }
 			return false;
 		}
-
+		//TODO method to use 
 		//public async Task<bool> EnsureAllExist(List<int> ids)
 		//{
 		//	foreach (var id in ids)

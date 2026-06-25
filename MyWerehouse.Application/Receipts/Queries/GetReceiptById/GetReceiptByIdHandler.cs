@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.Receipts.Queries.GetReceiptById
 
 		public async Task<AppResult<ReceiptDTO>> Handle(GetReceiptByIdQuery request, CancellationToken cancellationToken)
 		{
-			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
+			var receipt = await _receiptRepo.GetReceiptWithAllIncludesByIdAsync(request.ReceiptId);
 			if (receipt == null) return AppResult<ReceiptDTO>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 
 			var receiptDTO = _mapper.Map<ReceiptDTO>(receipt);

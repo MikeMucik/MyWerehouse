@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
@@ -26,7 +27,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			_mediator = _fixture.Mediator;
 		}
 		[Fact]
-		public async Task GetIssueById_GetData_ReturnDTO()
+		public async Task GetIssueById_ReturnDTO()
 		{
 			//Arrange&Act
 			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
@@ -35,6 +36,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal("U002", result.Result.PerformedBy);
 			Assert.Equal(DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23)), result.Result.IssueDateTimeSend);
@@ -43,7 +46,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(3, result.Result.Pallets.Count);
 		}
 		[Fact]
-		public async Task GetIssueProductSummaryById_GetData_ReturnDTO()
+		public async Task IssueProductSummaryById_ReturnDTO()
 		{
 			//Arrange&Act
 			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
@@ -55,17 +58,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal(2, result.Result.IssueItems.Count);
 			Assert.Equal("U002", result.Result.PerformedBy);
 			Assert.Equal(DateOnly.FromDateTime( DateTime.UtcNow.AddHours(25)), result.Result.DateToSend);
 
 			Assert.NotNull(result.Result.IssueItems);
-			Assert.Equal(400, result.Result.IssueItems.FirstOrDefault(x => x.ProductId == productId2).Quantity);
-			Assert.Equal(150, result.Result.IssueItems.FirstOrDefault(x => x.ProductId == productId1).Quantity);
+			Assert.Equal(400, result.Result.IssueItems.Single(x => x.ProductId == productId2).Quantity);
+			Assert.Equal(150, result.Result.IssueItems.Single(x => x.ProductId == productId1).Quantity);
 		}
 		[Fact]
-		public async Task LoadingIssueAsync_ProperData_ReturnList()
+		public async Task LoadingIssueList_ReturnListToLoad()
 		{
 			//Arrange&Act
 			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
@@ -133,10 +138,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				CurrentPage = 1,
 				PageSize = 1
 			};
-			//(filter, 1, 1);
 			var result = await _mediator.Send(query);
 			//Asser
 			Assert.NotNull(result);
+			Assert.IsType<AppResult<PagedResult<IssueSimplyDTO>>>(result);
 		}
 
 

@@ -42,7 +42,7 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> Get(Guid id)
 		{
 			var result = await _mediator.Send(new GetIssueByIdQuery(id));
-			return Ok(result);
+			return result.ToActionResult();
 		}
 
 		// Update - wiele rozwiązań więc POST

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
@@ -11,6 +12,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 {
 	public class AddDeleteLocationTests : TestBase
 	{		
+		private readonly LocationRepo _locationRepo;
+		public AddDeleteLocationTests() : base()
+		{
+			_locationRepo = new LocationRepo(DbContext);
+		}
 		[Fact]
 		public void AddNewLocation_AddLocation_AddedLoaction()
 		{
@@ -22,9 +28,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 				Height = 6,
 				Position = 10
 			};
-			var locationRepo = new LocationRepo(DbContext);
 			//Act
-			var result = locationRepo.AddLocation(location);
+			var result = _locationRepo.AddLocation(location);
 			DbContext.SaveChanges();
 			//Arrange
 			Assert.NotNull(result);
@@ -50,9 +55,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			 DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
 			var locationId = 1;
-			var locationRepo = new LocationRepo(DbContext);
 			//Act
-			locationRepo.DeleteLocation(location);
+			_locationRepo.DeleteLocation(location);
 			 DbContext.SaveChanges();
 			//Assert
 			var result = DbContext.Locations.Find(locationId);
@@ -68,11 +72,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			var endAisle = 3;
 			var amountPosition = 2;
 			var amountHeight = 2;
-			var locationRepo = new LocationRepo(DbContext); // jeśli to metoda repo
-															// lub: var service = new LocationService(); jeśli jest w serwisie
-
 			// Act
-			var result = locationRepo.CreateListLocationForBayRangeAisle(
+			var result = _locationRepo.CreateListLocationForBay(
 				bay,
 				startAisle,
 				endAisle,

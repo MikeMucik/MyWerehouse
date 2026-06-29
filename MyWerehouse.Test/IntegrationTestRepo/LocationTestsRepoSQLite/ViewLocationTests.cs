@@ -47,7 +47,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			Assert.Equal(20, result.Last().Id);
 		}
 		[Fact]
-		public async Task ReturnLocation_FindLocationAsync_ResultOk()
+		public async Task FindLocation_ReturnLocation_WhenLocationExist()
 		{
 			//Arrange
 			int bay = 2;
@@ -59,6 +59,20 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(1, result.Id);
+		}
+		[Fact]
+		public async Task FindLocation_ReturnNull_WhenLocationNotExist()
+		{
+			//Arrange
+			int bay = 20;
+			int aisle = 1;
+			int position = 3;
+			int height = 4;
+			//Act
+			var result = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
+			//Assert
+			Assert.Null(result);
+			//Assert.Equal(1, result.Id);
 		}
 	}
 }

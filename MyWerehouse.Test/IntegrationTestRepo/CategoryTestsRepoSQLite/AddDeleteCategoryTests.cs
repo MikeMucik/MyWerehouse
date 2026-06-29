@@ -11,6 +11,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 {
 	public class AddDeleteCategoryTests : TestBase
 	{
+		private readonly CategoryRepo _categoryRepo;
+		public AddDeleteCategoryTests(): base()
+		{
+			_categoryRepo = new CategoryRepo(DbContext);
+		}
 	
 		[Fact]
 		public void AddCategory_AddCategory_ShouldAddToList()
@@ -20,9 +25,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 			{
 				Name = "CategoryName"
 			};
-			var categoryRepo = new CategoryRepo(DbContext);
 			//Act
-			categoryRepo.AddCategory(newCategory);
+			_categoryRepo.AddCategory(newCategory);
 			DbContext.SaveChanges();
 			//Assert
 			var result = DbContext.Categories.Find(newCategory.Id);
@@ -37,13 +41,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 			{
 				Name = "CategoryName"
 			};
-			var categoryRepo = new CategoryRepo(DbContext);
 			//Act
-			categoryRepo.AddCategory(category);
+			_categoryRepo.AddCategory(category);
 			DbContext.SaveChanges();
 			var resultAdded = DbContext.Categories.Find(category.Id);
 			Assert.NotNull(resultAdded);
-			categoryRepo.DeleteCategory(category);
+			_categoryRepo.DeleteCategory(category);
 			DbContext.SaveChanges();
 			//Assert
 			var result = DbContext.Categories.Find(category.Id);
@@ -60,9 +63,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 			DbContext.Categories.Add(newCategory);
 			DbContext.SaveChanges();
 			var idCategory = 1;
-			var categoryRepo = new CategoryRepo(DbContext);
 			//Act
-			await categoryRepo.SwitchOffCategoryAsync(idCategory);
+			await _categoryRepo.SwitchOffCategoryAsync(idCategory);
 			//Assert
 			var result = DbContext.Categories.Find(idCategory);
 			Assert.NotNull(result);

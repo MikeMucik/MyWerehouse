@@ -8,12 +8,19 @@ using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Server.Middleware;
 
-Environment.SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "");
+//Environment.SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "");
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<WerehouseDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-//.LogTo(Console.WriteLine, LogLevel.Information)//
+options.UseSqlServer(
+	builder.Configuration.GetConnectionString("DefaultConnection"),
+	sqlOptions =>
+	{
+		sqlOptions.EnableRetryOnFailure(
+			maxRetryCount: 5,
+			maxRetryDelay: TimeSpan.FromSeconds(10),
+			errorNumbersToAdd: null);
+	})
 );
 // Add services to the container.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()

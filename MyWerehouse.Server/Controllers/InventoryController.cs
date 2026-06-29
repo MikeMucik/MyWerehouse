@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Queries.GetInventory;
+using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers
 {
@@ -16,7 +17,7 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> Get(Guid id)
 		{
 			var result = await _mediator.Send(new GetInventoryQuery(id));
-			return Ok(result);
+			return result.ToActionResult();
 		}		
 	}
 }

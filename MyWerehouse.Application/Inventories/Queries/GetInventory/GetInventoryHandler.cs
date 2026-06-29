@@ -5,22 +5,23 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.DTOs;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventory
 {
 	public class GetInventoryHandler(IInventoryRepo inventoryRepo,
-		IMapper mapper) : IRequestHandler<GetInventoryQuery, InventoryDTO>
+		IMapper mapper) : IRequestHandler<GetInventoryQuery, AppResult<InventoryDTO>>
 	{
 		public readonly IInventoryRepo _inventoryRepo = inventoryRepo;
 		public readonly IMapper _mapper = mapper;
 
-		public async Task<InventoryDTO> Handle (GetInventoryQuery request, CancellationToken ct)
+		public async Task<AppResult<InventoryDTO>> Handle(GetInventoryQuery request, CancellationToken ct)
 		{
 			var inventory = await _inventoryRepo.GetInventoryForProductAsync(request.ProductId);
 			var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
-			return inventoryDTO;
+			return AppResult<InventoryDTO>.Success(inventoryDTO);
 		}
 	}
 }

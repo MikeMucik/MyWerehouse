@@ -29,7 +29,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			var pagenumber = 1;
 			var ct = CancellationToken.None;
 			//Act
-			var result = await _categoryService.GetCategoriesAsync(pageSize, pagenumber, ct);
+			var result = await _categoryService.GetCategoriesAsync(pagenumber, pageSize, ct);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);

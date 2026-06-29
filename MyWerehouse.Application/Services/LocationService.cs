@@ -65,15 +65,15 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<Location>> FindLocationAsync(int bay, int aisle, int position, int height)
 		{
 			var location = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
-			return AppResult<Location>.Success(location)
-			?? AppResult<Location>.Fail($"Nie ma lokalizacji o zadanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}");
+			if (location is null) return AppResult<Location>.Fail($"Nie ma lokalizacji o żądanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}");
+			return AppResult<Location>.Success(location);
 		}
 
 		//potrzebne do many 
 		public AppResult<List<LocationDTO>> PrepareLocations(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{
 			var list = new List<LocationDTO>();
-			var locations = _locationRepo.CreateListLocationForBayRangeAisle(bay, startAisle, endAisle, amountPosition, amountHeigt);
+			var locations = _locationRepo.CreateListLocationForBay(bay, startAisle, endAisle, amountPosition, amountHeigt);
 			if (locations == null) return AppResult<List<LocationDTO>>.Fail("Brak elemntów do wyświetlenia", ErrorType.NotFound);
 
 			foreach (var location in locations)

@@ -6,7 +6,8 @@ Short:
 
 Architectur:
 Domain Drive Design
-Clean Architecture - Onion
+Obecnie Layered Architecture
+TODO: Clean Architecture - Onion
 CQRS - Command Query Responsibility Segregation
 
 Język:
@@ -19,18 +20,22 @@ API:
 ASP.NET Core
 baza danych:
 Microsoft SQL Server
+SQL Azure - produkcja
 GIT - GITHUB
 Testy:
 DateBaseInMemory( Crud )
 SQLiteInMemory( Handlers)
 
-
 Założenia projektu:
-Magazyn producenta lub działający w imieniu producenta, powinien przychodzić asortyment jedna partia, data - jedna paleta
+Magazyn producenta lub działający w imieniu producenta, przyjmowana paleta jeden towar, jedna data - jedna paria
+
+Aplikacja jest hostowana na darmowym planie Azure App Service (F1). Po dłuższym okresie bezczynności aplikacja może zostać uśpiona przez platformę Azure.
+Pierwsze żądanie może wymagać kilkudziesięciu sekund na ponowne uruchomienie aplikacji.
+URL : https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html
 
 Full;
 
-MyWarehouse to backendowa aplikacja do zarządzania procesami magazynowymi
+WMS backend API do obsługi przyjęć, palet, wydań, pickingu i historii
 
 System WMS ma za zadanie organizować proces przepływu produktu przez magazyn, odpowiada za przyjecia asortymentu, przygotowaniu 
 i wydaniu towaru, w tym zawiera się kompletacja(wybór policy jak dobierane są palety) jak i anulowanie zmówienia, jak i dekompletacja,

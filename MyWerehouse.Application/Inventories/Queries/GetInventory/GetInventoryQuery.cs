@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Inventories.DTOs;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventory
 {
-	public record GetInventoryQuery(Guid ProductId):IRequest<InventoryDTO>;	
+	public record GetInventoryQuery(Guid ProductId):IRequest<AppResult<InventoryDTO>>;	
 }

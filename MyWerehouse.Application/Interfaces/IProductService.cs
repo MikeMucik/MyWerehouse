@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Interfaces
 		Task<AppResult<EditProductDTO>> GetProductToEditAsync(Guid id);
 		Task<AppResult<Unit>> UpdateProductAsync(Guid id, EditProductDTO product);
 		Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id);
-		Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageSize, int PageNumber,CancellationToken ct);
-		Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageSize, int PageNumber, ProductSearchFilter filter, CancellationToken ct);
+		Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageNumber, int pageSize,CancellationToken ct);
+		Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageNumber, int pageSize, ProductSearchFilter filter, CancellationToken ct);
 	}
 }

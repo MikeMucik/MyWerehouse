@@ -13,16 +13,16 @@ namespace MyWerehouse.Application.Common.Pagination
 	{
 		public static async Task<PagedResult<T>> ToPagedResultAsync<T>(
 			this IQueryable<T> query,
-			int currentPage,
+			int pageNumber,
 			int pageSize,
 			CancellationToken ct)
 		{
-			currentPage = currentPage <= 0 ? 1 : currentPage;
+			pageNumber = pageNumber <= 0 ? 1 : pageNumber;
 			pageSize = pageSize <= 0 ? 10 : pageSize;
 			var totalCount = await query.CountAsync(ct);
 
 			var items = await query
-				.Skip(pageSize * (currentPage - 1))
+				.Skip(pageSize * (pageNumber - 1))
 				.Take(pageSize)
 				.ToListAsync(ct);
 
@@ -30,32 +30,9 @@ namespace MyWerehouse.Application.Common.Pagination
 			{
 				Items = items,
 				TotalCount = totalCount,
-				CurrentPage = currentPage,
+				CurrentPage = pageNumber,
 				PageSize = pageSize,				
 			};
 		}
 	}
 }
-//public static async Task<PagedResult<TDestination>> ToPagedResultAsync<TSource, TDestination>(
-//	this IQueryable<TSource> query,
-//	IConfigurationProvider mappConfig,
-//	int currentPage,
-//	int pageSize,
-//	CancellationToken ct)
-//{
-//	var totalCount = await query.CountAsync(ct);
-
-//	var items = await query
-//		.Skip(pageSize * (currentPage - 1))
-//		.Take(pageSize)
-//		.ProjectTo<TDestination>(mappConfig)
-//		.ToListAsync(ct);
-
-//	return new PagedResult<TDestination>
-//	{
-//		Items = items,
-//		TotalCount = totalCount,
-//		CurrentPage = currentPage,
-//		PageSize = pageSize,
-//	};
-//}

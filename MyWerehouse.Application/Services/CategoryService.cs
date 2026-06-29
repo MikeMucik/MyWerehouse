@@ -103,7 +103,7 @@ namespace MyWerehouse.Application.Services
 			else return AppResult<Unit>.Fail($"Brak kategori o numerze {existingCategory.Id}", ErrorType.NotFound);
 		}
 
-		public async Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageSize, int pageNumber, CancellationToken ct)
+		public async Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageNumber, int pageSize, CancellationToken ct)
 		{
 			var categories = _categoryRepo.GetAllCategories();
 			var orderedCategories = categories

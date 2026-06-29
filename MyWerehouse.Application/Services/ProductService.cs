@@ -163,7 +163,7 @@ namespace MyWerehouse.Application.Services
 
 			return AppResult<DetailsOfProductDTO>.Success(productDTO);
 		}
-		public async Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageSize, int pageNumber, CancellationToken ct)
+		public async Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageNumber, int pageSize, CancellationToken ct)
 		{
 			var products = _productRepo.GetAllProducts();
 			var productsOrdered = products
@@ -173,7 +173,7 @@ namespace MyWerehouse.Application.Services
 				.ToPagedResultAsync(pageNumber, pageSize, ct);
 			return AppResult<PagedResult<ProductDTO>>.Success(result);
 		}
-		public async Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageSize, int pageNumber, ProductSearchFilter filter, CancellationToken ct)
+		public async Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageNumber, int pageSize, ProductSearchFilter filter, CancellationToken ct)
 		{
 			var products = _productRepo.FindProducts(filter);
 			var productsOrdered = products

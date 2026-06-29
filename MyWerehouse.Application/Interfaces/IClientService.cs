@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Interfaces
 		Task<AppResult<ClientDTO>> GetClientToEditAsync(int id);
 		Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient);
 		Task<AppResult<DetailsOfClientDTO>> DetailsOfClientAsync(int id);
-		Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageSize, int PageNumber, ClientSearchFilter filter, CancellationToken ct);		
-		Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageSize, int PageNumber, CancellationToken ct);
+		Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageNumber, int pageSize, ClientSearchFilter filter, CancellationToken ct);		
+		Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageNumber, int pageSize, CancellationToken ct);
 	}
 }

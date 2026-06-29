@@ -19,7 +19,7 @@ using MyWerehouse.Domain.Receviving.Events;
 
 namespace MyWerehouse.Domain.Issuing.Models
 {
-	public class  Issue : AggregateRoots
+	public class Issue : AggregateRoots
 	{
 		public Guid Id { get; private set; } = Guid.NewGuid();
 		public int IssueNumber { get; private set; }
@@ -41,7 +41,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			IssueNumber = issueNumber;
 			if (clientId <= 0) throw new ClientDomainException();
 			ClientId = clientId;
-			if (dateToSend < DateOnly.FromDateTime( DateTime.UtcNow)) throw new WrongDateDomainException();
+			if (dateToSend < DateOnly.FromDateTime(DateTime.UtcNow)) throw new WrongDateDomainException();
 			IssueDateTimeSend = dateToSend;
 			IssueDateTimeCreate = DateTime.UtcNow;
 			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException(performedBy);
@@ -72,8 +72,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			if (userId == null || userId.Length == 0)
 			{
-				new InvalidUserIdDomainException(userId);
-			}			
+				throw new InvalidUserIdDomainException(userId);
+			}
 			PerformedBy = userId;
 		}
 
@@ -131,8 +131,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 				Pallets.Remove(pallet);
 			}
 			return toReturn;
-		}		
-				
+		}
+
 		public void VerifyToLoad(string userId)
 		{
 			//invarianty status
@@ -141,8 +141,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			IssueStatus = IssueStatus.ConfirmedToLoad;
 			foreach (var pallet in Pallets)
-			{				
-				pallet.AssignToIssue(Id, userId, pallet.Location.ToSnapshot());				
+			{
+				pallet.AssignToIssue(Id, userId, pallet.Location.ToSnapshot());
 			}
 			AddHistory(userId);
 		}
@@ -206,7 +206,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			IssueStatus = IssueStatus.IsShipped;
 			PerformedBy = userId;
-			AddHistory(userId);			
+			AddHistory(userId);
 		}
 
 		public void RemovePickingTask(PickingTask pickingTask)

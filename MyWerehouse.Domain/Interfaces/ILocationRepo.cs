@@ -11,10 +11,10 @@ namespace MyWerehouse.Domain.Interfaces
 	{
 		Location AddLocation(Location location);
 		void DeleteLocation(Location location);
-		Task<Location> GetLocationByIdAsync(int locationId);
+		Task<Location?> GetLocationByIdAsync(int locationId);
 		IQueryable<Location> GetAllAvailableLocations();
-		Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt);
-		IEnumerable<Location> CreateListLocationForBayRangeAisle(int Bay, int StartAisle, int EndAisle, int AmountPosition, int AmountHeigt);
+		Task<Location?> FindLocationAsync(int Bay, int Aisle, int Position, int Heigt);
+		IEnumerable<Location> CreateListLocationForBay(int Bay, int StartAisle, int EndAisle, int AmountPosition, int AmountHeigt);
 		Task<bool> ReceivingRampExistsAsync(int locationId);
 		Task<bool> ExistsByCoordinatesAsync(int bay, int aisle, int position, int height);
 	}

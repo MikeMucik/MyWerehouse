@@ -17,7 +17,6 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 {
 	public class ClientIntegrationCommand : CommandTestBase
 	{
-		//protected readonly DbContextOptions<WerehouseDbContext> _contextOptions;
 		protected readonly ClientService _clientService;
 		protected readonly IClientRepo _clientRepo;
 		protected readonly IReceiptRepo _receiptRepo;
@@ -27,10 +26,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 		protected readonly IValidator<UpdateClientDTO> _updateClientValidator; // Zadeklaruj
 		protected readonly IValidator<AddClientDTO> _addClientValidator; // Zadeklaruj
 		public ClientIntegrationCommand() : base()
-		{
-			//_contextOptions = new DbContextOptionsBuilder<WerehouseDbContext>()
-			//	.UseInMemoryDatabase("SharedTestDatabase")
-			//	.Options;
+		{			
 			_clientRepo = new ClientRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_issueRepo = new IssueRepo(_context);

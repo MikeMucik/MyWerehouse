@@ -285,7 +285,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			{
 				throw new MultipleProductsOnPalletDomainException(Id, PalletNumber, productId);
 			}
-			if (product == null) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
+			if (!product.Any()) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
 
 			return product.First();
 		}

@@ -26,7 +26,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Locations.Remove(location);
 		}
-		public async Task<Location> GetLocationByIdAsync(int locationId)
+		public async Task<Location?> GetLocationByIdAsync(int locationId)
 		{
 			return await _werehouseDbContext.Locations.FindAsync(locationId);
 		}
@@ -37,16 +37,18 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.OrderBy(l => l.Id);
 			return locations;
 		}
-		public async Task<Location> FindLocationAsync(int Bay, int Aisle, int Position, int Height)
+		public async Task<Location?> FindLocationAsync(int Bay, int Aisle, int Position, int Height)
 		{
 			var location = await _werehouseDbContext.Locations
 				.FirstOrDefaultAsync(x => x.Bay == Bay &&
 								x.Aisle == Aisle &&
 								x.Position == Position &&
 								x.Height == Height);
+			if (location == null) return null;
 			return location;
 		}
-		public IEnumerable<Location> CreateListLocationForBayRangeAisle(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
+		
+		public IEnumerable<Location> CreateListLocationForBay(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{
 			var locations = new List<Location>();
 

@@ -140,7 +140,7 @@ namespace MyWerehouse.Application.Services
 			}
 		}
 
-		public async Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageSize, int pageNumber, ClientSearchFilter filter, CancellationToken ct)
+		public async Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageNumber , int pageSize, ClientSearchFilter filter, CancellationToken ct)
 		{
 
 			var clients = _clientRepo.GetClients(filter);
@@ -152,7 +152,7 @@ namespace MyWerehouse.Application.Services
 
 			return AppResult<PagedResult<ClientDTO>>.Success(result);
 		}
-		public async Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageSize, int pageNumber, CancellationToken ct)
+		public async Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageNumber,int pageSize,  CancellationToken ct)
 		{
 			var clients = _clientRepo.GetAllClients();
 			var clientsOrdered = clients

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
+using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers
 {
@@ -21,31 +22,31 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> Add(CategoryDTO category)
 		{
 			var result = await _categoryService.AddCategoryAsync(category);
-			return Ok(result);
+			return result.ToActionResult();
 		}
 		[HttpGet("{id}")]
 		public async Task<IActionResult> Get(int id)
 		{
 			var result = await _categoryService.GetCategoryByIdAsync(id);
-			return Ok(result);
+			return result.ToActionResult();
 		}
 		[HttpPut("{id}update")]
 		public async Task<IActionResult> Update(int id, CategoryDTO category)
 		{
 			var result = await _categoryService.UpdateCategoryAsync(id, category);
-			return Ok(result);
+			return result.ToActionResult();
 		}
 		[HttpPost("delete")]//bo może tylko tylko ukrycie przez historię
 		public async Task<IActionResult> Delete(int id)
 		{
 			var result = await _categoryService.DeleteCategoryAsync(id);
-			return Ok(result);
+			return result.ToActionResult();
 		}
 		[HttpGet("all")]
 		public async Task<IActionResult> GetAll(int page, int size, CancellationToken ct)//można zamienić na [FromQuery] +DTO
 		{
 			var result = await _categoryService.GetCategoriesAsync(page,size, ct);
-			return Ok(result);
+			return result.ToActionResult();
 		}
 	}
 }

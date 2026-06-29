@@ -15,7 +15,7 @@ namespace MyWerehouse.Application.Interfaces
 		Task<AppResult<Unit>> AddCategoryAsync(CategoryDTO categoryDTO);		
 		Task<AppResult<Unit>> DeleteCategoryAsync(int id);
 		Task<AppResult<Unit>> UpdateCategoryAsync(int id, CategoryDTO categoryDTO);
-		Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageSize, int pageNumber, CancellationToken ct);
+		Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageNumber,int pageSize,  CancellationToken ct);
 		Task<AppResult<CategoryViewDTO>> GetCategoryByIdAsync(int id);
 	}
 }

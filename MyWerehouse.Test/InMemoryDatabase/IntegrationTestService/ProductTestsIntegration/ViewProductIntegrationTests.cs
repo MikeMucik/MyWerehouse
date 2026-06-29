@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			var pageNumber = 1;
 			var ct = CancellationToken.None;
 			//Act
-			var result = await _productService.GetProductsAsync(pageSize, pageNumber, ct);
+			var result = await _productService.GetProductsAsync(pageNumber, pageSize, ct);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -98,7 +98,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				ProductName = "Test",
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter, ct);
+			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, ct);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -115,10 +115,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			var ct = CancellationToken.None;
 			var filter = new ProductSearchFilter
 			{
-				
+
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter, ct);
+			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, ct);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -138,7 +138,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Length = 1000,
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageSize, pageNumber, filter,ct);
+			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, ct);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);

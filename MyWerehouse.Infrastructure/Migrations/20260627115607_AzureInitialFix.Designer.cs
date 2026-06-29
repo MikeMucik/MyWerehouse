@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyWerehouse.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Infrastructure.Migrations
 {
     [DbContext(typeof(WerehouseDbContext))]
-    partial class WerehouseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627115607_AzureInitialFix")]
+    partial class AzureInitialFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

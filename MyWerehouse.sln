@@ -5,8 +5,6 @@ VisualStudioVersion = 17.12.35728.132
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWerehouse.Server", "MyWerehouse.Server\MyWerehouse.Server.csproj", "{B2047AA1-5E3A-452C-834A-9E6BA0B23311}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "mywerehouse.client", "mywerehouse.client\mywerehouse.client.esproj", "{BC780A70-197F-444D-B48B-DD1083175E42}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWerehouse.Domain", "MyWerehouse.Domain\MyWerehouse.Domain.csproj", "{05F23372-6D47-4BBA-B3B4-D4D8DD3011EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWerehouse.Application", "MyWerehouse.Application\MyWerehouse.Application.csproj", "{BA6A92F4-462B-4226-AAB7-568E67F3F344}"
@@ -18,7 +16,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		READMEold.md = READMEold.md
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A2A2B059-E677-44F8-8332-D63F037F074B}"
+	ProjectSection(SolutionItems) = preProject
+		dotnet.yml = dotnet.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9DDC0B14-1F1C-420A-9CCB-892DBDB2D487}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{CC23C0B3-815C-40B8-B0DF-DBAFBD6EB1F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,12 +40,6 @@ Global
 		{B2047AA1-5E3A-452C-834A-9E6BA0B23311}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2047AA1-5E3A-452C-834A-9E6BA0B23311}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2047AA1-5E3A-452C-834A-9E6BA0B23311}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC780A70-197F-444D-B48B-DD1083175E42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BC780A70-197F-444D-B48B-DD1083175E42}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC780A70-197F-444D-B48B-DD1083175E42}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{BC780A70-197F-444D-B48B-DD1083175E42}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BC780A70-197F-444D-B48B-DD1083175E42}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC780A70-197F-444D-B48B-DD1083175E42}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{05F23372-6D47-4BBA-B3B4-D4D8DD3011EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{05F23372-6D47-4BBA-B3B4-D4D8DD3011EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05F23372-6D47-4BBA-B3B4-D4D8DD3011EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -55,6 +59,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A2A2B059-E677-44F8-8332-D63F037F074B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{CC23C0B3-815C-40B8-B0DF-DBAFBD6EB1F9} = {9DDC0B14-1F1C-420A-9CCB-892DBDB2D487}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BEF407D7-F7CE-4758-A9BD-6B2D6478D55A}

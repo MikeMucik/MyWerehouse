@@ -1,99 +1,56 @@
-﻿Readme
-MyWarehouse
-Overview
+﻿# MyWarehouse
 
-Short:
+Warehouse Management System REST API built with ASP.NET Core, CQRS and Domain-Driven Design.
 
-Architectur:
-Domain Drive Design
-Obecnie Layered Architecture
-TODO: Clean Architecture - Onion
-CQRS - Command Query Responsibility Segregation
+The project models real warehouse processes such as goods receipt, inventory management, picking and shipment.
 
-Język:
-C#
-platformna:
-.NET
-ORM:
-Entity Framework Core
-API:
-ASP.NET Core
-baza danych:
-Microsoft SQL Server
-SQL Azure - produkcja
-GIT - GITHUB
-Testy:
-DateBaseInMemory( Crud )
-SQLiteInMemory( Handlers)
+The project currently uses a layered architecture and is gradually being refactored towards Clean Architecture.
 
-Założenia projektu:
-Magazyn producenta lub działający w imieniu producenta, przyjmowana paleta jeden towar, jedna data - jedna paria
+## Links
 
-Aplikacja jest hostowana na darmowym planie Azure App Service (F1). Po dłuższym okresie bezczynności aplikacja może zostać uśpiona przez platformę Azure.
-Pierwsze żądanie może wymagać kilkudziesięciu sekund na ponowne uruchomienie aplikacji.
-URL : https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html
+- Repository
+https://github.com/MikeMucik/MyWerehouse
+- Swagger UI (Azure)
+https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html
+- CI Pipeline (GitHub Actions)
+  https://github.com/MikeMucik/MyWerehouse/actions
 
-Full;
+## Features
 
-WMS backend API do obsługi przyjęć, palet, wydań, pickingu i historii
+✔ Goods Receipts
 
-System WMS ma za zadanie organizować proces przepływu produktu przez magazyn, odpowiada za przyjecia asortymentu, przygotowaniu 
-i wydaniu towaru, w tym zawiera się kompletacja(wybór policy jak dobierane są palety) jak i anulowanie zmówienia, jak i dekompletacja,
-z naciskiem na wydanie towaru (Issue), picking oraz zarządzanie paletami. 
+✔ Inventory Management
 
-System wspiera pracę magazynu, w którym towary są składowane na paletach,
- wydawane w kartonach oraz kontrolowane pod kątem daty przydatności (BestBefore). 
+✔ Picking
 
-Aplikacja została zaprojektowana w sposób umożliwiający precyzyjne planowanie pracy pickerów oraz bezpieczną alokację zasobów magazynowych.
+✔ Reverse Picking
 
-Model uproszczony – emergency flow powoduje rozdzielenie logiki między VirtualPallet i PickingTask - dwa agregaty zmiast jednego, w innym wypadku
-całkiem nowy flow dla emergency picking.
+✔ Warehouse Locations
 
-Key Business Concepts:
+✔ Shipment Management
 
-Issue – zlecenie wydania towaru (np. tworzone na podstawie e-maila od klienta)
+✔ Product Allocation
 
-Receipt - przyjęcie towaru, zestaw palet przyjętych w jednej dostawie
+✔ History Tracking
 
-Pallet – fizyczna paleta magazynowa z określoną ilością kartonów
+## Screenshot
 
-Picking – proces kompletacji towaru pod konkretne Issue
+![Swagger UI](docs/images/swagger.png)
 
-ReversePicking - proces dekompletacji, gdy kompletacja ukończona ale zlecenie Issue wycofane
+## Architecture
 
-BestBefore – data przydatności, brana pod uwagę przy alokacji palet
+The application currently follows a layered architecture:
 
-Pallet Movements – rejestr zmian lokalizacji palet oraz jej historia
+Presentation
+    ↓
+Application
+    ↓
+Domain
+    ↓
+Infrastructure
 
-HistoryReceipt, HistoryIssue, HistoryPicking, HistoryReversePicking - zapis historii operacji
-Lokalizacja w historii to uproszczony wersja jako string - docelowo powinno być obiekt uproszczony klasy location
+## Solution Structure
 
-Architecture"
-
-Projekt oparty jest o Clean Architecture oraz CQRS:
-
-rozdzielenie logiki domenowej od infrastruktury - w toku
-
-jawne use-case’y (Command / Query)
-
-brak logiki biznesowej w kontrolerach
-
-Technologie
-
-.NET 9
-
-ASP.NET Core Web API
-
-MediatR (CQRS)
-
-EF Core
-
-SQLite (In-Memory) – testy integracyjne
-InMemoryDataBase - testy dla CRUD
-Swagger / OpenAPI
-
-Solution Structure(w toku)
-src/
 ├─ MyWarehouse.Api
 │  └─ Controllers, Swagger, Middleware
 ├─ MyWarehouse.Application
@@ -105,121 +62,62 @@ src/
 └─ tests/
    └─ MyWarehouse.IntegrationTests
 
-Project Responsibilities
+The current solution follows a layered architecture. The long-term goal is to complete the migration to Clean Architecture by further reducing dependencies between layers.
 
-Api – wystawia REST API, obsługuje HTTP, mapuje wyniki na odpowiedzi
+## Technologies
 
-Application – implementuje przypadki użycia (Issue, Picking, Allocation, ...)
+- .NET 9
 
-Domain – model domenowy magazynu i reguły biznesowe
+- ASP.NET Core Web API
 
-Infrastructure – dostęp do bazy danych i integracje techniczne
+- MediatR (CQRS)
 
-Tests – testy integracyjne bez mocków
+- EF Core
 
-Testy - jednostkowe
+- SQL Server
 
-CQRS & MediatR
-Commands
+- Swagger / OpenAPI
 
-Służą do zmiany stanu systemu:
+## Testing
 
-CreateIssueCommand
+The project currently contains over 300 integration tests covering warehouse business scenarios.
 
-AddPalletsToIssueByProductCommand
+Testing technologies:
 
-ChangeLocationPalletCommand
-...
+- SQLite InMemory
+- EF Core InMemory
+- GitHub Actions
 
-Wywoływane przez:
+## Running locally
+dotnet restore
 
-await _mediator.Send(command);
-Queries
-
-Służą do odczytu danych:
-
-GetListToPickingQuery
-
-Notifications (Events) - na razie tylko historia i stock
-
-Reprezentują zdarzenia domenowe:
-
-np. ChangeStock
-
-Wywoływane przez:
-
-await _mediator.Publish(notification);
-Picking & Planning
-
-System umożliwia:
-
-generowanie listy produktów do pickingu na dany dzień / zakres dat
-
-agregację zapotrzebowania na produkty
-
-//estymację obciążenia pracy (roboczogodziny, liczba pickerów) - plan
-
-Logika ta realizowana jest w warstwie Application i opiera się na przypisanych(zadaniach PickingTask) paletach do Issue.
-
-Database & Transactions
-
-EF Core jako ORM
-
-jawne transakcje (BeginTransactionAsync)
-
-kontrola współbieżności przy alokacji palet
-
-Testy integracyjne wykorzystują:
-
-SQLite In-Memory
-
-realne repozytoria (bez mocków)
-
-Testy jednostkowe do rozbudowy
-
-Testing
-
-Projekt zawiera testy integracyjne dla kluczowych scenariuszy:
-
-alokacja pełnych palet i reszty
-
-brak wystarczającej ilości kartonów
-
-filtrowanie po BestBefore
-
-Uruchomienie testów:
+dotnet run
 
 dotnet test
-Running Locally
-Requirements
+## Domain
 
-.NET 9 SDK
+The warehouse domain is based on the following business concepts:
 
-Start API
-dotnet restore
-dotnet run --project src/MyWarehouse.Api
+Issue – an order to issue goods (e.g. created based on an e-mail from a customer)
 
-Swagger dostępny pod:
+Receipt - receipt of goods, a set of pallets received in one delivery
 
-/ swagger
-Error Handling
+Pallet – a physical warehouse pallet with a specific number of boxes
 
-wyjątki domenowe (np. brak zasobów) są mapowane na wyniki biznesowe
+Picking – the process of assembling goods for a specific issue
 
-globalny middleware obsługuje wyjątki techniczne
+ReversePicking - the process of disassembly when the picking is completed but the Issue order is withdrawn
 
-kontrolery nie zawierają logiki domenowej
+BestBefore - expiration date, taken into account when allocating pallets
 
-Status
+## Future Improvements
 
-Projekt w aktywnym rozwoju. Fokus:
+- Complete migration to Clean Architecture
 
-stabilizacja modelu domenowego
+- JWT authentication and authorization
 
-rozbudowa planowania pickingu
+- Docker support
 
-inne polityki dobierania palet
+- Improved pallet allocation policies
 
-dalsze testy integracyjne
-
-Pobieranie palet do kompletacji od najmniejszej ilości z palet o tej samej dacie BB - policy
+- Warehouse workload planning

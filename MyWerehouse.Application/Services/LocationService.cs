@@ -36,7 +36,7 @@ namespace MyWerehouse.Application.Services
 			var result = _locationRepo.AddLocation(location);
 
 			await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<int>.Success(result.Id, "Dodano lokalizacje.");//"Dodano lokalizacje.",
+			return AppResult<int>.Success(result.Id, "Dodano lokalizacje.");
 		}
 		public async Task<AppResult<Unit>> DeleteLocationServiceAsync(int id)
 		{
@@ -69,7 +69,6 @@ namespace MyWerehouse.Application.Services
 			return AppResult<Location>.Success(location);
 		}
 
-		//potrzebne do many 
 		public AppResult<List<LocationDTO>> PrepareLocations(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{
 			var list = new List<LocationDTO>();

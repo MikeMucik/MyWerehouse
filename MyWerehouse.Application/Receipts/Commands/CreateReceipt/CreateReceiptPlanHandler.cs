@@ -6,15 +6,13 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {
 	public class CreateReceiptPlanHandler(WerehouseDbContext werehouseDbContext,
-		IReceiptRepo receiptRepo,
-		IClientRepo clientRepo,
-		ILocationRepo locationRepo) : IRequestHandler<CreateReceiptPlanCommand, AppResult<Unit>>
+		IReceiptRepo receiptRepo) : IRequestHandler<CreateReceiptPlanCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;

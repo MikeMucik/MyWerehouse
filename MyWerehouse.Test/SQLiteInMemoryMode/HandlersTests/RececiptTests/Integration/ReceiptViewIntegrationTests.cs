@@ -3,16 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Filters;
+using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
 {

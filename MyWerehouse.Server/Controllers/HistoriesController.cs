@@ -9,18 +9,25 @@ using MyWerehouse.Server.Extensions;
 namespace MyWerehouse.Server.Controllers
 {
 	[ApiController]
-	[Route("api/history")]
-	public class HistoryController : ControllerBase
+	[Route("api/histories")]
+	public class HistoriesController : ControllerBase
 	{
 		private readonly IMediator _mediator;
-		public HistoryController(IMediator mediator)
+		public HistoriesController(IMediator mediator)
 		{
 			_mediator = mediator;
 		}
 		
-		[HttpGet("FindHistoryRecordForPalletByFilter")]
-		public async Task<IActionResult> FindHistoryRecordForPalletByFilter([FromQuery] GetPalletHistoryQuery query)
-			=> (await _mediator.Send(query)).ToActionResult();
+		[HttpGet("pallets/{palletNumber}")]
+		public async Task<IActionResult> GetPalletHistory(string palletNumber)
+		{
+			var query = new GetPalletHistoryQuery
+			{
+				PalletNumber = palletNumber
+			};
+			return (await _mediator.Send(query)).ToActionResult();
+		}
+				
 	}
 }
 

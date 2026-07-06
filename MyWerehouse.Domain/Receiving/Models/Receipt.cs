@@ -11,10 +11,11 @@ using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Invetories.Events;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Receviving.Events;
-using MyWerehouse.Domain.Receviving.ReceivingExceptions;
+using MyWerehouse.Domain.Receiving.Events;
+using MyWerehouse.Domain.Receiving.ReceivingExceptions;
+using MyWerehouse.Domain.Receving.Events;
 
-namespace MyWerehouse.Domain.Receviving.Models
+namespace MyWerehouse.Domain.Receiving.Models
 {
 	public class Receipt : AggregateRoots
 	{
@@ -58,7 +59,6 @@ namespace MyWerehouse.Domain.Receviving.Models
 			ReceiptNumber = receiptNumber;
 			if (clientId <= 0) throw new ClientDomainException();
 			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException(performedBy);
-			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
 			ClientId = clientId;
 			PerformedBy = performedBy;
 			ReceiptDateTime = dateTime;
@@ -149,7 +149,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 			}
 			ReceiptStatus = ReceiptStatus.Verified;
 			AddHistory(userId);
-			this.AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));
+			AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));
 		}
 
 		//Detach i Attach tylko dla update - dla historii
@@ -166,7 +166,7 @@ namespace MyWerehouse.Domain.Receviving.Models
 
 		public void AddHistory(string userId)
 		{
-			this.AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
+			AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
 
 		//metody pomocnicze

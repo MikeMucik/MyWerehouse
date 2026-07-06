@@ -12,35 +12,35 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 {
 	public class MarkAsLoadedHandler(WerehouseDbContext werehouseDbContext,
-		IPalletRepo palletRepo) : IRequestHandler<MarkAsLoadedCommand, AppResult<MarkPalletAsLoadedResponeDTO>>
+		IPalletRepo palletRepo) : IRequestHandler<MarkAsLoadedCommand, AppResult<MarkPalletAsLoadedResponseDTO>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 
-		public async Task<AppResult<MarkPalletAsLoadedResponeDTO>> Handle(MarkAsLoadedCommand request, CancellationToken ct)
+		public async Task<AppResult<MarkPalletAsLoadedResponseDTO>> Handle(MarkAsLoadedCommand request, CancellationToken ct)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 			if (pallet == null)
-				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail($"Wskazana paleta nie istnieje.", ErrorType.NotFound);
+				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail($"Wskazana paleta nie istnieje.", ErrorType.NotFound);
 			if (pallet.Status == PalletStatus.Loaded)
-				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail($"Paleta {pallet.PalletNumber} jest już załadowana.", ErrorType.Conflict);
+				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail($"Paleta {pallet.PalletNumber} jest już załadowana.", ErrorType.Conflict);
 			var allowedStatuses = new[]
 				{
 					PalletStatus.ToIssue,
 					PalletStatus.LockedForIssue,//changing pallets
 				};
 			if (!allowedStatuses.Contains(pallet.Status))
-				return AppResult<MarkPalletAsLoadedResponeDTO>.Fail("Paleta nie ma statusu do załadowania");
+				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail("Paleta nie ma statusu do załadowania");
 			pallet.MarkAsLoaded(request.UserId, pallet.Location.ToSnapshot());
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			var respone = new MarkPalletAsLoadedResponeDTO
+			var respone = new MarkPalletAsLoadedResponseDTO
 			{
 				PalletId = pallet.Id,
 				PalletNumber = pallet.PalletNumber,
 				NewStatus = pallet.Status,
 				LoadedAt = DateTime.UtcNow,
 			};
-			return AppResult<MarkPalletAsLoadedResponeDTO>.Success(respone, $"Paleta {pallet.PalletNumber} załadowana.");
+			return AppResult<MarkPalletAsLoadedResponseDTO>.Success(respone, $"Paleta {pallet.PalletNumber} załadowana.");
 		}
 	}
 }

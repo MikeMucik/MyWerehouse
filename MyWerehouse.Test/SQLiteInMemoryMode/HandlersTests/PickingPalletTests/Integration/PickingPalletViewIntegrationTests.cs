@@ -56,7 +56,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var result = await _mediator.Send(query);
 			// Assert
 			Assert.False(result.IsSuccess);
-			Assert.Contains("nie jest do pickingu, zawiera rózne towary", result.Error);
+			Assert.Contains("nie jest do pickingu, zawiera różne towary", result.Error);
 		}
 		[Fact]
 		public async Task PrepareEmergencyPicking_ReturnInfoChangeStatus_WhenPalletHasWrongStatus()

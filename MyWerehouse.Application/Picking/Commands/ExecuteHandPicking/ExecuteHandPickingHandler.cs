@@ -32,7 +32,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteHandPickingCommand command, CancellationToken ct)
 		{
-			if (command.Quanitity <= 0)
+			if (command.Quantity <= 0)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Nie możesz pobrać ujemnej wartości.", ErrorType.Conflict);
 			}
@@ -57,7 +57,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			}
 			var pickingHandTask = await _pickingDomainService.GetSingleHandPickingTask(command.IssueId, product.ProductId);
 			
-			if (command.Quanitity > (pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity))
+			if (command.Quantity > (pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity))
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Chcesz pobrać więcej niż potrzeba.", ErrorType.Conflict);
 			}
@@ -73,17 +73,17 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			}
 			var availableQuantity = virtualPallet?.RemainingQuantity ?? product.Quantity;
-			if (command.Quanitity > availableQuantity)
+			if (command.Quantity > availableQuantity)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Zadania nie można zrealizować, mniej dostępnego towaru na palecie niż chęć pobrania", ErrorType.Conflict);
 			}
 			pickingHandTask.SetVirtualPallet(virtualPallet.Id);
 			var completion = PickingCompletion.Full;
-			if (command.Quanitity < pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity)
+			if (command.Quantity < pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity)
 			{
 				completion = PickingCompletion.Partial;
 			}
-			var resultProcessPicking = await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quanitity, command.UserId, pickingHandTask, completion, command.NumberRamp);
+			var resultProcessPicking = await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quantity, command.UserId, pickingHandTask, completion, command.NumberRamp);
 			if (!resultProcessPicking.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(resultProcessPicking.Message, ErrorType.Conflict);//

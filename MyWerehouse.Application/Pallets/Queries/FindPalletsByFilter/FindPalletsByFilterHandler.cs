@@ -10,12 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Domain.Interfaces;
 
-namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
+namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter
 {
-	public class FindPalletsByFiltrHandler(IPalletRepo palletRepo,
+	public class FindPalletsByFilterHandler(IPalletRepo palletRepo,
 		IMapper mapper) : IRequestHandler<FindPalletsByFilterQuery, AppResult<PagedResult<PalletSimplyDTO>>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;

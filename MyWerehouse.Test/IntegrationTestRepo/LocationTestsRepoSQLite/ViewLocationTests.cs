@@ -72,7 +72,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			var result = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
 			//Assert
 			Assert.Null(result);
-			//Assert.Equal(1, result.Id);
 		}
 	}
 }

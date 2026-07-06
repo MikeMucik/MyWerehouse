@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Receviving.Filters;
+using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Domain.Interfaces
 {

@@ -20,13 +20,13 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 		IReversePickingRepo reversePickingRepo,
 		IAddProductsToPalletService addProductsToPalletService,
 		IPalletRepo palletRepo
-		) : IRequestHandler<ExecutiveReversePickingCommand, AppResult<ReversePickingResult>>
+		) : IRequestHandler<ExecuteReversePickingCommand, AppResult<ReversePickingResult>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IAddProductsToPalletService _addProductsToPalletService = addProductsToPalletService;
 		private readonly IPalletRepo _palletRepo = palletRepo;
-		public async Task<AppResult<ReversePickingResult>> Handle(ExecutiveReversePickingCommand command, CancellationToken ct)
+		public async Task<AppResult<ReversePickingResult>> Handle(ExecuteReversePickingCommand command, CancellationToken ct)
 		{
 			//walidacja
 			if (command.Strategy == ReversePickingStrategy.AddToExistingPallet)

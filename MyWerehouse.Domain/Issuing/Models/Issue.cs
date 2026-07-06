@@ -15,7 +15,7 @@ using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Receviving.Events;
+using MyWerehouse.Domain.Receving.Events;
 
 namespace MyWerehouse.Domain.Issuing.Models
 {
@@ -117,7 +117,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 				//return;
 				throw new ProductAlreadyExistDomainException(productId);
 			}
-			if (quantity <= 0) throw new InvalidQuantityDomainException(quantity, Id, IssueNumber);
+			if (quantity <= 0) throw new IssueExceptions.InvalidQuantityDomainException(quantity, Id, IssueNumber);
 			var item = new IssueItem(Id, productId, quantity, bestBefore);
 			this.IssueItems.Add(item);
 		}

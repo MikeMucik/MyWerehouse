@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Receviving.Events;
+using MyWerehouse.Domain.Receving.Events;
 
 namespace MyWerehouse.Domain.Issuing.Events
 {

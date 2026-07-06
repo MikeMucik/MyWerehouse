@@ -5,11 +5,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentValidation;
 using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceiptById
 {

@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 {
-	public class ShowPaletToEditDTO : IMapFrom<Pallet>
+	public class ShowPalletToEditDTO : IMapFrom<Pallet>
 	{
 		public Guid Id { get; init; }
 		public string PalletNumber { get; init; }
@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Pallet, ShowPaletToEditDTO>()
+			profile.CreateMap<Pallet, ShowPalletToEditDTO>()
 				.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src => src.ProductsOnPallet));
 		}
 	}

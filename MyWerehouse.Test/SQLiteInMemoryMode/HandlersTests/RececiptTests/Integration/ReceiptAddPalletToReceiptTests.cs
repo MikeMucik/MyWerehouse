@@ -11,14 +11,14 @@ using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
 {
 	public class ReceiptAddPalletToReceiptTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -39,7 +39,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory(string name)
+		private static Category CreateCategory(string name)
 		{
 			return new Category
 			{
@@ -47,11 +47,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name, string sku)
+		private static Product CreateProduct(string name, string sku)
 		{
 			return Product.Create(name, sku, 1, 56);
 		}
-		private Location CreateLocation(int id, int position)
+		private static Location CreateLocation(int id, int position)
 		{
 			return new Location
 			{
@@ -94,6 +94,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			var newPallet = DbContext.Pallets.FirstOrDefault(p => p.ReceiptId == receipt.Id);
+			Assert.NotNull(newPallet);
 			var palletFromDb = newPallet;
 			Assert.NotNull(palletFromDb);
 			Assert.Equal(receipt.Id, palletFromDb.ReceiptId);
@@ -122,7 +123,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			var receiptAfter = await DbContext.Receipts
 				.Include(x => x.Pallets)
 				.FirstOrDefaultAsync(x => x.Id == receipt.Id);
-
+			Assert.NotNull(receiptAfter);
 			Assert.Contains(receiptAfter.Pallets, p => p.Id == newPallet.Id);
 		}
 		[Fact]

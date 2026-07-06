@@ -53,17 +53,17 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void ChangeQuantity(int quantity)
 		{
 			var newQuantity = Quantity + quantity;
-			if (newQuantity <= 0) throw new InvalidQunatityDomainException(PalletId);
+			if (newQuantity <= 0) throw new InvalidQuantityDomainException(PalletId);
 			Quantity = newQuantity;
 		}
 		public void IncreaseQuantity(int quantity)
 		{			
-			if (quantity <= 0) throw new InvalidQunatityDomainException(PalletId);
+			if (quantity <= 0) throw new InvalidQuantityDomainException(PalletId);
 			Quantity += quantity;
 		}
 		public void DecreaseQuantity(int quantity)
 		{
-			if (quantity <= 0) throw new InvalidQunatityDomainException(PalletId);
+			if (quantity <= 0) throw new InvalidQuantityDomainException(PalletId);
 			var newQuantity = Quantity - quantity;
 			if (newQuantity < 0) throw new InsufficientQunatityDomainException(PalletId);
 			Quantity = newQuantity;			

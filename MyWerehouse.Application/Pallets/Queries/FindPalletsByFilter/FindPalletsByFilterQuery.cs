@@ -7,10 +7,9 @@ using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Domain.Pallets.Filters;
 
-namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr
+namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter
 {
 	public class FindPalletsByFilterQuery : IRequest<AppResult<PagedResult<PalletSimplyDTO>>>
 	{

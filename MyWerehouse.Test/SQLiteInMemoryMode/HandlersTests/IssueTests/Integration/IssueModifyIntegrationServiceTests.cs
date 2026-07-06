@@ -53,7 +53,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		{
 			return Product.Create(name, "SKU1", categoryId, 10);
 		}
-		private Location CreateLocation(int position)
+		private static Location CreateLocation(int position)
 		{
 			return new Location
 			{
@@ -511,6 +511,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(1, vp.RemainingQuantity);
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
+			Assert.NotNull(result.Result);
 			Assert.Single(result.Result);
 			Assert.True(result.Result.First().Success);
 			Assert.Equal(product.Id, result.Result.First().ProductId);
@@ -845,7 +846,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				.ToList();
 
 
-			Assert.Equal(1, palletsProd1.Count); // Powinny być 1 palety (np. P1 )
+			Assert.Single(palletsProd1); // Powinny być 1 palety (np. P1 )
 
 			var allocProd1 = updatedIssue1.PickingTasks.FirstOrDefault(a => a.ProductId == product.Id);
 			//var allocProd2 = updatedIssue1.PickingTasks.LastOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.Id);
@@ -943,6 +944,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert.Equal("User1", updatedIssue.PerformedBy); //akcja nieudana więc użytkownik z poprzedniej zmiany
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
+			Assert.NotNull(result.Result);
 			Assert.Single(result.Result);
 			Assert.False(result.Result.First().Success);
 			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}", result.Result.First().Message);
@@ -1008,6 +1010,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal("User1", updatedIssue.PerformedBy); //akcja nieudana więc użytkownik z poprzedniej zmiany
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
+			Assert.NotNull(result.Result);
 			Assert.Single(result.Result);
 			Assert.False(result.Result.First().Success);
 			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Result.First().Message);

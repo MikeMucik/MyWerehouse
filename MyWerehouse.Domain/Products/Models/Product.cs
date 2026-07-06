@@ -1,8 +1,6 @@
 ﻿using System.Xml.Linq;
 using MyWerehouse.Domain.Invetories.Models;
-using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Products.ProductsExceptions;
-using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Domain.Products.Models
 {

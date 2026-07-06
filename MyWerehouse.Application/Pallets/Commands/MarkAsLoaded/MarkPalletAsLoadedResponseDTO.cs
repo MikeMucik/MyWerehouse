@@ -7,7 +7,7 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 {
-	public sealed class MarkPalletAsLoadedResponeDTO
+	public sealed class MarkPalletAsLoadedResponseDTO
 	{
 		public Guid PalletId { get; init; }
 		public required string PalletNumber { get; init; }

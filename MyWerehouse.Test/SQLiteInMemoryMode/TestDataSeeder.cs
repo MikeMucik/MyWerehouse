@@ -12,7 +12,7 @@ using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence;
 

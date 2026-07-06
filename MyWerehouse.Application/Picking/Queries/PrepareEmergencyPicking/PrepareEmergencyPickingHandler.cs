@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.DTOs;
+using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
-namespace MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking
+namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 {
 	public class PrepareEmergencyPickingHandler(IPalletRepo palletRepo,
 		IPickingTaskRepo pickingTaskRepo) : IRequestHandler<PrepareEmergencyPickingQuery, AppResult<PrepareCorrectedPickingResult>>
@@ -28,12 +29,12 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking
 			}
 			if (pallet.Status == PalletStatus.Archived || pallet.Status == PalletStatus.OnHold)
 			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta jest zablokowona, brak możliwości operacji.");
+				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta jest zablokowana, brak możliwości operacji.");
 			}
 			var checkPallet = pallet.ProductsOnPallet.Count;
 			if (checkPallet > 1)
 			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta nie jest do pickingu, zawiera rózne towary");
+				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta nie jest do pickingu, zawiera różne towary");
 
 			}
 			if (pallet.Status != PalletStatus.ToPicking) //do uzgodnienia biznesowego
@@ -60,7 +61,7 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking
 				{
 					IssueId = g.Key.IssueId,
 					IssueNumber = g.Key.IssueNumber,
-					QunatityToDo = g.Sum(a => a.RequestedQuantity)
+					QuanityToDo = g.Sum(a => a.RequestedQuantity)
 				})
 				.ToList();
 			var result = PrepareCorrectedPickingResult.RequiresOrder(

@@ -8,15 +8,15 @@ using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
-using MyWerehouse.Domain.Receviving.ReceivingExceptions;
+using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.Receiving.ReceivingExceptions;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
 {
 	public class ReceiptCompletePhysicalIntegrationTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -37,7 +37,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory(string name)
+		private static Category CreateCategory(string name)
 		{
 			return new Category
 			{
@@ -45,11 +45,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name, string sku)
+		private static Product CreateProduct(string name, string sku)
 		{
 			return Product.Create(name, sku, 1, 56);
 		}
-		private Location CreateLocation(int id, int position)
+		private static Location CreateLocation(int id, int position)
 		{
 			return new Location
 			{

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {

@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.ViewModels.ProductModels
 {
-	public class EditProductDTO :IMapFrom<Product>
+	public class EditProductDTO : IMapFrom<Product>
 	{
 		public string Name { get; init; }
 		public string SKU { get; init; }
@@ -22,21 +22,21 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int Width { get; init; } //cm
 		public int Weight { get; init; } //kg
 		public string Description { get; init; }
-		public DateTime AddedItemAd { get; init; } = DateTime.Now;
+		public DateTime AddedAd { get; init; } = DateTime.Now;
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Product, EditProductDTO >()
+			profile.CreateMap<Product, EditProductDTO>()
 				.ForMember(dest => dest.Length, opt => opt.MapFrom(static src => src.Details.Length))
 				.ForMember(dest => dest.Height, opt => opt.MapFrom(static src => src.Details.Height))
 				.ForMember(dest => dest.Width, opt => opt.MapFrom(static src => src.Details.Width))
 				.ForMember(dest => dest.Weight, opt => opt.MapFrom(static src => src.Details.Weight))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(static src => src.Details.Description))
 				.ReverseMap();
-		}		
+		}
 	}
-	public class AddProductDTOValidation : AbstractValidator<EditProductDTO>
+	public class EditProductDTOValidation : AbstractValidator<EditProductDTO>
 	{
-		public AddProductDTOValidation() 
+		public EditProductDTOValidation()
 		{
 			RuleFor(p => p.Name).NotNull().WithMessage("Uzupełnij dane - nazwa");
 			RuleFor(p => p.SKU).NotNull().WithMessage("Uzupełnij dane - SKU");

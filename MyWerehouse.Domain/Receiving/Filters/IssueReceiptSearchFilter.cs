@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Domain.Receviving.Filters
+namespace MyWerehouse.Domain.Receving.Filters
 {
 	public class IssueReceiptSearchFilter
 	{

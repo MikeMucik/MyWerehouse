@@ -16,14 +16,14 @@ using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.Integration
 {
 	public class ExecutiveReversePickingTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -44,7 +44,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory(string name)
+		private static Category CreateCategory(string name)
 		{
 			return new Category
 			{
@@ -52,11 +52,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name, string sku)
+		private static Product CreateProduct(string name, string sku)
 		{
 			return Product.Create(name, sku, 1, 10);
 		}
-		private Location CreateLocation(int id, int position)
+		private static Location CreateLocation(int id, int position)
 		{
 			return new Location
 			{
@@ -67,7 +67,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				Position = position
 			};
 		}
-		private Receipt CreateReceipt()
+		private static Receipt CreateReceipt()
 		{
 			return	Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMake",	DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
 		}
@@ -195,7 +195,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
-				new ExecutiveReversePickingCommand(task.Id, ReversePickingStrategy.ReturnToSource,
+				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.ReturnToSource,
 				pickingPallet.Id, "UserReverse", null, null));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
@@ -340,7 +340,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(2, palletP2.LocationId);			
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
-				new ExecutiveReversePickingCommand(task.Id, ReversePickingStrategy.AddToNewPallet,
+				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.AddToNewPallet,
 				pickingPallet.Id, "UserReverse", null, 100100));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
@@ -494,7 +494,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var list = new List<Pallet> { existingPallet };
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
-				new ExecutiveReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
+				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
 				pickingPallet.Id, "UserReverse", list, null));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
@@ -662,7 +662,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var list = new List<Pallet> { existingPallet };			
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
-				new ExecutiveReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
+				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
 				pickingPallet.Id, "UserReverse", list, null));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);
@@ -792,7 +792,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(8, productOnPickingPallet.Quantity);
 
 			//Act 2.2 - wykonanie pickingu - pomijamy strzelenie skanerem w paletę P4
-			var pickingTaskForProduct1 = pickingTaskToDo.FirstOrDefault(p => p.ProductId == product1.Id);
+			var pickingTaskForProduct1 = pickingTaskToDo.Single(p => p.ProductId == product1.Id);
+			
 			var toPicking1 = new PickingTaskDTO
 			{
 				Id = pickingTaskForProduct1.Id,
@@ -877,7 +878,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var list = new List<Pallet> { existingPallet};
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
-				new ExecutiveReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
+				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
 				pickingPallet.Id, "UserReverse", list, null));
 			//Assert 4
 			Assert.NotNull(resultReversePicking);

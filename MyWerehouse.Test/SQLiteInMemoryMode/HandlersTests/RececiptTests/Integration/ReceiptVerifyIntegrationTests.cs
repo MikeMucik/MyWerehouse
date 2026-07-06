@@ -12,8 +12,8 @@ using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
-using MyWerehouse.Domain.Receviving.ReceivingExceptions;
+using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.Receiving.ReceivingExceptions;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration

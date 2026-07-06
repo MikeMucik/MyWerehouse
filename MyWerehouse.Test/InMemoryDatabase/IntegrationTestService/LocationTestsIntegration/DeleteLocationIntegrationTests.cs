@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.ViewModels.LocationModels;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTestsIntegration
 {

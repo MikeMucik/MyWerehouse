@@ -4,24 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt;
 using MyWerehouse.Application.Receipts.Commands.CreateReceipt;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
 {
 	public class ReceiptNewReceiptAndAddPalletIntegrationTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -42,7 +36,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Location CreateLocation(int id, int position)
+		private static Location CreateLocation(int id, int position)
 		{
 			return new Location
 			{

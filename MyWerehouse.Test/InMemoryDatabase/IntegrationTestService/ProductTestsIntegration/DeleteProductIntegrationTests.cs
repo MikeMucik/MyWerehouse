@@ -8,7 +8,7 @@ using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsIntegration

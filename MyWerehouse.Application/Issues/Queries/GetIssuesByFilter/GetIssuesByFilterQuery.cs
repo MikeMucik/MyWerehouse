@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.Receviving.Filters;
+using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFilter
 {

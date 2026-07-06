@@ -6,7 +6,7 @@ using MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet;
 using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
-using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
+using MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter;
 using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Application.Pallets.Queries.GetPalletByPalletNumber;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
@@ -24,22 +24,24 @@ namespace MyWerehouse.Server.Controllers
 			_mediator = mediator;
 		}
 		// stworzenie palety
-		[HttpPost("add")]
+		[HttpPost]
 		public async Task<IActionResult> Create(CreatePalletCommand command)
 		{
 			var result = await _mediator.Send(command);
 			return result.ToActionResult();
 		}
 		// dane palety Guid
-		[HttpGet("{id}getInfo")]
+		[HttpGet("{id:guid}")]
 		public async Task<IActionResult> Get(Guid id)
 			=> (await _mediator.Send(new GetPalletQuery(id))).ToActionResult();
+		
 		// dane palety Palletnumber
-		[HttpGet("{palletId}getInfoPalletnumber")]
-		public async Task<IActionResult> GetByPalletNumber(string palletId)
+		[HttpGet("getPalletIdFromPalletNumber")]
+		public async Task<IActionResult> GetPalletId(string palletId)
 			=> (await _mediator.Send(new GetPalletByPalletNumberQuery(palletId))).ToActionResult();
+		
 		// paleta do edycji
-		[HttpGet("{id}toEdit")]
+		[HttpGet("{id}edit")]
 		public async Task<IActionResult> GetForEdit(Guid id)
 			=> (await _mediator.Send(new GetPalletToEditQuery(id))).ToActionResult();		
 
@@ -59,8 +61,8 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		// filtr / lista
-		[HttpGet("byFilter")]
-		public async Task<IActionResult> Find([FromQuery] FindPalletsByFilterQuery query)
+		[HttpGet("search")]
+		public async Task<IActionResult> Search([FromQuery] FindPalletsByFilterQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 }

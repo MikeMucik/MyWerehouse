@@ -97,9 +97,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				result = result.Where(p => p.Status == filter.PalletStatus);
 			}
-			if (filter.BestBefore != null || filter.BestBeforeTo != null)
+			if (filter.BestBeforeFrom != null || filter.BestBeforeTo != null)
 			{
-				var bestBeforeStart = filter.BestBefore ?? DateOnly.MinValue;
+				var bestBeforeStart = filter.BestBeforeFrom ?? DateOnly.MinValue;
 				var bestBeforeEnd = filter.BestBeforeTo ?? DateOnly.MaxValue;
 				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
 				pp.BestBefore >= bestBeforeStart && pp.BestBefore <= bestBeforeEnd));

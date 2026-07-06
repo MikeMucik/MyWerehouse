@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Receviving.Filters;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {

@@ -94,7 +94,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Arrange
 			var productId = new PalletSearchFilter
 			{
-				BestBefore = DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
+				BestBeforeFrom = DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
 			};
 			//Act
 			var result = _palletRepo.GetPalletsByFilter(productId);

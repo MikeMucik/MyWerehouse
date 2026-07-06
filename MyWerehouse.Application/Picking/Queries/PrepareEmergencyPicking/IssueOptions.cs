@@ -10,6 +10,6 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking
 	{
 		public Guid IssueId { get; init; }
 		public int IssueNumber { get; init; }
-		public int QunatityToDo { get; init; }
+		public int QuanityToDo { get; init; }
 	}
 }

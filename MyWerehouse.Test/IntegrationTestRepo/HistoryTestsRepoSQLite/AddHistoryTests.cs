@@ -12,12 +12,12 @@ using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
-namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepo
+namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 {
 	public class AddHistoryTests : TestBase
 	{

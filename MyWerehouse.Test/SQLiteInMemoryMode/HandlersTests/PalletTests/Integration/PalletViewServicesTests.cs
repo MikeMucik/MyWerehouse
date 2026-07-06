@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Arrange
 			var filter = new PalletSearchFilter
 			{
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(3))
+				BestBeforeFrom = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(3))
 			};
 			//Act
 			var query = new FindPalletsByFilterQuery
@@ -108,7 +108,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Arrange
 			var filter = new PalletSearchFilter
 			{
-				BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(36))
+				BestBeforeFrom = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(36))
 			};
 			//Act
 			var query = new FindPalletsByFilterQuery

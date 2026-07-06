@@ -1,6 +1,6 @@
 ﻿using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Domain.Clients.Models
 {

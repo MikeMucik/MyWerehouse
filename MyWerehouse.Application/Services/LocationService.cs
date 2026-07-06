@@ -58,7 +58,7 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<LocationDTO>> GetLocationServiceAsync(int id)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(id);
-			if (location == null) return AppResult<LocationDTO>.Fail("Brak elemntów do wyświetlenia", ErrorType.NotFound);
+			if (location == null) return AppResult<LocationDTO>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
 			var locationDTO = _mapper.Map<LocationDTO>(location);
 			return AppResult<LocationDTO>.Success(locationDTO);
 		}
@@ -73,7 +73,7 @@ namespace MyWerehouse.Application.Services
 		{
 			var list = new List<LocationDTO>();
 			var locations = _locationRepo.CreateListLocationForBay(bay, startAisle, endAisle, amountPosition, amountHeigt);
-			if (locations == null) return AppResult<List<LocationDTO>>.Fail("Brak elemntów do wyświetlenia", ErrorType.NotFound);
+			if (locations == null) return AppResult<List<LocationDTO>>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
 
 			foreach (var location in locations)
 			{

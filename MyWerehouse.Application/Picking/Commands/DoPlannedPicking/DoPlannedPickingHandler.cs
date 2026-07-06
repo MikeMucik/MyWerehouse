@@ -50,7 +50,7 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 			var completion = PickingCompletion.Full;
 			if (pickedQuantity <= 0 || pickedQuantity > neededQuantity)
 			{
-				return AppResult<ProcessPickingActionResult>.Fail("Ilosć musi być większa od zera i mniejsza od zapotrzebowania", ErrorType.Conflict);//Technical
+				return AppResult<ProcessPickingActionResult>.Fail("Ilość musi być większa od zera i mniejsza od zapotrzebowania", ErrorType.Conflict);//Technical
 			}
 			if (neededQuantity > pickedQuantity)
 			{

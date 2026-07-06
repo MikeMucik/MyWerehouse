@@ -15,7 +15,7 @@ using MyWerehouse.Server.Extensions;
 namespace MyWerehouse.Server.Controllers
 {
 	[ApiController]
-	[Route("api/recipe")]
+	[Route("api/receipts")]
 	public class ReceiptsController : ControllerBase
 	{
 		private readonly IMediator _mediator;
@@ -25,7 +25,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Stworzenie pustego przyjęcia
-		[HttpPost("new")]
+		[HttpPost]
 		public async Task<IActionResult> Create(CreateReceiptPlanCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
@@ -35,7 +35,7 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Aktualizacja przyjęcia, poprawa palet -> Post
-		[HttpPost("{id}update")]
+		[HttpPut("{id:guid}")]
 		public async Task<IActionResult> Update(Guid id, UpdateReceiptDTO dto)
 			=> (await _mediator.Send(new UpdateReceiptCommand(id, dto))).ToActionResult();
 
@@ -45,7 +45,7 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> Delete(DeleteDraftReceiptCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
-		[HttpPost("cancel")]
+		[HttpDelete("cancel")]
 		public async Task<IActionResult> Cancel(CancelReceiptCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 

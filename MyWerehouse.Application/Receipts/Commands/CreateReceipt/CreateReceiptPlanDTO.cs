@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentValidation;
 using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {

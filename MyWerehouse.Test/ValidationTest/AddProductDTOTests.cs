@@ -16,7 +16,7 @@ namespace MyWerehouse.Test.ValidationTest
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();			
-			var product = new EditProductDTO
+			var product = new CreateProductDTO
 			{
 				Name = "Apple",
 				SKU = "666666",
@@ -36,7 +36,7 @@ namespace MyWerehouse.Test.ValidationTest
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();
-			var product = new EditProductDTO
+			var product = new CreateProductDTO
 			{
 				//Name = "Apple",
 				SKU = "666666",
@@ -56,7 +56,7 @@ namespace MyWerehouse.Test.ValidationTest
 		{
 			//Arrange
 			var validator = new AddProductDTOValidation();
-			var product = new EditProductDTO
+			var product = new CreateProductDTO
 			{
 				Name = "Apple",
 				SKU = "666666",

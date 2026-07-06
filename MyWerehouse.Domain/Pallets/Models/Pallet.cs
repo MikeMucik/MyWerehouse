@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Invetories.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Domain.Pallets.Models
@@ -130,7 +130,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void AddProduct(Guid productId, int quantity, DateOnly? bestBefore)
 		{
 			if (quantity <= 0)
-				throw new InvalidQunatityDomainException(Id);
+				throw new InvalidQuantityDomainException(Id);
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, DateTime.UtcNow, bestBefore));
 		}
 
@@ -150,7 +150,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void AddProductForTests(Guid productId, int quantity, DateTime dateAdd, DateOnly? bestBefore)
 		{
 			if (quantity <= 0)
-				throw new InvalidQunatityDomainException(Id);
+				throw new InvalidQuantityDomainException(Id);
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, dateAdd, bestBefore));
 		}
 

@@ -41,10 +41,10 @@ namespace MyWerehouse.Application.Picking.Services
 			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
-		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet> pallets, List<VirtualPallet> virtualPallets,
+		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet>? pallets, List<VirtualPallet> virtualPallets,
 			Issue issue, Guid productId, int rest, DateOnly? bestBefore, string userId)
 		{
-			// pallets - palety używane w danym issue - potrzebne bo jeszcze nie zapisane w bazie - jeden handler - brak saveChanges
+			// pallets - pallets used in a given issue - needed because not saved in the database yet - one handler - no saveChanges
 			var quantity = rest;
 			var pickingTasks = new List<PickingTask>(); //dla result 																											
 			void CreatePickingTask(VirtualPallet vp, Issue issue, int quantity, Guid productId, DateOnly? bestBefore, string userId)
@@ -67,8 +67,8 @@ namespace MyWerehouse.Application.Picking.Services
 				if (quantity <= 0)
 					break;
 			}
-			//nowe palety do pickingu
-			//TODO weź tylko tyle palet ile potrzebujesz zwiększysz performance na razie Take 10			
+			//new pallets for picking
+			//TODO Take only as many pallets as you need, you will increase performance for now Take 10			
 			var usedPalletsId = pallets?
 				.Select(p => p.Id)
 				.ToHashSet() ?? new HashSet<Guid>();
@@ -78,7 +78,7 @@ namespace MyWerehouse.Application.Picking.Services
 			{
 				if (quantity <= 0) break;
 				var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.First().Quantity, palletToPicking.LocationId);
-				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //z nowych palet do pickingu
+				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //from new pallet for picking
 				var vp = _virtualPalletRepo.AddPalletToPicking(virtualPallet);
 
 				var taken = Math.Min(quantity, vp.RemainingQuantity);
@@ -87,7 +87,7 @@ namespace MyWerehouse.Application.Picking.Services
 				quantity -= taken;
 				if (quantity <= 0) break;
 			}
-			//jeśli za mało towaru to komunikat dla użytkownika 
+			//if there is not enough product, a message will be sent to the user
 			if (quantity > 0)
 			{
 				var productFull = await _productRepo.GetProductByIdAsync(productId);

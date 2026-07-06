@@ -8,15 +8,15 @@ using MediatR;
 
 namespace MyWerehouse.Application.Common.Behaviors
 {
-	public class ValidationBehavior<TRequest, TRespone> : IPipelineBehavior<TRequest, TRespone>
-		where TRequest : IRequest<TRespone>
+	public class ValidationBehavior<TRequest, TResposne> : IPipelineBehavior<TRequest, TResposne>
+		where TRequest : IRequest<TResposne>
 	{
 		private readonly IEnumerable<IValidator<TRequest>> _validators;
 		public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
 		{
 			_validators = validators;
 		}
-		public async Task<TRespone> Handle(TRequest request, RequestHandlerDelegate<TRespone> next, 
+		public async Task<TResposne> Handle(TRequest request, RequestHandlerDelegate<TResposne> next, 
 			CancellationToken cancellationToken)
 		{
 			if(_validators.Any())

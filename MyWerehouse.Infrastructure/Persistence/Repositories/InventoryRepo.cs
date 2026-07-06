@@ -22,14 +22,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{	
 			_werehouseDbContext.Inventories.Add(inventory);
 		}		
-		public async Task<Inventory> GetInventoryForProductAsync(Guid productId)//pobranie danych/ilość dla produktu z ostatniej aktualizacji
+		public async Task<Inventory?> GetInventoryForProductAsync(Guid productId)//pobranie danych/ilość dla produktu z ostatniej aktualizacji
 		{
 			var result = await _werehouseDbContext.Inventories
 				.Include(i => i.Product)
 				.SingleOrDefaultAsync(p => p.ProductId == productId);
 			return result;
 		}
-		//Na razie zbędne
+		//
 		public IQueryable<Inventory> GetAllInventory()
 		{
 			return _werehouseDbContext.Inventories;
@@ -41,7 +41,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			if (quantityBased == null) return false;
 			return quantityBased.Quantity >= quantity;
 		}
-		//Na razie zbędne - chyba do wywalenia
+		//
 		public async Task<int> GetAvailableQuantityAsync(Guid productId, DateOnly? bestBefore)
 		{
 			// 1. pełne dostępne palety
@@ -73,8 +73,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				pickingQuery = pickingQuery.Where(pp => pp.Pallet.ProductsOnPallet
 					.Any(pop => pop.ProductId == productId && pop.BestBefore >= bestBefore));
 			}
-
-			//var totalFromPicking = await pickingQuery.SumAsync(pp => pp.RemainingQuantity);
+						
 			var totalFromPicking = await pickingQuery
 				.Select(pp => pp.InitialPalletQuantity - (pp.PickingTasks.Sum(a =>(int?) a.RequestedQuantity) ?? 0))
 				.SumAsync();
@@ -94,7 +93,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var query = GetPalletsQuery(productId, bestBefore)
 				.Where(p => p.Status == PalletStatus.ToIssue );
-			//|| p.IssueId != 0
 			return await SumQuantityAsync(query, productId);
 		}
 		public async Task<int> GetQuantityProductReservedForPickingAsync(Guid productId, DateOnly? bestBefore)
@@ -117,6 +115,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			   .SumAsync(a => (int?)a.RequestedQuantity) ?? 0;
 			return totalAllocated;
 		}
+
+
 		private IQueryable<Pallet> GetPalletsQuery(Guid productId, DateOnly? bestBefore)
 		{
 			 var palletsWithProduct = _werehouseDbContext.Pallets
@@ -139,11 +139,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.SumAsync(pop => pop.Quantity);
 			return totalFromPallets;
 		}
-
-		//public async Task AddInventoryAsync(Inventory inventory)
-		//{
-		//	await _werehouseDbContext.Inventories.AddAsync(inventory);
-		//}
 
 		public async Task<List<Inventory>> GetInventoriesForProductsAsync(List<Guid> productIds)
 		{

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
 
-namespace MyWerehouse.Domain.Receviving.ReceivingExceptions
+namespace MyWerehouse.Domain.Receiving.ReceivingExceptions
 {
 	public class InvalidReceiptStateDomainException : DomainException
 	{

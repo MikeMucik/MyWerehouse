@@ -13,13 +13,13 @@ using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Receviving.Filters;
 using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Application.Common.Utils;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
 using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Application.Common.Pagination;
+using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Application.Services
 {
@@ -88,7 +88,7 @@ namespace MyWerehouse.Application.Services
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<AppResult<ClientDTO>> GetClientToEditAsync(int id)
+		public async Task<AppResult<ClientDTO>> GetClientByIdAsync(int id)
 		{
 			var client = await _clientRepo.GetClientToEditAsync(id);
 			if (client == null)

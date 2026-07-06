@@ -30,7 +30,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Stworzenie zlecenia wydania
-		[HttpPost("add")]
+		[HttpPost]
 		public async Task<IActionResult> Create(CreateIssueCommand command)
 		{
 			var result = await _mediator.Send(command);
@@ -46,7 +46,7 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		// Update - wiele rozwiązań więc POST
-		[HttpPost("{id}update")]
+		[HttpPut("{id}update")]
 		public async Task<IActionResult> Update(Guid id,ModifyIssueDTO dto, DateOnly dateToSend)
 		{
 			var result = await _mediator.Send(new ModifyIssueCommand(id, dto, dateToSend));
@@ -96,8 +96,8 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new IssueProductsSummaryQuery(id))).ToActionResult();
 
 		//Lista dla Issue według filtra
-		[HttpPost("IssuesByFiltr")]
-		public async Task<IActionResult> ListIssuesByFiltr([FromQuery]GetIssuesByFilterQuery query)
+		[HttpGet("search")]
+		public async Task<IActionResult> Search([FromQuery]GetIssuesByFilterQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista dla Issue ile jakiego towaru

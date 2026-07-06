@@ -49,7 +49,7 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Zakończ planowane/korygowane zadania kompletacyjne, stwórz awaryjne
-		[HttpPost("swithHand")]
+		[HttpPost("switchHand")]
 		public async Task<IActionResult> SwitchToHandPicking(FinishPlannedPickingPrepareToHandPickingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 

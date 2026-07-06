@@ -8,5 +8,5 @@ using MyWerehouse.Application.Inventories.DTOs;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventories
 {
-	public record GetInvetoriesQuery(int PageSize, int PageNumber):IRequest<ListOfInventoryDTO>;	
+	public record GetInventoriesQuery(int PageSize, int PageNumber):IRequest<ListOfInventoryDTO>;	
 }

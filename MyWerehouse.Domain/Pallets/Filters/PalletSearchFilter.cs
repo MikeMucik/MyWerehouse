@@ -20,7 +20,7 @@ namespace MyWerehouse.Domain.Pallets.Filters
 		public PalletStatus? PalletStatus { get; set; }
 		public int? ClientIdIn { get; set; }
 		public int? ClientIdOut { get; set; }
-		public DateOnly? BestBefore {  get; set; }
+		public DateOnly? BestBeforeFrom {  get; set; }
 		public DateOnly? BestBeforeTo {  get; set; }
 		public DateTime? StartDate { get; set; }
 		public DateTime? EndDate { get; set; }

@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Receviving.Filters;
+using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {

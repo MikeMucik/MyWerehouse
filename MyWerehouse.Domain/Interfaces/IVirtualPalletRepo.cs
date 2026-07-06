@@ -12,12 +12,11 @@ namespace MyWerehouse.Domain.Interfaces
 		VirtualPallet AddPalletToPicking(VirtualPallet virtualPallet);
 		void DeleteVirtualPalletPicking(VirtualPallet virtualPallet);
 		Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid productId);
-		Task<List<VirtualPallet>> GetVirtualPalletsByTimeAsync(DateTime start, DateTime end);//chyba do wywalenia
-		//Task<List<VirtualPallet>> GetVirtualPalletsByTimePickingTaskAsync(DateOnly start, DateOnly end);
+		Task<List<VirtualPallet>> GetVirtualPalletsByTimeAsync(DateTime start, DateTime end);//
 		IQueryable<VirtualPallet> GetVirtualPalletsByTimePickingTask(DateOnly start, DateOnly end);
 		Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly bestBefore);
 		Task<Guid> GetVirtualPalletIdFromPalletIdAsync(Guid palletId);
 		Task<VirtualPallet?> GetVirtualPalletByIdAsync(Guid? palletId);
-		Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId);//test repo
+		Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId);//add test repo
 	}
 }

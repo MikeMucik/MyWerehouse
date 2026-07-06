@@ -60,7 +60,7 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<Unit>> DeleteCategoryAsync(int id)
 		{
 			var category = await _categoryRepo.GetCategoryByIdAsync(id);
-			if (category == null) return AppResult<Unit>.Fail($"Kategoria o ID {id} nie została znalezniona", ErrorType.NotFound);
+			if (category == null) return AppResult<Unit>.Fail($"Kategoria o ID {id} nie została znaleziona", ErrorType.NotFound);
 			var filter = new ProductSearchFilter
 			{
 				CategoryId = id,

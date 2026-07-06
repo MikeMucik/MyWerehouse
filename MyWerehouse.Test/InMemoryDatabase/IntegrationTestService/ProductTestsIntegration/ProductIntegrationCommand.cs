@@ -16,6 +16,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 	{
 		protected readonly ProductService _productService;
 		protected readonly IValidator<EditProductDTO> _productValidator;
+		protected readonly IValidator<CreateProductDTO> _createProductValidator;
 		protected readonly IInventoryRepo _inventoryRepo;
 		protected readonly IProductRepo _productRepo;
 		protected readonly IReceiptRepo _receiptRepo;
@@ -24,10 +25,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		{	
 			_productRepo = new ProductRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
-			_productValidator = new AddProductDTOValidation();	
+			_productValidator = new EditProductDTOValidation();	
+			_createProductValidator = new AddProductDTOValidation();
 			_inventoryRepo = new InventoryRepo(_context);
 			_categoryRepo = new CategoryRepo(_context);
-			_productService = new ProductService(_productRepo, _mapper,_context,_inventoryRepo,_categoryRepo, _receiptRepo, _productValidator);
+			_productService = new ProductService(_productRepo, _mapper,_context,_inventoryRepo,_categoryRepo, _receiptRepo,_createProductValidator, _productValidator);
 		}
 	}
 }

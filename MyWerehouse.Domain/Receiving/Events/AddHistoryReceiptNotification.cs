@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.Receving.Events;
 
-namespace MyWerehouse.Domain.Receviving.Events
+namespace MyWerehouse.Domain.Receiving.Events
 {
 	public record AddHistoryReceiptNotification(
 		Guid ReceiptId,

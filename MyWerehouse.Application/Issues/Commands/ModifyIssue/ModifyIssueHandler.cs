@@ -52,7 +52,6 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				//remove old PickingTask 
 				foreach (var pickingTask in listOldPickingTask)
 				{
-					var sourcePallet = await _palletRepo.GetPalletByIdAsync(pickingTask.VirtualPallet.PalletId);
 					issue.RemovePickingTask(pickingTask);
 					pickingTask.Cancel(request.DTO.PerformedBy);
 
@@ -101,8 +100,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 						await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
-						// Logowanie krytyczne
-						// _logger.LogError(ex, ...)
+						//TODO 
 						resultList.Add(AssignProductToIssueResult.Fail("Wystąpił nieoczekiwany błąd", product.ProductId));
 						anyFailure = true;
 					}
@@ -113,9 +111,8 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 					.ToList();
 				// Pobieramy kandydatów do usunięcia WRAZ z ich fizycznymi paletami - usuwamy tylko virtualPallet
 				var virtualPalletsToCheck = await _werehouseDbContext.VirtualPallets
-					.Include(vp => vp.Pallet) // Ważne!
+					.Include(vp => vp.Pallet) 
 					.Where(vp =>
-					 //touchedVirtualPalletIds != null && //niepotrzebne do przemyślenia
 					 touchedVirtualPalletIds.Contains(vp.Id))
 					.ToListAsync(ct);
 

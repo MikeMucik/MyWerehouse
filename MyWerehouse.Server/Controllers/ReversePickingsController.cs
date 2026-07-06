@@ -1,34 +1,31 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking;
 using MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingToDo;
 using MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo;
 using MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking;
 using MyWerehouse.Server.Extensions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyWerehouse.Server.Controllers
 {
 	
 	[ApiController]
-	[Route("api/reversePicking")]
-	public class ReversePickingController : ControllerBase
+	[Route("api/reversePickings")]
+	public class ReversePickingsController : ControllerBase
 	{
 		private readonly IMediator _mediator;
-		public ReversePickingController(IMediator mediator)
+		public ReversePickingsController(IMediator mediator)
 		{
 			_mediator = mediator;
 		}
 
 		//Wykonaj dekompletacje
-		[HttpPost("execute")]
-		public async Task<IActionResult> Disassembly(ExecutiveReversePickingCommand command)
+		[HttpPost]
+		public async Task<IActionResult> Disassembly(ExecuteReversePickingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Pokaż zadania dekompletacyjne listę
-		[HttpGet("list")]
+		[HttpGet]
 		public async Task<IActionResult> Tasks ([FromQuery] GetListReversePickingToDoQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 

@@ -10,6 +10,12 @@ The project uses a layered architecture, CQRS, and a domain model inspired by Do
 - [Swagger UI on Azure](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html)
 - [GitHub Actions workflow](https://github.com/MikeMucik/MyWerehouse/actions)
 
+## Azure demo availability
+
+The API is hosted on the Azure App Service F1 plan. After a period of inactivity, the application may be stopped by Azure, so the first request can take approximately 40 seconds.
+
+If Swagger UI does not load immediately, please wait and try again. The application status can be checked using the [`GET /api/health`](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/api/health) endpoint. An HTTP 200 response confirms that the API has started.
+
 ## Features
 
 - Goods receipts

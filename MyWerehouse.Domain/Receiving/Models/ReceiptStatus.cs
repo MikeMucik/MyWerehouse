@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Domain.Receviving.Models
+namespace MyWerehouse.Domain.Receiving.Models
 {
 	public enum ReceiptStatus
 	{

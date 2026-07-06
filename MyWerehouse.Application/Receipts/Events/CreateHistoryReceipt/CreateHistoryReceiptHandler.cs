@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Receviving.Events;
+using MyWerehouse.Domain.Receiving.Events;
+using MyWerehouse.Domain.Receving.Events;
 
 namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 {

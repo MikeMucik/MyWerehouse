@@ -8,24 +8,22 @@ using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Inventories.DTOs;
-using MyWerehouse.Application.Inventories.Queries.GetInventories;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Invetories.Models;
 
-namespace MyWerehouse.Application.Inventories.Queries.GetProductCount
+namespace MyWerehouse.Application.Inventories.Queries.GetInventories
 {
-	public class GetInvetoriesHandler(IInventoryRepo inventoryRepo,
-		IMapper mapper) : IRequestHandler<GetInvetoriesQuery, ListOfInventoryDTO>
+	public class GetInventoriesHandler(IInventoryRepo inventoryRepo,
+		IMapper mapper) : IRequestHandler<GetInventoriesQuery, ListOfInventoryDTO>
 	{		
 		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;
 		private readonly IMapper _mapper = mapper;
 
-		public async Task<ListOfInventoryDTO> Handle (GetInvetoriesQuery request, CancellationToken ct)
+		public async Task<ListOfInventoryDTO> Handle (GetInventoriesQuery request, CancellationToken ct)
 		{
-			var invetories = _inventoryRepo.GetAllInventory()
+			var inventories = _inventoryRepo.GetAllInventory()
 				.OrderBy(i => i.ProductId)
 				.ProjectTo<InventoryDTO>(_mapper.ConfigurationProvider);
-			var inventoriesToShow = await invetories
+			var inventoriesToShow = await inventories
 				.Skip(request.PageSize * (request.PageNumber - 1))
 				.Take(request.PageSize)
 				.ToListAsync(ct);
@@ -34,7 +32,7 @@ namespace MyWerehouse.Application.Inventories.Queries.GetProductCount
 				InventoryDTOs = inventoriesToShow,
 				PageSize = request.PageSize,
 				PageNumber = request.PageNumber,
-				Count =await invetories.CountAsync(ct)
+				Count =await inventories.CountAsync(ct)
 			};
 		}
 	}

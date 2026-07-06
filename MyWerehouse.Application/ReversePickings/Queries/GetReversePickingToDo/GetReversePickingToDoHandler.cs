@@ -49,7 +49,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 			var filtr = new PalletSearchFilter
 			{
 				ProductId = pickingTask.ProductId,
-				BestBefore = pickingTask.BestBefore,
+				BestBeforeFrom = pickingTask.BestBefore,
 			};
 			var palletsWithProduct = _palletRepo.GetPalletsByFilter(filtr)//TODO reversePallet + reversePallet ;) repo
 				.Where(p =>

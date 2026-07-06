@@ -7,13 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.Receviving.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using FluentValidation;
+using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
 {

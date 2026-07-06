@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 			if (pallet == null) return AppResult<ChangeLocationResults>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
 			//location is occupied?
 			if (request.DestinationLocationId <= 0)//można ustalić dla danego magazynu
-				return AppResult<ChangeLocationResults>.Fail("niprawidłowa lokalizacja.", ErrorType.NotFound);
+				return AppResult<ChangeLocationResults>.Fail("Nieprawidłowa lokalizacja.", ErrorType.NotFound);
 
 			var existingPalletInDestination = await _palletRepo.CheckOccupancyAsync(request.DestinationLocationId);
 			var location = await _locationRepo.GetLocationByIdAsync(request.DestinationLocationId);
@@ -44,8 +44,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 				{
 					Success = false,
 					RequiresConfirmation = true,
-					Message = $"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {existingPalletInDestination.Id}. Użyj Force=true aby wymusić."
-					//OccupiedByPalletId = existingPalletInDestination.Id // Opcjonalnie: Dodaj pole do Results (frontend pokaże)
+					Message = $"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {existingPalletInDestination.PalletNumber}. Użyj Force = true aby wymusić."
 				};
 				return AppResult<ChangeLocationResults>.Success(answerWhenOccupied, answerWhenOccupied.Message);
 			}

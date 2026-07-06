@@ -8,8 +8,8 @@ using MyWerehouse.Server.Extensions;
 namespace MyWerehouse.Server.Controllers
 {
 	[ApiController]
-	[Route("api/inventory")]
-	public class InventoryController(IMediator mediator) : ControllerBase
+	[Route("api/inventories")]
+	public class InventoriesController(IMediator mediator) : ControllerBase
 	{		
 		private readonly IMediator _mediator = mediator;
 

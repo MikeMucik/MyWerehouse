@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Receviving.Filters;
-using MyWerehouse.Domain.Receviving.Models;
+using MyWerehouse.Domain.Receving.Filters;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 

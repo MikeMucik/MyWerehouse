@@ -11,13 +11,13 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Invetories.Models;
-using MyWerehouse.Domain.Receviving.Filters;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
 using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Application.Common.Pagination;
+using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Application.Services
 {
@@ -28,7 +28,8 @@ namespace MyWerehouse.Application.Services
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly ICategoryRepo _categoryRepo;
-		private readonly IReceiptRepo _receiptRepo;		
+		private readonly IReceiptRepo _receiptRepo;
+		private readonly IValidator<CreateProductDTO> _createProductValidator;
 		private readonly IValidator<EditProductDTO> _productValidator;
 
 		public ProductService(
@@ -38,6 +39,7 @@ namespace MyWerehouse.Application.Services
 			IInventoryRepo inventoryRepo,
 			ICategoryRepo categoryRepo,
 			IReceiptRepo? receiptRepo = null,
+			IValidator<CreateProductDTO>? createProductValidator = null,
 			IValidator<EditProductDTO>? productValidator = null)
 		{
 			_productRepo = repo;
@@ -46,12 +48,13 @@ namespace MyWerehouse.Application.Services
 			_inventoryRepo = inventoryRepo;
 			_categoryRepo = categoryRepo;
 			_receiptRepo = receiptRepo;
+			_createProductValidator = createProductValidator;
 			_productValidator = productValidator;
 		}
 
-		public async Task<AppResult<Guid>> AddProductAsync(EditProductDTO productDTO)
+		public async Task<AppResult<Guid>> AddProductAsync(CreateProductDTO productDTO)
 		{
-			var validationResult = _productValidator.Validate(productDTO);
+			var validationResult = _createProductValidator.Validate(productDTO);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
@@ -64,11 +67,11 @@ namespace MyWerehouse.Application.Services
 			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
 			if (existCategory == null)
 			{
-				return AppResult<Guid>.Fail($"Kateogria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<Guid>.Fail($"Kategoria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
 			}
 			if (existCategory.IsDeleted)
 			{
-				return AppResult<Guid>.Fail($"Kateogria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
+				return AppResult<Guid>.Fail($"Kategoria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
 			}
 			var productPrepare = Product.Create(
 				productDTO.Name,
@@ -136,11 +139,11 @@ namespace MyWerehouse.Application.Services
 			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
 			if (existCategory == null)
 			{
-				return AppResult<Unit>.Fail($"Kateogria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Kategoria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
 			}
 			if (existCategory.IsDeleted)
 			{
-				return AppResult<Unit>.Fail($"Kateogria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
+				return AppResult<Unit>.Fail($"Kategoria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
 			}
 			existingProduct.ApplyChangesForProduct(
 				productDTO.Name,

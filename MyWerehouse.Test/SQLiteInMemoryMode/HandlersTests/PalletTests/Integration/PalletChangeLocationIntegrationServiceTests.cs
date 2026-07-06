@@ -139,7 +139,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.False(result.Result.Success);
 			Assert.True(result.Result.RequiresConfirmation);
 			var fullNameLocation = $" Bay = {location2.Bay} Aisle = {location2.Aisle} Position = {location2.Position} Height ={location2.Height}";
-			Assert.Contains($"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {pallet2.Id}.", result.Message);
+			Assert.Contains($"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {pallet2.PalletNumber}.", result.Message);
 		}
 		[Fact]
 		public async Task ChangeLocationPallet_GiveBackInformationAndPutAnotherPallet_WhenLocationOccupiedAndConfirmedToTakeThisLocation()

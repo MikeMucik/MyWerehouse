@@ -4,13 +4,15 @@ using MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking;
 using MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingToDo;
 using MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo;
 using MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers
 {
 	
 	[ApiController]
-	[Route("api/reversePickings")]
+	[Route("api/reverse-pickings")]
 	public class ReversePickingsController : ControllerBase
 	{
 		private readonly IMediator _mediator;
@@ -20,9 +22,14 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		//Wykonaj dekompletacje
-		[HttpPost]
-		public async Task<IActionResult> Disassembly(ExecuteReversePickingCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}")]
+		public async Task<IActionResult> Disassembly(
+			Guid id, ReversePickingStrategy strategy,
+			Guid pickingPalletId, string userId,
+			List<Pallet> pallets, int? rampNumber )
+			=> (await _mediator.Send(new ExecuteReversePickingCommand(id, strategy,
+				pickingPalletId, userId, pallets, rampNumber)))
+			.ToActionResult();
 
 		//Pokaż zadania dekompletacyjne listę
 		[HttpGet]
@@ -30,13 +37,15 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Pokaż zadanie z możliwymi opcjami dekompletacji
-		[HttpGet("{id}")]
+		[HttpGet("{id:guid}")]
 		public async Task<IActionResult> TaskOption(Guid id)
-			=> (await _mediator.Send(new GetReversePickingToDoQuery(id))).ToActionResult();
+			=> (await _mediator.Send(new GetReversePickingToDoQuery(id)))
+			.ToActionResult();
 
 		//Lista palet do dekompletacji z lokalizacją
-		[HttpGet("listPalletToUnpicking")]
+		[HttpGet("available-pallets")]
 		public async Task<IActionResult> PalletsForReservePicking([FromQuery] ListPalletsForForkLifterReservePickingQuery query)
-			=> (await _mediator.Send(query)).ToActionResult();
+			=> (await _mediator.Send(query))
+			.ToActionResult();
 	}
 }

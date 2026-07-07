@@ -1,7 +1,5 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Queries.GetInventory;
 using MyWerehouse.Server.Extensions;
 
@@ -13,7 +11,7 @@ namespace MyWerehouse.Server.Controllers
 	{		
 		private readonly IMediator _mediator = mediator;
 
-		[HttpGet("{id}")]
+		[HttpGet("{id:guid}")]
 		public async Task<IActionResult> Get(Guid id)
 		{
 			var result = await _mediator.Send(new GetInventoryQuery(id));

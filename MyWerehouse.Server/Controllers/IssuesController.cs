@@ -32,66 +32,65 @@ namespace MyWerehouse.Server.Controllers
 		//Stworzenie zlecenia wydania
 		[HttpPost]
 		public async Task<IActionResult> Create(CreateIssueCommand command)
-		{
-			var result = await _mediator.Send(command);
-			return result.ToActionResult();
-		}
+			=> (await _mediator.Send(command))
+			.ToActionResult();		
 
 		//Do edycji lub przejrzenia zlecenia
-		[HttpGet("{id}")]
+		[HttpGet("{id:guid}")]
 		public async Task<IActionResult> Get(Guid id)
-		{
-			var result = await _mediator.Send(new GetIssueByIdQuery(id));
-			return result.ToActionResult();
-		}
+			=> (await _mediator.Send(new GetIssueByIdQuery(id)))
+			.ToActionResult();		
 
 		// Update - wiele rozwiązań więc POST
-		[HttpPut("{id}update")]
+		[HttpPut("{id:guid}")]
 		public async Task<IActionResult> Update(Guid id,ModifyIssueDTO dto, DateOnly dateToSend)
-		{
-			var result = await _mediator.Send(new ModifyIssueCommand(id, dto, dateToSend));
-			return result.ToActionResult();
-		}
+			=> (await _mediator.Send(new ModifyIssueCommand(id, dto, dateToSend))).ToActionResult();
+		
 
 		//Przypadek szczególny, gdy zlecenie "świeże"
-		[HttpDelete("delete")]
-		public async Task<IActionResult> Delete(DeleteIssueCommand command)
-			=> (await  _mediator.Send(command)).ToActionResult();
+		[HttpDelete("{id:guid}")]
+		public async Task<IActionResult> Delete(Guid id, string userId)
+			=> (await  _mediator.Send(new DeleteIssueCommand(id, userId)))
+			.ToActionResult();
 
 		//Zmiana statusu zlecenia i inne akcje więc POST - anulowanie
-		[HttpPost("cancel")]
-		public async Task<IActionResult> Cancel(CancelIssueCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/cancel")]
+		public async Task<IActionResult> Cancel(Guid id, string userId)
+			=> (await _mediator.Send(new CancelIssueCommand(id, userId)))
+			.ToActionResult();
 
 		//Zamiana palet dla Issue (np problem fizyczny na magazynie zablokowany dostęp)
-		[HttpPost("changePallet")]
-		public async Task<IActionResult> PalletReplacement(ChangePalletInIssueCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/change-pallet")]
+		public async Task<IActionResult> PalletReplacement(Guid id, Guid oldPalletId, Guid newPalletId, string userId)
+			=> (await _mediator.Send(new ChangePalletInIssueCommand(id, oldPalletId, newPalletId, userId)))
+			.ToActionResult();
 
 		//Zatwierdzenie magazynowe że załadunek skończony
-		[HttpPost("confirmLoading")]
-		public async Task<IActionResult> ConfirmEndLoading(CompletedLoadIssueCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/confirm-loading")]
+		public async Task<IActionResult> ConfirmEndLoading(Guid id, string userId)
+			=> (await _mediator.Send(new CompletedLoadIssueCommand(id, userId)))
+			.ToActionResult();
 
 		//Zatwierdzenie biurowe koniec załadunku gdy załadunek przerwany(np brak miejsca na aucie)
-		[HttpPost("EndDuringLoading")]
-		public async Task<IActionResult> BreakLoadingConfirmEndLoading(FinishIssueNotCompletedCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/finish-loading")]
+		public async Task<IActionResult> BreakLoadingConfirmEndLoading(Guid id, string userId)
+			=> (await _mediator.Send(new FinishIssueNotCompletedCommand(id, userId)))
+			.ToActionResult();
 
 		//Weryfikacja(biuro) po załadunku - aktualizacja stanów magazynowych
-		[HttpPost("confirmAfter")]
-		public async Task<IActionResult> VerificationAfterLoad(ConfirmIssueAfterLoadingCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/verify-after-loading")]
+		public async Task<IActionResult> VerificationAfterLoad(Guid id, string userId)
+			=> (await _mediator.Send(new ConfirmIssueAfterLoadingCommand(id, userId))).ToActionResult();
 
 		//Weryfikacja załadunku przed załadunkiem - porównania co zamówino vs co przygotowano
-		[HttpPost("confirmBefore")]
-		public async Task<IActionResult> VerificationBeforeLoad(VerifyIssueToLoadCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/verify-before-loading")]
+		public async Task<IActionResult> VerificationBeforeLoad(Guid id, string userId)
+			=> (await _mediator.Send(new VerifyIssueToLoadCommand(id, userId))).ToActionResult();
 
 		//Listy 
 
 		//Lista dla Issue ile jakiego towaru
-		[HttpGet("{id}/byProducts")]
+		[HttpGet("{id:guid}/byProducts")]
 		public async Task<IActionResult> ListProductsForIssue(Guid id)
 			=> (await _mediator.Send(new IssueProductsSummaryQuery(id))).ToActionResult();
 
@@ -101,12 +100,12 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista dla Issue ile jakiego towaru
-		[HttpGet("{id}/loadingList")]
+		[HttpGet("{id:guid}/loading-list")]
 		public async Task<IActionResult> ListForLoad(Guid id)
 			=> (await _mediator.Send(new LoadingIssueListQuery(id))).ToActionResult();
 
 		//Lista palet do "zdjęcia" dla operatora wózka
-		[HttpGet("{id}/forOperator")]
+		[HttpGet("{id:guid}/for-operator")]
 		public async Task<IActionResult> ListPalletsForTheForklift(Guid id)
 			 => (await _mediator.Send(new PalletsToTakeOffListQuery(id, 1, 30))).ToActionResult();	
 	}

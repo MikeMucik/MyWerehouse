@@ -39,47 +39,47 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Wykonaj skorygowane zadanie kompletacyjne
-		[HttpPost("corrected")]
-		public async Task<IActionResult> CorrectedPicking(ExecuteEmergencyPickingCommand command)
+		[HttpPost("emergency")]
+		public async Task<IActionResult> EmergencyPicking(ExecuteEmergencyPickingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Wykonaj awaryjne zadanie kompletacyjne
-		[HttpPost("emergency")]
+		[HttpPost("manual")]
 		public async Task<IActionResult> HandPicking(ExecuteHandPickingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Zakończ planowane/korygowane zadania kompletacyjne, stwórz awaryjne
-		[HttpPost("switchHand")]
+		[HttpPost("switch-manual")]
 		public async Task<IActionResult> SwitchToHandPicking(FinishPlannedPickingPrepareToHandPickingCommand command)
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Pokaż zadania do wykonania
 
 		//Podaj listę zadań dla palety - kompletacja planowana
-		[HttpGet("plannedList")]
+		[HttpGet("/planned-tasks")]
 		public async Task<IActionResult> ShowPlanned([FromQuery]ShowTaskToDoQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Podaj listę zadań dla palety - kompletacja skorygowana
-		[HttpGet("correctedList")]
+		[HttpGet("/emergency-options")]
 		public async Task<IActionResult> ShowCorrected([FromQuery]PrepareEmergencyPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista poglądowa klient -> zamówienie -> produkt -> ilośc		
 
 		//Lista
-		[HttpGet("List")]
+		[HttpGet("/issues")]
 		public async Task<IActionResult> GetList([FromQuery]GetListIssueToPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Drzewo
-		[HttpGet("Tree")]
+		[HttpGet("/issues-tree")]
 		public async Task<IActionResult> GetTree([FromQuery]GetListToPickingQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 
 		//Lista palet dla wózkowego- palety do przekazania do pickingu
-		[HttpPost("forkliftList")]
-		public async Task<IActionResult> GetListToPicking([FromQuery]GetListPickingPalletQuery query)
-			=> (await _mediator.Send(query)).ToActionResult();
+		[HttpGet("/forklift-pallets-list")]
+		public async Task<IActionResult> GetListToPicking(DateOnly dateStart, DateOnly dateEnd, int pageNumber, int pageSzie)
+			=> (await _mediator.Send(new GetListPickingPalletQuery(dateStart, dateEnd, pageNumber,pageSzie))).ToActionResult();
 	}
 }

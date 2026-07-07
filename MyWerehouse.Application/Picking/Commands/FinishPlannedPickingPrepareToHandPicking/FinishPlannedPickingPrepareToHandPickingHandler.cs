@@ -15,7 +15,7 @@ using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareToHandPicking
 {
-	public class FinishPlannedPickingPrepareToHandPickingHandle(
+	public class FinishPlannedPickingPrepareToHandPickingHandler(
 		WerehouseDbContext werehouseDbContext,
 		IPickingTaskRepo pickingTaskRepo,
 		IIssueRepo issueRepo,

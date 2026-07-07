@@ -16,7 +16,7 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking
 {
-	public class ExecutiveReversePickingHandler(WerehouseDbContext werehouseDbContext,
+	public class ExecuteReversePickingHandler(WerehouseDbContext werehouseDbContext,
 		IReversePickingRepo reversePickingRepo,
 		IAddProductsToPalletService addProductsToPalletService,
 		IPalletRepo palletRepo

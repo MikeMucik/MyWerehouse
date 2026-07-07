@@ -15,7 +15,7 @@ namespace MyWerehouse.Server.Controllers
 		{
 			_locationService = locationService;
 		}
-		[HttpGet("{id}")]
+		[HttpGet("{id:int}")]
 		public async Task<IActionResult> Get(int id)
 			=> (await _locationService.GetLocationServiceAsync(id))
 			.ToActionResult();
@@ -30,13 +30,13 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _locationService.DeleteLocationServiceAsync(id))
 			.ToActionResult();
 
-		[HttpPost("addMany")]//zatwierdzenie prepare
-		public async Task<IActionResult> CreateMany(List<LocationDTO> locations)
+		[HttpPost("bulk")]//zatwierdzenie prepare
+		public async Task<IActionResult> Bulk(List<LocationDTO> locations)
 			=> (await _locationService.CreateManyLocation(locations))
 			.ToActionResult();
 
-		[HttpPost("prepare")] //ile regałów alejek etc
-		public IActionResult PrepareLocation(int bay, int startAisle, int endAisle, int amountPosition, int numberOfLevels)
+		[HttpPost("preview")] //ile regałów alejek etc
+		public IActionResult Preview(int bay, int startAisle, int endAisle, int amountPosition, int numberOfLevels)
 			=> (_locationService.PrepareLocations(bay, startAisle, endAisle, amountPosition, numberOfLevels))
 			.ToActionResult();
 

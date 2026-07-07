@@ -47,7 +47,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void SetQuantity(int quantity)
 		{
-			if (quantity < 0) throw new InsufficientQunatityDomainException(PalletId);
+			if (quantity < 0) throw new InsufficientQuantityDomainException(PalletId);
 			Quantity = quantity;			
 		}
 		public void ChangeQuantity(int quantity)
@@ -65,7 +65,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			if (quantity <= 0) throw new InvalidQuantityDomainException(PalletId);
 			var newQuantity = Quantity - quantity;
-			if (newQuantity < 0) throw new InsufficientQunatityDomainException(PalletId);
+			if (newQuantity < 0) throw new InsufficientQuantityDomainException(PalletId);
 			Quantity = newQuantity;			
 		}
 		public void SetBestBefore(DateOnly? bestBefore)

@@ -30,43 +30,50 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(command)).ToActionResult();
 
 		//Przyjęcie palety dla Receipt
-		[HttpPost("addPallet")]
-		public async Task<IActionResult> CreatePalletForReceipt(AddPalletToReceiptCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/pallets")]
+		public async Task<IActionResult> CreatePalletForReceipt(Guid id, CreatePalletReceiptDTO dTO)
+			=> (await _mediator.Send(new AddPalletToReceiptCommand(id, dTO)))
+			.ToActionResult();
 
 		//Aktualizacja przyjęcia, poprawa palet -> Post
 		[HttpPut("{id:guid}")]
 		public async Task<IActionResult> Update(Guid id, UpdateReceiptDTO dto)
-			=> (await _mediator.Send(new UpdateReceiptCommand(id, dto))).ToActionResult();
+			=> (await _mediator.Send(new UpdateReceiptCommand(id, dto)))
+			.ToActionResult();
 
 		//Anulowanie przyjęcia, kasacja - nie ma wpływu na stan -> zatwierdzone nie można cofnąć
 
-		[HttpDelete("delete")]
-		public async Task<IActionResult> Delete(DeleteDraftReceiptCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpDelete("{id:guid}/delete")]
+		public async Task<IActionResult> Delete(Guid id, string userId)
+			=> (await _mediator.Send(new DeleteDraftReceiptCommand(id, userId)))
+			.ToActionResult();
 
-		[HttpDelete("cancel")]
-		public async Task<IActionResult> Cancel(CancelReceiptCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/cancel")]
+		public async Task<IActionResult> Cancel(Guid id, string userId)
+			=> (await _mediator.Send(new CancelReceiptCommand(id, userId)))
+			.ToActionResult();
 
 		//Zatwierdzenie skończenia rozładunku - magazyn
-		[HttpPost("confirmEnd")]
-		public async Task<IActionResult> ConfirmEndReceipt(CompletePhysicalReceiptCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/confirmEnd")]
+		public async Task<IActionResult> ConfirmEndReceipt(Guid id, string userId)
+			=> (await _mediator.Send(new CompletePhysicalReceiptCommand(id, userId)))
+			.ToActionResult();
 
 		//Zatwierdzenie rozładunku biuro - zmiana stanu magazynowego, palety w obiekgu
-		[HttpPost("finalize")]
-		public async Task<IActionResult> FinalizeReceipt(VerifyAndFinalizeReceiptCommand command)
-			=> (await _mediator.Send(command)).ToActionResult();
+		[HttpPost("{id:guid}/finalize")]
+		public async Task<IActionResult> FinalizeReceipt(Guid id, string userId)
+			=> (await _mediator.Send(new VerifyAndFinalizeReceiptCommand(id, userId)))
+			.ToActionResult();
 
 		//Pobranie przyjęcia np do edycji 
-		[HttpGet("{id}")]
-		public async Task<IActionResult> Get(Guid id)
-			=> (await _mediator.Send(new GetReceiptByIdQuery(id))).ToActionResult();
+		[HttpGet("{id:Guid}")]
+		public async Task<IActionResult> GetById(Guid id)
+			=> (await _mediator.Send(new GetReceiptByIdQuery(id)))
+			.ToActionResult();
 
 		//Pobranie przyjęć 
-		[HttpPost("ReceiptsByFilter")]
-		public async Task<IActionResult> GetByFilter([FromQuery] GetReceiptsByFilterQuery query)
+		[HttpPost("search")]
+		public async Task<IActionResult> Search([FromQuery] GetReceiptsByFilterQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}
 

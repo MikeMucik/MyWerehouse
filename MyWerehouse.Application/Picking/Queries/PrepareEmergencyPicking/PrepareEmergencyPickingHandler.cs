@@ -61,7 +61,7 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 				{
 					IssueId = g.Key.IssueId,
 					IssueNumber = g.Key.IssueNumber,
-					QuanityToDo = g.Sum(a => a.RequestedQuantity)
+					QuantityToDo = g.Sum(a => a.RequestedQuantity)
 				})
 				.ToList();
 			var result = PrepareCorrectedPickingResult.RequiresOrder(

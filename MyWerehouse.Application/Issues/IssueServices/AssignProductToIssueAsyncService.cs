@@ -52,10 +52,10 @@ namespace MyWerehouse.Application.Issues.IssueServices
 
 			//1. dostępność towaru	- walidacja
 			var totalAvailable = await _getProductCountService.GetProductCountAsync(issueLine.ProductId, issueLine.BestBefore);
-			if (issueLine.Quantity > totalAvailable)//
+			if (issueLine.Quantity > totalAvailable)
 			{
 				return AssignProductToIssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {issueLine.ProductId}. Asortyment nie został dodany do zlecenia."
-						, issueLine.ProductId, issueLine.Quantity, totalAvailable);
+						, issueLine.ProductId, product.SKU, issueLine.Quantity, totalAvailable);
 			}
 			//2. Oblicz pełne palety, Przydzielanie pełnych lub/z datą palet
 			var requiredFullPallets = 0;
@@ -87,10 +87,10 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					issueLine.ProductId, rest, issueLine.BestBefore, userId);
 				if (newPickingTaskFromRest.Success is false)
 				{
-					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueLine.ProductId, issueLine.Quantity, totalAvailable);
+					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueLine.ProductId,product.SKU, issueLine.Quantity, totalAvailable);
 				}
 			}
-			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.",issueLine.ProductId, palletAssigned);
+			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.",issueLine.ProductId, product.SKU, palletAssigned);
 		}
 		//pełne palety first
 		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO issueLine, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)

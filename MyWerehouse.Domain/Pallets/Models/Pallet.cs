@@ -78,7 +78,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public static Pallet CreateForTests(string palletNumber, DateTime dateReceived, int locationId, PalletStatus status, Guid? receiptId, Guid? issueId)
 		=> new Pallet(palletNumber, dateReceived, locationId, status, receiptId, issueId);
 
-		public void CreateNewPalletFromReservePicking(int locationId, string snapShot, string userId)
+		public void CreateNewPalletFromReservePicking(string snapShot, string userId)
 		{
 			Status = PalletStatus.InStock;
 			AddHistory(ReasonForPallet.ReversePicking, userId, snapShot);

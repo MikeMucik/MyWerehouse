@@ -31,21 +31,12 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 				: Task.FromResult<Pallet?>(null);
 			var pickingTask = _palletRepo.GetPalletByIdAsync(notification.PickingPalletId);
 			await Task.WhenAll(sourceTask, destinationTask, pickingTask);
-			//Pallet? sourcePallet = null;
-			//if (notification.PalletSourceId != null)
-			//{
-			//	sourcePallet = await _palletRepo.GetPalletByIdAsync(notification.PalletSourceId.Value);
-			//}
-			//Pallet? destinationPallet = null;
-			//if (notification.PalletDestinationId != null)
-			//{
-			//	destinationPallet = await _palletRepo.GetPalletByIdAsync(notification.PalletDestinationId.Value);
-			//}
-			//Pallet pickingPallet = await _palletRepo.GetPalletByIdAsync(notification.PickingPalletId);
+			
 			var sourcePallet = sourceTask.Result;
 			var destinationPallet = destinationTask.Result;
 			var pickingPallet = pickingTask.Result;
-				var history = new HistoryReversePicking
+			ArgumentNullException.ThrowIfNull(pickingPallet);
+			var history = new HistoryReversePicking
 				{
 					ReversePickingId = notification.ReversePickingId,
 					PickingPalletId = notification.PickingPalletId,

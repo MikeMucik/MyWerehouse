@@ -9,7 +9,6 @@ using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Products.Filters;
-using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.InMemoryDatabase.Common;
 
@@ -22,6 +21,9 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		private readonly ProductRepo _productRepo;
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly ICategoryRepo _categoryRepo;
+		private readonly IReceiptRepo _receiptRepo;
+		private readonly IValidator<CreateProductDTO> _createProductValidator;
+		private readonly IValidator<EditProductDTO> _productValidator;
 
 		public ViewProductIntegrationTests(InMemoryDatabaseFixtureExecutive fixture)
 		{
@@ -29,7 +31,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_productRepo = new ProductRepo(_context);
 			_inventoryRepo = new InventoryRepo(_context);
 			_categoryRepo = new CategoryRepo(_context);
-			_productService = new ProductService(_productRepo, _mapper, _context, _inventoryRepo, _categoryRepo);
+			_receiptRepo = new ReceiptRepo(_context);
+			_createProductValidator = new AddProductDTOValidation();
+			_productValidator = new EditProductDTOValidation();
+
+			_productService = new ProductService(_productRepo, _mapper, _context, _inventoryRepo, _categoryRepo, _receiptRepo, _createProductValidator, _productValidator);
 		}
 		[Fact]
 		public async Task ShowProductDetails_DetailsOfProductAsync_ReturnData()

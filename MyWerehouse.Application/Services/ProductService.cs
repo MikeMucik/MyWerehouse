@@ -38,9 +38,9 @@ namespace MyWerehouse.Application.Services
 			WerehouseDbContext werehouseDbContext,
 			IInventoryRepo inventoryRepo,
 			ICategoryRepo categoryRepo,
-			IReceiptRepo? receiptRepo = null,
-			IValidator<CreateProductDTO>? createProductValidator = null,
-			IValidator<EditProductDTO>? productValidator = null)
+			IReceiptRepo receiptRepo,
+			IValidator<CreateProductDTO> createProductValidator,
+			IValidator<EditProductDTO> productValidator)
 		{
 			_productRepo = repo;
 			_mapper = mapper;

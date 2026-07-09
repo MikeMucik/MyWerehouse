@@ -100,7 +100,8 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 						await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
-						//TODO 
+						//TODO
+						//var sku = 
 						resultList.Add(AssignProductToIssueResult.Fail("Wystąpił nieoczekiwany błąd", product.ProductId));
 						anyFailure = true;
 					}

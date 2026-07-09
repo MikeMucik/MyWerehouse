@@ -14,17 +14,19 @@ namespace MyWerehouse.Application.ReversePickings.Services
 	public class AddProductsToPalletService(
 		IPalletRepo palletRepo,
 		IProductRepo productRepo,
-		ILocationRepo locationRepo,
 		IVirtualPalletRepo virtualPalletRepo) : IAddProductsToPalletService
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
-		private readonly ILocationRepo _locationRepo = locationRepo;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 
 		public async Task<ReversePickingResult> AddProductsToSourcePallet(ReversePicking reversePicking, string userId)
 		{
-			var sourcePallet = reversePicking.PickingTask.VirtualPallet?.Pallet;//
+			var sourcePallet = reversePicking.PickingTask.VirtualPallet?.Pallet;
+			if (sourcePallet == null)
+			{
+				return ReversePickingResult.Fail("Paleta źródłowa nie istnieje.");
+			}
 			if (sourcePallet.Status == PalletStatus.Available || sourcePallet.Status == PalletStatus.ToPicking)
 			{
 				sourcePallet.ProductsOnPallet.Single().IncreaseQuantity(reversePicking.Quantity);
@@ -42,7 +44,11 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		{
 			var quantityToAdded = task.Quantity;
 			var product = await _productRepo.GetProductByIdAsync(task.ProductId);
-			var cartonsOnPallet = product.CartonsPerPallet;//
+			if (product == null)
+			{
+				return ReversePickingResult.Fail("Produkt nie istnieje.");
+			}
+			var cartonsOnPallet = product.CartonsPerPallet;
 			if (pallets.Count == 0)
 				return ReversePickingResult.Fail("Brak palet do uzupełnienia");
 			if (pallets.Any(p => p.ProductsOnPallet.Single().Quantity >= cartonsOnPallet))
@@ -70,19 +76,17 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				};
 				listPalletToAddProduct.Add(productToAdd);
 			}
-			return ReversePickingResult.Ok("Dodano towar.", listPalletToAddProduct); 
+			return ReversePickingResult.Ok("Dodano towar.", listPalletToAddProduct);
 		}
 
-		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId, int locationId)
+		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId,int locationId, string snapShot)
 		{
 			var newNumber = await _palletRepo.GetNextPalletIdAsync();
 			var newPallet = Pallet.Create(newNumber, locationId);
 			newPallet.AddProduct(task.ProductId, task.Quantity, task.BestBefore);
 			newPallet.ChangeStatus(PalletStatus.InStock);
-			var location = await _locationRepo.GetLocationByIdAsync(locationId);
-			var snapShot = location.ToSnapshot();
 			_palletRepo.AddPallet(newPallet);
-			newPallet.CreateNewPalletFromReservePicking(location.Id, snapShot, userId);
+			newPallet.CreateNewPalletFromReservePicking(snapShot, userId);
 			return ReversePickingResult.Ok("Dodano towar do nowej palety.", task.ProductId, newPallet.Id, newPallet.PalletNumber);
 		}
 	}

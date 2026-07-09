@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -62,7 +63,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			}
 			var existingPallets = existingReceipt.Pallets.ToDictionary(p => p.Id);
 			//Aktualizacja palet
-			foreach (var dto in request.DTO.Pallets.Where(p => p.Id != null))
+			foreach (var dto in request.DTO.Pallets.Where(p => p.Id != Guid.Empty))
 			{
 				if (!existingPallets.TryGetValue(dto.Id!, out var pallet))
 					continue;
@@ -87,6 +88,10 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 			{
 				var newId = await _palletRepo.GetNextPalletIdAsync();
 				var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber);
+				if (location == null)
+				{
+					return AppResult<Unit>.Fail("Podana lokalizacja jest nieprawidłowa.", ErrorType.Validation);
+				}
 				var pallet = Pallet.Create(newId, request.DTO.RampNumber);
 				foreach (var dto in palletToAdd.ProductsOnPallet)
 				{

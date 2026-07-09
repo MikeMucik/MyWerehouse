@@ -10,20 +10,21 @@ namespace MyWerehouse.Application.Issues.IssueServices
 	public sealed class AssignProductToIssueResult
 	{
 		public bool Success { get; init; }
-		public string Message { get; set; }
-		public Guid ProductId { get; init; }		
-		public string SKU { get; init; } //?
-		public IReadOnlyList<Pallet> AssignedPallets { get; init; }
+		public string Message { get; set; } = string.Empty;
+		public Guid ProductId { get; init; }
+		public string SKU { get; init; } = string.Empty;
+		public IReadOnlyList<Pallet> AssignedPallets { get; init; } = [];
 		public int QuantityRequest { get; init; }
 		public int QuantityOnStock { get; init; }
-		public AssignProductToIssueResult(){}
-		public static AssignProductToIssueResult Ok(string message, Guid productId, IReadOnlyList<Pallet> pallets)
+		public AssignProductToIssueResult() { }
+		public static AssignProductToIssueResult Ok(string message, Guid productId, string sku, IReadOnlyList<Pallet> pallets)
 		{
 			return new AssignProductToIssueResult
 			{
 				Success = true,
 				Message = message,
 				ProductId = productId,
+				SKU = sku,
 				AssignedPallets = pallets
 			};
 		}
@@ -33,7 +34,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			return new AssignProductToIssueResult
 			{
 				Success = true,
-				Message = message				
+				Message = message
 			};
 		}
 		public static AssignProductToIssueResult Fail(string message)
@@ -50,12 +51,13 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			{
 				Success = false,
 				Message = message,
-				ProductId = productNotAdded
+				ProductId = productNotAdded,				
 			};
 		}
 		public static AssignProductToIssueResult Fail(
 			string message,
 			Guid productNotAdded,
+			string sku,
 			int issueQuantity,
 			int onStock)
 		{
@@ -64,6 +66,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				Success = false,
 				Message = message,
 				ProductId = productNotAdded,
+				SKU = sku,
 				QuantityRequest = issueQuantity,
 				QuantityOnStock = onStock
 			};

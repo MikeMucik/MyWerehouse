@@ -45,7 +45,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			var product = await _werehouseDbContext.Products
 				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false);
-			return product.SKU;
+			return product!.SKU;//required
 		}
 		public async Task<Product?> GetProductToEditAsync(Guid id)
 		{

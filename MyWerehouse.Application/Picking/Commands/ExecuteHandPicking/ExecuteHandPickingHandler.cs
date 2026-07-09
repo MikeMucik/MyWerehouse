@@ -77,6 +77,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Zadania nie można zrealizować, mniej dostępnego towaru na palecie niż chęć pobrania", ErrorType.Conflict);
 			}
+			ArgumentNullException.ThrowIfNull(virtualPallet);
 			pickingHandTask.SetVirtualPallet(virtualPallet.Id);
 			var completion = PickingCompletion.Full;
 			if (command.Quantity < pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity)

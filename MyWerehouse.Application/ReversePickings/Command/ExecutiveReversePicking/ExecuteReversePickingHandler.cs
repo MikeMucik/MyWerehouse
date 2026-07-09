@@ -19,27 +19,17 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 	public class ExecuteReversePickingHandler(WerehouseDbContext werehouseDbContext,
 		IReversePickingRepo reversePickingRepo,
 		IAddProductsToPalletService addProductsToPalletService,
-		IPalletRepo palletRepo
+		IPalletRepo palletRepo,
+		ILocationRepo locationRepo
 		) : IRequestHandler<ExecuteReversePickingCommand, AppResult<ReversePickingResult>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IAddProductsToPalletService _addProductsToPalletService = addProductsToPalletService;
 		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly ILocationRepo _locationRepo = locationRepo;
 		public async Task<AppResult<ReversePickingResult>> Handle(ExecuteReversePickingCommand command, CancellationToken ct)
-		{
-			//walidacja
-			if (command.Strategy == ReversePickingStrategy.AddToExistingPallet)
-			{
-				if (command.Pallets == null || command.Pallets.Count == 0)
-				{
-					return AppResult<ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.", ErrorType.NotFound);
-				}
-			}
-			if (command.Strategy == ReversePickingStrategy.AddToNewPallet && command.RampNumber == null)
-			{
-				return AppResult<ReversePickingResult>.Fail("Brak lokalizacji dekompletacji", ErrorType.Validation);
-			}
+		{			
 			var reversePicking = await _reversePickingRepo.GetReversePickingAsync(command.TaskReversedId);
 			if (reversePicking is null)
 			{
@@ -74,12 +64,27 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					if (!result.Success) return Fail(result.Message);
 					break;
 				case ReversePickingStrategy.AddToExistingPallet:
+					if (command.Pallets == null || command.Pallets.Count == 0)
+					{
+						return AppResult<ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.", ErrorType.NotFound);
+					}
 					result = await _addProductsToPalletService.AddToExistingPallet(reversePicking, command.Pallets, command.UserId);
 					if (!result.Success) return Fail(result.Message);
 					//TODO front co potrzebuje						
 					break;
 				case ReversePickingStrategy.AddToNewPallet:
-					result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId, command.RampNumber.Value);
+					
+					if (command.RampNumber == null)
+					{
+						return AppResult<ReversePickingResult>.Fail("Brak lokalizacji dekompletacji", ErrorType.Validation);
+					}
+					var location =await _locationRepo.GetLocationByIdAsync(command.RampNumber.Value);
+					if (location == null)
+					{
+						return AppResult<ReversePickingResult>.Fail("Podana lokalizacja jest nieprawidłowa.", ErrorType.Validation);
+					}
+					var snapShot = location.ToSnapshot();
+					result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId, command.RampNumber!.Value, snapShot);
 					if (!result.Success) return Fail(result.Message);
 					break;
 				default:

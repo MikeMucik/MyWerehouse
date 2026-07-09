@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentValidation;
 using MyWerehouse.Application.Services;
+using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Domain.Interfaces;
@@ -21,6 +23,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 		private readonly ClientService _clientService;
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IIssueRepo _issueRepo;
+		private readonly IValidator<AddClientDTO> _addClientValidator;
+		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
+		private readonly IValidator<AddAddressDTO> _addAddressValidator;
+		private readonly IValidator<EditAddressDTO> _editAddressValidator;
+
 
 		public ClientIntegrationServiceView(InMemoryDatabaseFixtureExecutive fixture)
 		{
@@ -28,7 +35,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			_clientRepo = new ClientRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_issueRepo = new IssueRepo(_context);
-			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo, _issueRepo, _context);
+			_addAddressValidator = new AddAddressDTOValidation();
+			_editAddressValidator = new EditAddressDTOValidation();
+			_addClientValidator = new AddClientDTOValidation(_addAddressValidator);
+			_updateClientValidator = new UpdateClientDTOValidation(_editAddressValidator);
+			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo, _issueRepo, _context, _addClientValidator, _updateClientValidator);
 		}
 
 		[Fact]

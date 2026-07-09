@@ -28,6 +28,8 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 		public async Task<AppResult<ReversePickingDetailsDTO>> Handle(GetReversePickingToDoQuery query, CancellationToken ct)
 		{
 			var reversePickingTask = await _reversePickingRepo.GetReversePickingAsync(query.PickingTaskId);
+			if (reversePickingTask == null) return AppResult<ReversePickingDetailsDTO>.Fail("Nie znaleziono zadania dekompletacyjnego.", ErrorType.NotFound);
+
 			var pickingTask = reversePickingTask.PickingTask;
 			var reversePickingDTO = _mapper.Map<ReversePickingDTO>(reversePickingTask);
 			var remainingQuantity = pickingTask.PickedQuantity;
@@ -36,9 +38,9 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 
 			if (product.CartonsPerPallet == 0) return AppResult<ReversePickingDetailsDTO>.Fail($"Produkt {pickingTask.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt", ErrorType.Conflict);
 			
-			var sourcePalletId = pickingTask.VirtualPallet.PalletId;
-			var sourcePallet = await _palletRepo.GetPalletByIdAsync(sourcePalletId);
-			if (sourcePallet == null) return AppResult<ReversePickingDetailsDTO>.Fail($"Paleta o numerze {pickingTask.VirtualPallet.PalletId} nie istnieje.", ErrorType.NotFound);
+			var sourcePallet = pickingTask.VirtualPallet?.Pallet;
+			if (sourcePallet == null)	return AppResult<ReversePickingDetailsDTO>.Fail("Paleta źródłowa nie istnieje.", ErrorType.NotFound);
+			
 			// czy można dołączyć do palety z której pobierano
 			bool addSource = false;
 			if (sourcePallet.Status == PalletStatus.Available || sourcePallet.Status == PalletStatus.ToPicking)
@@ -51,11 +53,10 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				ProductId = pickingTask.ProductId,
 				BestBeforeFrom = pickingTask.BestBefore,
 			};
-			var palletsWithProduct = _palletRepo.GetPalletsByFilter(filtr)//TODO reversePallet + reversePallet ;) repo
+			var palletsWithProduct = _palletRepo.GetPalletsByFilter(filtr)
 				.Where(p =>
-				//p.ReceiptId != 0 || 
 				p.Receipt != null)
-				.Where(p => p.Status == PalletStatus.Available);// || p.Status == PalletStatus.ToPicking);	- w idealnym świecie 		
+				.Where(p => p.Status == PalletStatus.Available);	
 			var notFullPallets = await palletsWithProduct
 				.Where(p => p.ProductsOnPallet.Single().Quantity < product.CartonsPerPallet)
 				.OrderByDescending(p => p.ProductsOnPallet.Single().Quantity)

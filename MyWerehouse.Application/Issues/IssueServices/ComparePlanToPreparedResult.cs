@@ -9,9 +9,9 @@ namespace MyWerehouse.Application.Issues.IssueServices
 	public class ComparePlanToPreparedResult
 	{
 		public bool Success { get; init; }
-		public string Message { get; init; }
+		public string Message { get; init; } = string.Empty;
 		public Guid ProductId { get; init; }
-		public string SKU { get; init; }
+		public string SKU { get; init; } = string.Empty;
 		public int QuantityRequest { get; init; }
 		public int QuantityPrepared { get; init; }
 		public ComparePlanToPreparedResult() { }

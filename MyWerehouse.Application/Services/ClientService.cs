@@ -39,8 +39,8 @@ namespace MyWerehouse.Application.Services
 			IReceiptRepo receiptRepo,
 			IIssueRepo issueRepo,
 			WerehouseDbContext werehouseDbContext,
-			IValidator<AddClientDTO>? addClientValidator = null,
-			IValidator<UpdateClientDTO>? updateClientValidator = null)
+			IValidator<AddClientDTO> addClientValidator,
+			IValidator<UpdateClientDTO> updateClientValidator)
 		{
 			_clientRepo = clientRepo;
 			_mapper = mapper;

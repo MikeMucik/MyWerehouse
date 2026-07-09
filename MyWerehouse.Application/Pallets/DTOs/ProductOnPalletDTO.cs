@@ -12,8 +12,8 @@ namespace MyWerehouse.Application.Pallets.DTOs
 	public class ProductOnPalletDTO : IMapFrom<ProductOnPallet>
 	{
 		public Guid ProductId { get; init; }
-		public string ProductSKU { get; init; }//
-		public string ProductName { get; init; }//
+		public string ProductSKU { get; init; } = string.Empty;
+		public string ProductName { get; init; } = string.Empty;
 		public Guid PalletId { get; init; }
 		public int Quantity { get; init; }
 		public DateTime DateAdded { get; init; }
@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<ProductOnPallet, ProductOnPalletDTO>()
-				.ForMember(dest=>dest.ProductSKU, opt=>opt.MapFrom(src=>src.Product.SKU))
+				.ForMember(dest => dest.ProductSKU, opt => opt.MapFrom(src => src.Product.SKU))
 				.ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
 		}
 	}

@@ -150,7 +150,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return nextId;
 		}
 
-		public async Task<Pallet> CheckOccupancyAsync(int locationId)
+		public async Task<Pallet?> CheckOccupancyAsync(int locationId)
 		{
 			var pallet = await _werehouseDbContext.Pallets.FirstOrDefaultAsync(p => p.LocationId == locationId);
 			return pallet;

@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Histories.Models
 
 		public Guid ReversePickingId { get; set; }
 		public required Guid PickingPalletId {  get; set; }
-		public string PickingPalletNumber { get; set; }
+		public string PickingPalletNumber { get; set; } = string.Empty;
 		public Guid? PalletSourceId { get; set; }
 		public string? PalletSourceNumber { get; set; }
 		public Guid? PalletDestinationId { get; set; }
@@ -24,7 +24,7 @@ namespace MyWerehouse.Domain.Histories.Models
 		public int Quantity { get; set; }
 		public ReversePickingStatus? StatusBefore { get; set; }
 		public ReversePickingStatus StatusAfter { get; set; }
-		public string PerformedBy { get; set; }
+		public string PerformedBy { get; set; } = string.Empty;
 		public DateTime DateTime { get; set; }
 	}
 }

@@ -58,7 +58,7 @@ namespace MyWerehouse.Test.ValidationTest
 			var client = new AddClientDTO
 			{
 				Name = "name",
-				//FullName = "fullname",
+				FullName = "",
 				Email = "email@wp.pl",
 				Addresses = new List<AddAddressDTO> { address },
 				Description = "description",

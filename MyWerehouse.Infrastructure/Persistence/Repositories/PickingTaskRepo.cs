@@ -33,7 +33,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var pickingTask = _werehouseDbContext.PickingTasks
 				
-				.Include(a => a.VirtualPallet)
+				.Include(a => a.VirtualPallet!)
 					.ThenInclude(b => b.Pallet)
 						.ThenInclude(c => c.ProductsOnPallet)
 				.Include(i => i.Issue)
@@ -82,6 +82,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Where(x => x.PickingPalletId == pickingPalletId)
+				.Where(x=>x.VirtualPallet != null)
+				.Include(x=>x.VirtualPallet!)
+					.ThenInclude(xp=>xp.Pallet)
 				.ToListAsync();
 		}
 

@@ -11,18 +11,17 @@ namespace MyWerehouse.Application.Picking.Services
 		public bool Success { get; init; }
 
 		public bool NewPalletCreated { get; init; }
-		public string Message { get; set; }
+		public string Message { get; set; } = string.Empty;
 
 		public int RequestedQuantity { get; init; }
 		public int PickedQuantity { get; init; }
 		public int MissingQuantity { get; init; }
 
 		public Guid PalletId { get; init; }
-		public string PalletNumber { get; init; }
+		public string PalletNumber { get; init; } = string.Empty;
 		public ProcessPickingActionResult() { }
 		public static ProcessPickingActionResult Ok(Guid palletId
-			, string palletNumber, string message
-			)
+			, string palletNumber, string message)
 		{
 			return new ProcessPickingActionResult
 			{
@@ -34,8 +33,7 @@ namespace MyWerehouse.Application.Picking.Services
 			};
 		}
 		public static ProcessPickingActionResult OkWithNewPallet(Guid palletId
-			, string palletNumber, string message
-			)
+			, string palletNumber, string message)
 		{
 			return new ProcessPickingActionResult
 			{
@@ -46,23 +44,6 @@ namespace MyWerehouse.Application.Picking.Services
 				Message = message
 			};
 		}
-
-		//public static ProcessPickingActionResult OkPartial(bool newPalletCreted, Guid palletId, 
-		//	string palletNubmer, string message, int requestQuantity,
-		//	int pickedQuantity, int missingQuantity)
-		//{
-		//	return new ProcessPickingActionResult
-		//	{
-		//		Success = true,
-		//		NewPalletCreated = newPalletCreted,
-		//		Message = message,
-		//		PalletId = palletId,
-		//		PalletNumber = palletNubmer,
-		//		RequestedQuantity = requestQuantity,
-		//		PickedQuantity = pickedQuantity,
-		//		MissingQuantity = missingQuantity
-		//	};
-		//}
 
 		public static ProcessPickingActionResult Fail(string message)
 		{

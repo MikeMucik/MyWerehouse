@@ -10,9 +10,8 @@ namespace MyWerehouse.Application.Picking.Services
 	public sealed class AddPickingTaskToIssueResult
 	{
 		public bool Success { get; set; }
-		public string Message { get; set; }
-		public List<PickingTask> PickingTask { get; set; }
-		public PickingTask OnePickingTask { get; set; }
+		public string Message { get; set; } = string.Empty;
+		public List<PickingTask> PickingTask { get; set; } = [];
 		public AddPickingTaskToIssueResult()	{	}
 		public static AddPickingTaskToIssueResult Ok(List<PickingTask> pickingTask)
 		{
@@ -27,7 +26,7 @@ namespace MyWerehouse.Application.Picking.Services
 			return new AddPickingTaskToIssueResult
 			{
 				Success = true,
-				OnePickingTask = onePickingTask
+				PickingTask = [onePickingTask]
 			};
 		}
 		public static AddPickingTaskToIssueResult Fail(string message)

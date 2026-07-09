@@ -62,7 +62,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 
 			// Sprawdź ilości
 			Assert.Equal(10, createdVirtualPallet.InitialPalletQuantity);
-			Assert.Null(createdVirtualPallet.PickingTasks);
+			Assert.Empty(createdVirtualPallet.PickingTasks);
 			//Assert.Empty(createdVirtualPallet.PickingTasks);
 
 			// Sprawdź powiązany produkt

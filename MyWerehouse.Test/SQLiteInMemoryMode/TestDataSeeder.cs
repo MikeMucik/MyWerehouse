@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;

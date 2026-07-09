@@ -7,7 +7,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.Commands.CreateNewPallet;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
@@ -65,10 +65,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			var newPallet = new CreatePalletDTO
 			{
-				ProductsOnPallet = new HashSet<ProductOnPalletDTO>{ new ProductOnPalletDTO
+				UserId = "user",
+				ProductsOnPallet = new HashSet<ProductOnPalletCreateDTO>{ new ProductOnPalletCreateDTO
 						{
 							ProductId = product.Id,
 							Quantity = 5,
+
 						}
 				},
 			};
@@ -117,8 +119,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			var newPallet = new CreatePalletDTO
 			{
-				ProductsOnPallet = new HashSet<ProductOnPalletDTO>{
-					new ProductOnPalletDTO
+				UserId = "user",
+				ProductsOnPallet = new HashSet<ProductOnPalletCreateDTO>{
+					new ProductOnPalletCreateDTO
 						{
 							ProductId = product.Id,
 							Quantity = 0,
@@ -148,8 +151,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var product9Id = Guid.Parse("00000000-0000-0000-0009-000000000000");
 			var newPallet = new CreatePalletDTO
 			{
-				ProductsOnPallet = new HashSet<ProductOnPalletDTO>{
-					new ProductOnPalletDTO
+				UserId = "user",
+				ProductsOnPallet = new HashSet<ProductOnPalletCreateDTO>{
+					new ProductOnPalletCreateDTO
 						{
 							ProductId =product9Id,
 							Quantity = 10,

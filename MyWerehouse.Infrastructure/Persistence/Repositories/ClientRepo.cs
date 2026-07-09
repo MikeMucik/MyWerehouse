@@ -50,7 +50,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return null;
 		}
-		public async Task<Client> GetClientToEditAsync(int id)
+		public async Task<Client?> GetClientToEditAsync(int id)
 		{			
 				var client = await _werehouseDbContext.Clients
 						.Include(c => c.Addresses)

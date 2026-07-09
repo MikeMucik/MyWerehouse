@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Histories.Filters;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.InMemoryDatabase.Common;
@@ -85,7 +84,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			var result =await _palletMovementRepo.GetHistoryPallet(palletNumber);
 			// Assert
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Count());
+			Assert.Equal(2, result.Count);
 			//  Sprawdzenie że wszystkie wyniki dotyczą tej samej palety
 			Assert.All(result, r => Assert.Equal("Q1000", r.PalletNumber));
 

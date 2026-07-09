@@ -38,7 +38,7 @@ namespace MyWerehouse.Test.ValidationTest
 			var validator = new AddProductDTOValidation();
 			var product = new CreateProductDTO
 			{
-				//Name = "Apple",
+				Name = "",
 				SKU = "666666",
 				CategoryId = 1,
 				Length = 100,

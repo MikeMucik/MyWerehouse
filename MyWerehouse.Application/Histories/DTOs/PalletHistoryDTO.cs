@@ -10,7 +10,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 	public class PalletHistoryDTO 
 	{
 		public Guid Id { get; set; }
-		public string PalletNumber { get; set; }
+		public string PalletNumber { get; set; } = string.Empty;
 		public DateTime DateReceived { get; set; }		
 		public Guid? ReceiptId { get; set; }
 		public int? ReceiptNumber { get; set; }

@@ -33,7 +33,7 @@ namespace MyWerehouse.Test.ValidationTest
 			var validator = new EditAddressDTOValidation();
 			var address = new EditAddressDTO
 			{
-				//City = "Warsaw",
+				City = "",
 				Country = "Poland",
 				PostalCode = "00-999",
 				StreetName = "Wiejska",
@@ -50,7 +50,7 @@ namespace MyWerehouse.Test.ValidationTest
 			var address = new EditAddressDTO
 			{
 				City = "Warsaw",
-				//Country = "Poland",
+				Country = "",
 				PostalCode = "00-999",
 				StreetName = "Wiejska",
 				Phone = 4444444,

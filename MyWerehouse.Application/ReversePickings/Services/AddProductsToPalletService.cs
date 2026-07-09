@@ -73,13 +73,13 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			return ReversePickingResult.Ok("Dodano towar.", listPalletToAddProduct); 
 		}
 
-		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId, int rampNumber)
+		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId, int locationId)
 		{
 			var newNumber = await _palletRepo.GetNextPalletIdAsync();
-			var newPallet = Pallet.Create(newNumber, rampNumber);
+			var newPallet = Pallet.Create(newNumber, locationId);
 			newPallet.AddProduct(task.ProductId, task.Quantity, task.BestBefore);
 			newPallet.ChangeStatus(PalletStatus.InStock);
-			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
+			var location = await _locationRepo.GetLocationByIdAsync(locationId);
 			var snapShot = location.ToSnapshot();
 			_palletRepo.AddPallet(newPallet);
 			newPallet.CreateNewPalletFromReservePicking(location.Id, snapShot, userId);

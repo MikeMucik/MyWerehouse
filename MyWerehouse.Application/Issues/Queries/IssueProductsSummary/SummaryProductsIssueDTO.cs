@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Issues.Queries.IssueProductsSummary
 		public Guid Id { get; init; }
 		public int IssueNumber { get; init; }
 		public int ClientId { get; init; }
-		public string PerformedBy { get; init; }
+		public string PerformedBy { get; init; } = string.Empty;
 		public DateOnly DateToSend { get; init; }
 		public List<IssueItemViewDTO> IssueItems { get; init; } = new List<IssueItemViewDTO>();
 

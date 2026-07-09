@@ -11,7 +11,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		Available = 0,
 		Allocated = 1,
 		Picked = 2,
-		Correction = 3,//to trzeba dodać w reduce i 
+		CorrectionPicking = 3,
 		Cancelled = 4,
 		PickedPartially = 5,
 	}

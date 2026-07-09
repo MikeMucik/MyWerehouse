@@ -14,7 +14,7 @@ namespace MyWerehouse.Domain.Histories.Models
 		public int ReceiptNumber { get; set; }
 		public int ClientId { get; set; } //migracja bo dodane pole
 		public ReceiptStatus StatusAfter { get; set; }
-		public string PerformedBy { get; set; }
+		public string PerformedBy { get; set; } = string.Empty;
 		public DateTime DateTime { get; set; }
 		public virtual ICollection<HistoryReceiptDetail> Details { get; set; } = new List<HistoryReceiptDetail>();
 	}

@@ -27,7 +27,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			 if(await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r=>r.SourcePalletId == palletId) != null) return true ; return false;
 		}		
 
-		public async Task<ReversePicking> GetReversePickingAsync(Guid reversePickingId)
+		public async Task<ReversePicking?> GetReversePickingAsync(Guid reversePickingId)
 		{
 			return await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r => r.Id == reversePickingId);
 		}

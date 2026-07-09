@@ -12,8 +12,8 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 	public class DetailsOfProductDTO : IMapFrom<Product>
 	{
 		public Guid Id { get; init; }//
-		public string Name { get; init; }
-		public string CategoryName { get; init; }
+		public string Name { get; init; } = string.Empty;
+		public string CategoryName { get; init; } = string.Empty;
 		public int CategoryId { get; init; }
 		public bool? IsDeleted { get; init; }
 		public int CartonsPerPallet { get; init; }
@@ -21,17 +21,17 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int Height { get; init; } //cm
 		public int Width { get; init; } //cm
 		public int Weight { get; init; } //kg
-		public string Description { get; init; }
+		public string Description { get; init; } = string.Empty;
 		public DateTime AddedItemAd { get; init; } = DateTime.Now;
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Product, DetailsOfProductDTO>()
-				.ForMember(dest => dest.Length, opt => opt.MapFrom(src => src.Details.Length))
-				.ForMember(dest => dest.Height, opt => opt.MapFrom(src => src.Details.Height))
-				.ForMember(dest => dest.Width, opt => opt.MapFrom(src => src.Details.Width))
-				.ForMember(dest => dest.Weight, opt => opt.MapFrom(src => src.Details.Weight))
+				.ForMember(dest => dest.Length, opt => opt.MapFrom(src => src.Details!.Length))
+				.ForMember(dest => dest.Height, opt => opt.MapFrom(src => src.Details!.Height))
+				.ForMember(dest => dest.Width, opt => opt.MapFrom(src => src.Details!.Width))
+				.ForMember(dest => dest.Weight, opt => opt.MapFrom(src => src.Details!.Weight))
 				.ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-				.ForMember(dest => dest.Description, opt=>opt.MapFrom(src=>src.Details.Description))
+				.ForMember(dest => dest.Description, opt=>opt.MapFrom(src=>src.Details!.Description))
 				.ReverseMap()
 				;
 		}

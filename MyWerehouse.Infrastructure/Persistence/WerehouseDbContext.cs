@@ -1,12 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -14,13 +13,12 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Configuration;
-using MyWerehouse.Infrastructure.Persistence.Repositories;
 
 namespace MyWerehouse.Infrastructure.Persistence
 {
 	public class WerehouseDbContext : IdentityDbContext
 	{
-		private readonly IPublisher _publisher;
+		private readonly IPublisher? _publisher;
 		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options, IPublisher? publisher) : base(options)
 		{
 			_publisher = publisher;

@@ -18,11 +18,11 @@ namespace MyWerehouse.Domain.Picking.Models
 		public Guid? VirtualPalletId { get; private set; }
 		public VirtualPallet? VirtualPallet { get; private set; }
 		public Guid IssueId { get; private set; }
-		public Issue Issue { get; private set; }
+		public Issue Issue { get; private set; } = null!;
 		public int RequestedQuantity { get; private set; }
 		public PickingStatus PickingStatus { get; private set; }
 		public Guid ProductId { get; private set; } //
-		public Product Product { get; private set; }// potrzebne by wyświetlać SKU dla prodktu w DTO
+		public Product Product { get; private set; } = null!;// potrzebne by wyświetlać SKU dla prodktu w DTO
 		public DateOnly? BestBefore { get; private set; }
 		public Guid? PickingPalletId { get; private set; }
 		public Pallet? PickingPallet { get; private set; }
@@ -99,7 +99,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		{
 			var oldStatus = PickingStatus;
 			RequestedQuantity -= quantity;
-			PickingStatus = PickingStatus.Correction;
+			PickingStatus = PickingStatus.CorrectionPicking;
 			AddHistoryPicking(userId, null, null, oldStatus, 0);
 		}
 		// do ujednolicenia MarkPicked MarkPartiallyPicked

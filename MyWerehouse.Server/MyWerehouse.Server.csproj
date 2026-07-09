@@ -27,9 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyWerehouse.Application\MyWerehouse.Application.csproj" />
-    <ProjectReference Include="..\mywerehouse.client\mywerehouse.client.esproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
+   
     <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
   </ItemGroup>
 

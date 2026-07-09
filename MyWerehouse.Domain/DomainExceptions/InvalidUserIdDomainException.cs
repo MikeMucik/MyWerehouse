@@ -9,7 +9,7 @@ namespace MyWerehouse.Domain.DomainExceptions
 {
 	public class InvalidUserIdDomainException : DomainException
 	{
-		public InvalidUserIdDomainException(string userId)
-			: base($"Invalid {userId} or missing user ID.") { }
+		public InvalidUserIdDomainException()
+			: base($"Invalid userId or missing user ID.") { }
 	}
 }

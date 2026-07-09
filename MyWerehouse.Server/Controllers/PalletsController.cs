@@ -36,8 +36,8 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new GetPalletQuery(id))).ToActionResult();
 		
 		// dane palety Palletnumber
-		[HttpGet("/by-number/{palletNumber}")]
-		public async Task<IActionResult> GetPalletNumber(string palletNumber)
+		[HttpGet("by-number/{palletNumber}")]
+		public async Task<IActionResult> GetByPalletNumber(string palletNumber)
 			=> (await _mediator.Send(new GetPalletByPalletNumberQuery(palletNumber))).ToActionResult();
 		
 		// paleta do edycji
@@ -46,7 +46,7 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new GetPalletToEditQuery(id))).ToActionResult();		
 
 		// update palety
-		[HttpPut("{id:guid}/update")]
+		[HttpPut("{id:guid}")]
 		public async Task<IActionResult> Update(Guid id, Application.Pallets.Commands.UpdatePallet.EditPalletDTO dto)
 			=> (await _mediator.Send(new UpdatePalletCommand(id, dto))).ToActionResult();
 
@@ -57,7 +57,7 @@ namespace MyWerehouse.Server.Controllers
 			.ToActionResult();
 
 		// oznacz jako załadowana i być może też zmień na id
-		[HttpPost("{id:guid}/markLoaded")]
+		[HttpPost("{id:guid}/mark-loaded")]
 		public async Task<IActionResult> MarkLoaded(Guid id, string userId)
 			=> (await _mediator.Send(new MarkAsLoadedCommand(id, userId)))
 			.ToActionResult();

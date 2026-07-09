@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using MyWerehouse.Application.Common.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Server.Middleware
@@ -21,47 +21,63 @@ namespace MyWerehouse.Server.Middleware
 			}					
 			catch (DomainException ex)
 			{
-				_logger.LogWarning(ex, "Domain exception while proccessing request{Methid} {Path}",
+				_logger.LogWarning(ex, "Domain exception while processing request {Method} {Path}",
 					context.Request.Method, context.Request.Path);
 
 				await HandleDomainException(context, ex);				
 			}
 			catch (FluentValidation.ValidationException ex)
 			{
-				context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
-				await context.Response.WriteAsJsonAsync(new
-				{					
-					error = ex.Message
-				});
+				await HandleValidationException(context, ex);				
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Unhandled exception occured while proccessing request{Methid} {Path}",
+				_logger.LogError(ex, "Unhandled exception occurred while processing request {Method} {Path}",
 					context.Request.Method, context.Request.Path);				
 
 				await HandleExceptionAsync(context);
 			}
 		}
+		private static Task HandleValidationException(HttpContext context, FluentValidation.ValidationException ex)
+		{
+			var errors = ex.Errors
+				.GroupBy(e => e.PropertyName)
+				.ToDictionary(
+				g => g.Key,
+				g => g.Select(e => e.ErrorMessage)
+				.ToArray());
+			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			context.Response.ContentType = "application/problem+json";
+			var response = new ValidationProblemDetails(errors)
+			{
+				Title = "Validation error",				
+				Status = StatusCodes.Status400BadRequest
+			};
+			return context.Response.WriteAsJsonAsync(response);
+		}
 		private static Task HandleDomainException(HttpContext context, Exception ex)
 		{
-			context.Response.StatusCode = StatusCodes.Status400BadRequest;
-			var response = new
+			context.Response.StatusCode = StatusCodes.Status409Conflict;
+			context.Response.ContentType = "application/problem+json";
+			var response = new ProblemDetails
 			{
-				error = ex.GetType().Name,
-				message = ex.Message,
+				Title = "Business rule violation",
+				Detail = ex.Message,
+				Status = StatusCodes.Status409Conflict,
 			};
 			return context.Response.WriteAsJsonAsync(response);
 		}
 		private static async Task HandleExceptionAsync(HttpContext context)
 		{
 			context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-			context.Response.ContentType = "application/json";
-			var response = new
+			context.Response.ContentType = "application/problem+json";
+			var response = new ProblemDetails
 			{
-				StatusCodes = 500,
-				Message = "Wystąpił błąd serwera",
-				
+				Title = "Internal server error",
+				Status = StatusCodes.Status500InternalServerError,
+				Detail = "Unexpected Error"
 			};
+			response.Extensions["traceId"] = context.TraceIdentifier;
 			await context.Response.WriteAsJsonAsync(response);	
 		}
 	}

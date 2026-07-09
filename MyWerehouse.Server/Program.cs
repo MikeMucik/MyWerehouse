@@ -45,7 +45,7 @@ builder.Services.AddSwaggerGen(c =>
 WebApplication app;
 
 app = builder.Build();
-Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
+
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI(c =>

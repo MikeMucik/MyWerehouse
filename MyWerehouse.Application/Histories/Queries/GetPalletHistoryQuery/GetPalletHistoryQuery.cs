@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 {
 	public class GetPalletHistoryQuery : IRequest<AppResult<PalletHistoryDTO>>
 	{			
-		public string PalletNumber { get; set; }
+		public required string PalletNumber { get; set; }
 		//public int Page { get; set; }
 		//public int PageSize { get; set; }
 	};

@@ -11,8 +11,8 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 	public class PalletToLoadDTO
 	{
 		public Guid PalletId { get; init;}
-		public string PalletNumber { get; init;}
-		public string LocationName { get; init;}//
+		public string PalletNumber { get; init; } = string.Empty;
+		public string LocationName { get; init; } = string.Empty;
 		public int LocationId { get; init;}
 		public PalletStatus PalletStatus { get; init;}
 		public List<ProductOnPalletIssueDTO> ProductOnPalletIssue { get; init;} = new List<ProductOnPalletIssueDTO>();

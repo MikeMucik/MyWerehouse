@@ -10,23 +10,45 @@ namespace MyWerehouse.Server.Extensions
 		{
 			if (result.IsSuccess)
 			{
-				if (typeof(T) == typeof(Unit)) 
+				if (typeof(T) == typeof(Unit))
 				{
 					return new OkObjectResult(new
 					{
 						result.IsSuccess,
-						result.Message
+						result.Message,
 					});
 				}
 				return new OkObjectResult(result.Result);
 			}
 			return result.ErrorType switch
 			{
-				//ErrorType.NotFound => new NotFoundObjectResult(new { result.ErrorType, result.Error }),
-				ErrorType.NotFound => new NotFoundObjectResult(result.Error),
-				ErrorType.Conflict => new ConflictObjectResult(result.Error),
-				ErrorType.Validation => new BadRequestObjectResult(result.Error),
-				_ => new BadRequestObjectResult(result.Error)
+				ErrorType.NotFound => new NotFoundObjectResult(new ProblemDetails
+				{
+					Title = "Resource not found",
+					Detail = result.Error,
+					Status = StatusCodes.Status404NotFound,
+				}),
+				ErrorType.Conflict => new ConflictObjectResult(new ProblemDetails
+				{
+					Title = "Resource conflict",
+					Detail = result.Error,
+					Status = StatusCodes.Status409Conflict
+				}),
+				ErrorType.Validation => new BadRequestObjectResult(new ProblemDetails				
+				{
+					Title = "Validation error",
+					Detail = result.Error,
+					Status = StatusCodes.Status400BadRequest
+				}),
+				_ => new ObjectResult(new ProblemDetails
+				{
+					Title = "Internal server error",
+					Detail = "Unexpected error",
+					Status = StatusCodes.Status500InternalServerError
+				})
+				{
+					StatusCode = StatusCodes.Status500InternalServerError
+				}
 			};
 		}
 	}

@@ -20,6 +20,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<Pallet?> GetPickingPalletByIssueId(Guid issueId);			
 		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);				
 		Task<string> GetNextPalletIdAsync();		
-		Task<Pallet> CheckOccupancyAsync(int locationId); //numer lokacji																
+		Task<Pallet?> CheckOccupancyAsync(int locationId); 																
 	}
 }

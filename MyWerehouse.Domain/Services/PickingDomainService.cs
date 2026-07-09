@@ -21,17 +21,17 @@ namespace MyWerehouse.Domain.Services
 		{
 
 			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId);
-			if(pickingTasks.Count == 0)
+			if (pickingTasks.Count == 0)
 			{
 				throw new PickingTaskNotFoundDomainException(issueId, productId);
 			}
-			
+
 			if (pickingTasks.Count > 1)
 			{
 				throw new TooManyTaskDomainException(issueId, productId);
 			}
-			
-			if(pickingTasks.Any(a => a.VirtualPallet != null))
+
+			if (pickingTasks.Any(a => a.VirtualPallet != null))
 			{
 				throw new InvalidPickingStrategyDomainException(issueId, productId);
 			}

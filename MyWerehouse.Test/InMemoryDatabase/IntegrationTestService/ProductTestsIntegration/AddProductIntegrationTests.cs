@@ -106,7 +106,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			var productNew = new CreateProductDTO
 			{
 				Name = "Apple",
-				//SKU = "666666",
+				SKU = "",
+				CartonsPerPallet = 56,
 				CategoryId = 1,
 				Length = 100,
 				Height = 200,

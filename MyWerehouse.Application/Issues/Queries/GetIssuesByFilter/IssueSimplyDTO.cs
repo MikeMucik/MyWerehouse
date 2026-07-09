@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFilter
 		public int ClientId { get; init; }
 		public DateTime IssueDateTimeCreate { get; init; }
 		public DateOnly IssueDateTimeSend { get; init; }
-		public string PerformedBy { get; init; }
+		public string PerformedBy { get; init; } = string.Empty;
 		public IssueStatus IssueStatus { get; init; }
 		public void Mapping(Profile profile)
 		{

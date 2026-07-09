@@ -14,11 +14,11 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 {
 	public class AddClientDTO :IMapFrom<Client>
 	{
-		public string Name { get; set; }
-		public string Email { get; set; }
-		public string Description { get; set; }
+		public required string Name { get; set; }
+		public required string Email { get; set; } 
+		public required string Description { get; set; } 
 		[MaxLength(250)]
-		public string FullName { get; set; }
+		public required string FullName { get; set; } 
 		public ICollection<AddAddressDTO> Addresses { get; set; } = new List<AddAddressDTO>();
 		public void Mapping(Profile profile)
 		{
@@ -28,15 +28,15 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 	public class AddClientDTOValidation : AbstractValidator<AddClientDTO>
 	{
 		public AddClientDTOValidation(IValidator<AddAddressDTO> addressValidator)
-		{
+		{			
 			RuleFor(c => c.Name)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Uzupełnij dane - nazwa");
 			RuleFor(c => c.Email)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Uzupełnij dane - email");
 			RuleFor(c => c.FullName)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Uzupełnij dane - pełna nazwa");
 			RuleFor(c => c.Addresses)
 				.NotEmpty()

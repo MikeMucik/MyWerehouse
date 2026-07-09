@@ -13,7 +13,8 @@ namespace MyWerehouse.Domain.Interfaces
 	{		
 		Product AddProduct(Product product);		
 		void DeleteProduct(Product product);					
-		Task<Product?> GetProductByIdAsync(Guid id);		
+		Task<Product?> GetProductByIdAsync(Guid id);
+		Task<string?> GetSKUForProductAsync(Guid id);
 		Task<Product?> GetProductToEditAsync(Guid id);
 		Task<Product?> GetProductDetailsAsync(Guid id);
 		IQueryable<Product> GetAllProducts();		

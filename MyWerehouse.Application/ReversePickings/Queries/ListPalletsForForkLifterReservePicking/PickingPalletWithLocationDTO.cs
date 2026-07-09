@@ -12,8 +12,8 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLift
 	public class PickingPalletWithLocationDTO 
 	{
 		public Guid PalletId { get; init; }
-		public string PalletNumber { get; init; }
-		public string LocationName { get; init; }
+		public string PalletNumber { get; init; } = string.Empty;
+		public string LocationName { get; init; } = string.Empty;
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; }
 	}

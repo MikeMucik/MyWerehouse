@@ -33,11 +33,18 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
 		{
 			var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskDTO.Id);
+			if (pickingTaskToChange == null)
+				return AppResult<ProcessPickingActionResult>.Fail("Zadanie kompletacyjne nie zostało znalezione.", ErrorType.NotFound);
+
 			var issueId = pickingTaskToChange.IssueId;
 			var issue = await _issueRepo.GetIssueByIdAsync(issueId);
 			if (issue == null)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+			}
+			if (request.PickingTaskDTO.SourcePalletId == null)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail("Brak palety źródłowej.", ErrorType.NotFound);
 			}
 			var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.PickingTaskDTO.SourcePalletId.Value);
 			if (sourcePallet == null) return AppResult<ProcessPickingActionResult>.Fail($"Paleta o numerze {request.PickingTaskDTO.SourcePalletId} nie istnieje.", ErrorType.NotFound);
@@ -50,7 +57,7 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 			var completion = PickingCompletion.Full;
 			if (pickedQuantity <= 0 || pickedQuantity > neededQuantity)
 			{
-				return AppResult<ProcessPickingActionResult>.Fail("Ilość musi być większa od zera i mniejsza od zapotrzebowania", ErrorType.Conflict);//Technical
+				return AppResult<ProcessPickingActionResult>.Fail("Ilość musi być większa od zera i mniejsza od zapotrzebowania", ErrorType.Conflict);
 			}
 			if (neededQuantity > pickedQuantity)
 			{

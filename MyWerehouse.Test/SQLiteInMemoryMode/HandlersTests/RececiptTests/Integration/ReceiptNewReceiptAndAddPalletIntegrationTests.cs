@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			{
 				ClientId = client.Id,
 				ReceiptDateTime = DateTime.UtcNow,
-				//PerformedBy = "user",
+				PerformedBy = "",//
 				RampNumber = 1
 			};
 			var ex = await Assert.ThrowsAsync <ValidationException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));

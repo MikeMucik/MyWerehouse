@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 

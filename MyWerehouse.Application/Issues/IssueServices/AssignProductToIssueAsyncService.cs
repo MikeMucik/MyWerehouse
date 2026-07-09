@@ -31,27 +31,31 @@ namespace MyWerehouse.Application.Issues.IssueServices
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 
-		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO product, IssueAllocationPolicy policy,
-			List<Pallet> reusablePalletsForProduct, string userId)
+		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO issueLine, IssueAllocationPolicy policy,
+			List<Pallet>? reusablePalletsForProduct, string userId)
 		{
 			if (issue.IssueStatus == IssueStatus.New)
 				issue.ChangeStatus(IssueStatus.Pending);
 			if (issue.IssueStatus != IssueStatus.Pending && issue.IssueStatus != IssueStatus.New &&
 			issue.IssueStatus != IssueStatus.RequiresCorrection)
 			{
-				return AssignProductToIssueResult.Fail("Błąd statusu zlecenia");
+				return AssignProductToIssueResult.Fail("Błąd statusu zlecenia.");
 			}
-			var productfull = await _productRepo.GetProductByIdAsync(product.ProductId);
-			var productSKU = productfull.SKU;//checked in handler
+			var product = await _productRepo.GetProductByIdAsync(issueLine.ProductId);
+			if (product == null)
+			{
+				return AssignProductToIssueResult.Fail("Wskazany produkt nie istnieje.", issueLine.ProductId);
+			}
+			var productSKU = product.SKU;
 			reusablePalletsForProduct ??= [];//protected null
-			var oldCount = reusablePalletsForProduct.Count();
+			var oldCount = reusablePalletsForProduct.Count;
 
 			//1. dostępność towaru	- walidacja
-			var totalAvailable = await _getProductCountService.GetProductCountAsync(product.ProductId, product.BestBefore);
-			if (product.Quantity > totalAvailable)//
+			var totalAvailable = await _getProductCountService.GetProductCountAsync(issueLine.ProductId, issueLine.BestBefore);
+			if (issueLine.Quantity > totalAvailable)//
 			{
-				return AssignProductToIssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {product.ProductId}. Asortyment nie został dodany do zlecenia."
-						, product.ProductId, product.Quantity, totalAvailable);
+				return AssignProductToIssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {issueLine.ProductId}. Asortyment nie został dodany do zlecenia."
+						, issueLine.ProductId, issueLine.Quantity, totalAvailable);
 			}
 			//2. Oblicz pełne palety, Przydzielanie pełnych lub/z datą palet
 			var requiredFullPallets = 0;
@@ -60,47 +64,47 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			switch (policy)
 			{
 				case IssueAllocationPolicy.FullPalletFirst:
-					requiredFullPallets = await _getNumberPalletsAndRestService.GetBackOnlyFullPallets(product.ProductId, product.Quantity);
+					requiredFullPallets = await _getNumberPalletsAndRestService.GetBackOnlyFullPallets(issueLine.ProductId, issueLine.Quantity);
 					missingPalletsCount = requiredFullPallets - oldCount;
-					palletAssigned = await SelectAndAssignFullPallets(issue, product, reusablePalletsForProduct, requiredFullPallets, missingPalletsCount);
+					palletAssigned = await SelectAndAssignFullPallets(issue, issueLine, reusablePalletsForProduct, requiredFullPallets, missingPalletsCount);
 					break;
 				//case IssueAllocationPolicy.FefoWithFullPalletPreference:
 
 				default:
 					return AssignProductToIssueResult.Fail($"Allocation policy {policy} is not supported.");
 			}
-			var quantityFromPallets = palletAssigned.Sum(p => p.GetProductQuantity(product.ProductId));
-			var rest = product.Quantity - quantityFromPallets;
+			var quantityFromPallets = palletAssigned.Sum(p => p.GetProductQuantity(issueLine.ProductId));
+			var rest = issueLine.Quantity - quantityFromPallets;
 			if (rest < 0)
 				return AssignProductToIssueResult.Fail("Allocated more product than requested.");
 			//3. pobierz dostępne virtualPallet;
-			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(product.ProductId, product.BestBefore);
+			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(issueLine.ProductId, issueLine.BestBefore);
 			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 			if (rest > 0)
 			{
 				var newPickingTaskFromRest = await _addPickingTaskToIssueService.AddPickingTaskToIssue(
 					palletAssigned, availableVirtualPalletsQuery, issue,
-					product.ProductId, rest, product.BestBefore, userId);
+					issueLine.ProductId, rest, issueLine.BestBefore, userId);
 				if (newPickingTaskFromRest.Success is false)
 				{
-					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, product.ProductId, product.Quantity, totalAvailable);
+					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueLine.ProductId, issueLine.Quantity, totalAvailable);
 				}
 			}
-			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.",product.ProductId, palletAssigned);
+			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.",issueLine.ProductId, palletAssigned);
 		}
 		//pełne palety first
-		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO product, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)
+		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO issueLine, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)
 		{
-			List<Pallet> availablePallets = [];
+			List<Pallet> missingPallets = [];
 			if (missingPalletsCount > 0)
 			{
-				var productFullQuantity = await _productRepo.GetProductByIdAsync(product.ProductId);
-				availablePallets = await _palletRepo.GetAvailableFullPallets(product.ProductId, productFullQuantity.CartonsPerPallet, product.BestBefore, missingPalletsCount);
-				foreach (var pallet in availablePallets)
+				var product = await _productRepo.GetProductByIdAsync(issueLine.ProductId);//checked in upper
+				missingPallets = await _palletRepo.GetAvailableFullPallets(issueLine.ProductId, product!.CartonsPerPallet, issueLine.BestBefore, missingPalletsCount);
+				foreach (var pallet in missingPallets)
 					pallet.ChangeStatus(PalletStatus.LockedForIssue);
 			}
 			List<Pallet> allAvailablePallets = [.. reusablePalletsForProduct
-				.Concat(availablePallets)
+				.Concat(missingPallets)
 				.DistinctBy(p => p.Id)
 				.Take(requiredFullPallets)];
 			foreach (var pallet in allAvailablePallets)

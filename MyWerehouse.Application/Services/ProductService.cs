@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
 using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Domain.Receving.Filters;
+using MyWerehouse.Domain.Receiving.Filters;
+using MyWerehouse.Domain.Inventories.Models;
 
 namespace MyWerehouse.Application.Services
 {

@@ -1,5 +1,5 @@
 ﻿using System.Xml.Linq;
-using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Products.ProductsExceptions;
 
 namespace MyWerehouse.Domain.Products.Models
@@ -7,15 +7,15 @@ namespace MyWerehouse.Domain.Products.Models
 	public class Product
 	{
 		public Guid Id { get; private set; }
-		public string Name { get; private set; }
-		public string SKU { get; private set; }
+		public string Name { get; private set; } = string.Empty;
+		public string SKU { get; private set; } = string.Empty;
 		public DateTime AddedAd { get; private set; }
 		public int CategoryId { get; private set; }
-		public Category Category { get; private set; }
+		public Category Category { get; private set; } = null!;
 		public bool IsDeleted { get; private set; } = false;
 		public int CartonsPerPallet { get; private set; }
-		public ProductDetail Details { get; private set; }
-		public Inventory InventoryItem { get; private set; }
+		public ProductDetail? Details { get; private set; }
+		public Inventory InventoryItem { get; private set; } = null!;
 		private Product() { } //EF
 		private Product(string name, string sku, DateTime addedAd, int categoryId, bool isDeleted, int cartonsPerPallets, ProductDetail? details = null)
 		{

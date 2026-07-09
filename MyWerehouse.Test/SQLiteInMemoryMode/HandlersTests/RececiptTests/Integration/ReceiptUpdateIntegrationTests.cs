@@ -14,6 +14,7 @@ using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using FluentValidation;
 using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
 {
@@ -92,8 +93,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			{
 				ClientId = client.Id,
 				PerformedBy = "U100",
-				//ReceiptStatus = ReceiptStatus.Correction,
-				//ReceiptDateTime = new DateTime(2025, 6, 6),
 				RampNumber = 1,
 				Pallets =
 				new List<EditPalletInReceiptDTO>
@@ -103,7 +102,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -141,10 +140,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			var receiptWithPallets = await DbContext.Receipts
 				.Include(r => r.Pallets)
 				.FirstOrDefaultAsync(r => r.Id == receipt.Id);
+			Assert.NotNull(receiptWithPallets);
 			//Nie powinno tam być palety Q1000
 			Assert.DoesNotContain(receiptWithPallets.Pallets, p => p.PalletNumber == "Q1000");
 			using var arrangeContext = CreateNewContext();
 			var oldPallet = await arrangeContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q1000");
+			Assert.NotNull(oldPallet);
 			Assert.Equal(PalletStatus.Cancelled, oldPallet.Status);
 			var allPallets = await DbContext.Pallets.Where(p => p.Status != PalletStatus.Cancelled).ToListAsync();
 			Assert.Single(allPallets); // tylko jedna paleta powinna być
@@ -211,7 +212,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -274,7 +275,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -315,6 +316,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			using var arrangeContext = CreateNewContext();
 			//Stara paleta(Q1000) powinna być anulowana
 			var oldPallet = await arrangeContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q1000");
+			Assert.NotNull(oldPallet);
 			Assert.Equal(PalletStatus.Cancelled, oldPallet.Status);
 			var allPallets = await DbContext.Pallets.Where(p => p.Status != PalletStatus.Cancelled).ToListAsync();
 			Assert.Single(allPallets); // tylko nowa paleta powinna być
@@ -361,10 +363,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 					{
 						Id = pallet.Id,
 						PalletNumber = "Q1000",
-						LocationId =location.Id,
+						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -424,7 +426,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -488,7 +490,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -547,7 +549,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 						LocationId = 1,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -562,7 +564,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 						LocationId = 1,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{

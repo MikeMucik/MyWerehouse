@@ -16,13 +16,13 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 {
 	public class ModifyIssueHandler(
 		IIssueRepo issueRepo,
-		IPalletRepo palletRepo,
+		//IPalletRepo palletRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
 		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<ModifyIssueCommand, AppResult<List<AssignProductToIssueResult>>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly IPalletRepo _palletRepo = palletRepo;
+		//private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;

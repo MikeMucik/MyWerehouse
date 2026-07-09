@@ -16,7 +16,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public DateTime ReceiptDateTime { get; set; }
 		public int CLientId { get; set; }
 		public ReceiptStatus ReceiptStatus { get; set; }
-		public string PerformedBy { get; set; }
+		public string PerformedBy { get; set; } = string.Empty;
 		public ICollection<PalletListDTO> ListDTOs { get; set; } = new List<PalletListDTO>();
 		public void Mapping(Profile profile)
 		{

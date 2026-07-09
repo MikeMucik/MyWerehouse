@@ -23,7 +23,7 @@ namespace MyWerehouse.Domain.Histories.Models
 		public int QuantityPicked { get; set; }      // ile picker potwierdził
 		public PickingStatus StatusBefore { get; set; }
 		public PickingStatus StatusAfter { get; set; }		
-		public string PerformedBy { get; set; }
+		public string PerformedBy { get; set; } = string.Empty;
 		public DateTime DateTime { get; set; }
 	}
 }

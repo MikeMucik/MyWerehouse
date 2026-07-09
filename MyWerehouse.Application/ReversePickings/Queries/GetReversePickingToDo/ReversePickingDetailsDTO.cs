@@ -10,7 +10,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 {
 	public class ReversePickingDetailsDTO
 	{
-		public ReversePickingDTO ReversePickingDTO { get; init; }
+		public required ReversePickingDTO ReversePickingDTO { get; init; }
 		public List<Pallet> ListPalletsToAdd {  get; init; } = new List<Pallet>();
 		public bool CanReturnToSource { get; init; }
 		public bool CanAddToExistingPallet { get; init; }

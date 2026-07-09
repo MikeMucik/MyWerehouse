@@ -23,7 +23,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Wykonaj dekompletacje
 		[HttpPost("{id:guid}")]
-		public async Task<IActionResult> Disassembly(
+		public async Task<IActionResult> Execute(
 			Guid id, ReversePickingStrategy strategy,
 			Guid pickingPalletId, string userId,
 			List<Pallet> pallets, int? rampNumber )
@@ -38,7 +38,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Pokaż zadanie z możliwymi opcjami dekompletacji
 		[HttpGet("{id:guid}")]
-		public async Task<IActionResult> TaskOption(Guid id)
+		public async Task<IActionResult> TaskOptions(Guid id)
 			=> (await _mediator.Send(new GetReversePickingToDoQuery(id)))
 			.ToActionResult();
 

@@ -90,7 +90,7 @@ namespace MyWerehouse.Server.Controllers
 		//Listy 
 
 		//Lista dla Issue ile jakiego towaru
-		[HttpGet("{id:guid}/byProducts")]
+		[HttpGet("{id:guid}/products")]
 		public async Task<IActionResult> ListProductsForIssue(Guid id)
 			=> (await _mediator.Send(new IssueProductsSummaryQuery(id))).ToActionResult();
 
@@ -105,8 +105,8 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new LoadingIssueListQuery(id))).ToActionResult();
 
 		//Lista palet do "zdjęcia" dla operatora wózka
-		[HttpGet("{id:guid}/for-operator")]
-		public async Task<IActionResult> ListPalletsForTheForklift(Guid id)
-			 => (await _mediator.Send(new PalletsToTakeOffListQuery(id, 1, 30))).ToActionResult();	
+		[HttpGet("{id:guid}/operator-pallets")]
+		public async Task<IActionResult> ListPalletsForTheForklift(Guid id, int pageNumber, int pageSize)
+			 => (await _mediator.Send(new PalletsToTakeOffListQuery(id, pageNumber, pageSize))).ToActionResult();	
 	}
 }

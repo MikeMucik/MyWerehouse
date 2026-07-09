@@ -8,9 +8,9 @@ using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.DTOs
 {
-	public class ProductOnPalletDTOValidator : AbstractValidator<ProductOnPalletDTO>
+	public class ProductOnPalletCreateDTOValidator : AbstractValidator<ProductOnPalletCreateDTO>
 	{
-		public ProductOnPalletDTOValidator(IProductRepo productRepo)
+		public ProductOnPalletCreateDTOValidator(IProductRepo productRepo)
 		{
 			RuleFor(pp => pp.ProductId)
 				.NotEqual(Guid.Empty)

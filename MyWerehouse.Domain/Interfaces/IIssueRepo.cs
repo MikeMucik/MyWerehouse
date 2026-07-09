@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Receving.Filters;
+using MyWerehouse.Domain.Receiving.Filters;
 
 namespace MyWerehouse.Domain.Interfaces
 {
@@ -17,7 +17,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<Issue?> GetIssueByIdAsync(Guid id);		
 		Task<Issue?> GetIssueAllIncludedByIdAsync(Guid id);		
 		Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids);
-		//Task<Issue?> GetIssueByIdWithPalletAndItemsAsync(Guid id);
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
 		IQueryable<Pallet> GetPalletsByIssueId(Guid id);
 		Task<int> GetNextNumberOfIssue();

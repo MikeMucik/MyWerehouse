@@ -14,9 +14,9 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 	public class CreatePalletReceiptDTO
 	{		
 		public Guid Id { get; init ; }
-		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();	
+		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletCreateDTO>();	
 		public Guid ReceiptId { get; init; }		
 		public int ReceiptNumber { get; init; }		
-		public string UserId { get; init; }		
+		public required string UserId { get; init; }		
 	}	
 }

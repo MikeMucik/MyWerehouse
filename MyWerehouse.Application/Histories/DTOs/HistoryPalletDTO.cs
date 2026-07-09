@@ -12,13 +12,13 @@ namespace MyWerehouse.Application.Histories.DTOs
 	public class HistoryPalletDTO : IMapFrom<HistoryPallet>
 	{
 		public int Id { get; set; }
-		public string PalletId { get; set; }
-		public int? SourceLocationId { get; set; }
-		public string LocationSnapShotSource { get; set; }//
-		public int? DestinationLocationId { get; set; }
-		public string LocationSnapShotDestination { get; set; }//
+		public required string PalletId { get; set; }
+		public int SourceLocationId { get; set; }
+		public string LocationSnapShotSource { get; set; } = string.Empty;//
+		public int DestinationLocationId { get; set; }
+		public string LocationSnapShotDestination { get; set; } = string.Empty;//
 		public ReasonForPallet Reason { get; set; } // np. "Picking", "Correction", "Merge"
-		public string PerformedBy { get; set; } // opcjonalnie: user		
+		public string PerformedBy { get; set; } = string.Empty; // opcjonalnie: user		
 		public ICollection<HistoryPalletDetailDTO> HistoryPalletDetailsDTO { get; set; } = new List<HistoryPalletDetailDTO>();
 		public DateTime MovementDate { get; set; }
 		public void Mapping(Profile profile)

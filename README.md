@@ -1,4 +1,4 @@
-# MyWarehouse
+﻿# MyWarehouse
 
 MyWarehouse is a REST API for managing warehouse operations. It models inbound receipts, pallet storage, inventory, outbound orders, picking, reverse picking, and operation history.
 
@@ -129,6 +129,10 @@ The warehouse model is based on the following business concepts:
 - **Picking** - the process of collecting products for an outbound order.
 - **Reverse picking** - the process of returning previously picked products when an outbound order is cancelled.
 - **Best-before date** - the product date considered when pallets are allocated to an outbound order.
+
+## Example business flow
+
+Receipt → Pallet → Inventory → Issue → Picking → Loading
 
 ## Future improvements
 

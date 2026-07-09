@@ -11,7 +11,7 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IReversePickingRepo
 	{
 		void AddReversePicking(ReversePicking reversePicking);		
-		Task<ReversePicking> GetReversePickingAsync(Guid reversePickingId);
+		Task<ReversePicking?> GetReversePickingAsync(Guid reversePickingId);
 		IQueryable<ReversePicking> GetReversePickings();
 		Task<bool> ExistsForPickingPalletAsync(Guid palletId);
 		Task<List<Guid>> GetPalletsIdsByDate(DateOnly start, DateOnly end);

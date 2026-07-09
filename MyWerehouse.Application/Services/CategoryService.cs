@@ -100,7 +100,7 @@ namespace MyWerehouse.Application.Services
 				await _werehouseDbContext.SaveChangesAsync();
 				return AppResult<Unit>.Success(Unit.Value, "Kategorię zaktualizowano.");
 			}
-			else return AppResult<Unit>.Fail($"Brak kategori o numerze {existingCategory.Id}", ErrorType.NotFound);
+			else return AppResult<Unit>.Fail($"Brak kategori o numerze {id}", ErrorType.NotFound);
 		}
 
 		public async Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageNumber, int pageSize, CancellationToken ct)

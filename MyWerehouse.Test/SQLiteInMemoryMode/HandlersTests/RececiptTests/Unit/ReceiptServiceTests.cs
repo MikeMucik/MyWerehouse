@@ -17,6 +17,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Unit
 {
@@ -268,7 +269,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Unit
 						LocationId = 1,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
@@ -495,7 +496,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Unit
 						LocationId = initailLocation.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = DateTime.Now,
-						ProductsOnPallet = new List<ProductOnPalletDTO>
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{

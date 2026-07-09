@@ -10,7 +10,7 @@ namespace MyWerehouse.Domain.Histories.Models
 	{
 		public int  Id { get; set; }
 		public int HistoryPalletId { get; set; }
-		public virtual HistoryPallet HistoryPallet { get; set; }
+		public virtual HistoryPallet HistoryPallet { get; set; } = null!;
 		public Guid ProductId { get; set; }
 		public int Quantity { get; set; } //+/- może zmiana na QuantityChange oczywiście zawsze dodatni 
 

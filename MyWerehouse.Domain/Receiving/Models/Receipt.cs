@@ -9,11 +9,10 @@ using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Invetories.Events;
+using MyWerehouse.Domain.Inventories.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Receiving.Events;
 using MyWerehouse.Domain.Receiving.ReceivingExceptions;
-using MyWerehouse.Domain.Receving.Events;
 
 namespace MyWerehouse.Domain.Receiving.Models
 {
@@ -22,11 +21,11 @@ namespace MyWerehouse.Domain.Receiving.Models
 		public Guid Id { get; private set; }
 		public int ReceiptNumber { get; private set; }
 		public int ClientId { get; private set; }
-		public virtual Client Client { get; private set; }
+		public Client Client { get; private set; } = null!;
 		public DateTime ReceiptDateTime { get; private set; }
 		public virtual ICollection<Pallet> Pallets { get; private set; } = new List<Pallet>();
 		public virtual ICollection<HistoryReceipt> HistoryReceipt { get; private set; } = new List<HistoryReceipt>();
-		public string PerformedBy { get; private set; } // opcjonalnie: user
+		public string PerformedBy { get; private set; } = string.Empty; // opcjonalnie: user
 		public ReceiptStatus ReceiptStatus { get; private set; }
 		public int RampNumber { get; private set; }
 
@@ -38,10 +37,10 @@ namespace MyWerehouse.Domain.Receiving.Models
 			Id = Guid.NewGuid();
 			ReceiptNumber = receiptNumber;
 			if (clientId <= 0) throw new ClientDomainException();
-			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException(performedBy);
+			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException();
 			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
 			ClientId = clientId;
-			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException(performedBy);
+			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException();
 			ReceiptDateTime = DateTime.UtcNow;
 			ReceiptStatus = ReceiptStatus.Planned;
 			RampNumber = rampNumber;
@@ -58,7 +57,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 			Id = id;
 			ReceiptNumber = receiptNumber;
 			if (clientId <= 0) throw new ClientDomainException();
-			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException(performedBy);
+			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException();
 			ClientId = clientId;
 			PerformedBy = performedBy;
 			ReceiptDateTime = dateTime;

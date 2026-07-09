@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
 	public class EditPalletInReceiptDTOValidator : AbstractValidator<EditPalletInReceiptDTO>
 	{
-		public EditPalletInReceiptDTOValidator(IValidator<ProductOnPalletDTO> productOnPalletValidator)
+		public EditPalletInReceiptDTOValidator(IValidator<ProductOnPalletCreateDTO> productOnPalletValidator)
 		{
 			RuleFor(p => p.Status)
 				.NotEmpty()

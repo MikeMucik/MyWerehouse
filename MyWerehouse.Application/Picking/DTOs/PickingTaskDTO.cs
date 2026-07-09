@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Picking.DTOs
 		public Guid? SourcePalletId { get; init; }      
 		public string? SourcePalletNumber { get; init; }      
 		public Guid ProductId { get; init; }
-		public string SKU { get; init; }
+		public string SKU { get; init; } = string.Empty;
 		public int RequestedQuantity { get; init; }
 		public int PickedQuantity { get; init; }//faktyczna pobrana ilość
 		public PickingStatus PickingStatus { get; init; }
@@ -22,8 +22,8 @@ namespace MyWerehouse.Application.Picking.DTOs
 		{
 			profile.CreateMap<PickingTask, PickingTaskDTO>()
 				.ForMember(dest => dest.IssueNumber, opt => opt.MapFrom(static src => src.Issue.IssueNumber))
-				.ForMember(dest=>dest.SourcePalletId, opt=> opt.MapFrom(static src => src.VirtualPallet.PalletId))		
-				.ForMember(dest=>dest.SourcePalletNumber, opt=> opt.MapFrom(static src => src.VirtualPallet.Pallet.PalletNumber))
+				.ForMember(dest=>dest.SourcePalletId, opt=> opt.MapFrom(static src => src.VirtualPallet!.PalletId))		
+				.ForMember(dest=>dest.SourcePalletNumber, opt=> opt.MapFrom(static src => src.VirtualPallet!.Pallet!.PalletNumber))
 				.ForMember(dest=>dest.SKU, opt=>opt.MapFrom(static src => src.Product.SKU));			
 		}
 	}

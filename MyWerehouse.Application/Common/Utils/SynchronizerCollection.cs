@@ -17,6 +17,7 @@ namespace MyWerehouse.Application.Common.Utils
 			Action<TSource, TDestination> updateMapper,
 			Action<TDestination>? removeMapper = null)
 			where TDestination : class
+			where TKey: notnull
 		{
 			var existingMap = existingCollection.ToDictionary(destinationKeySelector); // daje warning bo 
 			var incomingItems = incomingCollection.ToList();			

@@ -22,9 +22,9 @@ namespace MyWerehouse.Domain.Picking.Models
 		public int Quantity { get; private set; }
 		public ReversePickingStatus Status { get; private set; }
 		public Guid PickingTaskId { get; private set; }
-		public PickingTask PickingTask { get; private set; }
+		public PickingTask PickingTask { get; private set; } = null!;
 		public DateOnly DateMade { get; private set; }
-		public string UserId { get; private set; }
+		public string UserId { get; private set; } = string.Empty;
 		private ReversePicking() { }
 
 		private ReversePicking(Guid pickingPalletid, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId)

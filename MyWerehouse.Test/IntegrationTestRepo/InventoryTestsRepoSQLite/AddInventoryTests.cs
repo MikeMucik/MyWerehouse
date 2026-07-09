@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
@@ -21,12 +21,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 				Name = "TestC",
 			};
 			var product = Product.Create("TestP", "1234Test", 1, 56);
-			//var product = new Product
-			//{
-			//	Category = category,
-			//	Name = "TestP",
-			//	SKU = "1234Test",
-			//};
+			
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();

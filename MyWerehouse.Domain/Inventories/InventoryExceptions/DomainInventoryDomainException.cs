@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 
-namespace MyWerehouse.Domain.Invetories.InventoryExceptions
+namespace MyWerehouse.Domain.Inventories.InventoryExceptions
 {
 	public class DomainInventoryDomainException : DomainException
 	{

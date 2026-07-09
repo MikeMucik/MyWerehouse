@@ -8,21 +8,20 @@ using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Pallets.Models;
 
-namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
+namespace MyWerehouse.Application.Receipts.Queries.GetReceiptById
 {
-	public class ShowPalletToEditDTO : IMapFrom<Pallet>
+	public class PalletForReceiptViewDTO : IMapFrom<Pallet>
 	{
 		public Guid Id { get; init; }
 		public string PalletNumber { get; init; } = string.Empty;
 		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
-		public string UserId { get; init; } = string.Empty;
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();
 
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Pallet, ShowPalletToEditDTO>()
+			profile.CreateMap<Pallet, PalletForReceiptViewDTO>()
 				.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src => src.ProductsOnPallet));
 		}
 	}

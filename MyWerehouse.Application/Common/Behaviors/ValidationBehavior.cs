@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.Common.Behaviors
 					.Where(f=>f != null)
 					.ToList();
 
-				if (failure.Any())
+				if (failure.Count != 0)
 				{
 					throw new ValidationException(failure);
 				}

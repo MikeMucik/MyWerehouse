@@ -14,11 +14,11 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 {
 	public class UpdateClientDTO : IMapFrom<Client>
 	{		
-		public string Name { get; init; }
-		public string Email { get; init; }
-		public string Description { get; init; }
+		public string Name { get; init; } = string.Empty;
+		public string Email { get; init; } = string.Empty;
+		public string Description { get; init; } = string.Empty;
 		[MaxLength(250)]
-		public string FullName { get; init; }
+		public string FullName { get; init; } = string.Empty;
 		public ICollection<EditAddressDTO> Addresses { get; init; } = new List<EditAddressDTO>();
 		public void Mapping(Profile profile)
 		{
@@ -31,13 +31,13 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 		public UpdateClientDTOValidation(IValidator<EditAddressDTO> addressValidator)
 		{
 			RuleFor(c => c.Name)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Uzupełnij dane - nazwa");
 			RuleFor(c => c.Email)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Uzupełnij dane - email");
 			RuleFor(c => c.FullName)
-				.NotNull()
+				.NotEmpty()
 				.WithMessage("Uzupełnij dane - pełna nazwa");
 			RuleFor(c => c.Addresses)
 				.NotEmpty()

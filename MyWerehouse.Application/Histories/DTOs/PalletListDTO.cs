@@ -12,9 +12,9 @@ namespace MyWerehouse.Application.Histories.DTOs
 	public class PalletListDTO : IMapFrom<HistoryReceiptDetail>, IMapFrom<HistoryIssueDetail>
 								
 	{
-		public string PalletId { get; set; }
+		public string PalletId { get; set; } = string.Empty;
 		public int LocationId { get; set; }
-		public string LocationSnapShot { get; set; }
+		public string LocationSnapShot { get; set; } = string.Empty;
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<HistoryReceiptDetail, PalletListDTO>();

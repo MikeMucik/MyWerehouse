@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Picking.Models;
 using AutoMapper;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Infrastructure.Persistence;
-using MyWerehouse.Domain.Receving.Filters;
+using MyWerehouse.Domain.Receiving.Filters;
 
 namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareToHandPicking
 {
@@ -40,7 +40,7 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 			{
 				var listOfPickTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issue.Id);
 				var reducedList = listOfPickTasks.Where(t => t.PickingStatus == PickingStatus.Allocated ||
-				t.PickingStatus == PickingStatus.Correction).ToList(); //biorę pod uwagę tylko aktywne taski do wykonania
+				t.PickingStatus == PickingStatus.CorrectionPicking).ToList(); //biorę pod uwagę tylko aktywne taski do wykonania
 				var listByProductAndDate = reducedList
 					.GroupBy(p => new { p.IssueId, p.ProductId, p.BestBefore })
 					.Select(g => new

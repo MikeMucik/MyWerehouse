@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;

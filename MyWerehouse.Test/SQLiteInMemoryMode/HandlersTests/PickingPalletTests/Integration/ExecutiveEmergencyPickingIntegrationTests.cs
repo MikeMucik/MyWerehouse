@@ -335,7 +335,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			Assert.Equal(issue.Id, pickingTaskAfter.Issue.Id);
 			Assert.NotNull(pickingTaskAfter.VirtualPallet);
-			Assert.Equal(PickingStatus.Correction, pickingTaskAfter.PickingStatus);
+			Assert.Equal(PickingStatus.CorrectionPicking, pickingTaskAfter.PickingStatus);
 
 			// ✅ Historia ruchu została zapisana (jeśli masz historię)
 			var history = await DbContext.HistoryPickings.ToListAsync();

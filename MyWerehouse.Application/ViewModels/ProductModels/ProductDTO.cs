@@ -12,9 +12,9 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 	public class ProductDTO : IMapFrom<Product>
 	{
 		public Guid Id { get; init; }
-		public string Name { get; init; }
-		public string SKU { get; init; }
-		public string Category { get; init; }
+		public string Name { get; init; } = string.Empty;
+		public string SKU { get; init; } = string.Empty ;
+		public string Category { get; init; } = string.Empty;
 		public bool IsDeleted { get; init; }
 		public void Mapping(Profile profile)
 		{

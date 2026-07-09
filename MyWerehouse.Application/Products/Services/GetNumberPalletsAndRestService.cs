@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.Products.Services
 		public async Task<int> GetBackOnlyFullPallets(Guid productId, int amountUnits)
 		{
 			var product = await _repo.GetProductByIdAsync(productId);
-			var amountCarOnPallet = product.CartonsPerPallet;//product sprawdzony w metodzie wyżej
+			var amountCarOnPallet = product!.CartonsPerPallet;//product sprawdzony w metodzie wyżej
 			var amountPallets = amountUnits / amountCarOnPallet;			
 			return amountPallets;
 		}

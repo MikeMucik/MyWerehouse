@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public int Quantity { get; set; }
 		public ReversePickingStatus? StatusBefore { get; set; }
 		public ReversePickingStatus StatusAfter { get; set; }
-		public string PerformedBy { get; set; }
+		public string PerformedBy { get; set; } = string.Empty;
 		public DateTime DateTime { get; set; }
 		public void Mapping(Profile profile)
 		{

@@ -38,7 +38,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			foreach (var pickingTaskToReverse in pickingTasksOfPickingPallet)
 			{
 				listTasks.Add(
-					ReversePicking.Create(palletId, pickingTaskToReverse.VirtualPallet.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
+					ReversePicking.Create(palletId, pickingTaskToReverse.VirtualPallet!.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
 					pickingTaskToReverse.RequestedQuantity, pickingTaskToReverse.Id, userId));					
 			}
 			foreach (var task in listTasks)

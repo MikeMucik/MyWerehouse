@@ -8,7 +8,7 @@ using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Receving.Filters;
+using MyWerehouse.Domain.Receiving.Filters;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
 {
@@ -36,6 +36,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			
 			//Assert
 			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.Equal(receiptId1, result.Result.ReceiptId);
 			Assert.Equal(10, result.Result.ClientId);
 			Assert.Equal("U001", result.Result.PerformedBy);
@@ -87,6 +88,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			var result = await _mediator.Send(query);
 			// Assert
 			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.Equal(receiptId, result.Result.ReceiptId);
 			Assert.Equal(expectedClientId, result.Result.ClientId);
 			Assert.Equal(expectedUser, result.Result.PerformedBy);

@@ -76,7 +76,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			var id = updatingProduct.Id;
 			var updatedProduct = new EditProductDTO
 			{
-				//Name = "Testqw",
+				Name = "",
 				CategoryId = 2,
 				SKU = "q1233",
 				IsDeleted = false,

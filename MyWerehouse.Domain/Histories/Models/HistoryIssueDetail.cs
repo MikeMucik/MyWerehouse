@@ -10,10 +10,10 @@ namespace MyWerehouse.Domain.Histories.Models
 	{
 		public int Id { get; set; }
 		public Guid PalletId { get; set; }
-		public string PalletNumber { get; set; }
+		public string PalletNumber { get; set; } = string.Empty;
 		public int LocationId { get; set; }
 		public string? LocationSnapShot { get; set; } //snapshot
 		public int HistoryIssueId { get; set; }
-		public virtual HistoryIssue HistoryIssue { get; set; }
+		public virtual HistoryIssue HistoryIssue { get; set; } = new HistoryIssue();
 	}
 }

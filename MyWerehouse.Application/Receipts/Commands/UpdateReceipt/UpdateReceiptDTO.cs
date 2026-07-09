@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Mapping;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
@@ -13,7 +14,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		public int ClientId { get; init; }
 		public DateTime ReceiptDateTime { get; init; }
 		public ICollection<EditPalletInReceiptDTO> Pallets { get; init; } = new List<EditPalletInReceiptDTO>();
-		public string PerformedBy { get; init; } 
+		public required string PerformedBy { get; init; } 
 		public ReceiptStatus ReceiptStatus { get; init; }
 		public int RampNumber { get; init; }		
 	}

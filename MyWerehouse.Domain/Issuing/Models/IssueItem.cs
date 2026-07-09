@@ -12,9 +12,9 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public int Id { get; private set; }
 		public Guid IssueId { get;private set; }
 		//public int IssueNumber { get; set; }
-		public Issue Issue { get; private set; }
+		public Issue Issue { get; private set; } = null!;
 		public Guid ProductId { get; private set; }
-		public Product Product { get; private set; }
+		public Product Product { get; private set; } = null!;
 		public int Quantity { get; private set; }
 		public DateOnly BestBefore { get; private set; }
 		public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
@@ -27,8 +27,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 			BestBefore = bestBefore;
 			CreatedAt = DateTime.UtcNow;
 		}
-		//public static IssueItem Create(Guid issueId, Guid productId, int quantity, DateOnly bestBefore)
-		//	=> new IssueItem(issueId, productId, quantity, bestBefore);
 
 		private IssueItem(int id, Guid issueId, Guid productId, int quantity, DateOnly bestBefore, DateTime createAt)
 		{

@@ -1,6 +1,174 @@
-@MyWerehouse.Server_HostAddress = http://localhost:5297
+@baseUrl = http://localhost:5297
+@azureBaseUrl = https://your-app-name.azurewebsites.net
+@userId = portfolio-demo-user
 
-GET {{MyWerehouse.Server_HostAddress}}/weatherforecast/
+@clientId = 1
+@categoryId = 1
+@productId = 00000000-0000-0000-0000-000000000000
+@locationId = 1
+@receiptId = 00000000-0000-0000-0000-000000000000
+@palletId = 00000000-0000-0000-0000-000000000000
+@issueId = 00000000-0000-0000-0000-000000000000
+
+### Health check - local
+GET {{baseUrl}}/api/health
 Accept: application/json
 
-###
+### Health check - Azure
+GET {{azureBaseUrl}}/api/health
+Accept: application/json
+
+### Categories - create
+POST {{baseUrl}}/api/categories
+Content-Type: application/json
+
+{
+  "name": "Food"
+}
+
+### Categories - list
+GET {{baseUrl}}/api/categories?page=1&size=10
+Accept: application/json
+
+### Clients - create
+POST {{baseUrl}}/api/clients
+Content-Type: application/json
+
+{
+  "name": "Demo Client",
+  "email": "demo.client@example.com",
+  "description": "Portfolio demo client",
+  "fullName": "Demo Client Sp. z o.o.",
+  "addresses": [
+    {
+      "country": "Poland",
+      "city": "Warsaw",
+      "region": "Mazowieckie",
+      "phone": 123456789,
+      "postalCode": "00-001",
+      "streetName": "Demo Street",
+      "streetNumber": "1"
+    }
+  ]
+}
+
+### Clients - list
+GET {{baseUrl}}/api/clients?pageNumber=1&pageSize=10
+Accept: application/json
+
+### Products - create
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+{
+  "name": "Demo Product",
+  "sku": "DEMO-SKU-001",
+  "categoryId": {{categoryId}},
+  "cartonsPerPallet": 40,
+  "length": 120,
+  "height": 160,
+  "width": 80,
+  "weight": 500,
+  "description": "Product used in the portfolio API scenario"
+}
+
+### Products - search
+GET {{baseUrl}}/api/products/search?SKU=DEMO-SKU-001&pageNumber=1&pageSize=10
+Accept: application/json
+
+### Locations - create
+POST {{baseUrl}}/api/locations
+Content-Type: application/json
+
+{
+  "id": 0,
+  "bay": 1,
+  "aisle": 1,
+  "position": 1,
+  "height": 1
+}
+
+### Locations - preview
+POST {{baseUrl}}/api/locations/preview?bay=1&startAisle=1&endAisle=2&amountPosition=3&numberOfLevels=2
+Accept: application/json
+
+### Receipts - create receipt plan
+POST {{baseUrl}}/api/receipts
+Content-Type: application/json
+
+{
+  "dto": {
+    "clientId": {{clientId}},
+    "receiptDateTime": "2026-07-09T10:00:00",
+    "performedBy": "{{userId}}",
+    "receiptStatus": 0,
+    "rampNumber": 1
+  }
+}
+
+### Receipts - search
+GET {{baseUrl}}/api/receipts/search?CurrentPage=1&PageSize=10&Filter.ClientId={{clientId}}
+Accept: application/json
+
+### Pallets - create
+POST {{baseUrl}}/api/pallets
+Content-Type: application/json
+
+{
+  "dto": {
+    "dateReceived": "2026-07-09T10:00:00",
+    "locationId": {{locationId}},
+    "status": 0,
+    "userId": "{{userId}}",
+    "productsOnPallet": [
+      {
+        "productId": "{{productId}}",
+        "palletId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 40,
+        "dateAdded": "2026-07-09T10:00:00",
+        "bestBefore": "2027-07-09"
+      }
+    ]
+  },
+  "rampNumber": 1,
+  "userId": "{{userId}}"
+}
+
+### Pallets - search
+GET {{baseUrl}}/api/pallets/search?CurrentPage=1&PageSize=10&Filter.ProductId={{productId}}
+Accept: application/json
+
+### Issues - create outbound order
+POST {{baseUrl}}/api/issues
+Content-Type: application/json
+
+{
+  "dto": {
+    "clientId": {{clientId}},
+    "performedBy": "{{userId}}",
+    "items": [
+      {
+        "productId": "{{productId}}",
+        "quantity": 10,
+        "bestBefore": "2027-07-09"
+      }
+    ]
+  },
+  "sendDate": "2026-07-15"
+}
+
+### Issues - search
+GET {{baseUrl}}/api/issues/search?CurrentPage=1&PageSize=10&Filter.ClientId={{clientId}}
+Accept: application/json
+
+### Error example - validation error
+POST {{baseUrl}}/api/categories
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### Error example - not found
+GET {{baseUrl}}/api/products/00000000-0000-0000-0000-000000000000
+Accept: application/json

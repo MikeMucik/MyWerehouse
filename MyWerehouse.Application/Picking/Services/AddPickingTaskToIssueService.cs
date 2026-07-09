@@ -90,8 +90,8 @@ namespace MyWerehouse.Application.Picking.Services
 			//if there is not enough product, a message will be sent to the user
 			if (quantity > 0)
 			{
-				var productFull = await _productRepo.GetProductByIdAsync(productId);
-				return AddPickingTaskToIssueResult.Fail($"Nie ma więcej asortymentu  {productFull.SKU} - nie można utworzyć zadania pickingu.");
+				var productSKU = await _productRepo.GetSKUForProductAsync(productId);
+				return AddPickingTaskToIssueResult.Fail($"Nie ma więcej asortymentu  {productSKU} - nie można utworzyć zadania pickingu.");
 			}
 			return AddPickingTaskToIssueResult.Ok(pickingTasks);
 		}

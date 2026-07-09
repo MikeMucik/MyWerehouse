@@ -13,6 +13,6 @@ namespace MyWerehouse.Domain.Histories.Models
 		public int Quantity { get; set; }
 		public DateOnly BestBefore { get; set; }
 		public int HistoryIssueId { get; set; }
-		public virtual HistoryIssue HistoryIssue { get; set; }
+		public virtual HistoryIssue HistoryIssue { get; set; } = null!;
 	}
 }

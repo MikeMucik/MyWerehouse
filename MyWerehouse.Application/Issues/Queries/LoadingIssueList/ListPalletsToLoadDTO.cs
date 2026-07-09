@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 		public Guid IssueId { get; init; }
 		public int IssueNumber { get; init; }
 		public int ClientId { get; init; }
-		public string ClientName { get; init; }
+		public string ClientName { get; init; } = string.Empty;
 		public List<PalletToLoadDTO> Pallets { get; init; } = new List<PalletToLoadDTO>();
 	}
 }

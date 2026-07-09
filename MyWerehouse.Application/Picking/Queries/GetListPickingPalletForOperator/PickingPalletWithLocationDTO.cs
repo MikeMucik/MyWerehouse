@@ -9,9 +9,9 @@ namespace MyWerehouse.Application.Picking.Queries.GetListPickingPalletForOperato
 	public class PickingPalletWithLocationDTO
 	{
 		public Guid PalletId { get; init;}
-		public string PalletNumber { get; init;}
+		public string PalletNumber { get; init; } = string.Empty;
 		public int LocationId { get; init;}
-		public string LocationName { get; init; }
+		public string LocationName { get; init; } = string.Empty;
 		public DateTime AddedToPicking { get; init; }		
 	}
 }

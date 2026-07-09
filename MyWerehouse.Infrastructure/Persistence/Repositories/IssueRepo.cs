@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Receving.Filters;
+using MyWerehouse.Domain.Receiving.Filters;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {
@@ -29,25 +29,24 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<Issue?> GetIssueByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Issues
-				//.Include(c=>c.Client)
 				.Include(i => i.Pallets)
-					.ThenInclude(l=>l.Location)
+					.ThenInclude(l => l.Location)
 				.Include(i => i.Pallets)
-					.ThenInclude(p=>p.ProductsOnPallet)
-				.Include(i=>i.IssueItems)
+					.ThenInclude(p => p.ProductsOnPallet)
+				.Include(i => i.IssueItems)
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}
 		public async Task<Issue?> GetIssueAllIncludedByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Issues
-				.Include(c=>c.Client)
+				.Include(c => c.Client)
 				.Include(i => i.Pallets)
 					.ThenInclude(l => l.Location)
 				.Include(i => i.Pallets)
 					.ThenInclude(p => p.ProductsOnPallet)
-						.ThenInclude(pp=>pp.Product)
+						.ThenInclude(pp => pp.Product)
 				.Include(i => i.IssueItems)
-					.ThenInclude(pp=>pp.Product)
+					.ThenInclude(pp => pp.Product)
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}
 		public async Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids)
@@ -60,9 +59,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var result = _werehouseDbContext.Issues
 				.Where(i => i.IssueStatus != IssueStatus.Archived);//
-			if(filter.IssueNumber != null && filter.IssueNumber != 0)
+			if (filter.IssueNumber != null && filter.IssueNumber != 0)
 			{
-				result = result.Where(i=>i.IssueNumber == filter.IssueNumber);
+				result = result.Where(i => i.IssueNumber == filter.IssueNumber);
 			}
 			if (filter.ClientId > 0)
 			{
@@ -90,19 +89,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				var end = filter.CreateDateEnd ?? DateTime.UtcNow;
 
 				result = result.Where(i => i.IssueDateTimeCreate >= start && i.IssueDateTimeCreate <= end);
-			}
-			//if (filter.SendDateStart.HasValue)
-			//{
-			//	var start = DateOnly.FromDateTime(filter.SendDateStart.Value);
-
-			//	var end = filter.SendDateEnd.HasValue
-			//		? DateOnly.FromDateTime(filter.SendDateEnd.Value)
-			//		: DateOnly.FromDateTime(DateTime.UtcNow);
-
-			//	result = result.Where(i =>
-			//		i.IssueDateTimeSend >= start &&
-			//		i.IssueDateTimeSend <= end);
-			//}
+			}			
 			if (filter.SendDateStart != null)
 			{
 				var start = filter.SendDateStart;
@@ -120,11 +107,11 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public IQueryable<Pallet> GetPalletsByIssueId(Guid id)
 		{
 			var list = _werehouseDbContext.Pallets
-				.Include(l=>l.Location)
+				.Include(l => l.Location)
 				.AsNoTracking()
-				.Where(p => p.IssueId == id);				
+				.Where(p => p.IssueId == id);
 			return list;
-		}		
+		}
 
 		public async Task<int> GetNextNumberOfIssue()
 		{
@@ -136,10 +123,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Where(x => x.IssueId == id)
-				.Select(x => x.VirtualPallet)
-				.Where(x => x != null)
+				.Where(x => x.VirtualPallet != null)
+				.Select(x => x.VirtualPallet!)				
 				.Distinct()
 				.ToListAsync();
-		}		
+		}
 	}
 }

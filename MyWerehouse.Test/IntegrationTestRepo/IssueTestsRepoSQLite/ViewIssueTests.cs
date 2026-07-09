@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Receving.Filters;
+using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
@@ -119,7 +119,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1001"));
 		}
 		[Fact]
-		public async Task ShowListIssues_GetPalletByIssueIdAsync_ReturnListPalletWithLocation()
+		public void ShowListIssues_GetPalletByIssueIdAsync_ReturnListPalletWithLocation()
 		{
 			//Arrange
 			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
@@ -134,8 +134,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 			Assert.Contains(result, p => p.PalletNumber == "Q1000" && p.LocationId == 1);
 			Assert.Contains(result, p => p.PalletNumber == "Q1001" && p.LocationId == 1);
-			Assert.Contains(result, p => p.PalletNumber == "Q2000" && p.LocationId == 3);
-			//Assert.Contains(result, p => p.PalletId == "Q2000"&&p.LocationId ==3);		
+			Assert.Contains(result, p => p.PalletNumber == "Q2000" && p.LocationId == 3);	
 		}
 	}
 }

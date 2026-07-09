@@ -10,8 +10,8 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Invetories.Models;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
+using MyWerehouse.Domain.Inventories.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integration
 {
@@ -82,13 +82,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletDTO
+				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
-				}),(new ProductOnPalletDTO
+				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
@@ -199,13 +199,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletDTO
+				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 50,
 					DateAdded = DateTime.Now,
 					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
-				}),(new ProductOnPalletDTO
+				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 100,
@@ -316,25 +316,25 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletDTO
+				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletDTO
+				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 4) }),
-				(new ProductOnPalletDTO
+				(new ProductOnPalletCreateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 5, 4) }),
-					(new ProductOnPalletDTO
+					(new ProductOnPalletCreateDTO
 				{
 					ProductId = product3.Id,
 					Quantity = 100,
@@ -387,20 +387,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = 1,
 				Status = PalletStatus.ToPicking,
 				UserId = "usert",
-				ProductsOnPallet = [ ( new ProductOnPalletDTO
+				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletDTO
+				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
-				(new ProductOnPalletDTO
+				(new ProductOnPalletCreateDTO
 				{
 					Quantity = 0,
 					DateAdded = DateTime.Now,
@@ -436,20 +436,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var updatedPallet = new EditPalletDTO
 			{
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletDTO
+				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletDTO
+				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
-				(new ProductOnPalletDTO
+				(new ProductOnPalletCreateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,

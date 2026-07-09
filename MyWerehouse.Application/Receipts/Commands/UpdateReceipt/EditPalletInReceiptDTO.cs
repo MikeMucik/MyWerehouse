@@ -11,19 +11,13 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
-	public class EditPalletInReceiptDTO :IMapFrom<Pallet>
+	public class EditPalletInReceiptDTO : IMapFrom<Pallet>
 	{
 		public Guid Id { get; init; }
-		public string PalletNumber { get; init; }//
+		public string? PalletNumber { get; init; }//jeśli tworzę nową to musi być puste - ustalenie biznesowe czy można tu tworzyć
 		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
-		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();
-
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Pallet, EditPalletInReceiptDTO>()
-				.ForMember(dest => dest.ProductsOnPallet, opt => opt.MapFrom(src => src.ProductsOnPallet));
-		}
-	}	
+		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletCreateDTO>();
+	}
 }

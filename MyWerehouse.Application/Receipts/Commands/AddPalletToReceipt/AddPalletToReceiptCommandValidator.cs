@@ -10,10 +10,11 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 {
 	public class AddPalletToReceiptCommandValidator : AbstractValidator<AddPalletToReceiptCommand>
 	{
-		public AddPalletToReceiptCommandValidator(IValidator<ProductOnPalletDTO> productOnPalletValidator)
+		public AddPalletToReceiptCommandValidator(IValidator<ProductOnPalletCreateDTO> productOnPalletValidator)
 		{
 			RuleFor(p => p.ReceiptId)
 				.NotNull()
+				.NotEmpty()
 				.WithMessage("Paleta musi mieć numer przyjęcia");
 			RuleFor(p => p.DTO.ReceiptNumber)
 				.GreaterThan(0)

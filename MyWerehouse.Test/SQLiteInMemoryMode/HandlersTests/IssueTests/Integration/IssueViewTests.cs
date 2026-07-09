@@ -12,7 +12,7 @@ using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
 using MyWerehouse.Application.Issues.Queries.IssueProductsSummary;
 using MyWerehouse.Application.Issues.Queries.LoadingIssueList;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Receving.Filters;
+using MyWerehouse.Domain.Receiving.Filters;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integration
 {

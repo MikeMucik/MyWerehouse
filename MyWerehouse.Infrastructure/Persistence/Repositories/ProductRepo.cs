@@ -37,6 +37,16 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return product;
 		}
 
+		public async Task<string?> GetSKUForProductAsync(Guid id)
+		{
+			if (id == Guid.Empty)
+			{
+				return null;
+			}
+			var product = await _werehouseDbContext.Products
+				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false);
+			return product.SKU;
+		}
 		public async Task<Product?> GetProductToEditAsync(Guid id)
 		{
 			if (id != Guid.Empty)
@@ -53,14 +63,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			if (id != Guid.Empty)
 			{
 				var product = await _werehouseDbContext.Products
-					.Include(p=>p.Category)
+					.Include(p => p.Category)
 					.Include(p => p.Details)
 					.FirstOrDefaultAsync(p => p.Id == id);
 				return product;
 			}
 			return null;
 		}
-		
+
 		public IQueryable<Product> GetAllProducts()
 		{
 			return _werehouseDbContext.Products.Where(p => p.IsDeleted == false);
@@ -91,21 +101,29 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				result = result.Where(p => p.CategoryId == filter.CategoryId);
 			}
-			if (filter.Height > 0)
+			if (filter.Height.HasValue && filter.Height > 0)
 			{
-				result = result.Where(p => p.Details.Height == filter.Height);
+				result = result.Where(p =>
+				p.Details != null &&
+				p.Details.Height == filter.Height);
 			}
-			if (filter.Weight > 0)
+			if (filter.Weight.HasValue && filter.Weight > 0)
 			{
-				result = result.Where(p => p.Details.Weight == filter.Weight);
+				result = result.Where(p =>
+				p.Details != null &&
+				p.Details.Weight == filter.Weight);
 			}
-			if (filter.Width > 0)
+			if (filter.Width.HasValue && filter.Width > 0)
 			{
-				result = result.Where(p => p.Details.Width == filter.Width);
+				result = result.Where(p =>
+				p.Details != null &&
+				p.Details.Width == filter.Width);
 			}
-			if (filter.Length > 0)
+			if (filter.Length.HasValue && filter.Length > 0)
 			{
-				result = result.Where(p => p.Details.Length == filter.Length);
+				result = result.Where(p =>
+				p.Details != null &&
+				p.Details.Length == filter.Length);
 			}
 			return result;
 		}

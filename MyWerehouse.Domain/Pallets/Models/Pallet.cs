@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Invetories.Events;
+using MyWerehouse.Domain.Inventories.Events;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
@@ -19,14 +19,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 	public class Pallet : AggregateRoots
 	{
 		public Guid Id { get; private set; }
-		public string PalletNumber { get; private set; }
+		public string PalletNumber { get; private set; } = string.Empty;
 		public DateTime DateReceived { get; private set; }
 		// Snapshot przechowywany jako string – uproszczenie pod potrzeby projektu/portfolio.
 		// W systemie produkcyjnym byłby to Value Object (np. LocationSnapshot).
 		//private readonly string _locationSnapshot;
 		//private readonly string snapShoot;
 		public int LocationId { get; private set; }
-		public Location Location { get; private set; }//dodać kiedyś factory
+		public Location Location { get; private set; } = null!;	
 		public PalletStatus Status { get; private set; } = 0;
 		public ICollection<ProductOnPallet> ProductsOnPallet { get; private set; } = new List<ProductOnPallet>();
 		public ICollection<HistoryPallet> PalletHistory { get; private set; } = new List<HistoryPallet>();
@@ -35,7 +35,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public Guid? IssueId { get; private set; }
 		public Issue? Issue { get; private set; }
 		[Timestamp]
-		public byte[] RowVersion { get; set; } //działa tylko w M-SQL wymaga DbUpdateConcurrencyException											   
+		public byte[] RowVersion { get; set; } = []; //działa tylko w M-SQL wymaga DbUpdateConcurrencyException											   
 
 		private Pallet() { }
 

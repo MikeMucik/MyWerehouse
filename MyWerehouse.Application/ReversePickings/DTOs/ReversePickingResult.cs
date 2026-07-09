@@ -12,11 +12,11 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 	public sealed class ReversePickingResult
 	{
 		public bool Success { get; init; }
-		public string Message { get; init; }
+		public string Message { get; init; } = string.Empty;
 		public Guid ProductId { get; init; }
 		public Guid? PalletId { get; init; }
 		public string? PalletNumber { get; init; }
-		public List<PalletProductQuantityDTO> PalletWithAddedProduct { get; init; }
+		public List<PalletProductQuantityDTO> PalletWithAddedProduct { get; init; } = new List<PalletProductQuantityDTO>();
 		public ReversePickingResult() { }
 		public static ReversePickingResult Ok(string message, Guid productId, Guid? palletId, string? palletNumber)
 		{

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Pallets.Queries.FindPalletsByFiltr;
+using MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter;
 using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Application.Pallets.Queries.GetPalletByPalletNumber;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
@@ -31,7 +31,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Arrange
 			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
 
-			var palletId = "Q1001";
 			var query = new GetPalletToEditQuery(palletGuid2);
 			//Act
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -41,6 +40,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 
 			var result = await _mediator.Send(query);
 			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.Single(result.Result.ProductsOnPallet);
 			Assert.Equal(1, result.Result.LocationId);
 			Assert.Equal(PalletStatus.OnHold, result.Result.Status);
@@ -57,8 +57,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		{
 			//Arrange
 			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
-
-			var palletId = "Q1000";
+					
 			var query = new GetPalletToEditQuery(palletGuid1);
 			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
@@ -70,6 +69,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.NotNull(result.Result.ProductsOnPallet);
 			Assert.Equal(2, result.Result.ProductsOnPallet.Count);
 			//Assert.Equal(receiptId1, result.Result.ReceiptId);
@@ -92,7 +92,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			};
 			//Act
 			var query = new FindPalletsByFilterQuery
-			//(filtr, 1, 1);
 			{
 				Filter = filter,
 				PageSize = 1,
@@ -103,7 +102,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.NotEmpty(result.Result.Items);
 		}
 		[Fact]
-		public void FindPallets_ReturnCollectionEmpty()
+		public async Task FindPallets_ReturnCollectionEmpty()
 		{
 			//Arrange
 			var filter = new PalletSearchFilter
@@ -117,10 +116,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				PageSize = 1,
 				CurrentPage = 1
 			};
-			var result = _mediator.Send(query);
+			var result =await _mediator.Send(query);
 			//Assert
-			Assert.False(result.Result.IsSuccess);
-			Assert.Contains("Brak", result.Result.Error);
+			Assert.NotNull(result);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Brak", result.Error);
 		}
 		[Fact]
 		public async Task GetPallet_ReturnFullInfo()

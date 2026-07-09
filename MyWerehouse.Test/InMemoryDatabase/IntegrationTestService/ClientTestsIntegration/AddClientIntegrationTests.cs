@@ -95,7 +95,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			{
 				City = "Warsaw",
 				Country = "Poland",
-				//PostalCode = "00-999",
+				PostalCode = "",
 				StreetName = "Wiejska",
 				Phone = 4444444,
 				Region = "Mazowieckie",
@@ -129,7 +129,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			};
 			var client = new AddClientDTO
 			{
-				//Name = "name",
+				Name = "",
 				FullName = "fullname",
 				Email = "email@wp.pl",
 				Addresses = new List<AddAddressDTO> { address },

@@ -12,9 +12,9 @@ namespace MyWerehouse.Domain.Pallets.Models
 	{
 		public int Id { get; private set; }
 		public Guid ProductId { get; private set; }
-		public Product Product { get; private set; }
+		public Product Product { get; private set; } = null!;
 		public Guid PalletId { get; private set; }
-		public Pallet Pallet { get; private set; }
+		public Pallet Pallet { get; private set; } = null!;
 		public int Quantity { get; private set; }
 		public DateTime DateAdded { get; private set; }
 		public DateOnly? BestBefore { get; private set; }

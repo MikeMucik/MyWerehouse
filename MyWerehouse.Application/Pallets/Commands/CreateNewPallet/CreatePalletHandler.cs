@@ -22,7 +22,8 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 
 		public async Task<AppResult<Unit>> Handle(CreatePalletCommand request, CancellationToken ct)
 		{
-			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);			
+			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
+			if (location == null) return AppResult<Unit>.Fail("Wskazana rampa nie istnieje.", ErrorType.NotFound);
 			var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
 			var pallet = Pallet.Create(newIdForPallet, request.RampNumber);
 			foreach (var product in request.DTO.ProductsOnPallet)

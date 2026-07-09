@@ -14,9 +14,9 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 	public class PalletDTOIssue : IMapFrom<Pallet>
 	{
 		public Guid Id { get; init; }
-		public string PalletNumber { get; init; }
+		public string PalletNumber { get; init; } = string.Empty;
 		public int LocationId { get; init; }
-		public string LocationSnapShot { get; init; }
+		public string LocationSnapShot { get; init; } = string.Empty;
 		public PalletStatus Status { get; init; }
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new HashSet<ProductOnPalletDTO>();
 		

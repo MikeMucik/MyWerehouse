@@ -9,13 +9,13 @@ using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Invetories.Events;
+using MyWerehouse.Domain.Inventories.Events;
 using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Receving.Events;
+using MyWerehouse.Domain.Receiving.Events;
 
 namespace MyWerehouse.Domain.Issuing.Models
 {
@@ -24,14 +24,14 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public Guid Id { get; private set; } = Guid.NewGuid();
 		public int IssueNumber { get; private set; }
 		public int ClientId { get; private set; }
-		public Client Client { get; private set; }
+		public Client Client { get; private set; } = null!;
 		public DateTime IssueDateTimeCreate { get; private set; }
 		public DateOnly IssueDateTimeSend { get; private set; }
 		public ICollection<Pallet> Pallets { get; private set; } = new List<Pallet>();
 		public ICollection<HistoryIssue> HistoryIssues { get; private set; } = new List<HistoryIssue>();
 		public ICollection<HistoryPicking> HistoryPickings { get; private set; } = new List<HistoryPicking>();
 		public ICollection<PickingTask> PickingTasks { get; private set; } = new List<PickingTask>();
-		public string PerformedBy { get; private set; }
+		public string PerformedBy { get; private set; } = string.Empty;
 		public IssueStatus IssueStatus { get; private set; }
 		public ICollection<IssueItem> IssueItems { get; private set; } = new List<IssueItem>();
 		private Issue() { }
@@ -44,7 +44,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			if (dateToSend < DateOnly.FromDateTime(DateTime.UtcNow)) throw new WrongDateDomainException();
 			IssueDateTimeSend = dateToSend;
 			IssueDateTimeCreate = DateTime.UtcNow;
-			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException(performedBy);
+			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException();
 			IssueStatus = IssueStatus.New;
 		}
 
@@ -61,7 +61,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			IssueDateTimeSend = issueDateTimeSend;
 			PerformedBy = performedBy;
 			IssueStatus = issueStatus;
-			IssueItems = issueItems;
+			IssueItems = issueItems ?? new List<IssueItem>();
 		}
 		public static Issue CreateForSeed(Guid id, int issueNumber, int clientId, DateTime issueDateTimeCreate,
 			DateOnly issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems) =>
@@ -72,7 +72,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			if (userId == null || userId.Length == 0)
 			{
-				throw new InvalidUserIdDomainException(userId);
+				throw new InvalidUserIdDomainException();
 			}
 			PerformedBy = userId;
 		}

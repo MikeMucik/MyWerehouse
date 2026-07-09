@@ -14,7 +14,7 @@ namespace MyWerehouse.Domain.Histories.Models
 		public int IssueNumber { get; set; }
 		public int ClientId { get; set; }
 		public IssueStatus StatusAfter { get; set; }
-		public string PerformedBy { get; set; }
+		public string PerformedBy { get; set; } = string.Empty;
 		public DateTime DateTime { get; set; }
 		public virtual ICollection<HistoryIssueDetail> Details { get; set; } = new List<HistoryIssueDetail>();
 		public virtual ICollection<HistoryIssueItems> Items { get; set; } = new List<HistoryIssueItems>();

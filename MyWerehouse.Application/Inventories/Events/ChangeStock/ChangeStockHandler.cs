@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Invetories.Events;
-using MyWerehouse.Domain.Invetories.InventoryExceptions;
-using MyWerehouse.Domain.Invetories.Models;
+using MyWerehouse.Domain.Inventories.Events;
+using MyWerehouse.Domain.Inventories.InventoryExceptions;
+using MyWerehouse.Domain.Inventories.Models;
 
 namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 {
@@ -42,8 +42,8 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 					inventory.Quantity += change.Quantity;
 					if (inventory.Quantity < 0)
 					{
-						var product = await _productRepo.GetProductByIdAsync(change.ProductId);
-						throw new DomainInventoryDomainException(change.ProductId, product.SKU);
+						var productSKU = await _productRepo.GetSKUForProductAsync(change.ProductId);
+						throw new DomainInventoryDomainException(change.ProductId, productSKU?? "[SKU not found]"); 
 					}
 					inventory.LastUpdated = DateTime.UtcNow;
 				}				

@@ -31,8 +31,8 @@ namespace MyWerehouse.Server.Controllers
 
 		//Przyjęcie palety dla Receipt
 		[HttpPost("{id:guid}/pallets")]
-		public async Task<IActionResult> CreatePalletForReceipt(Guid id, CreatePalletReceiptDTO dTO)
-			=> (await _mediator.Send(new AddPalletToReceiptCommand(id, dTO)))
+		public async Task<IActionResult> CreatePalletForReceipt(Guid id, CreatePalletReceiptDTO dto)
+			=> (await _mediator.Send(new AddPalletToReceiptCommand(id, dto)))
 			.ToActionResult();
 
 		//Aktualizacja przyjęcia, poprawa palet -> Post
@@ -43,7 +43,7 @@ namespace MyWerehouse.Server.Controllers
 
 		//Anulowanie przyjęcia, kasacja - nie ma wpływu na stan -> zatwierdzone nie można cofnąć
 
-		[HttpDelete("{id:guid}/delete")]
+		[HttpDelete("{id:guid}")]
 		public async Task<IActionResult> Delete(Guid id, string userId)
 			=> (await _mediator.Send(new DeleteDraftReceiptCommand(id, userId)))
 			.ToActionResult();
@@ -54,7 +54,7 @@ namespace MyWerehouse.Server.Controllers
 			.ToActionResult();
 
 		//Zatwierdzenie skończenia rozładunku - magazyn
-		[HttpPost("{id:guid}/confirmEnd")]
+		[HttpPost("{id:guid}/complete-unloading")]
 		public async Task<IActionResult> ConfirmEndReceipt(Guid id, string userId)
 			=> (await _mediator.Send(new CompletePhysicalReceiptCommand(id, userId)))
 			.ToActionResult();
@@ -66,13 +66,13 @@ namespace MyWerehouse.Server.Controllers
 			.ToActionResult();
 
 		//Pobranie przyjęcia np do edycji 
-		[HttpGet("{id:Guid}")]
+		[HttpGet("{id:guid}")]
 		public async Task<IActionResult> GetById(Guid id)
 			=> (await _mediator.Send(new GetReceiptByIdQuery(id)))
 			.ToActionResult();
 
 		//Pobranie przyjęć 
-		[HttpPost("search")]
+		[HttpGet("search")]
 		public async Task<IActionResult> Search([FromQuery] GetReceiptsByFilterQuery query)
 			=> (await _mediator.Send(query)).ToActionResult();
 	}

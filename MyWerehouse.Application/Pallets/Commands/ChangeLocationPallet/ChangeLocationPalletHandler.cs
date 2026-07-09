@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Persistence;
 
@@ -37,8 +36,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 			}
 			var fullNameLocation = $" Bay = {location.Bay} Aisle = {location.Aisle} Position = {location.Position} Height ={location.Height}";
 
-			bool isLocationOccupiedByDifferentPallet = existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id;
-			if (isLocationOccupiedByDifferentPallet && !request.Force)
+			if (existingPalletInDestination != null && existingPalletInDestination.Id != pallet.Id && !request.Force)
 			{
 				var answerWhenOccupied = new ChangeLocationResults
 				{

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Domain.Receiving.Models;
-using MyWerehouse.Domain.Receving.Filters;
 
 namespace MyWerehouse.Domain.Interfaces
 {

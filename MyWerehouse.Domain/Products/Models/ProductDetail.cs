@@ -10,17 +10,17 @@ namespace MyWerehouse.Domain.Products.Models
 	public class ProductDetail
 	{
 		public Guid ProductId { get; private set; }
-		public Product Product { get;private set; }
-		public int Length { get;private set; }
-		public int Height { get;private set; }
-		public int Width { get;private set; }
-		public int Weight { get;private set; }
-		public string Description { get;private set; }
+		public Product Product { get; private set; } = null!;
+		public int Length { get; private set; }
+		public int Height { get; private set; }
+		public int Width { get; private set; }
+		public int Weight { get; private set; }
+		public string Description { get; private set; } = string.Empty;
 
 		private ProductDetail() { }
 
-		private ProductDetail(Guid productId,int length, int height, int width, int weight, string description)
-		{			
+		private ProductDetail(Guid productId, int length, int height, int width, int weight, string description)
+		{
 			ProductId = productId;
 			if (length <= 0 || length > 120) throw new WrongLengthProductDomainException();//cm
 			Length = length;
@@ -33,6 +33,6 @@ namespace MyWerehouse.Domain.Products.Models
 			Description = description;
 		}
 		public static ProductDetail CreateDetails(Guid productId, int length, int height, int width, int weight, string description)
-			=>new ProductDetail(productId, length, height, width, weight, description);
+			=> new ProductDetail(productId, length, height, width, weight, description);
 	}
 }

@@ -16,15 +16,15 @@ namespace MyWerehouse.Domain.Picking.Models
 	{
 		public Guid Id { get; private set; }
 		public Guid PalletId { get; private set; }
-		public Pallet Pallet { get;private set; }
+		public Pallet Pallet { get; private set; } = null!;
 		public int InitialPalletQuantity { get; private set; }
-		public int LocationId { get; private set; }//needed??
-		public Location Location { get; private set; }//needed??
-		public DateTime DateMoved { get;private set; }//utworzenie
-		public ICollection<PickingTask> PickingTasks { get; private set; } //= new List<PickingTask>();
-		public ICollection<HistoryPicking> HistoryPicking { get;private set; } = new List<HistoryPicking>();
+		public int LocationId { get; private set; }
+		public Location Location { get; private set; } = null!;
+		public DateTime DateMoved { get; private set; }
+		public ICollection<PickingTask> PickingTasks { get; private set; } = new List<PickingTask>();
+		public ICollection<HistoryPicking> HistoryPicking { get; private set; } = new List<HistoryPicking>();
 		[NotMapped]
-		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a=>a.RequestedQuantity) ?? 0);
+		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a => a.RequestedQuantity) ?? 0);
 		private VirtualPallet() { }
 
 		private VirtualPallet(Guid palletId, int initialQuantity, int locationId)

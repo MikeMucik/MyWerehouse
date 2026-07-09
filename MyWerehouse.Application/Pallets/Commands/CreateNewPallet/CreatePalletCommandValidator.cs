@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
 	public class CreatePalletCommandValidator : AbstractValidator<CreatePalletCommand>
 	{
-		public CreatePalletCommandValidator(IValidator<ProductOnPalletDTO> productOnPalletValidator, ILocationRepo locationRepo)
+		public CreatePalletCommandValidator(IValidator<ProductOnPalletCreateDTO> productOnPalletValidator, ILocationRepo locationRepo)
 		{
 			RuleFor(p => p.DTO)
 				.NotNull()

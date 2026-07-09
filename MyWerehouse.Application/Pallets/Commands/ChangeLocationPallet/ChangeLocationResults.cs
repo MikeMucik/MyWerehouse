@@ -10,6 +10,6 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 	{
 		public bool Success { get; init; }
 		public bool RequiresConfirmation { get; init; }
-		public string Message { get; init; }
+		public string Message { get; init; } = string.Empty;
 	}
 }

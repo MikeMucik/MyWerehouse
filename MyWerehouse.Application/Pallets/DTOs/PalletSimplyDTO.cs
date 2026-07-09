@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Pallets.DTOs
 	public class PalletSimplyDTO : IMapFrom<Pallet>
 	{
 		public Guid Id { get; init; }
-		public string PalletNumber { get; init; }
+		public string PalletNumber { get; init; } = string.Empty;
 		public PalletStatus PalletStatus { get; init; }
 		public void Mapping(Profile profile)
 		{

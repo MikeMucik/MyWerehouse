@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 		PhysicallyCompleted = 2,
 		Verified = 3,
 		Correction = 4,		
-		Cancelled = 5,// gdy anuluje przyjęcie
+		Cancelled = 5,
 		Deleted =6,
 	}
 }

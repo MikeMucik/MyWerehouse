@@ -68,8 +68,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					missingPalletsCount = requiredFullPallets - oldCount;
 					palletAssigned = await SelectAndAssignFullPallets(issue, issueLine, reusablePalletsForProduct, requiredFullPallets, missingPalletsCount);
 					break;
-				//case IssueAllocationPolicy.FefoWithFullPalletPreference:
-
+			
 				default:
 					return AssignProductToIssueResult.Fail($"Allocation policy {policy} is not supported.");
 			}
@@ -114,7 +113,6 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			}
 			return allAvailablePallets;
 		}
-		//TODO
-		//Fifo, fefo etc.
+		//Obecnie wspierana jest polityka FullPalletFirst; pozostałe strategie mogą zostać dodane jako osobne polityki alokacji.
 	}
 }

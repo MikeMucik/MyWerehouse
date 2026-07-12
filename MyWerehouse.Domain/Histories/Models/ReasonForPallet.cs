@@ -17,8 +17,6 @@ namespace MyWerehouse.Domain.Histories.Models
 		ToLoad = 6,//paleta dodana do wydania
 		Loaded = 7,//paleta załadowana
 		CancelIssue = 8,//paleta została wycofana z issue z powodu kasacji issue
-		ReversePicking = 9,//paleta pod wpływem działania dekompletacyjnego
-		//InStock = 8,
-		//Archived= 9,
+		ReversePicking = 9,//paleta pod wpływem działania dekompletacyjnego		
 	}
 }

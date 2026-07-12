@@ -12,28 +12,7 @@ namespace MyWerehouse.Infrastructure
 	public static class DependencyInjection
 	{
 		public static IServiceCollection AddInfrastructure(this IServiceCollection services)
-		{
-			//services.AddTransient<IPickingTaskRepo, PickingTaskRepo>();
-			//services.AddTransient<ICategoryRepo, CategoryRepo>();
-			//services.AddTransient<IClientRepo, ClientRepo>();
-
-			//services.AddTransient<IHistoryIssueRepo, HistoryIssueRepo>();
-			//services.AddTransient<IHistoryReceiptRepo, HistoryReceiptRepo>();
-			//services.AddTransient<IHistoryPickingRepo, HistoryPickingRepo>();
-			//services.AddTransient<IHistoryReversePickingRepo, HistoryReversePickingRepo>();
-
-			//services.AddTransient<IInventoryRepo, InventoryRepo>();
-			//services.AddTransient<IIssueRepo, IssueRepo>();
-			//services.AddTransient<IIssueItemRepo, IssueItemRepo>();
-			//services.AddTransient<ILocationRepo, LocationRepo>();
-			//services.AddTransient<IPalletMovementRepo, PalletMovementRepo>();
-			//services.AddTransient<IPalletRepo, PalletRepo>();
-			//services.AddTransient<IvirtualPalletRepo, virtualPalletRepo>();			
-			//services.AddTransient<IProductRepo, ProductRepo>();
-			//services.AddTransient<IReceiptRepo, ReceiptRepo>();		
-			//services.AddTransient<IReversePickingRepo, ReversePickingRepo>();
-
-			//services.AddTransient<IHandPickingTaskRepo, HandPickingRepo>();
+		{			
 			services.AddScoped<IPickingTaskRepo, PickingTaskRepo>();
 			services.AddScoped<ICategoryRepo, CategoryRepo>();
 			services.AddScoped<IClientRepo, ClientRepo>();
@@ -53,9 +32,6 @@ namespace MyWerehouse.Infrastructure
 			services.AddScoped<IProductRepo, ProductRepo>();
 			services.AddScoped<IReceiptRepo, ReceiptRepo>();
 			services.AddScoped<IReversePickingRepo, ReversePickingRepo>();
-
-			
-
 
 			return services;
 		}

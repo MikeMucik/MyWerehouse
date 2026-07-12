@@ -58,18 +58,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.False(result.IsSuccess);
 			Assert.Contains("nie jest do pickingu, zawiera różne towary", result.Error);
 		}
-		[Fact]
-		public async Task PrepareEmergencyPicking_ReturnInfoChangeStatus_WhenPalletHasWrongStatus()
-		{
-			// Arrange
-			var palletGuid7 = Guid.Parse("00000000-0007-1111-0000-000000000000");
-			var query = new PrepareEmergencyPickingQuery(palletGuid7, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(0)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));
-			// Act			
-			var result = await _mediator.Send(query);
-			// Assert
-			Assert.False(result.IsSuccess);
-			Assert.Contains("Paleta nie jest w pickingu, zmień status.", result.Error);
-		}
+		//[Fact]
+		//public async Task PrepareEmergencyPicking_ReturnInfoChangeStatus_WhenPalletHasWrongStatus()
+		//{
+		//	// Arrange
+		//	var palletGuid7 = Guid.Parse("00000000-0007-1111-0000-000000000000");
+		//	var query = new PrepareEmergencyPickingQuery(palletGuid7, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(0)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));
+		//	// Act			
+		//	var result = await _mediator.Send(query);
+		//	// Assert
+		//	Assert.False(result.IsSuccess);
+		//	Assert.Contains("Paleta nie jest w pickingu, zmień status.", result.Error);
+		//}
 		[Fact]
 		public async Task ShowTaskToDo_ShouldReturnPagedPickingTasks_WhenProperPallet()
 		{

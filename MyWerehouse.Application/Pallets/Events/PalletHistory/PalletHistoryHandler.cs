@@ -34,7 +34,7 @@ namespace MyWerehouse.Application.Pallets.Events.PalletHistory
 				.Select(d => new HistoryPalletDetail
 				 {
 					 ProductId = d.ProductId,
-					 Quantity = d.Quantity,
+					 QuantityChange = d.QuantityChange,
 				 })
 				.ToList(),
 			};

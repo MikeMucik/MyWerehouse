@@ -10,13 +10,10 @@ namespace MyWerehouse.Domain.Picking.Models
 {
 	public class ReversePicking : AggregateRoots
 	{
-		public Guid Id { get; private set; } //= Guid.NewGuid(); //do zmiany z set na private set
+		public Guid Id { get; private set; } 
 		public Guid PickingPalletId { get; private set; }//paleta na której jest towar - kompletacyjna
-														 //public required string PickingPalletNumber { get; set; }//paleta na której jest towar - kompletacyjna
-		public Guid? SourcePalletId { get; private set; }//paleta źródłowa na nią może wrócić towar 
-														 //public string? DestinationPalletId { get; set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach
-		public Guid? DestinationPalletId { get; private set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach
-															  //public string? DestinationPalletNumber { get; set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach
+		public Guid? SourcePalletId { get; private set; }//paleta źródłowa na nią może wrócić towar 					 
+		public Guid? DestinationPalletId { get; private set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach															 
 		public Guid ProductId { get; private set; }
 		public DateOnly? BestBefore { get; private set; }
 		public int Quantity { get; private set; }

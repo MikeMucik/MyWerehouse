@@ -19,7 +19,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 			entity.HasOne(i => i.Product)
 			.WithOne(p => p.InventoryItem)
 			.HasForeignKey<Inventory>(i => i.ProductId)
-			.OnDelete(DeleteBehavior.Restrict);//do przemyślenia
+			.OnDelete(DeleteBehavior.Restrict);// Usunięcie produktu jest blokowane, jeśli istnieje powiązany stan magazynowy.
 		}
 	}
 }

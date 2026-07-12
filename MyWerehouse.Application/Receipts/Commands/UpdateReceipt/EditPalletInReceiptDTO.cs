@@ -14,10 +14,12 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 	public class EditPalletInReceiptDTO : IMapFrom<Pallet>
 	{
 		public Guid Id { get; init; }
-		public string? PalletNumber { get; init; }//jeśli tworzę nową to musi być puste - ustalenie biznesowe czy można tu tworzyć
+		public string? PalletNumber { get; init; }// Puste PalletNumber oznacza utworzenie nowej palety w ramach edycji przyjęcia.	
 		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
 		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletCreateDTO>();
+		public Guid? ReceiptId { get; init; }
+	
 	}
 }

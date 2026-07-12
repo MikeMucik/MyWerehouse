@@ -35,22 +35,21 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		}
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
-			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
-			// Pallets don't change warehouse's stock until receipt is confirmed
+			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia			
 			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.Id);
 			if (existingReceipt == null)
 				return AppResult<Unit>.Fail($"Przyjęcie nie zostało znalezione.", ErrorType.NotFound);
-			//foreach (var item in request.DTO.Pallets)
-			//{
-			//	if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
-			//	{
-			//		return AppResult<Unit>.Fail($"Paleta o numerze {item.PalletNumber} należy do innego przyjęcia.", ErrorType.Conflict);
-			//	}
-			//}
+			foreach (var item in request.DTO.Pallets)
+			{
+				if (item.ReceiptId != null && item.ReceiptId != existingReceipt.Id)
+				{
+					return AppResult<Unit>.Fail($"Paleta o numerze {item.PalletNumber} należy do innego przyjęcia.", ErrorType.Conflict);
+				}
+			}
 			//List palet do usunięcia z bazy danych 
 			var incomingPalletsIds = request.DTO.Pallets
 				.Select(p => p.Id)
-				.Where(id => id != Guid.Empty)//
+				.Where(id => id != Guid.Empty)
 				.ToHashSet();
 			var palletToDelete = existingReceipt.Pallets
 				.Where(p => !incomingPalletsIds.Contains(p.Id))
@@ -70,19 +69,27 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 
 				var productsForPallet = new List<ProductOnPallet>();
 
-				foreach (var product in dto.ProductsOnPallet) //możliwość na kilka produktów na razie zbędne
+				if (dto.ProductsOnPallet.Count != 1)
 				{
-					var productForPallet = ProductOnPallet.Create(product.ProductId,
-						product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);
-					productsForPallet.Add(productForPallet);
+					return AppResult<Unit>.Fail($"Paleta przyjmowana może mieć tylko jeden produkt", ErrorType.Conflict);
 				}
+				var product = dto.ProductsOnPallet.Single();
+
+				if (!await _productRepo.IsExistProduct(product.ProductId))
+					return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
+
+				var productForPallet = ProductOnPallet.Create(product.ProductId,
+					product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);
+
+				productsForPallet.Add(productForPallet);
+				
 				pallet.UpdateProductChanges(productsForPallet);
 				pallet.ChangeStatus(PalletStatus.Receiving);
 				pallet.AddHistory(ReasonForPallet.Correction, request.DTO.PerformedBy, pallet.Location.ToSnapshot());
 			}
 			//Dodanie nowych palet - Adding new palets
 			var palletsAdded = request.DTO.Pallets
-				.Where(p => p.Id == Guid.Empty)//
+				.Where(p => p.Id == Guid.Empty)
 				.ToList();
 			foreach (var palletToAdd in palletsAdded)
 			{

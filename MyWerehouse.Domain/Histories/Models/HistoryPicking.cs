@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Histories.Models
 	{
 		public int Id { get; set; }
 		public Guid PickingTaskId { get; set; }		
-		public Guid? PalletId { get; set; } // paleta źródło, może by dodać jeszcze paleta cel
+		public Guid? PalletId { get; set; } // paleta źródło
 		public string? PalletNumber { get; set; }
 		public Guid? PickingPalletId { get; set; }
 		public string? PickingPalletNumber { get; set; }

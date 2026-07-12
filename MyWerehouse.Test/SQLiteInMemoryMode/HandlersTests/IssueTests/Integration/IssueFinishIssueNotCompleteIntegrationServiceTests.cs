@@ -85,7 +85,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			notLoadedPallet.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, new DateTime(2025, 6, 6, 2, 2, 2),
-			DateOnly.FromDateTime( new DateTime(2025, 6, 12, 2, 2, 2)), "TestUser", IssueStatus.Pending, issueItem);
+			DateOnly.FromDateTime( new DateTime(2025, 6, 12, 2, 2, 2)), "TestUser", IssueStatus.ConfirmedToLoad, issueItem);
 						
 			DbContext.Pallets.AddRange(notLoadedPallet, loadedPallet);
 			DbContext.Issues.Add(issue);

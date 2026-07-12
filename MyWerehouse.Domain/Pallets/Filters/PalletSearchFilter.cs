@@ -10,7 +10,7 @@ namespace MyWerehouse.Domain.Pallets.Filters
 	public class PalletSearchFilter
 	{
 		public string? PalletNumber { get; set; }
-		public Guid? ProductId { get; set; }//
+		public Guid? ProductId { get; set; }
 		public string? ProductName { get; set; }
 		public string? SKU { get; set; }
 		public int? LocationBay { get; set; }
@@ -26,7 +26,7 @@ namespace MyWerehouse.Domain.Pallets.Filters
 		public DateTime? EndDate { get; set; }
 		public string? ReceiptUser {  get; set; }
 		public string? IssueUser { get; set; }
-		public Guid? ReceiptId { get; set; }//
-		public Guid? IssueId { get; set; }//
+		public Guid? ReceiptId { get; set; }
+		public Guid? IssueId { get; set; }
 	}
 }

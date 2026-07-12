@@ -32,7 +32,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(r => r.Pallets)
 					.ThenInclude(pr => pr.ProductsOnPallet)
 				.Include(l=>l.Pallets)//do swaggera by mógł zrobić snpaShot
-					.ThenInclude(l=>l.Location)//
+					.ThenInclude(l=>l.Location)
 				.FirstOrDefaultAsync(r => r.Id == id);
 		}
 		public async Task<Receipt?> GetReceiptWithAllIncludesByIdAsync(Guid id)

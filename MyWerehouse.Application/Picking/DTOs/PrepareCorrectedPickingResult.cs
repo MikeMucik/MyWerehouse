@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.Picking.DTOs
 	{
 		public bool Success { get; init; }
 		public bool RequiresIssueSelection { get; init; }
-		public string Message { get; init; } = string.Empty;//
+		public string Message { get; init; } = string.Empty;
 		public string? ProductInfo { get; init; }
 		public IReadOnlyList<IssueOptions> IssueOptions { get; init; } = [];
 		public static PrepareCorrectedPickingResult Fail(string message)

@@ -54,10 +54,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var list = _werehouseDbContext.VirtualPallets
 				.Include(a => a.PickingTasks)
-				.Include(p => p.Pallet)//
-					.ThenInclude(l=>l.Location)//
-				//.Include(p=>p.Pallet)
-				//	.ThenInclude(pp => pp.ProductsOnPallet)
+				.Include(p => p.Pallet)
+					.ThenInclude(l=>l.Location)				
 				.Where(vp =>
 				vp.PickingTasks.Any(pt =>
 				pt.PickingDay <= end && pt.PickingDay >= start && pt.PickingStatus == PickingStatus.Allocated));				
@@ -79,8 +77,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.VirtualPallets
 				.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId)
-				.Include(p=>p.Pallet)//
-					.ThenInclude(l=>l.Location)//
+				.Include(p=>p.Pallet)
+					.ThenInclude(l=>l.Location)
 				.ToListAsync();
 		}
 

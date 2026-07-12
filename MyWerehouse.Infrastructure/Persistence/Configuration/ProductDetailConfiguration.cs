@@ -14,8 +14,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 		public void Configure(EntityTypeBuilder<ProductDetail> entity)
 		{
 			entity.HasKey(e => e.ProductId);
-			entity.Property(e => e.ProductId).ValueGeneratedNever();
-			//może ograniczyć rozmiary kartonu
+			entity.Property(e => e.ProductId).ValueGeneratedNever();			
 		}
 	}
 }

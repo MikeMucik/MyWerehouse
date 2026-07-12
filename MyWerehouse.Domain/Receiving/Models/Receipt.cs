@@ -25,7 +25,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 		public DateTime ReceiptDateTime { get; private set; }
 		public virtual ICollection<Pallet> Pallets { get; private set; } = new List<Pallet>();
 		public virtual ICollection<HistoryReceipt> HistoryReceipt { get; private set; } = new List<HistoryReceipt>();
-		public string PerformedBy { get; private set; } = string.Empty; // opcjonalnie: user
+		public string PerformedBy { get; private set; } = string.Empty; 
 		public ReceiptStatus ReceiptStatus { get; private set; }
 		public int RampNumber { get; private set; }
 
@@ -37,8 +37,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 			Id = Guid.NewGuid();
 			ReceiptNumber = receiptNumber;
 			if (clientId <= 0) throw new ClientDomainException();
-			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException();
-			//if (rampNumber <= 0 || rampNumber > 100) throw new NotFoundRampException(rampNumber);//dostępne rampy
+			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException();			
 			ClientId = clientId;
 			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException();
 			ReceiptDateTime = DateTime.UtcNow;

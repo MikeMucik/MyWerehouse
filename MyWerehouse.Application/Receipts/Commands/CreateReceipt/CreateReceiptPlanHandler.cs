@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 
 		public async Task<AppResult<Unit>> Handle(CreateReceiptPlanCommand request, CancellationToken ct)
 		{
-			var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt();//
+			var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt();
 				var receipt = Receipt.Create(receiptNumber, request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber);
 				_receiptRepo.AddReceipt(receipt);
 				receipt.Create(request.DTO.PerformedBy);

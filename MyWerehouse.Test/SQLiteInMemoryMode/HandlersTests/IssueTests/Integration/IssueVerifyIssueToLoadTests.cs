@@ -107,7 +107,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.All(savedIssue.Pallets, p => Assert.True(p.ProductsOnPallet.Any()));
 		}
 		[Fact]
-		public async Task VerifyIssueToLoadAsync_ShouldChnageStatus_WhenStatusInProgress()
+		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenStatusInProgress()
 		{
 			//Arrange
 			var client = CreateClient();

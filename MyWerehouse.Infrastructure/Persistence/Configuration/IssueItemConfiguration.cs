@@ -26,10 +26,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 				.HasForeignKey(e => e.ProductId)
 				.OnDelete(DeleteBehavior.Restrict);
 
-			//entity.HasOne(a => a.Issue)
-			//	.WithMany(i => i.HistoryPickings)
-			//	.HasForeignKey(h => h.IssueId)
-			//	.OnDelete(DeleteBehavior.Restrict);
 		}
 	}
 }

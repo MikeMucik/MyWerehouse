@@ -11,7 +11,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 	{
 		public int Id { get; private set; }
 		public Guid IssueId { get;private set; }
-		//public int IssueNumber { get; set; }
 		public Issue Issue { get; private set; } = null!;
 		public Guid ProductId { get; private set; }
 		public Product Product { get; private set; } = null!;

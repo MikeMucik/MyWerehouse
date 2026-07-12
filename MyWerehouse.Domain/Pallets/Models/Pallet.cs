@@ -22,11 +22,9 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public string PalletNumber { get; private set; } = string.Empty;
 		public DateTime DateReceived { get; private set; }
 		// Snapshot przechowywany jako string – uproszczenie pod potrzeby projektu/portfolio.
-		// W systemie produkcyjnym byłby to Value Object (np. LocationSnapshot).
-		//private readonly string _locationSnapshot;
-		//private readonly string snapShoot;
+		// W systemie produkcyjnym byłby to Value Object (np. LocationSnapshot).		
 		public int LocationId { get; private set; }
-		public Location Location { get; private set; } = null!;	
+		public Location Location { get; private set; } = null!;
 		public PalletStatus Status { get; private set; } = 0;
 		public ICollection<ProductOnPallet> ProductsOnPallet { get; private set; } = new List<ProductOnPallet>();
 		public ICollection<HistoryPallet> PalletHistory { get; private set; } = new List<HistoryPallet>();
@@ -179,8 +177,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void AssignToIssue(Guid issueId, string userId, string snapShot)
 		{
-			//może invarianty !!
-			Status = PalletStatus.ToIssue;
+			if (Status != PalletStatus.ToIssue && Status != PalletStatus.LockedForIssue)
+			{
+				throw new InvalidPalletStatusDomainException(Id);
+			}
+			if (Status == PalletStatus.LockedForIssue)
+			{
+				Status = PalletStatus.ToIssue;
+			}
 			IssueId = issueId;
 			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
 		}
@@ -215,7 +219,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void ToArchive(string userId, ReasonForPallet reason, string snapShot)
 		{
-			//invarianty ?? 
 			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id);
 			Status = PalletStatus.Archived;
 			AddHistory(reason, userId, snapShot);
@@ -227,8 +230,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			{
 				Status = PalletStatus.Available;
 			}
-			//var oldLocationId = this.LocationId;
-			//var oldLocationSnapshot = this.Location.ToSnopShot();
+
 			this.AddDomainEvent(new PalletHistoryNotification(this.Id, PalletNumber,
 				oldLocationId, oldLocationSnapShot, newLocationId, newLocationSnapShot, ReasonForPallet.Moved, userId, this.Status, BuildMovementDetails()));
 			this.LocationId = newLocationId;
@@ -300,10 +302,9 @@ namespace MyWerehouse.Domain.Pallets.Models
 			this.Status = PalletStatus.Loaded;
 			this.AddHistory(ReasonForPallet.Loaded, userId, snapShot);
 		}
-		
+
 		public void ChangeStatus(PalletStatus status)
 		{
-			//invarianty!!
 			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id);
 			this.Status = status;
 		}

@@ -11,7 +11,7 @@ namespace MyWerehouse.Domain.Interfaces
 	{		
 		void AddInventory (Inventory inventory);	
 		Task<Inventory?> GetInventoryForProductAsync(Guid productId);
-		Task<List<Inventory>> GetInventoriesForProductsAsync(List<Guid> productIds);//Do Dictionary
+		Task<List<Inventory>> GetInventoriesForProductsAsync(List<Guid> productIds);
 		IQueryable<Inventory> GetAllInventory();		
 		Task <bool> HasStockAsync(Guid productId, int quantity);
 		Task<int> GetAvailableQuantityAsync(Guid productId, DateOnly? bestBefore);
@@ -20,13 +20,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<int> GetQuantityProductReservedForPickingAsync(Guid productId, DateOnly? bestBefore);
 	}
 }
-//Exists(int productId)
-//Sprawdza, czy dany produkt jest już ujęty w inwentarzu.
 
-//RemoveProductFromInventory(int productId)
-//Używane rzadko, ale przydatne np. gdy usuwasz produkt całkowicie.
-
-//GetBelowMinimumStock()
-//Pobiera produkty, których stan spadł poniżej ustalonego minimum – np. do alertów.
 
 

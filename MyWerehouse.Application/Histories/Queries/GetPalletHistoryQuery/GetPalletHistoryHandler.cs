@@ -4,11 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Histories.DTOs;
 using MyWerehouse.Domain.Interfaces;
@@ -38,9 +34,8 @@ namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 			var historyOrdered = history.OrderBy(x => x.MovementDate);
 
 			var result = _mapper.Map<List<HistoryPalletDTO>>(historyOrdered);
-
-			//TODO Details & Paging
-			var r = new PalletHistoryDTO
+						
+			var historyForPallet = new PalletHistoryDTO
 			{
 				Id = pallet.Id,
 				PalletNumber = pallet.PalletNumber,
@@ -51,7 +46,7 @@ namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 				IssueNumber = pallet.Issue?.IssueNumber,
 				PalletMovementsDTO = result
 			};
-			return AppResult<PalletHistoryDTO>.Success(r);
+			return AppResult<PalletHistoryDTO>.Success(historyForPallet);
 		}
 	}
 }

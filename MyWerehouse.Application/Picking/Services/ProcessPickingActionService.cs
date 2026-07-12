@@ -88,7 +88,7 @@ namespace MyWerehouse.Application.Picking.Services
 		{
 			if (pickingCompletion == PickingCompletion.Full)
 			{
-				pickingTask.MarkPicked(pickingPallet.Id, pickingPallet.PalletNumber, palletSource.Id, palletSource.PalletNumber, userId); //
+				pickingTask.MarkPicked(pickingPallet.Id, pickingPallet.PalletNumber, palletSource.Id, palletSource.PalletNumber, userId);
 			}
 			else
 			{

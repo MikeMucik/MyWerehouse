@@ -480,7 +480,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
-				//.Last();
 				.First(i => i.IssueNumber == 3); //trzecie issue w teście
 
 			Assert.Equal("User2", updatedIssue.PerformedBy);

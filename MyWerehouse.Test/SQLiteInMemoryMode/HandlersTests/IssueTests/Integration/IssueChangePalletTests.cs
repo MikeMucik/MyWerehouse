@@ -104,8 +104,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Contains(updatedIssue.Pallets, p => p.PalletNumber == "P2");
 
 			Assert.Equal(PalletStatus.Available, p1.Status);
-			Assert.Equal(PalletStatus.LockedForIssue, p2.Status);
-			Assert.Equal(IssueStatus.ChangingPallet, updatedIssue.IssueStatus);
+			Assert.Equal(PalletStatus.ToIssue, p2.Status);
+			Assert.Equal(IssueStatus.Pending, updatedIssue.IssueStatus);
 		}
 
 		[Fact]

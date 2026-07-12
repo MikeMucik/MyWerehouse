@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.Picking.Services
 {
@@ -41,16 +39,17 @@ namespace MyWerehouse.Application.Picking.Services
 			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
-		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet>? pallets, List<VirtualPallet> virtualPallets,
+		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet>? pallets, List<VirtualPallet>? virtualPallets,
 			Issue issue, Guid productId, int rest, DateOnly? bestBefore, string userId)
 		{
-			// pallets - pallets used in a given issue - needed because not saved in the database yet - one handler - no saveChanges
+			virtualPallets ??= [];
+			// Palety mogą nie być jeszcze zapisane w bazie, bo cały proces odbywa się w jednym handlerze przed SaveChanges.
 			var quantity = rest;
 			var pickingTasks = new List<PickingTask>(); //dla result 																											
 			void CreatePickingTask(VirtualPallet vp, Issue issue, int quantity, Guid productId, DateOnly? bestBefore, string userId)
 			{
 				var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated, productId,
-						bestBefore, null, issue.IssueDateTimeSend.AddDays(-2), 0);  //na razie ustalone na sztywno 
+						bestBefore, null, issue.IssueDateTimeSend.AddDays(-2), 0);  // PickingDay jest wyliczany jako dwa dni przed planowaną wysyłką.
 				_pickingTaskRepo.AddPickingTask(pickingTask);
 				pickingTasks.Add(pickingTask);
 
@@ -68,11 +67,11 @@ namespace MyWerehouse.Application.Picking.Services
 					break;
 			}
 			//new pallets for picking
-			//TODO Take only as many pallets as you need, you will increase performance for now Take 10			
+					
 			var usedPalletsId = pallets?
 				.Select(p => p.Id)
 				.ToHashSet() ?? new HashSet<Guid>();
-			var availablePallets = await _palletRepo.GetAvailablePalletsExcluding(productId, bestBefore, usedPalletsId);//.ToListAsync();
+			var availablePallets = await _palletRepo.GetAvailablePalletsExcluding(productId, bestBefore, usedPalletsId);
 			
 			foreach (var palletToPicking in availablePallets)
 			{

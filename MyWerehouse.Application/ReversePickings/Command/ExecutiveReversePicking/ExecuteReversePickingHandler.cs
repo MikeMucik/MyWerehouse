@@ -70,7 +70,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					}
 					result = await _addProductsToPalletService.AddToExistingPallet(reversePicking, command.Pallets, command.UserId);
 					if (!result.Success) return Fail(result.Message);
-					//TODO front co potrzebuje						
+										
 					break;
 				case ReversePickingStrategy.AddToNewPallet:
 					

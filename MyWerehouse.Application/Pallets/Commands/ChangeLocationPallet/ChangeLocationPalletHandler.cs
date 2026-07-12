@@ -19,13 +19,11 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		public async Task<AppResult<ChangeLocationResults>> Handle(ChangeLocationPalletCommand request, CancellationToken ct)
 		{
-			//Zmiany statusów przez zmianę lokalizacji wybrane lokalizacje
-			//zmieniają statusy palet ToPicking, ze InStock jeśli do lokalizacji
-			//TODO Figure out change pallet's status when operator set location			
+			// Zmiana lokalizacji może zmienić status palety w zależności od typu lokalizacji docelowej.		
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 			if (pallet == null) return AppResult<ChangeLocationResults>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
 			//location is occupied?
-			if (request.DestinationLocationId <= 0)//można ustalić dla danego magazynu
+			if (request.DestinationLocationId <= 0)
 				return AppResult<ChangeLocationResults>.Fail("Nieprawidłowa lokalizacja.", ErrorType.NotFound);
 
 			var existingPalletInDestination = await _palletRepo.CheckOccupancyAsync(request.DestinationLocationId);

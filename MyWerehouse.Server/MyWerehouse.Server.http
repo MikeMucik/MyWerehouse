@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:5297
-@azureBaseUrl = https://your-app-name.azurewebsites.net
+@azureBaseUrl = https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html
 @userId = portfolio-demo-user
 
 @clientId = 1

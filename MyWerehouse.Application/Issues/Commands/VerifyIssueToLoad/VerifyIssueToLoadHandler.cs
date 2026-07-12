@@ -24,9 +24,9 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 			if (issue == null)
 				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 			//check requested amount = prepered amount
-			
+
 			var listOfProduct = issue.IssueItems.Select(x => x.ProductId);
-			var resultComparing = new List<ComparePlanToPreparedResult>();	
+			var resultComparing = new List<ComparePlanToPreparedResult>();
 			foreach (var product in listOfProduct)
 			{
 				var result = await _comparePlanToPreparedService.ComparePlanToPrepared(request.IssueId, product);
@@ -38,9 +38,9 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				return AppResult<List<ComparePlanToPreparedResult>>.Success(resultComparing, "Wydanie zatwierdzono warunkowo z nieskończoną kompletacją.");
 			}
-			if (resultComparing.Any(a=>a.Success == false))
+			if (resultComparing.Any(a => a.Success == false))
 			{
-				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Wydania nie zatwierdzono.",resultComparing, ErrorType.Validation);
+				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Wydania nie zatwierdzono.", resultComparing, ErrorType.Validation);
 			}
 			issue.VerifyToLoad(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);

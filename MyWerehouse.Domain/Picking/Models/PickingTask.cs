@@ -21,7 +21,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public Issue Issue { get; private set; } = null!;
 		public int RequestedQuantity { get; private set; }
 		public PickingStatus PickingStatus { get; private set; }
-		public Guid ProductId { get; private set; } //
+		public Guid ProductId { get; private set; } 
 		public Product Product { get; private set; } = null!;// potrzebne by wyświetlać SKU dla prodktu w DTO
 		public DateOnly? BestBefore { get; private set; }
 		public Guid? PickingPalletId { get; private set; }
@@ -77,7 +77,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore,
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
-		//TODO można przejśc na 3 strategie i klasy rozwiązań
+		
 		public void Cancel(string userId)
 		{
 			var oldStatus = PickingStatus;
@@ -102,7 +102,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus = PickingStatus.CorrectionPicking;
 			AddHistoryPicking(userId, null, null, oldStatus, 0);
 		}
-		// do ujednolicenia MarkPicked MarkPartiallyPicked
+		
 		public void MarkPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, string userId)
 		{
 			var	oldStatus = PickingStatus;
@@ -127,16 +127,8 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus = PickingStatus.PickedPartially;
 			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, pickedQuantity);
 		}
-		//public void ChangeToAvailable(string userId, string snapShot)
-		//{
-		//	var pickingTasks = this.VirtualPallet?.PickingTasks;
-		//	if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
-		//	{
-		//		VirtualPallet.Pallet.ChangeStatus(PalletStatus.Available);
-		//		VirtualPallet.Pallet.AddHistory(Histories.Models.ReasonForPallet.ReversePicking, userId, snapShot);
-		//	}
-		//}
-		//Różne źródła prawdy dlatego przeciążenie - nie jest to najlepsze rozwiązanie
+
+		// Historia pickingu może pochodzić z różnych źródeł, dlatego przeciążenia przekazują jawne dane palet.
 		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
 		{
 

@@ -38,7 +38,6 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 				Items = request.Detailsitems
 				.Select(i=>new HistoryIssueItems
 				{
-					//Id = i.Id,
 					ProductId = i.ProductId,
 					Quantity= i.Quantity,
 					BestBefore = i.BestBedore

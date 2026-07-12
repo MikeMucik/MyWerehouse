@@ -14,13 +14,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 		public void Configure(EntityTypeBuilder<Issue> entity)
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(x => x.Id).ValueGeneratedNever();
-			//entity.Property(x => x.IssueNumber).ValueGeneratedOnAdd();
-
-			//entity.HasOne(a => a.Issue)
-			//	.WithMany(i => i.PickingTasks)
-			//	.HasForeignKey(a => a.IssueId)
-			//	.OnDelete(DeleteBehavior.Restrict);
+			entity.Property(x => x.Id).ValueGeneratedNever();			
 		}
 	}
 }

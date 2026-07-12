@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<HistoryPalletDetail, HistoryPalletDetailDTO>()
-				.ForMember(dest=>dest.QuantityChange, opt=>opt.MapFrom(src=>src.Quantity));
+				.ForMember(dest=>dest.QuantityChange, opt=>opt.MapFrom(src=>src.QuantityChange));
 		}
 	}
 }

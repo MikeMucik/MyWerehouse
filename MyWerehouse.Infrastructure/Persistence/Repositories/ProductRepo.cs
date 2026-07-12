@@ -79,11 +79,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var result = _werehouseDbContext.Products
 				.AsQueryable();
-			//.Where(p => p.IsDeleted == false);
-			//if (filter.ProductId > 0)
-			//{
-			//	result = result.Where(p => p.ProductId == filter.ProductId);
-			//}
+			
 			if (!string.IsNullOrEmpty(filter.ProductName))
 			{
 				result = result.Where(p => p.Name != null && p.Name.StartsWith(filter.ProductName));
@@ -132,16 +128,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			if (await _werehouseDbContext.Products.FindAsync(id) != null) { return true; }
 			return false;
-		}
-		//TODO method to use 
-		//public async Task<bool> EnsureAllExist(List<int> ids)
-		//{
-		//	foreach (var id in ids)
-		//	{
-		//		if (await _werehouseDbContext.Products.FindAsync(id) == null)
-		//		{ return true; }
-		//	}
-		//	return false;
-		//}
+		}		
 	}
 }

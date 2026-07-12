@@ -20,7 +20,6 @@ namespace MyWerehouse.Application.ViewModels.AddressModels
 		public required string PostalCode { get; init; } 
 		public required string StreetName { get; init; } 
 		public required string StreetNumber { get; init; } 
-		//public string AdditionalEmail { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Address, EditAddressDTO>()

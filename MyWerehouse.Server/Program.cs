@@ -8,7 +8,6 @@ using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Server.Middleware;
 
-//Environment.SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "");
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<WerehouseDbContext>(options =>

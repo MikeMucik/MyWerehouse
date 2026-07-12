@@ -141,3 +141,6 @@ Receipt → Pallet → Inventory → Issue → Picking → Loading
 - Add containerized deployment support.
 - Extend pallet allocation policies.
 - Add warehouse workload planning.
+- Gradually reducing dependence on automapper
+- Add more policy to create Issue(FefoStrict,FefoWithFullPalletPreference
+

@@ -28,8 +28,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(i => i.Product)
 				.SingleOrDefaultAsync(p => p.ProductId == productId);
 			return result;
-		}
-		//
+		}		
 		public IQueryable<Inventory> GetAllInventory()
 		{
 			return _werehouseDbContext.Inventories;
@@ -40,8 +39,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.FirstOrDefaultAsync(p => p.ProductId == productId);
 			if (quantityBased == null) return false;
 			return quantityBased.Quantity >= quantity;
-		}
-		//
+		}		
 		public async Task<int> GetAvailableQuantityAsync(Guid productId, DateOnly? bestBefore)
 		{
 			// 1. pełne dostępne palety

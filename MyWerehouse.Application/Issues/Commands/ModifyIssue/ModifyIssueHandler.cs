@@ -16,13 +16,11 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 {
 	public class ModifyIssueHandler(
 		IIssueRepo issueRepo,
-		//IPalletRepo palletRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
 		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<ModifyIssueCommand, AppResult<List<AssignProductToIssueResult>>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		//private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
@@ -32,24 +30,25 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			var issue = await _issueRepo.GetIssueByIdAsync(request.Id);
 			if (issue == null)
 				return AppResult<List<AssignProductToIssueResult>>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
-			// Nowe zlecenie można podmienić wszystkie palety i nie zatwierdzone, nie zaczęty picking
+			// Zlecenia w statusach New, Pending i RequiresCorrection można przebudować przed rozpoczęciem realizacji.
 			if (issue.IssueStatus == IssueStatus.New ||
 				issue.IssueStatus == IssueStatus.Pending ||
 				issue.IssueStatus == IssueStatus.RequiresCorrection)
 			{
 				await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-				//Kasowanie starych palet, zatrzymanie palet do tego samego zlecenia, kasowanie pickingu
-				var reusablePallets = new List<Pallet>();//
-				var listOldPallets = issue.Pallets.ToList();//
+				issue.ChangeClient(request.DTO.ClientId);
+				// Odłączamy poprzednie palety i anulujemy dotychczasowe zadania pickingu przed ponowną alokacją.
+				var reusablePallets = new List<Pallet>();
+				var listOldPallets = issue.Pallets.ToList();
 				foreach (var pallet in listOldPallets)
 				{
 					issue.DetachPallet(pallet);
 					pallet.DetachToIssue(request.DTO.PerformedBy, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.Correction);
-					pallet.ChangeStatus(PalletStatus.LockedForIssue);//potrzebne by palety nie były dostępne w innych miejscach
+					pallet.ChangeStatus(PalletStatus.LockedForIssue);// Palety pozostają zablokowane, żeby nie zostały użyte równolegle w innym zleceniu.
 					reusablePallets.Add(pallet);
 				}
 				var listOldPickingTask = issue.PickingTasks.ToList();
-				//remove old PickingTask 
+				// Anulujemy poprzednie zadania pickingu przed ponowną alokacją.
 				foreach (var pickingTask in listOldPickingTask)
 				{
 					issue.RemovePickingTask(pickingTask);
@@ -57,9 +56,10 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				var anyFailure = false; // Flaga, czy wystąpił jakikolwiek błąd
-				var anySuccess = false; // Flaga, czy cokolwiek się udało
-				foreach (var product in request.DTO.IssueItems) //bo dla każdego osobno i memo na koniec
+				var anyFailure = false; 
+				var anySuccess = false;
+				foreach (var product in request.DTO.IssueItems)
+					// Każdy produkt jest alokowany osobno, a wynik zbiorczy zwracany na końcu.
 				{
 					// dla dwóch takich samych produktów - zabezpieczenie, nie powinno się zdarzyć
 					var savepointName = $"BeforeProduct_{product.ProductId}_{Guid.NewGuid()}";
@@ -94,25 +94,25 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 						resultList.Add(result);
 						anySuccess = true;
 					}
-					catch (DomainException ex) // Łapiemy tutaj wyjątki domenowe, żeby obsłużyć logikę czyszczenia, częsciowy wynik da odpowiedz co jest nie tak z zleceniem wydania  
+					catch (DomainException ex) // Wyjątki domenowe obsługujemy per produkt, żeby zachować częściowy wynik modyfikacji zlecenia.
 					{
 						await transaction.RollbackToSavepointAsync(savepointName, ct);
 						await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
-						//TODO
-						//var sku = 
-						resultList.Add(AssignProductToIssueResult.Fail("Wystąpił nieoczekiwany błąd", product.ProductId));
+
+						resultList.Add(AssignProductToIssueResult.Fail($"Wystąpił błąd {ex.Message}", product.ProductId));
 						anyFailure = true;
 					}
 				}
 				var touchedVirtualPalletIds = listOldPickingTask
-					.Select(a => a.VirtualPalletId)
+					.Where(a => a.VirtualPalletId.HasValue)
+					.Select(a => a.VirtualPalletId!.Value)
 					.Distinct()
 					.ToList();
-				// Pobieramy kandydatów do usunięcia WRAZ z ich fizycznymi paletami - usuwamy tylko virtualPallet
+				// Usuwamy tylko puste VirtualPallets; fizyczne palety wracają do dostępnych.
 				var virtualPalletsToCheck = await _werehouseDbContext.VirtualPallets
-					.Include(vp => vp.Pallet) 
+					.Include(vp => vp.Pallet)
 					.Where(vp =>
 					 touchedVirtualPalletIds.Contains(vp.Id))
 					.ToListAsync(ct);
@@ -137,7 +137,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				}
 				issue.AddHistory(request.DTO.PerformedBy);
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);				
+				await transaction.CommitAsync(ct);
 				return AppResult<List<AssignProductToIssueResult>>.Success(resultList);
 			}
 			else if (issue.IssueStatus == IssueStatus.ConfirmedToLoad)
@@ -171,7 +171,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				{
 					return AppResult<List<AssignProductToIssueResult>>.Fail(
 						  string.Join(";", errorMessage),
-					   ErrorType.Conflict // lub Validation, zależnie od semantyki
+					   ErrorType.Conflict 
 				   );
 				}
 				if (newQuantities.Count == 0)
@@ -184,29 +184,26 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				}
 				var dataForNewIssue = new CreateIssueDTO
 				{
-					ClientId = issue.ClientId,
+					ClientId = request.DTO.ClientId,
 					Items = newQuantities,
 					PerformedBy = request.DTO.PerformedBy,
 				};
 				var receiverFromCreate = await _mediator.Send(new CreateIssueCommand(dataForNewIssue, request.DateToSend), ct);
-				if (receiverFromCreate.IsSuccess is false || receiverFromCreate is null)
-					return AppResult<List<AssignProductToIssueResult>>.Fail("Nie udało się utworzyć nowego zlecenia.", ErrorType.Conflict); //Technical??
-				resultList = receiverFromCreate?.Result?.ToList();
+				if (receiverFromCreate is null || receiverFromCreate.IsSuccess is false || receiverFromCreate.Result is null)
+					return AppResult<List<AssignProductToIssueResult>>.Fail("Nie udało się utworzyć nowego zlecenia.", ErrorType.Conflict);
+				resultList = receiverFromCreate.Result;
 				foreach (var result in resultList)
 				{
 					if (result.Success)
 					{
-						result.Message += " (Dodatkowe zlecenie na ostatnią chwilę - stare jest w realizacji).";
-						//dodatkowy towar do zlecenia w nowym zleceniu - additional goods to be ordered in a new order
+						result.Message += " (Dodatkowe zlecenie na ostatnią chwilę - stare jest w realizacji).";						
 					}
 				}
 				return AppResult<List<AssignProductToIssueResult>>.Success(resultList);
 			}
 			else
-			{
-				resultList.Add(AssignProductToIssueResult.Fail(
-					$"Nie można zaktualizować zlecenia {issue.Id}, status: {issue.IssueStatus}"));
-				return AppResult<List<AssignProductToIssueResult>>.Success(resultList);
+			{				
+				return AppResult<List<AssignProductToIssueResult>>.Fail($"Nie można zaktualizować zlecenia {issue.Id}, status: {issue.IssueStatus}", ErrorType.Conflict);
 			}
 		}
 	}

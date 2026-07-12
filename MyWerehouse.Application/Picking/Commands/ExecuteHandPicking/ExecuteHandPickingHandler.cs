@@ -41,7 +41,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Zamówienie o numerze {command.IssueId} nie zostało znalezione.", ErrorType.NotFound);
 			}
-			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource);//ustalić warunek biznesowy, wskazuje biuro które palety pobrać - emergency
+			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource);// W hand picking paleta źródłowa jest wskazywana ręcznie przez biuro.
 			if (pallet == null)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Paleta o numerze {command.PalletIdSource} nie istnieje.", ErrorType.NotFound);
@@ -50,7 +50,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Zadania nie można zrealizować, paleta nie nadaje się do pobrań.", ErrorType.Conflict);
 			}
-			var product = pallet.ProductsOnPallet.FirstOrDefault();//
+			var product = pallet.ProductsOnPallet.FirstOrDefault();
 			if (product == null || product.Quantity == 0)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Paleta {command.PalletIdSource} jest pusta.", ErrorType.Conflict);
@@ -87,7 +87,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			var resultProcessPicking = await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quantity, command.UserId, pickingHandTask, completion, command.NumberRamp);
 			if (!resultProcessPicking.Success)
 			{
-				return AppResult<ProcessPickingActionResult>.Fail(resultProcessPicking.Message, ErrorType.Conflict);//
+				return AppResult<ProcessPickingActionResult>.Fail(resultProcessPicking.Message, ErrorType.Conflict);
 			}
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<ProcessPickingActionResult>.Success(resultProcessPicking, "Towar dołączono do zlecenia");

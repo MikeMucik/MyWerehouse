@@ -20,13 +20,12 @@ namespace MyWerehouse.Application.Common.Results
 		public string? Error { get; private set; }
 		public string? Message { get; private set; }
 		public ErrorType ErrorType { get; private set; }
-		private AppResult() { }
-		//sukces
+		private AppResult() { }		
 		public static AppResult<T> Success(T value, string message) =>
 			new AppResult<T> { IsSuccess = true, Message= message,  Result = value };
 		public static AppResult<T> Success(T value) =>
 			new AppResult<T> { IsSuccess = true, Result = value };
-		//porażka
+		
 		public static AppResult<T> Fail(string error, ErrorType errorType = ErrorType.Validation) =>
 			new AppResult<T> { IsSuccess = false, Error = error, ErrorType = errorType };
 

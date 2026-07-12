@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Receiving.Filters
 		public int? ReceiptNumber { get; set; }
 		public int? ClientId { get; set; }
 		public string? ClientName { get; set; }
-		public Guid? ProductId { get; set; }//
+		public Guid? ProductId { get; set; }
 		public string? SKU { get; set; } 
 		public string? ProductName { get; set; }		
 		public DateOnly? SendDateStart { get; set; } //issue data wysyłki,

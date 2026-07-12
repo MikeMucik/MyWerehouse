@@ -29,9 +29,9 @@ namespace MyWerehouse.Infrastructure.Persistence
 		public DbSet<Client> Clients { get; set; }
 		public DbSet<HistoryIssue> HistoryIssues { get; set; }
 		public DbSet<HistoryIssueDetail> HistoryIssueDetails { get; set; }
-		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }//																
-		public DbSet<HistoryReceiptDetail> HistoryReceiptDetails { get; set; }//																
-		public DbSet<HistoryPicking> HistoryPickings { get; set; }//		
+		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }																
+		public DbSet<HistoryReceiptDetail> HistoryReceiptDetails { get; set; }															
+		public DbSet<HistoryPicking> HistoryPickings { get; set; }	
 		public DbSet<HistoryReversePicking> HistoryReversePickings { get; set; }
 		public DbSet<Inventory> Inventories { get; set; }
 		public DbSet<Issue> Issues { get; set; }

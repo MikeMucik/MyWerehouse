@@ -34,7 +34,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 
 			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 			if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {rampNumber} nie została znaleziona", ErrorType.NotFound);
-			//Dla jednego produktu
+			
 			var pallet = Pallet.Create(newId, rampNumber);
 			if (request.DTO.ProductsOnPallet.Count != 1)
 			{
@@ -55,10 +55,3 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		}
 	}
 }
-//Dla wielu - szerszse podejście
-			//foreach (var dto in request.DTO.ProductsOnPallet)
-			//{
-			//	if (!await _productRepo.IsExistProduct(dto.ProductId))
-			//		return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
-			//	pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
-			//}

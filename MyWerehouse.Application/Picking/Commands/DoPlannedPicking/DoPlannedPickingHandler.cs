@@ -79,10 +79,9 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 				return AppResult<ProcessPickingActionResult>.Success(resultProccesPicking);
 			}
 			else
-			{
-				var oldListVirtualPallet = new List<VirtualPallet>(); //TODO pobierz dostępne virtualPallet lub usuń opcję czy wyszukiwać inne palety do kompletacji, nie powinno być ale życie sobie
+			{				
 				var newQuantityToPickingTask = neededQuantity - pickedQuantity;
-				var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, oldListVirtualPallet,
+				var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTaskToIssue(null, null,
 					issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId);
 				var partialResult = new ProcessPickingActionResult
 				{

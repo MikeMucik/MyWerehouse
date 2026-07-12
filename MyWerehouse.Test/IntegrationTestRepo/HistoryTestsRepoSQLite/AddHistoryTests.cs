@@ -71,7 +71,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				{
 					new HistoryPalletDetail
 					{
-						Quantity = -1,
+						QuantityChange = -1,
 						ProductId =product.Id,
 					}
 				},
@@ -91,7 +91,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				//.OrderByDescending(p => p.MovementDate)
 				.FirstOrDefault();
 			Assert.NotNull(result);
-			Assert.Equal(-1, resultList.First(p => p.PerformedBy == "U001").HistoryPalletDetails.First().Quantity);
+			Assert.Equal(-1, resultList.First(p => p.PerformedBy == "U001").HistoryPalletDetails.First().QuantityChange);
 			Assert.Equal("U001", result.PerformedBy);
 			Assert.Equal(ReasonForPallet.Correction, result.Reason);
 		}

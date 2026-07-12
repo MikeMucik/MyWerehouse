@@ -12,10 +12,8 @@ namespace MyWerehouse.Domain.Picking.Events
 	public record CreateHistoryReversePickingNotification(
 		Guid ReversePickingId,
 		Guid PickingPalletId,
-		Guid? PalletSourceId,
-		//string? PalletSourceNumber,
+		Guid? PalletSourceId,		
 		Guid? PalletDestinationId,
-		//string? PalletDestinationNumber,
 		Guid IssueId,
 		int IssueNumber,
 		Guid ProductId,

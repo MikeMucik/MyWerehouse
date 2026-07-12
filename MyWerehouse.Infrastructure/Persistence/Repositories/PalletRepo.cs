@@ -77,7 +77,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
 				pp.Product.SKU == filter.SKU));
 			}
-			if (filter.LocationBay > 0)//drugi warunek w zależności od magazynu
+			if (filter.LocationBay > 0)
 			{
 				result = result.Where(p => p.Location.Bay == filter.LocationBay);
 			}
@@ -126,7 +126,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			if (!string.IsNullOrEmpty(filter.IssueUser))
 			{
-				result = result.Where(p => p.Issue != null && p.Issue.PerformedBy == filter.IssueUser);//dodaj test
+				result = result.Where(p => p.Issue != null && p.Issue.PerformedBy == filter.IssueUser);
 			}
 			return result;
 		}		
@@ -137,12 +137,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(static p => p.PalletNumber.StartsWith("Q"))
 				.OrderByDescending(p => p.PalletNumber)
 				.FirstOrDefaultAsync();
-
-			//var lastPallet = await _werehouseDbContext.Pallets.MaxAsync(p => p.PalletNumber);
-
+			
 			int lastNumber = 0;
-			if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))
-			//if (lastPallet != null && int.TryParse(lastPallet.AsSpan(1), out var parsed))
+			if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))			
 			{
 				lastNumber = parsed;
 			}
@@ -176,7 +173,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId)
 		{
 			var pallets = await _werehouseDbContext.Pallets
-				.Include(l=>l.Location)//bo snapShot
+				.Include(l=>l.Location)
 				.Include(p => p.ProductsOnPallet)
 				.Where(p => !excludedId.Contains(p.Id))
 				.Where(p =>
@@ -190,7 +187,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.Where(pp => pp.ProductId == productId)					
 					.Min(pp => pp.BestBefore ??DateOnly.MaxValue))
 				
-				.ThenBy(p => p.ProductsOnPallet//ThenBy
+				.ThenBy(p => p.ProductsOnPallet
 					.Where(pp => pp.ProductId == productId)
 					.Min(pp => pp.Quantity))
 				.ThenBy(p => p.LocationId)

@@ -19,9 +19,9 @@ namespace MyWerehouse.Application.Common.Utils
 			where TDestination : class
 			where TKey: notnull
 		{
-			var existingMap = existingCollection.ToDictionary(destinationKeySelector); // daje warning bo 
-			var incomingItems = incomingCollection.ToList();			
-			//update
+			var existingMap = existingCollection.ToDictionary(destinationKeySelector);
+			var incomingItems = incomingCollection.ToList();
+			// Aktualizujemy istniejące elementy.
 			foreach (var incomingItem in incomingItems.Where(i => !EqualityComparer<TKey>.Default.Equals(sourceKeySelector(i), default)))
 			{
 				if (existingMap.TryGetValue(sourceKeySelector(incomingItem), out var existingItem))
@@ -29,12 +29,12 @@ namespace MyWerehouse.Application.Common.Utils
 					updateMapper(incomingItem, existingItem);
 				}				
 			}
-			// potem dodania nowych (Id = default)
+			// Dodajemy nowe elementy, których klucz ma wartość domyślną.
 			foreach (var incomingItem in incomingItems.Where(i => EqualityComparer<TKey>.Default.Equals(sourceKeySelector(i), default)))
 			{
 				existingCollection.Add(addMapper(incomingItem));
 			}
-			//usunięcie niepotrzebnych			
+			// Usuwamy elementy, których nie ma już w DTO			
 			if (removeMapper != null)
 			{
 				var incomingKeys = incomingItems

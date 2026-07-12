@@ -37,10 +37,7 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta nie jest do pickingu, zawiera różne towary");
 
 			}
-			if (pallet.Status != PalletStatus.ToPicking) //do uzgodnienia biznesowego
-			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta nie jest w pickingu, zmień status.");
-			}			
+					
 			var product = pallet.ProductsOnPallet.FirstOrDefault();
 			if (product == null)
 			{

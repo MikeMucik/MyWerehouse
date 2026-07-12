@@ -57,17 +57,17 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 			var pickingTasksForIssue = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(request.IssueId, palletItem.ProductId);
 			if (pickingTasksForIssue == null) return AppResult<ProcessPickingActionResult>.Fail($"Zadanie do kompletacji nie istnieje", ErrorType.NotFound);
 			var neededQuantity = pickingTasksForIssue.Where(a => a.PickingStatus == PickingStatus.Allocated).Sum(a => a.RequestedQuantity);
-			//warunek że tylko na końcówkę tj ilość neededQuantity musi być mniejsza niż ilośc na palecie
+			// Emergency picking obsługuje tylko brakującą końcówkę ilości z aktywnej palety pickingowej.
 			var quantityToPick = Math.Min(neededQuantity, palletItem.Quantity);
 			if (quantityToPick <= 0)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Brak zapotrzebowania na ten produkt dla wybranego zlecenia.", ErrorType.Conflict);
 			}
 			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(request.PalletId);
-			// dodanie do palety virtualPallet - można obęjść przez zmianę statusu, osobna akcja - do przemyślenia
+			// W obecnym flow paleta trafia bezpośrednio do ToPicking; osobna akcja zmiany statusu może być dodana później.
 			if (virtualPallet == null)			
 			{
-				pallet.ChangeStatus(PalletStatus.ToPicking);//jeśli nie jest można zmienić jeśli zmieni się podejście biznesowe - najpierw krok że zmiana statusu - teraz bez
+				pallet.ChangeStatus(PalletStatus.ToPicking);
 				pallet.AssignToPicking(request.UserId, pallet.Location.ToSnapshot());
 				virtualPallet = VirtualPallet.Create(pallet.Id, palletItem.Quantity, pallet.LocationId);
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet); 

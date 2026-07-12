@@ -102,12 +102,11 @@ namespace MyWerehouse.Application.Services
 		{
 			var existingClient = await _clientRepo.GetClientToEditAsync(id);
 			if (existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.");
-			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);//do testów
+			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
-			}
-			//var newDataClient = _mapper.Map(updatedClient, existingClient);
+			}			
 			existingClient.Email = updatedClient.Email;
 			existingClient.Description = updatedClient.Description;
 			existingClient.FullName = updatedClient.FullName;

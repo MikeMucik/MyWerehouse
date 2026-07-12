@@ -112,9 +112,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 			var existing = IssueItems.FirstOrDefault(x => x.ProductId == productId);
 			if (existing != null)
 			{
-				//TODO ?? jeśli zdecydujemy na zmianę Item a nie jak teraz nowa wartość
-				//existing.IncreaseQuantity(quantity);
-				//return;
 				throw new ProductAlreadyExistDomainException(productId);
 			}
 			if (quantity <= 0) throw new IssueExceptions.InvalidQuantityDomainException(quantity, Id, IssueNumber);
@@ -135,7 +132,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void VerifyToLoad(string userId)
 		{
-			//invarianty status
 			if (!(IssueStatus == IssueStatus.InProgress || IssueStatus == IssueStatus.ChangingPallet
 				|| IssueStatus == IssueStatus.Pending || IssueStatus == IssueStatus.PickingShortage))
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
@@ -151,7 +147,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			if (Pallets.Any(p => p.Status != PalletStatus.Loaded))
 			{
-				throw new NotEndedLoadingDomainException(Id, IssueNumber); //może dodać jakie nie są ale to nie w domenie				
+				throw new NotEndedLoadingDomainException(Id, IssueNumber);
 			}
 			PerformedBy = userId;
 			if (IssueStatus != IssueStatus.IsShipped)
@@ -169,7 +165,10 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void FinishIssueNotCompleted(string userId)
 		{
-			//invarianty dla status
+			if (IssueStatus != IssueStatus.ConfirmedToLoad)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
 			PerformedBy = userId;
 			foreach (var pallet in Pallets)
 			{
@@ -181,18 +180,22 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void Cancel(string userId)
 		{
-			//invarianty dla status
-			IssueStatus = IssueStatus.Cancelled;
+			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.IsShipped)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
+				IssueStatus = IssueStatus.Cancelled;
 			PerformedBy = userId;
 			AddHistory(userId);
 		}
 
 		public void ChangePalletInIssue(string userId)
 		{
-			//invarianty dla status
+			var status = IssueStatus;
 			IssueStatus = IssueStatus.ChangingPallet;
 			PerformedBy = userId;
 			AddHistory(userId);
+			IssueStatus = status;
 		}
 
 		public void CompletedLoad(string userId)
@@ -209,6 +212,11 @@ namespace MyWerehouse.Domain.Issuing.Models
 			AddHistory(userId);
 		}
 
+		public void ChangeClient(int clientId)
+		{
+			ClientId = clientId;
+		}
+
 		public void RemovePickingTask(PickingTask pickingTask)
 		{
 			PickingTasks.Remove(pickingTask);
@@ -222,15 +230,19 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void AttachPallet(Pallet pallet)
 		{
 			if (!Pallets.Contains(pallet))
+			{
 				this.Pallets.Add(pallet);
+				pallet.ChangeStatus(PalletStatus.ToIssue);
+			}
 		}
-		//*
-		public void AttachPickingTask(PickingTask task) //do testów
+
+
+		public void AttachPickingTask(PickingTask task)
 		{
 			this.PickingTasks.Add(task);
 		}
 
-		public void ReservePallet(Pallet pallet) //do testów
+		public void ReservePallet(Pallet pallet)
 		{
 			if (pallet.Status == PalletStatus.ToIssue)
 				throw new AlreadyAssignedDomainException(pallet.Id);

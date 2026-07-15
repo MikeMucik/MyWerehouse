@@ -10,7 +10,7 @@ using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Receiving.Filters;
 
-namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integration
 {
 	[Collection("QueryCollection")]
 	public class ReceiptViewIntegrationTests
@@ -67,7 +67,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
-			//Assert.NotNull(rresult);
+			Assert.False(result.IsSuccess);
 			Assert.Contains($"Przyjęcie o numerze {receiptId9} nie zostało znalezione.", result.Error);
 		}
 
@@ -208,7 +208,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 				{
 					Assert.True(dto.ClientId > 0);
 					Assert.False(string.IsNullOrWhiteSpace(dto.PerformedBy));
-					Assert.NotEqual(default(DateTime), dto.ReceiptDateTime);
+					Assert.NotEqual(default, dto.ReceiptDateTime);
 				}
 			}
 		}

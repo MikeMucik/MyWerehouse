@@ -25,12 +25,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 		[Fact]
 		public void ShowAllProduct_GetAllProducts_ReturnList()
 		{
-			//Arrange
-			//Act
+			//Arrange&Act			
 			var result = _productRepo.GetAllProducts();
 			//Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Count()); //3->Factory
+			Assert.Equal(3, result.Count()); 
 		}
 		[Fact]
 		public void ByName_FindProduct_ShowProductContainsWord()
@@ -41,8 +40,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 			var result = _productRepo.FindProducts(filter);
 			//Assert
 			Assert.NotNull(result);
-			Assert.IsType<Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable<Product>>(result);
-			Assert.Equal(2, result.Count()); //bo dwa zaczynają się na test
+			Assert.Equal(2, result.Count());
+			var resultList = result.ToList();
+			foreach (var item in resultList)
+			{
+				Assert.Contains("Test", item.Name);
+			}
 		}
 		[Fact]
 		public void BySKUAndWidth_FindProduct_ShowProductsWithSKU()
@@ -53,8 +56,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 			var result = _productRepo.FindProducts(filter);
 			//Assert
 			Assert.NotNull(result);
-			Assert.IsType<Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable<Product>>(result);
-			Assert.Equal(1, result.Count());
+			Assert.Single(result);
+			var resultList = result.ToList();
+			Assert.Equal("0987654321", resultList[0].SKU);
 		}
 		[Fact]
 		public void ByWeightAndWidth_FindProduct_ShowProductsWithWeightAndWidth()
@@ -65,8 +69,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 			var result = _productRepo.FindProducts(filter);
 			//Assert
 			Assert.NotNull(result);
-			Assert.IsType<Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable<Product>>(result);
-			Assert.Equal(1, result.Count());
+			Assert.Single(result);
+			var resultList = result.ToList();
+			var resultSingle = resultList[0];
+			Assert.NotNull(resultSingle.Details);
+			Assert.Equal(2, resultSingle.Details.Weight);
+			Assert.Equal(30, resultSingle.Details.Width);
 		}
 	}
 }

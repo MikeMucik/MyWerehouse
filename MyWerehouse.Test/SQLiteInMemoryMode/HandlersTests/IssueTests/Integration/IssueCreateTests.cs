@@ -20,7 +20,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 {
 	public class IssueCreateTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -41,7 +41,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory(string name)
+		private static Category CreateCategory(string name)
 		{
 			return new Category
 			{
@@ -49,11 +49,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name, int categoryId)
+		private static Product CreateProduct(string name, int categoryId)
 		{
 			return Product.Create(name, "SKU1", categoryId, 10);
 		}
-		private Location CreateLocation(int position)
+		private static Location CreateLocation(int position)
 		{
 			return new Location
 			{
@@ -103,9 +103,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2))));
 
 			// Assert
+			Assert.NotNull(resultForIssue);
+			Assert.True(resultForIssue.IsSuccess);
+			Assert.NotNull(resultForIssue.Result);
 			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
 			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Message);
@@ -183,8 +186,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2))));
 			// Assert
+			Assert.NotNull(resultForIssue);
+			Assert.True(resultForIssue.IsSuccess);
+			Assert.NotNull(resultForIssue.Result);
 			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
 			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Message);
@@ -209,11 +215,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var pickingPalletP4 = DbContext.VirtualPallets.Include(pp => pp.PickingTasks).FirstOrDefault(x => x.PalletId == pallet4.Id);
 			Assert.NotNull(palletToPickingP4);
 			Assert.NotNull(pickingPalletP4);
-			//Assert.Equal(3, pickingPalletP4.PickingTasks.First().RequestedQuantity);//
-			Assert.Equal(2, pickingPalletP4.PickingTasks.First().RequestedQuantity);//
-																					//Assert.Equal(2, pickingPalletP4.PickingTasks.First().RequestedQuantity);//
+			Assert.Equal(2, pickingPalletP4.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(1, pickingPalletP4.RemainingQuantity);
-			//Assert.Equal(0, pickingPalletP4.RemainingQuantity);
 			Assert.Equal(pallet4.Id, pickingPalletP4.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPickingP4.Status);
 			Assert.Equal(issue.Id, pickingPalletP4.PickingTasks.First().IssueId);
@@ -222,9 +225,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var pickingPalletP5 = DbContext.VirtualPallets.Include(pp => pp.PickingTasks).FirstOrDefault(x => x.PalletId == pallet5.Id);
 			Assert.NotNull(palletToPickingP5);
 			Assert.NotNull(pickingPalletP5);
-			//Assert.Equal(1, pickingPalletP5.PickingTasks.First().RequestedQuantity);//
-			Assert.Equal(2, pickingPalletP5.PickingTasks.First().RequestedQuantity);//
-																					//Assert.Equal(1, pickingPalletP5.RemainingQuantity);
+			Assert.Equal(2, pickingPalletP5.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(0, pickingPalletP5.RemainingQuantity);
 			Assert.Equal(pallet5.Id, pickingPalletP5.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPickingP5.Status);
@@ -292,9 +293,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					}
 				}
 			};
-			await Mediator.Send(new CreateIssueCommand(createIssue, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(createIssue, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			// Assert
+			Assert.NotNull(resultForIssue);
+			Assert.True(resultForIssue.IsSuccess);
+			Assert.NotNull(resultForIssue.Result);
 			var issue = DbContext.Issues.First();
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
@@ -308,7 +312,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(palletToPicking1);
 			Assert.NotNull(pickingPallet1);
 			Assert.Equal(6, pickingPallet1.PickingTasks.First().RequestedQuantity);
-			//Assert.Equal(6, pickingPallet1.PickingTask.FirstOrDefault(i=>i.IssueId == issue.Id).Quantity);
 			Assert.Equal(4, pickingPallet1.RemainingQuantity);
 			Assert.Equal(pallet3.Id, pickingPallet1.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking1.Status);
@@ -348,7 +351,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location5 = CreateLocation(5);
 			var product1 = CreateProduct("Prod1", 1);
 			var product2 = CreateProduct("Prod2", 2);
-			
+
 			var pallet1 = Pallet.CreateForTests("P1", new DateTime(2025, 3, 3), 1, PalletStatus.Available, null, null);
 			pallet1.AddProductForTests(product1.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 
@@ -407,8 +410,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = await Mediator.Send(new CreateIssueCommand(createIssue, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 			// Assert
 			Assert.NotNull(result);
-			//var issue = DbContext.Issues.FirstOrDefault(i => i.Id == createIssue.Id);
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			var issue = DbContext.Issues.FirstOrDefault(i => i.IssueNumber == 2);
+			Assert.NotNull(issue);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
 			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
@@ -417,16 +422,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(2, partialPallets.Count); // P3, P5
 
 
-			var palletToPicking1 = DbContext.Pallets.FirstOrDefault(p => p.PalletNumber == "P3");
-			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.PickingTasks).FirstOrDefault(p => p.PalletId == pallet3.Id);
+			var palletToPicking1 = DbContext.Pallets.Single(p => p.PalletNumber == "P3");
+			var pickingPallet1 = DbContext.VirtualPallets.Include(pp => pp.PickingTasks).Single(p => p.PalletId == pallet3.Id);
 			Assert.NotNull(palletToPicking1);
 			Assert.NotNull(pickingPallet1);
-			//Assert.Equal(6, pickingPallet1.PickingTask.First().Quantity);
-			Assert.Equal(6, pickingPallet1.PickingTasks.FirstOrDefault(i => i.IssueId == issue.Id).RequestedQuantity);
+			Assert.NotNull(pickingPallet1.PickingTasks);
+			Assert.Equal(6, pickingPallet1.PickingTasks.Single(i => i.IssueId == issue.Id).RequestedQuantity);
 			Assert.Equal(2, pickingPallet1.RemainingQuantity); //bo zarezerzowane z innego wydania
 			Assert.Equal(pallet3.Id, pickingPallet1.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking1.Status);
-			//Assert.Equal(issue.Id, pickingPallet1.PickingTask.FirstOrDefault(i=>i.).IssueId);
 
 			var palletToPicking2 = DbContext.Pallets.FirstOrDefault(p => p.PalletNumber == "P5");
 			var pickingPallet2 = DbContext.VirtualPallets.Include(pp => pp.PickingTasks).FirstOrDefault(p => p.PalletId == pallet5.Id);
@@ -441,14 +445,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Movements
 			var movements = DbContext.HistoryPallet.ToList();
 			Assert.NotEmpty(movements);
-			//Assert.Equal(5, movements.Count);
+			Assert.Equal(4, movements.Count);
 			Assert.Contains(movements, m => m.PalletNumber == "P1");
 			Assert.Contains(movements, m => m.PalletNumber == "P2");
-			//Assert.Contains(movements, m => m.PalletId == "P3");
 			Assert.Contains(movements, m => m.PalletNumber == "P4");
 			Assert.Contains(movements, m => m.PalletNumber == "P5");
 		}
-		//SadPath
+		// Sad path
 		[Fact]
 		public async Task CreateIssue_ShouldReturnError_WhenNotEnoughProduct()
 		{
@@ -474,7 +477,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1, location2, location3);
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3);
-		    DbContext.SaveChanges();
+			DbContext.SaveChanges();
 			//Act
 			var issueItem = new CreateIssueDTO
 			{
@@ -487,13 +490,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2))));
 
 			// Assert
-			var result = resultForIssue.Result.First();
-			// Assert
+			Assert.NotNull(resultForIssue);
+			Assert.NotNull(resultForIssue.Result);
+			var result = resultForIssue.Result.First();			
 			Assert.False(result.Success);
-			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
+			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Items.First().Quantity, result.QuantityRequest);
 			var stock = 30; //Quantity P1+P2+P3
@@ -536,12 +540,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))
 				}]
 			};
-			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(2))));
+			var resultForIssue = await Mediator.Send(new CreateIssueCommand(issueItem, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2))));
 			// Assert
+			Assert.NotNull(resultForIssue);
+			Assert.NotNull(resultForIssue.Result);
 			var result = resultForIssue.Result.First();
 			// Assert
 			Assert.False(result.Success);
-			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
+			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Items.First().Quantity, result.QuantityRequest);
 			var stock = 20; //Quantity P1+P2 P3 BestBeforeWrong

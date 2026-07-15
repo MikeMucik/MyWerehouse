@@ -33,20 +33,20 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			Assert.NotNull(result);
 			Assert.Equal(receiptId2, result.IssueId);
 			Assert.Equal(20, result.RequestedQuantity);
+			Assert.NotNull(result.VirtualPallet);
 			Assert.Equal(3, result.VirtualPallet.LocationId);
 		}
 		[Fact]
 		public void ByVirtualPalletAndDatePicking_GetPickingTaskListAsync_ReturnList()
 		{
 			//Arrange
-			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
-			var virtualPalletId = 1;
+			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");			
 			var date =DateOnly.FromDateTime( DateTime.UtcNow);
 			//Act
 			var result =  _pickingTaskRepo.GetPickingTaskList(vpId1, date);
 			//Assert
 			Assert.NotNull(result);
-			Assert.NotEmpty(result); // coś zostało znalezione
+			Assert.NotEmpty(result); 
 			// wszystkie alokacje mają właściwy VirtualPallet
 			Assert.All(result, a => Assert.Equal(vpId1, a.VirtualPalletId));
 			// wszystkie alokacje mają status Allocated
@@ -92,9 +92,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		[Fact]
 		public async Task ByProductIdAndDates_GetPickingTasksProductIdAsync_ReturnList()
 		{
-			//var productId = 11;
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
-
 			var dateStart =DateOnly.FromDateTime( DateTime.UtcNow);
 			var dateEnd = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
 			//Act

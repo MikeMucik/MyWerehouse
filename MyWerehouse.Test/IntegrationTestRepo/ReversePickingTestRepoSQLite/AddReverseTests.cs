@@ -83,7 +83,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 10, PickingStatus.Picked, product.Id,
 				DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 10);
-			//virtualPallet.PickingTasks = [pickingTask];
+			
 			var pickingPallet = Pallet.CreateForTests("Q5000", DateTime.Now, 1, PalletStatus.ToIssue, null, null);
 			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
 			
@@ -98,9 +98,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			DbContext.SaveChanges();
 
 			var reversePickingRepo = new ReversePickingRepo(DbContext);
-			var reversePicking = ReversePicking.Create(pickingPallet.Id, null, product.Id, pickingPallet.ProductsOnPallet.FirstOrDefault().BestBefore,
-				pickingPallet.ProductsOnPallet.FirstOrDefault().Quantity, pickingTask.Id, "UserR");
-			//może zmienić na żródło
+			var reversePicking = ReversePicking.Create(pickingPallet.Id, null, product.Id, pickingPallet.ProductsOnPallet.Single().BestBefore,
+				pickingPallet.ProductsOnPallet.Single().Quantity, pickingTask.Id, "UserR");
+			
 			//Act
 			reversePickingRepo.AddReversePicking(reversePicking);
 			DbContext.SaveChanges();
@@ -113,7 +113,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			Assert.NotNull(result);
 
 			// --- klucze i wymagane pola ---
-			Assert.True(result.Id != null);
+			Assert.True(result.Id != Guid.Empty);
 
 			Assert.Equal(pickingPallet.Id, result.PickingPalletId);
 			Assert.Equal(pickingTask.Id, result.PickingTaskId);

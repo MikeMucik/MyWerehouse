@@ -4,6 +4,8 @@ MyWarehouse is a REST API for managing warehouse operations. It models inbound r
 
 The project uses a layered architecture, CQRS, and a domain model inspired by Domain-Driven Design. It is being gradually refactored to reduce coupling between the Application and Infrastructure layers.
 
+The repository name uses "MyWerehouse" for historical reasons; the project is presented as MyWarehouse.
+
 ## Links
 
 - [GitHub repository](https://github.com/MikeMucik/MyWerehouse)
@@ -141,6 +143,6 @@ Receipt → Pallet → Inventory → Issue → Picking → Loading
 - Add containerized deployment support.
 - Extend pallet allocation policies.
 - Add warehouse workload planning.
-- Gradually reducing dependence on automapper
-- Add more policy to create Issue(FefoStrict,FefoWithFullPalletPreference
+- Gradually reduce dependency on AutoMapper.
+- Add additional issue allocation policies, such as FEFO-based allocation.
 

@@ -161,8 +161,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert
 			Assert.NotNull(result);
-			var pallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.PalletNumber == "P1");
-			var pallet1 = await DbContext.Pallets.FirstOrDefaultAsync(p => p.PalletNumber == "P2");
+			var pallet = await DbContext.Pallets.SingleAsync(p => p.PalletNumber == "P1");
+			var pallet1 = await DbContext.Pallets.SingleAsync(p => p.PalletNumber == "P2");
 
 			Assert.Equal(PalletStatus.Available, pallet.Status);
 			Assert.Equal(PalletStatus.Available, pallet1.Status);
@@ -240,7 +240,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			Assert.Empty(pickingTasks);
 
-			var historyPicking = await DbContext.HistoryPickings.FirstOrDefaultAsync(x => x.IssueId == issue.Id && x.PerformedBy == "UserC");
+			var historyPicking = await DbContext.HistoryPickings.SingleAsync(x => x.IssueId == issue.Id && x.PerformedBy == "UserC");
 			Assert.Equal(PickingStatus.Cancelled, historyPicking.StatusAfter);
 			Assert.Equal(PickingStatus.Allocated, historyPicking.StatusBefore);
 

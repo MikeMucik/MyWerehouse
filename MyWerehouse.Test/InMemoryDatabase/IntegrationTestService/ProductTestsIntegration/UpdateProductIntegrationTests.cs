@@ -57,6 +57,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				.Include(d => d.Details)
 				.FirstOrDefault(x => x.Id == updatingProduct.Id);
 			Assert.NotNull(result);
+			Assert.NotNull(result.Details);
 			Assert.Equal(updatedProduct.Name, result.Name);
 			Assert.Equal(updatedProduct.SKU, result.SKU);
 			Assert.Equal(updatedProduct.CategoryId, result.CategoryId);
@@ -163,7 +164,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			var e = await Assert.ThrowsAsync<WrongLengthProductDomainException>(() => _productService.UpdateProductAsync(id, updatedProduct));
 
-			Assert.Contains("Not corect size of length(range: 1-120cm).", e.Message);
+			Assert.Contains("Not correct size of length(range: 1-120cm).", e.Message);
 		}
 	}
 }

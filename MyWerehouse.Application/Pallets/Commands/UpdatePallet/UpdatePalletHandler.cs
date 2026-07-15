@@ -25,6 +25,10 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.Id);
 			if (existingPallet == null)
 				return AppResult<Unit>.Fail("Wskazana paleta nie istnieje.", ErrorType.NotFound);
+			if(existingPallet.Issue != null)
+			{
+				return AppResult<Unit>.Fail("Wskazana paleta jest w wydaniu, nie można jej zmienić bez usunięcia jej z wydania.", ErrorType.Conflict);
+			}
 			foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
 			{
 				if (!await _productRepo.IsExistProduct(pop.ProductId))

@@ -12,7 +12,7 @@ using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Receiving.ReceivingExceptions;
 using MyWerehouse.Domain.Warehouse.Models;
 
-namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integration
 {
 	public class ReceiptCompletePhysicalIntegrationTests : TestBase
 	{
@@ -112,8 +112,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
-			// Act&Assert
-			//var result = await Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user"));
+			// Act&Assert		
 			var ex = await Assert.ThrowsAsync<InvalidReceiptStateDomainException>(() => Mediator.Send(new CompletePhysicalReceiptCommand(receipt.Id, "user")));
 			Assert.Equal($"Operation prohibited for {receipt.ReceiptNumber} ({receipt.Id}). Incorrect status {receipt.ReceiptStatus}.", ex.Message);
 		}

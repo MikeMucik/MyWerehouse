@@ -14,7 +14,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 		public void Configure(EntityTypeBuilder<Issue> entity)
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(x => x.Id).ValueGeneratedNever();			
+			entity.Property(x => x.Id).ValueGeneratedNever();
+
+			entity.HasIndex(p => p.IssueNumber)
+				.IsUnique();			
 		}
 	}
 }

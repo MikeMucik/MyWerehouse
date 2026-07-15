@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIntegration
 {
-	public class DeleteClientIntegratiornTests : ClientIntegrationCommand
+	public class DeleteClientIntegrationTests : ClientIntegrationCommand
 	{
 		[Fact]
 		public async Task DeleteClientAsync_ShouldHideClient_WhenClientHasReceipt()

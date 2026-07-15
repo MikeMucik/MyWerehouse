@@ -253,7 +253,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public bool ContainsProduct(Guid productId)
 		{
 			return ProductsOnPallet.Any(p => p.ProductId == productId);
-			//założenie że na palecie tylko jedna data danego produktu bo inaczej + BB
+			//założenie że na palecie tylko jedna data danego produktu 
 		}
 
 		public int GetProductQuantity(Guid productId)

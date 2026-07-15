@@ -107,6 +107,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newSourcePallet.Id, issue.Id, "user1", 100100));
 			// Assert		
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
 
 			Assert.True(result.Result.NewPalletCreated);
@@ -198,6 +199,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
 			// Assert
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
 
 			Assert.False(result.Result.NewPalletCreated);
@@ -299,6 +301,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newSourcePallet.Id, issue.Id, "user1", 100100));
 			// Assert		
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Equal("Towar dołączono do zlecenia", result.Message);
 
 			Assert.True(result.Result.NewPalletCreated);

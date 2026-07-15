@@ -96,6 +96,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var userId = "U001"; var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId));
 			//Assert
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.False(result.Result.RequiresConfirmation);
 			Assert.Contains($"Paleta {pallet.Id} została umieszczona w lokalizacji. ", result.Message);
 			var resultPallet = DbContext.Pallets.First(x => x.Id == palletId);
@@ -136,6 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 
 			//Assert
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.False(result.Result.Success);
 			Assert.True(result.Result.RequiresConfirmation);
 			var fullNameLocation = $" Bay = {location2.Bay} Aisle = {location2.Aisle} Position = {location2.Position} Height ={location2.Height}";
@@ -168,6 +170,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var result = await Mediator.Send(new ChangeLocationPalletCommand(palletId, destinationLocation, userId, true));
 			//Assert
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.False(result.Result.RequiresConfirmation);
 			Assert.Contains($"Paleta {pallet1.Id} została umieszczona w lokalizacji. ", result.Message);
 

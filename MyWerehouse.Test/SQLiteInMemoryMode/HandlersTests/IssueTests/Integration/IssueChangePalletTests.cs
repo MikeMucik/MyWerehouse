@@ -137,8 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Issues.Add(issue);
 			DbContext.SaveChanges();
 			//&Act
-			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId1, pallet.Id, pallet.Id, "tester"));
+			var result = await Mediator.Send(new ChangePalletInIssueCommand(issueId, pallet.Id, pallet.Id, "tester"));
 			//Assert
 			Assert.False(result.IsSuccess);
 			Assert.Contains("tą samą", result.Error);

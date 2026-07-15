@@ -83,7 +83,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			Assert.Equal(pickingTask.RequestedQuantity, result.RequestedQuantity);
 		}
 		[Fact]
-		public void DeleteRecord_DeletePickingTask_ReomveFromCollection()
+		public void DeleteRecord_DeletePickingTask_RemoveFromCollection()
 		{
 			//Arrange
 			var address = new Address

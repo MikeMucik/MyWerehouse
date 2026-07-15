@@ -11,7 +11,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integration
 {
-	public class PalletMarkAsLoadedTests : TestBase
+	public class PalletMarkAsLoadedIntegrationTests : TestBase
 	{
 		private Product CreateProduct(string name, string sku)
 		{
@@ -55,6 +55,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var result = await Mediator.Send(new MarkAsLoadedCommand(pallet.Id, "User"));
 			//Assert
 			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.Contains("Paleta Q0001 załadowana.", result.Message);
 			Assert.Equal(PalletStatus.Loaded, result.Result.NewStatus);
 			var history = DbContext.HistoryPallet.FirstOrDefault(p => p.PalletId == pallet.Id);
@@ -79,6 +80,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var result = await Mediator.Send(new MarkAsLoadedCommand(pallet.Id, "User"));
 			//Assert
 			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.Contains("Paleta Q0001 załadowana.", result.Message);
 			Assert.Equal(PalletStatus.Loaded, result.Result.NewStatus);
 		}

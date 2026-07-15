@@ -42,6 +42,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			Assert.True(result.IsSuccess);
 			var product = _context.Products.Find(result.Result);
 			Assert.NotNull(product);
+			Assert.NotNull(product.Details);
 			Assert.Equal(productNew.Name, product.Name);
 			Assert.Equal(productNew.SKU, product.SKU);
 			Assert.Equal(productNew.CategoryId, product.CategoryId);

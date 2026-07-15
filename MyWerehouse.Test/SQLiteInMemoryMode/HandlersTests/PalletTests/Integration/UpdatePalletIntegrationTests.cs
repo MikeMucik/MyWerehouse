@@ -1,28 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using FluentValidation;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
+using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Inventories.Models;
+using MyWerehouse.Domain.Issuing.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integration
 {
 
-	public class UpdatePalletIntegrationServiceTests : TestBase
+	public class UpdatePalletIntegrationTests : TestBase
 	{
-		Guid productId = Guid.NewGuid();
-		Guid productId1 = Guid.NewGuid();
-		Guid productId2 = Guid.NewGuid();
-		Guid productId3 = Guid.NewGuid();
-		private Category CreateCategory()
+		private readonly Guid productId = Guid.NewGuid();
+		private readonly Guid productId1 = Guid.NewGuid();
+		private readonly Guid productId2 = Guid.NewGuid();
+		private readonly Guid productId3 = Guid.NewGuid();
+		private static Category CreateCategory()
 		{
 			return new Category
 			{
@@ -31,11 +35,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(Guid id, string name, string sku)
+		private static Product CreateProduct(Guid id, string name, string sku)
 		{
 			return Product.CreateForSeed(id, name, sku, DateTime.UtcNow, 1, false, 56);
 		}
-		private Location CreateLocation(int position)
+		private static Location CreateLocation(int position)
 		{
 			return new Location
 			{
@@ -45,7 +49,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				Position = position
 			};
 		}
-		private Inventory CreateInventory(Guid id, int quantity)
+		private static Inventory CreateInventory(Guid id, int quantity)
 		{
 			return new Inventory
 			{
@@ -164,8 +168,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				h.PerformedBy == "user"
 			);
 
-			var numberProductDto = updatedPallet.ProductsOnPallet.FirstOrDefault(x => x.ProductId == product.Id).ProductId;
-			var numberProductResult = result.ProductsOnPallet.FirstOrDefault(x => x.ProductId == product.Id).ProductId;
+			var numberProductDto = updatedPallet.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
+			var numberProductResult = result.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
 			var updatedQty = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
 			var resultQty = result.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
 			Assert.Equal(updatedQty, resultQty);
@@ -283,8 +287,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				h.PerformedBy == "user"
 			);
 
-			var numberProductDto = updatedPallet.ProductsOnPallet.FirstOrDefault(x=>x.ProductId == product.Id).ProductId; 
-			var numberProductResult = result.ProductsOnPallet.FirstOrDefault(x => x.ProductId == product.Id).ProductId; 
+			var numberProductDto = updatedPallet.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
+			var numberProductResult = result.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
 			var updatedQty = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
 			var resultQty = result.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
 			Assert.Equal(updatedQty, resultQty);
@@ -300,6 +304,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var product2 = CreateProduct(productId2, "Test22", "667777");
 			var product3 = CreateProduct(productId3, "Test33", "67777");
 			var location = CreateLocation(0);
+
 			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
 			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
 			pallet.AddProduct(product1.Id, 200, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
@@ -316,19 +321,21 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				ProductsOnPallet = [
+					(new ProductOnPalletCreateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletCreateDTO
+				}),
+					(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = DateTime.Now,
 					BestBefore = new DateOnly(2027, 3, 4) }),
-				(new ProductOnPalletCreateDTO
+					(new ProductOnPalletCreateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,
@@ -353,13 +360,165 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
 			Assert.Equal(updatedPallet.ProductsOnPallet.Count, result.ProductsOnPallet.Count);
-			var numberProductDto = updatedPallet.ProductsOnPallet.FirstOrDefault(x=>x.ProductId == product.Id).ProductId; 
-			var numberProductResult = result.ProductsOnPallet.FirstOrDefault(x=>x.ProductId == product.Id).ProductId; 
+			var numberProductDto = updatedPallet.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
+			var numberProductResult = result.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
 			var updatedQty = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
 			var resultQty = result.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
 			Assert.Equal(updatedQty, resultQty);
 			Assert.Equal(numberProductDto, numberProductResult);
 		}
+
+		[Fact]
+		public async Task UpdatePallet_ShouldKeepDataReceipt_WhenProperData()
+		{
+			//Arange	
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Id = 1,
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};
+			var category = CreateCategory();
+			var product = CreateProduct(productId, "Test", "666666");
+			var product1 = CreateProduct(productId1, "Test1", "55555");
+			var location = CreateLocation(0);
+
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "user", new DateTime(2025, 1, 1), ReceiptStatus.Verified, 1);
+			
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
+			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, receiptId1, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			DbContext.Pallets.Add(pallet);
+			DbContext.SaveChanges();
+			//Act
+			var id = pallet.Id;
+			var updatedPallet = new EditPalletDTO
+			{
+				LocationId = location.Id,
+				Status = PalletStatus.ToPicking,
+				UserId = "user",
+				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				{
+					ProductId = product.Id,
+					Quantity = 100,
+					DateAdded = DateTime.Now,
+					BestBefore = new DateOnly(2027, 3, 3)
+				}),(new ProductOnPalletCreateDTO
+				{
+					ProductId = product1.Id,
+					Quantity = 300,
+					DateAdded = DateTime.Now,
+					BestBefore = new DateOnly(2027, 3, 4) })
+					]
+			};
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
+			//Assert
+			Assert.NotNull(resultHandler);
+			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+
+			var result = DbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.Single(x => x.Id == pallet.Id);
+			Assert.NotNull(result);
+			Assert.Equal(updatedPallet.Status, result.Status);
+			Assert.Equal(updatedPallet.ProductsOnPallet.Count, result.ProductsOnPallet.Count);
+			var numberProductDto = updatedPallet.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
+			var numberProductResult = result.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
+			var updatedQty = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
+			var resultQty = result.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
+			Assert.Equal(updatedQty, resultQty);
+			Assert.Equal(numberProductDto, numberProductResult);
+			Assert.Equal(receiptId1, pallet.ReceiptId);
+		}
+
+		[Fact]
+		public async Task UpdatePallet_ShouldThrowValidationError_WhenPalletInIssue()
+		{
+			//Arange	
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Id = 1,
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};
+			var category = CreateCategory();
+			var product = CreateProduct(productId, "Test", "666666");
+			var product1 = CreateProduct(productId1, "Test1", "55555");
+			var location = CreateLocation(0);
+
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "user", new DateTime(2025, 1, 1), ReceiptStatus.Verified, 1);
+			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
+			var issue = Issue.CreateForSeed(issueId1, 1, 1, new DateTime(2026, 7, 7), DateOnly.MaxValue, "user", IssueStatus.InProgress, null);
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
+			DbContext.Issues.Add(issue);
+			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, receiptId1, issueId1);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			DbContext.Pallets.Add(pallet);
+			DbContext.SaveChanges();
+			//Act
+			var id = pallet.Id;
+			var updatedPallet = new EditPalletDTO
+			{
+				LocationId = location.Id,
+				Status = PalletStatus.ToPicking,
+				UserId = "user",
+				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				{
+					ProductId = product.Id,
+					Quantity = 100,
+					DateAdded = DateTime.Now,
+					BestBefore = new DateOnly(2027, 3, 3)
+				}),(new ProductOnPalletCreateDTO
+				{
+					ProductId = product1.Id,
+					Quantity = 300,
+					DateAdded = DateTime.Now,
+					BestBefore = new DateOnly(2027, 3, 4) })
+					]
+			};
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
+			//Assert
+			Assert.NotNull(resultHandler);
+			Assert.False(resultHandler.IsSuccess);
+			Assert.Contains("Wskazana paleta jest w wydaniu, nie można jej zmienić bez usunięcia jej z wydania.", resultHandler.Error);
+		}
+
 
 		[Fact]
 		public async Task UpdatePallet_ThrowValidationException_NoNumberProductQuantityZeroWrongBB()

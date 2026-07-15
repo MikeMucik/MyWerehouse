@@ -54,6 +54,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 			Assert.NotNull(result); 
 			var fullResult = DbContext.Products.FirstOrDefault(p => p.Name == product.Name);
 			Assert.NotNull(fullResult);
+			Assert.NotNull(fullResult.Details);
 			Assert.Equal("666666", fullResult.SKU);
 			Assert.Equal(100, fullResult.Details.Length);		
 		}

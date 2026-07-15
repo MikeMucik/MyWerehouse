@@ -16,7 +16,7 @@ using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Receiving.ReceivingExceptions;
 using MyWerehouse.Domain.Warehouse.Models;
 
-namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integration
 {
 	public class ReceiptVerifyIntegrationTests : TestBase
 	{

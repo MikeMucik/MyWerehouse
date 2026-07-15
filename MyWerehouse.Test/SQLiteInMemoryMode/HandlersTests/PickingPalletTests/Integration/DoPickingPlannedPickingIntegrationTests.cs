@@ -120,7 +120,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-
+			Assert.NotNull(result.Result);
 			Assert.True(result.Result.NewPalletCreated);
 			Assert.Contains("Weź nową paletę dla zlecenia. Towar:", result.Result.Message);
 
@@ -130,8 +130,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				.FirstAsync(p => p.Id == sourcePallet.Id);
 			var newPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.FirstOrDefaultAsync(p => p.Status == PalletStatus.Picking);
-
+				.SingleAsync(p => p.Status == PalletStatus.Picking);			
 			// Assert PickingTask
 			Assert.NotNull(updatedPickingTask);
 			Assert.Equal(newPallet.Id, updatedPickingTask.PickingPalletId);
@@ -199,7 +198,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-
+			Assert.NotNull(result.Result);
 			Assert.True(result.Result.NewPalletCreated);
 			Assert.Contains("Weź nową paletę dla zlecenia. Towar:", result.Result.Message);
 
@@ -209,7 +208,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				.FirstAsync(p => p.Id == sourcePallet.Id);
 			var newPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.FirstOrDefaultAsync(p => p.Status == PalletStatus.Picking);
+				.SingleAsync(p => p.Status == PalletStatus.Picking);
+			
 			// Assert PickingTask
 			Assert.NotNull(updatedPickingTask);
 			Assert.Equal(newPallet.Id, updatedPickingTask.PickingPalletId);
@@ -281,7 +281,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-
+			Assert.NotNull(result.Result);
 			Assert.False(result.Result.NewPalletCreated);
 			Assert.Contains("Dołącz towar do starej palety kompletacyjnej. Towar:", result.Result.Message);
 
@@ -291,7 +291,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				.FirstAsync(p => p.Id == sourcePallet1.Id);
 			var newPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.FirstOrDefaultAsync(p => p.Status == PalletStatus.Picking);
+				.SingleAsync(p => p.Status == PalletStatus.Picking);
 			// Assert PickingTask
 			Assert.NotNull(updatedPickingTask);
 			Assert.Equal(newPallet.Id, updatedPickingTask.PickingPalletId);
@@ -363,7 +363,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-
+			Assert.NotNull(result.Result);
 			Assert.False(result.Result.NewPalletCreated);
 			Assert.Contains("Dołącz towar do starej palety kompletacyjnej. Towar:", result.Result.Message);
 
@@ -373,15 +373,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				.FirstAsync(p => p.Id == sourcePallet1.Id);
 			var newPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.FirstOrDefaultAsync(p => p.Status == PalletStatus.Picking);
-			// Assert PickingTask
+				.SingleAsync(p => p.Status == PalletStatus.Picking);
+			
 			Assert.NotNull(updatedPickingTask);
 			Assert.Equal(newPallet.Id, updatedPickingTask.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedPickingTask.PickingStatus);
-			// Assert Source Pallet (powinno zostać 90)
+			
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
 			Assert.Equal(90, updatedSourcePallet.ProductsOnPallet.First().Quantity);
-			// Assert New Pallet (powinno powstać 10 sztuk jednego produktu i 10 sztuk drugiego produktu na palecie Picking)
+			
 			Assert.NotNull(newPallet);
 			Assert.Equal(2, newPallet.ProductsOnPallet.Count);
 			Assert.Equal(20, newPallet.ProductsOnPallet.First(p => p.ProductId == product1.Id).Quantity);
@@ -444,7 +444,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-
+			Assert.NotNull(result.Result);
 			Assert.False(result.Result.NewPalletCreated);
 			Assert.Contains("Dołącz towar do starej palety kompletacyjnej. Towar:", result.Result.Message);
 
@@ -454,15 +454,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				.FirstAsync(p => p.Id == sourcePallet1.Id);
 			var newPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.FirstOrDefaultAsync(p => p.Status == PalletStatus.Picking);
-			// Assert PickingTask
+				.SingleAsync(p => p.Status == PalletStatus.Picking);
+			
 			Assert.NotNull(updatedPickingTask);
 			Assert.Equal(newPallet.Id, updatedPickingTask.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedPickingTask.PickingStatus);
-			// Assert Source Pallet (powinno zostać 90)
+			
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
 			Assert.Equal(90, updatedSourcePallet.ProductsOnPallet.First().Quantity);
-			// Assert New Pallet (powinno powstać 10 sztuk jednego produktu i 10 sztuk drugiego produktu na palecie Picking)
+			
 			Assert.NotNull(newPallet);
 			Assert.Equal(2, newPallet.ProductsOnPallet.Count);
 			Assert.Equal(20, newPallet.ProductsOnPallet.First(p => p.ProductId == product1.Id).Quantity);
@@ -545,6 +545,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Contains("Wykonano niepełne zadanie kompletacyjne.Poproś o nowe palety źródłowe do kompletacji.", result.Message);
 
 			Assert.False(result.Result.NewPalletCreated);
@@ -552,7 +553,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		}
 		
 		[Fact]
-		public async Task DoPicking_ThrowErrorInfo_WhenNotEnoughProduct_AddTheAnotherProductToExistPickingPalletAndMakeNewPickingTask()
+		public async Task DoPicking_ThrowInfo_WhenNotEnoughProduct_AddTheAnotherProductToExistPickingPalletAndMakeNewPickingTask()
 		{
 			// Arrange
 			var client = CreateClient();
@@ -610,8 +611,66 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Contains("Nie ma więcej asortymentu", result.Message);
 			Assert.Contains("Wykonano częściową kompletację. Pobrano ", result.Result.Message);
-		}		
+		}
+
+		[Fact]
+		public async Task DoPicking_ThrowErrorInfo_WhenUserWantTakeTooMany()
+		{
+			// Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product1 = CreateProduct("Prod A", "666");
+			var product2 = CreateProduct("Prod B", "777");
+			var location = CreateLocation(1, 1);
+			var locationPicking = CreateLocation(100100, 5);
+			DbContext.Categories.Add(category);
+			DbContext.Locations.AddRange(location, locationPicking);
+			DbContext.Clients.AddRange(client);
+			DbContext.Products.AddRange(product1, product2);
+			DbContext.SaveChanges();
+			var issueId = Guid.NewGuid();
+			var issueItem = new List<IssueItem>{
+				IssueItem.CreateForSeed(1, issueId, product1.Id, 30, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+			};
+			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
+			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, issueItem);
+
+			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
+			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+
+			
+			DbContext.Pallets.AddRange(sourcePallet1);
+			DbContext.Issues.AddRange(issue);
+			DbContext.SaveChanges();
+			var virtualPallet1 = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 10, location.Id, new DateTime(2025, 8, 12));
+			var pickingGuid = Guid.NewGuid();
+			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
+			 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), null, null, 0);
+			DbContext.PickingTasks.AddRange(pickingTask1);
+			DbContext.VirtualPallets.AddRange(virtualPallet1);
+			DbContext.SaveChanges();
+			// Act
+			var pickingTaskDTO = new PickingTaskDTO
+			{
+				Id = pickingTask1.Id,
+				IssueId = issue.Id,
+				ProductId = product2.Id,
+				RequestedQuantity = pickingTask1.RequestedQuantity,
+				PickedQuantity = 15,
+				PickingStatus = PickingStatus.Allocated,
+				SourcePalletId = sourcePallet1.Id,
+				SourcePalletNumber = sourcePallet1.PalletNumber,
+				RampNumber = 100100,
+				BestBefore = pickingTask1.BestBefore,
+			};
+			var result = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1"));
+			// Assert
+			Assert.NotNull(result);
+			Assert.False(result.IsSuccess);
+			Assert.Contains("Ilość musi być większa od zera i mniejsza od zapotrzebowania", result.Error);
+		}
 	}
 }

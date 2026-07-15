@@ -9,6 +9,6 @@ namespace MyWerehouse.Domain.Products.ProductsExceptions
 {
 	public class WrongHeightProductDomainException : DomainException
 	{
-		public WrongHeightProductDomainException() : base("Not corect size of height (range: 1-220cm).") { }
+		public WrongHeightProductDomainException() : base("Not correct size of height (range: 1-220cm).") { }
 	}
 }

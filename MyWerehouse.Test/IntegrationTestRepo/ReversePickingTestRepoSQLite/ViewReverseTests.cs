@@ -19,7 +19,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			_reversePickingRepo = new ReversePickingRepo(_fixture.DbContext);
 		}
 		[Fact]
-		public async Task ShowReversePicking_GetReversePickingAsync_ReturnRecord()
+		public async Task ShowReversePicking_ReturnRecord_GetReversePickingAsync()
 		{
 			//Arrange
 			var reversePickingTaskId1 = Guid.Parse("11111111-1111-1111-2222-111111111111");
@@ -33,29 +33,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(pickingId2, result.PickingTaskId);
-			//Assert.Equal("Q5000", result.PickingPalletId);
 			Assert.Equal(palletGuid9, result.PickingPalletId);
 			Assert.Equal(productId1, result.ProductId);
 			Assert.Equal(10, result.Quantity);
 			Assert.Equal("UserR", result.UserId);
-		}
-		//[Fact]
-		//public async Task ShowReversePicking_GetReversePickingAsync_ReturnNull()
-		//{
-		//	//Arrange
-		//	var id = 1;
-		//	//Act
-		//	var result = await _reversePickingRepo.GetReversePickingAsync(id);
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.Equal(2, result.PickingTaskId);
-		//	Assert.Equal("Q5000", result.PickingPalletId);
-		//	Assert.Equal(10, result.ProductId);
-		//	Assert.Equal(10, result.Quantity);
-		//	Assert.Equal("UserR", result.UserId);
-		//}
+		}		
 		[Fact]
-		public void ShowReversePicking_GetReversePickings_ReturnRecords()
+		public void ShowReversePicking_ReturnRecords_GetReversePickings()
 		{
 			//Arrange&Act
 			var result = _reversePickingRepo.GetReversePickings();

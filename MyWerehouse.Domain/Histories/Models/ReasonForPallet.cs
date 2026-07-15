@@ -8,9 +8,9 @@ namespace MyWerehouse.Domain.Histories.Models
 {
 	public enum ReasonForPallet
 	{
-		New = 0, // nowa paleta - prawie się nie zdarza
+		New = 0, // nowa paleta 
 		Received = 1,//nowa paleta w przyjęciu
-		Picking = 2,//paleta 
+		Picking = 2,//paleta źródło kompletacji
 		Moved = 3,//paleta została przeniesiona z miejsca na inne miejsce
 		Correction = 4,//paleta została poprawiona
 		Merge = 5,//paleta została połączona z inną paletą

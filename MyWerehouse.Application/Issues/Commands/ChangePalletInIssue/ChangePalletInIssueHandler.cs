@@ -22,18 +22,18 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 
 		public async Task<AppResult<Unit>> Handle(ChangePalletInIssueCommand request, CancellationToken ct)
 		{
-			//Można podmieniać tylko palety z jednym towarem, nie palety kompletacyjne
-			if (await _palletRepo.GetPalletByIdAsync(request.NewPalletId) is null)
-				return AppResult<Unit>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
-			if (await _palletRepo.GetPalletByIdAsync(request.OldPalletId) is null)
-				return AppResult<Unit>.Fail($"Paleta którą chcesz podmienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
-			if (request.OldPalletId == request.NewPalletId)
-				return AppResult<Unit>.Fail("Nie można podmienić paletę na tą samą", ErrorType.Conflict);
+			//Można podmieniać tylko palety z jednym towarem, nie palety kompletacyjne			
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 			var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(request.OldPalletId);
+			if (palletToRemoveFromIssue is null)
+				return AppResult<Unit>.Fail($"Paleta którą chcesz podmienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
 			var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(request.NewPalletId);
+			if (palletToAddingIssue is null)
+				return AppResult<Unit>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);			
+			if (request.OldPalletId == request.NewPalletId)
+				return AppResult<Unit>.Fail("Nie można podmienić paletę na tą samą", ErrorType.Conflict);
 			if (palletToAddingIssue == null || palletToRemoveFromIssue == null)
 				return AppResult<Unit>.Fail("Jedna z podanych palet nie istnieje.", ErrorType.Conflict);
 			if (palletToRemoveFromIssue.IssueId != request.IssueId)

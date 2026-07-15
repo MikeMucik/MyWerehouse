@@ -17,8 +17,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 		{
 			TestDataSeeder.SeedDatabase(DbContext);
 		}
-		public WerehouseDbContext DbContext => base.DbContext;
-		// Opcjonalnie: Metoda do tworzenia czystego kontekstu (bez seedu, dla izolowanych testów)
+		public new WerehouseDbContext DbContext => base.DbContext;
+		
 		public WerehouseDbContext CreateCleanContext() => CreateNewContext();  // Z TestBase
 	
 	}

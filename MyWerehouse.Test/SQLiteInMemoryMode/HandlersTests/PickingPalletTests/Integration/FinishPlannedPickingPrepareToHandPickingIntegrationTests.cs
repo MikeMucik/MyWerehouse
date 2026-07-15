@@ -121,12 +121,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
 			Assert.Equal(2, result.Result.Count);
-			//var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product1.Id && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
-			//var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product2.Id && x.IssueId == issue.Id && x.PickingStatus != PickingStatus.Cancelled);
-			var resultForProduct1 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product1.Id && x.IssueId == issue.Id && x.PickingStatus == PickingStatus.Available);
-			var resultForProduct2 = DbContext.PickingTasks.FirstOrDefault(x => x.ProductId == product2.Id && x.IssueId == issue.Id && x.PickingStatus == PickingStatus.Available);
-			Assert.NotNull(resultForProduct1);
-			Assert.NotNull(resultForProduct2);
+			var resultForProduct1 = DbContext.PickingTasks.Single(x => x.ProductId == product1.Id && x.IssueId == issue.Id && x.PickingStatus == PickingStatus.Available);
+			var resultForProduct2 = DbContext.PickingTasks.Single(x => x.ProductId == product2.Id && x.IssueId == issue.Id && x.PickingStatus == PickingStatus.Available);
 			Assert.Equal(25, resultForProduct1.RequestedQuantity);
 			Assert.Equal(10, resultForProduct2.RequestedQuantity);
 		}
@@ -295,8 +291,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			};
 			var result1 = await Mediator.Send(new DoPlannedPickingCommand(pickingTask1DTO, "user1st"));
 			Assert.True(result1.IsSuccess);
-			var task1 = DbContext.PickingTasks.FirstOrDefault(t=>t.Id == pickingTask1.Id);
-			Assert.NotNull(task1);
+			var task1 = DbContext.PickingTasks.Single(t=>t.Id == pickingTask1.Id);			
 			Assert.Equal(PickingStatus.PickedPartially, task1.PickingStatus);
 			Assert.Equal(5, task1.PickedQuantity);
 			var pickingTask2DTO = new PickingTaskDTO
@@ -315,8 +310,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			};
 			var result2 = await Mediator.Send(new DoPlannedPickingCommand(pickingTask2DTO, "user1st"));
 			Assert.True(result2.IsSuccess);
-			var task2 = DbContext.PickingTasks.FirstOrDefault(t => t.Id == pickingTask2.Id);
-			Assert.NotNull(task2);
+			var task2 = DbContext.PickingTasks.Single(t => t.Id == pickingTask2.Id);
+			
 			Assert.Equal(PickingStatus.Picked, task2.PickingStatus);
 			Assert.Equal(10, task2.PickedQuantity);
 			//Act 2

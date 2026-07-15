@@ -24,7 +24,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 		public async Task TakeVirtualPallets_GetVirtualPalletsAsync_ReturnList()
 		{
 			//Arrange
-			var productId = 11;
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
 
 			//Act
@@ -74,47 +73,19 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			Assert.Equal(2, result.Count);
 			// upewniamy się, że to właściwe palety
 			var palletIds = result.Select(v => v.PalletId).ToList();
-			//Assert.Contains("Q1100", palletIds);
 			Assert.Contains(palletGuid5, palletIds);
-			//Assert.Contains("Q1200", palletIds);
 			Assert.Contains(palletGuid8, palletIds);
-
 			// żadna inna spoza zakresu
-			//Assert.DoesNotContain("Q1101", palletIds);
 			Assert.DoesNotContain(palletGuid2, palletIds);
-
 			// opcjonalnie: sprawdzamy daty, że rzeczywiście są w zakresie
 			Assert.All(result, v =>
 				Assert.InRange(v.DateMoved, startDate, endDate));
 		}
-		//[Fact]
-		//public async Task TakeVirtualPalletsByPickingDates_GetVirtualPalletsAsync_ReturnList()
-		//{
-		//	//Arrange
-		//	//var startDate = new DateTime(2025, 5, 5);
-		//	//var endDate = new DateTime(2025, 10, 10);
-		//	var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2));
-		//	var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-		//	//Act
-		//	var result = await _virtualPalletRepo.GetVirtualPalletsByTimePickingTaskAsync(startDate, endDate);
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.NotEmpty(result);
-		//	Assert.Equal(2, result.Count);
-		//	// upewniamy się, że to właściwe palety
-		//	var palletIds = result.Select(v => v.Pallet.PalletNumber).ToList();
-		//	Assert.Contains("Q1100", palletIds);
-		//	Assert.Contains("Q1200", palletIds);
-
-		//	// żadna inna spoza zakresu
-		//	Assert.DoesNotContain("Q1101", palletIds);
-		//}
+		
 		[Fact]
 		public async Task TakeVirtualPalletsByPickingDates_GetVirtualPallets_ReturnList()
 		{
 			//Arrange
-			//var startDate = new DateTime(2025, 5, 5);
-			//var endDate = new DateTime(2025, 10, 10);
 			var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2));
 			var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 			//Act
@@ -127,13 +98,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			var palletIds = result.Select(v => v.Pallet.PalletNumber);
 			Assert.Contains("Q1100", palletIds);
 			Assert.Contains("Q1200", palletIds);
-
 			// żadna inna spoza zakresu
 			Assert.DoesNotContain("Q1101", palletIds);
 
-			//// opcjonalnie: sprawdzamy daty, że rzeczywiście są w zakresie
-			//Assert.All(result, v =>
-			//	Assert.InRange(v.DateMoved, startDate, endDate));
 		}
 
 		[Fact]
@@ -142,7 +109,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			//Arrange
 			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
-			//var palletId = "Q1100";
 			var palletId = palletGuid5;
 			//Act
 			var result = await _virtualPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletId);
@@ -155,14 +121,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 		{
 			//Arrange
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
-			var virtualPalletId = 1;
 			//Act
 			var result = await _virtualPalletRepo.GetVirtualPalletByIdAsync(vpId1);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<VirtualPallet>(result);
-			//Dodaj asercje
-
 		}
 	}
 }

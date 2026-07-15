@@ -88,7 +88,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			//Assert			
 			var resultList = DbContext.HistoryPallet.Where(m => m.PalletNumber == "Q1000");
 			var result = resultList
-				//.OrderByDescending(p => p.MovementDate)
 				.FirstOrDefault();
 			Assert.NotNull(result);
 			Assert.Equal(-1, resultList.First(p => p.PerformedBy == "U001").HistoryPalletDetails.First().QuantityChange);
@@ -224,30 +223,39 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, null);
 
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "User2",
 			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
-
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1);
-			DbContext.Pallets.AddRange(pallet1);
+			
 			DbContext.Receipts.AddRange(receipt);
 			DbContext.SaveChanges();
+			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, receiptId1, null);
+			DbContext.Pallets.AddRange(pallet1);
+			DbContext.SaveChanges();
+
 			var historyReceiptRepo = new HistoryReceiptRepo(DbContext);
 			//Act
 			var historyReceipt = new HistoryReceipt
 			{
-
 				ReceiptId = receipt.Id,
 				ReceiptNumber = receipt.ReceiptNumber,
 				ClientId = receipt.ClientId,
 				StatusAfter = ReceiptStatus.Verified,
 				DateTime = DateTime.Now,
 				PerformedBy = receipt.PerformedBy,
+				Details = new List< HistoryReceiptDetail>
+				{
+					new HistoryReceiptDetail
+					{
+						PalletId = pallet1.Id,
+						PalletNumber = pallet1.PalletNumber,
+					}
+				}
 			};
 			historyReceiptRepo.AddHistoryReceipt(historyReceipt);
 			DbContext.SaveChanges();
@@ -257,7 +265,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			Assert.NotNull(result);
 			Assert.Equal(ReceiptStatus.Verified, result.StatusAfter);
 			Assert.Equal("User2", result.PerformedBy);
-			//Assert.Contains(result.Details, h => h.PalletId == "Q1000");
+			Assert.Contains(result.Details, h => h.PalletNumber == "Q1000");
 		}
 		[Fact]
 		public async Task AddRecord_AddHistoryPicking_AddToList()
@@ -330,7 +338,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			var historyPicking = new HistoryPicking
 			{
 				PickingTaskId = virtualPallet.PickingTasks.First().Id,
-				//PickingTaskNumber = virtualPallet.PickingTasks.First().PickingTaskNumber,
 				QuantityAllocated = virtualPallet.PickingTasks.First().RequestedQuantity,
 				StatusAfter = PickingStatus.Picked,
 				DateTime = DateTime.Now,
@@ -445,7 +452,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				DateTime = DateTime.UtcNow,
 				PerformedBy = reverseTask.UserId,
 				Quantity = reverseTask.Quantity,
-				//StatusBefore = notification.StatusBefore,
 				StatusAfter =ReversePickingStatus.Ongoing
 			};
 

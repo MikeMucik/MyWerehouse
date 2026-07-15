@@ -14,9 +14,8 @@ using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
 using FluentValidation;
 using MyWerehouse.Domain.Receiving.Models;
-using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 
-namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integration
 {
 
 	public class ReceiptUpdateIntegrationTests : TestBase

@@ -184,7 +184,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Single(reverseTasks);
 
 			var task = reverseTasks.First();
-			//Assert.Equal(pickingPallet.Id, task.PickingPalletId);
+			Assert.Equal(pickingPallet.Id, task.PickingPalletId);
 			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
 			//Act 4 

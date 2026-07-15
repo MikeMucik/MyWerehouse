@@ -54,7 +54,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
 				Assert.Equal("ClientTest", result.Result.Name);
-			//Assert.Equal("TestDetails", result.Description);
+			Assert.Equal("ClientDescription", result.Result.Description);
 			Assert.Equal("ConutryTest", result.Result.Address.First().Country);
 		}
 		[Fact]

@@ -54,7 +54,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			var totalAvailable = await _getProductCountService.GetProductCountAsync(issueLine.ProductId, issueLine.BestBefore);
 			if (issueLine.Quantity > totalAvailable)
 			{
-				return AssignProductToIssueResult.Fail($"Nie wystarczająca ilości produktu o numerze {issueLine.ProductId}. Asortyment nie został dodany do zlecenia."
+				return AssignProductToIssueResult.Fail($"Nie wystarczająca ilość produktu o numerze {issueLine.ProductId}. Asortyment nie został dodany do zlecenia."
 						, issueLine.ProductId, product.SKU, issueLine.Quantity, totalAvailable);
 			}
 			//2. Oblicz pełne palety, Przydzielanie pełnych lub/z datą palet

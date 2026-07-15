@@ -16,11 +16,11 @@ using MyWerehouse.Domain.Pallets.Models;
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integration
 {
 	[Collection("QueryCollection")]
-	public class PalletViewServicesTests
+	public class PalletViewIntegrationTests
 	{
 		private readonly QueryTestSQLFixture _fixture;
 		private readonly IMediator _mediator;
-		public PalletViewServicesTests(QueryTestSQLFixture fixture)
+		public PalletViewIntegrationTests(QueryTestSQLFixture fixture)
 		{
 			_fixture = fixture;
 			_mediator = _fixture.Mediator;
@@ -44,8 +44,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Single(result.Result.ProductsOnPallet);
 			Assert.Equal(1, result.Result.LocationId);
 			Assert.Equal(PalletStatus.OnHold, result.Result.Status);
-			//Assert.Equal(receiptId1, result.Result.ReceiptId);
-			//Assert.Equal(issueId1, result.Result.IssueId);
 			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
 			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId1);
 			Assert.Equal(100, product1.Quantity);
@@ -66,14 +64,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 
 			var result = await _mediator.Send(query);
 			//Assert
-			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
-			var issueId1 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			Assert.NotNull(result);
 			Assert.NotNull(result.Result);
 			Assert.NotNull(result.Result.ProductsOnPallet);
 			Assert.Equal(2, result.Result.ProductsOnPallet.Count);
-			//Assert.Equal(receiptId1, result.Result.ReceiptId);
-			//Assert.Equal(issueId1, result.Result.IssueId);
 			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
 			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId1);
 			Assert.Equal(50, product1.Quantity);
@@ -99,6 +93,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			};
 			var result =await _mediator.Send(query);
 			//Assert
+			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.NotEmpty(result.Result.Items);
 		}
 		[Fact]
@@ -134,6 +130,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.NotNull(result.Result);
 			var expected = _fixture.DbContext.Pallets
 				.FirstOrDefault(p=>p.Id == palletGuid2);
+			Assert.NotNull(expected);
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.Null(result.Error);
@@ -148,8 +145,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Equal(expected.Status, pallet.Status);
 
 			Assert.Equal(expected.ReceiptId, pallet.ReceiptId);
+			Assert.NotNull(expected.Receipt);
 			Assert.Equal(expected.Receipt.ReceiptNumber, pallet.ReceiptNumber);
 			Assert.Equal(expected.IssueId, pallet.IssueId);
+			Assert.NotNull(expected.Issue);
 			Assert.Equal(expected.Issue.IssueNumber, pallet.IssueNumber);
 
 			var product = Assert.Single(pallet.ProductsOnPallet);
@@ -175,8 +174,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
+			Assert.NotNull(result.Result);
 			Assert.True(result.IsSuccess);
 			var expected = _fixture.DbContext.Pallets.FirstOrDefault(p=>p.PalletNumber == palletNumber);
+			Assert.NotNull(expected);
 			Assert.Equal(expected.Id, result.Result.Id);
 		}
 	}

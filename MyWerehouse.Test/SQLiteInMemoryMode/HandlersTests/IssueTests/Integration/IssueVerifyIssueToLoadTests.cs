@@ -62,7 +62,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 		}
 		[Fact]
-		public async Task VerifyIssueToLoadAsync_ShouldChnageStatus_WhenStatusPending()
+		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenStatusPending()
 		{
 			//Arrange
 			var client = CreateClient();
@@ -152,7 +152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.All(savedIssue.Pallets, p => Assert.True(p.ProductsOnPallet.Any()));
 		}
 		[Fact]
-		public async Task VerifyIssueToLoadAsync_ShouldChnageStatus_WhenWrongStatusPallets()
+		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenWrongStatusPallets()
 		{
 			//Arrange
 			var client = CreateClient();
@@ -183,13 +183,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Act
 			var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
 			//Assert
+			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Contains("Wydania nie zatwierdzono.", result.Error);
 			Assert.Contains(result.Result, x => x.Message.Contains("Nie wszystkie palety do załadunku mają odpowiedni status."));
 
 		}
 		[Fact]
-		public async Task VerifyIssueToLoadAsync_ShouldChnageStatus_WhenWrondBBDate()
+		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenWrongBBDate()
 		{
 			//Arrange
 			var client = CreateClient();
@@ -220,15 +222,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Act
 			var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
 			//Assert
+			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			Assert.Contains("Wydania nie zatwierdzono.", result.Error);
 			Assert.Equal(ErrorType.Validation, result.ErrorType);
-			//Assert.Contains(result.Result, x => x.Message.Contains("Towar się nie zgadza. Zażądano 20 a przygotowano 0."));
+			Assert.Contains(result.Result, x => x.Message.Contains("Towar się nie zgadza. Zażądano 20"));
 
-			var failedItem = Assert.Single(result.Result.Where(x => !x.Success));
-			var expectedQuantityRequest = issueItem.FirstOrDefault(p => p.ProductId == product.Id).Quantity;
+			var failedItem = Assert.Single(result.Result, x => !x.Success);
+			var expectedQuantityRequest = issueItem.Single(p => p.ProductId == product.Id).Quantity;
 			var expectedQuantityPrepared = 0; // Date BestBefore not equal
-				//pallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == product.Id).Quantity + pallet1.ProductsOnPallet.FirstOrDefault(p => p.ProductId == product.Id).Quantity;
 			Assert.Equal(product.Id, failedItem.ProductId);
 			Assert.Equal(product.SKU, failedItem.SKU);
 			Assert.Equal(expectedQuantityRequest, failedItem.QuantityRequest);
@@ -238,8 +241,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		[Fact]
 		public async Task VerifyIssueToLoad_NotConfirmIssue_WhenNotExistIssue()
 		{
-			//Arrange
-			//Act
+			//Arrange&Act
 			var issueId2 = Guid.Parse("21111111-1111-1111-1111-111111111111");
 			var result = await Mediator.Send(new VerifyIssueToLoadCommand(issueId2, "user123"));
 			//Assert

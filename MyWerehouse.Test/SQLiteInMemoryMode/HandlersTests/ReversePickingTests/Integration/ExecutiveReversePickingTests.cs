@@ -582,7 +582,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.NotEmpty(pickingTaskToDo);
 			Assert.Equal(2, pickingTaskToDo.Count);
 			//Act 2 - wykonanie pickingu
-			var pickingTaskForProduct = pickingTaskToDo.Single(p => p.ProductId == product.Id); // await DbContext.PickingTasks.FirstOrDefaultAsync(x => x.IssueId == issue.Id && x.ProductId == product.Id);
+			var pickingTaskForProduct = pickingTaskToDo.Single(p => p.ProductId == product.Id); 
 			var toPicking = new PickingTaskDTO
 			{
 				Id = pickingTaskForProduct.Id,
@@ -927,13 +927,4 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(3, history1.Count());
 		}
 	}
-}
-
-//// Assert 3– pickingTasks cancelled
-//var pickingTasksAfterCancelled = await DbContext.PickingTasks
-//	.Where(a => a.IssueId == issue.Id)
-//	.ToListAsync();
-
-//Assert.Equal(2, pickingTasksAfterCancelled.Count);
-//Assert.Equal(PickingStatus.Cancelled, pickingTasksAfterCancelled[0].PickingStatus);
-//Assert.Equal(PickingStatus.Cancelled, pickingTasksAfterCancelled[1].PickingStatus);	
+}	

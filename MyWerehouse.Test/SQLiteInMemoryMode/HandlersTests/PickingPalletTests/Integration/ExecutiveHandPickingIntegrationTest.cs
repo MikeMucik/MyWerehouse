@@ -124,6 +124,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Single(virtualPallet.PickingTasks);
 
 			var pickingTask = DbContext.PickingTasks.Single();
+			Assert.NotNull(pickingTask.VirtualPallet);
 			Assert.Equal(issue.Id, pickingTask.IssueId);
 			Assert.Equal(product1.Id, pickingTask.ProductId);
 			Assert.Equal(20, pickingTask.RequestedQuantity);
@@ -216,6 +217,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Single(virtualPalletOld.PickingTasks);
 
 			var pickingTask = virtualPalletOld.PickingTasks.Single();
+			Assert.NotNull(pickingTask.VirtualPallet);
 			Assert.Equal(issue.Id, pickingTask.IssueId);
 			Assert.Equal(product1.Id, pickingTask.ProductId);
 			Assert.Equal(20, pickingTask.RequestedQuantity);
@@ -308,6 +310,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var pickingTask = virtualPallet.PickingTasks.Single();
 			Assert.NotNull(pickingTask);
+			Assert.NotNull(pickingTask.VirtualPallet);
 			Assert.Equal(issue.Id, pickingTask.IssueId);
 			Assert.Equal(product1.Id, pickingTask.ProductId);
 			Assert.Equal(20, pickingTask.RequestedQuantity);

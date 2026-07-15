@@ -13,7 +13,7 @@ using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integration
 {
-	public class CreatePalletIntegrationServiceTests :TestBase
+	public class CreatePalletIntegrationTests :TestBase
 	{
 		private static readonly Guid guid = Guid.NewGuid();
 		private readonly Guid productId = guid;

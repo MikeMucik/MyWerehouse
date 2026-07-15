@@ -139,7 +139,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				PageSize = 1
 			};
 			var result = await _mediator.Send(query);
-			//Asser
+			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<AppResult<PagedResult<IssueSimplyDTO>>>(result);
 		}

@@ -16,10 +16,13 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 			entity.HasKey(e => e.Id);
 			entity.Property(x => x.Id).ValueGeneratedNever();
 
+			entity.HasIndex(p => p.ReceiptNumber)
+				.IsUnique();
+
 			entity.HasMany(r => r.Pallets)
 			.WithOne(p => p.Receipt)
 			.HasForeignKey(p => p.ReceiptId)
-			.OnDelete(DeleteBehavior.Cascade);
+			.OnDelete(DeleteBehavior.Restrict);
 		}
 	}
 }

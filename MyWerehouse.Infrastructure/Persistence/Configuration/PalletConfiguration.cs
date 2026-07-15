@@ -9,7 +9,7 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Configuration
 {
-	public class PalletConfiguration :  IEntityTypeConfiguration<Pallet>
+	public class PalletConfiguration : IEntityTypeConfiguration<Pallet>
 	{
 		public void Configure(EntityTypeBuilder<Pallet> entity)
 		{
@@ -17,6 +17,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 			entity.Property(p => p.Id)
 				.IsRequired()
 				.HasMaxLength(10);
+
+			entity.HasIndex(p => p.PalletNumber)
+				.IsUnique();
 
 			entity.Property(p => p.Status)
 			.HasConversion<string>();

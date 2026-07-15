@@ -76,7 +76,7 @@ namespace MyWerehouse.Application.Picking.Services
 			foreach (var palletToPicking in availablePallets)
 			{
 				if (quantity <= 0) break;
-				var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.First().Quantity, palletToPicking.LocationId);
+				var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.Single().Quantity, palletToPicking.LocationId);
 				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //from new pallet for picking
 				var vp = _virtualPalletRepo.AddPalletToPicking(virtualPallet);
 

@@ -11,9 +11,9 @@ using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
-namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integration
+namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integration
 {
-	public class ReceiptNewReceiptAndAddPalletIntegrationTests : TestBase
+	public class ReceiptNewReceiptIntegrationTests : TestBase
 	{
 		private static Client CreateClient()
 		{
@@ -99,7 +99,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.RececiptTests.Integr
 		public async Task CreateReceiptPlan_ReturnValidationInfo_WhenNotExistingClient()
 		{
 			//Arrange
-			var client = CreateClient();// a tu jest CLient.Id = 1
+			var client = CreateClient();
 			var location = CreateLocation(1, 1);
 			DbContext.Locations.Add(location);
 			DbContext.Clients.Add(client);

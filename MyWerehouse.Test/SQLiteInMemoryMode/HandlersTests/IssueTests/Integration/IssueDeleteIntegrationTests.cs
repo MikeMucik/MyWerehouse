@@ -98,7 +98,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					null, null, null, 0);
 				db.Issues.Add(issue);
 				db.Pallets.AddRange(pallet1, pallet2);
-				//await db.SaveChangesAsync();
 				db.VirtualPallets.Add(virtualPallet);
 				db.PickingTasks.Add(pickingTask);
 				await db.SaveChangesAsync();

@@ -18,7 +18,7 @@ using Xunit.Sdk;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integration
 {
-	public class IssueModifyIntegrationServiceTests : TestBase
+	public class IssueModifyIntegrationTests : TestBase
 	{
 		private static Client CreateClient()
 		{
@@ -95,14 +95,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
-
+			//Assert
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(1));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -112,14 +114,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			new IssueItemDTO { ProductId = product.Id, Quantity = 15, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366))  }
 		}
 			};
-			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7))));
+			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
 
-			//Assert.Equal("User2", updatedIssue.PerformedBy);
+			Assert.Equal("User2", updatedIssue.PerformedBy);
 			Assert.Single(updatedIssue.Pallets);
 			Assert.Equal(PalletStatus.LockedForIssue, updatedIssue.Pallets.First().Status);
 
@@ -140,7 +142,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == InitialPalletQuantity - pickingTask
 			var vp = DbContext.VirtualPallets
 				.Include(v => v.PickingTasks)
-				.First(v => v.PalletId == pallet2.Id);
+				.Single(v => v.PalletId == pallet2.Id);
 
 			Assert.Equal(5, vp.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(vp.InitialPalletQuantity - vp.PickingTasks.Sum(a => a.RequestedQuantity), vp.RemainingQuantity);
@@ -148,10 +150,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
 			Assert.Single(result.Result);
-			Assert.True(result.Result.First().Success);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
+			Assert.True(result.Result.Single().Success);
+			Assert.Equal(product.Id, result.Result.Single().ProductId);
 
-			var p2After = DbContext.Pallets.AsNoTracking().First(p => p.PalletNumber == "P2");
+			var p2After = DbContext.Pallets.AsNoTracking().Single(p => p.PalletNumber == "P2");
 			// bezpieczeństwo — potwierdzamy faktyczną zmianę statusu
 			Assert.Equal(PalletStatus.ToPicking, p2After.Status);
 		}
@@ -195,7 +197,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.NotNull(issue);
-			Assert.Single(issue.Pallets); 
+			Assert.Single(issue.Pallets);
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
@@ -215,12 +217,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var history = DbContext.HistoryPickings
 				.OrderBy(h => h.DateTime)
 				.ToList();
-			// Powinny być 1 wpisy: Create 
+			// Powinny być 1 wpis: Create 
 			Assert.NotNull(history);
 			Assert.Single(history);
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = client.Id,
@@ -302,7 +304,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 
 			var issueOld = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-10),
-			DateOnly.FromDateTime( DateTime.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
+			DateOnly.FromDateTime(DateTime.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
 
 			var sourcePallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2);
 			var pickingGuid = Guid.NewGuid();
@@ -328,18 +330,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 					new IssueItemDTO { ProductId = product.Id, Quantity = 10, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 				}
 			};
-
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 			//Assert 1
 			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.IssueNumber == 2);
 			Assert.NotNull(issue);
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
-
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = issue.ClientId,
@@ -349,9 +350,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			new IssueItemDTO { ProductId = product.Id, Quantity = 15, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 		}
 			};
-
 			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend));
-
 			// Assert – sprawdź Issue
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -362,21 +361,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 			Assert.Single(updatedIssue.Pallets);
 			Assert.Equal(PalletStatus.LockedForIssue, updatedIssue.Pallets.First().Status);
-
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
 					.ThenInclude(vp => vp.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
-
 			// Powinna być jedna alokacja (5 sztuk) powiązana z VirtualPallet dla "P2"
 			Assert.Single(pickingTasksForIssue);
 			var alloc = pickingTasksForIssue.Single();
 			Assert.Equal(5, alloc.RequestedQuantity);
 			Assert.NotNull(alloc.VirtualPallet);
 			Assert.Equal(pallet2.Id, alloc.VirtualPallet.PalletId);
-
 			// Dodatkowa kontrola: VirtualPallet.RemainingQuantity == InitialPalletQuantity - pickingTask
 			var vp = DbContext.VirtualPallets
 				.Include(v => v.PickingTasks)
@@ -385,7 +381,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(5, vp.PickingTasks.First(x => x.IssueId == issue.Id).RequestedQuantity);
 			Assert.Equal(vp.InitialPalletQuantity - vp.PickingTasks.Sum(a => a.RequestedQuantity), vp.RemainingQuantity);
 			Assert.Equal(1, vp.RemainingQuantity);
-
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
 			Assert.Single(result.Result);
@@ -393,7 +388,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 		}
 		[Fact]
-		public async Task ModifyIssue_ShouldMakeNewIssue_WhenIssueConfirmedToLoad()
+		public async Task ModifyIssue_ShouldMakeNewIssue_WhenIssueConfirmedToLoadAndOldIssueExist()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -403,12 +398,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
 			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.ToPicking, null, null);
 			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-
 			var issueId = Guid.NewGuid();
-
 			var issueOld = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-10),
 			DateOnly.FromDateTime(DateTime.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
 			var virtualPallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2);
@@ -424,11 +416,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
-
 			// Act 1 – create issue with 1 pallet (10 szt.)
 			var createIssueDto = new CreateIssueDTO
 			{
-				//Id = Guid.NewGuid(),
 				ClientId = client.Id,
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
@@ -438,17 +428,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
-
-			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.IssueNumber == 2);
+			//Assert
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
+			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.IssueNumber == 2);//IssueNumber = 1 to stare issue
+			Assert.NotNull(issue);
 			issue.ChangeStatus(IssueStatus.ConfirmedToLoad);
-			//issue.IssueStatus = IssueStatus.ConfirmedToLoad;
 			//Assert
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = client.Id,
@@ -460,17 +452,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 
 			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend));
-			//var newIssueItems = DbContext.IssueItems.Where(i => i.IssueNumber == 3).ToList();
+			//Assert
+			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
 			var newIssueItems = DbContext.IssueItems.Where(i => i.IssueId == issue.Id).ToList();
-			//var newIssueItems = DbContext.IssueItems.Where(i => i.IssueId == 3).ToList();
 			foreach (var it in newIssueItems) { Console.WriteLine($"Item: ProductId={it.ProductId}, Quantity={it.Quantity}, BestBefore={it.BestBefore}"); }
-			// Assert – sprawdź Issue
-			//var newIssue = DbContext.Issues.Find(3);  // Lub Include(i => i.IssueItems)
-			var newIssue = DbContext.Issues.First(i => i.IssueNumber == 3);  // Lub Include(i => i.IssueItems)
-																			 //var newIssueItems1 = DbContext.IssueItems.Where(i => i.IssueId == 3).ToList();
-																			 //var newIssueItems1 = DbContext.IssueItems.Where(i => i.IssueNumber == 3).ToList();
-			var newNumberGiud = DbContext.Issues.FirstOrDefault(i => i.IssueNumber == 3).Id;
-			var newIssueItems1 = DbContext.IssueItems.Where(i => i.IssueId == newNumberGiud).ToList();
+			// Assert – sprawdź Issue		
+			var newIssue = DbContext.Issues.First(i => i.IssueNumber == 3);
+			var newNumberGuid = DbContext.Issues.Single(i => i.IssueNumber == 3).Id;
+			var newIssueItems1 = DbContext.IssueItems.Where(i => i.IssueId == newNumberGuid).ToList();
 
 			Assert.NotNull(newIssue);  // Issue istnieje
 			Assert.Single(newIssueItems1);  // Dokładnie jeden!
@@ -484,7 +474,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 			Assert.Empty(updatedIssue.Pallets);
-			//Assert.Equal(PalletStatus.InTransit, updatedIssue.Pallets.First().Status);
 
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
@@ -524,17 +513,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var category = CreateCategory("name");
 			var location = CreateLocation(1);
 			var location1 = CreateLocation(2);
-			var product = CreateProduct("Prod1", 1);
-			var product1 = CreateProduct("Prod2", 1);
+			var product1 = CreateProduct("Prod1", 1);
+			var product2 = CreateProduct("Prod2", 1);
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(product, product1);
+			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.AddRange(location, location1);
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3);
 			await DbContext.SaveChangesAsync();
@@ -546,8 +535,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 12, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 7, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 12, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
+					new IssueItemDTO { ProductId = product2.Id, Quantity = 7, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 				}
 			};
 
@@ -566,8 +555,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Powinny być dwie alokacja (2 sztuk) powiązana z VirtualPallet dla "P2" i "P3"
 			Assert.Equal(2, pickingTasksForIssue1.Count);
-			var alloc1 = pickingTasksForIssue1.Find(a => a.ProductId == product.Id);
-			var alloc2 = pickingTasksForIssue1.Find(a => a.ProductId == product1.Id);
+			var alloc1 = pickingTasksForIssue1.Single(a => a.ProductId == product1.Id);
+			var alloc2 = pickingTasksForIssue1.Single(a => a.ProductId == product2.Id);
 			Assert.Equal(2, alloc1.RequestedQuantity);
 			Assert.Equal(7, alloc2.RequestedQuantity);
 			Assert.NotNull(alloc1.VirtualPallet);
@@ -577,21 +566,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
 				ClientId = client.Id,
 				IssueItems = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 22, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) } ,
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 22, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) } ,
+					new IssueItemDTO { ProductId = product2.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 				}
 			};
 
-			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend ));
+			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend));
 
 			// Assert – sprawdź Issue
+			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
@@ -602,9 +594,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(2, result.Result.Count);
 			Assert.False(result.Result.First().Success);
 			Assert.True(result.Result.Last().Success);
-			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}", result.Result.First().Message);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
-			Assert.Equal(product1.Id, result.Result.Last().ProductId);
+			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product1.Id}", result.Result.First().Message);
+			Assert.Equal(product1.Id, result.Result.First().ProductId);
+			Assert.Equal(product2.Id, result.Result.Last().ProductId);
 		}
 
 		[Fact]
@@ -617,20 +609,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var location2 = CreateLocation(3);
 			var location3 = CreateLocation(4);
-			var product = CreateProduct("Prod1", 1);
-			var product1 = CreateProduct("Prod2", 1);
+			var product1 = CreateProduct("Prod1", 1);
+			var product2 = CreateProduct("Prod2", 1);
 
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, null, null);
-			pallet4.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet4.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(product, product1);
+			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.AddRange(location, location1, location2, location3);
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet4, pallet3);
 			await DbContext.SaveChangesAsync();
@@ -642,8 +634,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 12, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 7, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 12, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
+					new IssueItemDTO { ProductId = product2.Id, Quantity = 7, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 				}
 			};
 
@@ -662,8 +654,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Powinny być dwie alokacja (2 sztuk) powiązana z VirtualPallet dla "P2" i "P3"
 			Assert.Equal(2, pickingTasksForIssue1.Count);
-			var alloc1 = pickingTasksForIssue1.Find(a => a.ProductId == product.Id);
-			var alloc2 = pickingTasksForIssue1.Find(a => a.ProductId == product1.Id);
+			var alloc1 = pickingTasksForIssue1.Single(a => a.ProductId == product1.Id);
+			var alloc2 = pickingTasksForIssue1.Single(a => a.ProductId == product2.Id);
 			Assert.Equal(2, alloc1.RequestedQuantity);
 			Assert.Equal(7, alloc2.RequestedQuantity);
 			Assert.NotNull(alloc1.VirtualPallet);
@@ -673,7 +665,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 21 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -681,14 +673,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 				IssueItems = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 21, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) } ,
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 21, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) } ,
+					new IssueItemDTO { ProductId = product2.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 				}
 			};
 
-			var result = await Mediator.Send(new ModifyIssueCommand(id,updateDto,dateToSend ));
+			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend));
 
 			// Assert – sprawdź Issue
+			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
@@ -699,10 +694,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(2, result.Result.Count);
 			Assert.True(result.Result.First().Success);
 			Assert.True(result.Result.Last().Success);
-			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Result.First().Message);
-			Assert.Contains($"Towar {product1.SKU} został dołączony do zlecenia.", result.Result.Last().Message);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
-			Assert.Equal(product1.Id, result.Result.Last().ProductId);
+			Assert.Contains($"Towar {product1.SKU} został dołączony do zlecenia.", result.Result.First().Message);
+			Assert.Contains($"Towar {product2.SKU} został dołączony do zlecenia.", result.Result.Last().Message);
+			Assert.Equal(product1.Id, result.Result.First().ProductId);
+			Assert.Equal(product2.Id, result.Result.Last().ProductId);
 
 			var updatedIssue1 = DbContext.Issues
 				.Include(i => i.Pallets)
@@ -712,30 +707,26 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// SPRAWDZENIE DLA PROD 1 (21 sztuki)
 			// Oczekujemy: 2 pełne palety + alokacja na 1 sztuki
 			var palletsProd1 = updatedIssue1.Pallets
-				.Where(p => p.ProductsOnPallet.Any(pop => pop.ProductId == product.Id))
+				.Where(p => p.ProductsOnPallet.Any(pop => pop.ProductId == product1.Id))
 				.ToList();
-
 
 			Assert.Equal(2, palletsProd1.Count); // Powinny być 2 palety (np. P1 i P4)
 
-			var allocProd1 = updatedIssue1.PickingTasks.FirstOrDefault(a => a.ProductId == product.Id);
-			//var allocProd2 = updatedIssue1.PickingTasks.LastOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.Id);
-			Assert.NotNull(allocProd1);
-			//Assert.NotNull(allocProd2);
-			Assert.Equal(1, allocProd1.RequestedQuantity); // Reszta 2 sztuki
-														   //Assert.Equal(9, allocProd2.Quantity); // Reszta 2 sztuki
+			var allocProd1 = updatedIssue1.PickingTasks.Single(a => a.ProductId == product1.Id);			
+			
+			Assert.Equal(1, allocProd1.RequestedQuantity);
 
 			// SPRAWDZENIE DLA PROD 2 (8 sztuk)
 			// Oczekujemy: 0 pełnych palet + alokacja na 8 sztuk
 			var palletsProd2 = updatedIssue1.Pallets
-				.Where(p => p.ProductsOnPallet.Any(pop => pop.ProductId == product1.Id))
+				.Where(p => p.ProductsOnPallet.Any(pop => pop.ProductId == product2.Id))
 				.ToList();
 			Assert.Empty(palletsProd2); // 8 sztuk nie tworzy pełnej palety
 
-			var allocProd3 = updatedIssue1.PickingTasks
-				.FirstOrDefault(a => a.ProductId == product1.Id);
-			Assert.NotNull(allocProd3);
-			Assert.Equal(8, allocProd3.RequestedQuantity);
+			var allocProd2 = updatedIssue1.PickingTasks
+				.FirstOrDefault(a => a.ProductId == product2.Id);
+			Assert.NotNull(allocProd2);
+			Assert.Equal(8, allocProd2.RequestedQuantity);
 		}
 
 		[Fact]
@@ -792,8 +783,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Powinny być dwie alokacja (2 sztuk) powiązana z VirtualPallet dla "P2" i "P3"
 			Assert.Equal(2, pickingTasksForIssue1.Count);
-			var alloc1 = pickingTasksForIssue1.Find(a => a.ProductId == product.Id);
-			var alloc2 = pickingTasksForIssue1.Find(a => a.ProductId == product1.Id);
+			var alloc1 = pickingTasksForIssue1.Single(a => a.ProductId == product.Id);
+			var alloc2 = pickingTasksForIssue1.Single(a => a.ProductId == product1.Id);
 			Assert.Equal(2, alloc1.RequestedQuantity);
 			Assert.Equal(7, alloc2.RequestedQuantity);
 			Assert.NotNull(alloc1.VirtualPallet);
@@ -803,7 +794,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 11 szt. 
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -815,9 +806,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var result = await Mediator.Send(new ModifyIssueCommand(id,updateDto,dateToSend ));
-			//var result1 = await _m
+			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend));
+
 			// Assert – sprawdź Issue
+			Assert.NotNull(result);
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
@@ -844,15 +838,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				.Where(p => p.ProductsOnPallet.Any(pop => pop.ProductId == product.Id))
 				.ToList();
 
-
 			Assert.Single(palletsProd1); // Powinny być 1 palety (np. P1 )
 
 			var allocProd1 = updatedIssue1.PickingTasks.FirstOrDefault(a => a.ProductId == product.Id);
-			//var allocProd2 = updatedIssue1.PickingTasks.LastOrDefault(a => a.VirtualPallet.Pallet.ProductsOnPallet.First().ProductId == product.Id);
 			Assert.NotNull(allocProd1);
-			//Assert.NotNull(allocProd2);
-			Assert.Equal(1, allocProd1.RequestedQuantity); // Reszta 2 sztuki
-														   //Assert.Equal(9, allocProd2.Quantity); // Reszta 2 sztuki
+			Assert.Equal(1, allocProd1.RequestedQuantity); 												  
 
 			// SPRAWDZENIE DLA PROD 2 (8 sztuk)
 			// Oczekujemy: 0 pełnych palet + alokacja na 8 sztuk
@@ -866,11 +856,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(allocProd3);
 			Assert.Equal(8, allocProd3.RequestedQuantity);
 		}
-		//SadPath
-
-
+		// Sad path
 		[Fact]
-		public async Task ModifyIssueAsync_InsufficientStaff()
+		public async Task ModifyIssueAsync_ReturnInfo_WhenInsufficientStaff()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -901,7 +889,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
-
+			//Assert
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
+			Assert.NotNull(created.Result);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
@@ -922,7 +913,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -933,20 +924,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 			};
 
-			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend ));
+			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend));
 
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
 
-			//Assert.Equal("User1", updatedIssue.PerformedBy); //akcja nieudana więc użytkownik z poprzedniej zmiany
+			Assert.Equal("User1", updatedIssue.PerformedBy); //akcja nieudana więc poprzedni użytkownik 
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
 			Assert.Single(result.Result);
 			Assert.False(result.Result.First().Success);
-			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}", result.Result.First().Message);
+			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product.Id}", result.Result.First().Message);
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 		}
 		[Fact]
@@ -981,14 +972,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
-
+			//Assert
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
+			Assert.NotNull(created.Result);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -1012,7 +1006,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result.Result);
 			Assert.Single(result.Result);
 			Assert.False(result.Result.First().Success);
-			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Result.First().Message);
+			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Result.First().Message);
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 		}
 		[Fact]
@@ -1056,7 +1050,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: inny numer id
 			var id = Guid.NewGuid();
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				ClientId = client.Id,
@@ -1072,9 +1066,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.False(result1.IsSuccess);
 			Assert.Contains($"Zamówienie nie zostało znalezione.", result1.Error);
 		}
-		//NotCompletedAfterUpdate
+		// Not completed after update
 		[Fact]
-		public async Task ModifyIssueAsync_OneProductEnoughSecondNot_IssueNotCompleted()
+		public async Task ModifyIssueAsync_IssueNotCompleted_WhenSecondProductEnoughFirstNot()
 		{
 			// Arrange – setup initial data
 			var client = CreateClient();
@@ -1083,54 +1077,57 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var location2 = CreateLocation(3);
 			var location3 = CreateLocation(4);
-			var product = CreateProduct("Prod1", 1);
-			var product1 = CreateProduct("Prod2", 1);
+			var product1 = CreateProduct("Prod1", 1);
+			var product2 = CreateProduct("Prod2", 1);
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
-			DbContext.Products.AddRange(product, product1);
+			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.AddRange(location, location1, location2);
 			DbContext.SaveChanges();
 			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, location.Id, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 
 			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, location1.Id, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 
 			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, location2.Id, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
 
 
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3);
 			await DbContext.SaveChangesAsync();
 
-			// Act 1 – create issue with 1 pallet (12 szt.)
+			// Act 1 
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 12, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 12, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
+					new IssueItemDTO { ProductId = product2.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
 				}
 			};
 			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
-
+			//Assert 1
+			Assert.NotNull(created);
+			Assert.True(created.IsSuccess);
+			Assert.NotNull(created.Result);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 
-			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
+			// Act 2 – update: product1 = 2 palety +2 product2 bez zmian
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
 				ClientId = client.Id,
 				IssueItems = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 22, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))}
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 22, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) },
+					new IssueItemDTO { ProductId = product2.Id, Quantity = 8, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))}
 				}
 			};
 			var result = await Mediator.Send(new ModifyIssueCommand(id, updateDto, dateToSend));
@@ -1138,15 +1135,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
+			Assert.Equal(2, result.Result.Count);
+			Assert.False(result.Result.First(x => x.ProductId == product1.Id).Success);
+			Assert.True(result.Result.First(x => x.ProductId == product2.Id).Success);
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
 			Assert.Equal(IssueStatus.RequiresCorrection, updatedIssue.IssueStatus);
-			//Assert.Equal("User2", updatedIssue.PerformedBy);
-			//Assert.Single(updatedIssue.Pallets);
-			//Assert.Equal(PalletStatus.LockedForIssue, updatedIssue.Pallets.First().Status);
-
+			Assert.Equal("User2", updatedIssue.PerformedBy);
+			
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
@@ -1168,23 +1166,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			Assert.Equal(8, vp.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(vp.InitialPalletQuantity - vp.PickingTasks.Sum(a => a.RequestedQuantity), vp.RemainingQuantity);
-
-			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
-			Assert.Equal(2, result.Result.Count);
-			Assert.False(result.Result.First().Success);
-			Assert.True(result.Result.Last().Success);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
-			Assert.Equal(product1.Id, result.Result.Last().ProductId);
-
+						
 			// ACT UpdateIssueAsync
-			var p2After = DbContext.Pallets.AsNoTracking().First(p => p.PalletNumber == "P2");
-			var p3After = DbContext.Pallets.AsNoTracking().First(p => p.PalletNumber == "P3");
+			var p1After = DbContext.Pallets.AsNoTracking().Single(p => p.PalletNumber == "P1");
+			var p2After = DbContext.Pallets.AsNoTracking().Single(p => p.PalletNumber == "P2");
+			var p3After = DbContext.Pallets.AsNoTracking().Single(p => p.PalletNumber == "P3");
 			// bezpieczeństwo — potwierdzamy faktyczną zmianę statusu
+			Assert.Equal(PalletStatus.LockedForIssue, p1After.Status);
 			Assert.Equal(PalletStatus.Available, p2After.Status);
 			Assert.Equal(PalletStatus.ToPicking, p3After.Status);
 		}
 		[Fact]
-		public async Task ModifyIssueAsync_InsufficientStaffForOne()
+		public async Task ModifyIssueAsync_IssueNotCompleted_WhenSecondProductReducedFirstNotEnough()
 		{
 			// Arrange 
 			var client = CreateClient();
@@ -1220,7 +1213,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7))));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
 
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
@@ -1248,7 +1241,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Act 2 – update: zmieniamy zamówienie na 22 szt. (brak towaru)
 			var id = issue.Id;
-			var dateToSend =DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7));
+			var dateToSend = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
 				PerformedBy = "User2",
@@ -1276,7 +1269,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(2, result.Result.Count);
 			Assert.False(result.Result.First().Success);
 			Assert.True(result.Result.Last().Success);
-			Assert.Contains($"Nie wystarczająca ilości produktu o numerze {product.Id}", result.Result.First().Message);
+			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product.Id}", result.Result.First().Message);
 			Assert.Equal(product.Id, result.Result.First().ProductId);
 			Assert.Equal(product1.Id, result.Result.Last().ProductId);
 		}

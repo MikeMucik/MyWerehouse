@@ -17,64 +17,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		{
 			var _context = fixture.Context;
 			_palletMovementRepo = new HistoryPalletRepo(_context);
-		}
-		//[Fact]
-		//public void ShowRecordByFilter_GetDataByFilter_ShowList()
-		//{
-		//	//Arrange
-		//	var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
-
-		//	var filter = new HistoryPalletSearchFilter
-		//	{				
-		//		ProductName = "Test",
-		//		MovementDateStart = new DateTime(2025,1,1)				
-		//	};
-		//	//Act
-		//	var palletId = Guid.Parse("00000000-0001-1111-0000-000000000000");
-
-		//	var result = _palletMovementRepo.GetDataByFilter(filter, palletId);
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.Equal(2, result.Count());
-		//	//  Sprawdzenie że wszystkie wyniki dotyczą tej samej palety
-		//	Assert.All(result, r => Assert.Equal("Q1000", r.PalletNumber));
-
-		//	//  Sprawdzenie że wszystkie mają Reason = Moved
-		//	Assert.All(result, r => Assert.Equal(ReasonForPallet.Moved, r.Reason));
-
-		//	//  Sprawdzenie że mają poprawną datę (>= MovementDateStart)
-		//	Assert.All(result, r => Assert.True(r.MovementDate >= new DateTime(2025, 1, 1)));
-
-		//	//  Sprawdzenie że użytkownik jest zgodny
-		//	Assert.All(result, r => Assert.Equal("TestUser", r.PerformedBy));
-
-		//	//  Sprawdzenie że każda pozycja ma detale produktów
-		//	Assert.All(result, r => Assert.NotEmpty(r.HistoryPalletDetails));
-
-		//	//  Sprawdzenie że w detalach znajdują się poprawne produkty
-		//	Assert.All(result, r =>
-		//		Assert.Contains(r.HistoryPalletDetails, d => d.ProductId == productId1 && d.Quantity > 0));
-
-		//	//  Dodatkowo można sprawdzić, że jedna z pozycji ma konkretny cel (np. DestinationLocationId = 2)
-		//	Assert.Contains(result, r => r.DestinationLocationId == 2);
-		//	Assert.Contains(result, r => r.DestinationLocationId == 3);
-		//}
-		//[Fact]
-		//public void ShowRecordByFilter_GetDataByFilter_ShowNull()
-		//{
-		//	//Arrange
-		//	var filter = new HistoryPalletSearchFilter
-		//	{							
-		//		MovementDateStart = new DateTime(2025, 3, 3)
-		//	};
-		//	 var palletId = Guid.Parse("00000000-0002-1111-0000-000000000000");
-
-		//	//Act
-		//	var result = _palletMovementRepo.GetDataByFilter(filter, palletId);
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.Equal(0, result.Count());
-		//}	
+		}		
 		[Fact]
 		public async Task GetHistoryPallet_ReturnHistory()
 		{
@@ -87,20 +30,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			Assert.Equal(2, result.Count);
 			//  Sprawdzenie że wszystkie wyniki dotyczą tej samej palety
 			Assert.All(result, r => Assert.Equal("Q1000", r.PalletNumber));
-
 			//  Sprawdzenie że wszystkie mają Reason = Moved
 			Assert.All(result, r => Assert.Equal(ReasonForPallet.Moved, r.Reason));
-
 			//  Sprawdzenie że mają poprawną datę (>= MovementDateStart)
 			Assert.All(result, r => Assert.True(r.MovementDate >= new DateTime(2025, 1, 1)));
-
 			//  Sprawdzenie że użytkownik jest zgodny
 			Assert.All(result, r => Assert.Equal("TestUser", r.PerformedBy));
-
 			//  Sprawdzenie że każda pozycja ma detale produktów
 			Assert.All(result, r => Assert.NotEmpty(r.HistoryPalletDetails));
-				
-
 			//  Dodatkowo można sprawdzić, że jedna z pozycji ma konkretny cel (np. DestinationLocationId = 2)
 			Assert.Contains(result, r => r.DestinationLocationId == 2);
 			Assert.Contains(result, r => r.DestinationLocationId == 3);
@@ -110,10 +47,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		[Fact]
 		public async Task CanDeletePalletAsync_ReturnFalse_IsCanDelete()
 		{
-			//Arrange
-			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
-			//var palletId = "Q1000";
-			var palletId = palletGuid1;
+			//Arrange		  
+			var palletId =Guid.Parse("00000000-0001-1111-0000-000000000000");
 			//Act
 			var result =await _palletMovementRepo.CanDeletePalletAsync(palletId);
 			//Assert
@@ -123,9 +58,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		public async Task IsCanDelete_CanDeletePalletAsync_ReturnTrue()
 		{
 			//Arrange
-			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
-			//var palletId = "Q1001";
-			var palletId = palletGuid2;
+			var palletId = Guid.Parse("00000000-0002-1111-0000-000000000000");
 			//Act
 			var result = await _palletMovementRepo.CanDeletePalletAsync(palletId);
 			//Assert

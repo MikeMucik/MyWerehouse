@@ -20,9 +20,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 		protected readonly IPalletRepo _palletRepo;
 
 		public ViewLocationIntegrationTests() : base()
-			//(InMemoryDatabaseFixtureExecutive fixture) : base()
 		{
-			//var _context = InMemoryDatabaseFixtureExecutive.Context;
 			_locationRepo = new LocationRepo(_context);
 			_palletRepo = new PalletRepo(_context);
 			_locationService = new LocationService(_locationRepo, _mapper, _palletRepo, _context);
@@ -36,7 +34,6 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			Assert.True(result.IsSuccess);
 			Assert.IsType<Location>(result);
 		}
-
 		public async Task GetLocation_ShouldReturnLocationDTOForId()
 		{
 			//Arrange&Act

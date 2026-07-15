@@ -126,7 +126,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			// 5. Reverse powinien być zapisany w bazie tylko jeden
 			Assert.Equal(1, DbContext.ReversePickings.Count());
 			}
-		//SadPath
+		// Sad path
 		[Fact]
 		public async Task CreateTaskToReversePicking_ThrowInfo_NonPickingPallet()
 		{

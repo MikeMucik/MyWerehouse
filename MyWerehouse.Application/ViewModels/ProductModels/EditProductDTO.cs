@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int Width { get; init; } //cm
 		public int Weight { get; init; } //kg
 		public required string Description { get; init; }
-		public DateTime AddedAd { get; init; } = DateTime.Now;
+		
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Product, EditProductDTO>()

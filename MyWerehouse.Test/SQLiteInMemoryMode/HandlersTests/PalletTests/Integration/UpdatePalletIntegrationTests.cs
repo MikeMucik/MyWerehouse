@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,7 +37,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		}
 		private static Product CreateProduct(Guid id, string name, string sku)
 		{
-			return Product.CreateForSeed(id, name, sku, DateTime.UtcNow, 1, false, 56);
+			return Product.CreateForSeed(id, name, sku, TestDates.UtcNow, 1, false, 56);
 		}
 		private static Location CreateLocation(int position)
 		{
@@ -55,7 +55,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			{
 				ProductId = id,
 				Quantity = quantity,
-				LastUpdated = DateTime.UtcNow.AddDays(-1)
+				LastUpdated = TestDates.UtcNow.AddDays(-1)
 			};
 		}
 		[Fact]
@@ -70,9 +70,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var location = CreateLocation(0);
 			var inventoryP = CreateInventory(productId, 10);
 			var inventoryP1 = CreateInventory(productId1, 200);
-			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
-			pallet.AddProduct(product1.Id, 200, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 200, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 			DbContext.Categories.Add(category);
 			DbContext.Inventories.AddRange(inventoryP, inventoryP1);
 			DbContext.Products.AddRange(product, product1, product2, product3);
@@ -90,14 +90,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
-					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
+					DateAdded = TestDates.Now,
+					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = DateTime.Now,
-					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), })
+					DateAdded = TestDates.Now,
+					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), })
 					]
 			};
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
@@ -187,9 +187,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var location = CreateLocation(0);
 			var inventoryP = CreateInventory(productId, 1000);
 			var inventoryP1 = CreateInventory(productId1, 2000);
-			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
-			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 			DbContext.Categories.Add(category);
 			DbContext.Inventories.AddRange(inventoryP, inventoryP1);
 			DbContext.Products.AddRange(product, product1, product2, product3);
@@ -207,14 +207,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 50,
-					DateAdded = DateTime.Now,
-					BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)),
+					DateAdded = TestDates.Now,
+					BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
-					BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), })
+					DateAdded = TestDates.Now,
+					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), })
 					]
 			};
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
@@ -305,9 +305,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var product3 = CreateProduct(productId3, "Test33", "67777");
 			var location = CreateLocation(0);
 
-			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
-			pallet.AddProduct(product1.Id, 200, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 200, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1, product2, product3);
@@ -326,26 +326,26 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),
 					(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) }),
 					(new ProductOnPalletCreateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 5, 4) }),
 					(new ProductOnPalletCreateDTO
 				{
 					ProductId = product3.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
@@ -404,8 +404,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.Products.AddRange(product, product1);
 			DbContext.Locations.Add(location);
 			DbContext.Receipts.Add(receipt);
-			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, receiptId1, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, receiptId1, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act
@@ -419,13 +419,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					]
 			};
@@ -487,8 +487,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.Locations.Add(location);
 			DbContext.Receipts.Add(receipt);
 			DbContext.Issues.Add(issue);
-			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, receiptId1, issueId1);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, receiptId1, issueId1);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act
@@ -502,13 +502,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					]
 			};
@@ -530,9 +530,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var product2 = CreateProduct(productId2, "Test22", "667777");
 			var product3 = CreateProduct(productId3, "Test33", "67777");
 			var location = CreateLocation(0);
-			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
-			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
@@ -550,19 +550,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
 				(new ProductOnPalletCreateDTO
 				{
 					Quantity = 0,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2024, 5, 4) })
 					]
 			};
@@ -581,9 +581,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var product1 = CreateProduct(productId1, "Test11", "67777");
 			var product2 = CreateProduct(productId2, "Test22", "667777");
 			var location = CreateLocation(0);
-			var pallet = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
-			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(360)));
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 100, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 300, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1, product2);
@@ -599,20 +599,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletCreateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
 				(new ProductOnPalletCreateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,
-					DateAdded = DateTime.Now,
+					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,7 +40,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result.Result);
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal("U002", result.Result.PerformedBy);
-			Assert.Equal(DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23)), result.Result.IssueDateTimeSend);
+			Assert.Equal(DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23)), result.Result.IssueDateTimeSend);
 
 			Assert.NotNull(result.Result.Pallets);
 			Assert.Equal(3, result.Result.Pallets.Count);
@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal(2, result.Result.IssueItems.Count);
 			Assert.Equal("U002", result.Result.PerformedBy);
-			Assert.Equal(DateOnly.FromDateTime( DateTime.UtcNow.AddHours(25)), result.Result.DateToSend);
+			Assert.Equal(DateOnly.FromDateTime( TestDates.UtcNow.AddHours(25)), result.Result.DateToSend);
 
 			Assert.NotNull(result.Result.IssueItems);
 			Assert.Equal(400, result.Result.IssueItems.Single(x => x.ProductId == productId2).Quantity);
@@ -101,12 +101,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// produkt 10
 			var prod10_Q1000 = palletQ1000.ProductOnPalletIssue.First(p => p.ProductId == productId1);
 			Assert.Equal(50, prod10_Q1000.Quantity);
-			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), prod10_Q1000.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), prod10_Q1000.BestBefore);
 
 			// produkt 11
 			var prod11_Q1000 = palletQ1000.ProductOnPalletIssue.First(p => p.ProductId == productId2);
 			Assert.Equal(200, prod11_Q1000.Quantity);
-			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), prod11_Q1000.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), prod11_Q1000.BestBefore);
 
 			// --- Paleta Q2000 ---
 			var palletQ2000 = result.Result.Pallets.First(p => p.PalletNumber == "Q2000");
@@ -121,7 +121,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var prod11_Q2000 = palletQ2000.ProductOnPalletIssue.First();
 			Assert.Equal(productId2, prod11_Q2000.ProductId);
 			Assert.Equal(200, prod11_Q2000.Quantity);
-			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), prod11_Q2000.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), prod11_Q2000.BestBefore);
 		}
 		[Fact]
 		public async Task GetIssueByFilter_ShouldReturnItems_WhenFilterEmpty()

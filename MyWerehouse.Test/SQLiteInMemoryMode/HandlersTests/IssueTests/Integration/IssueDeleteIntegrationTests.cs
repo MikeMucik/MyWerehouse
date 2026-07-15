@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -44,8 +44,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 				var issueId = Guid.NewGuid();
 
-				var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-7),
-				DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7)), "UserInit", status, null);
+				var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow.AddDays(-7),
+				DateOnly.FromDateTime( TestDates.UtcNow.AddDays(7)), "UserInit", status, null);
 
 				db.Clients.Add(client);
 				db.Issues.Add(issue);
@@ -84,12 +84,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				var pallets = new List<Pallet>();
 				var issueId = Guid.NewGuid();
 				var issueItem = new List<IssueItem> { IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)) };
-				var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-7),
-				DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7)), "UserInit", issueStatus, issueItem);
-				var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
+				var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow.AddDays(-7),
+				DateOnly.FromDateTime( TestDates.UtcNow.AddDays(7)), "UserInit", issueStatus, issueItem);
+				var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
 				pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet1);
-				var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToPicking, null, issue.Id);
+				var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToPicking, null, issue.Id);
 				pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet2);
 				// Dodaj przykładową alokację

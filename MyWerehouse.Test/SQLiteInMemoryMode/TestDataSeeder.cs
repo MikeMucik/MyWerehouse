@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -102,11 +102,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			{
 				var issueItems = new List<IssueItem>
 				{
-					IssueItem.CreateForSeed(1, issueId2, productId1, 150, DateOnly.FromDateTime(DateTime.Today.AddMonths(3)), DateTime.Today),
-					IssueItem.CreateForSeed(2, issueId2, productId2, 400, DateOnly.FromDateTime(DateTime.Today.AddMonths(3)), DateTime.Today)
+					IssueItem.CreateForSeed(1, issueId2, productId1, 150, DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), TestDates.TodayDateTime),
+					IssueItem.CreateForSeed(2, issueId2, productId2, 400, DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), TestDates.TodayDateTime)
 				};
 				context.Issues.Add(
-					Issue.CreateForSeed(issueId2, 2, 11, DateTime.UtcNow.AddDays(-5), DateOnly.FromDateTime( DateTime.UtcNow.AddDays(1)), "U002", IssueStatus.New, issueItems));
+					Issue.CreateForSeed(issueId2, 2, 11, TestDates.UtcNow.AddDays(-5), DateOnly.FromDateTime( TestDates.UtcNow.AddDays(1)), "U002", IssueStatus.New, issueItems));
 			}
 			context.SaveChanges();
 			// 3. Dane końcowe, zależne od receipt/issue/product
@@ -139,19 +139,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.ProductOnPallet.Any())
 			{
 				context.ProductOnPallet.AddRange(
-					ProductOnPallet.CreateForSeed(1, productId1, palletGuid1, 50, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(1, productId1, palletGuid1, 50, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
 					
-					ProductOnPallet.CreateForSeed(2, productId1, palletGuid2, 100, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(3, productId2, palletGuid1, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(4, productId2, palletGuid4, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(5, productId2, palletGuid3, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(6, productId2, palletGuid5, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(7, productId2, palletGuid7, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(8, productId2, palletGuid6, 150, new DateTime(2024, 3, 3), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(9, productId1, palletGuid8, 300, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
+					ProductOnPallet.CreateForSeed(2, productId1, palletGuid2, 100, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(3, productId2, palletGuid1, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(4, productId2, palletGuid4, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(5, productId2, palletGuid3, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(6, productId2, palletGuid5, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(7, productId2, palletGuid7, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(8, productId2, palletGuid6, 150, new DateTime(2024, 3, 3), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(9, productId1, palletGuid8, 300, new DateTime(2024, 4, 4), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
 					
-					ProductOnPallet.CreateForSeed(10, productId1, palletGuid9, 10, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366))),
-					ProductOnPallet.CreateForSeed(11, productId2, palletGuid9, 20, new DateTime(2024, 4, 4), DateOnly.FromDateTime(DateTime.Today.AddDays(366)))
+					ProductOnPallet.CreateForSeed(10, productId1, palletGuid9, 10, new DateTime(2024, 4, 4), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
+					ProductOnPallet.CreateForSeed(11, productId2, palletGuid9, 20, new DateTime(2024, 4, 4), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)))
 				);
 			}
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
@@ -160,9 +160,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.VirtualPallets.Any())
 			{
 				context.VirtualPallets.AddRange(
-					VirtualPallet.CreateForSeed(vpId1, palletGuid5, 200, 3, DateTime.UtcNow.AddDays(-1)),
+					VirtualPallet.CreateForSeed(vpId1, palletGuid5, 200, 3, TestDates.UtcNow.AddDays(-1)),
 					VirtualPallet.CreateForSeed(vpId2, palletGuid6, 150, 3, new DateTime(2024, 6, 6)),
-					VirtualPallet.CreateForSeed(vpId3, palletGuid8, 300, 3, DateTime.UtcNow.AddDays(-1)));
+					VirtualPallet.CreateForSeed(vpId3, palletGuid8, 300, 3, TestDates.UtcNow.AddDays(-1)));
 			}
 			var pickingId1 = Guid.Parse("11111111-1111-2222-1111-111111111111");
 			var pickingId2 = Guid.Parse("11111111-2222-2222-1111-111111111111");
@@ -174,19 +174,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			{
 				context.PickingTasks.AddRange(
 					PickingTask.CreateForSeed(pickingId1, vpId1, issueId2, 20, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 0),
 				PickingTask.CreateForSeed(pickingId2, vpId1, issueId2, 20, PickingStatus.Picked, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 20),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 20),
 
 				PickingTask.CreateForSeed(pickingId3, vpId2, issueId2, 50, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-5)), 0),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-5)), 0),
 
 				PickingTask.CreateForSeed(pickingId4, vpId3, issueId2, 100, PickingStatus.Allocated, productId1,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 0),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 0),
 				PickingTask.CreateForSeed(pickingId5, vpId3, issueId2, 10, PickingStatus.Picked, productId1,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 10),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 10),
 				PickingTask.CreateForSeed(pickingId6, vpId1, issueId2, 20, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(DateTime.Today.AddDays(366)), null, DateOnly.FromDateTime(DateTime.UtcNow.AddHours(23).AddDays(-2)), 10)
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 10)
 					);
 			}
 
@@ -312,8 +312,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.ReversePickings.Any())
 			{
 				context.ReversePickings.AddRange(
-					ReversePicking.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), 10, pickingId2, "UserR"),
-					ReversePicking.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)), 10, pickingId5, "UserR")
+					ReversePicking.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId2, "UserR"),
+					ReversePicking.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId5, "UserR")
 				);
 			}
 			context.SaveChanges();

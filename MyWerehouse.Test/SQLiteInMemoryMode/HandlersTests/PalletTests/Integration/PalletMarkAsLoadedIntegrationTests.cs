@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,8 +47,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q0001", DateTime.UtcNow.AddDays(-30), location.Id, PalletStatus.ToIssue, null, null);
-			pallet.AddProductForTests(product.Id, 10, DateTime.UtcNow.AddDays(-30), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			var pallet = Pallet.CreateForTests("Q0001", TestDates.UtcNow.AddDays(-30), location.Id, PalletStatus.ToIssue, null, null);
+			pallet.AddProductForTests(product.Id, 10, TestDates.UtcNow.AddDays(-30), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act
@@ -72,8 +72,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q0001", DateTime.UtcNow.AddDays(-30), location.Id, PalletStatus.LockedForIssue, null, null);
-			pallet.AddProductForTests(product.Id, 10, DateTime.UtcNow.AddDays(-30), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			var pallet = Pallet.CreateForTests("Q0001", TestDates.UtcNow.AddDays(-30), location.Id, PalletStatus.LockedForIssue, null, null);
+			pallet.AddProductForTests(product.Id, 10, TestDates.UtcNow.AddDays(-30), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			//Act
@@ -96,8 +96,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q0001", DateTime.UtcNow.AddDays(-30), location.Id, PalletStatus.Archived, null, null);
-			pallet.AddProductForTests(product.Id, 10, DateTime.UtcNow.AddDays(-30), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			var pallet = Pallet.CreateForTests("Q0001", TestDates.UtcNow.AddDays(-30), location.Id, PalletStatus.Archived, null, null);
+			pallet.AddProductForTests(product.Id, 10, TestDates.UtcNow.AddDays(-30), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();

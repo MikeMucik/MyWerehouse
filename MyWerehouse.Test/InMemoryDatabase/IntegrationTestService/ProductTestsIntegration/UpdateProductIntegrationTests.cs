@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,7 +43,6 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 2,
 				SKU = "q1233",
 				IsDeleted = false,
-				AddedAd = DateTime.Now,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -81,7 +80,6 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 2,
 				SKU = "q1233",
 				IsDeleted = false,
-				AddedAd = DateTime.Now,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -112,7 +110,6 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 2,
 				SKU = "q1233",
 				IsDeleted = false,
-				AddedAd = DateTime.Now,
 				Height = 10,
 				Weight = 10,
 				Width = 10,
@@ -154,7 +151,6 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CategoryId = 2,
 				SKU = "q1233",
 				IsDeleted = false,
-				AddedAd = DateTime.Now,
 				Height = 10,
 				Weight = 10,
 				Width = 10,

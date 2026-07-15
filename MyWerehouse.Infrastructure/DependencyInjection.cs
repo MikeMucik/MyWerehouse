@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using MyWerehouse.Application.Common.DateTimeProvider;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 
@@ -33,6 +34,7 @@ namespace MyWerehouse.Infrastructure
 			services.AddScoped<IReceiptRepo, ReceiptRepo>();
 			services.AddScoped<IReversePickingRepo, ReversePickingRepo>();
 
+			services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 			return services;
 		}
 	}

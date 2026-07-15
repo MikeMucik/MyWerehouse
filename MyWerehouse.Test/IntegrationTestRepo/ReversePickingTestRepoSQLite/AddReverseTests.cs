@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,11 +61,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.Now.AddMonths(12)));
+			var pallet1 = Pallet.CreateForTests("Q1010", TestDates.Now, 1, PalletStatus.Available, null, null);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.Now.AddMonths(12)));
 
-			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 1, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.Now.AddMonths(12)));
+			var pallet2 = Pallet.CreateForTests("Q1011", TestDates.Now, 1, PalletStatus.Available, null, null);
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.Now.AddMonths(12)));
 					
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -75,17 +75,17 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem =new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product.Id,18, DateOnly.FromDateTime ( DateTime.UtcNow.AddDays(365)), DateTime.UtcNow.AddDays(-7))
+				IssueItem.CreateForSeed(1, issueId, product.Id,18, DateOnly.FromDateTime ( TestDates.UtcNow.AddDays(365)), TestDates.UtcNow.AddDays(-7))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, client.Id, DateTime.UtcNow.AddDays(-7),
-			DateOnly.FromDateTime( DateTime.UtcNow.AddDays(7)), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
-			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 20, location1.Id, DateTime.UtcNow.AddDays(-7));
+			var issue = Issue.CreateForSeed(issueId, 1, client.Id, TestDates.UtcNow.AddDays(-7),
+			DateOnly.FromDateTime( TestDates.UtcNow.AddDays(7)), "UserS", IssueStatus.ConfirmedToLoad, issueItem);
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 20, location1.Id, TestDates.UtcNow.AddDays(-7));
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issue.Id, 10, PickingStatus.Picked, product.Id,
-				DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 10);
+				DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 10);
 			
-			var pickingPallet = Pallet.CreateForTests("Q5000", DateTime.Now, 1, PalletStatus.ToIssue, null, null);
-			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			var pickingPallet = Pallet.CreateForTests("Q5000", TestDates.Now, 1, PalletStatus.ToIssue, null, null);
+			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			
 			issue.ReservePallet(pallet1);
 			issue.ReservePallet(pallet2);
@@ -100,18 +100,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			var reversePickingRepo = new ReversePickingRepo(DbContext);
 			var reversePicking = ReversePicking.Create(pickingPallet.Id, null, product.Id, pickingPallet.ProductsOnPallet.Single().BestBefore,
 				pickingPallet.ProductsOnPallet.Single().Quantity, pickingTask.Id, "UserR");
-			
 			//Act
 			reversePickingRepo.AddReversePicking(reversePicking);
-			DbContext.SaveChanges();
-			
+			DbContext.SaveChanges();			
 			// Assert
 			var result = DbContext.ReversePickings
 				.Include(rp => rp.PickingTask)
 				.SingleOrDefault();
 
 			Assert.NotNull(result);
-
 			// --- klucze i wymagane pola ---
 			Assert.True(result.Id != Guid.Empty);
 
@@ -119,34 +116,27 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			Assert.Equal(pickingTask.Id, result.PickingTaskId);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal("UserR", result.UserId);
-
 			// --- dane ilościowe i daty ---
 			Assert.Equal(10, result.Quantity);
 			Assert.Equal(
 				pickingPallet.ProductsOnPallet.First().BestBefore,
 				result.BestBefore
 			);
-
 			// --- status ReversePicking ---
 			Assert.Equal(ReversePickingStatus.Ongoing, result.Status);
-
 			// --- palety źródłowe / docelowe ---
 			Assert.Null(result.SourcePalletId);
 			Assert.Null(result.DestinationPalletId);
-
 			// --- relacja ---
 			Assert.NotNull(result.PickingTask);
 			Assert.Equal(pickingTask.Id, result.PickingTask.Id);
-
 			// ilość reverse picking nie może przekraczać alokacji
 			Assert.True(result.Quantity <= pickingTask.RequestedQuantity);
-
 			// BestBefore musi dotyczyć tego samego produktu
 			Assert.Equal(
 				pickingTask.BestBefore,
 				result.BestBefore
 			);
-
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,7 +28,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			};
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
+			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
 			
 			var palletRepo = new PalletRepo(DbContext);
 			//Act
@@ -62,8 +62,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Products.Add(product);
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 1, DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
+			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 1, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
 			
 			var palletRepo = new PalletRepo(DbContext);
 			//Act
@@ -119,9 +119,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product1.Id, 1, DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
-			pallet.AddProduct(product2.Id, 20, DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));		
+			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product1.Id, 1, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
+			pallet.AddProduct(product2.Id, 20, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));		
 			
 			var palletRepo = new PalletRepo(DbContext);
 			//Act

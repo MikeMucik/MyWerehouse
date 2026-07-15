@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,8 +58,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			//Arrange
 			var category = CreateCategory();
 			var product = CreateProduct("Prod1");
-			var palletP1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, null, null);
-			palletP1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var palletP1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
+			palletP1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			_context.Categories.Add(category);
 			_context.Products.Add(product);
 			_context.Pallets.AddRange(palletP1);

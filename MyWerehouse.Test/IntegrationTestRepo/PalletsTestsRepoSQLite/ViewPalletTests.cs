@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Arrange
 			var productId = new PalletSearchFilter
 			{
-				BestBeforeFrom = DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
+				BestBeforeFrom = DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(1)),
 			};
 			//Act
 			var result = _palletRepo.GetPalletsByFilter(productId);

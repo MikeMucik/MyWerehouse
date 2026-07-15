@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -78,11 +78,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(2, issueId, product2.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
 			var performedBy = "Janek";
-			var loadedPallet = Pallet.CreateForTests("P1", DateTime.UtcNow, location1.Id, PalletStatus.Loaded, null, issueId);
-			loadedPallet.AddProduct(product1.Id, 5, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			var loadedPallet = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.Loaded, null, issueId);
+			loadedPallet.AddProduct(product1.Id, 5, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			
-			var notLoadedPallet = Pallet.CreateForTests("P2", DateTime.UtcNow, location2.Id, PalletStatus.ToIssue, null,issueId);
-			notLoadedPallet.AddProduct(product2.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			var notLoadedPallet = Pallet.CreateForTests("P2", TestDates.UtcNow, location2.Id, PalletStatus.ToIssue, null,issueId);
+			notLoadedPallet.AddProduct(product2.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			
 			var issue = Issue.CreateForSeed(issueId, 2, client.Id, new DateTime(2025, 6, 6, 2, 2, 2),
 			DateOnly.FromDateTime( new DateTime(2025, 6, 12, 2, 2, 2)), "TestUser", IssueStatus.ConfirmedToLoad, issueItem);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
@@ -122,10 +122,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			DbContext.Receipts.Add(receipt);
 			DbContext.SaveChanges();
-			var pallet1 = Pallet.CreateForTests("Q3000", DateTime.Now, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 100, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet2 = Pallet.CreateForTests("Q3001", DateTime.Now, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 750, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(356)));
+			var pallet1 = Pallet.CreateForTests("Q3000", TestDates.Now, 1, PalletStatus.Available, receipt.Id, null);
+			pallet1.AddProduct(product.Id, 100, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("Q3001", TestDates.Now, 2, PalletStatus.Available, receipt.Id, null);
+			pallet2.AddProduct(product.Id, 750, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(356)));
 			DbContext.Pallets.AddRange(pallet1, pallet2);		
 
 			DbContext.SaveChanges();

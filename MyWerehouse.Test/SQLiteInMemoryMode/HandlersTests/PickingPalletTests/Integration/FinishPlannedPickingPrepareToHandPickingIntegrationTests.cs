@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -78,18 +78,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.SaveChanges();
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
-			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 
 			var sourcePallet2 = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 
 			var sourcePallet3 = Pallet.CreateForTests("Q1002", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 
 			var issueId = Guid.NewGuid();
 
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddHours(12)), "TestUser", IssueStatus.New, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
+			DateOnly.FromDateTime(TestDates.UtcNow.AddHours(12)), "TestUser", IssueStatus.New, null);
 
 			DbContext.Pallets.AddRange(sourcePallet1, sourcePallet2, sourcePallet3);
 			DbContext.Issues.AddRange(issue);
@@ -103,13 +103,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var pickingGuid1 = Guid.NewGuid();
 			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid1, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
-			 DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			var pickingGuid2 = Guid.NewGuid();
 			var pickingTask2 = PickingTask.CreateForSeed(pickingGuid2, virtualPallet2.Id, issue.Id, 10, PickingStatus.Allocated, product1.Id,
-			 DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			var pickingGuid3 = Guid.NewGuid();
 			var pickingTask3 = PickingTask.CreateForSeed(pickingGuid3, virtualPallet3.Id, issue.Id, 15, PickingStatus.Allocated, product1.Id,
-			 DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 
 			DbContext.PickingTasks.AddRange(pickingTask1, pickingTask2, pickingTask3);
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3);
@@ -142,18 +142,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.SaveChanges();
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
-			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 
 			var sourcePallet2 = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 
 			var sourcePallet3 = Pallet.CreateForTests("Q1002", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 
 			var issueId = Guid.NewGuid();
 
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddHours(12)), "TestUser", IssueStatus.New, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
+			DateOnly.FromDateTime(TestDates.UtcNow.AddHours(12)), "TestUser", IssueStatus.New, null);
 
 			DbContext.Pallets.AddRange(sourcePallet1, sourcePallet2, sourcePallet3);
 			DbContext.Issues.AddRange(issue);
@@ -167,13 +167,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var pickingGuid1 = Guid.NewGuid();
 			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid1, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			var pickingGuid2 = Guid.NewGuid();
 			var pickingTask2 = PickingTask.CreateForSeed(pickingGuid2, virtualPallet2.Id, issue.Id, 10, PickingStatus.Allocated, product1.Id,
-			 DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			var pickingGuid3 = Guid.NewGuid();
 			var pickingTask3 = PickingTask.CreateForSeed(pickingGuid3, virtualPallet3.Id, issue.Id, 15, PickingStatus.Allocated, product1.Id,
-			 DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3);
 			DbContext.PickingTasks.AddRange(pickingTask1, pickingTask2, pickingTask3);
 			DbContext.SaveChanges();
@@ -233,23 +233,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.SaveChanges();
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
-			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(400)));
+			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 
 			var sourcePallet2 = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(400)));
+			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 
 			var sourcePallet3 = Pallet.CreateForTests("Q1002", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(400)));
+			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 			//nowe
 			var sourcePallet4 = Pallet.CreateForTests("Q1003", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet4.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(400)));
+			sourcePallet4.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 
 			var sourcePallet5 = Pallet.CreateForTests("Q1004", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet5.AddProductForTests(product2.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(400)));
+			sourcePallet5.AddProductForTests(product2.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 
 			var issueId = Guid.NewGuid();
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddHours(12)), "TestUser", IssueStatus.New, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
+			DateOnly.FromDateTime(TestDates.UtcNow.AddHours(12)), "TestUser", IssueStatus.New, null);
 
 			DbContext.Pallets.AddRange(sourcePallet1, sourcePallet2, sourcePallet3, sourcePallet4, sourcePallet5);
 			DbContext.Issues.AddRange(issue);
@@ -263,13 +263,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var pickingGuid1 = Guid.NewGuid();
 			var pickingTask1 = PickingTask.CreateForSeed(pickingGuid1, virtualPallet1.Id, issue.Id, 10, PickingStatus.Allocated, product2.Id,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			var pickingGuid2 = Guid.NewGuid();
 			var pickingTask2 = PickingTask.CreateForSeed(pickingGuid2, virtualPallet2.Id, issue.Id, 10, PickingStatus.Allocated, product1.Id,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			var pickingGuid3 = Guid.NewGuid();
 			var pickingTask3 = PickingTask.CreateForSeed(pickingGuid3, virtualPallet3.Id, issue.Id, 15, PickingStatus.Allocated, product1.Id,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)), null, null, 0);
+			DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 0);
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3);
 			DbContext.PickingTasks.AddRange(pickingTask1, pickingTask2, pickingTask3);
 			await DbContext.SaveChangesAsync();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,7 +46,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			};
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 10, "U1234",
-			DateTime.UtcNow, ReceiptStatus.PhysicallyCompleted, 1);
+			TestDates.UtcNow, ReceiptStatus.PhysicallyCompleted, 1);
 			
 			_context.Locations.Add(location);
 			_context.Receipts.Add(receipt);

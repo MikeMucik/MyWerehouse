@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,8 +32,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 				Height = 1
 			};
 			DbContext.Locations.AddRange(location1, location2);
-			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, null);			
-			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.UtcNow, 2, PalletStatus.Available, null, null);			
+			var pallet1 = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, null);			
+			var pallet2 = Pallet.CreateForTests("Q1011", TestDates.UtcNow, 2, PalletStatus.Available, null, null);			
 			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.SaveChanges();
 			var palletRepo = new PalletRepo(DbContext);

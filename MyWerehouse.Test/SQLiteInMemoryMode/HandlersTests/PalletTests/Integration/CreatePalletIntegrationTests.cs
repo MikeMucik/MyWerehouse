@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,7 +28,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		}
 		private Product CreateProduct(string name)
 		{
-			return Product.CreateForSeed(productId, name, "666666", DateTime.UtcNow, 1,false, 56);
+			return Product.CreateForSeed(productId, name, "666666", TestDates.UtcNow, 1,false, 56);
 		}
 		private static Location CreateLocation(int position)
 		{
@@ -46,7 +46,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			{
 				ProductId = productId,
 				Quantity = 10,
-				LastUpdated = DateTime.UtcNow.AddDays(-1)
+				LastUpdated = TestDates.UtcNow.AddDays(-1)
 			};
 		}
 		[Fact]

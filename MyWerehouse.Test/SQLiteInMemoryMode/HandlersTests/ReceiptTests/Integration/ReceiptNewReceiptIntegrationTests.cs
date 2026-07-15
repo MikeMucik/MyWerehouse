@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,7 +61,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var newPalletDto = new CreateReceiptPlanDTO
 			{
 				ClientId = client.Id,
-				ReceiptDateTime = DateTime.UtcNow,
+				ReceiptDateTime = TestDates.UtcNow,
 				PerformedBy = "user",
 				RampNumber = 1
 			};
@@ -87,7 +87,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var newPalletDto = new CreateReceiptPlanDTO
 			{
 				ClientId = client.Id,
-				ReceiptDateTime = DateTime.UtcNow,
+				ReceiptDateTime = TestDates.UtcNow,
 				PerformedBy = "",//
 				RampNumber = 1
 			};
@@ -108,7 +108,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var newPalletDto = new CreateReceiptPlanDTO
 			{
 				ClientId = 2,
-				ReceiptDateTime = DateTime.UtcNow,
+				ReceiptDateTime = TestDates.UtcNow,
 				PerformedBy = "user",
 				RampNumber = 1
 			};

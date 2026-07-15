@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -82,13 +82,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-5),
-			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow.AddDays(-5),
+			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
-			sourcePallet.AddProductForTests(product.Id, 60, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)));
+			sourcePallet.AddProductForTests(product.Id, 60, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			
 			var pickingPallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
-			pickingPallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
+			pickingPallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
 			
 			DbContext.Pallets.AddRange(sourcePallet, pickingPallet);
 			DbContext.Issues.AddRange(issue);
@@ -98,8 +98,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			
 			var pickinTaskGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickinTaskGuid, virtualPallet.Id, issueId, 40,
-				PickingStatus.Picked, product.Id, DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)),
-				pickingPallet.Id, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)), 40);
+				PickingStatus.Picked, product.Id, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)),
+				pickingPallet.Id, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-1)), 40);
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.AddRange(virtualPallet);
 			DbContext.SaveChanges();
@@ -146,10 +146,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow.AddDays(-5),
-			DateOnly.FromDateTime( DateTime.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow.AddDays(-5),
+			DateOnly.FromDateTime( TestDates.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
-			sourcePallet1.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.Now.AddMonths(24)));
+			sourcePallet1.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
 			
 			DbContext.Pallets.AddRange(sourcePallet1);
 			DbContext.Issues.AddRange(issue);

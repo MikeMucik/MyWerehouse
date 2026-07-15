@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,8 +51,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_context.SaveChanges();
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, client.Id, "U005",
-			DateTime.UtcNow, ReceiptStatus.Verified, location.Id);
-			var pallet = Pallet.CreateForTests("Q1234", DateTime.Now, location.Id, PalletStatus.Receiving, receipt.Id, null);
+			TestDates.UtcNow, ReceiptStatus.Verified, location.Id);
+			var pallet = Pallet.CreateForTests("Q1234", TestDates.Now, location.Id, PalletStatus.Receiving, receipt.Id, null);
 			pallet.AddProduct(product1.Id, 100, new DateOnly(2027, 3, 3));	
 			_context.Receipts.Add(receipt);
 			_context.Pallets.Add(pallet);

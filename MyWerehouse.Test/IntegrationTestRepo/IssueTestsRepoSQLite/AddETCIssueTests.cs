@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,9 +55,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 				Position = 1
 			};
 			
-			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);			
+			var pallet1 = Pallet.CreateForTests("Q1010", TestDates.Now, 1, PalletStatus.Available, null, null);			
 			
-			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 2, PalletStatus.Available, null, null);
+			var pallet2 = Pallet.CreateForTests("Q1011", TestDates.Now, 2, PalletStatus.Available, null, null);
 			
 			DbContext.Clients.Add(initailClient);			
 			DbContext.Locations.AddRange(location1, location2);
@@ -127,9 +127,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 				Position = 1
 			};
 			
-			var pallet1 = Pallet.CreateForTests("Q1010", DateTime.Now, 1, PalletStatus.Available, null, null);
+			var pallet1 = Pallet.CreateForTests("Q1010", TestDates.Now, 1, PalletStatus.Available, null, null);
 			
-			var pallet2 = Pallet.CreateForTests("Q1011", DateTime.Now, 2, PalletStatus.Available, null, null);
+			var pallet2 = Pallet.CreateForTests("Q1011", TestDates.Now, 2, PalletStatus.Available, null, null);
 			
 			DbContext.Clients.Add(initailClient);
 			

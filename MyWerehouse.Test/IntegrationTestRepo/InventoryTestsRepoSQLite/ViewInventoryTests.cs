@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -66,7 +66,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
-			var bestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365));		
+			var bestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365));		
 			//Act
 			var result =await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId2, bestBefore);
 			//Assert
@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 		{
 			//Arrange
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
-			var bestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
+			var bestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(30));
 			//var
 			//Act
 			var result = await _inventoryRepo.GetAvailableQuantityAsync(productId2, bestBefore);

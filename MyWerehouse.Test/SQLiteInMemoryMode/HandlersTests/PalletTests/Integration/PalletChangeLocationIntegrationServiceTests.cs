@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -59,7 +59,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var movement = new HistoryPallet
 			{
 				DestinationLocationId = location1.Id,
-				MovementDate = DateTime.UtcNow.AddDays(-2),
+				MovementDate = TestDates.UtcNow.AddDays(-2),
 				PalletId = pallet.Id,
 				PalletNumber = pallet.PalletNumber,
 				Reason = ReasonForPallet.Moved,
@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			{
 				SourceLocationId = location1.Id,
 				DestinationLocationId = location2.Id,
-				MovementDate = DateTime.UtcNow.AddDays(-1),
+				MovementDate = TestDates.UtcNow.AddDays(-1),
 				PalletId = pallet.Id,
 				PalletNumber = pallet.PalletNumber,
 				Reason = ReasonForPallet.Moved,

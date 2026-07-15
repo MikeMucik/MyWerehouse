@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,8 +36,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			DbContext.Products.Add(product);
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)));
+			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
@@ -91,8 +91,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 				Height = 1
 			};
 			DbContext.Locations.Add(location);
-			var pallet = Pallet.CreateForTests("Q00001", DateTime.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(12)));
+			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
+			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
 
 			DbContext.Pallets.Add(pallet);
 			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);

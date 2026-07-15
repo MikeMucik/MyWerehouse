@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -63,8 +63,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 
 			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
 
-			var startDate = DateTime.UtcNow.AddDays(-2);
-			var endDate = DateTime.UtcNow.AddDays(1);
+			var startDate = TestDates.UtcNow.AddDays(-2);
+			var endDate = TestDates.UtcNow.AddDays(1);
 			//Act
 			var result = await _virtualPalletRepo.GetVirtualPalletsByTimeAsync(startDate, endDate);
 			//Assert
@@ -86,8 +86,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 		public async Task TakeVirtualPalletsByPickingDates_GetVirtualPallets_ReturnList()
 		{
 			//Arrange
-			var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2));
-			var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+			var startDate = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-2));
+			var endDate = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1));
 			//Act
 			var result = await _virtualPalletRepo.GetVirtualPalletsByTimePickingTask(startDate, endDate).ToListAsync();
 			//Assert

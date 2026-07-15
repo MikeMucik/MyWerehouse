@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 		}
 		private static Receipt CreateReceipt()
 		{
-			return	Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMake",	DateTime.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
+			return	Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMake",	TestDates.UtcNow.AddDays(-1), ReceiptStatus.Verified, 100100);
 		}
 		
 		[Fact]
@@ -83,10 +83,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var location2 = CreateLocation(2, 2);
 			var locationBase = CreateLocation(100100, 5);			
 			var receipt = CreateReceipt();
-			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -103,11 +103,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18,BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))  }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18,BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365))  }
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7))));
 			//Assert 1
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).Single();
@@ -241,10 +241,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var locationBase = CreateLocation(100100, 5);
 			var receipt = CreateReceipt();
 			
-			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -261,11 +261,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)) }
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7))));
 			//Assert
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
@@ -385,10 +385,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var locationBase = CreateLocation(100100, 5);
 			var receipt = CreateReceipt();
 			
-			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -404,11 +404,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)) }
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7))));
 			//Assert
 			Assert.NotNull(created);
 			Assert.True(created.IsSuccess);
@@ -486,8 +486,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(2, palletP2.LocationId);
 
 			//Arange for Act 4
-			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			pallet3.AddProduct(product.Id, 1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Pallets.Add(pallet3);
 			await DbContext.SaveChangesAsync();
 			var existingPallet = await DbContext.Pallets.SingleAsync(x => x.PalletNumber == "P3");
@@ -544,12 +544,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var locationBase = CreateLocation(100100, 5);
 			var receipt = CreateReceipt();
 			
-			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
-			pallet4.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet4 = Pallet.CreateForTests("P4", TestDates.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
+			pallet4.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -565,12 +565,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18,BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))  },
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 4, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18,BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365))  },
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 4, BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)) }
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7))));
 			//Assert
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
@@ -654,8 +654,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(10, pallet4.ProductsOnPallet.Single().Quantity);
 			
 			//ArrangeFor Act4
-			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			pallet3.AddProduct(product.Id, 1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Pallets.Add(pallet3);
 			await DbContext.SaveChangesAsync();
 			var existingPallet = await DbContext.Pallets.SingleAsync(x => x.PalletNumber == "P3");
@@ -722,12 +722,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var locationBase = CreateLocation(100100, 5);
 			var receipt = CreateReceipt();
 			
-			var pallet1 = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet2 = Pallet.CreateForTests("P2", DateTime.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
-			var pallet4 = Pallet.CreateForTests("P4", DateTime.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
-			pallet4.AddProduct(product1.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
+			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet4 = Pallet.CreateForTests("P4", TestDates.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
+			pallet4.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -743,12 +743,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				PerformedBy = "User1",
 				Items = new List<IssueItemDTO>
 				{
-					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore =DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365))  },
-					new IssueItemDTO { ProductId = product1.Id, Quantity = 4, BestBefore = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(365)) }
+					new IssueItemDTO { ProductId = product.Id, Quantity = 18, BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365))  },
+					new IssueItemDTO { ProductId = product1.Id, Quantity = 4, BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)) }
 				}
 			};
 
-			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7))));
+			var created = await Mediator.Send(new CreateIssueCommand(createIssueDto, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7))));
 			//Assert 1
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).Single();
@@ -870,8 +870,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(PalletStatus.ToPicking, palletP2.Status);			
 			
 			//ArrangeFor Act4
-			var pallet3 = Pallet.CreateForTests("P3", DateTime.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
-			pallet3.AddProduct(product.Id, 1, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.Available, receipt.Id, null);
+			pallet3.AddProduct(product.Id, 1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Pallets.Add(pallet3);
 			await	DbContext.SaveChangesAsync();			
 			var existingPallet =await DbContext.Pallets.SingleAsync(x => x.PalletNumber == "P3");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -79,12 +79,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.Pending, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.Pending, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);
@@ -124,12 +124,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);
@@ -169,12 +169,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.LockedForIssue, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);
@@ -208,12 +208,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueItem = new List<IssueItem>{
 				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2027, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);

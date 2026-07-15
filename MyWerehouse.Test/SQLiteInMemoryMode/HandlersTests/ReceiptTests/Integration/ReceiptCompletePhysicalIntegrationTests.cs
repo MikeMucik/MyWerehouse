@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -72,9 +72,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
 				new DateTime(2025, 6, 6), ReceiptStatus.InProgress, 1);
 
-			var pallet = Pallet.CreateForTests("PAL001", DateTime.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
+			var pallet = Pallet.CreateForTests("PAL001", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			var pallet1 = Pallet.CreateForTests("PAL002", DateTime.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
+			var pallet1 = Pallet.CreateForTests("PAL002", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -98,9 +98,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var category = CreateCategory("Category");
 			var product = CreateProduct("Product A", "123456");
 			var location = CreateLocation(1, 1);			
-			var pallet = Pallet.CreateForTests("PAL001", DateTime.UtcNow, 1, PalletStatus.Receiving, null, null);
+			var pallet = Pallet.CreateForTests("PAL001", TestDates.UtcNow, 1, PalletStatus.Receiving, null, null);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
-			var pallet1 = Pallet.CreateForTests("PAL002", DateTime.UtcNow, 1, PalletStatus.Receiving, null, null);
+			var pallet1 = Pallet.CreateForTests("PAL002", TestDates.UtcNow, 1, PalletStatus.Receiving, null, null);
 			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",

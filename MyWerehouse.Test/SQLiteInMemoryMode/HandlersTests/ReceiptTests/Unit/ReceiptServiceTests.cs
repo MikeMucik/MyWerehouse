@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
-			var pallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
+			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
 			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
 			
 			DbContext.Categories.Add(category);
@@ -109,7 +109,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 						Id = pallet.Id,
 						LocationId = 1,
 						Status = PalletStatus.Receiving,
-						DateReceived = DateTime.Now,
+						DateReceived = TestDates.Now,
 						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
@@ -117,7 +117,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 								PalletId = pallet.Id,
 								ProductId = product1.Id,
 								Quantity = 1,
-								DateAdded = DateTime.Now,
+								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -195,7 +195,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			
-			var initialPallet = Pallet.CreateForTests("Q1000", DateTime.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
+			var initialPallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
 			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
 			
 			DbContext.Categories.Add(initialCategory);
@@ -220,14 +220,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 					{						
 						LocationId = initailLocation.Id,
 						Status = PalletStatus.Receiving,
-						DateReceived = DateTime.Now,
+						DateReceived = TestDates.Now,
 						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
 						{
 							new()
 							{
 								ProductId = initialProduct1.Id,
 								Quantity = 1,
-								DateAdded = DateTime.Now,
+								DateAdded = TestDates.Now,
 							}
 						}
 					}

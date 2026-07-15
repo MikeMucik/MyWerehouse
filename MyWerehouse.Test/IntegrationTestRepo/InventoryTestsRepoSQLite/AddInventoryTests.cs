@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
 			var quantity = 10;
-			var date = DateTime.UtcNow;
+			var date = TestDates.UtcNow;
 			var inventory = new Inventory
 			{
 				//ProductId = product.Id,

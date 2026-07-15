@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -85,12 +85,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
 				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
 
 			//Inventory
@@ -98,13 +98,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var inventory = new Inventory
 			{
 				Product = product,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 			var inventory1 = new Inventory
 			{
 				Product = product1,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 			DbContext.Inventories.AddRange(inventory1, inventory);
@@ -170,12 +170,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
 				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
 
 			//Inventory
@@ -183,13 +183,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var inventory = new Inventory
 			{
 				Product = product,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 5
 			};
 			var inventory1 = new Inventory
 			{
 				Product = product1,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 5
 			};
 
@@ -235,12 +235,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
 				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
 
 			//Inventory
@@ -248,13 +248,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var inventory = new Inventory
 			{
 				Product = product,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 			var inventory1 = new Inventory
 			{
 				Product = product1,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 
@@ -287,12 +287,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
 				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, null);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, null);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, null);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
 
 			//Inventory
@@ -300,13 +300,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var inventory = new Inventory
 			{
 				Product = product,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 			var inventory1 = new Inventory
 			{
 				Product = product1,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 
@@ -339,24 +339,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
 				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
 			};
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.Now.AddDays(-7),
-			DateOnly.FromDateTime(DateTime.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
-			var pallet = Pallet.CreateForTests("P1", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
 
-			var pallet1 = Pallet.CreateForTests("P2", DateTime.UtcNow, 1, PalletStatus.Loaded, null, issueId);
+			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, new DateOnly(2026, 1, 1));
 
 			var inventory = new Inventory
 			{
 				Product = product,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 			var inventory1 = new Inventory
 			{
 				Product = product1,
-				LastUpdated = DateTime.Now.AddDays(-7),
+				LastUpdated = TestDates.Now.AddDays(-7),
 				Quantity = 100
 			};
 			DbContext.Pallets.AddRange(pallet, pallet1);

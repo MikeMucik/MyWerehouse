@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -54,7 +54,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, null);
+			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, null);
 
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				PalletStatus = PalletStatus.Available,
 				PerformedBy = "U001",
 				Reason = ReasonForPallet.Correction,
-				MovementDate = DateTime.Now,
+				MovementDate = TestDates.Now,
 			};
 			var palletMovementRepo = new HistoryPalletRepo(DbContext);
 
@@ -144,10 +144,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, null);
+			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, null);
 
-			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, DateTime.Now
-				, DateOnly.FromDateTime( DateTime.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
+			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, TestDates.Now
+				, DateOnly.FromDateTime( TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);
@@ -161,7 +161,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				IssueId = issue.Id,
 				IssueNumber = issue.IssueNumber,
 				ClientId = issue.ClientId,
-				DateTime = DateTime.Now,
+				DateTime = TestDates.Now,
 				//Items
 				Details = new List<HistoryIssueDetail>
 				{
@@ -234,7 +234,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			
 			DbContext.Receipts.AddRange(receipt);
 			DbContext.SaveChanges();
-			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, receiptId1, null);
+			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, receiptId1, null);
 			DbContext.Pallets.AddRange(pallet1);
 			DbContext.SaveChanges();
 
@@ -246,7 +246,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				ReceiptNumber = receipt.ReceiptNumber,
 				ClientId = receipt.ClientId,
 				StatusAfter = ReceiptStatus.Verified,
-				DateTime = DateTime.Now,
+				DateTime = TestDates.Now,
 				PerformedBy = receipt.PerformedBy,
 				Details = new List< HistoryReceiptDetail>
 				{
@@ -317,11 +317,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, DateTime.Now
-			,DateOnly.FromDateTime( DateTime.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
+			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, TestDates.Now
+			,DateOnly.FromDateTime( TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
-			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, issue.Id);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, issue.Id);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
@@ -340,7 +340,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				PickingTaskId = virtualPallet.PickingTasks.First().Id,
 				QuantityAllocated = virtualPallet.PickingTasks.First().RequestedQuantity,
 				StatusAfter = PickingStatus.Picked,
-				DateTime = DateTime.Now,
+				DateTime = TestDates.Now,
 				PerformedBy = "A",
 				StatusBefore = PickingStatus.Allocated,
 				ProductId = virtualPallet.PickingTasks.First().ProductId,
@@ -413,11 +413,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Height = 1,
 				Position = 1
 			};
-			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, DateTime.Now
-			, DateOnly.FromDateTime(DateTime.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
+			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, TestDates.Now
+			, DateOnly.FromDateTime(TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
-			var pallet1 = Pallet.CreateForTests("Q1000", DateTime.Now, 1, PalletStatus.Available, null, issue.Id);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, issue.Id);
+			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
@@ -434,10 +434,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.SaveChanges();
 			//wykonaj picking i utwórz paletę
-			var pickingPallet = Pallet.CreateForTests("Q1001", DateTime.Now, 1, PalletStatus.ToIssue, null, issue.Id);
-			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)));
+			var pickingPallet = Pallet.CreateForTests("Q1001", TestDates.Now, 1, PalletStatus.ToIssue, null, issue.Id);
+			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			//DbContext.Clients.Add(initailClient);
-			var reverseTask = ReversePicking.Create(pickingPallet.Id,pallet1.Id,product.Id,DateOnly.FromDateTime(DateTime.UtcNow.AddDays(366)), 10, pickingTask.Id,"UserReserve");
+			var reverseTask = ReversePicking.Create(pickingPallet.Id,pallet1.Id,product.Id,DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), 10, pickingTask.Id,"UserReserve");
 			
 			var historyReversePicking = new HistoryReversePicking
 			{
@@ -449,7 +449,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				IssueId = issue.Id,
 				IssueNumber = issue.IssueNumber,
 				ProductId = reverseTask.ProductId,
-				DateTime = DateTime.UtcNow,
+				DateTime = TestDates.UtcNow,
 				PerformedBy = reverseTask.UserId,
 				Quantity = reverseTask.Quantity,
 				StatusAfter =ReversePickingStatus.Ongoing

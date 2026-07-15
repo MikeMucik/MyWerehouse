@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +33,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		{
 			// Arrange
 			var palletGuid8 = Guid.Parse("00000000-0008-1111-0000-000000000000");
-			var today = DateOnly.FromDateTime(DateTime.UtcNow);
-			var tomorrow = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+			var today = DateOnly.FromDateTime(TestDates.UtcNow);
+			var tomorrow = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1));
 			var query = new PrepareEmergencyPickingQuery(palletGuid8, today, tomorrow);
 			// Act			
 			var result = await _mediator.Send(query);
@@ -51,7 +51,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		{
 			// Arrange
 			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");		
-			var query = new PrepareEmergencyPickingQuery(palletGuid9, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(0)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));			
+			var query = new PrepareEmergencyPickingQuery(palletGuid9, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(0)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)));			
 			// Act			
 			var result = await _mediator.Send(query);
 			// Assert
@@ -65,7 +65,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Arrange
 			var palletGuid5 = Guid.Parse("00000000-0005-1111-0000-000000000000");
 			var pallet = palletGuid5;
-			var today =DateOnly.FromDateTime( DateTime.UtcNow);
+			var today =DateOnly.FromDateTime( TestDates.UtcNow);
 			var query = new ShowTaskToDoQuery(pallet, today,1,1);
 			// Act
 			var result = await _mediator.Send(query);
@@ -81,7 +81,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		{			
 			// pojedyncze rekordy dla każdej alokacji(zadania pickingTask) z danego okresu czasu
 			// Arrange
-			var query = new GetListToPickingQuery(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));
+			var query = new GetListToPickingQuery(DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-2)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)));
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert 
@@ -96,7 +96,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		{
 			//lista palet do zdjęcia przez wózkowego pallet's list for operator
 			// Arrange
-			var query = new GetListPickingPalletQuery(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), 1,5);
+			var query = new GetListPickingPalletQuery(DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-2)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)), 1,5);
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert 
@@ -112,7 +112,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		{
 			//Lista ile danego towaru dla danego zlecenia posegregowane i zgrupowane po kliencie Product's list by issue&client
 			// Arrange
-			var query = new GetListIssueToPickingQuery(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));
+			var query = new GetListIssueToPickingQuery(DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-2)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)));
 			// Act
 			var result = await _mediator.Send(query);
 			// Assert 

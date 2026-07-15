@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,7 +47,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
 			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId1);
 			Assert.Equal(100, product1.Quantity);
-			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product1.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), product1.BestBefore);
 		}
 
 		[Fact]
@@ -71,10 +71,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
 			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId1);
 			Assert.Equal(50, product1.Quantity);
-			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product1.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), product1.BestBefore);
 			var product2 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId2);
 			Assert.Equal(200, product2.Quantity);
-			Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(366)), product2.BestBefore);
+			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), product2.BestBefore);
 		}
 		[Fact]
 		public async Task FindPalletsByFilter_ReturnCollection()
@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Arrange
 			var filter = new PalletSearchFilter
 			{
-				BestBeforeFrom = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(3))
+				BestBeforeFrom = DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(3))
 			};
 			//Act
 			var query = new FindPalletsByFilterQuery
@@ -103,7 +103,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Arrange
 			var filter = new PalletSearchFilter
 			{
-				BestBeforeFrom = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(36))
+				BestBeforeFrom = DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(36))
 			};
 			//Act
 			var query = new FindPalletsByFilterQuery

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -72,13 +72,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var location1 = CreateLocation(1, 1);
 			var locationPickingZone = CreateLocation(100100, 5);			
 			var issueId = Guid.NewGuid();
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
+			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 			
 			var pallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 		
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, locationPickingZone);
@@ -89,7 +89,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.SaveChanges();
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
-			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.Now.AddDays(300)), null, null, 0);
 			
 			DbContext.PickingTasks.Add(handPicknigTask);
 			DbContext.SaveChanges();
@@ -168,20 +168,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
+			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
-			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 			
 			var pallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 					
 			DbContext.Pallets.AddRange(sourcePallet1, pallet);
 			DbContext.Issues.AddRange(issue);
 			DbContext.SaveChanges();
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
-			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.Now.AddDays(300)), null, null, 0);
 			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet1.Id, 100,sourcePallet1.LocationId, new DateTime(2025, 8, 12));
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.PickingTasks.Add(handPicknigTask);
@@ -256,13 +256,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			
 			var issueId = Guid.NewGuid();
 
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
+			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 			
 			var pallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 			
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, locationPickingZone);
@@ -273,7 +273,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			await DbContext.SaveChangesAsync();
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
-			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 0);
+			 DateOnly.FromDateTime(TestDates.Now.AddDays(300)), null, null, 0);
 			
 			DbContext.PickingTasks.Add(handPicknigTask);
 			await DbContext.SaveChangesAsync();
@@ -347,13 +347,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var location1 = CreateLocation(1, 1);
 			var locationPickingZone = CreateLocation(100100, 5);			
 			var issueId = Guid.NewGuid();
-			var issue = Issue.CreateForSeed(issueId, 1, 1, DateTime.UtcNow,
-			DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
+			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			sourcePallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 			
 			var pallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(300)));
+			pallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
 			
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, locationPickingZone);
@@ -364,7 +364,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.SaveChanges();
 			var pickingGuid = Guid.NewGuid();
 			var handPicknigTask = PickingTask.CreateForSeed(pickingGuid, null, issue.Id, 20, PickingStatus.Available, product1.Id,
-			 DateOnly.FromDateTime(DateTime.Now.AddDays(300)), null, null, 10);
+			 DateOnly.FromDateTime(TestDates.Now.AddDays(300)), null, null, 10);
 			
 			DbContext.PickingTasks.Add(handPicknigTask);
 			DbContext.SaveChanges();

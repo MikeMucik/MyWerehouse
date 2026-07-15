@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -86,8 +86,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			//Arrange
 			var filter = new IssueReceiptSearchFilter
 			{
-				SendDateStart = DateOnly.FromDateTime(DateTime.UtcNow),
-				SendDateEnd = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
+				SendDateStart = DateOnly.FromDateTime(TestDates.UtcNow),
+				SendDateEnd = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1))
 			};
 
 			//Act

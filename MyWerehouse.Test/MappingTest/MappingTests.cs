@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,7 +45,6 @@ namespace MyWerehouse.Test.MappingTest
 				Width = 300,
 				Weight = 400,
 				Description = "500",
-				AddedAd = DateTime.Now,
 			};
 			//Act
 			var product = _mapper.Map<Product>(productNew);

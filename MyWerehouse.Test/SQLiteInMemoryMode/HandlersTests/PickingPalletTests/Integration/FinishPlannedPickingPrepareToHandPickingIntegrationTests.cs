@@ -50,7 +50,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		}
 		private static Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, 1, 100);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 100);
 		}
 		private static Location CreateLocation(int id, int position)
 		{
@@ -177,7 +177,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3);
 			DbContext.PickingTasks.AddRange(pickingTask1, pickingTask2, pickingTask3);
 			DbContext.SaveChanges();
-			//Act 1 
+			var virtualPallet2ForDto = Assert.IsType<VirtualPallet>(pickingTask2.VirtualPallet);
+			var sourcePallet2ForDto = Assert.IsType<Pallet>(virtualPallet2ForDto.Pallet);
+			
 			var pickingTaskDTO = new PickingTaskDTO
 			{
 				Id = pickingTask2.Id,
@@ -192,6 +194,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				RampNumber = 100100,
 				BestBefore = pickingTask2.BestBefore,
 			};
+			//Act 1 
 			var result1 = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1st"));
 			Assert.True(result1.IsSuccess);
 			//Act 
@@ -273,7 +276,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.VirtualPallets.AddRange(virtualPallet1, virtualPallet2, virtualPallet3);
 			DbContext.PickingTasks.AddRange(pickingTask1, pickingTask2, pickingTask3);
 			await DbContext.SaveChangesAsync();
-			//Act 1 
+			var virtualPallet1ForDto = Assert.IsType<VirtualPallet>(pickingTask1.VirtualPallet);
+			var sourcePallet1ForDto = Assert.IsType<Pallet>(virtualPallet1ForDto.Pallet);
+			var virtualPallet2ForDto = Assert.IsType<VirtualPallet>(pickingTask2.VirtualPallet);
+			var sourcePallet2ForDto = Assert.IsType<Pallet>(virtualPallet2ForDto.Pallet);          
+			
 			var pickingTask1DTO = new PickingTaskDTO
 			{
 				Id = pickingTask1.Id,
@@ -289,11 +296,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
+			//Act 1 
 			var result1 = await Mediator.Send(new DoPlannedPickingCommand(pickingTask1DTO, "user1st"));
+			//Assert 1
 			Assert.True(result1.IsSuccess);
 			var task1 = DbContext.PickingTasks.Single(t=>t.Id == pickingTask1.Id);			
 			Assert.Equal(PickingStatus.PickedPartially, task1.PickingStatus);
 			Assert.Equal(5, task1.PickedQuantity);
+			//Arrange 2
 			var pickingTask2DTO = new PickingTaskDTO
 			{
 				Id = pickingTask2.Id,

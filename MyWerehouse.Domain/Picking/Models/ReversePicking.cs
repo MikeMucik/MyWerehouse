@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Picking.Events;
+using MyWerehouse.Domain.Picking.PickingExceptions;
 
 namespace MyWerehouse.Domain.Picking.Models
 {
@@ -24,7 +25,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public string UserId { get; private set; } = string.Empty;
 		private ReversePicking() { }
 
-		private ReversePicking(Guid pickingPalletid, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId)
+		private ReversePicking(Guid pickingPalletid, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId, DateOnly createdAt)
 		{
 			Id = Guid.NewGuid();
 			PickingPalletId = pickingPalletid;
@@ -34,12 +35,12 @@ namespace MyWerehouse.Domain.Picking.Models
 			Quantity = quantity;
 			Status = ReversePickingStatus.Ongoing;
 			PickingTaskId = pickingTaskId;
-			DateMade = DateOnly.FromDateTime(DateTime.UtcNow);
+			DateMade = createdAt;
 			UserId = userId;
 		}
-		public static ReversePicking Create(Guid pickingPalletId, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId)
-			=> new ReversePicking(pickingPalletId, sourcePalletid, productId, bestBefore, quantity, pickingTaskId, userId);
-		private ReversePicking(Guid id, Guid pickingPalletid, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId)
+		public static ReversePicking Create(Guid pickingPalletId, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId, DateOnly createdAt)
+			=> new ReversePicking(pickingPalletId, sourcePalletid, productId, bestBefore, quantity, pickingTaskId, userId, createdAt);
+		private ReversePicking(Guid id, Guid pickingPalletid, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId, DateOnly createdAt)
 		{
 			Id = id;
 			PickingPalletId = pickingPalletid;
@@ -49,15 +50,19 @@ namespace MyWerehouse.Domain.Picking.Models
 			Quantity = quantity;
 			Status = ReversePickingStatus.Ongoing;
 			PickingTaskId = pickingTaskId;
-			DateMade = DateOnly.FromDateTime(DateTime.UtcNow);
+			DateMade = createdAt;
 			UserId = userId;
 		}
-		public static ReversePicking CreateForSeed(Guid id, Guid pickingPalletId, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId)
-			=> new ReversePicking(id, pickingPalletId, sourcePalletid, productId, bestBefore, quantity, pickingTaskId, userId);
+		public static ReversePicking CreateForSeed(Guid id, Guid pickingPalletId, Guid? sourcePalletid, Guid productId, DateOnly? bestBefore, int quantity, Guid pickingTaskId, string userId, DateOnly createdAt)
+			=> new ReversePicking(id, pickingPalletId, sourcePalletid, productId, bestBefore, quantity, pickingTaskId, userId, createdAt);
 
 		public void ChangeStatus(ReversePickingStatus status)
 		{
 			//invariant!!
+			if(Status == ReversePickingStatus.Cancelled || Status == ReversePickingStatus.Archaived)
+			{
+				//throw new CannotMakeOperationForStatusDomainException(Id, Status);
+			}
 			Status = status;
 		}
 		public void AddHistory(Guid pickingPalletId, string userId, Guid issueId, int issueNumber, ReversePickingStatus before, ReversePickingStatus after)

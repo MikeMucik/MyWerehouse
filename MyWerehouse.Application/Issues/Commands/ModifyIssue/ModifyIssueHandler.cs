@@ -18,14 +18,17 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 		IIssueRepo issueRepo,
 		IMediator mediator,
 		WerehouseDbContext werehouseDbContext,
-		IAssignProductToIssueService assignProductToIssueAsync) : IRequestHandler<ModifyIssueCommand, AppResult<List<AssignProductToIssueResult>>>
+		IAssignProductToIssueService assignProductToIssueAsync,
+		IDateTimeProvider dateTimeProvider) : IRequestHandler<ModifyIssueCommand, AppResult<List<AssignProductToIssueResult>>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IMediator _mediator = mediator;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		public async Task<AppResult<List<AssignProductToIssueResult>>> Handle(ModifyIssueCommand request, CancellationToken ct)
 		{
+			var now = _dateTimeProvider.UtcNow;
 			var resultList = new List<AssignProductToIssueResult>();
 			var issue = await _issueRepo.GetIssueByIdAsync(request.Id);
 			if (issue == null)
@@ -52,7 +55,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				foreach (var pickingTask in listOldPickingTask)
 				{
 					issue.RemovePickingTask(pickingTask);
-					pickingTask.Cancel(request.DTO.PerformedBy);
+					pickingTask.Cancel(request.DTO.PerformedBy, now);
 
 				}
 				await _werehouseDbContext.SaveChangesAsync(ct);

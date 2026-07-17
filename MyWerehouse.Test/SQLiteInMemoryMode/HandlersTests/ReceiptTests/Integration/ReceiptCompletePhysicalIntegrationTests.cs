@@ -47,7 +47,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		}
 		private static Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, 1, 56);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 56);
 		}
 		private static Location CreateLocation(int id, int position)
 		{
@@ -73,9 +73,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 				new DateTime(2025, 6, 6), ReceiptStatus.InProgress, 1);
 
 			var pallet = Pallet.CreateForTests("PAL001", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
-			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 			var pallet1 = Pallet.CreateForTests("PAL002", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -99,9 +99,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var product = CreateProduct("Product A", "123456");
 			var location = CreateLocation(1, 1);			
 			var pallet = Pallet.CreateForTests("PAL001", TestDates.UtcNow, 1, PalletStatus.Receiving, null, null);
-			pallet.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 			var pallet1 = Pallet.CreateForTests("PAL002", TestDates.UtcNow, 1, PalletStatus.Receiving, null, null);
-			pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);			

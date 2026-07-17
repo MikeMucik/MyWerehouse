@@ -75,15 +75,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("Test", "666666", 1, 56);
+			var product = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
 
-			var product1 = Product.Create("Test", "666666", 1, 56);
+			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
 
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -179,9 +179,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 				Name = "name",
 				IsDeleted = false
 			};
-			var initialProduct = Product.Create("Test", "666666", 1, 56);
+			var initialProduct = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
 
-			var initialProduct1 = Product.Create("Test", "666666", 1, 56);
+			var initialProduct1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
 
 			var initailLocation = new Location
 			{
@@ -196,7 +196,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			
 			var initialPallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
-			initialPallet.AddProduct(initialProduct.Id, 100, new DateOnly(2027, 3, 3));
+			initialPallet.AddProduct(initialProduct.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.AddRange(initialProduct, initialProduct1);

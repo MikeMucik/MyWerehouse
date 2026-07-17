@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Events;
@@ -11,10 +12,11 @@ using MyWerehouse.Infrastructure;
 
 namespace MyWerehouse.Application.Picking.Events.CreateHistoryPicking
 {
-	public class CreateHistoryPickingHandler(IHistoryPickingRepo historyPickingRepo)
+	public class CreateHistoryPickingHandler(IHistoryPickingRepo historyPickingRepo, IDateTimeProvider dateTimeProvider)
 		: INotificationHandler<CreateHistoryPickingNotification>
 	{
 		private readonly IHistoryPickingRepo _historyPickingRepo = historyPickingRepo;		
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public Task Handle(CreateHistoryPickingNotification request, CancellationToken ct)
 		{			
@@ -33,7 +35,7 @@ namespace MyWerehouse.Application.Picking.Events.CreateHistoryPicking
 				StatusBefore = request.StatusBefore,
 				StatusAfter = request.StatusAfter,
 				PerformedBy = request.PerformedBy,
-				DateTime = DateTime.UtcNow,
+				DateTime = _dateTimeProvider.UtcNow,
 			};
 			_historyPickingRepo.AddHistoryPicking(history);		
 			return Task.CompletedTask;

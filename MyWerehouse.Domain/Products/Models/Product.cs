@@ -17,20 +17,20 @@ namespace MyWerehouse.Domain.Products.Models
 		public ProductDetail? Details { get; private set; }
 		public Inventory InventoryItem { get; private set; } = null!;
 		private Product() { } //EF
-		private Product(string name, string sku, DateTime addedAd, int categoryId, bool isDeleted, int cartonsPerPallets, ProductDetail? details = null)
+		private Product(string name, string sku, DateTime createdAt, int categoryId, bool isDeleted, int cartonsPerPallets, ProductDetail? details = null)
 		{
 			if (cartonsPerPallets <= 0) throw new PalletCartonQuantityMustBePositiveDomainException();
 			Id = Guid.NewGuid();
 			Name = name;
 			SKU = sku;
-			AddedAd = addedAd;
+			AddedAd = createdAt;
 			CategoryId = categoryId;
 			IsDeleted = isDeleted;
 			CartonsPerPallet = cartonsPerPallets;
 			Details = details;
 		}
-		public static Product Create(string name, string sku, int categoryId, int cartonsPerPallets, ProductDetail? details = null)
-		=> new Product(name, sku, DateTime.UtcNow, categoryId, false, cartonsPerPallets, details);
+		public static Product Create(string name, string sku, DateTime createdAt, int categoryId, int cartonsPerPallets, ProductDetail? details = null)
+		=> new Product(name, sku, createdAt, categoryId, false, cartonsPerPallets, details);
 
 		private Product(Guid id, string name, string sku, DateTime addedAd, int categoryId, bool isDeleted, int cartonsPerPallet)
 		{

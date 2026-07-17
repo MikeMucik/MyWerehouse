@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Infrastructure.Common.DateTimeProvider;
 
 namespace MyWerehouse.Application.Picking.Services
 {
@@ -16,32 +18,37 @@ namespace MyWerehouse.Application.Picking.Services
 		private readonly IVirtualPalletRepo _virtualPalletRepo;
 		private readonly IPalletRepo _palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
+		private readonly IDateTimeProvider _dateTimeProvider;
 		public AddPickingTaskToIssueService(
 			IProductRepo productRepo,
 			IVirtualPalletRepo virtualPalletRepo,
 			IPalletRepo palletRepo,
-			IPickingTaskRepo pickingTaskRepo)
+			IPickingTaskRepo pickingTaskRepo,
+			IDateTimeProvider dateTimeProvider)
 		{
 			_productRepo = productRepo;
 			_virtualPalletRepo = virtualPalletRepo;
 			_palletRepo = palletRepo;
 			_pickingTaskRepo = pickingTaskRepo;
+			_dateTimeProvider = dateTimeProvider;
 		}
 
 		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet vp, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
 		{
+			var now = _dateTimeProvider.UtcNow;
 			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated,
 				productId, bestBefore, null, issue.IssueDateTimeSend.AddDays(-2), 0);
 			_pickingTaskRepo.AddPickingTask(pickingTask);
 			var sourcePallet = await _palletRepo.GetPalletByIdAsync(vp.PalletId);
 			if (sourcePallet == null)
 				return AddPickingTaskToIssueResult.Fail("Brak palety źródłowej.");
-			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);
+			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0, now);
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
 		public async Task<AddPickingTaskToIssueResult> AddPickingTaskToIssue(List<Pallet>? pallets, List<VirtualPallet>? virtualPallets,
 			Issue issue, Guid productId, int rest, DateOnly? bestBefore, string userId)
 		{
+			var now = _dateTimeProvider.UtcNow;
 			virtualPallets ??= [];
 			// Palety mogą nie być jeszcze zapisane w bazie, bo cały proces odbywa się w jednym handlerze przed SaveChanges.
 			var quantity = rest;
@@ -53,7 +60,7 @@ namespace MyWerehouse.Application.Picking.Services
 				_pickingTaskRepo.AddPickingTask(pickingTask);
 				pickingTasks.Add(pickingTask);
 
-				pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0);
+				pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0, now);
 
 			}
 			//z dostępnych palet do pickingu	
@@ -76,7 +83,7 @@ namespace MyWerehouse.Application.Picking.Services
 			foreach (var palletToPicking in availablePallets)
 			{
 				if (quantity <= 0) break;
-				var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.Single().Quantity, palletToPicking.LocationId);
+				var virtualPallet = VirtualPallet.Create(palletToPicking.Id, palletToPicking.ProductsOnPallet.Single().Quantity, palletToPicking.LocationId, now);
 				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //from new pallet for picking
 				var vp = _virtualPalletRepo.AddPalletToPicking(virtualPallet);
 

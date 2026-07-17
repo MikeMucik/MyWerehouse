@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -70,13 +70,13 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			//Act&Assert
 			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
-			Assert.Contains("Uzupe≈Çnij dane - wysoko≈õƒá", ex.Message);
+			Assert.Contains("Uzupe≥nij dane - wysokoúÊ", ex.Message);
 		}
 		[Fact]
 		public async Task AddNewProductAsync_ShouldReturnAppResultError_WhenDataNameExist()
 		{
 			//Arrange
-			var product = Product.Create( "Test", "666666", 1, 56);
+			var product = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
 			
 			_context.Products.Add(product);
 			_context.SaveChanges();
@@ -97,7 +97,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains("Produkt o tej nazwie ju≈º istnieje.", result.Error);
+			Assert.Contains("Produkt o tej nazwie juø istnieje.", result.Error);
 			Assert.Equal(ErrorType.NotFound, result.ErrorType);
 		}
 		[Fact]
@@ -118,7 +118,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			//Act&Assert
 			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
-			Assert.Contains("Uzupe≈Çnij dane - SKU", ex.Message);
+			Assert.Contains("Uzupe≥nij dane - SKU", ex.Message);
 		}
 	}
 }

@@ -75,7 +75,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				};
 				var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 				var category = new Category { Id = 1, Name = "Cat", IsDeleted = false };
-				var product = Product.Create("TestFull", "123", 1, 10);
+				var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
 				db.Clients.Add(client);
 				db.Categories.Add(category);
 				db.Products.Add(product);
@@ -87,10 +87,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow.AddDays(-7),
 				DateOnly.FromDateTime( TestDates.UtcNow.AddDays(7)), "UserInit", issueStatus, issueItem);
 				var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
-				pallet1.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+				pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet1);
 				var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToPicking, null, issue.Id);
-				pallet2.AddProduct(product.Id, 10, new DateOnly(2026, 1, 1));
+				pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet2);
 				// Dodaj przykładową alokację
 				var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 10,pallet2.LocationId, new DateTime(2025, 8, 12));

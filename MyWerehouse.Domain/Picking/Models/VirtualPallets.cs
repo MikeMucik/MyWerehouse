@@ -27,17 +27,17 @@ namespace MyWerehouse.Domain.Picking.Models
 		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a => a.RequestedQuantity) ?? 0);
 		private VirtualPallet() { }
 
-		private VirtualPallet(Guid palletId, int initialQuantity, int locationId)
+		private VirtualPallet(Guid palletId, int initialQuantity, int locationId, DateTime moveDate)
 		{
 			Id = Guid.NewGuid();
 			PalletId = palletId;
 			InitialPalletQuantity = initialQuantity;
 			LocationId = locationId;
-			DateMoved = DateTime.UtcNow;
+			DateMoved = moveDate;
 		}
 
-		public static VirtualPallet Create(Guid palletId, int initialQuantity, int locationId)
-			=> new VirtualPallet(palletId, initialQuantity, locationId);
+		public static VirtualPallet Create(Guid palletId, int initialQuantity, int locationId, DateTime moveDate)
+			=> new VirtualPallet(palletId, initialQuantity, locationId, moveDate);
 
 		private VirtualPallet(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime date)
 		{

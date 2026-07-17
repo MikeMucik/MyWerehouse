@@ -45,8 +45,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 			DateReceived = dateReceived;
 		}
 
-		public static Pallet Create(string palletNumber, int locationId)
-			=> new Pallet(palletNumber, locationId, DateTime.Now);
+		public static Pallet Create(string palletNumber, int locationId, DateTime receivedAt)
+			=> new Pallet(palletNumber, locationId, receivedAt);
 
 		private Pallet(Guid id, string palletNumber, DateTime dateReceived, int locationId, PalletStatus status, Guid? receiptId, Guid? issueId)
 		{
@@ -125,14 +125,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 			this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
 		}
 
-		public void AddProduct(Guid productId, int quantity, DateOnly? bestBefore)
+		public void AddProduct(Guid productId, int quantity, DateTime createdAt, DateOnly? bestBefore)
 		{
 			if (quantity <= 0)
 				throw new InvalidQuantityDomainException(Id);
-			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, DateTime.UtcNow, bestBefore));
+			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, createdAt, bestBefore));
 		}
 
-		public void AddOrIncreaseProductQuantity(Guid productId, int quantity, DateOnly? bestBefore)
+		public void AddOrIncreaseProductQuantity(Guid productId, int quantity, DateTime createdAt, DateOnly? bestBefore)
 		{
 			var existingProduct = ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId);
 			if (existingProduct != null)
@@ -142,7 +142,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				existingProduct.IncreaseQuantity(quantity);
 				return;
 			}
-			AddProduct(productId, quantity, bestBefore);
+			AddProduct(productId, quantity, createdAt, bestBefore);
 		}
 
 		public void AddProductForTests(Guid productId, int quantity, DateTime dateAdd, DateOnly? bestBefore)

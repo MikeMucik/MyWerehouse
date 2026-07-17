@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.DTOs
 {
 	public class ProductOnPalletCreateDTOValidator : AbstractValidator<ProductOnPalletCreateDTO>
 	{
-		public ProductOnPalletCreateDTOValidator(IProductRepo productRepo)
+		public ProductOnPalletCreateDTOValidator(IProductRepo productRepo, IDateTimeProvider dateTimeProvider)
 		{
 			RuleFor(pp => pp.ProductId)
 				.NotEqual(Guid.Empty)
@@ -25,7 +26,7 @@ namespace MyWerehouse.Application.Pallets.DTOs
 				.NotNull()
 				.WithMessage("Produkt musi mieć datę przyjęcia");
 			RuleFor(pp => pp.BestBefore)
-				.GreaterThan(DateOnly.FromDateTime(DateTime.Now))
+				.GreaterThan(dateTimeProvider.Today)
 				.WithMessage("Data do spożycia musi być późniejsza niż data dzisiejsza")
 				.When(pp => pp.BestBefore != null);
 		}

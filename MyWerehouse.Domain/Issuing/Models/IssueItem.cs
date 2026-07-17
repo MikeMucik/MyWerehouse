@@ -16,15 +16,15 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public Product Product { get; private set; } = null!;
 		public int Quantity { get; private set; }
 		public DateOnly BestBefore { get; private set; }
-		public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+		public DateTime CreatedAt { get; private set; }
 		private IssueItem() { }
-		internal IssueItem(Guid issueId,  Guid productId, int quantity, DateOnly bestBefore)
+		internal IssueItem(Guid issueId,  Guid productId, int quantity, DateOnly bestBefore, DateTime createdAt)
 		{
 			IssueId = issueId;				
 			ProductId = productId;			
 			Quantity = quantity;
 			BestBefore = bestBefore;
-			CreatedAt = DateTime.UtcNow;
+			CreatedAt = createdAt;
 		}
 
 		private IssueItem(int id, Guid issueId, Guid productId, int quantity, DateOnly bestBefore, DateTime createAt)

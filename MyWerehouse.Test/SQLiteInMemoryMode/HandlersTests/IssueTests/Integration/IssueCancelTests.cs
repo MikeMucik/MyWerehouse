@@ -55,7 +55,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 		private static Product CreateProduct(string name)
 		{
-			return Product.Create(name, "SKU1", 1, 10);
+			return Product.Create(name, "SKU1", TestDates.UtcNow, 1, 10);
 		}
 		private static Location CreateLocation(int position)
 		{
@@ -80,9 +80,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 				TestDates.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
 			var palletP1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			palletP1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			palletP1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var palletP2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			palletP2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			palletP2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -128,9 +128,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 			TestDates.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);			
 			var palletP1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			palletP1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			palletP1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var palletP2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, receipt.Id, null);
-			palletP2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			palletP2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -179,9 +179,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 				TestDates.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
 			var palletPP1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			palletPP1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			palletPP1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var palletPP2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			palletPP2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			palletPP2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -262,9 +262,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "UserMakae",
 				TestDates.UtcNow.AddDays(-1), ReceiptStatus.Verified, 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow.AddDays(-10), 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow.AddDays(-9), 2, PalletStatus.Available, receipt.Id, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);

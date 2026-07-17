@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ReversePickings.Services;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -17,7 +18,8 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		IPickingTaskRepo pickingTaskRepo,
 		IVirtualPalletRepo virtualPalletRepo,
 		WerehouseDbContext werehouseDbContext,
-		ICreateReversePickingService createReversePickingService
+		ICreateReversePickingService createReversePickingService,
+		IDateTimeProvider dateTimeProvider
 			) : IRequestHandler<CancelIssueCommand, AppResult<Unit>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
@@ -25,9 +27,10 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly ICreateReversePickingService _createReversePickingService = createReversePickingService;
-
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		public async Task<AppResult<Unit>> Handle(CancelIssueCommand request, CancellationToken ct)
 		{
+			var now = _dateTimeProvider.UtcNow;
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
@@ -62,7 +65,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 						.ToList();
 					foreach (var pickingTask in pickingTaskToRemove)
 					{
-						pickingTask.Cancel(request.UserId);
+						pickingTask.Cancel(request.UserId, now);
 
 						vp.PickingTasks.Remove(pickingTask);
 						_pickingTaskRepo.DeletePickingTask(pickingTask);

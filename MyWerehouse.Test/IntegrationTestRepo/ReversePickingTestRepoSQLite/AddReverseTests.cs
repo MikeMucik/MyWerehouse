@@ -45,7 +45,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
 			
 			var location1 = new Location
 			{
@@ -62,10 +62,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				Position = 1
 			};
 			var pallet1 = Pallet.CreateForTests("Q1010", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.Now.AddMonths(12)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.Now.AddMonths(12)));
 
 			var pallet2 = Pallet.CreateForTests("Q1011", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.Now.AddMonths(12)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.Now.AddMonths(12)));
 					
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -85,7 +85,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)), null, null, 10);
 			
 			var pickingPallet = Pallet.CreateForTests("Q5000", TestDates.Now, 1, PalletStatus.ToIssue, null, null);
-			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
+			pickingPallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			
 			issue.ReservePallet(pallet1);
 			issue.ReservePallet(pallet2);
@@ -99,7 +99,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 
 			var reversePickingRepo = new ReversePickingRepo(DbContext);
 			var reversePicking = ReversePicking.Create(pickingPallet.Id, null, product.Id, pickingPallet.ProductsOnPallet.Single().BestBefore,
-				pickingPallet.ProductsOnPallet.Single().Quantity, pickingTask.Id, "UserR");
+				pickingPallet.ProductsOnPallet.Single().Quantity, pickingTask.Id, "UserR", TestDates.Today);
 			//Act
 			reversePickingRepo.AddReversePicking(reversePicking);
 			DbContext.SaveChanges();			

@@ -78,13 +78,13 @@ namespace MyWerehouse.Domain.Picking.Models
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
 		
-		public void Cancel(string userId)
+		public void Cancel(string userId, DateTime createdAt)
 		{
 			var oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.PickedPartially || PickingStatus == PickingStatus.Picked)
 				throw new CannotCancelPickingTaskInCurrentStatusDomainException(Id, IssueId, PickingStatus);
 			this.PickingStatus = PickingStatus.Cancelled;			
-			AddHistoryPicking(userId, null,null, oldStatus, 0);			
+			AddHistoryPicking(userId, null,null, oldStatus, 0, createdAt);			
 			this.RequestedQuantity = 0;
 		}
 
@@ -95,15 +95,15 @@ namespace MyWerehouse.Domain.Picking.Models
 			this.VirtualPalletId = virtualPalletId;
 		}
 
-		public void ReduceQuantity(int quantity, string userId)
+		public void ReduceQuantity(int quantity, string userId, DateTime createdAt)
 		{
 			var oldStatus = PickingStatus;
 			RequestedQuantity -= quantity;
 			PickingStatus = PickingStatus.CorrectionPicking;
-			AddHistoryPicking(userId, null, null, oldStatus, 0);
+			AddHistoryPicking(userId, null, null, oldStatus, 0, createdAt);
 		}
 		
-		public void MarkPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, string userId)
+		public void MarkPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, string userId, DateTime createdAt)
 		{
 			var	oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
@@ -113,9 +113,9 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickedQuantity = RequestedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.Picked;
-			AddHistoryPicking(userId,sourcePalletId,sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, PickedQuantity);
+			AddHistoryPicking(userId,sourcePalletId,sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, PickedQuantity, createdAt);
 		}
-		public void MarkPartiallyPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, int pickedQuantity, string userId)
+		public void MarkPartiallyPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, int pickedQuantity, string userId, DateTime createdAt)
 		{
 			var oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
@@ -125,11 +125,11 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickedQuantity = pickedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.PickedPartially;
-			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, pickedQuantity);
+			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, pickedQuantity, createdAt);
 		}
 
 		// Historia pickingu może pochodzić z różnych źródeł, dlatego przeciążenia przekazują jawne dane palet.
-		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
+		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked, DateTime createdAt)// PickingStatus statusAfter,
 		{
 
 			this.AddDomainEvent(new CreateHistoryPickingNotification(
@@ -146,9 +146,9 @@ namespace MyWerehouse.Domain.Picking.Models
 				statusBefore,
 				PickingStatus,
 				userId,
-				DateTime.UtcNow));
+				createdAt));
 		}
-		public void AddHistoryPicking(string userId, Guid? sourcePalletId, string? sourcePalletNumber, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked)// PickingStatus statusAfter,
+		public void AddHistoryPicking(string userId, Guid? sourcePalletId, string? sourcePalletNumber, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked, DateTime createdAt)// PickingStatus statusAfter,
 		{
 
 			this.AddDomainEvent(new CreateHistoryPickingNotification(
@@ -165,7 +165,7 @@ namespace MyWerehouse.Domain.Picking.Models
 				statusBefore,
 				PickingStatus,
 				userId,
-				DateTime.UtcNow));
+				createdAt));
 		}
 	}
 }

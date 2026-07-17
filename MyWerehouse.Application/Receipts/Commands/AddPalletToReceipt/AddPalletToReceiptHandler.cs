@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Persistence;
@@ -15,7 +16,8 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		IReceiptRepo receiptRepo,
 		IPalletRepo palletRepo,
 		IProductRepo productRepo,
-		ILocationRepo locationRepo
+		ILocationRepo locationRepo,
+		IDateTimeProvider dateTimeProvider
 			) : IRequestHandler<AddPalletToReceiptCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
@@ -23,19 +25,21 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<AppResult<Unit>> Handle(AddPalletToReceiptCommand request, CancellationToken ct)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
 			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 			var rampNumber = receipt.RampNumber;
-			receipt.StartReceiving(DateTime.UtcNow, request.DTO.UserId);
+			var now = _dateTimeProvider.UtcNow;
+			receipt.StartReceiving(now, request.DTO.UserId);
 			var newId = await _palletRepo.GetNextPalletIdAsync();
 
 			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 			if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {rampNumber} nie została znaleziona", ErrorType.NotFound);
 			
-			var pallet = Pallet.Create(newId, rampNumber);
+			var pallet = Pallet.Create(newId, rampNumber, now);
 			if (request.DTO.ProductsOnPallet.Count != 1)
 			{
 				return AppResult<Unit>.Fail($"Paleta przyjmowana może mieć tylko jeden produkt", ErrorType.Conflict);
@@ -45,7 +49,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 			if (!await _productRepo.IsExistProduct(product.ProductId))
 				return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
 
-			pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
+			pallet.AddProduct(product.ProductId, product.Quantity, now, product.BestBefore);
 			
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToReceipt(receipt.Id, snapShot, request.DTO.UserId);

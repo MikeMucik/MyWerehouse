@@ -5,15 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Events;
 
 namespace MyWerehouse.Application.Pallets.Events.PalletHistory
 {
-	public class PalletHistoryHandler(IHistoryPalletRepo palletMovementRepo) : INotificationHandler<PalletHistoryNotification>
+	public class PalletHistoryHandler(IHistoryPalletRepo palletMovementRepo, IDateTimeProvider dateTimeProvider) : INotificationHandler<PalletHistoryNotification>
 	{
 		private readonly IHistoryPalletRepo _palletMovementRepo = palletMovementRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public Task Handle(PalletHistoryNotification notification, CancellationToken cancellationToken)
 		{			
@@ -27,7 +29,7 @@ namespace MyWerehouse.Application.Pallets.Events.PalletHistory
 				DestinationLocationSnapShot = notification.DestinationSnapshot,
 				Reason = notification.ReasonMovement,
 				PerformedBy = notification.UserId,
-				MovementDate = DateTime.UtcNow,
+				MovementDate = _dateTimeProvider.UtcNow,
 				PalletStatus = notification.PalletStatus,
 				
 				HistoryPalletDetails = notification.Details

@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class IssueItemDTOValidator : AbstractValidator<IssueItemDTO>
 	{
-		public IssueItemDTOValidator(IProductRepo productRepo)
+		public IssueItemDTOValidator(IProductRepo productRepo, IDateTimeProvider dateTimeProvider)
 		{
 			RuleFor(x => x.ProductId)
 				.NotEqual(Guid.Empty).WithMessage("Nieprawidłowy numer produktu");
@@ -20,7 +21,7 @@ namespace MyWerehouse.Application.Issues.DTOs
 			RuleFor(x => x.Quantity)
 				.GreaterThan(0).WithMessage("Ilość produktu musi być większa dod zera");
 			RuleFor(x => x.BestBefore)
-				.Must(date => date > DateOnly.FromDateTime(DateTime.Now))
+				.Must(date => date > dateTimeProvider.Today)
 				.WithMessage("Data do spożycia musi być datą z przyszłości");
 		}
 	}

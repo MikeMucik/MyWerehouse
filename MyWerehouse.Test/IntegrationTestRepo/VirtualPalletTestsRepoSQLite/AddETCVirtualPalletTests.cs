@@ -24,7 +24,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 				Id = 1,
 				Name = "CategoryName"
 			};
-			var product = Product.Create("Banana", "1234567890", 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
 			var location = new Location
 			{
 				Bay = 1,
@@ -37,10 +37,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
 			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
-			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
+			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId, TestDates.UtcNow);
 			DbContext.SaveChanges();
 			var virtualPalletRepo = new VirtualPalletRepo(DbContext);
 			//Act
@@ -80,7 +80,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			};
 			DbContext.Categories.Add(newCategory);
 
-			var product = Product.Create("Banana", "1234567890", 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
 			var location = new Location
@@ -92,10 +92,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			};
 			DbContext.Locations.Add(location);
 			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
 
 			DbContext.Pallets.Add(pallet);
-			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
+			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId, TestDates.UtcNow);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.SaveChanges();
 			var virtualPalletRepo = new VirtualPalletRepo(DbContext);

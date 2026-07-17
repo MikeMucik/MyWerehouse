@@ -22,7 +22,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 		}
 		private static Product CreateProduct(string name)
 		{
-			return Product.Create(name, "SKU1", 1, 10);
+			return Product.Create(name, "SKU1", TestDates.UtcNow, 1, 10);
 		}
 		[Fact]
 		public async Task DeleteLocation_ShouldRemoveLocation_WhenPlaceIsEmpty()
@@ -59,7 +59,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			var category = CreateCategory();
 			var product = CreateProduct("Prod1");
 			var palletP1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			palletP1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			palletP1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			_context.Categories.Add(category);
 			_context.Products.Add(product);
 			_context.Pallets.AddRange(palletP1);

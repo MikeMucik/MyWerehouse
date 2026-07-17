@@ -32,7 +32,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 		private Receipt() { }
 
 
-		private Receipt(int receiptNumber, int clientId, string performedBy, int rampNumber)
+		private Receipt(int receiptNumber, int clientId, string performedBy, int rampNumber, DateTime createdAt)
 		{
 			Id = Guid.NewGuid();
 			ReceiptNumber = receiptNumber;
@@ -40,14 +40,14 @@ namespace MyWerehouse.Domain.Receiving.Models
 			if (string.IsNullOrWhiteSpace(performedBy)) throw new InvalidUserIdDomainException();			
 			ClientId = clientId;
 			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException();
-			ReceiptDateTime = DateTime.UtcNow;
+			ReceiptDateTime = createdAt;
 			ReceiptStatus = ReceiptStatus.Planned;
 			RampNumber = rampNumber;
 			Pallets = new List<Pallet>();
 		}
 
-		public static Receipt Create(int receiptNumber, int clientId, string performedBy, int rampNumber)
-			=> new Receipt(receiptNumber, clientId, performedBy, rampNumber);
+		public static Receipt Create(int receiptNumber, int clientId, string performedBy, int rampNumber, DateTime createdAt)
+			=> new Receipt(receiptNumber, clientId, performedBy, rampNumber, createdAt);
 
 		//Tests
 		private Receipt(Guid id, int receiptNumber, int clientId,
@@ -110,14 +110,14 @@ namespace MyWerehouse.Domain.Receiving.Models
 			AddHistory(userId);
 		}
 
-		public void UpdateReceipt(string userId, int clientId)
+		public void UpdateReceipt(string userId, int clientId, DateTime updatedAt)
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
 				throw new ReceiptAlreadyVerifyDomainException(Id, ReceiptNumber);
 			PerformedBy = userId;
 			ReceiptStatus = ReceiptStatus.Correction;
 			ClientId = clientId;
-			ReceiptDateTime = DateTime.UtcNow;
+			ReceiptDateTime = updatedAt;
 			AddHistory(userId);
 		}
 

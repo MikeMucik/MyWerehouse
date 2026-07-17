@@ -5,22 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking
 {
 	public class ListPalletsForForkLifterReservePickingHandler(IReversePickingRepo reversePickingRepo,
-		IPalletRepo palletRepo)
+		IPalletRepo palletRepo,
+		IDateTimeProvider dateTimeProvider)
 		: IRequestHandler<ListPalletsForForkLifterReservePickingQuery, AppResult<List<PickingPalletWithLocationDTO>>>
 	{
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<AppResult<List<PickingPalletWithLocationDTO>>> Handle(ListPalletsForForkLifterReservePickingQuery query, CancellationToken ct)
 		{
 			var list = new List<PickingPalletWithLocationDTO>();
-			var dateStart = query.Start ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-			var dateEnd = query.End ?? DateOnly.FromDateTime(DateTime.UtcNow);
+			var dateStart = query.Start ?? _dateTimeProvider.Today.AddDays(-1);
+			var dateEnd = query.End ?? _dateTimeProvider.Today;
 
 			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(dateStart, dateEnd);
 			if (palletsIds.Count == 0)

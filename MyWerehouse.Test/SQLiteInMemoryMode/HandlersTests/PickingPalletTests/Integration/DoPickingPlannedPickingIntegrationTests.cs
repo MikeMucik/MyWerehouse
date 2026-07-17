@@ -53,7 +53,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		}
 		private Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, 1, 100);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 100);
 		}
 		private Location CreateLocation(int id,int position)
 		{

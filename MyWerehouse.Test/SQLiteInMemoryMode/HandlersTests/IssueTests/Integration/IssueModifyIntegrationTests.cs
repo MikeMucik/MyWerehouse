@@ -51,7 +51,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 		private static Product CreateProduct(string name, int categoryId)
 		{
-			return Product.Create(name, "SKU1", categoryId, 10);
+			return Product.Create(name, "SKU1", TestDates.UtcNow, categoryId, 10);
 		}
 		private static Location CreateLocation(int position)
 		{
@@ -74,9 +74,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10,TestDates.UtcNow  , DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -128,7 +128,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
@@ -168,10 +168,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var product = CreateProduct("Prod1", 1);
 
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -203,7 +203,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
@@ -246,7 +246,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 			// Powinna być jedna alokacja (5 sztuk) powiązana z VirtualPallet dla "P2"
@@ -296,17 +296,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.ToPicking, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			var issueId = Guid.NewGuid();
 
 			var issueOld = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-10),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
 
-			var sourcePallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2);
+			var sourcePallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2, TestDates.UtcNow);
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, sourcePallet.Id, issueId, 4, PickingStatus.Allocated, product.Id,
 					null, null, null, 0);
@@ -364,7 +364,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 			// Powinna być jedna alokacja (5 sztuk) powiązana z VirtualPallet dla "P2"
@@ -397,13 +397,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.ToPicking, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var issueId = Guid.NewGuid();
 			var issueOld = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-10),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
-			var virtualPallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2);
+			var virtualPallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2, TestDates.UtcNow);
 			var pickingGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issueId, 4, PickingStatus.Allocated, product.Id,
 				null, null, null, 0);
@@ -478,7 +478,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == updatedIssue.Id)
 				.ToList();
 
@@ -516,11 +516,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var product1 = CreateProduct("Prod1", 1);
 			var product2 = CreateProduct("Prod2", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product2.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product2.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);
@@ -549,7 +549,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
@@ -613,13 +613,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var product2 = CreateProduct("Prod2", 1);
 
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet4 = Pallet.CreateForTests("P4", TestDates.UtcNow, 4, PalletStatus.Available, null, null);
-			pallet4.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet4.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product2.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product2.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);
@@ -648,7 +648,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
@@ -742,13 +742,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var product = CreateProduct("Prod1", 1);
 			var product1 = CreateProduct("Prod2", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
 			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
+			pallet3.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
 			var pallet4 = Pallet.CreateForTests("P4", TestDates.UtcNow, 4, PalletStatus.Available, null, null);
-			pallet4.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
+			pallet4.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(13)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -777,7 +777,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
@@ -867,9 +867,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -900,7 +900,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
@@ -950,9 +950,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.OnHold, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -1019,7 +1019,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.OnHold, null, null);
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -1085,13 +1085,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Locations.AddRange(location, location1, location2);
 			DbContext.SaveChanges();
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, location.Id, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, location1.Id, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, location2.Id, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product2.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product2.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 
 			DbContext.Pallets.AddRange(pallet1, pallet2, pallet3);
@@ -1148,7 +1148,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 
@@ -1189,11 +1189,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var product = CreateProduct("Prod1", 1);
 			var product1 = CreateProduct("Prod2", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -1222,7 +1222,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue1 = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
-					.ThenInclude(vp => vp.Pallet)
+					.ThenInclude(vp => vp!.Pallet)
 				.Where(a => a.IssueId == issue.Id)
 				.ToList();
 

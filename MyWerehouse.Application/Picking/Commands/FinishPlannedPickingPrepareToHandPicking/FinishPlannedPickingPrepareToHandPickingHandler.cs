@@ -12,6 +12,7 @@ using AutoMapper;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Domain.Receiving.Filters;
+using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareToHandPicking
 {
@@ -19,21 +20,24 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 		WerehouseDbContext werehouseDbContext,
 		IPickingTaskRepo pickingTaskRepo,
 		IIssueRepo issueRepo,
-		IMapper mapper) : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, AppResult<List<PickingTaskDTO>>>
+		IMapper mapper,
+		IDateTimeProvider dateTimeProvider) : IRequestHandler<FinishPlannedPickingPrepareToHandPickingCommand, AppResult<List<PickingTaskDTO>>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IMapper _mapper = mapper;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<AppResult<List<PickingTaskDTO>>> Handle(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
 		{
+			var now = _dateTimeProvider.UtcNow;
 			var listToDoTasks = new List<PickingTaskDTO>();
 			
 			var filtr = new IssueReceiptSearchFilter
 			{
-				SendDateStart = command.Start ?? DateOnly.FromDateTime(DateTime.UtcNow),
-				SendDateEnd = command.End ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))				
+				SendDateStart = command.Start ?? _dateTimeProvider.Today,
+				SendDateEnd = command.End ?? _dateTimeProvider.Today.AddDays(1)				
 			};
 			var listOfIssues = await _issueRepo.GetIssuesByFilter(filtr).ToListAsync(ct);
 			foreach (var issue in listOfIssues)
@@ -52,7 +56,7 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 				foreach (var task in listByProductAndDate)
 				{
 					var taskToDo = PickingTask.Create(null, issue.Id, task.TotalQuantity, PickingStatus.Available, task.ProductId,
-						task.BestBefore, null, DateOnly.FromDateTime(DateTime.UtcNow), 0);
+						task.BestBefore, null, _dateTimeProvider.Today, 0);
 
 					_pickingTaskRepo.AddPickingTask(taskToDo);
 					var handTaskDTO = _mapper.Map<PickingTaskDTO>(taskToDo);
@@ -61,7 +65,7 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 				}
 				foreach (var task in reducedList)
 				{
-					task.Cancel(command.UserId);
+					task.Cancel(command.UserId, now);
 				}
 			}
 			await _werehouseDbContext.SaveChangesAsync(ct);

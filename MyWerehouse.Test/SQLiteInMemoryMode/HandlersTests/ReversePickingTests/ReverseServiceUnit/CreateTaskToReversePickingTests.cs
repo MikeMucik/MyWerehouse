@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +17,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 {
 	public class CreateTaskToReversePickingTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -39,7 +38,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory(string name)
+		private static Category CreateCategory(string name)
 		{
 			return new Category
 			{
@@ -47,11 +46,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name, string sku)
+		private static Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, 1, 100);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 100);
 		}
-		private Location CreateLocation(int id, int position)
+		private static Location CreateLocation(int id, int position)
 		{
 			return new Location
 			{
@@ -74,7 +73,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var _palletRepo = new PalletRepo(DbContext);
 			var _pickingTaskRepo = new PickingTaskRepo(DbContext);
 			var _reversePickingRepo = new ReversePickingRepo(DbContext);
-			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo);
+			var _providerDateTime = new TestDateTimeProvider();
+			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo, _providerDateTime);
 			
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
@@ -138,7 +138,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var _palletRepo = new PalletRepo(DbContext);
 			var _pickingTaskRepo = new PickingTaskRepo(DbContext);
 			var _reversePickingRepo = new ReversePickingRepo(DbContext);
-			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo);
+			var _providerDateTime = new TestDateTimeProvider();
+			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo, _providerDateTime);
 			
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);

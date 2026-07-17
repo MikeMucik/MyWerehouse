@@ -49,7 +49,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 				Id =1 ,
 				Name = "TestC",
 			};
-			var product = Product.Create("TestP", "1234Test", 1, 56);
+			var product = Product.Create("TestP", "1234Test", TestDates.UtcNow, 1, 56);
 			
 			var location = new Location
 			{
@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
 			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 1, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
+			pallet.AddProduct(product.Id, 1, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
 			
 			var palletRepo = new PalletRepo(DbContext);
 			//Act
@@ -106,8 +106,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			{
 				Name = "TestC",
 			};
-			var product1 = Product.Create("TestP", "1234Test", 1, 56);		
-			var product2 = Product.Create("TestP2", "1234Test2", 1, 56);			
+			var product1 = Product.Create("TestP", "1234Test", TestDates.UtcNow, 1, 56);		
+			var product2 = Product.Create("TestP2", "1234Test2", TestDates.UtcNow, 1, 56);			
 			var location = new Location
 			{
 				Bay = 1,
@@ -120,8 +120,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			DbContext.Locations.Add(location);
 			DbContext.SaveChanges();
 			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product1.Id, 1, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
-			pallet.AddProduct(product2.Id, 20, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));		
+			pallet.AddProduct(product1.Id, 1, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
+			pallet.AddProduct(product2.Id, 20, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));		
 			
 			var palletRepo = new PalletRepo(DbContext);
 			//Act

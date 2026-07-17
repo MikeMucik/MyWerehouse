@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Persistence;
@@ -13,22 +14,24 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
 	public class CreatePalletHandler(WerehouseDbContext werehouseDbContext,
-		IPalletRepo palletRepo, ILocationRepo locationRepo)
+		IPalletRepo palletRepo, ILocationRepo locationRepo, IDateTimeProvider dateTimeProvider)
 		: IRequestHandler<CreatePalletCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<AppResult<Unit>> Handle(CreatePalletCommand request, CancellationToken ct)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
 			if (location == null) return AppResult<Unit>.Fail("Wskazana rampa nie istnieje.", ErrorType.NotFound);
 			var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
-			var pallet = Pallet.Create(newIdForPallet, request.RampNumber);
+			var now = _dateTimeProvider.UtcNow;
+			var pallet = Pallet.Create(newIdForPallet, request.RampNumber, now);
 			foreach (var product in request.DTO.ProductsOnPallet)
 			{
-				pallet.AddProduct(product.ProductId, product.Quantity, product.BestBefore);
+				pallet.AddProduct(product.ProductId, product.Quantity, now, product.BestBefore);
 			}
 			_palletRepo.AddPallet(pallet);
 			var snapShot = location.ToSnapshot();

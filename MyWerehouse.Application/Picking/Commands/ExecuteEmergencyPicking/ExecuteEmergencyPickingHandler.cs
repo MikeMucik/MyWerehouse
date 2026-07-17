@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Services;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
@@ -21,7 +22,8 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 		WerehouseDbContext werehouseDbContext,
 		IIssueRepo issueRepo,
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
-		IProcessPickingActionService processPickingActionService) : IRequestHandler<ExecuteEmergencyPickingCommand, AppResult<ProcessPickingActionResult>>
+		IProcessPickingActionService processPickingActionService,
+		IDateTimeProvider dateTimeProvider) : IRequestHandler<ExecuteEmergencyPickingCommand, AppResult<ProcessPickingActionResult>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
@@ -30,10 +32,10 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
-
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;	
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteEmergencyPickingCommand request, CancellationToken ct)
 		{
-			
+			var now = _dateTimeProvider.UtcNow;
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 			if (pallet == null)
 			{
@@ -69,7 +71,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 			{
 				pallet.ChangeStatus(PalletStatus.ToPicking);
 				pallet.AssignToPicking(request.UserId, pallet.Location.ToSnapshot());
-				virtualPallet = VirtualPallet.Create(pallet.Id, palletItem.Quantity, pallet.LocationId);
+				virtualPallet = VirtualPallet.Create(pallet.Id, palletItem.Quantity, pallet.LocationId, now);
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet); 
 			}
 
@@ -89,19 +91,20 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 		
 		private async Task ReduceAllocation(Guid issueId, Guid productId, int quantity, string userId)
 		{
+			var now = _dateTimeProvider.UtcNow;
 			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId);
 			foreach (var pickingTask in pickingTasks)
 			{
 				if (quantity <= 0) break;
 				if (pickingTask.RequestedQuantity > quantity)
 				{
-					pickingTask.ReduceQuantity(quantity, userId);
+					pickingTask.ReduceQuantity(quantity, userId,now);
 					quantity = 0;
 				}
 				else
 				{
 					quantity -= pickingTask.RequestedQuantity;
-					pickingTask.Cancel(userId);
+					pickingTask.Cancel(userId, now);
 				}
 			}
 		}

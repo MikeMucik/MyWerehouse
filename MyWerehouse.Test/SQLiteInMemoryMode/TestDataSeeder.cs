@@ -106,7 +106,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					IssueItem.CreateForSeed(2, issueId2, productId2, 400, DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), TestDates.TodayDateTime)
 				};
 				context.Issues.Add(
-					Issue.CreateForSeed(issueId2, 2, 11, TestDates.UtcNow.AddDays(-5), DateOnly.FromDateTime( TestDates.UtcNow.AddDays(1)), "U002", IssueStatus.New, issueItems));
+					Issue.CreateForSeed(issueId2, 2, 11, TestDates.UtcNow.AddDays(-5), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)), "U002", IssueStatus.New, issueItems));
 			}
 			context.SaveChanges();
 			// 3. Dane końcowe, zależne od receipt/issue/product
@@ -140,7 +140,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			{
 				context.ProductOnPallet.AddRange(
 					ProductOnPallet.CreateForSeed(1, productId1, palletGuid1, 50, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
-					
+
 					ProductOnPallet.CreateForSeed(2, productId1, palletGuid2, 100, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
 					ProductOnPallet.CreateForSeed(3, productId2, palletGuid1, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
 					ProductOnPallet.CreateForSeed(4, productId2, palletGuid4, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
@@ -149,7 +149,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					ProductOnPallet.CreateForSeed(7, productId2, palletGuid7, 200, new DateTime(2024, 2, 2), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
 					ProductOnPallet.CreateForSeed(8, productId2, palletGuid6, 150, new DateTime(2024, 3, 3), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
 					ProductOnPallet.CreateForSeed(9, productId1, palletGuid8, 300, new DateTime(2024, 4, 4), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
-					
+
 					ProductOnPallet.CreateForSeed(10, productId1, palletGuid9, 10, new DateTime(2024, 4, 4), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366))),
 					ProductOnPallet.CreateForSeed(11, productId2, palletGuid9, 20, new DateTime(2024, 4, 4), DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)))
 				);
@@ -312,8 +312,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.ReversePickings.Any())
 			{
 				context.ReversePickings.AddRange(
-					ReversePicking.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId2, "UserR"),
-					ReversePicking.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId5, "UserR")
+					ReversePicking.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId2, "UserR", TestDates.Today),
+					ReversePicking.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId5, "UserR", TestDates.Today)
 				);
 			}
 			context.SaveChanges();

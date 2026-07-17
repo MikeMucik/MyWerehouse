@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <Folder Include="Picking\Filters\" />
+    <Folder Include="ReversePicking\Events\" />
+    <Folder Include="ReversePicking\Models\" />
+    <Folder Include="ReversePicking\ReversePickingException\" />
   </ItemGroup>
 
   <ItemGroup>

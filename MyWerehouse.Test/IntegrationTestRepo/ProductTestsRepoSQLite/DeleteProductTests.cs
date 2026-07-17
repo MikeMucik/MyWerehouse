@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +22,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 				Name = "CategoryName"
 			};
 			DbContext.Categories.Add(newCategory);
-			var product = Product.Create("Banana", "1234567890", 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
 			var productRepo = new ProductRepo(DbContext);

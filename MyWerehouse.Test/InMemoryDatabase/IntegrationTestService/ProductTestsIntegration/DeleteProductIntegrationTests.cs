@@ -44,7 +44,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Height = 1,
 				Position = 1
 			};
-			var product1 = Product.Create("Test", "666666", 1, 56);
+			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
 			_context.Clients.Add(client);
 			_context.Products.Add(product1);
 			_context.Locations.Add(location);
@@ -53,7 +53,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, client.Id, "U005",
 			TestDates.UtcNow, ReceiptStatus.Verified, location.Id);
 			var pallet = Pallet.CreateForTests("Q1234", TestDates.Now, location.Id, PalletStatus.Receiving, receipt.Id, null);
-			pallet.AddProduct(product1.Id, 100, new DateOnly(2027, 3, 3));	
+			pallet.AddProduct(product1.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));	
 			_context.Receipts.Add(receipt);
 			_context.Pallets.Add(pallet);
 			_context.SaveChanges();			
@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task DeleteProductAsync_ShouldDeleteFrom_WhenProductNotUsed()
 		{
 			//Arrange
-			var product1 = Product.Create("Test", "666666", 1, 56);
+			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
 			
 			_context.Products.Add(product1);
 			_context.SaveChanges();

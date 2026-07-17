@@ -16,7 +16,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 	{
 		private Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, 1, 100);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 100);
 		}
 		private Category CreateCategory()
 		{
@@ -52,7 +52,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			var pallet = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), location1.Id, PalletStatus.Available, null, null);
 			pallet.AddProductForTests(product1.Id, 100, new DateTime(2025, 4, 4, 8, 8, 8), new DateOnly(2027, 3, 3));
-			pallet.AddProduct(product2.Id, 10, new DateOnly(2027, 3, 4));
+			pallet.AddProduct(product2.Id, 10, TestDates.UtcNow, new DateOnly(2027, 3, 4));
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
 
@@ -122,7 +122,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var pallet1 = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), 1, PalletStatus.Available, null, null);
 			pallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 4, 4, 8, 8, 8), new DateOnly(2027, 3, 3));
 			var pallet2 = Pallet.CreateForTests("Q2001", new DateTime(2020, 1, 1, 0, 0, 0), 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 4));
+			pallet2.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 4));
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);
 
@@ -155,7 +155,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var pallet1 = Pallet.CreateForTests("Q2000", new DateTime(2020, 1, 1, 0, 0, 0), 1, PalletStatus.Available, null, null);
 			pallet1.AddProductForTests(product1.Id, 100, new DateTime(2025, 4, 4, 8, 8, 8), new DateOnly(2027, 3, 3));
 			var pallet2 = Pallet.CreateForTests("Q2001", new DateTime(2020, 1, 1, 0, 0, 0), 2, PalletStatus.Available, null, null);
-			pallet2.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 4));
+			pallet2.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 4));
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);
 

@@ -35,21 +35,21 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public IssueStatus IssueStatus { get; private set; }
 		public ICollection<IssueItem> IssueItems { get; private set; } = new List<IssueItem>();
 		private Issue() { }
-		private Issue(int issueNumber, int clientId, DateOnly dateToSend, string performedBy)
+		private Issue(int issueNumber, int clientId, DateOnly dateToSend, DateTime createdAt, string performedBy)
 		{
 			Id = Guid.NewGuid();
 			IssueNumber = issueNumber;
 			if (clientId <= 0) throw new ClientDomainException();
 			ClientId = clientId;
-			if (dateToSend < DateOnly.FromDateTime(DateTime.UtcNow)) throw new WrongDateDomainException();
+			if (dateToSend < DateOnly.FromDateTime(createdAt)) throw new WrongDateDomainException();
 			IssueDateTimeSend = dateToSend;
-			IssueDateTimeCreate = DateTime.UtcNow;
+			IssueDateTimeCreate = createdAt;
 			PerformedBy = performedBy ?? throw new InvalidUserIdDomainException();
 			IssueStatus = IssueStatus.New;
 		}
 
-		public static Issue Create(int issueNumber, int clientId, DateOnly dateToSend, string performedBy)
-			=> new Issue(issueNumber, clientId, dateToSend, performedBy);
+		public static Issue Create(int issueNumber, int clientId, DateOnly dateToSend, DateTime createdAt, string performedBy)
+			=> new Issue(issueNumber, clientId, dateToSend, createdAt, performedBy);
 
 		private Issue(Guid id, int issueNumber, int clientId, DateTime issueDateTimeCreate,
 			DateOnly issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems)
@@ -84,7 +84,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			IssueStatus = issueStatus;
 		}
 
-		public void CancelIssue(string userId)
+		public void CancelIssue(string userId, DateTime createdAt)
 		{
 			if (IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.Archived)
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
@@ -96,7 +96,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			foreach (var task in PickingTasks)
 			{
-				task.Cancel(userId);
+				task.Cancel(userId, createdAt);
 			}
 		}
 
@@ -107,7 +107,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			return item?.Quantity ?? 0;
 		}
 
-		public void AddIssueItem(Guid productId, int quantity, DateOnly bestBefore)
+		public void AddIssueItem(Guid productId, int quantity, DateOnly bestBefore, DateTime createdAt)
 		{
 			var existing = IssueItems.FirstOrDefault(x => x.ProductId == productId);
 			if (existing != null)
@@ -115,7 +115,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 				throw new ProductAlreadyExistDomainException(productId);
 			}
 			if (quantity <= 0) throw new IssueExceptions.InvalidQuantityDomainException(quantity, Id, IssueNumber);
-			var item = new IssueItem(Id, productId, quantity, bestBefore);
+			var item = new IssueItem(Id, productId, quantity, bestBefore, createdAt);
 			this.IssueItems.Add(item);
 		}
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.ReversePickings.DTOs;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -14,17 +15,21 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		private readonly IPalletRepo _palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IReversePickingRepo _reversePickingRepo;
+		private readonly IDateTimeProvider _dateTimeProvider;
 		public CreateReversePickingService(IPalletRepo palletRepo,
 			IPickingTaskRepo pickingTaskRepo,
-			IReversePickingRepo reversePickingRepo)
+			IReversePickingRepo reversePickingRepo,
+			IDateTimeProvider dateTimeProvider)
 		{
 			_palletRepo = palletRepo;
 			_pickingTaskRepo = pickingTaskRepo;
 			_reversePickingRepo = reversePickingRepo;
+			_dateTimeProvider = dateTimeProvider;
 		}
 
 		public async Task<ReversePickingResult> CreateReversePicking(Guid palletId, string userId)
 		{
+			var nowDateOnly = _dateTimeProvider.Today;    
 			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId))
 				return ReversePickingResult.Fail("Zadania dekompletacji są już utworzone.");
 			var listTasks = new List<ReversePicking>();
@@ -39,7 +44,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			{
 				listTasks.Add(
 					ReversePicking.Create(palletId, pickingTaskToReverse.VirtualPallet!.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
-					pickingTaskToReverse.RequestedQuantity, pickingTaskToReverse.Id, userId));					
+					pickingTaskToReverse.RequestedQuantity, pickingTaskToReverse.Id, userId, nowDateOnly));					
 			}
 			foreach (var task in listTasks)
 			{

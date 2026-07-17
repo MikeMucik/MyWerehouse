@@ -18,6 +18,7 @@ using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Domain.Inventories.Models;
+using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Application.Services
 {
@@ -31,6 +32,7 @@ namespace MyWerehouse.Application.Services
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IValidator<CreateProductDTO> _createProductValidator;
 		private readonly IValidator<EditProductDTO> _productValidator;
+		private readonly IDateTimeProvider _dateTimeProvider;
 
 		public ProductService(
 			IProductRepo repo,
@@ -40,7 +42,8 @@ namespace MyWerehouse.Application.Services
 			ICategoryRepo categoryRepo,
 			IReceiptRepo receiptRepo,
 			IValidator<CreateProductDTO> createProductValidator,
-			IValidator<EditProductDTO> productValidator)
+			IValidator<EditProductDTO> productValidator,
+			IDateTimeProvider dateTimeProvider)
 		{
 			_productRepo = repo;
 			_mapper = mapper;
@@ -50,6 +53,7 @@ namespace MyWerehouse.Application.Services
 			_receiptRepo = receiptRepo;
 			_createProductValidator = createProductValidator;
 			_productValidator = productValidator;
+			_dateTimeProvider = dateTimeProvider;
 		}
 
 		public async Task<AppResult<Guid>> AddProductAsync(CreateProductDTO productDTO)
@@ -76,6 +80,7 @@ namespace MyWerehouse.Application.Services
 			var productPrepare = Product.Create(
 				productDTO.Name,
 				productDTO.SKU,
+				_dateTimeProvider.UtcNow,
 				productDTO.CategoryId,
 				productDTO.CartonsPerPallet);
 			productPrepare.AddDetails(
@@ -89,7 +94,7 @@ namespace MyWerehouse.Application.Services
 			{
 				Product = product,
 				Quantity = 0,
-				LastUpdated = DateTime.UtcNow,
+				LastUpdated = _dateTimeProvider.UtcNow,
 			};
 			_inventoryRepo.AddInventory(inventory);
 			await _werehouseDbContext.SaveChangesAsync();

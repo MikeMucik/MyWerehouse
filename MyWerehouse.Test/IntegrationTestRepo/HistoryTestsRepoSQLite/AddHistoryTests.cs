@@ -31,7 +31,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
 
 			var location1 = new Location
 			{
@@ -121,7 +121,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
 
 			var location1 = new Location
 			{
@@ -214,7 +214,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
 
 			var location1 = new Location
 			{
@@ -294,7 +294,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
 
 			var location1 = new Location
 			{
@@ -321,7 +321,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			,DateOnly.FromDateTime( TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, issue.Id);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
@@ -329,7 +329,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			DbContext.Pallets.AddRange(pallet1);
 			DbContext.Issues.AddRange(issue);
 			DbContext.SaveChanges();
-			var virtualPallet = VirtualPallet.Create(pallet1.Id, 100, location1.Id);
+			var virtualPallet = VirtualPallet.Create(pallet1.Id, 100, location1.Id, TestDates.UtcNow);
 			var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 10, PickingStatus.Allocated, product.Id,
 					null, null, null, 0);
 			DbContext.VirtualPallets.AddRange(virtualPallet);
@@ -390,7 +390,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
 
 			var location1 = new Location
 			{
@@ -417,7 +417,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			, DateOnly.FromDateTime(TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, issue.Id);
-			pallet1.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);
 			DbContext.Products.Add(product);
@@ -425,7 +425,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			DbContext.Pallets.AddRange(pallet1);
 			DbContext.Issues.AddRange(issue);
 			DbContext.SaveChanges();
-			var virtualPallet = VirtualPallet.Create(pallet1.Id, 100, location1.Id);
+			var virtualPallet = VirtualPallet.Create(pallet1.Id, 100, location1.Id, TestDates.UtcNow);
 
 			var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 10, PickingStatus.Allocated, product.Id,
 					null, null, null, 0);
@@ -435,9 +435,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			DbContext.SaveChanges();
 			//wykonaj picking i utwórz paletę
 			var pickingPallet = Pallet.CreateForTests("Q1001", TestDates.Now, 1, PalletStatus.ToIssue, null, issue.Id);
-			pickingPallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
-			//DbContext.Clients.Add(initailClient);
-			var reverseTask = ReversePicking.Create(pickingPallet.Id,pallet1.Id,product.Id,DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), 10, pickingTask.Id,"UserReserve");
+			pickingPallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			
+			var reverseTask = ReversePicking.Create(pickingPallet.Id,pallet1.Id,product.Id,DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), 10, pickingTask.Id,"UserReserve", TestDates.Today);
 			
 			var historyReversePicking = new HistoryReversePicking
 			{

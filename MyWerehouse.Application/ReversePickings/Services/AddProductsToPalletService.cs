@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.ReversePickings.DTOs;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -14,11 +15,13 @@ namespace MyWerehouse.Application.ReversePickings.Services
 	public class AddProductsToPalletService(
 		IPalletRepo palletRepo,
 		IProductRepo productRepo,
-		IVirtualPalletRepo virtualPalletRepo) : IAddProductsToPalletService
+		IVirtualPalletRepo virtualPalletRepo,
+		IDateTimeProvider dateTimeProvider) : IAddProductsToPalletService
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<ReversePickingResult> AddProductsToSourcePallet(ReversePicking reversePicking, string userId)
 		{
@@ -82,8 +85,9 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId,int locationId, string snapShot)
 		{
 			var newNumber = await _palletRepo.GetNextPalletIdAsync();
-			var newPallet = Pallet.Create(newNumber, locationId);
-			newPallet.AddProduct(task.ProductId, task.Quantity, task.BestBefore);
+			var now = _dateTimeProvider.UtcNow;
+			var newPallet = Pallet.Create(newNumber, locationId, now);
+			newPallet.AddProduct(task.ProductId, task.Quantity, now, task.BestBefore);
 			newPallet.ChangeStatus(PalletStatus.InStock);
 			_palletRepo.AddPallet(newPallet);
 			newPallet.CreateNewPalletFromReservePicking(snapShot, userId);

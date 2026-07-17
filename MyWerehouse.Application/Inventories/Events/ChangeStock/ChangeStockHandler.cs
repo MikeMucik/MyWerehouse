@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Inventories.Events;
 using MyWerehouse.Domain.Inventories.InventoryExceptions;
@@ -11,10 +12,11 @@ using MyWerehouse.Domain.Inventories.Models;
 
 namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 {
-	public class ChangeStockHandler(IInventoryRepo inventoryRepo, IProductRepo productRepo) : INotificationHandler<ChangeStockNotification>
+	public class ChangeStockHandler(IInventoryRepo inventoryRepo, IProductRepo productRepo, IDateTimeProvider dateTimeProvider) : INotificationHandler<ChangeStockNotification>
 	{
 		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;
 		private readonly IProductRepo _productRepo = productRepo;//for better errorInfo
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		public async Task Handle(ChangeStockNotification notification, CancellationToken cancellationToken)
 		{
 			if (!notification.Changes.Any()) { return; }
@@ -33,7 +35,7 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 					{
 						ProductId = change.ProductId,						
 						Quantity = change.Quantity,
-						LastUpdated = DateTime.UtcNow,
+						LastUpdated = _dateTimeProvider.UtcNow,
 					};
 					_inventoryRepo.AddInventory(newInventory);
 				}
@@ -45,7 +47,7 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 						var productSKU = await _productRepo.GetSKUForProductAsync(change.ProductId);
 						throw new DomainInventoryDomainException(change.ProductId, productSKU?? "[SKU not found]"); 
 					}
-					inventory.LastUpdated = DateTime.UtcNow;
+					inventory.LastUpdated = _dateTimeProvider.UtcNow;
 				}				
 			}
 		}

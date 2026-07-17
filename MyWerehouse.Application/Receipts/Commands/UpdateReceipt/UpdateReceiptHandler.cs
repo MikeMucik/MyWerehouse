@@ -7,6 +7,7 @@ using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ReversePickings.DTOs;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -21,21 +22,25 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		private readonly IPalletRepo _palletRepo;
 		private readonly IProductRepo _productRepo;
 		private readonly ILocationRepo _locationRepo;
+		private readonly IDateTimeProvider _dateTimeProvider;
 		public UpdateReceiptHandler(WerehouseDbContext werehouseDbContext,
 			IReceiptRepo receiptRepo,
 			IPalletRepo palletRepo,
 			IProductRepo productRepo,
-			ILocationRepo locationRepo)
+			ILocationRepo locationRepo,
+			IDateTimeProvider dateTimeProvider)
 		{
 			_werehouseDbContext = werehouseDbContext;
 			_receiptRepo = receiptRepo;
 			_palletRepo = palletRepo;
 			_productRepo = productRepo;
 			_locationRepo = locationRepo;
+			_dateTimeProvider = dateTimeProvider;
 		}
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
-			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia			
+			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia	
+			var now = _dateTimeProvider.UtcNow;
 			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.Id);
 			if (existingReceipt == null)
 				return AppResult<Unit>.Fail($"Przyjęcie nie zostało znalezione.", ErrorType.NotFound);
@@ -99,19 +104,20 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				{
 					return AppResult<Unit>.Fail("Podana lokalizacja jest nieprawidłowa.", ErrorType.Validation);
 				}
-				var pallet = Pallet.Create(newId, request.DTO.RampNumber);
+				
+				var pallet = Pallet.Create(newId, request.DTO.RampNumber, now);
 				foreach (var dto in palletToAdd.ProductsOnPallet)
 				{
 					if (!await _productRepo.IsExistProduct(dto.ProductId))
 						return AppResult<Unit>.Fail($"Produkt o numerze {dto.ProductId} nie istnieje.", ErrorType.NotFound);
-					pallet.AddProduct(dto.ProductId, dto.Quantity, dto.BestBefore);
+					pallet.AddProduct(dto.ProductId, dto.Quantity, now, dto.BestBefore);
 				}
 				var snapShot = location.ToSnapshot();
 				_palletRepo.AddPallet(pallet);
 				pallet.AssignToReceipt(existingReceipt.Id, snapShot, request.DTO.PerformedBy);
 				existingReceipt.AttachPallet(pallet);
 			}
-			existingReceipt.UpdateReceipt(request.DTO.PerformedBy, request.DTO.ClientId);
+			existingReceipt.UpdateReceipt(request.DTO.PerformedBy, request.DTO.ClientId, now);
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Przyjęcie o numerze {existingReceipt.ReceiptNumber} zostało zaktualizowane");
 		}

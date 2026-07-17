@@ -9,9 +9,11 @@ using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MyWerehouse.Application;
 using MyWerehouse.Application.Common.Mapping;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Persistence;
 
@@ -37,6 +39,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			services.AddLogging(config => config.AddConsole());
 			services.AddApplication();
 			services.AddInfrastructure();
+			services.RemoveAll<IDateTimeProvider>();
+			services.AddSingleton<IDateTimeProvider, TestDateTimeProvider>();//stały czas dla testów
 			services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 			_provider = services.BuildServiceProvider();
 			_mapper = _provider.GetRequiredService<IMapper>();

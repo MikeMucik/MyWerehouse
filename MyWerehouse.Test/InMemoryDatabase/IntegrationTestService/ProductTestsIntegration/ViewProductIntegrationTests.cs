@@ -35,7 +35,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_createProductValidator = new AddProductDTOValidation();
 			_productValidator = new EditProductDTOValidation();
 
-			_productService = new ProductService(_productRepo, _mapper, _context, _inventoryRepo, _categoryRepo, _receiptRepo, _createProductValidator, _productValidator);
+			_productService = new ProductService(_productRepo, _mapper, _context, _inventoryRepo, _categoryRepo, _receiptRepo, _createProductValidator, _productValidator, new TestDateTimeProvider());
 		}
 		[Fact]
 		public async Task ShowProductDetails_DetailsOfProductAsync_ReturnData()

@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Name = "TestCategory"
 
 			};
-			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -48,7 +48,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Id = 1,
 				Name = "TestCategory"
 			};
-			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			_categoryService.AddCategoryAsync(categoryDTO));
 			var result = _context.Categories.Count();
 			Assert.Equal(quantity, result);
-			Assert.Contains("Podaj nazwÄ™ kategorii.", ex.Message);
+			Assert.Contains("Podaj nazwê kategorii.", ex.Message);
 		}
 		[Fact]
 		public async Task AddCategory_ShouldNotAddCategory_WhenRepeatedInput()
@@ -74,7 +74,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Id = 1,
 				Name = "TestCategory"
 			};
-			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -90,7 +90,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			var resultBase = _context.Categories.Count();
 			Assert.Equal(_context.Categories.Count(), resultBase);
 			Assert.Equal(ErrorType.Conflict, result.ErrorType);
-			Assert.Contains("Kategoria o tej nazwie juÅ¼ istnieje.", result.Error);
+			Assert.Contains("Kategoria o tej nazwie ju¿ istnieje.", result.Error);
 			Assert.Equal(quantity, resultBase);
 		}
 		[Fact]
@@ -121,7 +121,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Name = "TestCategory"
 
 			};
-			var product = Product.Create("fdsfd", "aaa", 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -164,7 +164,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(id,updatedCategory));
 			//Assert
 			Assert.NotNull(ex);	
-			Assert.Contains("Podaj nazwÄ™ kategorii.", ex.Message);			
+			Assert.Contains("Podaj nazwê kategorii.", ex.Message);			
 		}
 	}
 }

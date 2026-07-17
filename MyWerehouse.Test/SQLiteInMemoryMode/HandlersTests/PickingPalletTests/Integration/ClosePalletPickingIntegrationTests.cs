@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				Name = "Category",
 				IsDeleted = false
 			};
-			var product = Product.Create("Prod A", "666", 1, 100);			
+			var product = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 100);			
 			var location1 = new Location
 			{
 				Id = 1,
@@ -111,7 +111,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				Name = "Category",
 				IsDeleted = false
 			};
-			var product = Product.Create("Prod A", "666", 1, 100);
+			var product = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 100);
 			var location1 = new Location
 			{
 				Id = 1,

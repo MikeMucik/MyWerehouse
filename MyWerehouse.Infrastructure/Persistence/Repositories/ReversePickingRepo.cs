@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,7 +34,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public IQueryable<ReversePicking> GetReversePickings()
 		{
-			return  _werehouseDbContext.ReversePickings.Where(r=>r.Status != ReversePickingStatus.Archaive || r.Status != ReversePickingStatus.Completed);
+			return  _werehouseDbContext.ReversePickings.Where(r=>r.Status != ReversePickingStatus.Archaived && r.Status != ReversePickingStatus.Completed);
 		}
 
 		public Task<List<Guid>> GetPalletsIdsByDate(DateOnly start, DateOnly end)

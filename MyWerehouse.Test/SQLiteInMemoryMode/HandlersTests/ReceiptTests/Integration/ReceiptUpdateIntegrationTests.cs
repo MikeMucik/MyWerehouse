@@ -51,7 +51,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		}
 		private Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, 1, 56);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 56);
 		}
 		private Location CreateLocation(int id, int position)
 		{
@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -185,7 +185,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client, clientNew);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -245,9 +245,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			var secondPallet = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			secondPallet.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
+			secondPallet.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -338,7 +338,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -400,7 +400,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -462,9 +462,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
 				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			var secondPallet = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			secondPallet.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
+			secondPallet.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -521,9 +521,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
 				new DateTime(2025, 6, 6), ReceiptStatus.InProgress, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			var pallet1 = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
+			pallet1.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
@@ -611,9 +611,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
 				new DateTime(2025, 6, 6), ReceiptStatus.InProgress, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, new DateOnly(2027, 3, 3));
+			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			var pallet1 = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product1.Id, 200, new DateOnly(2027, 3, 3));
+			pallet1.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);

@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			_context.Categories.AddRange(category, category1);
 			_context.SaveChanges();
-			var updatingProduct = Product.Create("Test", "dede", 1, 56);			
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);			
 			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");			
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
@@ -67,7 +67,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task UpdateProductAsync_ThrowsException_WhenNotProperDataName()
 		{
 			// Arrange			
-			var updatingProduct = Product.Create("Test", "dede", 1, 56);			
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);			
 			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
 			_context.ProductDetails.Add(details);
 			_context.Products.Add(updatingProduct);
@@ -96,7 +96,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task UpdateProductAsync_ThrowsValidationException_WhenNoDataLength()
 		{
 			// Arrange			
-			var updatingProduct = Product.Create("Test", "dede", 1, 56);			
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);			
 			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
 
 			_context.ProductDetails.Add(details);
@@ -137,7 +137,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			_context.Categories.AddRange(category, category1);
 			_context.SaveChanges();
-			var updatingProduct = Product.Create("Test", "dede", 1, 56);
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);
 			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
 
 			_context.ProductDetails.Add(details);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -16,10 +17,12 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 	{		
 		private readonly IHistoryReversePickingRepo _historyReversePickingRepo;
 		private readonly IPalletRepo _palletRepo;
-		public CreateHistoryReversePickingHandler(IHistoryReversePickingRepo historyReversePickingRepo, IPalletRepo pallet)
+		private readonly IDateTimeProvider _dateTimeProvider;
+		public CreateHistoryReversePickingHandler(IHistoryReversePickingRepo historyReversePickingRepo, IPalletRepo pallet, IDateTimeProvider dateTimeProvider)
 		{
 			_historyReversePickingRepo = historyReversePickingRepo;
 			_palletRepo = pallet;
+			_dateTimeProvider = dateTimeProvider;
 		}
 		public async Task Handle(CreateHistoryReversePickingNotification notification, CancellationToken ct)
 		{
@@ -48,7 +51,7 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 					IssueId = notification.IssueId,
 					IssueNumber = notification.IssueNumber,
 					ProductId = notification.ProductId,
-					DateTime = DateTime.UtcNow,
+					DateTime = _dateTimeProvider.UtcNow,
 					PerformedBy = notification.UserId,
 					Quantity = notification.Quantity,
 					StatusBefore = notification.StatusBefore,

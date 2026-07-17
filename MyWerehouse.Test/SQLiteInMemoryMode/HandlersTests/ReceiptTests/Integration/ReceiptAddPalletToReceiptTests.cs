@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,7 +49,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		}
 		private static Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, 1, 56);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 56);
 		}
 		private static Location CreateLocation(int id, int position)
 		{
@@ -152,7 +152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var ex = await Assert.ThrowsAsync<ValidationException>(() =>
 			Mediator.Send(new AddPalletToReceiptCommand(receipt.Id, newPalletDto)));
 
-			Assert.Contains("IloÅ›Ä‡ produktu musi byÄ‡ wiÄ™ksza od zera", ex.Message);
+			Assert.Contains("Iloœæ produktu musi byæ wiêksza od zera", ex.Message);
 		}
 		[Fact]
 		public async Task AddPalletToReceipt_ThrowValidateException_WhenTwoProduct()
@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			};
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new AddPalletToReceiptCommand(receipt.Id, newPalletDto)));
 
-			Assert.Contains("Paleta przyjmowana moÅ¼e mieÄ‡ tylko jeden rodzaj produktu", ex.Message);
+			Assert.Contains("Paleta przyjmowana mo¿e mieæ tylko jeden rodzaj produktu", ex.Message);
 		}
 	}
 }

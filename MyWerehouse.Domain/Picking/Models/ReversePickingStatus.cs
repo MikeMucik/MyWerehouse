@@ -13,6 +13,6 @@ namespace MyWerehouse.Domain.Picking.Models
 		Completed = 2,
 		Cancelled = 3,
 		Failed = 4,
-		Archaive = 5,
+		Archaived = 5,
 	}
 }

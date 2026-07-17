@@ -44,7 +44,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			{
 				Name = "CategoryName"
 			};
-			var product = Product.Create("Banana", "1234567890", 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
 			
 			var location = new Location
 			{
@@ -54,14 +54,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 				Height = 1
 			};
 			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
 			
 			DbContext.Clients.Add(initailClient);
 			DbContext.Products.Add(product);
 			DbContext.Categories.Add(newCategory);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
-			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
+			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId, TestDates.UtcNow);
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, new DateTime(2025, 5, 5)
 				, DateOnly.FromDateTime(new DateTime(2025, 5, 6)), "U002",IssueStatus.Pending, null);
 			
@@ -108,7 +108,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			{
 				Name = "CategoryName"
 			};
-			var product = Product.Create("Banana", "1234567890", 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
 			
 			var location = new Location
 			{
@@ -118,14 +118,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 				Height = 1
 			};
 			var pallet = Pallet.CreateForTests("Q00001", TestDates.Now, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)));
 			
 			DbContext.Products.Add(product);
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(newCategory);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
-			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId);
+			var virtualPallet = VirtualPallet.Create(pallet.Id, pallet.ProductsOnPallet.First().Quantity, pallet.LocationId, TestDates.UtcNow);
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 2, 1, new DateTime(2025, 5, 5)
 				, DateOnly.FromDateTime(new DateTime(2025, 5, 6)), "U002", IssueStatus.Pending, null);
 		

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
@@ -13,11 +14,12 @@ using MyWerehouse.Domain.Picking.Models;
 namespace MyWerehouse.Application.Picking.Services
 {
 	public class ProcessPickingActionService(IPalletRepo palletRepo,
-		ILocationRepo locationRepo, IProductRepo productRepo) : IProcessPickingActionService
+		ILocationRepo locationRepo, IProductRepo productRepo, IDateTimeProvider dateTimeProvider) : IProcessPickingActionService
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 		private readonly IProductRepo _productRepo = productRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, Guid productId,
 			int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion, int locationId)
@@ -61,38 +63,39 @@ namespace MyWerehouse.Application.Picking.Services
 			PickingCompletion pickingCompletion,int rampNumber, string snapShot, Pallet palletSource)
 		{
 			// Pobierz aktywną paletę pickingową (zamknięte palety nie są zwracane)
+			var now = _dateTimeProvider.UtcNow;
 			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(pickingTask.IssueId);
 			if (oldPallet == null)//Tworzę nową paletę	
 			{
 				var newNumberPallet = await _palletRepo.GetNextPalletIdAsync();
 				var sourcePalletBB = bestBefore;
-				var pallet = Pallet.Create(newNumberPallet, rampNumber);
+				var pallet = Pallet.Create(newNumberPallet, rampNumber, now);
 				pallet.ChangeStatus(PalletStatus.Picking);//Bo paleta kompletacyjna
-				pallet.AddProduct(productId, quantity, sourcePalletBB);
+				pallet.AddProduct(productId, quantity, now, sourcePalletBB);
 				var palletId = _palletRepo.AddPallet(pallet);
 				pallet.ReserveToIssue(issueId, userId, snapShot);
 				//Obsługa pickingTask
-				MarkPickingTask(pickingTask, pickingCompletion, pallet, palletSource, userId, quantity);
+				MarkPickingTask(pickingTask, pickingCompletion, pallet, palletSource, userId, quantity, now);
 				return new CreateNewPickingPalletResult(true, palletId, newNumberPallet); //pokaż komunikat weź nową paletę
 			}
 			else//dodaje do już istniejącej
 			{
-				oldPallet.AddOrIncreaseProductQuantity(productId, quantity, bestBefore);
+				oldPallet.AddOrIncreaseProductQuantity(productId, quantity,now, bestBefore);
 				//Obsługa pickingTask	
-				MarkPickingTask(pickingTask, pickingCompletion, oldPallet, palletSource, userId, quantity);
+				MarkPickingTask(pickingTask, pickingCompletion, oldPallet, palletSource, userId, quantity, now);
 				return new CreateNewPickingPalletResult(false, oldPallet.Id, oldPallet.PalletNumber);
 			}
 		}
 		private static void MarkPickingTask(PickingTask pickingTask, PickingCompletion pickingCompletion, Pallet pickingPallet,
-			Pallet palletSource, string userId, int quantity)
+			Pallet palletSource, string userId, int quantity, DateTime now)
 		{
 			if (pickingCompletion == PickingCompletion.Full)
 			{
-				pickingTask.MarkPicked(pickingPallet.Id, pickingPallet.PalletNumber, palletSource.Id, palletSource.PalletNumber, userId);
+				pickingTask.MarkPicked(pickingPallet.Id, pickingPallet.PalletNumber, palletSource.Id, palletSource.PalletNumber, userId, now);
 			}
 			else
 			{
-				pickingTask.MarkPartiallyPicked(pickingPallet.Id, pickingPallet.PalletNumber, palletSource.Id, palletSource.PalletNumber, quantity, userId);
+				pickingTask.MarkPartiallyPicked(pickingPallet.Id, pickingPallet.PalletNumber, palletSource.Id, palletSource.PalletNumber, quantity, userId, now);
 			}
 			pickingPallet.AddHistory(ReasonForPallet.Picking, userId, pickingPallet.Location.ToSnapshot());
 		}

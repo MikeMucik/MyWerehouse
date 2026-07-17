@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Services;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Services;
@@ -20,7 +21,8 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 		WerehouseDbContext werehouseDbContext,
 		IIssueRepo issueRepo,
 		IProcessPickingActionService processPickingActionService,
-		IPickingDomainService pickingDomainService
+		IPickingDomainService pickingDomainService,
+		IDateTimeProvider dateTimeProvider
 			) : IRequestHandler<ExecuteHandPickingCommand, AppResult<ProcessPickingActionResult>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
@@ -29,9 +31,11 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
 		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteHandPickingCommand command, CancellationToken ct)
 		{
+			var now = _dateTimeProvider.UtcNow;
 			if (command.Quantity <= 0)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Nie możesz pobrać ujemnej wartości.", ErrorType.Conflict);
@@ -68,7 +72,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(command.PalletIdSource);
 			if (virtualPallet == null)
 			{
-				virtualPallet = VirtualPallet.Create(pallet.Id, product.Quantity, pallet.LocationId);
+				virtualPallet = VirtualPallet.Create(pallet.Id, product.Quantity, pallet.LocationId, now);
 				pallet.AssignToPicking(command.UserId, pallet.Location.ToSnapshot());
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			}

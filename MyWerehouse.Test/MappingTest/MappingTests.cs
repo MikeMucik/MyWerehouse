@@ -60,7 +60,7 @@ namespace MyWerehouse.Test.MappingTest
 			//Arrange
 			var category = new Category { Id = 1, Name = "TestCategory" };
 			
-			var productNew = Product.Create("Apple", "666666", 1, 56);
+			var productNew = Product.Create("Apple", "666666", TestDates.UtcNow, 1, 56);
 			var details = ProductDetail.CreateDetails(productNew.Id, 100, 200, 120, 400, "500");
 			
 			productNew.SetDetails(details);

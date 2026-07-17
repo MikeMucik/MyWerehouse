@@ -51,7 +51,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 		private static Product CreateProduct(string name, int categoryId)
 		{
-			return Product.Create(name, "SKU1", categoryId, 10);
+			return Product.Create(name, "SKU1", TestDates.UtcNow, categoryId, 10);
 		}
 		private static Location CreateLocation(int position)
 		{
@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet2.AddProductForTests(product.Id, 9, new DateTime(2025, 4, 4), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -261,7 +261,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet2.AddProductForTests(product1.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product1.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
+			pallet3.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 
 			var pallet4 = Pallet.CreateForTests("P4", new DateTime(2025, 3, 3), 4, PalletStatus.Available, null, null);
 			pallet4.AddProductForTests(product2.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
@@ -470,7 +470,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet2.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product.Id, 10, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet3.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -520,7 +520,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var pallet2 = Pallet.CreateForTests("P2", new DateTime(2025, 3, 3), 2, PalletStatus.Available, null, null);
 			pallet2.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product.Id, 10, new DateOnly(2024, 1, 1));
+			pallet3.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2024, 1, 1));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);

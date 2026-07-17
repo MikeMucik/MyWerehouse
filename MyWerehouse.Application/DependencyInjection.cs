@@ -9,7 +9,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Common.Behaviors;
-using MyWerehouse.Application.Common.DateTimeProvider;
 using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.Services;

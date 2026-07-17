@@ -4,16 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Events;
 
 namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 {
-	public class CreateHistoryIssueHandler(IHistoryIssueRepo historyIssueRepo) 
+	public class CreateHistoryIssueHandler(IHistoryIssueRepo historyIssueRepo, IDateTimeProvider dateTimeProvider) 
 		: INotificationHandler<AddHistoryForIssueNotification>
 	{	
 		private readonly IHistoryIssueRepo _historyIssueRepo = historyIssueRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public Task Handle(AddHistoryForIssueNotification request, CancellationToken cancellationToken)
 		{		
@@ -25,7 +27,7 @@ namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 				ClientId = request.ClientId,
 				StatusAfter = request.IssueStatus,
 				PerformedBy = request.UserId,
-				DateTime = DateTime.UtcNow,
+				DateTime = _dateTimeProvider.UtcNow,
 				Details = details
 				.Select(d=> new HistoryIssueDetail
 				{

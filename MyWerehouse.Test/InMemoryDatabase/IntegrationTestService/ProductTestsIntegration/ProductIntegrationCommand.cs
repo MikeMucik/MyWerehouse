@@ -29,7 +29,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			_createProductValidator = new AddProductDTOValidation();
 			_inventoryRepo = new InventoryRepo(_context);
 			_categoryRepo = new CategoryRepo(_context);
-			_productService = new ProductService(_productRepo, _mapper,_context,_inventoryRepo,_categoryRepo, _receiptRepo,_createProductValidator, _productValidator);
+			_productService = new ProductService(_productRepo, _mapper,_context,_inventoryRepo,_categoryRepo, _receiptRepo,_createProductValidator, _productValidator, new TestDateTimeProvider());
 		}
 	}
 }

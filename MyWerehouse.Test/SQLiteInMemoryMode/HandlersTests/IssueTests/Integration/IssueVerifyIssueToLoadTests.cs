@@ -49,7 +49,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 		private Product CreateProduct(string name, string sku, int categoryId)
 		{
-			return Product.Create(name, sku, TestDates.UtcNow, categoryId, 10);
+			return Product.Create(name, sku, TestDates.UtcNow, categoryId, 10, 30, 30, 30, 30, "TestDetails");
 		}
 		private Location CreateLocation(int position)
 		{

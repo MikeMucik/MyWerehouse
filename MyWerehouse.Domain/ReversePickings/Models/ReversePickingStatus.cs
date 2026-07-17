@@ -1,18 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyWerehouse.Domain.Picking.Models
+namespace MyWerehouse.Domain.ReversePickings.Models
 {
 	public enum ReversePickingStatus
 	{
 		Ongoing = 0,
 		InProgress = 1,
 		Completed = 2,
-		Cancelled = 3,
-		Failed = 4,
-		Archaived = 5,
 	}
 }

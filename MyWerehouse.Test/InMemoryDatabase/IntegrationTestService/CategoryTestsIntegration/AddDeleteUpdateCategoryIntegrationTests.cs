@@ -24,7 +24,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Name = "TestCategory"
 
 			};
-			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -48,7 +48,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Id = 1,
 				Name = "TestCategory"
 			};
-			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -74,7 +74,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Id = 1,
 				Name = "TestCategory"
 			};
-			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
@@ -121,7 +121,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Name = "TestCategory"
 
 			};
-			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			_context.Products.Add(product);
 			_context.Categories.Add(category);

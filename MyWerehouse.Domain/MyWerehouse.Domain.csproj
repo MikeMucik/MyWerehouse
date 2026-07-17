@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Picking\Filters\" />
-    <Folder Include="ReversePicking\Events\" />
-    <Folder Include="ReversePicking\Models\" />
-    <Folder Include="ReversePicking\ReversePickingException\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
   </ItemGroup>
 

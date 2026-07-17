@@ -46,8 +46,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 		{
 			// Arrange		
 			var category = CreateCategory("Category");
-			var product1 = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 50);
-			var product2 = Product.Create("Prod B", "667", TestDates.UtcNow, 1, 100);
+			var product1 = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 50, 30, 30, 30, 30, "TestDetails");
+			var product2 = Product.Create("Prod B", "667", TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");
 			var location1 = CreateLocation(1, 1);
 			var location2 = CreateLocation(2, 2);
 			var location3 = CreateLocation(3, 3);
@@ -213,8 +213,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 		{
 			// Arrange		
 			var category = CreateCategory("Category");
-			var product1 = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 50);
-			var product2 = Product.Create("Prod B", "667", TestDates.UtcNow, 1, 100);
+			var product1 = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 50, 30, 30, 30, 30, "TestDetails");
+			var product2 = Product.Create("Prod B", "667", TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");
 			var location1 = CreateLocation(1, 1);
 			var location2 = CreateLocation(2, 2);
 			var location3 = CreateLocation(3, 3);

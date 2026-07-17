@@ -28,7 +28,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		}
 		private Product CreateProduct(string name)
 		{
-			return Product.CreateForSeed(productId, name, "666666", TestDates.UtcNow, 1,false, 56);
+			return Product.CreateForTests(productId, name, "666666", TestDates.UtcNow, 1,false, 56);
 		}
 		private static Location CreateLocation(int position)
 		{

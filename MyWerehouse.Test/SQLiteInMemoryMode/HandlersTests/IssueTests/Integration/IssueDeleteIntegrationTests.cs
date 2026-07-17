@@ -75,7 +75,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				};
 				var location = new Location { Aisle = 1, Bay = 1, Height = 1, Position = 1 };
 				var category = new Category { Id = 1, Name = "Cat", IsDeleted = false };
-				var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
+				var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10, 30, 30, 30, 30, "TestDetails");
 				db.Clients.Add(client);
 				db.Categories.Add(category);
 				db.Products.Add(product);

@@ -111,7 +111,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10, 30, 30, 30, 30, "TestDetails");
 
 			DbContext.Clients.Add(initailClient);
 			DbContext.Categories.Add(initialCategory);

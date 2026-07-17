@@ -13,6 +13,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
@@ -21,42 +22,43 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 {
 	public class AddHistoryTests : TestBase
 	{
-		[Fact]
-		public void AddRecord_AddPalletMovement_AddToList()
+		private static Category CreateCategory(string name)
 		{
-			//Arrange
-			var initialCategory = new Category
+			return new Category
 			{
-				Id = 1,
-				Name = "name",
+				Name = name,
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
+		}
+		private static Product CreateProduct(string name, string sku)
+		{
+			return Product.CreateForTests(Guid.NewGuid() ,name, sku, TestDates.UtcNow, 1,false, 10);
+		}
+		private static Location CreateLocation(int id, int aisle)
+		{
+			return new Location
+			{
+				Id = id,
+				Bay = 1,
+				Aisle = aisle,
+				Height = 1,
+				Position = 1
+			};
+		}
+		[Fact]
+		public void AddHistoryPallett_ShouldAddRecord_AddToList()
+		{
 
-			var location1 = new Location
-			{
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location2 = new Location
-			{
-				Aisle = 2,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location3 = new Location
-			{
-				Aisle = 3,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
+			//Arrange
+			var category = CreateCategory("name");
+			var product = CreateProduct("TestFull", "123");
+			var location1 = CreateLocation(1, 1);
+			var location2 = CreateLocation(2, 2);
+			var location3 = CreateLocation(3, 3);
+			
 			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, null);
 
-			DbContext.Categories.Add(initialCategory);
+			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1, location2, location3);
 			DbContext.Pallets.AddRange(pallet1);
@@ -98,6 +100,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		public void AddRecord_AddHistoryIssue_AddToList()
 		{
 			//Arrange
+			var category = CreateCategory("name");
+			var product = CreateProduct("TestFull", "123");
+			var location1 = CreateLocation(1, 1);
+			var location2 = CreateLocation(2, 2);
+			var location3 = CreateLocation(3, 3);
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -115,42 +122,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				Description = "Description",
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
-			};
-			var initialCategory = new Category
-			{
-				Name = "name",
-				IsDeleted = false
-			};
-			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
-
-			var location1 = new Location
-			{
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location2 = new Location
-			{
-				Aisle = 2,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location3 = new Location
-			{
-				Aisle = 3,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
+			};		
 			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, null);
 
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, TestDates.Now
 				, DateOnly.FromDateTime( TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			DbContext.Clients.Add(initailClient);
-			DbContext.Categories.Add(initialCategory);
+			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1, location2, location3);
 			DbContext.Pallets.AddRange(pallet1);
@@ -191,6 +170,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		public void AddRecord_AddHistoryReceipt_AddToList()
 		{
 			//Arrange
+			var category = CreateCategory("name");
+			var product = CreateProduct("TestFull", "123");
+			var location1 = CreateLocation(1, 1);
+			
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -209,26 +192,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-			var initialCategory = new Category
-			{
-				Name = "name",
-				IsDeleted = false
-			};
-			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
-
-			var location1 = new Location
-			{
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
+			
 
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "User2",
 			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			DbContext.Clients.Add(initailClient);
-			DbContext.Categories.Add(initialCategory);
+			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1);
 			
@@ -271,6 +241,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		public async Task AddRecord_AddHistoryPicking_AddToList()
 		{
 			//Arrange
+			var category = CreateCategory("name");
+			var product = CreateProduct("TestFull", "123");
+			var location1 = CreateLocation(1, 1);
+			var location2 = CreateLocation(2, 2);
+			var location3 = CreateLocation(3, 3);
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -289,41 +264,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-			var initialCategory = new Category
-			{
-				Name = "name",
-				IsDeleted = false
-			};
-			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
-
-			var location1 = new Location
-			{
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location2 = new Location
-			{
-				Aisle = 2,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location3 = new Location
-			{
-				Aisle = 3,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
+			
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, TestDates.Now
 			,DateOnly.FromDateTime( TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, issue.Id);
 			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(initailClient);
-			DbContext.Categories.Add(initialCategory);
+			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1, location2, location3);
 			DbContext.Pallets.AddRange(pallet1);
@@ -367,6 +315,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		public async Task AddRecord_AddHistoryReversePicking_AddToList()
 		{
 			//Arrange
+			var category = CreateCategory("name");
+			var product = CreateProduct("TestFull", "123");
+			var location1 = CreateLocation(1, 1);
+			var location2 = CreateLocation(2, 2);
+			var location3 = CreateLocation(3, 3);
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -385,41 +338,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				FullName = "FullNameCompany",
 				Addresses = new List<Address> { address }
 			};
-			var initialCategory = new Category
-			{
-				Name = "name",
-				IsDeleted = false
-			};
-			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
-
-			var location1 = new Location
-			{
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location2 = new Location
-			{
-				Aisle = 2,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var location3 = new Location
-			{
-				Aisle = 3,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
+			
 			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, TestDates.Now
 			, DateOnly.FromDateTime(TestDates.Now.AddDays(7)), "user", IssueStatus.RequiresCorrection, null);
 
 			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.Now, 1, PalletStatus.Available, null, issue.Id);
 			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(initailClient);
-			DbContext.Categories.Add(initialCategory);
+			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location1, location2, location3);
 			DbContext.Pallets.AddRange(pallet1);
@@ -437,7 +363,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			var pickingPallet = Pallet.CreateForTests("Q1001", TestDates.Now, 1, PalletStatus.ToIssue, null, issue.Id);
 			pickingPallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			
-			var reverseTask = ReversePicking.Create(pickingPallet.Id,pallet1.Id,product.Id,DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), 10, pickingTask.Id,"UserReserve", TestDates.Today);
+			var reverseTask = ReversePickingTask.Create(pickingPallet.Id,pallet1.Id,product.Id,DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), 10, pickingTask.Id,"UserReserve", TestDates.Today);
 			
 			var historyReversePicking = new HistoryReversePicking
 			{
@@ -470,4 +396,3 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		}
 	}
 }
-

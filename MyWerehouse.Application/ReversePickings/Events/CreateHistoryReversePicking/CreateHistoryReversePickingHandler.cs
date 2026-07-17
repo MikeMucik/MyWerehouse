@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +8,7 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Events;
-using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Domain.ReversePickings.Events;
 
 namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking
 {

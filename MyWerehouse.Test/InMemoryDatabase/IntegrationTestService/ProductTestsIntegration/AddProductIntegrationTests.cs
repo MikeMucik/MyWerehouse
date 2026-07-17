@@ -76,7 +76,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task AddNewProductAsync_ShouldReturnAppResultError_WhenDataNameExist()
 		{
 			//Arrange
-			var product = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			_context.Products.Add(product);
 			_context.SaveChanges();

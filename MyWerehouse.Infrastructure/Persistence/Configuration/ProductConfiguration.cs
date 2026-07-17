@@ -32,10 +32,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 				.UseCollation("SQL_Latin1_General_CP1_CI_AS");
 			}
 
-			entity.HasOne(pm => pm.InventoryItem)
-			.WithOne(i => i.Product)
-			.HasForeignKey<Inventory>(i => i.ProductId);
-
 			entity.HasOne(p => p.Details)
 			.WithOne(p => p.Product)
 			.HasForeignKey<ProductDetail>(p => p.ProductId)

@@ -13,6 +13,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
@@ -67,19 +68,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			var productId989 = Guid.Parse("00000000-0000-0000-0989-000000000000");
 			if (!context.Products.Any())
 			{
-				context.Products.AddRange(Product.CreateForSeed(productId1, "Test", "0987654321", new DateTime(2025, 05, 01), 1, false, 56),
-					Product.CreateForSeed(productId2, "TestD", "fghtredfg", new DateTime(2025, 05, 01), 1, false, 50),
-					Product.CreateForSeed(productId989, "NotAdded", "fghtredfg1", new DateTime(2025, 05, 01), 1, false, 112)
+				context.Products.AddRange(
+					Product.CreateForSeed(productId1, "Test", "0987654321", new DateTime(2025, 05, 01), 1, false, 56, 10, 20, 30, 2, "TestDetails"),
+					Product.CreateForSeed(productId2, "TestD", "fghtredfg", new DateTime(2025, 05, 01), 1, false, 50, 20, 40, 60, 3, "TestDetails 11"),
+					Product.CreateForTests(productId989, "NotAdded", "fghtredfg1", new DateTime(2025, 05, 01), 1, false, 112)
 
 				);
 			}
-
-			if (!context.ProductDetails.Any())
-			{
-				context.ProductDetails.AddRange(
-					ProductDetail.CreateDetails(productId1, 10, 20, 30, 2, "TestDetails"),
-					ProductDetail.CreateDetails(productId2, 20, 40, 60, 3, "TestDetails 11"));
-			}
+	
 
 			if (!context.Addresses.Any())
 			{
@@ -312,8 +308,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.ReversePickings.Any())
 			{
 				context.ReversePickings.AddRange(
-					ReversePicking.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId2, "UserR", TestDates.Today),
-					ReversePicking.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId5, "UserR", TestDates.Today)
+					ReversePickingTask.CreateForSeed(reversePickingTaskId1, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId2, "UserR", TestDates.Today),
+					ReversePickingTask.CreateForSeed(reversePickingTaskId2, palletGuid9, null, productId1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)), 10, pickingId5, "UserR", TestDates.Today)
 				);
 			}
 			context.SaveChanges();

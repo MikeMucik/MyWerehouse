@@ -16,7 +16,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 	{
 		private Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, TestDates.UtcNow, 1, 100);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");
 		}
 		private Category CreateCategory()
 		{

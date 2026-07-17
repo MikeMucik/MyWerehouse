@@ -112,7 +112,7 @@ dotnet run --project MyWerehouse.Server
 Swagger UI is available at:
 
 ```text
-https://localhost:7243/swagger
+https://localhost:7243/swagger.html
 ```
 
 Run the test suite with:
@@ -129,12 +129,24 @@ The warehouse model is based on the following business concepts:
 - **Receipt** - an inbound delivery containing one or more pallets received by the warehouse.
 - **Pallet** - a physical warehouse pallet containing products and assigned to a warehouse location.
 - **Picking** - the process of collecting products for an outbound order.
-- **Reverse picking** - the process of returning previously picked products when an outbound order is cancelled.
+- **Reverse picking** - a task created after cancelling an issue when picked goods must be physically returned from the picking pallet.
 - **Best-before date** - the product date considered when pallets are allocated to an outbound order.
 
 ## Example business flow
 
 Receipt → Pallet → Inventory → Issue → Picking → Loading
+
+1. Create an inbound receipt.
+2. Add pallets and products.
+3. Confirm receipt and update inventory.
+4. Create an outbound issue.
+5. Allocate pallets and picking tasks.
+6. Complete picking and loading.
+
+## Known limitation
+
+- Identity is registered, but endpoints are not protected yet.
+- Application still references Infrastructure in selected handlers.
 
 ## Future improvements
 

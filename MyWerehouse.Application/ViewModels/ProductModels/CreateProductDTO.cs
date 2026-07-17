@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int Length { get; init; } //cm
 		public int Height { get; init; } //cm
 		public int Width { get; init; } //cm
-		public int Weight { get; init; } //kg
+		public int Weight { get; init; } //grams
 		public required string Description { get; init; }
 		public void Mapping(Profile profile)
 		{

@@ -82,8 +82,7 @@ namespace MyWerehouse.Application.Services
 				productDTO.SKU,
 				_dateTimeProvider.UtcNow,
 				productDTO.CategoryId,
-				productDTO.CartonsPerPallet);
-			productPrepare.AddDetails(
+				productDTO.CartonsPerPallet,
 				productDTO.Length,
 				productDTO.Height,
 				productDTO.Width,

@@ -22,7 +22,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 		}
 		private static Product CreateProduct(string name)
 		{
-			return Product.Create(name, "SKU1", TestDates.UtcNow, 1, 10);
+			return Product.Create(name, "SKU1", TestDates.UtcNow, 1, 10, 30, 30, 30, 30, "TestDetails");
 		}
 		[Fact]
 		public async Task DeleteLocation_ShouldRemoveLocation_WhenPlaceIsEmpty()

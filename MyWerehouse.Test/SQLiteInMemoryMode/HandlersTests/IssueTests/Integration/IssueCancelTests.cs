@@ -17,6 +17,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integration
@@ -55,7 +56,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 		}
 		private static Product CreateProduct(string name)
 		{
-			return Product.Create(name, "SKU1", TestDates.UtcNow, 1, 10);
+			return Product.Create(name, "SKU1", TestDates.UtcNow, 1, 10, 30, 30, 30, 30, "TestDetails");
 		}
 		private static Location CreateLocation(int position)
 		{

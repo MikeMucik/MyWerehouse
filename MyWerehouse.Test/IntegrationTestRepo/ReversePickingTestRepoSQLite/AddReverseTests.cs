@@ -10,6 +10,7 @@ using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
@@ -45,7 +46,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				Name = "name",
 				IsDeleted = false
 			};
-			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10);
+			var product = Product.Create("TestFull", "123", TestDates.UtcNow, 1, 10, 30, 30, 30, 30, "TestDetails");
 			
 			var location1 = new Location
 			{
@@ -98,7 +99,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			DbContext.SaveChanges();
 
 			var reversePickingRepo = new ReversePickingRepo(DbContext);
-			var reversePicking = ReversePicking.Create(pickingPallet.Id, null, product.Id, pickingPallet.ProductsOnPallet.Single().BestBefore,
+			var reversePicking = ReversePickingTask.Create(pickingPallet.Id, null, product.Id, pickingPallet.ProductsOnPallet.Single().BestBefore,
 				pickingPallet.ProductsOnPallet.Single().Quantity, pickingTask.Id, "UserR", TestDates.Today);
 			//Act
 			reversePickingRepo.AddReversePicking(reversePicking);

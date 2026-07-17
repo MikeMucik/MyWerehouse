@@ -47,7 +47,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		}
 		private static Product CreateProduct(string name, string sku)
 		{
-			return Product.Create(name, sku, TestDates.UtcNow, 1, 56);
+			return Product.Create(name, sku, TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 		}
 		private static Location CreateLocation(int id, int position)
 		{

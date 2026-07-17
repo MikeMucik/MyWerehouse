@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Clients.Models;
@@ -11,6 +11,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Configuration;
 
@@ -44,7 +45,7 @@ namespace MyWerehouse.Infrastructure.Persistence
 		public DbSet<ProductDetail> ProductDetails { get; set; }
 		public DbSet<ProductOnPallet> ProductOnPallet { get; set; }
 		public DbSet<Receipt> Receipts { get; set; }
-		public DbSet<ReversePicking> ReversePickings { get; set; }
+		public DbSet<ReversePickingTask> ReversePickings { get; set; }
 		public DbSet<VirtualPallet> VirtualPallets { get; set; }
 
 		public override async Task<int> SaveChangesAsync(CancellationToken ct = default)

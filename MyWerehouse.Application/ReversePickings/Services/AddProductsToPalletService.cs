@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,7 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Services
 {
@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
-		public async Task<ReversePickingResult> AddProductsToSourcePallet(ReversePicking reversePicking, string userId)
+		public async Task<ReversePickingResult> AddProductsToSourcePallet(ReversePickingTask reversePicking, string userId)
 		{
 			var sourcePallet = reversePicking.PickingTask.VirtualPallet?.Pallet;
 			if (sourcePallet == null)
@@ -43,7 +43,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			virtualPallet?.ChangeToAvailable(userId, sourcePallet.Location.ToSnapshot());
 			return ReversePickingResult.Ok("Dodano towar do palety źródłowej", reversePicking.ProductId, reversePicking.SourcePalletId);
 		}
-		public async Task<ReversePickingResult> AddToExistingPallet(ReversePicking task, List<Pallet> pallets, string userId)
+		public async Task<ReversePickingResult> AddToExistingPallet(ReversePickingTask task, List<Pallet> pallets, string userId)
 		{
 			var quantityToAdded = task.Quantity;
 			var product = await _productRepo.GetProductByIdAsync(task.ProductId);
@@ -82,7 +82,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			return ReversePickingResult.Ok("Dodano towar.", listPalletToAddProduct);
 		}
 
-		public async Task<ReversePickingResult> AddToNewPallet(ReversePicking task, string userId,int locationId, string snapShot)
+		public async Task<ReversePickingResult> AddToNewPallet(ReversePickingTask task, string userId,int locationId, string snapShot)
 		{
 			var newNumber = await _palletRepo.GetNextPalletIdAsync();
 			var now = _dateTimeProvider.UtcNow;

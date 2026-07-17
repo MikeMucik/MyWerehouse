@@ -24,7 +24,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 				Id = 1,
 				Name = "CategoryName"
 			};
-			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			var location = new Location
 			{
 				Bay = 1,
@@ -80,7 +80,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			};
 			DbContext.Categories.Add(newCategory);
 
-			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			DbContext.Products.Add(product);
 			DbContext.SaveChanges();
 			var location = new Location

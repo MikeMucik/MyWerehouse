@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Services
 {
@@ -32,7 +32,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			var nowDateOnly = _dateTimeProvider.Today;    
 			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId))
 				return ReversePickingResult.Fail("Zadania dekompletacji są już utworzone.");
-			var listTasks = new List<ReversePicking>();
+			var listTasks = new List<ReversePickingTask>();
 			var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
 			if (pallet == null) return ReversePickingResult.Fail($"Paleta o numerze {palletId} nie istnieje.");
 			var issue = pallet.Issue;
@@ -43,8 +43,8 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			foreach (var pickingTaskToReverse in pickingTasksOfPickingPallet)
 			{
 				listTasks.Add(
-					ReversePicking.Create(palletId, pickingTaskToReverse.VirtualPallet!.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
-					pickingTaskToReverse.RequestedQuantity, pickingTaskToReverse.Id, userId, nowDateOnly));					
+					ReversePickingTask.Create(palletId, pickingTaskToReverse.VirtualPallet!.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
+					pickingTaskToReverse.PickedQuantity, pickingTaskToReverse.Id, userId, nowDateOnly));					
 			}
 			foreach (var task in listTasks)
 			{
@@ -52,7 +52,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			}
 			foreach (var task in listTasks)
 			{
-				task.AddHistory(task.PickingPalletId, userId, issue.Id, issue.IssueNumber, ReversePickingStatus.Ongoing, ReversePickingStatus.Ongoing);
+				task.AddHistory(userId, issue.Id, issue.IssueNumber, ReversePickingStatus.Ongoing, ReversePickingStatus.Ongoing);
 			}
 			return ReversePickingResult.Ok();
 		}

@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 
 namespace MyWerehouse.Application.ReversePickings.DTOs
 {
-	public class ReversePickingDTO : IMapFrom<ReversePicking>
+	public class ReversePickingDTO : IMapFrom<ReversePickingTask>
 	{
 		public Guid Id { get; init; }
 		public required string PickingPalletId { get; init; }
@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 		public ReversePickingStatus Status { get; init; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<ReversePicking,  ReversePickingDTO>();
+			profile.CreateMap<ReversePickingTask,  ReversePickingDTO>();
 		}
 	}
 }

@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {
@@ -17,24 +16,24 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-		public void AddReversePicking(ReversePicking reversePicking)
+		public void AddReversePicking(ReversePickingTask reversePicking)
 		{
 			 _werehouseDbContext.Add(reversePicking);
 		}
 		
 		public async Task<bool> ExistsForPickingPalletAsync(Guid palletId)
 		{
-			 if(await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r=>r.SourcePalletId == palletId) != null) return true ; return false;
+			 if(await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r=>r.PickingPalletId == palletId) != null) return true ; return false;
 		}		
 
-		public async Task<ReversePicking?> GetReversePickingAsync(Guid reversePickingId)
+		public async Task<ReversePickingTask?> GetReversePickingAsync(Guid reversePickingId)
 		{
 			return await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r => r.Id == reversePickingId);
 		}
 
-		public IQueryable<ReversePicking> GetReversePickings()
+		public IQueryable<ReversePickingTask> GetReversePickings()
 		{
-			return  _werehouseDbContext.ReversePickings.Where(r=>r.Status != ReversePickingStatus.Archaived && r.Status != ReversePickingStatus.Completed);
+			return  _werehouseDbContext.ReversePickings.Where(r=>r.Status != ReversePickingStatus.Completed);
 		}
 
 		public Task<List<Guid>> GetPalletsIdsByDate(DateOnly start, DateOnly end)

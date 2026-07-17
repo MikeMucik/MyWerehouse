@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 
-namespace MyWerehouse.Domain.Picking.Events
+namespace MyWerehouse.Domain.ReversePickings.Events
 {
 	public record CreateHistoryReversePickingNotification(
 		Guid ReversePickingId,

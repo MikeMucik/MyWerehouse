@@ -61,9 +61,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Name = "name",
 				IsDeleted = false
 			};
-			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
+			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
-			var product2 = Product.Create("Test1", "666666", TestDates.UtcNow, 1, 65);
+			var product2 = Product.Create("Test1", "666666", TestDates.UtcNow, 1, 65, 30, 30, 30, 30, "TestDetails");
 
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product1, product2);

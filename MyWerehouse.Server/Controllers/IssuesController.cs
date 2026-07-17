@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.Issues.Commands.CancelIssue;
 using MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading;
@@ -28,20 +28,17 @@ namespace MyWerehouse.Server.Controllers
 		{
 			_mediator = mediator;
 		}
-
-		//Stworzenie zlecenia wydania
+		
 		[HttpPost]
 		public async Task<IActionResult> Create(CreateIssueCommand command)
 			=> (await _mediator.Send(command))
 			.ToActionResult();		
 
-		//Do edycji lub przejrzenia zlecenia
 		[HttpGet("{id:guid}")]
 		public async Task<IActionResult> Get(Guid id)
 			=> (await _mediator.Send(new GetIssueByIdQuery(id)))
 			.ToActionResult();		
 
-		// Update - wiele rozwiązań więc POST
 		[HttpPut("{id:guid}")]
 		public async Task<IActionResult> Update(Guid id,ModifyIssueDTO dto, DateOnly dateToSend)
 			=> (await _mediator.Send(new ModifyIssueCommand(id, dto, dateToSend))).ToActionResult();
@@ -65,7 +62,6 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _mediator.Send(new ChangePalletInIssueCommand(id, oldPalletId, newPalletId, userId)))
 			.ToActionResult();
 
-		//Zatwierdzenie magazynowe że załadunek skończony
 		[HttpPost("{id:guid}/confirm-loading")]
 		public async Task<IActionResult> ConfirmEndLoading(Guid id, string userId)
 			=> (await _mediator.Send(new CompletedLoadIssueCommand(id, userId)))

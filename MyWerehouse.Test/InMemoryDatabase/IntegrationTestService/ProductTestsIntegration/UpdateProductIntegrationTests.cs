@@ -14,8 +14,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 {
 	public class UpdateProductIntegrationTests : ProductIntegrationCommand
 	{
-		//private class SeedFor
-
+		
 		[Fact]
 		public async Task UpdateProductAsync_ChangeData_WhenProperData()
 		{
@@ -30,9 +29,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			_context.Categories.AddRange(category, category1);
 			_context.SaveChanges();
-			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);			
-			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");			
-			_context.ProductDetails.Add(details);
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56,1, 1, 1, 1, "Test");			
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act
@@ -67,9 +64,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task UpdateProductAsync_ThrowsException_WhenNotProperDataName()
 		{
 			// Arrange			
-			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);			
-			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
-			_context.ProductDetails.Add(details);
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56, 1, 1, 1, 1, "Test");					
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act&Assert
@@ -96,10 +91,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task UpdateProductAsync_ThrowsValidationException_WhenNoDataLength()
 		{
 			// Arrange			
-			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);			
-			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
-
-			_context.ProductDetails.Add(details);
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act&Assert
@@ -137,10 +129,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			_context.Categories.AddRange(category, category1);
 			_context.SaveChanges();
-			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56);
-			var details = ProductDetail.CreateDetails(updatingProduct.Id, 1, 1, 1, 1, "Test");
-
-			_context.ProductDetails.Add(details);
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act&Assert

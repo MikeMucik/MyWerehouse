@@ -1,17 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.IdentityModel.Tokens;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking
@@ -52,8 +50,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			}
 			//produkt na palecie kompletacyjnej - product on pickingPallet
 			var productOnPallet = pickingPallet.GetProductAggregate(reversePicking.ProductId);
-
-			reversePicking.ChangeStatus(ReversePickingStatus.InProgress);
+			reversePicking.Start();
 			ReversePickingResult result;
 			static AppResult<ReversePickingResult> Fail(string message)
 			=> AppResult<ReversePickingResult>.Fail(message, ErrorType.Conflict);
@@ -94,8 +91,8 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			productOnPallet.SetQuantity(0);
 			pickingPallet.CkeckIfToArchive(command.UserId, ReasonForPallet.ReversePicking, pickingPallet.Location.ToSnapshot());
 			//zadanie dekompletacyjne
-			reversePicking.ChangeStatus(ReversePickingStatus.Completed);
-			reversePicking.AddHistory(pickingPallet.Id, command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
+			reversePicking.Complete();
+			reversePicking.AddHistory(command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<ReversePickingResult>.Success(result);
 		}		

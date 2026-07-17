@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 
 		public async Task<AppResult<ReversePickingDetailsDTO>> Handle(GetReversePickingToDoQuery query, CancellationToken ct)
 		{
-			var reversePickingTask = await _reversePickingRepo.GetReversePickingAsync(query.PickingTaskId);
+			var reversePickingTask = await _reversePickingRepo.GetReversePickingAsync(query.ReversePickingTaskId);
 			if (reversePickingTask == null) return AppResult<ReversePickingDetailsDTO>.Fail("Nie znaleziono zadania dekompletacyjnego.", ErrorType.NotFound);
 
 			var pickingTask = reversePickingTask.PickingTask;

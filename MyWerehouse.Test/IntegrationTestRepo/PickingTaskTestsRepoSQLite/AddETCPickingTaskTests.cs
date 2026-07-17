@@ -44,7 +44,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			{
 				Name = "CategoryName"
 			};
-			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			var location = new Location
 			{
@@ -108,7 +108,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			{
 				Name = "CategoryName"
 			};
-			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56);
+			var product = Product.Create("Banana", "1234567890", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			var location = new Location
 			{

@@ -53,7 +53,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		}
 		private Product CreateProduct(Guid id, string name, string sku)
 		{
-			return Product.CreateForSeed(id, name, sku, TestDates.UtcNow.AddMonths(-5), 1, false, 56);
+			return Product.CreateForTests(id, name, sku, TestDates.UtcNow.AddMonths(-5), 1, false, 56);
 		}
 		private Location CreateLocation(int id, int position)
 		{

@@ -44,7 +44,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Height = 1,
 				Position = 1
 			};
-			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
+			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			_context.Clients.Add(client);
 			_context.Products.Add(product1);
 			_context.Locations.Add(location);
@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		public async Task DeleteProductAsync_ShouldDeleteFrom_WhenProductNotUsed()
 		{
 			//Arrange
-			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56);
+			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			
 			_context.Products.Add(product1);
 			_context.SaveChanges();

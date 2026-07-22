@@ -63,8 +63,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
 				.Where(a => a.ProductId == productId &&
-				a.PickingStatus == PickingStatus.Allocated &&
-				a.RequestedQuantity > 0 &&
+				(a.PickingStatus == PickingStatus.Allocated || a.PickingStatus == PickingStatus.CorrectionPicking) &&
+				a.RequestedQuantity > a.PickedQuantity &&
 				a.Issue.IssueDateTimeSend >= from && a.Issue.IssueDateTimeSend <= to)
 				.ToListAsync();
 			return result;

@@ -28,6 +28,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			_fixture = fixture;
 			_mediator = _fixture.Mediator;
 		}
+
+		//PrepareEmergencyPicking_ShouldReturnIssueWithCorrectionPickingTask;
+		//PrepareEmergencyPicking_ShouldNotReturnIssueWithPickingShortage;
+
 		[Fact]
 		public async Task PrepareEmergencyPicking_ReturnValidInfo_WhenPalletHasOneProduct()
 		{

@@ -11,9 +11,7 @@ namespace MyWerehouse.Application.Picking.Services
 {
 	public interface IProcessPickingActionService
 	{
-		Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet,
-		Issue issue, Guid productId, int quantityToPick,
-		string userId, PickingTask pickingTask,
-		PickingCompletion pickingCompletion, int rampNumber);
+		Task<ProcessPickingActionResult> ExecuteProcessPicking(Pallet sourcePallet, Issue issue, Guid productId,
+			int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion, int locationId);
 	}
 }

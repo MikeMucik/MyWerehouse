@@ -49,7 +49,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				return AppResult<ReversePickingResult>.Fail($"Zamówienie o numerze {issueId} nie zostało znalezione.", ErrorType.NotFound);
 			}
 			//produkt na palecie kompletacyjnej - product on pickingPallet
-			var productOnPallet = pickingPallet.GetProductAggregate(reversePicking.ProductId);
+			var productOnPallet = pickingPallet.GetProductOnPallet(reversePicking.ProductId);
 			reversePicking.Start();
 			ReversePickingResult result;
 			static AppResult<ReversePickingResult> Fail(string message)

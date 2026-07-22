@@ -12,8 +12,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 {
 	public class AddProductTests : TestBase
 	{
-
-
 		[Fact]
 		public void AddProperDataWithDetails_AddProduct_ShouldAddToCollection()
 		{

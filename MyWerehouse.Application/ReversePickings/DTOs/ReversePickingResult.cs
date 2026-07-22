@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.ReversePickings.Services;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.ReversePickings.DTOs
 {
@@ -46,6 +44,7 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 				Success = true,
 			};
 		}
+				
 		public static ReversePickingResult Ok(string message, List<PalletProductQuantityDTO> palletWithAddedProduct)
 		{
 			return new ReversePickingResult
@@ -63,6 +62,6 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 				Success = false,
 				Message = message
 			};
-		}
+		}		
 	}
 }

@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Services;
 using MyWerehouse.Domain.Common;
@@ -22,7 +21,8 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 		IIssueRepo issueRepo,
 		IProcessPickingActionService processPickingActionService,
 		IPickingDomainService pickingDomainService,
-		IDateTimeProvider dateTimeProvider
+		IDateTimeProvider dateTimeProvider,
+		IPickingTaskRepo pickingTaskRepo
 			) : IRequestHandler<ExecuteHandPickingCommand, AppResult<ProcessPickingActionResult>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
@@ -32,6 +32,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
 		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteHandPickingCommand command, CancellationToken ct)
 		{
@@ -59,8 +60,9 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Paleta {command.PalletIdSource} jest pusta.", ErrorType.Conflict);
 			}
-			var pickingHandTask = await _pickingDomainService.GetSingleHandPickingTask(command.IssueId, product.ProductId);
-			
+			var tasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, product.ProductId);
+			var pickingHandTask = _pickingDomainService.GetSingleHandPickingTask(tasks, command.IssueId, product.ProductId);
+
 			if (command.Quantity > (pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity))
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Chcesz pobrać więcej niż potrzeba.", ErrorType.Conflict);
@@ -88,7 +90,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			{
 				completion = PickingCompletion.Partial;
 			}
-			var resultProcessPicking = await _processPickingActionService.ProcessPicking(pallet, issue, product.ProductId, command.Quantity, command.UserId, pickingHandTask, completion, command.NumberRamp);
+			var resultProcessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, issue, product.ProductId, command.Quantity, command.UserId, pickingHandTask, completion, command.NumberRamp);
 			if (!resultProcessPicking.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(resultProcessPicking.Message, ErrorType.Conflict);

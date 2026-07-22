@@ -280,7 +280,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				this.ChangeStatus(PalletStatus.ReversePicking);
 			}
 		}
-		public ProductOnPallet GetProductAggregate(Guid productId)
+		public ProductOnPallet GetProductOnPallet(Guid productId)
 		{
 			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId);
 			if (product.Count() > 1)
@@ -344,6 +344,31 @@ namespace MyWerehouse.Domain.Pallets.Models
 				.Select(g => new StockItemChange(
 					g.Key,
 					g.Sum(q => q.Quantity)));
+		}
+
+
+		//Nowe metody - logika  application -> domain
+		public static Pallet CreatePickingPallet(
+			string palletNumber,
+			int locationId,
+			DateTime createdAt,
+			Guid firstProduct,
+			int fisrtQuantity,
+			DateOnly? bestBefore)
+		{
+			var pallet = Pallet.Create(palletNumber, locationId, createdAt);
+			pallet.ChangeStatus(PalletStatus.Picking);
+			pallet.AddProduct(firstProduct, fisrtQuantity, createdAt, bestBefore);
+			return pallet;
+		}
+		 public  void PickProduct(ProductOnPallet product, int quantity, string userId, string snapshot)
+		{
+			product.DecreaseQuantity(quantity);			
+			if(product.Quantity == 0)
+			{
+				this.ChangeStatus(PalletStatus.Archived);
+			}
+			this.AddHistory(ReasonForPallet.Picking, userId, snapshot);
 		}
 	}
 }

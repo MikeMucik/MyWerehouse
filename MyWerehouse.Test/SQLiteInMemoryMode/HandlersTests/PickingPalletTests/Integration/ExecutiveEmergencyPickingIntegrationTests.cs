@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Picking.Commands.DoPlannedPicking;
 using MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking;
+using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
@@ -18,7 +20,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 {
 	public class ExecutiveEmergencyPickingIntegrationTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -39,7 +41,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory(string name)
+		private static Category CreateCategory(string name)
 		{
 			return new Category
 			{
@@ -47,11 +49,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name, string sku)
+		private static Product CreateProduct(string name, string sku)
 		{
 			return Product.Create(name, sku, TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");
 		}
-		private Location CreateLocation(int id, int position)
+		private static Location CreateLocation(int id, int position)
 		{
 			return new Location
 			{
@@ -396,5 +398,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.False(result.IsSuccess);
 			Assert.Equal($"Zamówienie o numerze {issue.Id} nie zostało znalezione.", result.Error);
 		}
+
+		//ExecuteEmergencyPicking_ShouldFail_WhenIssueHasPickingShortage;
+
+		//ExecuteEmergencyPicking_ShouldCompleteCorrectionTask_WhenEmergencyIsExecutedSecondTime;
+
+		//ExecuteEmergencyPicking_ShouldFail_WhenProcessPickingFails.
 	}
 }

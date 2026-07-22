@@ -31,12 +31,13 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		{
 			var nowDateOnly = _dateTimeProvider.Today;    
 			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId))
-				return ReversePickingResult.Fail("Zadania dekompletacji są już utworzone.");
+				return ReversePickingResult.Ok();
 			var listTasks = new List<ReversePickingTask>();
 			var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
 			if (pallet == null) return ReversePickingResult.Fail($"Paleta o numerze {palletId} nie istnieje.");
 			var issue = pallet.Issue;
 			if (issue == null) return ReversePickingResult.Fail("Brak zlecenia wydania.");
+			issue.EnsureCanBeCancelled();
 			var pickingTasksOfPickingPallet = await _pickingTaskRepo.GetPickingTasksByPickingPalletIdAsync(palletId);
 			if (pickingTasksOfPickingPallet.Count == 0)
 				return ReversePickingResult.Fail("Brak alokacji dla palety. Paleta nie do dekompletacji.");

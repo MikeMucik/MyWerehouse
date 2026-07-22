@@ -286,5 +286,14 @@ namespace MyWerehouse.Domain.Issuing.Models
 					g.Key,
 					-g.Sum(q => q.Quantity)));
 		}
+
+		//Nowe metody
+		public void EnsureCanBeCancelled()
+		{
+			if(IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
+		}
 	}
 }

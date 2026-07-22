@@ -8,8 +8,8 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 {
@@ -35,7 +35,6 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 			if (checkPallet > 1)
 			{
 				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta nie jest do pickingu, zawiera różne towary");
-
 			}
 					
 			var product = pallet.ProductsOnPallet.FirstOrDefault();
@@ -46,9 +45,13 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 			// Logika wyszukiwania pasujących zleceń				
 			var timeFrom = request.Start;
 			var timeTo = request.End;
-			var pickingTasksAll = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);
-			var pickingTasks = pickingTasksAll.Where(p => p.PickingStatus == PickingStatus.Allocated);
+			//var pickingTasksAll
+			var pickingTasks  = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);
+			//= pickingTasksAll.Where(p => p.PickingStatus == PickingStatus.Allocated || p.PickingStatus == PickingStatus.CorrectionPicking);
 			var grouped = pickingTasks
+				.Where(i =>	i.Issue.IssueStatus == IssueStatus.New ||
+							i.Issue.IssueStatus == IssueStatus.Pending ||
+							i.Issue.IssueStatus == IssueStatus.InProgress)
 				.GroupBy(a => new
 				{
 					a.IssueId,
@@ -58,7 +61,7 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 				{
 					IssueId = g.Key.IssueId,
 					IssueNumber = g.Key.IssueNumber,
-					QuantityToDo = g.Sum(a => a.RequestedQuantity)
+					QuantityToDo = g.Sum(a => a.RequestedQuantity - a.PickedQuantity)
 				})
 				.ToList();
 			var result = PrepareCorrectedPickingResult.RequiresOrder(

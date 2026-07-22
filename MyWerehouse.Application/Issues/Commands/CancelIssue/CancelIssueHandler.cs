@@ -50,8 +50,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			var restPallets = issue.Pallets.Except(listPallet).ToList();
 			foreach (var p in restPallets)
 			{
-				var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId);
-				if (!resultReverse.Success && resultReverse.Message.Contains("Zadania")) return AppResult<Unit>.Fail(resultReverse.Message, ErrorType.Conflict);
+				var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId); 
 				if (!resultReverse.Success) return AppResult<Unit>.Fail(resultReverse.Message, ErrorType.NotFound);
 			}
 			//usuń alokacje/pickingTask jeśli nie zrobione				

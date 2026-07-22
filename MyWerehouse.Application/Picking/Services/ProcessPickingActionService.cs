@@ -21,72 +21,57 @@ namespace MyWerehouse.Application.Picking.Services
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
-		public async Task<ProcessPickingActionResult> ProcessPicking(Pallet sourcePallet, Issue issue, Guid productId,
+		public async Task<ProcessPickingActionResult> ExecuteProcessPicking(Pallet sourcePallet, Issue issue, Guid productId,
 			int quantityToPick, string userId, PickingTask pickingTask, PickingCompletion pickingCompletion, int locationId)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(locationId);
-
-			if (location is null)
-				return ProcessPickingActionResult.Fail("Nie znaleziono rampy.");
-
-			var snapshot = location.ToSnapshot();
-
-			var productOnSourcePallet = sourcePallet.ProductsOnPallet.FirstOrDefault(p => p.ProductId == productId);
+			if (location == null) return ProcessPickingActionResult.Fail("Nie znaleziono rampy.");
+			var snapshotPickingPallet = location.ToSnapshot();
+			var now = _dateTimeProvider.UtcNow;
+			var productOnSourcePallet = sourcePallet.GetProductOnPallet(productId);
 			if (productOnSourcePallet is null)
 				return ProcessPickingActionResult.Fail($"Na palecie {sourcePallet.Id} nie znaleziono produktu o Id : {productId}.");
-			var bestBefore = pickingTask.BestBefore;
-			//Utwórz nową lub dodaj do starej
-			var pickingPallet = await CreateNewPalletOrAddToOldPickingPallet(issue.Id, productId,
-				quantityToPick, userId, bestBefore, pickingTask, pickingCompletion, locationId, snapshot, sourcePallet);
+			var pickingPallet = await GetOrCreatePickingPallet(issue.Id, productId, quantityToPick, userId,
+				pickingTask, locationId, snapshotPickingPallet, sourcePallet, pickingCompletion);
+			//var bestBefore = pickingTask.BestBefore;
 			var productSKU = await _productRepo.GetSKUForProductAsync(productId);
-			//Usuwanie towaru z palety źródłowej -> do nowej metody pomocnicznej
-			productOnSourcePallet.DecreaseQuantity(quantityToPick);
-			if (productOnSourcePallet.Quantity == 0)//archiwizuj jeśli pusta
-			{
-				sourcePallet.ChangeStatus(PalletStatus.Archived);
-			}
+			var snapshotSourcePallet = sourcePallet.Location.ToSnapshot();			
+			sourcePallet.PickProduct(productOnSourcePallet, quantityToPick, userId, snapshotSourcePallet);
 			if (pickingPallet.NewPalletCreated)
 			{
-				sourcePallet.AddHistory(ReasonForPallet.Picking, userId, sourcePallet.Location.ToSnapshot());
 				return ProcessPickingActionResult.OkWithNewPallet(pickingPallet.PalletId, pickingPallet.PalletNumber,
 					$"Weź nową paletę dla zlecenia. Towar: {productSKU} ilość:{quantityToPick}");
 			}
 			else
 			{
-				sourcePallet.AddHistory(ReasonForPallet.Picking, userId, sourcePallet.Location.ToSnapshot());
 				return ProcessPickingActionResult.Ok(pickingPallet.PalletId, pickingPallet.PalletNumber,
 					$"Dołącz towar do starej palety kompletacyjnej. Towar: {productSKU} ilość:{quantityToPick}");
 			}
 		}
-		private async Task<CreateNewPickingPalletResult> CreateNewPalletOrAddToOldPickingPallet(Guid issueId, Guid productId,
-			int quantity, string userId, DateOnly? bestBefore, PickingTask pickingTask,
-			PickingCompletion pickingCompletion,int rampNumber, string snapShot, Pallet palletSource)
+
+		public async Task<CreateNewPickingPalletResult> GetOrCreatePickingPallet(Guid issueId, Guid productId, int quantity, string userId,
+		PickingTask pickingTask, int locationId, string snapShot, Pallet palletSource, PickingCompletion completion)
 		{
-			// Pobierz aktywną paletę pickingową (zamknięte palety nie są zwracane)
 			var now = _dateTimeProvider.UtcNow;
-			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(pickingTask.IssueId);
-			if (oldPallet == null)//Tworzę nową paletę	
+			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issueId);
+			if (oldPallet is null)
 			{
 				var newNumberPallet = await _palletRepo.GetNextPalletIdAsync();
-				var sourcePalletBB = bestBefore;
-				var pallet = Pallet.Create(newNumberPallet, rampNumber, now);
-				pallet.ChangeStatus(PalletStatus.Picking);//Bo paleta kompletacyjna
-				pallet.AddProduct(productId, quantity, now, sourcePalletBB);
+				var pallet = Pallet.CreatePickingPallet(newNumberPallet, locationId, now, productId, quantity, pickingTask.BestBefore);
 				var palletId = _palletRepo.AddPallet(pallet);
 				pallet.ReserveToIssue(issueId, userId, snapShot);
-				//Obsługa pickingTask
-				MarkPickingTask(pickingTask, pickingCompletion, pallet, palletSource, userId, quantity, now);
-				return new CreateNewPickingPalletResult(true, palletId, newNumberPallet); //pokaż komunikat weź nową paletę
+				CompleteTask(pickingTask, completion, pallet, palletSource, userId, quantity, now);
+				return new CreateNewPickingPalletResult(true, palletId, newNumberPallet);
 			}
-			else//dodaje do już istniejącej
+			else
 			{
-				oldPallet.AddOrIncreaseProductQuantity(productId, quantity,now, bestBefore);
-				//Obsługa pickingTask	
-				MarkPickingTask(pickingTask, pickingCompletion, oldPallet, palletSource, userId, quantity, now);
+				oldPallet.AddOrIncreaseProductQuantity(productId, quantity, now, pickingTask.BestBefore);
+				CompleteTask(pickingTask, completion, oldPallet, palletSource, userId, quantity, now);
 				return new CreateNewPickingPalletResult(false, oldPallet.Id, oldPallet.PalletNumber);
 			}
 		}
-		private static void MarkPickingTask(PickingTask pickingTask, PickingCompletion pickingCompletion, Pallet pickingPallet,
+
+		private static void CompleteTask(PickingTask pickingTask, PickingCompletion pickingCompletion, Pallet pickingPallet,
 			Pallet palletSource, string userId, int quantity, DateTime now)
 		{
 			if (pickingCompletion == PickingCompletion.Full)

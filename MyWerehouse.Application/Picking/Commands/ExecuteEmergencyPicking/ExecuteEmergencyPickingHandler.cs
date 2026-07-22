@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Services;
 using MyWerehouse.Domain.Common;
@@ -11,8 +6,8 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Services;
 using MyWerehouse.Infrastructure.Persistence;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 {
@@ -23,7 +18,8 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 		IIssueRepo issueRepo,
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
 		IProcessPickingActionService processPickingActionService,
-		IDateTimeProvider dateTimeProvider) : IRequestHandler<ExecuteEmergencyPickingCommand, AppResult<ProcessPickingActionResult>>
+		IDateTimeProvider dateTimeProvider,
+		IPickingDomainService pickingDomainService) : IRequestHandler<ExecuteEmergencyPickingCommand, AppResult<ProcessPickingActionResult>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
@@ -32,7 +28,8 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
-		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;	
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteEmergencyPickingCommand request, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
@@ -45,11 +42,31 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Zadania nie można zrealizować, paleta nie nadaje się do pobrań.", ErrorType.Conflict);
 			}
+			var palletAllowed =	pallet.Status == PalletStatus.Available ||
+								pallet.Status == PalletStatus.InStock ||
+								pallet.Status == PalletStatus.ToPicking;
+			if (!palletAllowed)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail(
+					"Aktualny status palety nie pozwala na Emergency Picking.",
+					ErrorType.Conflict);
+			}
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
-			}			
+			}
+			var emergencyAllowed =
+				issue.IssueStatus == IssueStatus.New ||
+				issue.IssueStatus == IssueStatus.Pending ||
+				issue.IssueStatus == IssueStatus.InProgress;
+
+			if (!emergencyAllowed)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail(
+					"Status wydania nie pozwala na Emergency Picking.",
+					ErrorType.Conflict);
+			}
 			var palletItem = pallet.ProductsOnPallet.SingleOrDefault();
 			if (palletItem == null)
 			{
@@ -58,8 +75,12 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 			// Oblicz, ile faktycznie można/trzeba skompletować
 			var pickingTasksForIssue = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(request.IssueId, palletItem.ProductId);
 			if (pickingTasksForIssue == null) return AppResult<ProcessPickingActionResult>.Fail($"Zadanie do kompletacji nie istnieje", ErrorType.NotFound);
-			var neededQuantity = pickingTasksForIssue.Where(a => a.PickingStatus == PickingStatus.Allocated).Sum(a => a.RequestedQuantity);
-			// Emergency picking obsługuje tylko brakującą końcówkę ilości z aktywnej palety pickingowej.
+			var allocatedTask = pickingTasksForIssue
+				.Where(a => a.PickingStatus == PickingStatus.Allocated
+				|| a.PickingStatus == PickingStatus.CorrectionPicking)
+				.ToList();
+			var neededQuantity = allocatedTask.Sum(a => a.RequestedQuantity - a.PickedQuantity); //-PickedQuantity for safety
+																								 // Emergency picking obsługuje tylko brakującą końcówkę ilości z aktywnej palety pickingowej.
 			var quantityToPick = Math.Min(neededQuantity, palletItem.Quantity);
 			if (quantityToPick <= 0)
 			{
@@ -67,15 +88,14 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 			}
 			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(request.PalletId);
 			// W obecnym flow paleta trafia bezpośrednio do ToPicking; osobna akcja zmiany statusu może być dodana później.
-			if (virtualPallet == null)			
+			if (virtualPallet == null)
 			{
 				pallet.ChangeStatus(PalletStatus.ToPicking);
 				pallet.AssignToPicking(request.UserId, pallet.Location.ToSnapshot());
 				virtualPallet = VirtualPallet.Create(pallet.Id, palletItem.Quantity, pallet.LocationId, now);
-				_virtualPalletRepo.AddPalletToPicking(virtualPallet); 
+				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			}
-
-			await ReduceAllocation(issue.Id, palletItem.ProductId, quantityToPick, request.UserId);
+			_pickingDomainService.ReduceAllocation(allocatedTask, quantityToPick, request.UserId, now);
 			var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, palletItem.ProductId, quantityToPick, palletItem.BestBefore, request.UserId);
 			if (!newPickingTaskInfo.Success)
 			{
@@ -84,29 +104,17 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 					ErrorType.Conflict);
 			}
 			var newPickingTask = newPickingTaskInfo.PickingTask.Single();
-			var resultProccessPicking = await _processPickingActionService.ProcessPicking(pallet, issue, palletItem.ProductId, quantityToPick, request.UserId, newPickingTask, PickingCompletion.Full, request.RampNumber);
+			var resultProccessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, issue,
+				palletItem.ProductId, quantityToPick, request.UserId, newPickingTask, PickingCompletion.Full,
+				request.RampNumber);
+			if (!resultProccessPicking.Success)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail(
+					resultProccessPicking.Message,
+					ErrorType.Conflict);
+			}
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<ProcessPickingActionResult>.Success(resultProccessPicking, "Towar dołączono do zlecenia");
-		}
-		
-		private async Task ReduceAllocation(Guid issueId, Guid productId, int quantity, string userId)
-		{
-			var now = _dateTimeProvider.UtcNow;
-			var pickingTasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId);
-			foreach (var pickingTask in pickingTasks)
-			{
-				if (quantity <= 0) break;
-				if (pickingTask.RequestedQuantity > quantity)
-				{
-					pickingTask.ReduceQuantity(quantity, userId,now);
-					quantity = 0;
-				}
-				else
-				{
-					quantity -= pickingTask.RequestedQuantity;
-					pickingTask.Cancel(userId, now);
-				}
-			}
 		}
 	}
 }

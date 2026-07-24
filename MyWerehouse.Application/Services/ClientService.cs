@@ -93,7 +93,7 @@ namespace MyWerehouse.Application.Services
 			var client = await _clientRepo.GetClientToEditAsync(id);
 			if (client == null)
 			{
-				return AppResult<ClientDTO>.Fail($"Brak klienta o numerze {id}");
+				return AppResult<ClientDTO>.Fail($"Brak klienta o numerze {id}", ErrorType.NotFound);
 			}
 			var clientDTO = _mapper.Map<ClientDTO>(client);
 			return AppResult<ClientDTO>.Success(clientDTO);
@@ -101,7 +101,7 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient)
 		{
 			var existingClient = await _clientRepo.GetClientToEditAsync(id);
-			if (existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.");
+			if (existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.", ErrorType.NotFound);
 			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);
 			if (!validationResult.IsValid)
 			{

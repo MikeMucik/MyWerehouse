@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Products.Filters;
-using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 using Xunit;
@@ -23,7 +22,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 		}
 
 		[Fact]
-		public void ShowAllProduct_GetAllProducts_ReturnList()
+		public void GetAllProducts_ShowAllProduct()
 		{
 			//Arrange&Act			
 			var result = _productRepo.GetAllProducts();
@@ -32,7 +31,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 			Assert.Equal(3, result.Count()); 
 		}
 		[Fact]
-		public void ByName_FindProduct_ShowProductContainsWord()
+		public void FindProduct_ShowProductContainsWord_ByName()
 		{
 			//Arrange
 			var filter = new ProductSearchFilter { ProductName = "Test" };
@@ -48,7 +47,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 			}
 		}
 		[Fact]
-		public void BySKUAndWidth_FindProduct_ShowProductsWithSKU()
+		public void FindProduct_ShowProductsWithSKU_BySKUAndWidth()
 		{
 			//Arrange			
 			var filter = new ProductSearchFilter { SKU = "0987654321" };
@@ -61,7 +60,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ProductTestsRepoSQLite
 			Assert.Equal("0987654321", resultList[0].SKU);
 		}
 		[Fact]
-		public void ByWeightAndWidth_FindProduct_ShowProductsWithWeightAndWidth()
+		public void FindProduct_ShowProductsWithWeightAndWidth_WhenWeightAndWidth()
 		{
 			//Arrange
 			var filter = new ProductSearchFilter { Weight = 2, Width = 30 };			

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Picking.Commands.ClosePickingPallet
@@ -26,10 +27,6 @@ namespace MyWerehouse.Application.Picking.Commands.ClosePickingPallet
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione do którego ma należeć paleta.", ErrorType.NotFound);
-			if (pallet.Status == Domain.Pallets.Models.PalletStatus.ToIssue)
-				return AppResult<Unit>.Fail($"Paleta {pallet.PalletNumber} jest już dołączona do zlecenia.");
-			if (pallet.Status != Domain.Pallets.Models.PalletStatus.Picking)
-				return AppResult<Unit>.Fail($"Palety {pallet.PalletNumber} nie można zamknąć. Błędny status palety.");
 			pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location.ToSnapshot());
 			//drukowanie etykiety
 			await _werehouseDbContext.SaveChangesAsync(ct);

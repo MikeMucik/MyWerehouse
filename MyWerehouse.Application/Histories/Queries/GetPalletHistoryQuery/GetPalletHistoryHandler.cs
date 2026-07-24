@@ -21,12 +21,12 @@ namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 		{
 			if (String.IsNullOrEmpty(query.PalletNumber))
 			{
-				return AppResult<PalletHistoryDTO>.Fail("Nie podano numeru palety");
+				return AppResult<PalletHistoryDTO>.Fail("Nie podano numeru palety", ErrorType.Validation);
 			}
 			var pallet = await _palletRepo.GetPalletByPalletNumberAsync(query.PalletNumber);
 			if (pallet == null)
 			{
-				return AppResult<PalletHistoryDTO>.Fail($"Paleta o numerze {query.PalletNumber} nie istnieje.");
+				return AppResult<PalletHistoryDTO>.Fail($"Paleta o numerze {query.PalletNumber} nie istnieje.", ErrorType.NotFound);
 			}
 			
 			var history = await _palletMovementRepo.GetHistoryPallet(query.PalletNumber);

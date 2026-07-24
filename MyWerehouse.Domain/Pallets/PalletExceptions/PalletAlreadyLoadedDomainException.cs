@@ -7,12 +7,12 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Pallets.PalletExceptions
 {
-	public class InvalidPalletStatusDomainException : DomainException
+	public class PalletAlreadyLoadedDomainException : DomainException
 	{
 		public Guid PalletId { get; }
 		public string PalletNumber { get; }
-		public InvalidPalletStatusDomainException(Guid palletId, string palletNumber)
-			: base($"Pallet {palletId}, {palletNumber} has wrong status. Operation stopped.")
+		public PalletAlreadyLoadedDomainException(Guid palletId, string palletNumber)
+			   : base($"Pallet {palletId}, {palletNumber} is already loaded.")
 		{
 			PalletId = palletId;
 			PalletNumber = palletNumber;

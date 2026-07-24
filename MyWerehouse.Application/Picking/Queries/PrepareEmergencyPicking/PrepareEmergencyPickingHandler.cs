@@ -25,29 +25,27 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 			//Nie wyjątek bo to częsta sytuacja w rzeczywistości
 			if (pallet == null)
 			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail($"Brak palety na stanie magazynu.");
+				return AppResult<PrepareCorrectedPickingResult>.Fail($"Brak palety na stanie magazynu.", ErrorType.NotFound);
 			}
 			if (pallet.Status == PalletStatus.Archived || pallet.Status == PalletStatus.OnHold)
 			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta jest zablokowana, brak możliwości operacji.");
+				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta jest zablokowana, brak możliwości operacji.", ErrorType.Conflict);
 			}
 			var checkPallet = pallet.ProductsOnPallet.Count;
 			if (checkPallet > 1)
 			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta nie jest do pickingu, zawiera różne towary");
+				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta nie jest do pickingu, zawiera różne towary", ErrorType.Validation);
 			}
 					
 			var product = pallet.ProductsOnPallet.FirstOrDefault();
 			if (product == null)
 			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta jest pusta.");
+				return AppResult<PrepareCorrectedPickingResult>.Fail("Paleta jest pusta.", ErrorType.NotFound);
 			}
 			// Logika wyszukiwania pasujących zleceń				
 			var timeFrom = request.Start;
-			var timeTo = request.End;
-			//var pickingTasksAll
+			var timeTo = request.End;			
 			var pickingTasks  = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);
-			//= pickingTasksAll.Where(p => p.PickingStatus == PickingStatus.Allocated || p.PickingStatus == PickingStatus.CorrectionPicking);
 			var grouped = pickingTasks
 				.Where(i =>	i.Issue.IssueStatus == IssueStatus.New ||
 							i.Issue.IssueStatus == IssueStatus.Pending ||

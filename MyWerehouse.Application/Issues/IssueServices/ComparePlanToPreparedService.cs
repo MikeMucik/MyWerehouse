@@ -31,20 +31,20 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				return ComparePlanToPreparedResult.Fail("Produkt nie występuje w zleceniu.", productId, sku);
 			}
 			var dateBB = issueItemForProduct.BestBefore;
-			
+
 			var pallets = _issueRepo.GetPalletsByIssueId(issueId);
 			foreach (var pallet in pallets)
 			{
-				if(pallet.Status != Domain.Pallets.Models.PalletStatus.ToIssue)
+				if (pallet.Status != Domain.Pallets.Models.PalletStatus.ToIssue)
 				{
 					return ComparePlanToPreparedResult.Fail("Nie wszystkie palety do załadunku mają odpowiedni status.");
 				}
 			}
-			var quantityFromPallets =await pallets
+			var quantityFromPallets = await pallets
 				.SelectMany(p => p.ProductsOnPallet)
 				.Where(pp => pp.ProductId == productId && pp.BestBefore == dateBB)
 				.SumAsync(pp => pp.Quantity);
-			
+
 			if (issueItemForProduct.Quantity == quantityFromPallets)
 			{
 				return ComparePlanToPreparedResult.Ok("Towar się zgadza.", productId, sku);

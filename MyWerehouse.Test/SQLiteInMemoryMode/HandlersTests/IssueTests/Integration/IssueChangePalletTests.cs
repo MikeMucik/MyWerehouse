@@ -7,8 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
@@ -59,7 +61,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Height = 1,
 				Position = position
 			};
-		}		
+		}
 		[Fact]
 		public async Task ChangePalletInIssue_ShouldChange_WhenProperData()
 		{
@@ -68,7 +70,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var category = CreateCategory();
 			var location = CreateLocation(1);
 			var product = CreateProduct("Prod1");
-			
+
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -83,12 +85,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));			
-			
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			DbContext.SaveChanges();
-			
+
 			// Act
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
 
@@ -115,7 +117,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var client = CreateClient();
 			var category = CreateCategory();
 			var location = CreateLocation(1);
-			var product = CreateProduct("Prod1");			
+			var product = CreateProduct("Prod1");
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -129,18 +131,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "UserS", IssueStatus.Pending, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));			
-			
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			DbContext.SaveChanges();
-			//&Act
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(issueId, pallet.Id, pallet.Id, "tester"));
-			//Assert
-			Assert.False(result.IsSuccess);
-			Assert.Contains("tą samą", result.Error);
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<CannotReplaceTheSamePalletDomainException>(()
+				=> Mediator.Send(new ChangePalletInIssueCommand(issueId, pallet.Id, pallet.Id, "tester")));
+			Assert.Contains($"Pallet {pallet.Id} cannot be replaced with itself.", ex.Message);
 		}
 
 		[Fact]
@@ -150,7 +151,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var client = CreateClient();
 			var category = CreateCategory();
 			var location = CreateLocation(1);
-			var product = CreateProduct("Prod1");			
+			var product = CreateProduct("Prod1");
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
@@ -158,10 +159,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.SaveChanges();
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, null);
 			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
 			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
-			
+
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.SaveChanges();
 			// Act
@@ -181,7 +182,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location = CreateLocation(1);
 			var product = CreateProduct("Prod1");
 			var productA = CreateProduct("ProdA");
-			
+
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, productA);
@@ -196,17 +197,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(productA.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));			
-			
+			pallet1.AddProduct(productA.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			DbContext.SaveChanges();
-			// Act
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
-
-			// Assert
-			Assert.False(result.IsSuccess);
-			Assert.Contains("różnymi produktami", result.Error);
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<ProductOnPalletsAreNotTheSameDomainException>(()
+				=> Mediator.Send(new ChangePalletInIssueCommand(issueId, pallet.Id, pallet1.Id, "tester")));
+			Assert.Contains($"Products on replacement pallets do not match: {pallet.ProductsOnPallet.Single().ProductId} and {pallet1.ProductsOnPallet.Single().ProductId}.", ex.Message);
 		}
 
 		[Fact]
@@ -217,7 +216,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var category = CreateCategory();
 			var location = CreateLocation(1);
 			var product = CreateProduct("Prod1");
-			
+
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
@@ -231,18 +230,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "UserS", IssueStatus.Pending, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, location.Id, PalletStatus.ToIssue, null, issueId);
 			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
-			
+
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, location.Id, PalletStatus.ToIssue, null, null);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));		
-			
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			DbContext.SaveChanges();
-			//Act
-			var result = await Mediator.Send(new ChangePalletInIssueCommand(issue.Id, pallet.Id, pallet1.Id, "tester"));
-			//Assert
-			Assert.False(result.IsSuccess);
-			Assert.Contains("błędny status", result.Error);
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<InvalidPalletStatusDomainException>(()
+				=> Mediator.Send(new ChangePalletInIssueCommand(issueId, pallet.Id, pallet1.Id, "tester")));
+			Assert.Contains($"Pallet {pallet1.Id}, {pallet1.PalletNumber} has wrong status.", ex.Message);
 		}
 	}
 }

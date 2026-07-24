@@ -9,13 +9,11 @@ namespace MyWerehouse.Domain.Inventories.InventoryExceptions
 {
 	public class DomainInventoryDomainException : DomainException
 	{
-		public Guid ProductId { get; }
-		public string SKU { get; }
-		public DomainInventoryDomainException(Guid productId, string sku)
-			: base($"Product {sku}({productId}) quantity below zero - prohibited condition")
+		public Guid ProductId { get; }		
+		public DomainInventoryDomainException(Guid productId)
+			: base($"Product ({productId}) quantity below zero - prohibited condition")
 		{
-			ProductId = productId;
-			SKU = sku;
+			ProductId = productId;			
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -34,13 +34,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO issueLine, IssueAllocationPolicy policy,
 			List<Pallet>? reusablePalletsForProduct, string userId)
 		{
-			if (issue.IssueStatus == IssueStatus.New)
-				issue.ChangeStatus(IssueStatus.Pending);
-			if (issue.IssueStatus != IssueStatus.Pending && issue.IssueStatus != IssueStatus.New &&
-			issue.IssueStatus != IssueStatus.RequiresCorrection)
-			{
-				return AssignProductToIssueResult.Fail("Błąd statusu zlecenia.");
-			}
+			issue.BeginAllocation();
 			var product = await _productRepo.GetProductByIdAsync(issueLine.ProductId);
 			if (product == null)
 			{
@@ -66,9 +60,9 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				case IssueAllocationPolicy.FullPalletFirst:
 					requiredFullPallets = await _getNumberPalletsAndRestService.GetBackOnlyFullPallets(issueLine.ProductId, issueLine.Quantity);
 					missingPalletsCount = requiredFullPallets - oldCount;
-					palletAssigned = await SelectAndAssignFullPallets(issue, issueLine, reusablePalletsForProduct, requiredFullPallets, missingPalletsCount);
+					palletAssigned = await SelectAndAssignFullPallets(issue, issueLine, reusablePalletsForProduct, requiredFullPallets, missingPalletsCount, userId);
 					break;
-			
+
 				default:
 					return AssignProductToIssueResult.Fail($"Allocation policy {policy} is not supported.");
 			}
@@ -86,21 +80,19 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					issueLine.ProductId, rest, issueLine.BestBefore, userId);
 				if (newPickingTaskFromRest.Success is false)
 				{
-					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueLine.ProductId,product.SKU, issueLine.Quantity, totalAvailable);
+					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueLine.ProductId, product.SKU, issueLine.Quantity, totalAvailable);
 				}
 			}
-			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.",issueLine.ProductId, product.SKU, palletAssigned);
+			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.", issueLine.ProductId, product.SKU, palletAssigned);
 		}
 		//pełne palety first
-		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO issueLine, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)
+		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO issueLine, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount, string userId)
 		{
 			List<Pallet> missingPallets = [];
 			if (missingPalletsCount > 0)
 			{
 				var product = await _productRepo.GetProductByIdAsync(issueLine.ProductId);//checked in upper
 				missingPallets = await _palletRepo.GetAvailableFullPallets(issueLine.ProductId, product!.CartonsPerPallet, issueLine.BestBefore, missingPalletsCount);
-				foreach (var pallet in missingPallets)
-					pallet.ChangeStatus(PalletStatus.LockedForIssue);
 			}
 			List<Pallet> allAvailablePallets = [.. reusablePalletsForProduct
 				.Concat(missingPallets)
@@ -109,7 +101,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			foreach (var pallet in allAvailablePallets)
 			{
 				var snapShot = pallet.Location.ToSnapshot();
-				pallet.ReserveToIssue(issue.Id, issue.PerformedBy, snapShot);
+				pallet.ReserveToIssue(issue.Id, userId, snapShot);
 			}
 			return allAvailablePallets;
 		}

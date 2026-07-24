@@ -18,6 +18,6 @@ namespace MyWerehouse.Domain.Pallets.PalletExceptions
 			PalletId = palletId;
 			PalletNumber = palletNumber;
 			ProductId = productId;
-		}
+		}		
 	}
 }

@@ -78,14 +78,14 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					var location =await _locationRepo.GetLocationByIdAsync(command.RampNumber.Value);
 					if (location == null)
 					{
-						return AppResult<ReversePickingResult>.Fail("Podana lokalizacja jest nieprawidłowa.", ErrorType.Validation);
+						return AppResult<ReversePickingResult>.Fail("Podana lokalizacja jest nieprawidłowa.", ErrorType.NotFound);
 					}
 					var snapShot = location.ToSnapshot();
 					result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId, command.RampNumber!.Value, snapShot);
 					if (!result.Success) return Fail(result.Message);
 					break;
 				default:
-					return AppResult<ReversePickingResult>.Fail($"Nieobsługiwana strategia: {command.Strategy}");					
+					return AppResult<ReversePickingResult>.Fail($"Nieobsługiwana strategia: {command.Strategy}", ErrorType.Conflict);					
 			}
 			//paleta dekompletowana
 			productOnPallet.SetQuantity(0);

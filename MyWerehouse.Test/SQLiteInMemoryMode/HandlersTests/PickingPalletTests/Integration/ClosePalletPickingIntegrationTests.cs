@@ -9,6 +9,7 @@ using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
@@ -17,32 +18,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 {
 	public class ClosePalletPickingIntegrationTests :TestBase
 	{
-		[Fact]
-		public async Task ClosePalletPicking_ShouldChangeStatus_WhenProperData()
+		private static Client CreateClient()
 		{
-			var category = new Category
-			{
-				Id =1,
-				Name = "Category",
-				IsDeleted = false
-			};
-			var product = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");			
-			var location1 = new Location
-			{
-				Id = 1,
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var locationPicking = new Location
-			{
-				Id = 100100,
-				Aisle = 10,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -53,7 +30,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			var client = new Client
+			return new Client
 			{
 				Name = "Client A",
 				Email = "123@wp.pl",
@@ -62,6 +39,40 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				Addresses = [address],
 				IsDeleted = false,
 			};
+		}
+		private static Category CreateCategory()
+		{
+			return new Category
+			{
+				Id = 1,
+				Name = "Category",
+				IsDeleted = false
+			};
+		}
+		private static Product CreateProduct()
+		{
+			return Product.Create("Prod A", "666", TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");
+		}
+		private static Location CreateLocation(int id, int aisle)
+		{
+			return new Location
+			{
+				Id = id,
+				Aisle = aisle,
+				Bay = 1,
+				Height = 1,
+				Position = 1
+			};
+		}
+		[Fact]
+		public async Task ClosePalletPicking_ShouldChangeStatus_WhenProperData()
+		{
+			//Arrange
+			var category = CreateCategory();
+			var product = CreateProduct();
+			var location1 = CreateLocation(1, 1);
+			var locationPicking = CreateLocation(100100, 10);
+			var client = CreateClient();
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 			
@@ -73,7 +84,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-6),
 			DateOnly.FromDateTime( TestDates.Now.AddDays(1)), "user1", IssueStatus.Pending, null);
 		
-			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, locationPicking);
 			DbContext.Clients.AddRange(client);
@@ -105,48 +115,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		[Fact]
 		public async Task ClosePalletPicking_ShouldReturnErrorInfo_WhenPalletAlreadyAssigned()
 		{
-			var category = new Category
-			{
-				Id = 1,
-				Name = "Category",
-				IsDeleted = false
-			};
-			var product = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");
-			var location1 = new Location
-			{
-				Id = 1,
-				Aisle = 1,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var locationPicking = new Location
-			{
-				Id = 100100,
-				Aisle = 10,
-				Bay = 1,
-				Height = 1,
-				Position = 1
-			};
-			var address = new Address
-			{
-				City = "Warsaw",
-				Country = "Poland",
-				PostalCode = "00-999",
-				StreetName = "Wiejska",
-				Phone = 4444444,
-				Region = "Mazowieckie",
-				StreetNumber = "23/3"
-			};
-			var client = new Client
-			{
-				Name = "Client A",
-				Email = "123@wp.pl",
-				Description = "des",
-				FullName = "full",
-				Addresses = [address],
-				IsDeleted = false,
-			};
+			//Arrange
+			var category = CreateCategory();
+			var product = CreateProduct();
+			var location1 = CreateLocation(1, 1);
+			var locationPicking = CreateLocation(100100, 10);
+			var client = CreateClient();
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 
@@ -158,7 +132,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-6),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.Pending, null);
 
-			DbContext.Addresses.Add(address);
 			DbContext.Categories.Add(category);
 			DbContext.Locations.AddRange(location1, locationPicking);
 			DbContext.Clients.AddRange(client);
@@ -174,11 +147,36 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
-			//Act
-			var result = await Mediator.Send(new ClosePickingPalletCommand(pickingPallet.Id, issue.Id, "UserPicker"));
-			//Assert
-			Assert.NotNull(result);
-			Assert.Contains("Paleta Q1001 jest już dołączona do zlecen", result.Error);			
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<AlreadyAssignedDomainException>(() => Mediator.Send(new ClosePickingPalletCommand(pickingPallet.Id, issue.Id, "UserPicker")));
+			Assert.Contains("Pallet already assigned.", ex.Message);
+		}
+		[Fact]
+		public async Task ClosePalletPicking_ShouldThrowInvalidPalletStatus_WhenPalletIsNotPicking()
+		{
+			//Arrange
+			var category = CreateCategory();
+			var product = CreateProduct();
+			var location = CreateLocation(1, 1);
+			var client = CreateClient();
+			var pickingPallet = Pallet.CreateForTests("Q1001", TestDates.Now, location.Id, PalletStatus.Available, null, null);
+			pickingPallet.AddProductForTests(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
+			var issue = Issue.CreateForSeed(Guid.NewGuid(), 1, 1, TestDates.Now.AddDays(-6),
+				DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.Pending, null);
+
+			DbContext.Categories.Add(category);
+			DbContext.Locations.Add(location);
+			DbContext.Clients.Add(client);
+			DbContext.Products.Add(product);
+			DbContext.Pallets.Add(pickingPallet);
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<InvalidPalletStatusDomainException>(() =>
+				Mediator.Send(new ClosePickingPalletCommand(pickingPallet.Id, issue.Id, "UserPicker")));
+			Assert.Equal(pickingPallet.Id, ex.PalletId);
+			Assert.Equal(pickingPallet.PalletNumber, ex.PalletNumber);
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MyWerehouse.Application.Pallets.Commands.MarkAsLoaded;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
@@ -101,11 +102,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
-			//Act
-			var result = await Mediator.Send(new MarkAsLoadedCommand(pallet.Id, "User"));
-			//Assert
-			Assert.NotNull(result);
-			Assert.Contains("Paleta nie ma statusu do załadowania", result.Error);
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<InvalidPalletStatusDomainException>(() => Mediator.Send(new MarkAsLoadedCommand(pallet.Id, "User")));
+			Assert.Contains($"Pallet {pallet.Id}, {pallet.PalletNumber} has wrong status.", ex.Message);			
 		}
 	}
 }

@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Picking.Commands.DoPlannedPicking;
+using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking;
-using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
@@ -399,10 +398,191 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Equal($"Zamówienie o numerze {issue.Id} nie zostało znalezione.", result.Error);
 		}
 
-		//ExecuteEmergencyPicking_ShouldFail_WhenIssueHasPickingShortage;
+		[Fact]
+		public async Task ExecuteEmergencyPicking_ShouldFail_WhenIssueHasPickingShortage()
+		{
+			// Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product = CreateProduct("Prod A", "666");
+			var location = CreateLocation(1, 1);
 
-		//ExecuteEmergencyPicking_ShouldCompleteCorrectionTask_WhenEmergencyIsExecutedSecondTime;
+			DbContext.Categories.Add(category);
+			DbContext.Locations.Add(location);
+			DbContext.Clients.Add(client);
+			DbContext.Products.Add(product);
+			DbContext.SaveChanges();
 
-		//ExecuteEmergencyPicking_ShouldFail_WhenProcessPickingFails.
+			var emergencyPallet = Pallet.CreateForTests("Q2000", new DateTime(2025, 8, 8),
+				location.Id, PalletStatus.Available, null, null);
+			emergencyPallet.AddProductForTests(product.Id, 10, new DateTime(2025, 8, 8),
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
+
+			var issueId = Guid.NewGuid();
+			var issue = Issue.CreateForSeed(issueId, 1, client.Id, TestDates.UtcNow,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.PickingShortage, null);
+
+			DbContext.Pallets.Add(emergencyPallet);
+			DbContext.Issues.Add(issue);
+			DbContext.SaveChanges();
+
+			// Act
+			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(
+				emergencyPallet.Id, issue.Id, "user1", 100100));
+
+			// Assert
+			Assert.False(result.IsSuccess);
+			Assert.Equal(ErrorType.Conflict, result.ErrorType);
+			Assert.Equal("Status wydania nie pozwala na Emergency Picking.", result.Error);
+			Assert.Equal(PalletStatus.Available, emergencyPallet.Status);
+			Assert.Equal(10, emergencyPallet.ProductsOnPallet.Single().Quantity);
+		}
+
+		[Fact]
+		public async Task ExecuteEmergencyPicking_ShouldCompleteCorrectionTask_WhenEmergencyIsExecutedSecondTime()
+		{
+			// Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product = CreateProduct("Prod A", "666");
+			var location = CreateLocation(1, 1);
+			var locationPicking = CreateLocation(100100, 5);
+
+			DbContext.Categories.Add(category);
+			DbContext.Locations.AddRange(location, locationPicking);
+			DbContext.Clients.Add(client);
+			DbContext.Products.Add(product);
+			DbContext.SaveChanges();
+
+			var bestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365));
+			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8),
+				location.Id, PalletStatus.ToPicking, null, null);
+			sourcePallet.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), bestBefore);
+
+			var firstEmergencyPallet = Pallet.CreateForTests("Q2000", new DateTime(2025, 8, 8),
+				location.Id, PalletStatus.Available, null, null);
+			firstEmergencyPallet.AddProductForTests(product.Id, 4, new DateTime(2025, 8, 8), bestBefore);
+
+			var secondEmergencyPallet = Pallet.CreateForTests("Q2001", new DateTime(2025, 8, 8),
+				location.Id, PalletStatus.Available, null, null);
+			secondEmergencyPallet.AddProductForTests(product.Id, 6, new DateTime(2025, 8, 8), bestBefore);
+
+			var issueId = Guid.NewGuid();
+			var issue = Issue.CreateForSeed(issueId, 1, client.Id, TestDates.UtcNow,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
+
+			DbContext.Pallets.AddRange(sourcePallet, firstEmergencyPallet, secondEmergencyPallet);
+			DbContext.Issues.Add(issue);
+			DbContext.SaveChanges();
+
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet.Id, 10,
+				location.Id, new DateTime(2025, 8, 12));
+			var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 10,
+				PickingStatus.Allocated, product.Id, bestBefore, null,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
+
+			DbContext.VirtualPallets.Add(virtualPallet);
+			DbContext.PickingTasks.Add(pickingTask);
+			DbContext.SaveChanges();
+
+			// Act - first Emergency Picking leaves 6 in CorrectionPicking
+			var firstResult = await Mediator.Send(new ExecuteEmergencyPickingCommand(
+				firstEmergencyPallet.Id, issue.Id, "user1", locationPicking.Id));
+
+			Assert.True(firstResult.IsSuccess);
+			Assert.Equal(PickingStatus.CorrectionPicking, pickingTask.PickingStatus);
+			Assert.Equal(6, pickingTask.RequestedQuantity);
+
+			// Act - second Emergency Picking completes the remaining quantity
+			var secondResult = await Mediator.Send(new ExecuteEmergencyPickingCommand(
+				secondEmergencyPallet.Id, issue.Id, "user1", locationPicking.Id));
+
+			// Assert
+			Assert.True(secondResult.IsSuccess);
+
+			var pickingTaskAfter = await DbContext.PickingTasks
+				.FirstAsync(a => a.Id == pickingTask.Id);
+			Assert.Equal(PickingStatus.Cancelled, pickingTaskAfter.PickingStatus);
+			Assert.Equal(0, pickingTaskAfter.RequestedQuantity);
+
+			var pickingPallet = await DbContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.SingleAsync(p => p.IssueId == issue.Id && p.Status == PalletStatus.Picking);
+			Assert.Equal(10, pickingPallet.ProductsOnPallet.Single(p => p.ProductId == product.Id).Quantity);
+
+			var emergencyTasks = await DbContext.PickingTasks
+				.Where(t => t.IssueId == issue.Id && t.Id != pickingTask.Id && t.PickingStatus == PickingStatus.Picked)
+				.ToListAsync();
+			Assert.Equal(2, emergencyTasks.Count);
+			Assert.Equal(10, emergencyTasks.Sum(t => t.PickedQuantity));
+			Assert.Equal(PalletStatus.Archived, firstEmergencyPallet.Status);
+			Assert.Equal(PalletStatus.Archived, secondEmergencyPallet.Status);
+		}
+
+		[Fact]
+		public async Task ExecuteEmergencyPicking_ShouldFail_WhenProcessPickingFails()
+		{
+			// Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product = CreateProduct("Prod A", "666");
+			var location = CreateLocation(1, 1);
+
+			DbContext.Categories.Add(category);
+			DbContext.Locations.Add(location);
+			DbContext.Clients.Add(client);
+			DbContext.Products.Add(product);
+			DbContext.SaveChanges();
+
+			var bestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365));
+			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8),
+				location.Id, PalletStatus.ToPicking, null, null);
+			sourcePallet.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), bestBefore);
+
+			var emergencyPallet = Pallet.CreateForTests("Q2000", new DateTime(2025, 8, 8),
+				location.Id, PalletStatus.Available, null, null);
+			emergencyPallet.AddProductForTests(product.Id, 5, new DateTime(2025, 8, 8), bestBefore);
+
+			var issueId = Guid.NewGuid();
+			var issue = Issue.CreateForSeed(issueId, 1, client.Id, TestDates.UtcNow,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
+
+			DbContext.Pallets.AddRange(sourcePallet, emergencyPallet);
+			DbContext.Issues.Add(issue);
+			DbContext.SaveChanges();
+
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet.Id, 10,
+				location.Id, new DateTime(2025, 8, 12));
+			var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 10,
+				PickingStatus.Allocated, product.Id, bestBefore, null,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
+
+			DbContext.VirtualPallets.Add(virtualPallet);
+			DbContext.PickingTasks.Add(pickingTask);
+			DbContext.SaveChanges();
+
+			// Act - ramp does not exist
+			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(
+				emergencyPallet.Id, issue.Id, "user1", 999999));
+
+			// Assert
+			Assert.False(result.IsSuccess);
+			Assert.Equal(ErrorType.Conflict, result.ErrorType);
+			Assert.Equal("Nie znaleziono rampy.", result.Error);
+
+			await using var freshContext = CreateNewContext();
+			var emergencyPalletAfter = await freshContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.SingleAsync(p => p.Id == emergencyPallet.Id);
+			var pickingTaskAfter = await freshContext.PickingTasks
+				.SingleAsync(t => t.Id == pickingTask.Id);
+			var tasksCount = await freshContext.PickingTasks.CountAsync(t => t.IssueId == issue.Id);
+
+			Assert.Equal(PalletStatus.Available, emergencyPalletAfter.Status);
+			Assert.Equal(5, emergencyPalletAfter.ProductsOnPallet.Single().Quantity);
+			Assert.Equal(PickingStatus.Allocated, pickingTaskAfter.PickingStatus);
+			Assert.Equal(10, pickingTaskAfter.RequestedQuantity);
+			Assert.Equal(1, tasksCount);
+		}
 	}
 }

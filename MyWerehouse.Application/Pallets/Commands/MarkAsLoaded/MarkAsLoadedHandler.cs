@@ -24,16 +24,7 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 			if (pallet == null)
-				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail($"Wskazana paleta nie istnieje.", ErrorType.NotFound);
-			if (pallet.Status == PalletStatus.Loaded)
-				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail($"Paleta {pallet.PalletNumber} jest już załadowana.", ErrorType.Conflict);
-			var allowedStatuses = new[]
-				{
-					PalletStatus.ToIssue,
-					PalletStatus.LockedForIssue,//changing pallets
-				};
-			if (!allowedStatuses.Contains(pallet.Status))
-				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail("Paleta nie ma statusu do załadowania");
+				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail($"Wskazana paleta nie istnieje.", ErrorType.NotFound);		
 			pallet.MarkAsLoaded(request.UserId, pallet.Location.ToSnapshot());
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			var respone = new MarkPalletAsLoadedResponseDTO

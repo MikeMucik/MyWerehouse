@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
@@ -88,7 +87,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 
 				productsForPallet.Add(productForPallet);
 				
-				pallet.UpdateProductChanges(productsForPallet);
+				pallet.UpdateProductChangesForReceipt(productsForPallet);
 				pallet.ChangeStatus(PalletStatus.Receiving);
 				pallet.AddHistory(ReasonForPallet.Correction, request.DTO.PerformedBy, pallet.Location.ToSnapshot());
 			}

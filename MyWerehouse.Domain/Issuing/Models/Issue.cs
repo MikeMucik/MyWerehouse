@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -67,16 +67,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			DateOnly issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems) =>
 			new Issue(id, issueNumber, clientId, issueDateTimeCreate, issueDateTimeSend,
 				performedBy, issueStatus, issueItems);
-
-		public void ChangeUser(string userId)
-		{
-			if (userId == null || userId.Length == 0)
-			{
-				throw new InvalidUserIdDomainException();
-			}
-			PerformedBy = userId;
-		}
-
+		
 		public void ChangeStatus(IssueStatus issueStatus)
 		{
 			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived)
@@ -92,7 +83,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			AddHistory(userId);
 			foreach (var pallet in Pallets)
 			{
-				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
+				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
 			}
 			foreach (var task in PickingTasks)
 			{
@@ -119,12 +110,47 @@ namespace MyWerehouse.Domain.Issuing.Models
 			this.IssueItems.Add(item);
 		}
 
+		public void BeginAllocation()
+		{
+			if (IssueStatus == IssueStatus.New)
+			{
+				IssueStatus = IssueStatus.Pending;
+			}
+			if (IssueStatus != IssueStatus.Pending &&
+				IssueStatus != IssueStatus.RequiresCorrection &&
+				IssueStatus != IssueStatus.New)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			};
+		}
+
+		public void MarkAllocationCompleted(string userId)
+		{
+			if (IssueStatus != IssueStatus.New && IssueStatus != IssueStatus.Pending
+				&& IssueStatus != IssueStatus.RequiresCorrection)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
+			this.ChangeStatus(IssueStatus.Pending);
+			PerformedBy = userId;
+		}
+
+		public void MarkAllocationNotCompleted()
+		{
+			if (IssueStatus != IssueStatus.New && IssueStatus != IssueStatus.Pending
+				&& IssueStatus != IssueStatus.RequiresCorrection)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
+			this.ChangeStatus(IssueStatus.RequiresCorrection);			
+		}
+
 		public List<Pallet> RemoveNotLoadedPallets(string userId)
 		{
 			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
 			foreach (var pallet in toReturn)
 			{
-				pallet.DetachToIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.Correction);
+				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.Correction);
 				Pallets.Remove(pallet);
 			}
 			return toReturn;
@@ -184,13 +210,62 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
-				IssueStatus = IssueStatus.Cancelled;
+			IssueStatus = IssueStatus.Cancelled;
 			PerformedBy = userId;
 			AddHistory(userId);
 		}
 
-		public void ChangePalletInIssue(string userId)
+		public void ReplacePalletInIssue(Pallet oldPallet, Pallet newPallet, string userId)
 		{
+			if (IssueStatus != IssueStatus.ConfirmedToLoad && 
+				IssueStatus != IssueStatus.Pending)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
+			if (oldPallet.Status == PalletStatus.Loaded)
+			{
+				throw new PalletAlreadyLoadedDomainException(oldPallet.Id, oldPallet.PalletNumber);
+			}
+			if (oldPallet.Id == newPallet.Id)
+			{
+				throw new CannotReplaceTheSamePalletDomainException(oldPallet.Id);
+			}
+			if (!Pallets.Any(p => p.Id == oldPallet.Id) || oldPallet.IssueId != Id)
+			{
+				throw new NotBelongsToIssueDomainException(oldPallet.Id, oldPallet.PalletNumber, Id, IssueNumber);
+			}
+			if (!(newPallet.Status == PalletStatus.Available || newPallet.Status == PalletStatus.InStock))
+			{
+				throw new InvalidPalletStatusDomainException(newPallet.Id, newPallet.PalletNumber);
+			}
+			if (newPallet.IssueId != null)
+			{
+				throw new AlreadyAssignedDomainException(newPallet.Id);
+			}
+			if (newPallet.ProductsOnPallet.Count != 1)
+			{
+				throw new NotOneProductsOnPalletDomainException(newPallet.Id, newPallet.PalletNumber);
+			}
+			if (oldPallet.ProductsOnPallet.Count != 1)
+			{
+				throw new NotOneProductsOnPalletDomainException(oldPallet.Id, oldPallet.PalletNumber);
+			}
+			if (oldPallet.ProductsOnPallet.Single().ProductId != newPallet.ProductsOnPallet.Single().ProductId)
+			{
+				throw new ProductOnPalletsAreNotTheSameDomainException(oldPallet.ProductsOnPallet.Single().ProductId, newPallet.ProductsOnPallet.Single().ProductId);
+			}
+			if (oldPallet.ProductsOnPallet.Single().Quantity != newPallet.ProductsOnPallet.Single().Quantity)
+			{
+				throw new ProductOnPalletsAreNotTheSameAmountDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().Quantity, newPallet.ProductsOnPallet.Single().Quantity);
+			}
+			if (oldPallet.ProductsOnPallet.Single().BestBefore != newPallet.ProductsOnPallet.Single().BestBefore)
+			{
+				throw new ProductOnPalletsAreNotTheSameBBDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().BestBefore, newPallet.ProductsOnPallet.Single().BestBefore);
+			}
+			newPallet.ReserveToIssue(Id, userId, newPallet.Location.ToSnapshot());
+			this.AttachPallet(newPallet);
+			oldPallet.DetachFromIssue(userId, oldPallet.Location.ToSnapshot(), ReasonForPallet.Correction);
+			this.DetachPallet(oldPallet);
 			var status = IssueStatus;
 			IssueStatus = IssueStatus.ChangingPallet;
 			PerformedBy = userId;
@@ -214,6 +289,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void ChangeClient(int clientId)
 		{
+			//
 			ClientId = clientId;
 		}
 
@@ -290,7 +366,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		//Nowe metody
 		public void EnsureCanBeCancelled()
 		{
-			if(IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled)
+			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}

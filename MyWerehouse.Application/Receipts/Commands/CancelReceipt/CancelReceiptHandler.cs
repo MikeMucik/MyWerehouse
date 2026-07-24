@@ -25,13 +25,12 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
 
 			var listPalletsOfReceipt = await _palletRepo.GetPalletsByReceiptId(request.ReceiptId);
-			bool canCancel = true;
+			//logika do domeny
 			foreach (var pallet in listPalletsOfReceipt)
-			{
-				canCancel = pallet.CanBeCancelled();
-				if (!canCancel)
+			{			
+				if (!pallet.CanBeCancelled())
 				{
-					return AppResult<Unit>.Fail("Nie można anulować przyjęcia, palety w obiegu magazynu.");
+					return AppResult<Unit>.Fail("Nie można anulować przyjęcia, palety w obiegu magazynu.", ErrorType.Conflict);
 				}
 			}
 			foreach (var pallet in listPalletsOfReceipt)

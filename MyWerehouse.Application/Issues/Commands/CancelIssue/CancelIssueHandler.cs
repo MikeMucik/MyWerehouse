@@ -42,7 +42,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko palety z przyjęcia
 				{
 					//issue.DetachPallet(pallet, request.UserId); // nie odłączam by mieć spis palet dla anulowanego zlecenia do historii
-					pallet.DetachToIssue(request.UserId, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.CancelIssue);
+					pallet.DetachFromIssue(request.UserId, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.CancelIssue);
 					listPallet.Add(pallet);
 				}
 			}

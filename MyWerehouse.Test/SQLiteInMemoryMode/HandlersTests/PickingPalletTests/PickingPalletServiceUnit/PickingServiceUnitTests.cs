@@ -15,6 +15,7 @@ using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Application.Picking.Queries.GetListToPickingFlat;
 using MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree;
+using MyWerehouse.Domain.Services;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.PickingPalletServiceUnit
 {
@@ -361,6 +362,81 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 			var issue3Product2 = issue3To2Client.Products.Single(x => x.ProductId == product2.Id);
 			Assert.Equal(25, issue3Product1.Quantity);
 			Assert.Equal(15, issue3Product2.Quantity);			
+		}
+
+		[Fact]
+		public async Task ReduceAllocation_ShouldCancelSmallestTaskAndReduceNext_WhenManyTasks()
+		{
+			// Arrange
+			var category = CreateCategory("Category");
+			var product = Product.Create("Prod A", "666", TestDates.UtcNow, 1, 100, 30, 30, 30, 30, "TestDetails");
+			var location = CreateLocation(1, 1);
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Name = "Client A",
+				Email = "123@wp.pl",
+				Description = "Description",
+				FullName = "FullName",
+				Addresses = [address]
+			};
+
+			DbContext.Categories.Add(category);
+			DbContext.Locations.Add(location);
+			DbContext.Clients.Add(client);
+			DbContext.Products.Add(product);
+			DbContext.SaveChanges();
+
+			var issueId = Guid.NewGuid();
+			var issue = Issue.CreateForSeed(issueId, 1, client.Id, TestDates.UtcNow,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, null);
+			var pallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8),
+				location.Id, PalletStatus.ToPicking, null, null);
+			pallet.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8),
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
+
+			DbContext.Issues.Add(issue);
+			DbContext.Pallets.Add(pallet);
+			DbContext.SaveChanges();
+
+			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet.Id, 100,
+				location.Id, new DateTime(2025, 8, 12));
+			var smallestTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 5,
+				PickingStatus.Allocated, product.Id, null, null,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
+			var middleTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 8,
+				PickingStatus.Allocated, product.Id, null, null,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
+			var largestTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 10,
+				PickingStatus.Allocated, product.Id, null, null,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
+
+			DbContext.VirtualPallets.Add(virtualPallet);
+			DbContext.PickingTasks.AddRange(smallestTask, middleTask, largestTask);
+			await DbContext.SaveChangesAsync();
+
+			var service = new PickingDomainService();
+
+			// Act - reduce 5 from the smallest task and 6 from the next one
+			service.ReduceAllocation(
+				[smallestTask, middleTask, largestTask], 11, "user1", TestDates.UtcNow);
+
+			// Assert
+			Assert.Equal(PickingStatus.Cancelled, smallestTask.PickingStatus);
+			Assert.Equal(0, smallestTask.RequestedQuantity);
+			Assert.Equal(PickingStatus.CorrectionPicking, middleTask.PickingStatus);
+			Assert.Equal(2, middleTask.RequestedQuantity);
+			Assert.Equal(PickingStatus.Allocated, largestTask.PickingStatus);
+			Assert.Equal(10, largestTask.RequestedQuantity);
 		}
 	}
 }

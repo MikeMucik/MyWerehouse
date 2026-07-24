@@ -119,7 +119,7 @@ namespace MyWerehouse.Application.Services
 			var result = await _categoryRepo.GetCategoryByIdAsync(id);
 			if (result == null)
 			{
-				return AppResult<CategoryViewDTO>.Fail("Nie znaleziono kategorii.");
+				return AppResult<CategoryViewDTO>.Fail("Nie znaleziono kategorii.", ErrorType.NotFound);
 			}
 			var categoryDTO = _mapper.Map<CategoryViewDTO>(result);
 			return AppResult<CategoryViewDTO>.Success(categoryDTO);

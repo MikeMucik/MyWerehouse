@@ -201,7 +201,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Act&Assert
 			var ex = await Assert.ThrowsAsync<DomainInventoryDomainException>(() => Mediator.Send(new ConfirmIssueAfterLoadingCommand(issue.Id, "UserTest")));
 	
-			Assert.Equal($"Product {product.SKU}({product.Id}) quantity below zero - prohibited condition", ex.Message);
+			Assert.Equal($"Product ({product.Id}) quantity below zero - prohibited condition", ex.Message);
 
 		}
 		[Fact]

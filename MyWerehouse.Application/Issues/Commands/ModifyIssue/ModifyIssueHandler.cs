@@ -34,6 +34,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			if (issue == null)
 				return AppResult<List<AssignProductToIssueResult>>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 			// Zlecenia w statusach New, Pending i RequiresCorrection można przebudować przed rozpoczęciem realizacji.
+			//
 			if (issue.IssueStatus == IssueStatus.New ||
 				issue.IssueStatus == IssueStatus.Pending ||
 				issue.IssueStatus == IssueStatus.RequiresCorrection)
@@ -46,7 +47,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				foreach (var pallet in listOldPallets)
 				{
 					issue.DetachPallet(pallet);
-					pallet.DetachToIssue(request.DTO.PerformedBy, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.Correction);
+					pallet.DetachFromIssue(request.DTO.PerformedBy, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.Correction);
 					pallet.ChangeStatus(PalletStatus.LockedForIssue);// Palety pozostają zablokowane, żeby nie zostały użyte równolegle w innym zleceniu.
 					reusablePallets.Add(pallet);
 				}
@@ -129,16 +130,17 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 					vp.Pallet?.ChangeStatus(PalletStatus.Available);
 					_werehouseDbContext.VirtualPallets.Remove(vp);
 				}
+
 				if (anySuccess)
 				{
-					issue.ChangeUser(request.DTO.PerformedBy);
-					issue.ChangeStatus(IssueStatus.Pending);
+					issue.MarkAllocationCompleted(request.DTO.PerformedBy);
 				}
 				if (anyFailure)
 				{
-					issue.ChangeStatus(IssueStatus.RequiresCorrection);
+					issue.MarkAllocationNotCompleted();
 				}
 				issue.AddHistory(request.DTO.PerformedBy);
+
 				await _werehouseDbContext.SaveChangesAsync(ct);
 				await transaction.CommitAsync(ct);
 				return AppResult<List<AssignProductToIssueResult>>.Success(resultList);

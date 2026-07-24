@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode
@@ -20,6 +21,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 		public new WerehouseDbContext DbContext => base.DbContext;
 		
 		public WerehouseDbContext CreateCleanContext() => CreateNewContext();  // Z TestBase
+		public IServiceScope CreateIsolatedScope() => _provider.CreateScope();
 	
 	}
 

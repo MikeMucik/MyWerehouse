@@ -124,6 +124,32 @@ namespace MyWerehouse.Domain.Pallets.Models
 			}
 			this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
 		}
+		public void UpdateProductChangesForReceipt(List<ProductOnPallet> updatedProducts)
+		{
+			var changeQuangtityInventory = this.CalculateQuantityDelta(updatedProducts);
+			var toRemove = ProductsOnPallet
+				.Where(existing => updatedProducts.All(d => d.ProductId != existing.ProductId))
+				.ToList();
+			foreach (var item in toRemove)
+			{
+				ProductsOnPallet.Remove(item);
+			}
+			foreach (var pop in updatedProducts)
+			{
+				var existing = ProductsOnPallet
+					.SingleOrDefault(x => x.ProductId == pop.ProductId);
+
+				if (existing == null)
+				{
+					ProductsOnPallet.Add(pop);
+				}
+				else
+				{
+					existing.SetQuantity(pop.Quantity);
+					existing.SetBestBefore(pop.BestBefore);
+				}
+			}
+		}
 
 		public void AddProduct(Guid productId, int quantity, DateTime createdAt, DateOnly? bestBefore)
 		{
@@ -162,14 +188,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 			{
 				Status = PalletStatus.LockedForIssue;
 			}
-			//żeby można było dalej kompletować na tą samą paletę
+			//żeby można było dalej kompletować na tą samą paletę, status lockedForIssue dla modify
 			else if (Status == PalletStatus.Picking || Status == PalletStatus.LockedForIssue)
 			{
 				// OK – zostaje
 			}
 			else
 			{
-				throw new InvalidPalletStatusDomainException(Id);
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			}
 			IssueId = issueId;
 			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
@@ -179,7 +205,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			if (Status != PalletStatus.ToIssue && Status != PalletStatus.LockedForIssue)
 			{
-				throw new InvalidPalletStatusDomainException(Id);
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			}
 			if (Status == PalletStatus.LockedForIssue)
 			{
@@ -196,7 +222,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
 		}
 
-		public void DetachToIssue(string userId, string snapShot, ReasonForPallet reason)
+		public void DetachFromIssue(string userId, string snapShot, ReasonForPallet reason)
 		{
 			IssueId = null;
 			Status = PalletStatus.Available;
@@ -219,7 +245,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void ToArchive(string userId, ReasonForPallet reason, string snapShot)
 		{
-			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id);
+			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			Status = PalletStatus.Archived;
 			AddHistory(reason, userId, snapShot);
 		}
@@ -238,8 +264,12 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void CloseAndAddPickingPallet(Guid issueId, string userId, string snapShot)
 		{
+			if (Status == PalletStatus.ToIssue)
+			{
+				throw new AlreadyAssignedDomainException(Id);
+			}
 			if (Status != PalletStatus.Picking)
-				throw new InvalidPalletStatusDomainException(Id);
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			Status = PalletStatus.ToIssue;
 			IssueId = issueId;
 			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
@@ -294,10 +324,14 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void MarkAsLoaded(string userId, string snapShot)
 		{
+			if (Status == PalletStatus.Loaded)
+			{
+				throw new PalletAlreadyLoadedDomainException(Id, PalletNumber);
+			}
 			if (Status != PalletStatus.ToIssue
 				&& Status != PalletStatus.LockedForIssue)
 			{
-				throw new InvalidPalletStatusDomainException(Id);
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			}
 			this.Status = PalletStatus.Loaded;
 			this.AddHistory(ReasonForPallet.Loaded, userId, snapShot);
@@ -305,7 +339,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void ChangeStatus(PalletStatus status)
 		{
-			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id);
+			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			this.Status = status;
 		}
 		//metody pomocnicze
@@ -361,10 +395,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 			pallet.AddProduct(firstProduct, fisrtQuantity, createdAt, bestBefore);
 			return pallet;
 		}
-		 public  void PickProduct(ProductOnPallet product, int quantity, string userId, string snapshot)
+		public void PickProduct(ProductOnPallet product, int quantity, string userId, string snapshot)
 		{
-			product.DecreaseQuantity(quantity);			
-			if(product.Quantity == 0)
+			product.DecreaseQuantity(quantity);
+			if (product.Quantity == 0)
 			{
 				this.ChangeStatus(PalletStatus.Archived);
 			}

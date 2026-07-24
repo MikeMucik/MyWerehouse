@@ -5,9 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
@@ -28,43 +26,13 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
 			var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(request.OldPalletId);
 			if (palletToRemoveFromIssue is null)
-				return AppResult<Unit>.Fail($"Paleta którą chcesz podmienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Paleta którą chcesz podmienić o numerze {request.OldPalletId} nie istnieje.", ErrorType.NotFound);
 			var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(request.NewPalletId);
 			if (palletToAddingIssue is null)
-				return AppResult<Unit>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);			
-			if (request.OldPalletId == request.NewPalletId)
-				return AppResult<Unit>.Fail("Nie można podmienić paletę na tą samą", ErrorType.Conflict);
-			if (palletToAddingIssue == null || palletToRemoveFromIssue == null)
-				return AppResult<Unit>.Fail("Jedna z podanych palet nie istnieje.", ErrorType.Conflict);
-			if (palletToRemoveFromIssue.IssueId != request.IssueId)
-				return AppResult<Unit>.Fail("Paleta do usunięcia nie należy do zlecenia.", ErrorType.Conflict);
-			if (palletToAddingIssue.IssueId != null ||
-				(palletToAddingIssue.Status != PalletStatus.Available &&
-				palletToAddingIssue.Status != PalletStatus.InStock))
-				return AppResult<Unit>.Fail("Nowej palety nie można przypisać do zlecenia, błędny status.", ErrorType.Conflict);
-			if(palletToRemoveFromIssue.ProductsOnPallet.Count != 1)
-			{
-				return AppResult<Unit>.Fail("Paleta usuwana nie może być usunięta bo jest paletą kompletacyjną.", ErrorType.Validation);
-			}
-			if(palletToAddingIssue.ProductsOnPallet.Count != 1)
-			{
-				return AppResult<Unit>.Fail("Nowa paleta nie może być dodana bo jest paletą kompletacyjną.", ErrorType.Validation);
-			}
-			var productOnOldPallet = palletToRemoveFromIssue.ProductsOnPallet.Single().ProductId;
-			var productOnNewPallet = palletToAddingIssue.ProductsOnPallet.Single().ProductId;
-			if (productOnOldPallet == Guid.Empty)
-				return AppResult<Unit>.Fail("Paleta usuwana nie zawiera produktu.", ErrorType.NotFound);
-			if (productOnNewPallet == Guid.Empty)
-				return AppResult<Unit>.Fail("Nowa paleta nie zawiera produktu.", ErrorType.NotFound);
-			if (productOnOldPallet != productOnNewPallet)
-				return AppResult<Unit>.Fail("Nie można podmienić palet z różnymi produktami.", ErrorType.Conflict);
-			palletToAddingIssue.ReserveToIssue(issue.Id, request.UserId, palletToAddingIssue.Location.ToSnapshot());
-			issue.AttachPallet(palletToAddingIssue);
-			palletToRemoveFromIssue.DetachToIssue(request.UserId, palletToRemoveFromIssue.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.Correction);
-			issue.DetachPallet(palletToRemoveFromIssue);
-			issue.ChangePalletInIssue(request.UserId);
+				return AppResult<Unit>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
+			issue.ReplacePalletInIssue(palletToRemoveFromIssue, palletToAddingIssue, request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value , "Podmieniono palety.");
+			return AppResult<Unit>.Success(Unit.Value, "Podmieniono palety.");
 		}
 	}
 }

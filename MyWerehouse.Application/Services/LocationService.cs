@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.Services
 		{
 			if (await _locationRepo.ExistsByCoordinatesAsync(locationDTO.Bay, locationDTO.Aisle, locationDTO.Position, locationDTO.Height))
 			{
-				return AppResult<int>.Fail("Lokalizacja o zadanych parametrach już istnieje.");
+				return AppResult<int>.Fail("Lokalizacja o zadanych parametrach już istnieje.",ErrorType.Conflict);
 			}
 			var location = _mapper.Map<Location>(locationDTO);
 
@@ -65,7 +65,7 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<Location>> FindLocationAsync(int bay, int aisle, int position, int height)
 		{
 			var location = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
-			if (location is null) return AppResult<Location>.Fail($"Nie ma lokalizacji o żądanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}");
+			if (location is null) return AppResult<Location>.Fail($"Nie ma lokalizacji o żądanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}", ErrorType.NotFound);
 			return AppResult<Location>.Success(location);
 		}
 
@@ -88,7 +88,7 @@ namespace MyWerehouse.Application.Services
 			{
 				if (await _locationRepo.ExistsByCoordinatesAsync(location.Bay, location.Aisle, location.Position, location.Height))
 				{
-					return AppResult<Unit>.Fail($"Lokalizacja o parametrach Bay = {location.Bay}, Aisle = {location.Aisle}, Position = {location.Position}, Height = {location.Height} już istnieje.");
+					return AppResult<Unit>.Fail($"Lokalizacja o parametrach Bay = {location.Bay}, Aisle = {location.Aisle}, Position = {location.Position}, Height = {location.Height} już istnieje.", ErrorType.Conflict);
 				}
 			}
 			foreach (var locationDTO in locations.ToList())

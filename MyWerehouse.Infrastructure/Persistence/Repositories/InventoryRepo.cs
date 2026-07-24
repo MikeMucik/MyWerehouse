@@ -90,17 +90,15 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<int> GetQuantityProductReservedForIssueAsync(Guid productId, DateOnly? bestBefore)
 		{
 			var query = GetPalletsQuery(productId, bestBefore)
-				.Where(p => p.Status == PalletStatus.ToIssue );
+				.Where(p => p.Status == PalletStatus.ToIssue);
 			return await SumQuantityAsync(query, productId);
 		}
 		public async Task<int> GetQuantityProductReservedForPickingAsync(Guid productId, DateOnly? bestBefore)
 		{
 			var palletsWithProduct = _werehouseDbContext.VirtualPallets
 				.Include(p=>p.Pallet)
-
 				.Where(p=>p.Pallet.Status == PalletStatus.ToPicking &&
-				p.Pallet.ProductsOnPallet.Any(pop=>pop.ProductId == productId))		
-				
+				p.Pallet.ProductsOnPallet.Any(pop=>pop.ProductId == productId))						
 				.AsQueryable();
 			if (bestBefore.HasValue)
 			{
@@ -113,7 +111,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			   .SumAsync(a => (int?)a.RequestedQuantity) ?? 0;
 			return totalAllocated;
 		}
-
 
 		private IQueryable<Pallet> GetPalletsQuery(Guid productId, DateOnly? bestBefore)
 		{

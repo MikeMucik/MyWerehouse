@@ -4,30 +4,45 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Inventories.Events;
-using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Inventories.InventoryExceptions;
 using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Domain.Inventories.Models
 {
 	public class Inventory : AggregateRoots
-	{		
+	{
+		//public Guid ProductId { get;private set; }
 		public Guid ProductId { get; set; }
 		public virtual Product Product { get; set; } = null!;
-		public int Quantity { get; set; }				
+		//public int Quantity { get;private set; }
+		public int Quantity { get; set; }
 		public DateTime LastUpdated { get; set; }
-				
-		public static List<StockItemChange> CreateStockItem(List<Pallet> pallets)
+		public Inventory() { }
+
+		private Inventory(Guid productId, int quantity, DateTime dateTime)
 		{
-			var list = new List<StockItemChange>();
-			foreach (var pallet in pallets)
+			ProductId = productId;
+			if (quantity < 0)
 			{
-				list = [.. pallet.ProductsOnPallet
-					.GroupBy(p=>p.ProductId)
-					.Select(g=> new StockItemChange(g.Key, g.Sum(x=>x.Quantity)))];				
+				throw new DomainInventoryDomainException(ProductId);
 			}
-			return list;
+			Quantity = quantity;
+			LastUpdated = dateTime;
+		}		
+		public static Inventory CreateStockItem(Guid productId, int quantity, DateTime dateTime)
+			=> new Inventory(productId, quantity, dateTime);
+		public void ApplyChangeInInventory(int quantity, DateTime dateTime)
+		{
+
+			var newQuantity = Quantity + quantity;
+
+			if (newQuantity < 0)
+			{				
+				throw new DomainInventoryDomainException(ProductId);
+			}
+			LastUpdated = dateTime;
+			Quantity = newQuantity;
 		}
 	}
-	
+
 }

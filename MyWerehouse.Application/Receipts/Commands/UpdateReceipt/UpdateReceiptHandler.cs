@@ -87,7 +87,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 
 				productsForPallet.Add(productForPallet);
 				
-				pallet.UpdateProductChangesForReceipt(productsForPallet);
+				pallet.ReplaceProducts(productsForPallet);
 				pallet.ChangeStatus(PalletStatus.Receiving);
 				pallet.AddHistory(ReasonForPallet.Correction, request.DTO.PerformedBy, pallet.Location.ToSnapshot());
 			}

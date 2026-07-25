@@ -35,7 +35,18 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(i => i.IssueItems)
 				.FirstOrDefaultAsync(i => i.Id == id);
 		}
-		public async Task<Issue?> GetIssueAllIncludedByIdAsync(Guid id)
+		public async Task<Issue?> GetIssueByIdForModifyAsync(Guid id)
+		{
+			return await _werehouseDbContext.Issues
+				.Include(i => i.Pallets)
+					.ThenInclude(l => l.Location)
+				.Include(i => i.Pallets)
+					.ThenInclude(p => p.ProductsOnPallet)
+				.Include(i => i.IssueItems)
+				.Include(i=>i.PickingTasks)
+				.FirstOrDefaultAsync(i => i.Id == id);
+		}
+		public async Task<Issue?> GetIssueForViewIncludedByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(c => c.Client)

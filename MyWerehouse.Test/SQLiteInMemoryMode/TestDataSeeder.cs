@@ -290,18 +290,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			if (!context.Inventories.Any())
 			{
 				context.Inventories.AddRange(
-					new Inventory
-					{
-						ProductId = productId1,
-						Quantity = 10,
-						LastUpdated = new DateTime(2025, 5, 6)
-					},
-					new Inventory
-					{
-						ProductId = productId2,
-						Quantity = 0,
-						LastUpdated = new DateTime(2025, 5, 6)
-					});
+					Inventory.CreateStockItem(productId1, 10, new DateTime(2025, 5, 6)),
+					Inventory.CreateStockItem(productId2, 0, new DateTime(2025, 5, 6)));
 			}
 			var reversePickingTaskId1 = Guid.Parse("11111111-1111-1111-2222-111111111111");
 			var reversePickingTaskId2 = Guid.Parse("11111111-1111-1111-2333-111111111111");

@@ -70,7 +70,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public async Task<VirtualPallet?> GetVirtualPalletByIdAsync(Guid? palletId)
 		{
-			return await _werehouseDbContext.VirtualPallets.FirstAsync(p => p.Id == palletId);
+			return await _werehouseDbContext.VirtualPallets
+				.Include(p=>p.PickingTasks)
+				.FirstAsync(p => p.Id == palletId);
 		}
 		
 		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly bestBefore)

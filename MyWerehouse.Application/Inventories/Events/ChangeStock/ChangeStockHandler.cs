@@ -7,7 +7,6 @@ using MediatR;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Inventories.Events;
-using MyWerehouse.Domain.Inventories.InventoryExceptions;
 using MyWerehouse.Domain.Inventories.Models;
 
 namespace MyWerehouse.Application.Inventories.Events.ChangeStock

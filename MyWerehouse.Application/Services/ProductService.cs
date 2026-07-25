@@ -89,12 +89,7 @@ namespace MyWerehouse.Application.Services
 				productDTO.Weight,
 				productDTO.Description);
 			var product = _productRepo.AddProduct(productPrepare);
-			var inventory = new Inventory
-			{
-				Product = product,
-				Quantity = 0,
-				LastUpdated = _dateTimeProvider.UtcNow,
-			};
+			var inventory = Inventory.CreateStockItem(product.Id, 0, _dateTimeProvider.UtcNow);
 			_inventoryRepo.AddInventory(inventory);
 			await _werehouseDbContext.SaveChangesAsync();
 			return AppResult<Guid>.Success(product.Id);

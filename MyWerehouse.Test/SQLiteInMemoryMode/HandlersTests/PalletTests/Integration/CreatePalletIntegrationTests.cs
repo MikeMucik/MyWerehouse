@@ -42,12 +42,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		}
 		private Inventory CreateInventory()
 		{
-			return new Inventory
-			{
-				ProductId = productId,
-				Quantity = 10,
-				LastUpdated = TestDates.UtcNow.AddDays(-1)
-			};
+			return Inventory.CreateStockItem(productId, 10, TestDates.UtcNow.AddDays(-1));
 		}
 		[Fact]
 		public async Task CreatePallet_ShouldCreate_WhenValidData()

@@ -68,12 +68,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		}
 		private Inventory CreateInventory(Guid id, int quantity)
 		{
-			return new Inventory
-			{
-				ProductId = id,
-				Quantity = quantity,
-				LastUpdated = TestDates.UtcNow.AddDays(-1)
-			};
+			return Inventory.CreateStockItem(id, quantity, TestDates.UtcNow.AddDays(-1));
 		}
 		[Fact]
 		public async Task VerifyAndFinalizeReceipt_UpdatesStatusAndInventory_WhenOneProduct()

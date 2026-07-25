@@ -59,5 +59,11 @@ namespace MyWerehouse.Domain.Picking.Models
 				Pallet.AddHistory(Histories.Models.ReasonForPallet.ReversePicking, userId, snapShot);
 			}
 		}
+		public bool CanBeDeletedAfterReallocation()
+		{
+			if (PickingTasks.Count == 0)
+				return true;
+			return false;
+		}
 	}
 }

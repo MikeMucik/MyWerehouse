@@ -588,7 +588,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
 
-			Assert.Equal("User2", updatedIssue.PerformedBy);
+			
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.Equal(2, result.Result.Count);
@@ -597,6 +597,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product1.Id}", result.Result.First().Message);
 			Assert.Equal(product1.Id, result.Result.First().ProductId);
 			Assert.Equal(product2.Id, result.Result.Last().ProductId);
+			Assert.Equal("User2", updatedIssue.PerformedBy);
 		}
 
 		[Fact]

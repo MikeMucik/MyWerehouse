@@ -27,13 +27,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			DbContext.SaveChanges();
 			var quantity = 10;
 			var date = TestDates.UtcNow;
-			var inventory = new Inventory
-			{
-				//ProductId = product.Id,
-				Product = product,
-				Quantity = quantity,
-				LastUpdated = date,
-			};
+			var inventory = Inventory.CreateStockItem(product.Id, quantity, date);
 			var inventoryRepo = new InventoryRepo(DbContext);
 			//Act
 			inventoryRepo.AddInventory(inventory);

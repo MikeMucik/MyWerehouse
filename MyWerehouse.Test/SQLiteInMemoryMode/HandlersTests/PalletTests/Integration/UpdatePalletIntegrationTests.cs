@@ -51,12 +51,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		}
 		private static Inventory CreateInventory(Guid id, int quantity)
 		{
-			return new Inventory
-			{
-				ProductId = id,
-				Quantity = quantity,
-				LastUpdated = TestDates.UtcNow.AddDays(-1)
-			};
+			return Inventory.CreateStockItem(id, quantity, TestDates.UtcNow.AddDays(-1));
 		}
 		[Fact]
 		public async Task UpdatePallet_ShouldIncreasingQuantity_WhenProperData()
@@ -180,22 +175,28 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		{
 			//Arange	
 			var category = CreateCategory();
-			var product = CreateProduct(productId, "Test", "666666");
-			var product1 = CreateProduct(productId1, "Test11", "67777");
-			var product2 = CreateProduct(productId2, "Test22", "667777");
-			var product3 = CreateProduct(productId3, "Test33", "67777");
+			var product1 = CreateProduct(productId, "Test", "666666");
+			var product2 = CreateProduct(productId1, "Test11", "67777");
+			var product3 = CreateProduct(productId2, "Test22", "667777");
+			var product4 = CreateProduct(productId3, "Test33", "67777");
 			var location = CreateLocation(0);
-			var inventoryP = CreateInventory(productId, 1000);
-			var inventoryP1 = CreateInventory(productId1, 2000);
+			var inventoryP1 = CreateInventory(productId, 1000);
+			var inventoryP2 = CreateInventory(productId1, 2000);
 			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
-			pallet.AddProduct(product1.Id, 300, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			pallet.AddProduct(product1.Id, 100, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			pallet.AddProduct(product2.Id, 300, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
 			DbContext.Categories.Add(category);
-			DbContext.Inventories.AddRange(inventoryP, inventoryP1);
-			DbContext.Products.AddRange(product, product1, product2, product3);
+			DbContext.Inventories.AddRange(inventoryP1, inventoryP2);
+			DbContext.Products.AddRange(product1, product2
+			, product3, product4);
 			DbContext.Locations.Add(location);
 			DbContext.Pallets.Add(pallet);
 			DbContext.SaveChanges();
+			var initialInventoryQuantityForProduct1 = inventoryP1.Quantity;
+			var initialInventoryQuantityForProduct2 = inventoryP2.Quantity;
+			var initialPalletQuantityForProduct1 = pallet.ProductsOnPallet.First(x => x.ProductId == product1.Id).Quantity;
+			var initialPalletQuantityForProduct2 = pallet.ProductsOnPallet.First(x => x.ProductId == product2.Id).Quantity;
+
 			//Act
 			var id = pallet.Id;
 			var updatedPallet = new EditPalletDTO
@@ -205,18 +206,23 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
 				{
-					ProductId = product.Id,
+					ProductId = product1.Id,
 					Quantity = 50,
 					DateAdded = TestDates.Now,
 					BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletCreateDTO
 				{
-					ProductId = product1.Id,
+					ProductId = product2.Id,
 					Quantity = 100,
 					DateAdded = TestDates.Now,
 					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), })
 					]
 			};
+			var updatedQuantityP1 = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product1.Id).Quantity;
+			var updatedQuantityP2 = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product2.Id).Quantity;
+			var expectedQuantityP1 = initialInventoryQuantityForProduct1 - initialPalletQuantityForProduct1 + updatedQuantityP1;
+			var expectedQuantityP2 = initialInventoryQuantityForProduct2 - initialPalletQuantityForProduct2 + updatedQuantityP2;
+
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
 			//Assert
 			Assert.NotNull(resultHandler);
@@ -249,33 +255,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			}
 			Assert.All(
 			result.ProductsOnPallet,
-			pop => Assert.Equal(result.Id, pop.PalletId)
-			);
+			pop => Assert.Equal(result.Id, pop.PalletId));
 			Assert.DoesNotContain(
 			result.ProductsOnPallet,
-			p => p.ProductId == product2.Id || p.ProductId == product3.Id
-			);
+			p => p.ProductId == product3.Id || p.ProductId == product4.Id);
 			Assert.Equal(PalletStatus.ToPicking, result.Status);
+			await using var assertionContext = CreateNewContext();
+			var inventoryItems = assertionContext.Inventories
+				.AsNoTracking()
+				.Where(i => i.ProductId == product1.Id || i.ProductId == product2.Id)
+				.ToList();
 
-			var inventoryItems = DbContext.Inventories
-			.Where(i => i.ProductId == product.Id || i.ProductId == product1.Id)
-			.ToList();
-
-			var inventoryProduct = inventoryItems.Single(i => i.ProductId == product.Id);
 			var inventoryProduct1 = inventoryItems.Single(i => i.ProductId == product1.Id);
+			var inventoryProduct2 = inventoryItems.Single(i => i.ProductId == product2.Id);
 
-			Assert.Equal(
-				inventoryP.Quantity - pallet.ProductsOnPallet.First(p => p.ProductId == product.Id).Quantity +
-				updatedPallet.ProductsOnPallet.First(p => p.ProductId == product.Id).Quantity,
-				inventoryProduct.Quantity
-			);
-
-			Assert.Equal(
-				inventoryP1.Quantity - pallet.ProductsOnPallet.First(p => p.ProductId == product1.Id).Quantity +
-				updatedPallet.ProductsOnPallet.First(p => p.ProductId == product1.Id).Quantity,
-				inventoryProduct1.Quantity
-			);
-
+			Assert.Equal(expectedQuantityP1, inventoryProduct1.Quantity);
+			Assert.Equal(expectedQuantityP2, inventoryProduct2.Quantity);
 			var history = DbContext.HistoryPallet
 			.Where(h => h.PalletId == pallet.Id)
 			.ToList();
@@ -287,10 +282,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				h.PerformedBy == "user"
 			);
 
-			var numberProductDto = updatedPallet.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
-			var numberProductResult = result.ProductsOnPallet.Single(x => x.ProductId == product.Id).ProductId;
-			var updatedQty = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
-			var resultQty = result.ProductsOnPallet.First(x => x.ProductId == product.Id).Quantity;
+			var numberProductDto = updatedPallet.ProductsOnPallet.Single(x => x.ProductId == product1.Id).ProductId;
+			var numberProductResult = result.ProductsOnPallet.Single(x => x.ProductId == product1.Id).ProductId;
+			var updatedQty = updatedPallet.ProductsOnPallet.First(x => x.ProductId == product1.Id).Quantity;
+			var resultQty = result.ProductsOnPallet.First(x => x.ProductId == product1.Id).Quantity;
 			Assert.Equal(updatedQty, resultQty);
 			Assert.Equal(numberProductDto, numberProductResult);
 		}
@@ -398,7 +393,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "user", new DateTime(2025, 1, 1), ReceiptStatus.Verified, 1);
-			
+
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);

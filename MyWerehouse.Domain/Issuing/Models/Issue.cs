@@ -67,7 +67,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			DateOnly issueDateTimeSend, string performedBy, IssueStatus issueStatus, List<IssueItem>? issueItems) =>
 			new Issue(id, issueNumber, clientId, issueDateTimeCreate, issueDateTimeSend,
 				performedBy, issueStatus, issueItems);
-		
+
 		public void ChangeStatus(IssueStatus issueStatus)
 		{
 			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived)
@@ -121,7 +121,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 				IssueStatus != IssueStatus.New)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
-			};
+			}
+			;
 		}
 
 		public void MarkAllocationCompleted(string userId)
@@ -133,16 +134,18 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			this.ChangeStatus(IssueStatus.Pending);
 			PerformedBy = userId;
+			this.AddHistory(userId);
 		}
 
-		public void MarkAllocationNotCompleted()
+		public void MarkAllocationNotCompleted(string userId)
 		{
 			if (IssueStatus != IssueStatus.New && IssueStatus != IssueStatus.Pending
 				&& IssueStatus != IssueStatus.RequiresCorrection)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
-			this.ChangeStatus(IssueStatus.RequiresCorrection);			
+			this.ChangeStatus(IssueStatus.RequiresCorrection);
+			this.AddHistory(userId);
 		}
 
 		public List<Pallet> RemoveNotLoadedPallets(string userId)
@@ -217,7 +220,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void ReplacePalletInIssue(Pallet oldPallet, Pallet newPallet, string userId)
 		{
-			if (IssueStatus != IssueStatus.ConfirmedToLoad && 
+			if (IssueStatus != IssueStatus.ConfirmedToLoad &&
 				IssueStatus != IssueStatus.Pending)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
@@ -371,5 +374,63 @@ namespace MyWerehouse.Domain.Issuing.Models
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
 		}
+
+		public IssueModificationMode DetremineModificationMode()
+		{
+			return IssueStatus switch
+			{
+				IssueStatus.New or
+				IssueStatus.Pending or
+				IssueStatus.RequiresCorrection
+				=> IssueModificationMode.Reallocation,
+
+				IssueStatus.ConfirmedToLoad
+				=> IssueModificationMode.SupplementaryIssue,
+
+				_ => throw new NotAllowedOperationDomainException(Id, IssueNumber)
+			};
+		}
+		public ReallocationPreparation PrepareForReallocation(int clientId, string userId, DateTime now)
+		{
+			this.ChangeClient(clientId);
+			// Od³¹czamy poprzednie palety i anulujemy dotychczasowe zadania pickingu przed ponown¹ alokacj¹.
+			var reusablePallets = new List<Pallet>();
+			var listOldPallets = Pallets.ToList();
+			foreach (var pallet in listOldPallets)
+			{
+				DetachPallet(pallet);
+				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.Correction);
+				pallet.ChangeStatus(PalletStatus.LockedForIssue);// Palety pozostaj¹ zablokowane, ¿eby nie zosta³y u¿yte równolegle w innym zleceniu.
+				reusablePallets.Add(pallet);
+			}
+			var listOldPickingTask = PickingTasks.ToList();
+			// Anulujemy poprzednie zadania pickingu przed ponown¹ alokacj¹.
+			foreach (var pickingTask in listOldPickingTask)
+			{
+				RemovePickingTask(pickingTask);
+				pickingTask.Cancel(userId, now);
+			}
+			var touchedVirtualPalletIds = listOldPickingTask
+				.Where(a => a.VirtualPalletId.HasValue)
+				.Select(a => a.VirtualPalletId!.Value)
+				.Distinct()
+				.ToList();
+			return new ReallocationPreparation(listOldPallets, touchedVirtualPalletIds);
+		}
+
+		public bool CompleteReallocation(List<Pallet> pallets, List<Pallet> oldPallets)
+		{
+			var assignedIds = pallets.Select(p => p.Id).ToHashSet();
+			var returnPallets = oldPallets
+				.Where(p => !assignedIds.Contains(p.Id))
+				.ToList();
+
+			foreach (var returnPallet in returnPallets)
+			{
+				returnPallet.ChangeStatus(PalletStatus.Available);
+			}
+			return true;
+		}
+
 	}
 }

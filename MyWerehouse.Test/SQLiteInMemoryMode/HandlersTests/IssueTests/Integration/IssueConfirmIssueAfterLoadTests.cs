@@ -95,18 +95,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			//Inventory
 			//dla dwóch produktów
-			var inventory = new Inventory
-			{
-				Product = product,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
-			var inventory1 = new Inventory
-			{
-				Product = product1,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
+			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
+			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));
 			DbContext.Inventories.AddRange(inventory1, inventory);
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -180,18 +170,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			//Inventory
 			//dla dwóch produktów
-			var inventory = new Inventory
-			{
-				Product = product,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 5
-			};
-			var inventory1 = new Inventory
-			{
-				Product = product1,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 5
-			};
+			var inventory = Inventory.CreateStockItem(product.Id, 5, TestDates.Now.AddDays(-7));
+			var inventory1 = Inventory.CreateStockItem(product1.Id, 5, TestDates.Now.AddDays(-7));
 
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
@@ -245,18 +225,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			//Inventory
 			//dla dwóch produktów
-			var inventory = new Inventory
-			{
-				Product = product,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
-			var inventory1 = new Inventory
-			{
-				Product = product1,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
+			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
+			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));
 
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
@@ -297,18 +267,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			//Inventory
 			//dla dwóch produktów
-			var inventory = new Inventory
-			{
-				Product = product,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
-			var inventory1 = new Inventory
-			{
-				Product = product1,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
+			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
+			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));
 
 			DbContext.AddRange(inventory, inventory1);
 			DbContext.Pallets.AddRange(pallet, pallet1);
@@ -347,18 +307,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
 			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 
-			var inventory = new Inventory
-			{
-				Product = product,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
-			var inventory1 = new Inventory
-			{
-				Product = product1,
-				LastUpdated = TestDates.Now.AddDays(-7),
-				Quantity = 100
-			};
+			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
+			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			DbContext.AddRange(inventory, inventory1);

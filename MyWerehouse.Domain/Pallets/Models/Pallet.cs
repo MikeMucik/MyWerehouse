@@ -92,41 +92,15 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void Update(string userId, List<ProductOnPallet> products, PalletStatus palletStatus, string snapShot)
 		{
+			var changeQuangtityInventory = this.CalculateQuantityDelta(products);
 			Status = palletStatus;
-			this.UpdateProductChanges(products);
+			this.ReplaceProducts(products);
+			this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
 			AddHistory(ReasonForPallet.Correction, userId, snapShot);
 		}
 
-		public void UpdateProductChanges(List<ProductOnPallet> updatedProducts)
+		public void ReplaceProducts(List<ProductOnPallet> updatedProducts)
 		{
-			var changeQuangtityInventory = this.CalculateQuantityDelta(updatedProducts);
-			var toRemove = ProductsOnPallet
-				.Where(existing => updatedProducts.All(d => d.ProductId != existing.ProductId))
-				.ToList();
-			foreach (var item in toRemove)
-			{
-				ProductsOnPallet.Remove(item);
-			}
-			foreach (var pop in updatedProducts)
-			{
-				var existing = ProductsOnPallet
-					.SingleOrDefault(x => x.ProductId == pop.ProductId);
-
-				if (existing == null)
-				{
-					ProductsOnPallet.Add(pop);
-				}
-				else
-				{
-					existing.SetQuantity(pop.Quantity);
-					existing.SetBestBefore(pop.BestBefore);
-				}
-			}
-			this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
-		}
-		public void UpdateProductChangesForReceipt(List<ProductOnPallet> updatedProducts)
-		{
-			var changeQuangtityInventory = this.CalculateQuantityDelta(updatedProducts);
 			var toRemove = ProductsOnPallet
 				.Where(existing => updatedProducts.All(d => d.ProductId != existing.ProductId))
 				.ToList();

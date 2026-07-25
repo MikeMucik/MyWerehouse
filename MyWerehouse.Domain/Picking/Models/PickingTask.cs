@@ -167,5 +167,6 @@ namespace MyWerehouse.Domain.Picking.Models
 				userId,
 				createdAt));
 		}
+		
 	}
 }

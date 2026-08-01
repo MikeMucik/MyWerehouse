@@ -129,7 +129,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				result = result.Where(p => p.Issue != null && p.Issue.PerformedBy == filter.IssueUser);
 			}
 			return result;
-		}		
+		}
 
 		public async Task<string> GetNextPalletIdAsync()
 		{
@@ -137,9 +137,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(static p => p.PalletNumber.StartsWith("Q"))
 				.OrderByDescending(p => p.PalletNumber)
 				.FirstOrDefaultAsync();
-			
+
 			int lastNumber = 0;
-			if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))			
+			if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))
 			{
 				lastNumber = parsed;
 			}
@@ -173,7 +173,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId)
 		{
 			var pallets = await _werehouseDbContext.Pallets
-				.Include(l=>l.Location)
+				.Include(l => l.Location)
 				.Include(p => p.ProductsOnPallet)
 				.Where(p => !excludedId.Contains(p.Id))
 				.Where(p =>
@@ -184,9 +184,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					)
 				)
 				.OrderBy(p => p.ProductsOnPallet
-					.Where(pp => pp.ProductId == productId)					
-					.Min(pp => pp.BestBefore ??DateOnly.MaxValue))
-				
+					.Where(pp => pp.ProductId == productId)
+					.Min(pp => pp.BestBefore ?? DateOnly.MaxValue))
+
 				.ThenBy(p => p.ProductsOnPallet
 					.Where(pp => pp.ProductId == productId)
 					.Min(pp => pp.Quantity))
@@ -197,13 +197,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return pallets;
 		}
 
-		public async Task<List<Pallet>> GetAvailableFullPallets(Guid productId, int fullPallet, DateOnly? minBestBefore, int neededPallets)
+		public async Task<List<Pallet>> GetMissingFullPallets(Guid productId, int fullPallet, DateOnly? minBestBefore, int neededPallets)
 		{
 			var pallets = await _werehouseDbContext.Pallets
 				.Where(p => (p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
 					p.ProductsOnPallet.Any(pp => pp.ProductId == productId &&
 					(minBestBefore == null || pp.BestBefore >= minBestBefore) && pp.Quantity == fullPallet
 				))
+				.Include(p => p.Location)
 				.OrderBy(p => p.ProductsOnPallet
 					.Where(x => x.ProductId == productId)
 					.Select(x => x.BestBefore)
@@ -211,6 +212,18 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ThenBy(x => x.Location)
 				.Take(neededPallets)
 				.Include(p => p.ProductsOnPallet)
+				.ToListAsync();
+			return pallets;
+		}
+		public async Task<List<Pallet>> GetAvailablePalletsForReversePickingAsync(Guid productId, DateOnly? bestBefore, Guid sourceId, int cartonsPerPallet)
+		{
+			var pallets = await _werehouseDbContext.Pallets
+				.Include(p => p.Location)
+				.Include(p => p.ProductsOnPallet)
+				.Where(a => a.ProductsOnPallet.Count == 1 && a.ProductsOnPallet.Any(pp => pp.ProductId == productId && pp.BestBefore == bestBefore)				 
+				&& a.Receipt != null && a.Status == PalletStatus.Available && a.Id != sourceId&&
+				a.ProductsOnPallet.Single().Quantity < cartonsPerPallet)
+				.OrderByDescending(p => p.ProductsOnPallet.Single().Quantity)
 				.ToListAsync();
 			return pallets;
 		}

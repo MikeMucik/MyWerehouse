@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -101,7 +101,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			//Act
 			var result = await _clientService.DeleteClientAsync(clientId);
 			//Assert
-			Assert.Equal($"Klient o numerze {clientId} nie istnieje.", result.Error);
+			Assert.Equal($"Client {clientId} does not exist.", result.Error);
 		}
 	}
 }

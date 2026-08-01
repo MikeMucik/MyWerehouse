@@ -30,7 +30,7 @@ namespace MyWerehouse.Application.Picking.Queries.ShowTaskToDo
 			var result = await pickingTaskOrdered
 				.ProjectTo<PickingTaskDTO>(_mapper.ConfigurationProvider)
 				.ToPagedResultAsync(request.CurrentPage,request.PageSize,ct);
-			if (result.TotalCount == 0) return AppResult<PagedResult<PickingTaskDTO>>.Fail("Brak zadań kompletacyjnych dla palety", ErrorType.NotFound);
+			if (result.TotalCount == 0) return AppResult<PagedResult<PickingTaskDTO>>.Fail("No picking tasks were found for the pallet.");
 			return AppResult<PagedResult<PickingTaskDTO>>.Success(result);
 		}
 	}

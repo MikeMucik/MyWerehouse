@@ -14,13 +14,13 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 		{
 			RuleFor(p => p.UpdatingPallet.Status)
 				.NotEmpty()
-				.WithMessage("Paleta musi mieć status.");
+				.WithMessage("Pallet status is required.");
 			RuleFor(p => p.UpdatingPallet.LocationId)
 				.GreaterThan(0)
-				.WithMessage("Paleta musi mieć lokalizację.");
+				.WithMessage("Pallet location is required.");
 			RuleFor(p => p.UpdatingPallet.ProductsOnPallet)
 				.NotEmpty()
-				.WithMessage("Paleta musi zawierać towar/y.");
+				.WithMessage("Pallet must contain at least one product.");
 			RuleForEach(p => p.UpdatingPallet.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)
 				.When(p => p.UpdatingPallet.ProductsOnPallet != null && p.UpdatingPallet.ProductsOnPallet.Count > 0);

@@ -7,17 +7,15 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Pallets.PalletExceptions
 {
-	public class MultipleProductsOnPalletDomainException: DomainException
+	public class PalletMustContainSingleProductLineDomainException: DomainException
 	{
 		public Guid PalletId { get; }
 		public string PalletNumber { get; }
-		public Guid ProductId { get; }
-		public MultipleProductsOnPalletDomainException(Guid palletId, string palletNumber, Guid productId)
-			:base($"Product {productId} has multiply to records on pallet, expected one.")
+		public PalletMustContainSingleProductLineDomainException(Guid palletId, string palletNumber)
+			:base($"Pallet {palletNumber} ({palletId}) must contain exactly one product line.")
 		{
 			PalletId = palletId;
 			PalletNumber = palletNumber;
-			ProductId = productId;
 		}		
 	}
 }

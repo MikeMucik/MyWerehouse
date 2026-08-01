@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -98,7 +98,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
 			Assert.False(result.Result.RequiresConfirmation);
-			Assert.Contains($"Paleta {pallet.Id} została umieszczona w lokalizacji. ", result.Message);
+			Assert.Contains($"Pallet {pallet.Id} was moved to the location. ", result.Message);
 			var resultPallet = DbContext.Pallets.First(x => x.Id == palletId);
 			Assert.Equal(location2.Id, resultPallet.LocationId);
 
@@ -141,7 +141,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.False(result.Result.Success);
 			Assert.True(result.Result.RequiresConfirmation);
 			var fullNameLocation = $" Bay = {location2.Bay} Aisle = {location2.Aisle} Position = {location2.Position} Height ={location2.Height}";
-			Assert.Contains($"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {pallet2.PalletNumber}.", result.Message);
+			Assert.Contains($"Location {fullNameLocation} is already occupied by pallet {pallet2.PalletNumber}.", result.Message);
 		}
 		[Fact]
 		public async Task ChangeLocationPallet_GiveBackInformationAndPutAnotherPallet_WhenLocationOccupiedAndConfirmedToTakeThisLocation()
@@ -172,7 +172,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
 			Assert.False(result.Result.RequiresConfirmation);
-			Assert.Contains($"Paleta {pallet1.Id} została umieszczona w lokalizacji. ", result.Message);
+			Assert.Contains($"Pallet {pallet1.Id} was moved to the location. ", result.Message);
 
 			// sprawdzamy, że obie palety siedzą w tej samej lokalizacji
 			var movedPallet = DbContext.Pallets.First(x => x.Id == palletId);

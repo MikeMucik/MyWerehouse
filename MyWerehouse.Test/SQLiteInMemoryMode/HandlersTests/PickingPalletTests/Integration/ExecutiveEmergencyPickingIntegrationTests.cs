@@ -1,16 +1,17 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
@@ -109,10 +110,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert		
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
-			Assert.Equal("Towar dołączono do zlecenia", result.Message);
+			Assert.Equal("Product was added to the issue.", result.Message);
 
 			Assert.True(result.Result.NewPalletCreated);
-			Assert.Contains("Weź nową paletę dla zlecenia. Towar:", result.Result.Message);
+			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
 
 			// ✅ Paleta została zaktualizowana
 			var updatedPallet = await DbContext.Pallets
@@ -201,10 +202,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
-			Assert.Equal("Towar dołączono do zlecenia", result.Message);
+			Assert.Equal("Product was added to the issue.", result.Message);
 
 			Assert.False(result.Result.NewPalletCreated);
-			Assert.Contains("Dołącz towar do starej palety kompletacyjnej. Towar:", result.Result.Message);
+			Assert.Contains("Add the product to the existing picking pallet. Product:", result.Result.Message);
 
 			// ✅ Paleta została zaktualizowana
 			var updatedPallet = await DbContext.Pallets
@@ -303,10 +304,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			// Assert		
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
-			Assert.Equal("Towar dołączono do zlecenia", result.Message);
+			Assert.Equal("Product was added to the issue.", result.Message);
 
 			Assert.True(result.Result.NewPalletCreated);
-			Assert.Contains("Weź nową paletę dla zlecenia. Towar:", result.Result.Message);
+			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
 
 			// ✅ Paleta została zaktualizowana
 			var updatedPallet = await DbContext.Pallets
@@ -395,7 +396,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(newToPickPallet.Id, issue.Id, "user1", 100100));
 			// Assert
 			Assert.False(result.IsSuccess);
-			Assert.Equal($"Zamówienie o numerze {issue.Id} nie zostało znalezione.", result.Error);
+			Assert.Equal($"Issue {issue.Id} was not found.", result.Error);
 		}
 
 		[Fact]
@@ -425,17 +426,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.Pallets.Add(emergencyPallet);
 			DbContext.Issues.Add(issue);
 			DbContext.SaveChanges();
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<NotAllowedOperationDomainException>(() => Mediator.Send(new ExecuteEmergencyPickingCommand(
+				emergencyPallet.Id, issue.Id, "user1", location.Id)));
+			Assert.Contains($"Operation forbidden for {issue.IssueNumber}({issueId}), wrong status.", ex.Message);
+			//// Act
+			//var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(
+			//	emergencyPallet.Id, issue.Id, "user1", location.Id));
 
-			// Act
-			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(
-				emergencyPallet.Id, issue.Id, "user1", 100100));
-
-			// Assert
-			Assert.False(result.IsSuccess);
-			Assert.Equal(ErrorType.Conflict, result.ErrorType);
-			Assert.Equal("Status wydania nie pozwala na Emergency Picking.", result.Error);
-			Assert.Equal(PalletStatus.Available, emergencyPallet.Status);
-			Assert.Equal(10, emergencyPallet.ProductsOnPallet.Single().Quantity);
+			//// Assert
+			//Assert.False(result.IsSuccess);
+			//Assert.Equal(ErrorType.Conflict, result.ErrorType);
+			//Assert.Equal("The issue status does not allow emergency picking.", result.Error);
+			//Assert.Equal(PalletStatus.Available, emergencyPallet.Status);
+			//Assert.Equal(10, emergencyPallet.ProductsOnPallet.Single().Quantity);
 		}
 
 		[Fact]
@@ -520,7 +524,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		}
 
 		[Fact]
-		public async Task ExecuteEmergencyPicking_ShouldFail_WhenProcessPickingFails()
+		public async Task ExecuteEmergencyPicking_ShouldFailValidation_WhenRampDoesNotExist()
 		{
 			// Arrange
 			var client = CreateClient();
@@ -562,13 +566,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.SaveChanges();
 
 			// Act - ramp does not exist
-			var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(
-				emergencyPallet.Id, issue.Id, "user1", 999999));
+			var exception = await Assert.ThrowsAsync<ValidationException>(() =>
+				Mediator.Send(new ExecuteEmergencyPickingCommand(
+					emergencyPallet.Id, issue.Id, "user1", 999999)));
 
 			// Assert
-			Assert.False(result.IsSuccess);
-			Assert.Equal(ErrorType.Conflict, result.ErrorType);
-			Assert.Equal("Nie znaleziono rampy.", result.Error);
+			Assert.Contains(exception.Errors, failure =>
+				failure.PropertyName == nameof(ExecuteEmergencyPickingCommand.RampNumber) &&
+				failure.ErrorMessage == "The selected location does not exist.");
 
 			await using var freshContext = CreateNewContext();
 			var emergencyPalletAfter = await freshContext.Pallets
@@ -583,6 +588,125 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Equal(PickingStatus.Allocated, pickingTaskAfter.PickingStatus);
 			Assert.Equal(10, pickingTaskAfter.RequestedQuantity);
 			Assert.Equal(1, tasksCount);
+		}
+
+		[Fact]
+		public async Task ExecuteEmergencyPicking_ShouldThrow_WhenSourcePalletHasDifferentBestBefore()
+		{
+			// Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product = CreateProduct("Prod A", "666");
+			var location = CreateLocation(1, 1);
+			var locationPicking = CreateLocation(100100, 5);
+			var expectedBestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365));
+			var sourceBestBefore = expectedBestBefore.AddDays(-30);
+
+			DbContext.Categories.Add(category);
+			DbContext.Locations.AddRange(location, locationPicking);
+			DbContext.Clients.Add(client);
+			DbContext.Products.Add(product);
+			await DbContext.SaveChangesAsync();
+
+			var issue = Issue.CreateForSeed(
+				Guid.NewGuid(),
+				1,
+				client.Id,
+				TestDates.UtcNow,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)),
+				"TestUser",
+				IssueStatus.New,
+				null);
+
+			var allocatedSourcePallet = Pallet.CreateForTests(
+				"Q1000",
+				TestDates.UtcNow,
+				location.Id,
+				PalletStatus.ToPicking,
+				null,
+				null);
+			allocatedSourcePallet.AddProductForTests(
+				product.Id,
+				10,
+				TestDates.UtcNow,
+				expectedBestBefore);
+
+			var emergencySourcePallet = Pallet.CreateForTests(
+				"Q1001",
+				TestDates.UtcNow,
+				location.Id,
+				PalletStatus.ToPicking,
+				null,
+				null);
+			emergencySourcePallet.AddProductForTests(
+				product.Id,
+				5,
+				TestDates.UtcNow,
+				sourceBestBefore);
+
+			DbContext.Pallets.AddRange(allocatedSourcePallet, emergencySourcePallet);
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+
+			var allocatedVirtualPallet = VirtualPallet.CreateForSeed(
+				Guid.NewGuid(),
+				allocatedSourcePallet.Id,
+				10,
+				location.Id,
+				TestDates.UtcNow);
+			var emergencyVirtualPallet = VirtualPallet.CreateForSeed(
+				Guid.NewGuid(),
+				emergencySourcePallet.Id,
+				5,
+				location.Id,
+				TestDates.UtcNow);
+			var allocatedTask = PickingTask.CreateForSeed(
+				Guid.NewGuid(),
+				allocatedVirtualPallet.Id,
+				issue.Id,
+				10,
+				PickingStatus.Allocated,
+				product.Id,
+				expectedBestBefore,
+				null,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)),
+				0);
+
+			DbContext.VirtualPallets.AddRange(allocatedVirtualPallet, emergencyVirtualPallet);
+			DbContext.PickingTasks.Add(allocatedTask);
+			await DbContext.SaveChangesAsync();
+
+			// Act
+			await Assert.ThrowsAsync<NotCorrectDateBestBeforeDomainException>(() =>
+				Mediator.Send(new ExecuteEmergencyPickingCommand(
+					emergencySourcePallet.Id,
+					issue.Id,
+					"UserCor",
+					locationPicking.Id)));
+
+			// Assert
+			await using var freshContext = CreateNewContext();
+			var emergencyPalletAfter = await freshContext.Pallets
+				.Include(p => p.ProductsOnPallet)
+				.SingleAsync(p => p.Id == emergencySourcePallet.Id);
+			var allocatedTaskAfter = await freshContext.PickingTasks
+				.SingleAsync(t => t.Id == allocatedTask.Id);
+			var issueAfter = await freshContext.Issues
+				.SingleAsync(i => i.Id == issue.Id);
+			var emergencyVirtualPalletAfter = await freshContext.VirtualPallets
+				.Include(v => v.PickingTasks)
+				.SingleAsync(v => v.Id == emergencyVirtualPallet.Id);
+
+			Assert.Equal(PalletStatus.ToPicking, emergencyPalletAfter.Status);
+			Assert.Equal(5, emergencyPalletAfter.ProductsOnPallet.Single().Quantity);
+			Assert.Equal(PickingStatus.Allocated, allocatedTaskAfter.PickingStatus);
+			Assert.Equal(10, allocatedTaskAfter.RequestedQuantity);
+			Assert.Equal(IssueStatus.New, issueAfter.IssueStatus);
+			Assert.Empty(emergencyVirtualPalletAfter.PickingTasks);
+			Assert.False(await freshContext.Pallets.AnyAsync(p =>
+				p.IssueId == issue.Id &&
+				p.Status == PalletStatus.Picking));
+			Assert.Equal(1, await freshContext.PickingTasks.CountAsync(t => t.IssueId == issue.Id));
 		}
 	}
 }

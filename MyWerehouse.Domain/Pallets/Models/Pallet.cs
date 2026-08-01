@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Inventories.Events;
+using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
+using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
@@ -102,7 +104,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void ReplaceProducts(List<ProductOnPallet> updatedProducts)
 		{
 			var toRemove = ProductsOnPallet
-				.Where(existing => updatedProducts.All(d => d.ProductId != existing.ProductId))
+				.Where(existing => updatedProducts.All(d
+				=> d.ProductId != existing.ProductId || d.BestBefore != existing.BestBefore))
 				.ToList();
 			foreach (var item in toRemove)
 			{
@@ -111,7 +114,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			foreach (var pop in updatedProducts)
 			{
 				var existing = ProductsOnPallet
-					.SingleOrDefault(x => x.ProductId == pop.ProductId);
+					.SingleOrDefault(x => x.ProductId == pop.ProductId && x.BestBefore == pop.BestBefore);
 
 				if (existing == null)
 				{
@@ -120,7 +123,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				else
 				{
 					existing.SetQuantity(pop.Quantity);
-					existing.SetBestBefore(pop.BestBefore);
+					//existing.SetBestBefore(pop.BestBefore);
 				}
 			}
 		}
@@ -134,11 +137,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void AddOrIncreaseProductQuantity(Guid productId, int quantity, DateTime createdAt, DateOnly? bestBefore)
 		{
-			var existingProduct = ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId);
+			var existingProduct = ProductsOnPallet.SingleOrDefault(p => p.ProductId == productId
+			&& p.BestBefore == bestBefore);
 			if (existingProduct != null)
 			{
-				if (existingProduct.BestBefore != bestBefore)
-					throw new TwoDateOneProductOnPalletDomainException(Id);
 				existingProduct.IncreaseQuantity(quantity);
 				return;
 			}
@@ -284,12 +286,25 @@ namespace MyWerehouse.Domain.Pallets.Models
 				this.ChangeStatus(PalletStatus.ReversePicking);
 			}
 		}
-		public ProductOnPallet GetProductOnPallet(Guid productId)
+		public ProductOnPallet GetProductOnPallet(Guid productId, DateOnly? bestBefore)
 		{
-			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId);
+			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId
+			&&(bestBefore == null|| p.BestBefore >= bestBefore));
 			if (product.Count() > 1)
 			{
-				throw new MultipleProductsOnPalletDomainException(Id, PalletNumber, productId);
+				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
+			}
+			if (!product.Any()) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
+
+			return product.First();
+		}
+		public ProductOnPallet GetProductOnPalletForReverse(Guid productId, DateOnly? bestBefore)
+		{
+			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId
+			&& p.BestBefore == bestBefore);
+			if (product.Count() > 1)
+			{
+				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
 			}
 			if (!product.Any()) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
 
@@ -320,18 +335,28 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public List<StockItemChange> CalculateQuantityDelta(IEnumerable<ProductOnPallet> updatedProducts)//It must be done before update
 		{
 			var result = new List<StockItemChange>();
-			var updatedById = updatedProducts.ToDictionary(x => x.ProductId, x => x.Quantity);
-			var allIds = ProductsOnPallet.Select(x => x.ProductId).Union(updatedProducts.Select(p => p.ProductId));
-			foreach (var id in allIds)
+
+			var oldByProduct = ProductsOnPallet
+				.GroupBy(x => x.ProductId)
+				.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
+
+			var newByProduct = updatedProducts
+				.GroupBy(x => x.ProductId)
+				.ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
+
+			var productIds = oldByProduct.Keys.Union(newByProduct.Keys);
+
+			foreach (var productId in productIds)
 			{
-				var oldQty = ProductsOnPallet.FirstOrDefault(p => p.ProductId == id)?.Quantity ?? 0;
-				updatedById.TryGetValue(id, out var newQty);
-				var delta = newQty - oldQty;
+				oldByProduct.TryGetValue(productId, out var oldQuantity);
+				newByProduct.TryGetValue(productId, out var newQuantity);
+
+				var delta = newQuantity - oldQuantity;
+
 				if (delta != 0)
-				{
-					result.Add(new StockItemChange(id, delta));
-				}
+					result.Add(new StockItemChange(productId, delta));
 			}
+
 			return result;
 		}
 
@@ -353,7 +378,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 					g.Key,
 					g.Sum(q => q.Quantity)));
 		}
-
 
 		//Nowe metody - logika  application -> domain
 		public static Pallet CreatePickingPallet(
@@ -377,6 +401,70 @@ namespace MyWerehouse.Domain.Pallets.Models
 				this.ChangeStatus(PalletStatus.Archived);
 			}
 			this.AddHistory(ReasonForPallet.Picking, userId, snapshot);
+		}
+		public ProductOnPallet EnsureCanBeUsedForPicking()
+		{
+			if (Status != PalletStatus.Available &&
+				Status != PalletStatus.InStock &&
+				Status != PalletStatus.ToPicking)
+			{
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+			}
+
+			if (ProductsOnPallet.Count > 1)
+			{
+				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
+			}
+			var product = ProductsOnPallet.SingleOrDefault() ??
+				throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber);
+
+			if (product.Quantity <= 0)
+				throw new InsufficientQuantityDomainException(Id, PalletNumber);
+			return product;
+		}
+		public void IsCorrectDate(DateOnly? bestBefore)
+		{
+			if (bestBefore != null)
+			{
+				if (ProductsOnPallet.Single().BestBefore < bestBefore)
+				{
+					throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
+				}
+			}
+			//else if (bestBefore == null)
+			//{
+			//	throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
+			//}
+		}
+		public (int,int) AddReversePickedProduct(Guid productId, DateOnly? bestBefore,
+			int quantity, int cartonsPerPallet, string userId, string snapshot)
+		{
+			if(ProductsOnPallet.Count != 1)
+			{
+				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
+			}
+			var productOnaPallet = ProductsOnPallet.Single();
+			if (productOnaPallet.ProductId != productId)
+			{
+				throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
+			}
+			if(bestBefore != null)
+			{
+				if(productOnaPallet.BestBefore != bestBefore)
+				{
+					throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
+				}
+			}
+			if (productOnaPallet.Quantity >= cartonsPerPallet)
+			{
+				throw new InvalidQuantityDomainException(Id);
+			}
+			var freeSpace = cartonsPerPallet - productOnaPallet.Quantity;
+			var addedQuantity = Math.Min(freeSpace, quantity);
+			productOnaPallet.IncreaseQuantity(addedQuantity);
+			quantity -= addedQuantity;
+			AddHistory(ReasonForPallet.ReversePicking, userId, snapshot);
+			return(quantity, addedQuantity);
 		}
 	}
 }

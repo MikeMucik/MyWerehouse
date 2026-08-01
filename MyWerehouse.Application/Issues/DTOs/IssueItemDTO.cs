@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,6 @@ namespace MyWerehouse.Application.Issues.DTOs
 	{	
 		public Guid ProductId { get; init; }
 		public int Quantity { get; init; }
-		public DateOnly BestBefore { get; init; }			
+		public DateOnly? BestBefore { get; init; }			
 	}
 }

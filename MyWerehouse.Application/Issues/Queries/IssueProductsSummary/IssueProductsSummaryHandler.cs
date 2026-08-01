@@ -41,7 +41,7 @@ namespace MyWerehouse.Application.Issues.Queries.IssueProductsSummary
 			
 			if (dto == null)
 			{
-				return AppResult<SummaryProductsIssueDTO>.Fail($"Zamówienie o numerze {query.IssueId} nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<SummaryProductsIssueDTO>.Fail($"Issue {query.IssueId} was not found.");
 			}
 			return AppResult<SummaryProductsIssueDTO>.Success(dto);
 		}

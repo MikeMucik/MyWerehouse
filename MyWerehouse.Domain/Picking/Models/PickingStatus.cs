@@ -8,11 +8,11 @@ namespace MyWerehouse.Domain.Picking.Models
 {
 	public enum PickingStatus
 	{
-		Available = 0,
-		Allocated = 1,
-		Picked = 2,
-		CorrectionPicking = 3,
-		Cancelled = 4,
-		PickedPartially = 5,
+		Available = 0, //handPickingTasks
+		Allocated = 1, //PlannedPickingTasks
+		Picked = 2,//wykonany task
+		CorrectionPicking = 3,//task po redukcji
+		Cancelled = 4,//anulowany task
+		PickedPartially = 5,//pobrany częściowo 
 	}
 }

@@ -4,106 +4,94 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Azure.Core;
-using MediatR;
 using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Picking.Services;
-using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.Issues.IssueServices
 {
 	public class AssignProductToIssueAsyncService(
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
 		IGetProductCountService getProductCountService,
-		IGetNumberPalletsAndRestService getNumberPalletsAndRestService,
 		IVirtualPalletRepo virtualPalletRepo,
 		IProductRepo productRepo,
 		IPalletRepo palletRepo) : IAssignProductToIssueService
 	{
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IGetProductCountService _getProductCountService = getProductCountService;
-		private readonly IGetNumberPalletsAndRestService _getNumberPalletsAndRestService = getNumberPalletsAndRestService;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
-
-		public async Task<AssignProductToIssueResult> AssignProductToIssue(Issue issue, IssueItemDTO issueLine, IssueAllocationPolicy policy,
-			List<Pallet>? reusablePalletsForProduct, string userId)
+		public async Task<AssignProductToIssueResult> AssignGoodsToIssue(Issue issue, IssueItemDTO issueItem, IssueAllocationPolicy policy,
+			List<Pallet>? oldAssignedPallets, string userId)
 		{
 			issue.BeginAllocation();
-			var product = await _productRepo.GetProductByIdAsync(issueLine.ProductId);
+			var product = await _productRepo.GetProductByIdAsync(issueItem.ProductId);
 			if (product == null)
 			{
-				return AssignProductToIssueResult.Fail("Wskazany produkt nie istnieje.", issueLine.ProductId);
+				return AssignProductToIssueResult.Fail("The specified product does not exist.", issueItem.ProductId);
 			}
-			var productSKU = product.SKU;
-			reusablePalletsForProduct ??= [];//protected null
-			var oldCount = reusablePalletsForProduct.Count;
-
+			oldAssignedPallets ??= [];//pełne palety z wskazanym produktem anulowane przy modyfikacji zlecenia, ale trzymane tymczasowo tylko do tej operacji
+			var oldPalletCount = oldAssignedPallets.Count;
 			//1. dostępność towaru	- walidacja
-			var totalAvailable = await _getProductCountService.GetProductCountAsync(issueLine.ProductId, issueLine.BestBefore);
-			if (issueLine.Quantity > totalAvailable)
+			var totalAvailable = await _getProductCountService.GetProductCountAsync(issueItem.ProductId, issueItem.BestBefore);
+			if (issueItem.Quantity > totalAvailable)
 			{
-				return AssignProductToIssueResult.Fail($"Nie wystarczająca ilość produktu o numerze {issueLine.ProductId}. Asortyment nie został dodany do zlecenia."
-						, issueLine.ProductId, product.SKU, issueLine.Quantity, totalAvailable);
+				return AssignProductToIssueResult.Fail($"Insufficient quantity of product {issueItem.ProductId}. The product was not added to the issue."
+						, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
 			}
-			//2. Oblicz pełne palety, Przydzielanie pełnych lub/z datą palet
+			//2. Przydzielanie pełnych lub/z datą palet
 			var requiredFullPallets = 0;
-			var palletAssigned = new List<Pallet>();
+			var palletFullSelected = new List<Pallet>();
 			var missingPalletsCount = 0;
 			switch (policy)
 			{
 				case IssueAllocationPolicy.FullPalletFirst:
-					requiredFullPallets = await _getNumberPalletsAndRestService.GetBackOnlyFullPallets(issueLine.ProductId, issueLine.Quantity);
-					missingPalletsCount = requiredFullPallets - oldCount;
-					palletAssigned = await SelectAndAssignFullPallets(issue, issueLine, reusablePalletsForProduct, requiredFullPallets, missingPalletsCount, userId);
+					requiredFullPallets = product.CalculateFullPalletCount(issueItem.Quantity);
+					missingPalletsCount = requiredFullPallets - oldPalletCount;
+					palletFullSelected = await SelectFullPallets(product, issueItem.BestBefore, oldAssignedPallets, requiredFullPallets, missingPalletsCount);
 					break;
 
 				default:
 					return AssignProductToIssueResult.Fail($"Allocation policy {policy} is not supported.");
 			}
-			var quantityFromPallets = palletAssigned.Sum(p => p.GetProductQuantity(issueLine.ProductId));
-			var rest = issueLine.Quantity - quantityFromPallets;
-			if (rest < 0)
-				return AssignProductToIssueResult.Fail("Allocated more product than requested.");
+			var quantityFromPallets = palletFullSelected.Sum(p => p.GetProductQuantity(issueItem.ProductId));
+			var rest = issueItem.Quantity - quantityFromPallets;// ta linijka potrzebna
+			if (rest < 0) return AssignProductToIssueResult.Fail("Allocated more product than requested.");
 			//3. pobierz dostępne virtualPallet;
-			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(issueLine.ProductId, issueLine.BestBefore);
+			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(issueItem.ProductId, issueItem.BestBefore);
 			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 			if (rest > 0)
 			{
-				var newPickingTaskFromRest = await _addPickingTaskToIssueService.AddPickingTaskToIssue(
-					palletAssigned, availableVirtualPalletsQuery, issue,
-					issueLine.ProductId, rest, issueLine.BestBefore, userId);
+				var newPickingTaskFromRest = await _addPickingTaskToIssueService.AddPickingTasksToIssue(
+					palletFullSelected, availableVirtualPalletsQuery, issue,
+					issueItem.ProductId, rest, issueItem.BestBefore, userId);
 				if (newPickingTaskFromRest.Success is false)
 				{
-					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueLine.ProductId, product.SKU, issueLine.Quantity, totalAvailable);
+					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
 				}
 			}
-			return AssignProductToIssueResult.Ok($"Towar {productSKU} został dołączony do zlecenia.", issueLine.ProductId, product.SKU, palletAssigned);
+			issue.AssignPallets(palletFullSelected, userId);
+			return AssignProductToIssueResult.Ok($"Product {product.SKU} was added to the issue.", issueItem.ProductId, product.SKU, palletFullSelected);
 		}
 		//pełne palety first
-		private async Task<List<Pallet>> SelectAndAssignFullPallets(Issue issue, IssueItemDTO issueLine, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount, string userId)
+		private async Task<List<Pallet>> SelectFullPallets(Product product, DateOnly? bestBefore, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)
 		{
 			List<Pallet> missingPallets = [];
 			if (missingPalletsCount > 0)
 			{
-				var product = await _productRepo.GetProductByIdAsync(issueLine.ProductId);//checked in upper
-				missingPallets = await _palletRepo.GetAvailableFullPallets(issueLine.ProductId, product!.CartonsPerPallet, issueLine.BestBefore, missingPalletsCount);
+				missingPallets = await _palletRepo.GetMissingFullPallets(product.Id, product!.CartonsPerPallet, bestBefore, missingPalletsCount);
 			}
-			List<Pallet> allAvailablePallets = [.. reusablePalletsForProduct
+			// Czy tą operację lepiej zrobic na Dictionary ?
+			List<Pallet> allNecessaryPallets = [.. reusablePalletsForProduct
 				.Concat(missingPallets)
 				.DistinctBy(p => p.Id)
 				.Take(requiredFullPallets)];
-			foreach (var pallet in allAvailablePallets)
-			{
-				var snapShot = pallet.Location.ToSnapshot();
-				pallet.ReserveToIssue(issue.Id, userId, snapShot);
-			}
-			return allAvailablePallets;
+			return allNecessaryPallets;
 		}
 		//Obecnie wspierana jest polityka FullPalletFirst; pozostałe strategie mogą zostać dodane jako osobne polityki alokacji.
 	}

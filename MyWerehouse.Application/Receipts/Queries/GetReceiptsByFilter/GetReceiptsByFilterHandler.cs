@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter
 			var result = await receiptsOrdered
 				.ProjectTo<ReceiptSimplyDTO>(_mapper.ConfigurationProvider)
 				.ToPagedResultAsync(request.CurrentPage,request.PageSize,ct);
-			if (result.TotalCount == 0) return AppResult<PagedResult<ReceiptSimplyDTO>>.Fail($"Brak przyjęć do wyświetlenia.", ErrorType.NotFound);
+			if (result.TotalCount == 0) return AppResult<PagedResult<ReceiptSimplyDTO>>.Fail($"No receipts to display.");
 			return AppResult<PagedResult<ReceiptSimplyDTO>>.Success(result);
 		}
 	}

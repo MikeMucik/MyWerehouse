@@ -17,18 +17,18 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			var product = await _productRepo.GetProductByIdAsync(productId);
 			if (product == null)
 			{
-				return ComparePlanToPreparedResult.Fail("Produkt nie nie istnieje.");
+				return ComparePlanToPreparedResult.Fail("Product does not exist.");
 			}
 			var sku = product.SKU;
 			var issue = await _issueRepo.GetIssueByIdAsync(issueId);
 			if (issue == null)
 			{
-				return ComparePlanToPreparedResult.Fail("Brak zlecenia wydania");
+				return ComparePlanToPreparedResult.Fail("Issue was not found.");
 			}
 			var issueItemForProduct = issue.IssueItems.FirstOrDefault(p => p.ProductId == productId);
 			if (issueItemForProduct == null)
 			{
-				return ComparePlanToPreparedResult.Fail("Produkt nie występuje w zleceniu.", productId, sku);
+				return ComparePlanToPreparedResult.Fail("Product is not included in the issue.", productId, sku);
 			}
 			var dateBB = issueItemForProduct.BestBefore;
 
@@ -37,21 +37,21 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			{
 				if (pallet.Status != Domain.Pallets.Models.PalletStatus.ToIssue)
 				{
-					return ComparePlanToPreparedResult.Fail("Nie wszystkie palety do załadunku mają odpowiedni status.");
+					return ComparePlanToPreparedResult.Fail("Not all pallets to be loaded have the required status.");
 				}
 			}
 			var quantityFromPallets = await pallets
 				.SelectMany(p => p.ProductsOnPallet)
-				.Where(pp => pp.ProductId == productId && pp.BestBefore == dateBB)
+				.Where(pp => pp.ProductId == productId &&(dateBB == null || pp.BestBefore >= dateBB))
 				.SumAsync(pp => pp.Quantity);
 
 			if (issueItemForProduct.Quantity == quantityFromPallets)
 			{
-				return ComparePlanToPreparedResult.Ok("Towar się zgadza.", productId, sku);
+				return ComparePlanToPreparedResult.Ok("Prepared product matches the issue.", productId, sku);
 			}
 			else
 			{
-				return ComparePlanToPreparedResult.Fail($"Towar się nie zgadza. Zażądano {issueItemForProduct.Quantity} z BB {dateBB} a przygotowano {quantityFromPallets}. Sprawdź ilość oraz daty BB na paletach.", productId, sku, issueItemForProduct.Quantity, quantityFromPallets);
+				return ComparePlanToPreparedResult.Fail($"Prepared product does not match the issue. Requested {issueItemForProduct.Quantity} with best-before date {dateBB}, but prepared {quantityFromPallets}. Check pallet quantities and best-before dates.", productId, sku, issueItemForProduct.Quantity, quantityFromPallets);
 			}
 		}
 	}

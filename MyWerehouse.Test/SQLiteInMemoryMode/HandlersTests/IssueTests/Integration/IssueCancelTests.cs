@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -247,7 +247,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Assert – Result
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 
 		}
 		[Fact]
@@ -309,7 +309,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				ProductId = product.Id,
 				RampNumber = 100100
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
 			var pickingPallet = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q0001");
@@ -323,7 +328,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert 3
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);

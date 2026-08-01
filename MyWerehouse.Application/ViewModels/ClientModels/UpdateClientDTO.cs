@@ -32,16 +32,16 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 		{
 			RuleFor(c => c.Name)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - nazwa");
+				.WithMessage("Client name is required.");
 			RuleFor(c => c.Email)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - email");
+				.WithMessage("Client email is required.");
 			RuleFor(c => c.FullName)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - pełna nazwa");
+				.WithMessage("Client full name is required.");
 			RuleFor(c => c.Addresses)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - adress");
+				.WithMessage("At least one client address is required.");
 			RuleForEach(c => c.Addresses)
 				.SetValidator(addressValidator)
 				.When(a => a.Addresses != null && a.Addresses.Count > 0);

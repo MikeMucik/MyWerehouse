@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPalletByPalletNumber
 			var pallet = await _palletRepo.GetPalletByPalletNumberAsync(request.PalletNumber);
 			if(pallet == null)
 			{
-				return AppResult<PalletSimplyDTO>.Fail("Paleta nie istnieje.", ErrorType.NotFound);
+				return AppResult<PalletSimplyDTO>.Fail("Pallet does not exist.");
 			}
 			var palletDTO = _mapper.Map<PalletSimplyDTO>(pallet);
 			return AppResult<PalletSimplyDTO>.Success(palletDTO);

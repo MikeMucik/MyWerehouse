@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -385,7 +385,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			};
 			//Act&Assert
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt)));
-			Assert.Contains("Paleta w przyjęciu może mieć tylko jeden rodzaj towaru.", ex.Message);
+			Assert.Contains("A received pallet may contain only one product type.", ex.Message);
 		}
 		[Fact]
 		public async Task UpdateReceipt_ShouldChangeProductAndQuantity_WhenProductOnPalletIsChanged()
@@ -506,7 +506,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains($" nie zostało znalezione.", result.Error);
+			Assert.Contains($"Receipt was not found.", result.Error);
 		}
 		[Fact]
 		public async Task UpdateReceipt_ShouldAddAndRemovePallet_WhenNewPalletWithoutIdIsProvided()
@@ -635,7 +635,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			};
 			//Act&Assert
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdateReceiptCommand(id, updatingReceipt)));
-			Assert.Contains("Przyjęcie musi zawierać przyjęte palety.", ex.Message);
+			Assert.Contains("Receipt must contain at least one pallet.", ex.Message);
 		}
 	}
 }

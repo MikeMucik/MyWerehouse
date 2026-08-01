@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -159,7 +159,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			//Act & Assert
 			var result = await _createReversePickingTask.CreateReversePicking(sourcePallet1.Id, "UserReverse");
 			DbContext.SaveChanges();
-			Assert.Contains("Brak alokacji dla palety. Paleta nie do dekompletacji.", result.Message);
+			Assert.Contains("The pallet has no allocation and cannot be reverse-picked.", result.Message);
 		}
 	}
 }

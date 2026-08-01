@@ -25,6 +25,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Issues.Remove(issue);
 		}
+		
 		public async Task<Issue?> GetIssueByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Issues

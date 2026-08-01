@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,14 +42,14 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.Equal(1, result.Result);
-			Assert.Contains("Dodano lokalizacje.", result.Message);
+			Assert.Contains("Location added.", result.Message);
 			var locationId = 1;
 			//Act
 			var resultDeleting = await _locationService.DeleteLocationServiceAsync(locationId);
 			//Assert
 			Assert.NotNull(resultDeleting);
 			Assert.True(resultDeleting.IsSuccess);
-			Assert.Contains("Operacja zakończyła się sukcesem", resultDeleting.Message);
+			Assert.Contains("Operation completed successfully.", resultDeleting.Message);
 		}
 
 		[Fact]
@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.Equal(1, result.Result);
-			Assert.Contains("Dodano lokalizacje.", result.Message);
+			Assert.Contains("Location added.", result.Message);
 			var locationId = 1;
 
 			//Act
@@ -86,7 +86,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			//Assert
 			Assert.NotNull(resultDeleting);
 			Assert.False(resultDeleting.IsSuccess);
-			Assert.Contains("Miejsce paletowe nie jest puste nie można skasować", resultDeleting.Error);
+			Assert.Contains("The pallet location is not empty and cannot be deleted.", resultDeleting.Error);
 		}
 	}
 }

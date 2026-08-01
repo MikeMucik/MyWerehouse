@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +16,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Application.Picking.Queries.GetListToPickingFlat;
 using MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree;
 using MyWerehouse.Domain.Services;
+using System.Collections.ObjectModel;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.PickingPalletServiceUnit
 {
@@ -410,27 +411,29 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 
 			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet.Id, 100,
 				location.Id, new DateTime(2025, 8, 12));
+			var requiredBestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(6));
 			var smallestTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 5,
-				PickingStatus.Allocated, product.Id, null, null,
+				PickingStatus.Allocated, product.Id, requiredBestBefore, null,
 				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
 			var middleTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 8,
-				PickingStatus.Allocated, product.Id, null, null,
+				PickingStatus.Allocated, product.Id, requiredBestBefore, null,
 				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
 			var largestTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, 10,
-				PickingStatus.Allocated, product.Id, null, null,
+				PickingStatus.Allocated, product.Id, requiredBestBefore, null,
 				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5)), 0);
 
 			DbContext.VirtualPallets.Add(virtualPallet);
 			DbContext.PickingTasks.AddRange(smallestTask, middleTask, largestTask);
 			await DbContext.SaveChangesAsync();
-
 			var service = new PickingDomainService();
-
-			// Act - reduce 5 from the smallest task and 6 from the next one
-			service.ReduceAllocation(
-				[smallestTask, middleTask, largestTask], 11, "user1", TestDates.UtcNow);
+			// Act - reduce 5 from the smallest task and 6 from the next one			
+			var result = service.ReallocateForEmergencyPicking(
+				[smallestTask, middleTask, largestTask]
+				, 11, "user1", TestDates.UtcNow, issueId, product.Id, pallet.Id, pallet.PalletNumber);
 
 			// Assert
+			Assert.Equal(11, result.QuantityToPick);
+			Assert.Equal(requiredBestBefore, result.BestBefore);
 			Assert.Equal(PickingStatus.Cancelled, smallestTask.PickingStatus);
 			Assert.Equal(0, smallestTask.RequestedQuantity);
 			Assert.Equal(PickingStatus.CorrectionPicking, middleTask.PickingStatus);

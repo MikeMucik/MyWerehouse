@@ -19,85 +19,76 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 		IVirtualPalletRepo virtualPalletRepo,
 		WerehouseDbContext werehouseDbContext,
 		IIssueRepo issueRepo,
-		IProcessPickingActionService processPickingActionService,
+		IExecuteProcessPickingService processPickingActionService,
 		IPickingDomainService pickingDomainService,
 		IDateTimeProvider dateTimeProvider,
-		IPickingTaskRepo pickingTaskRepo
+		IPickingTaskRepo pickingTaskRepo,
+		IAddPickingTaskToIssueService addPickingTaskToIssueService
 			) : IRequestHandler<ExecuteHandPickingCommand, AppResult<ProcessPickingActionResult>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly IProcessPickingActionService _processPickingActionService = processPickingActionService;
+		private readonly IExecuteProcessPickingService _processPickingActionService = processPickingActionService;
 		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
+		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
+
 
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteHandPickingCommand command, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
-			if (command.Quantity <= 0)
-			{
-				return AppResult<ProcessPickingActionResult>.Fail("Nie możesz pobrać ujemnej wartości.", ErrorType.Conflict);
-			}
 			var issue = await _issueRepo.GetIssueByIdAsync(command.IssueId);
 			if (issue == null)
 			{
-				return AppResult<ProcessPickingActionResult>.Fail($"Zamówienie o numerze {command.IssueId} nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<ProcessPickingActionResult>.Fail($"Issue {command.IssueId} was not found.");
 			}
+
 			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource);// W hand picking paleta źródłowa jest wskazywana ręcznie przez biuro.
 			if (pallet == null)
 			{
-				return AppResult<ProcessPickingActionResult>.Fail($"Paleta o numerze {command.PalletIdSource} nie istnieje.", ErrorType.NotFound);
+				return AppResult<ProcessPickingActionResult>.Fail($"Pallet {command.PalletIdSource} does not exist.");
 			}
-			if (pallet.ProductsOnPallet.Count > 1)
-			{
-				return AppResult<ProcessPickingActionResult>.Fail("Zadania nie można zrealizować, paleta nie nadaje się do pobrań.", ErrorType.Conflict);
-			}
-			var product = pallet.ProductsOnPallet.FirstOrDefault();
-			if (product == null || product.Quantity == 0)
-			{
-				return AppResult<ProcessPickingActionResult>.Fail($"Paleta {command.PalletIdSource} jest pusta.", ErrorType.Conflict);
-			}
-			var tasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, product.ProductId);
-			var pickingHandTask = _pickingDomainService.GetSingleHandPickingTask(tasks, command.IssueId, product.ProductId);
+			var palletItem = pallet.EnsureCanBeUsedForPicking();
 
-			if (command.Quantity > (pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity))
-			{
-				return AppResult<ProcessPickingActionResult>.Fail("Chcesz pobrać więcej niż potrzeba.", ErrorType.Conflict);
-			}
-			if (pickingHandTask.PickingStatus == PickingStatus.Picked)
-			{
-				return AppResult<ProcessPickingActionResult>.Fail("Zapotrzebowania na ten asortyment już zrealizowane", ErrorType.Conflict);
-			}
+			var tasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, palletItem.ProductId);
+
+			var pickingHandTask = _pickingDomainService.GetSingleHandPickingTask(tasks, command.IssueId, palletItem.ProductId);//sprawdzenie czy został ainicjalizowana ręczna kompletacja
+
+			pickingHandTask.BeginExecuteHandPicking(command.PickedQuantity);
+			pallet.IsCorrectDate(pickingHandTask.BestBefore);
 			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(command.PalletIdSource);
 			if (virtualPallet == null)
 			{
-				virtualPallet = VirtualPallet.Create(pallet.Id, product.Quantity, pallet.LocationId, now);
+				virtualPallet = VirtualPallet.Create(pallet.Id, palletItem.Quantity, pallet.LocationId, now);
 				pallet.AssignToPicking(command.UserId, pallet.Location.ToSnapshot());
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			}
-			var availableQuantity = virtualPallet?.RemainingQuantity ?? product.Quantity;
-			if (command.Quantity > availableQuantity)
+			var availableQuantity = virtualPallet.RemainingQuantity;// ?? product.Quantity;//wydaje mi się że to zakomentowane tu zbędne
+			if (command.PickedQuantity > availableQuantity)
 			{
-				return AppResult<ProcessPickingActionResult>.Fail("Zadania nie można zrealizować, mniej dostępnego towaru na palecie niż chęć pobrania", ErrorType.Conflict);
+				return AppResult<ProcessPickingActionResult>.Fail("The pallet contains less product than the requested picking quantity.", ErrorType.Conflict);
 			}
-			ArgumentNullException.ThrowIfNull(virtualPallet);
-			pickingHandTask.SetVirtualPallet(virtualPallet.Id);
-			var completion = PickingCompletion.Full;
-			if (command.Quantity < pickingHandTask.RequestedQuantity - pickingHandTask.PickedQuantity)
+
+			var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, palletItem.ProductId, command.PickedQuantity, pickingHandTask.BestBefore, command.UserId);
+			if (!newPickingTaskInfo.Success)
 			{
-				completion = PickingCompletion.Partial;
+				return AppResult<ProcessPickingActionResult>.Fail(
+					newPickingTaskInfo.Message,
+					ErrorType.Conflict);
 			}
-			var resultProcessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, issue, product.ProductId, command.Quantity, command.UserId, pickingHandTask, completion, command.NumberRamp);
+			var newPickingTask = newPickingTaskInfo.PickingTask.Single();
+			var resultProcessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, newPickingTask, command.PickedQuantity, command.UserId, command.RampNumber);
 			if (!resultProcessPicking.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(resultProcessPicking.Message, ErrorType.Conflict);
 			}
+			pickingHandTask.CompleteHandPicking(command.PickedQuantity);
+			issue.CompletePicking();
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<ProcessPickingActionResult>.Success(resultProcessPicking, "Towar dołączono do zlecenia");
+			return AppResult<ProcessPickingActionResult>.Success(resultProcessPicking, "Product was added to the issue.");
 		}
 	}
-
 }

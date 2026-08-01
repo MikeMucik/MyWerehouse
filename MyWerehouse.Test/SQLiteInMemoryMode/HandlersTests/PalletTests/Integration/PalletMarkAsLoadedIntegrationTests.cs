@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -57,7 +57,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotNull(result.Result);
-			Assert.Contains("Paleta Q0001 załadowana.", result.Message);
+			Assert.Contains("Pallet Q0001 was loaded.", result.Message);
 			Assert.Equal(PalletStatus.Loaded, result.Result.NewStatus);
 			var history = DbContext.HistoryPallet.FirstOrDefault(p => p.PalletId == pallet.Id);
 			Assert.NotNull(history);
@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotNull(result.Result);
-			Assert.Contains("Paleta Q0001 załadowana.", result.Message);
+			Assert.Contains("Pallet Q0001 was loaded.", result.Message);
 			Assert.Equal(PalletStatus.Loaded, result.Result.NewStatus);
 		}
 		[Fact]

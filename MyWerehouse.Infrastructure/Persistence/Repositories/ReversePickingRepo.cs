@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,26 +18,37 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public void AddReversePicking(ReversePickingTask reversePicking)
 		{
-			 _werehouseDbContext.Add(reversePicking);
+			_werehouseDbContext.Add(reversePicking);
 		}
-		
+
 		public async Task<bool> ExistsForPickingPalletAsync(Guid palletId)
 		{
-			 if(await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r=>r.PickingPalletId == palletId) != null) return true ; return false;
-		}		
+			if (await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r => r.PickingPalletId == palletId) != null) return true; return false;
+		}
 
 		public async Task<ReversePickingTask?> GetReversePickingAsync(Guid reversePickingId)
 		{
-			return await _werehouseDbContext.ReversePickings.FirstOrDefaultAsync(r => r.Id == reversePickingId);
+			return await _werehouseDbContext.ReversePickings
+				.Include(p => p.PickingTask)
+					.ThenInclude(p => p.Issue)
+				.Include(p => p.PickingTask)
+					.ThenInclude(p => p.VirtualPallet!)
+						.ThenInclude(p => p.Pallet)
+							.ThenInclude(p=>p.ProductsOnPallet)
+				.Include(p => p.PickingTask)
+					.ThenInclude(p => p.VirtualPallet!)
+						.ThenInclude(p => p.Pallet)
+							.ThenInclude(p => p.Location)
+					.FirstOrDefaultAsync(r => r.Id == reversePickingId);
 		}
 
 		public IQueryable<ReversePickingTask> GetReversePickings()
 		{
-			return  _werehouseDbContext.ReversePickings.Where(r=>r.Status != ReversePickingStatus.Completed);
+			return _werehouseDbContext.ReversePickings.Where(r => r.Status != ReversePickingStatus.Completed);
 		}
 
 		public Task<List<Guid>> GetPalletsIdsByDate(DateOnly start, DateOnly end)
-		{			
+		{
 			var task = _werehouseDbContext.ReversePickings.Where(r => r.DateMade >= start && r.DateMade <= end);
 			var palletIds = task
 				.Select(r => r.PickingPalletId)

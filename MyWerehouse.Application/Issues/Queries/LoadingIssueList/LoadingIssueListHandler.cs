@@ -54,7 +54,7 @@ namespace MyWerehouse.Application.Issues.Queries.LoadingIssueList
 				}).FirstOrDefaultAsync(ct);
 			if (dto == null)
 			{
-				return AppResult<ListPalletsToLoadDTO>.Fail($"Zamówienie o numerze {request.IssueId} nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<ListPalletsToLoadDTO>.Fail($"Issue {request.IssueId} was not found.");
 			}
 			return AppResult<ListPalletsToLoadDTO>.Success(dto);
 		}

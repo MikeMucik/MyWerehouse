@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -222,7 +222,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			var fullPallet = 50;
 			DateOnly date = new DateOnly(2024,2,2);
 			//Act
-			var result =await _palletRepo.GetAvailableFullPallets(productId1, fullPallet, date, 1);
+			var result =await _palletRepo.GetMissingFullPallets(productId1, fullPallet, date, 1);
 			//Assert
 			Assert.NotNull(result);					
 			Assert.Single(result);			

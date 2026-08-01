@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -100,7 +100,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.NotNull(resultHandler);
 			Assert.True(resultHandler.IsSuccess);
 
-			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+			Assert.Contains("Pallet Q1010 was updated.", resultHandler.Message);
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Single(x => x.Id == pallet.Id);
@@ -228,7 +228,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.NotNull(resultHandler);
 			Assert.True(resultHandler.IsSuccess);
 
-			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+			Assert.Contains("Pallet Q1010 was updated.", resultHandler.Message);
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Single(x => x.Id == pallet.Id);
@@ -347,7 +347,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
 			//Assert
 			Assert.NotNull(resultHandler);
-			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+			Assert.Contains("Pallet Q1010 was updated.", resultHandler.Message);
 
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -427,7 +427,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
 			//Assert
 			Assert.NotNull(resultHandler);
-			Assert.Contains("Paleta Q1010 została zaktualizowana.", resultHandler.Message);
+			Assert.Contains("Pallet Q1010 was updated.", resultHandler.Message);
 
 			var result = DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -511,7 +511,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Assert
 			Assert.NotNull(resultHandler);
 			Assert.False(resultHandler.IsSuccess);
-			Assert.Contains("Wskazana paleta jest w wydaniu, nie można jej zmienić bez usunięcia jej z wydania.", resultHandler.Error);
+			Assert.Contains("The specified pallet belongs to an issue and cannot be updated until it is removed from the issue.", resultHandler.Error);
 		}
 
 
@@ -562,9 +562,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 					]
 			};
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(id, updatedPallet)));
-			Assert.Contains("Produkt na palecie musi mieć numer produktu", ex.Message);
-			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
-			Assert.Contains("Data do spożycia musi być późniejsza niż data dzisiejsza", ex.Message);
+			Assert.Contains("Product ID is required.", ex.Message);
+			Assert.Contains("Product quantity must be greater than zero.", ex.Message);
+			Assert.Contains("Best-before date must be later than today.", ex.Message);
 		}
 
 		[Fact]
@@ -612,8 +612,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 					]
 			};
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(id, updatedPallet)));
-			Assert.Contains("Paleta musi mieć status", ex.Message);
-			Assert.Contains("Paleta musi mieć lokalizację", ex.Message);
+			Assert.Contains("Pallet status is required.", ex.Message);
+			Assert.Contains("Pallet location is required.", ex.Message);
 		}
 	}
 }

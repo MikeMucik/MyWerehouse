@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -116,7 +116,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains("Brak", result.Error);
+			Assert.Contains("No pallets match the specified criteria.", result.Error);
 		}
 		[Fact]
 		public async Task GetPallet_ReturnFullInfo()

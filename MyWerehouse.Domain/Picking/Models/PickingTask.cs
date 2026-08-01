@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Events;
@@ -21,7 +24,7 @@ namespace MyWerehouse.Domain.Picking.Models
 		public Issue Issue { get; private set; } = null!;
 		public int RequestedQuantity { get; private set; }
 		public PickingStatus PickingStatus { get; private set; }
-		public Guid ProductId { get; private set; } 
+		public Guid ProductId { get; private set; }
 		public Product Product { get; private set; } = null!;// potrzebne by wyświetlać SKU dla prodktu w DTO
 		public DateOnly? BestBefore { get; private set; }
 		public Guid? PickingPalletId { get; private set; }
@@ -77,14 +80,23 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus pickingStatus, Guid productId, DateOnly? bestBefore,
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
-		
+
+		public static PickingTask CreatePickingTaskForIssue(VirtualPallet vp, Issue issue, int quantity, Guid productId,DateOnly pickingDate,  DateOnly? bestBefore, string userId, DateTime now)
+		{
+			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated, productId,
+						bestBefore, null, pickingDate, 0);  // PickingDay jest wyliczany jako dwa dni przed planowaną wysyłką.
+			pickingTask.Issue = issue;
+			pickingTask.VirtualPallet = vp;
+			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0, now);
+			return pickingTask;
+		}
 		public void Cancel(string userId, DateTime createdAt)
 		{
 			var oldStatus = PickingStatus;
 			if (PickingStatus == PickingStatus.PickedPartially || PickingStatus == PickingStatus.Picked)
 				throw new CannotCancelPickingTaskInCurrentStatusDomainException(Id, IssueId, PickingStatus);
-			this.PickingStatus = PickingStatus.Cancelled;			
-			AddHistoryPicking(userId, null,null, oldStatus, 0, createdAt);			
+			this.PickingStatus = PickingStatus.Cancelled;
+			AddHistoryPicking(userId, null, null, oldStatus, 0, createdAt);
 			this.RequestedQuantity = 0;
 		}
 
@@ -102,23 +114,23 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingStatus = PickingStatus.CorrectionPicking;
 			AddHistoryPicking(userId, null, null, oldStatus, 0, createdAt);
 		}
-		
+
 		public void MarkPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, string userId, DateTime createdAt)
 		{
-			var	oldStatus = PickingStatus;
-			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
+			var oldStatus = PickingStatus;
+			if (PickingStatus != PickingStatus.Allocated && PickingStatus != PickingStatus.CorrectionPicking && PickingStatus != PickingStatus.Available)
 				throw new CannotMakeOperationForStatusDomainException(Id, PickingStatus);
 			if (pickingPalletId == Guid.Empty)
 				throw new RequiredPickingPalletDomainException();
 			PickedQuantity = RequestedQuantity;
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.Picked;
-			AddHistoryPicking(userId,sourcePalletId,sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, PickedQuantity, createdAt);
+			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, PickedQuantity, createdAt);
 		}
 		public void MarkPartiallyPicked(Guid pickingPalletId, string pickingPalletNumber, Guid sourcePalletId, string sourcePalletNumber, int pickedQuantity, string userId, DateTime createdAt)
 		{
 			var oldStatus = PickingStatus;
-			if (PickingStatus == PickingStatus.Picked || PickingStatus == PickingStatus.PickedPartially)
+			if (PickingStatus != PickingStatus.Allocated && PickingStatus != PickingStatus.CorrectionPicking && PickingStatus != PickingStatus.Available)
 				throw new CannotMakeOperationForStatusDomainException(Id, PickingStatus);
 			if (pickingPalletId == Guid.Empty)
 				throw new RequiredPickingPalletDomainException();
@@ -126,6 +138,25 @@ namespace MyWerehouse.Domain.Picking.Models
 			PickingPalletId = pickingPalletId;
 			PickingStatus = PickingStatus.PickedPartially;
 			AddHistoryPicking(userId, sourcePalletId, sourcePalletNumber, pickingPalletId, pickingPalletNumber, oldStatus, pickedQuantity, createdAt);
+		}
+
+		public void CompleteTask(Pallet pickingPallet, Pallet sourcePallet, int pickedQuantity, string userId, DateTime now)
+		{
+			if (RequestedQuantity == pickedQuantity)
+			{
+				MarkPicked(pickingPallet.Id, pickingPallet.PalletNumber, sourcePallet.Id,
+					sourcePallet.PalletNumber, userId, now);
+			}
+			else if (RequestedQuantity > pickedQuantity)
+			{
+				MarkPartiallyPicked(pickingPallet.Id, pickingPallet.PalletNumber, sourcePallet.Id,
+					sourcePallet.PalletNumber, pickedQuantity, userId, now);
+			}
+			else
+			{
+				throw new TooHighValueDomainException(RequestedQuantity, pickedQuantity);
+			}
+			pickingPallet.AddHistory(ReasonForPallet.Picking, userId, pickingPallet.Location.ToSnapshot());
 		}
 
 		// Historia pickingu może pochodzić z różnych źródeł, dlatego przeciążenia przekazują jawne dane palet.
@@ -167,6 +198,35 @@ namespace MyWerehouse.Domain.Picking.Models
 				userId,
 				createdAt));
 		}
-		
+		public void EnsureSourcePallet(Guid palletId)
+		{
+			if (VirtualPallet is null)
+				throw new TaskWithOutSourceDomainException();
+
+			if (VirtualPallet.PalletId != palletId)
+				throw new InvalidSourcePalletDomainException(
+					Id,
+					VirtualPallet.PalletId,
+					palletId);
+		}
+		public void BeginExecuteHandPicking(int pickedQuantity)
+		{			
+			if (pickedQuantity > RequestedQuantity)
+			{
+				throw new TooHighValueDomainException(RequestedQuantity, pickedQuantity);
+			}
+			if (PickingStatus == PickingStatus.Cancelled)
+			{
+				throw new CannotMakeOperationForStatusDomainException(Id, PickingStatus);
+			}
+		}
+		public void CompleteHandPicking(int quantityTaken)
+		{
+			RequestedQuantity = RequestedQuantity - quantityTaken;
+			if (RequestedQuantity == 0)
+			{
+				PickingStatus = PickingStatus.Cancelled;
+			}
+		}
 	}
 }

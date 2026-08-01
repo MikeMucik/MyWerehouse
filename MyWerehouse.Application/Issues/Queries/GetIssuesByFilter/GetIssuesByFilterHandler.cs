@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssuesByFilter
 			var result = await issueOrdered
 				.ProjectTo<IssueSimplyDTO>(_mapper.ConfigurationProvider)
 				.ToPagedResultAsync(request.CurrentPage,request.PageSize,ct);			
-			if (result.TotalCount == 0) return AppResult<PagedResult<IssueSimplyDTO>>.Fail("Brak zleceń o zadanych parametrach", ErrorType.NotFound);
+			if (result.TotalCount == 0) return AppResult<PagedResult<IssueSimplyDTO>>.Fail("No issues match the specified criteria.");
 			return AppResult<PagedResult<IssueSimplyDTO>>.Success(result);
 		}
 	}

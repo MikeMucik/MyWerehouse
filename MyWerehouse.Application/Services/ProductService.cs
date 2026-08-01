@@ -66,16 +66,16 @@ namespace MyWerehouse.Application.Services
 			var existingProduct = _productRepo.FindProducts(new ProductSearchFilter { ProductName = productDTO.Name });
 			if (await existingProduct.AnyAsync())
 			{
-				return AppResult<Guid>.Fail("Produkt o tej nazwie już istnieje.", ErrorType.NotFound);
+				return AppResult<Guid>.Fail("A product with this name already exists.");
 			}
 			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
 			if (existCategory == null)
 			{
-				return AppResult<Guid>.Fail($"Kategoria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<Guid>.Fail($"Category {productDTO.CategoryId} does not exist.");
 			}
 			if (existCategory.IsDeleted)
 			{
-				return AppResult<Guid>.Fail($"Kategoria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
+				return AppResult<Guid>.Fail($"Category {productDTO.CategoryId} is inactive.", ErrorType.Conflict);
 			}
 			var productPrepare = Product.Create(
 				productDTO.Name,
@@ -99,7 +99,7 @@ namespace MyWerehouse.Application.Services
 			var product = await _productRepo.GetProductByIdAsync(id);
 			if (product == null)
 			{
-				return AppResult<Unit>.Fail("Brak produktu o tym numerze", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("No product with this ID was found.");
 			}
 			var filter = new IssueReceiptSearchFilter
 			{
@@ -133,16 +133,16 @@ namespace MyWerehouse.Application.Services
 			var existingProduct = await _productRepo.GetProductToEditAsync(id);
 			if (existingProduct == null)
 			{
-				return AppResult<Unit>.Fail($"Produkt o numerze {id} nie istnieje", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Product {id} does not exist.");
 			}
 			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
 			if (existCategory == null)
 			{
-				return AppResult<Unit>.Fail($"Kategoria o numerze {productDTO.CategoryId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Category {productDTO.CategoryId} does not exist.");
 			}
 			if (existCategory.IsDeleted)
 			{
-				return AppResult<Unit>.Fail($"Kategoria o numerze {productDTO.CategoryId} jest nieaktywna.", ErrorType.Conflict);
+				return AppResult<Unit>.Fail($"Category {productDTO.CategoryId} is inactive.", ErrorType.Conflict);
 			}
 			existingProduct.ApplyChangesForProduct(
 				productDTO.Name,
@@ -160,7 +160,7 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id)
 		{
 			var product = await _productRepo.GetProductDetailsAsync(id);
-			if (product == null) return AppResult<DetailsOfProductDTO>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
+			if (product == null) return AppResult<DetailsOfProductDTO>.Fail("No product data to display.");
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
 
 			return AppResult<DetailsOfProductDTO>.Success(productDTO);

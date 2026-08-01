@@ -111,7 +111,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			};
 			//Act&Assert
 			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
-			Assert.Contains("numer pocztowy", exceptionMessage.Message);
+			Assert.Contains("Postal code is required.", exceptionMessage.Message);
 		}
 		[Fact]
 		public async Task AddClient_ShouldThrowValidationException_WhenNoName()
@@ -137,7 +137,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			};
 			//Act&Assert
 			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
-			Assert.Contains("nazwa", exceptionMessage.Message);
+			Assert.Contains("Client name is required.", exceptionMessage.Message);
 		}
 	}
 }

@@ -14,19 +14,19 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 		public ModifyIssueDTOValidator(IValidator<IssueItemDTO> itemValidator, IClientRepo clientRepo)
 		{
 			RuleFor(x => x.Id).NotEmpty()
-				.WithMessage("Numer zamówienia wymagany");
+				.WithMessage("Issue ID is required.");
 			RuleFor(x => x.DTO.ClientId)
-				.GreaterThan(0).WithMessage("Numer Klienta wymagany");
+				.GreaterThan(0).WithMessage("Client ID must be greater than zero.");
 			RuleFor(x => x.DTO.ClientId)
 				.MustAsync(async (id,ct) => await clientRepo.IsClientExistAsync(id))
-				.WithMessage("Wskazany klient nie istnieje.");
+				.WithMessage("The selected client does not exist.");
 			RuleFor(x => x.DTO.PerformedBy)
-				.NotEmpty().WithMessage("Użytkownik wymagany");
+				.NotEmpty().WithMessage("User is required.");
 			RuleFor(x => x.DateToSend)
-				.GreaterThan(DateOnly.FromDateTime(DateTime.MinValue)).WithMessage("Nie prawidłowa data zamówienia");
+				.GreaterThan(DateOnly.FromDateTime(DateTime.MinValue)).WithMessage("Issue date is invalid.");
 			RuleForEach(x => x.DTO.IssueItems).SetValidator(itemValidator);
 			RuleFor(x => x.DTO.IssueItems)
-				.NotEmpty().WithMessage("Brak ilości i/lub towaru w zamówieniu");
+				.NotEmpty().WithMessage("An issue must contain at least one product.");
 		}
 	}
 }

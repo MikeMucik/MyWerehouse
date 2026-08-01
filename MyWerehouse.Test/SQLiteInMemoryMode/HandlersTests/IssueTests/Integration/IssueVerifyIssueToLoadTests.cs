@@ -1,10 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -17,7 +16,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 {
 	public class IssueVerifyIssueToLoadTests : TestBase
 	{
-		private Client CreateClient()
+		private static Client CreateClient()
 		{
 			var address = new Address
 			{
@@ -38,7 +37,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Addresses = new List<Address> { address }
 			};
 		}
-		private Category CreateCategory(string name)
+		private static Category CreateCategory(string name)
 		{
 			return new Category
 			{
@@ -47,11 +46,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				IsDeleted = false
 			};
 		}
-		private Product CreateProduct(string name, string sku, int categoryId)
+		private static Product CreateProduct(string name, string sku, int categoryId)
 		{
 			return Product.Create(name, sku, TestDates.UtcNow, categoryId, 10, 30, 30, 30, 30, "TestDetails");
 		}
-		private Location CreateLocation(int position)
+		private static Location CreateLocation(int position)
 		{
 			return new Location
 			{
@@ -186,8 +185,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
 			Assert.NotNull(result.Result);
-			Assert.Contains("Wydania nie zatwierdzono.", result.Error);
-			Assert.Contains(result.Result, x => x.Message.Contains("Nie wszystkie palety do załadunku mają odpowiedni status."));
+			Assert.Contains("Issue was not approved.", result.Error);
+			Assert.Contains(result.Result, x => x.Message.Contains("Not all pallets to be loaded have the required status."));
 
 		}
 		[Fact]
@@ -225,9 +224,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
 			Assert.NotNull(result.Result);
-			Assert.Contains("Wydania nie zatwierdzono.", result.Error);
+			Assert.Contains("Issue was not approved.", result.Error);
 			Assert.Equal(ErrorType.Validation, result.ErrorType);
-			Assert.Contains(result.Result, x => x.Message.Contains("Towar się nie zgadza. Zażądano 20"));
+			Assert.Contains(result.Result, x => x.Message.Contains("Prepared product does not match the issue. Requested 20"));
 
 			var failedItem = Assert.Single(result.Result, x => !x.Success);
 			var expectedQuantityRequest = issueItem.Single(p => p.ProductId == product.Id).Quantity;
@@ -236,7 +235,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(product.SKU, failedItem.SKU);
 			Assert.Equal(expectedQuantityRequest, failedItem.QuantityRequest);
 			Assert.Equal(expectedQuantityPrepared, failedItem.QuantityPrepared);
-			Assert.Contains("Towar się nie zgadza", failedItem.Message);
+			Assert.Contains("Prepared product does not match the issue", failedItem.Message);
 		}
 		[Fact]
 		public async Task VerifyIssueToLoad_NotConfirmIssue_WhenNotExistIssue()
@@ -247,7 +246,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains("Zamówienie nie zostało znalezione.", result.Error);
+			Assert.Contains("Issue was not found.", result.Error);
 		}
 	}
 }

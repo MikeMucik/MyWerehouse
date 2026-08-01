@@ -19,12 +19,12 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 		public async Task<AppResult<Unit>> Handle(VerifyAndFinalizeReceiptCommand request, CancellationToken cancellationToken)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
-			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
+			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 
 			// W obecnej wersji portfolio weryfikacja oznacza ręczne potwierdzenie zgodności przyjęcia.
 			receipt.VerifiedReceipt(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(cancellationToken);
-			return AppResult<Unit>.Success(Unit.Value, "Palety z przyjęcia zweryfikowano, gotowe do użycia.");
+			return AppResult<Unit>.Success(Unit.Value, "Receipt pallets were verified and are ready for use.");
 		}
 	}
 }

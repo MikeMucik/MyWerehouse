@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +13,10 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 {
 	public record ExecuteReversePickingCommand(Guid TaskReversedId,
 		ReversePickingStrategy Strategy, Guid PickingPalletId, 
-		string UserId, List<Pallet>? Pallets, int? RampNumber)
+		string UserId,
+		//List<Pallet>? Pallets,
+		List<Guid>? PalletsIds,
+		int? RampNumber)
 		:IRequest<AppResult<ReversePickingResult>>;	
 }
 //List<Pallet> - strategy:ToExist

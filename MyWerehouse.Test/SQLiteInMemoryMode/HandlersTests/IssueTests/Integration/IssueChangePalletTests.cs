@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -96,7 +96,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Assert
 			Assert.True(result.IsSuccess);
-			Assert.Equal("Podmieniono palety.", result.Message);
+			Assert.Equal("Pallets were replaced.", result.Message);
 
 			var updatedIssue = await DbContext.Issues.Include(i => i.Pallets).FirstAsync(i => i.Id == issue.Id);
 			var p1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
@@ -170,7 +170,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = await Mediator.Send(new ChangePalletInIssueCommand(receiptId9, pallet.Id, pallet1.Id, "tester"));
 			//Assert
 			Assert.False(result.IsSuccess);
-			Assert.Contains("Zamówienie nie zostało znalezione.", result.Error);
+			Assert.Contains("Issue was not found.", result.Error);
 		}
 
 		[Fact]

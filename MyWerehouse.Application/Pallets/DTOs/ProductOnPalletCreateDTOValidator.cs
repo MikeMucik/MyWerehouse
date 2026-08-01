@@ -15,19 +15,19 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		{
 			RuleFor(pp => pp.ProductId)
 				.NotEqual(Guid.Empty)
-				.WithMessage("Produkt na palecie musi mieć numer produktu");
+				.WithMessage("Product ID is required.");
 			RuleFor(pp => pp.ProductId)
 				.MustAsync(async (id, ct) => await productRepo.IsExistProduct(id))
-				.WithMessage("Wybrany product nie istnieje.");
+				.WithMessage("The selected product does not exist.");
 			RuleFor(pp => pp.Quantity)
 				.GreaterThan(0)
-				.WithMessage("Ilość produktu musi być większa od zera");
+				.WithMessage("Product quantity must be greater than zero.");
 			RuleFor(pp => pp.DateAdded)
 				.NotNull()
-				.WithMessage("Produkt musi mieć datę przyjęcia");
+				.WithMessage("Product receipt date is required.");
 			RuleFor(pp => pp.BestBefore)
 				.GreaterThan(dateTimeProvider.Today)
-				.WithMessage("Data do spożycia musi być późniejsza niż data dzisiejsza")
+				.WithMessage("Best-before date must be later than today.")
 				.When(pp => pp.BestBefore != null);
 		}
 	}

@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 		{
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
-				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Issue was not found.");
 			//check requested amount = prepered amount
 
 			var listOfProduct = issue.IssueItems.Select(x => x.ProductId);
@@ -36,15 +36,15 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 			{
 				issue.VerifyToLoad(request.UserId);
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				return AppResult<List<ComparePlanToPreparedResult>>.Success(resultComparing, "Wydanie zatwierdzono warunkowo z nieskończoną kompletacją.");
+				return AppResult<List<ComparePlanToPreparedResult>>.Success(resultComparing, "Issue was conditionally approved with incomplete picking.");
 			}
 			if (resultComparing.Any(a => a.Success == false))
 			{
-				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Wydania nie zatwierdzono.", resultComparing, ErrorType.Validation);
+				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Issue was not approved.", resultComparing, ErrorType.Validation);
 			}
 			issue.VerifyToLoad(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<List<ComparePlanToPreparedResult>>.Success(resultComparing, "Wydanie zatwierdzono.");
+			return AppResult<List<ComparePlanToPreparedResult>>.Success(resultComparing, "Issue approved.");
 		}
 	}
 }

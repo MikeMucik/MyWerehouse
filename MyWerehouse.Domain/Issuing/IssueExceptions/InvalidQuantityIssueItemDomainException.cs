@@ -7,12 +7,12 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Issuing.IssueExceptions
 {
-	public class InvalidQuantityDomainException : DomainException
+	public class InvalidQuantityIssueItemDomainException : DomainException
 	{
 		public int Quantity { get; }
 		public Guid IssueId { get; }
 		public int IssueNumber { get; }
-		public InvalidQuantityDomainException(int quantity, Guid issueId, int issueNumber) :
+		public InvalidQuantityIssueItemDomainException(int quantity, Guid issueId, int issueNumber) :
 			base($"Not allowed qunatity.")
 		{
 			Quantity = quantity;

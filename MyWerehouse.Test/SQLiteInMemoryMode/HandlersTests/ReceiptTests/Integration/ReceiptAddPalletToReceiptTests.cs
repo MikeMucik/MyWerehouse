@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -152,7 +152,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var ex = await Assert.ThrowsAsync<ValidationException>(() =>
 			Mediator.Send(new AddPalletToReceiptCommand(receipt.Id, newPalletDto)));
 
-			Assert.Contains("Iloœæ produktu musi byæ wiêksza od zera", ex.Message);
+			Assert.Contains("Product quantity must be greater than zero.", ex.Message);
 		}
 		[Fact]
 		public async Task AddPalletToReceipt_ThrowValidateException_WhenTwoProduct()
@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			};
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new AddPalletToReceiptCommand(receipt.Id, newPalletDto)));
 
-			Assert.Contains("Paleta przyjmowana mo¿e mieæ tylko jeden rodzaj produktu", ex.Message);
+			Assert.Contains("A received pallet may contain only one product type.", ex.Message);
 		}
 	}
 }

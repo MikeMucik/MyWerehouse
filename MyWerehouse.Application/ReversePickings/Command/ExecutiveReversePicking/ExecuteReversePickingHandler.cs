@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,25 +31,25 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			var reversePicking = await _reversePickingRepo.GetReversePickingAsync(command.TaskReversedId);
 			if (reversePicking is null)
 			{
-				return AppResult<ReversePickingResult>.Fail("Brak zadania do dekompletacji", ErrorType.NotFound);
+				return AppResult<ReversePickingResult>.Fail("Reverse picking task was not found.");
 			}
 			var pickingPallet = await _palletRepo.GetPalletByIdAsync(command.PickingPalletId);
 			if (pickingPallet == null)
 			{
-				return AppResult<ReversePickingResult>.Fail("Brak palety do dekompletacji", ErrorType.NotFound);
+				return AppResult<ReversePickingResult>.Fail("Pallet for reverse picking was not found.");
 			}
 			if (reversePicking?.PickingTask?.Issue == null)
 			{
-				return AppResult<ReversePickingResult>.Fail("Nie załadowano pełnych danych", ErrorType.NotFound);
+				return AppResult<ReversePickingResult>.Fail("Required data was not loaded.");
 			}
 			var issueId = reversePicking.PickingTask.IssueId;
 			var issueNumber = reversePicking.PickingTask.Issue.IssueNumber;
 			if (issueId == Guid.Empty)
 			{
-				return AppResult<ReversePickingResult>.Fail($"Zamówienie o numerze {issueId} nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<ReversePickingResult>.Fail($"Issue {issueId} was not found.");
 			}
 			//produkt na palecie kompletacyjnej - product on pickingPallet
-			var productOnPallet = pickingPallet.GetProductOnPallet(reversePicking.ProductId);
+			var productOnPallet = pickingPallet.GetProductOnPalletForReverse(reversePicking.ProductId, reversePicking.BestBefore);
 			reversePicking.Start();
 			ReversePickingResult result;
 			static AppResult<ReversePickingResult> Fail(string message)
@@ -61,11 +61,11 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					if (!result.Success) return Fail(result.Message);
 					break;
 				case ReversePickingStrategy.AddToExistingPallet:
-					if (command.Pallets == null || command.Pallets.Count == 0)
+					if (command.PalletsIds == null || command.PalletsIds.Count == 0)
 					{
-						return AppResult<ReversePickingResult>.Fail("Lista pusta palet do których możną dołączyć towar.", ErrorType.NotFound);
+						return AppResult<ReversePickingResult>.Fail("No pallets were provided for receiving the product.");
 					}
-					result = await _addProductsToPalletService.AddToExistingPallet(reversePicking, command.Pallets, command.UserId);
+					result = await _addProductsToPalletService.AddToExistingPallet(reversePicking, command.PalletsIds, command.UserId);
 					if (!result.Success) return Fail(result.Message);
 										
 					break;
@@ -73,22 +73,22 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					
 					if (command.RampNumber == null)
 					{
-						return AppResult<ReversePickingResult>.Fail("Brak lokalizacji dekompletacji", ErrorType.Validation);
+						return AppResult<ReversePickingResult>.Fail("Reverse picking location was not provided.", ErrorType.Validation);
 					}
 					var location =await _locationRepo.GetLocationByIdAsync(command.RampNumber.Value);
 					if (location == null)
 					{
-						return AppResult<ReversePickingResult>.Fail("Podana lokalizacja jest nieprawidłowa.", ErrorType.NotFound);
+						return AppResult<ReversePickingResult>.Fail("The specified location is invalid.");
 					}
 					var snapShot = location.ToSnapshot();
 					result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId, command.RampNumber!.Value, snapShot);
 					if (!result.Success) return Fail(result.Message);
 					break;
 				default:
-					return AppResult<ReversePickingResult>.Fail($"Nieobsługiwana strategia: {command.Strategy}", ErrorType.Conflict);					
+					return AppResult<ReversePickingResult>.Fail($"Unsupported strategy: {command.Strategy}.", ErrorType.Conflict);
 			}
 			//paleta dekompletowana
-			productOnPallet.SetQuantity(0);
+			productOnPallet.DecreaseQuantity(reversePicking.Quantity);
 			pickingPallet.CkeckIfToArchive(command.UserId, ReasonForPallet.ReversePicking, pickingPallet.Location.ToSnapshot());
 			//zadanie dekompletacyjne
 			reversePicking.Complete();

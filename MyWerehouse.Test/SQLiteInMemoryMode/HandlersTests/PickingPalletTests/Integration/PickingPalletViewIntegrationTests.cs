@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +48,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
-			Assert.Equal("Podaj numer zamówienia by kontynuować", result.Result.Message);
+			Assert.Equal("Provide the issue number to continue.", result.Result.Message);
 			Assert.NotNull(result.Result.IssueOptions);
 			Assert.Single(result.Result.IssueOptions);
 		}
@@ -142,7 +142,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var result = await _mediator.Send(query);
 			// Assert
 			Assert.False(result.IsSuccess);
-			Assert.Contains("nie jest do pickingu, zawiera różne towary", result.Error);
+			Assert.Contains("The pallet is not suitable for picking because it contains different products.", result.Error);
 		}
 		
 		[Fact]

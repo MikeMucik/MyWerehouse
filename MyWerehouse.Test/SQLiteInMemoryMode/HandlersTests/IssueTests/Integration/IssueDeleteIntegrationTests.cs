@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -212,7 +212,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Assert
 			Assert.False(result.IsSuccess);
-			Assert.Contains("nie można anulować", result.Error);
+			Assert.Contains("cannot be cancelled.", result.Error);
 
 			// Nic nie powinno zostać zmienione
 			var issue = DbContext.Issues.First(i => i.Id == issueId);

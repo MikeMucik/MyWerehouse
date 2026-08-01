@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -95,7 +95,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Palety z przyjęcia zweryfikowano, gotowe do użycia.", result.Message);
+			Assert.Contains("Receipt pallets were verified and are ready for use.", result.Message);
 			var receiptVeryfying = await DbContext.Receipts.FindAsync(receipt.Id);
 			Assert.NotNull(receiptVeryfying);
 			receiptVeryfying.ReceiptStatus.Should().Be(ReceiptStatus.Verified);
@@ -143,7 +143,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Palety z przyjęcia zweryfikowano, gotowe do użycia.", result.Message);
+			Assert.Contains("Receipt pallets were verified and are ready for use.", result.Message);
 			var receiptVeryfying = await DbContext.Receipts.FindAsync(receipt.Id);
 			Assert.NotNull(receiptVeryfying);
 			receiptVeryfying.ReceiptStatus.Should().Be(ReceiptStatus.Verified);

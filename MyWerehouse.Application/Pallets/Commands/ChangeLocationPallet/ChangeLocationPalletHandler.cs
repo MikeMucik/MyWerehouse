@@ -21,16 +21,16 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 		{
 			// Zmiana lokalizacji może zmienić status palety w zależności od typu lokalizacji docelowej.		
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
-			if (pallet == null) return AppResult<ChangeLocationResults>.Fail($"Paleta o numerze {request.PalletId} nie istnieje.", ErrorType.NotFound);
+			if (pallet == null) return AppResult<ChangeLocationResults>.Fail($"Pallet {request.PalletId} does not exist.");
 			//location is occupied?
 			if (request.DestinationLocationId <= 0)
-				return AppResult<ChangeLocationResults>.Fail("Nieprawidłowa lokalizacja.", ErrorType.NotFound);
+				return AppResult<ChangeLocationResults>.Fail("Invalid location.");
 
 			var existingPalletInDestination = await _palletRepo.CheckOccupancyAsync(request.DestinationLocationId);
 			var location = await _locationRepo.GetLocationByIdAsync(request.DestinationLocationId);
 			if (location == null)
 			{
-				return AppResult<ChangeLocationResults>.Fail($"Brak lokalizacji o numerze {request.DestinationLocationId}.", ErrorType.NotFound);
+				return AppResult<ChangeLocationResults>.Fail($"Location {request.DestinationLocationId} was not found.");
 			}
 			var fullNameLocation = $" Bay = {location.Bay} Aisle = {location.Aisle} Position = {location.Position} Height ={location.Height}";
 
@@ -40,7 +40,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 				{
 					Success = false,
 					RequiresConfirmation = true,
-					Message = $"Lokalizacja {fullNameLocation} jest już zajęta przez paletę {existingPalletInDestination.PalletNumber}. Użyj Force = true aby wymusić."
+					Message = $"Location {fullNameLocation} is already occupied by pallet {existingPalletInDestination.PalletNumber}. Use Force = true to proceed."
 				};
 				return AppResult<ChangeLocationResults>.Success(answerWhenOccupied, answerWhenOccupied.Message);
 			}
@@ -53,7 +53,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 			{
 				Success = true,
 				RequiresConfirmation = false,
-				Message = $"Paleta {pallet.Id} została umieszczona w lokalizacji. "
+				Message = $"Pallet {pallet.Id} was moved to the location. "
 			};
 			return AppResult<ChangeLocationResults>.Success(answerWhenFree, answerWhenFree.Message);
 		}

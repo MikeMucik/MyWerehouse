@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -135,7 +135,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert
 			Assert.True(resultPicking.IsSuccess);
@@ -175,7 +180,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 
 			// Assert – Result
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 
 
 			var reverseTasks = await DbContext.ReversePickings
@@ -261,7 +266,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2.1
 			Assert.True(resultPicking.IsSuccess);
@@ -289,7 +299,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPickingSecond = new DoPlannedPickingCommand(toPickingSecond, "UserPicking");
+			var doPickingSecond = new DoPlannedPickingCommand(
+				toPickingSecond.Id,
+				toPickingSecond.SourcePalletId!.Value,
+				toPickingSecond.PickedQuantity,
+				toPickingSecond.RampNumber,
+				"UserPicking");
 			var resultPickingSecond = await Mediator.Send(doPickingSecond);
 			//Assert 2.2
 			Assert.True(resultPickingSecond.IsSuccess);
@@ -304,7 +319,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 
 			//Assert
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -417,7 +432,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = locationBase.Id,
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
 			Assert.True(resultPicking.IsSuccess);
@@ -437,7 +457,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert 3 - result
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -558,7 +578,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
 			Assert.True(resultPicking.IsSuccess);
@@ -577,7 +602,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -695,7 +720,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2.1
 			Assert.True(resultPicking.IsSuccess);
@@ -723,7 +753,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPickingSecond = new DoPlannedPickingCommand(toPickingSecond, "UserPicking");
+			var doPickingSecond = new DoPlannedPickingCommand(
+				toPickingSecond.Id,
+				toPickingSecond.SourcePalletId!.Value,
+				toPickingSecond.PickedQuantity,
+				toPickingSecond.RampNumber,
+				"UserPicking");
 			var resultPickingSecond = await Mediator.Send(doPickingSecond);
 			//Assert 2.2
 			Assert.True(resultPickingSecond.IsSuccess);
@@ -738,7 +773,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 
 			//Assert
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -863,7 +898,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2.1
 			Assert.True(resultPicking.IsSuccess);
@@ -891,7 +931,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPickingSecond = new DoPlannedPickingCommand(toPickingSecond, "UserPicking");
+			var doPickingSecond = new DoPlannedPickingCommand(
+				toPickingSecond.Id,
+				toPickingSecond.SourcePalletId!.Value,
+				toPickingSecond.PickedQuantity,
+				toPickingSecond.RampNumber,
+				"UserPicking");
 			var resultPickingSecond = await Mediator.Send(doPickingSecond);
 			//Assert 2.2
 			Assert.True(resultPickingSecond.IsSuccess);
@@ -906,7 +951,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 
 			//Assert
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);

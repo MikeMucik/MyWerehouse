@@ -75,10 +75,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.FirstAsync(p => p.Id == palletId);
 		}
 		
-		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly bestBefore)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly? bestBefore)
 		{
 			return await _werehouseDbContext.VirtualPallets
-				.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId)
+				.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId 
+				&&(bestBefore == null|| v.Pallet.ProductsOnPallet.First().BestBefore >= bestBefore))
+				.Include(p => p.PickingTasks)
 				.Include(p=>p.Pallet)
 					.ThenInclude(l=>l.Location)
 				.ToListAsync();
@@ -86,7 +88,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public async Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId)
 		{
-			return await _werehouseDbContext.VirtualPallets.FirstOrDefaultAsync(v=>v.PalletId == palletId);
+			return await _werehouseDbContext.VirtualPallets
+				.Include(p=>p.PickingTasks)
+				.FirstOrDefaultAsync(v=>v.PalletId == palletId);
 		}		
 	}
 }

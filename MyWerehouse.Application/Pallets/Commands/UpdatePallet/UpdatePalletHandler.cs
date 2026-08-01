@@ -24,15 +24,15 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 		{
 			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.Id);
 			if (existingPallet == null)
-				return AppResult<Unit>.Fail("Wskazana paleta nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("The specified pallet does not exist.");
 			if(existingPallet.Issue != null)
 			{
-				return AppResult<Unit>.Fail("Wskazana paleta jest w wydaniu, nie można jej zmienić bez usunięcia jej z wydania.", ErrorType.Conflict);
+				return AppResult<Unit>.Fail("The specified pallet belongs to an issue and cannot be updated until it is removed from the issue.", ErrorType.Conflict);
 			}
 			foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
 			{
 				if (!await _productRepo.IsExistProduct(pop.ProductId))
-					return AppResult<Unit>.Fail($"Wskazany produkt nie istnieje.", ErrorType.NotFound);
+					return AppResult<Unit>.Fail($"The specified product does not exist.");
 			}
 			var updatedProducts1 = new List<ProductOnPallet>();
 			foreach (var product in request.UpdatingPallet.ProductsOnPallet)
@@ -44,7 +44,7 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			var snapShot = existingPallet.Location.ToSnapshot();
 			existingPallet.Update(request.UpdatingPallet.UserId, updatedProducts1, request.UpdatingPallet.Status, snapShot);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Paleta {existingPallet.PalletNumber} została zaktualizowana.");
+			return AppResult<Unit>.Success(Unit.Value, $"Pallet {existingPallet.PalletNumber} was updated.");
 		}
 	}
 }

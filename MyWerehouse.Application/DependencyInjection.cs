@@ -37,7 +37,7 @@ namespace MyWerehouse.Application
 			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));			
 			
 			services.AddScoped<IAddPickingTaskToIssueService, AddPickingTaskToIssueService>();
-			services.AddScoped<IProcessPickingActionService, ProcessPickingActionService>();
+			services.AddScoped<IExecuteProcessPickingService, ExecuteProcessPickingService>();
 			services.AddScoped<IGetProductCountService, GetProductCountService>();
 			services.AddScoped<IGetNumberPalletsAndRestService, GetNumberPalletsAndRestService>();
 			services.AddScoped<IAssignProductToIssueService, AssignProductToIssueAsyncService>();

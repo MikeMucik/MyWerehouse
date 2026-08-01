@@ -3,15 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Common.ValueObject;
 
 namespace MyWerehouse.Application.Common.Results
 {
-	public enum ErrorType
-	{
-		Validation,
-		NotFound,
-		Conflict,		
-	}
 	public class AppResult<T>
 	{
 		public bool IsSuccess { get; private set; }
@@ -25,10 +20,10 @@ namespace MyWerehouse.Application.Common.Results
 		public static AppResult<T> Success(T value) =>
 			new AppResult<T> { IsSuccess = true, Result = value };
 		
-		public static AppResult<T> Fail(string error, ErrorType errorType) =>
+		public static AppResult<T> Fail(string error, ErrorType errorType = ErrorType.NotFound) =>
 			new AppResult<T> { IsSuccess = false, Error = error, ErrorType = errorType };
 
-		public static AppResult<T> Fail(string error,T value, ErrorType errorType) =>
+		public static AppResult<T> Fail(string error,T value, ErrorType errorType = ErrorType.NotFound) =>
 			new AppResult<T> { IsSuccess = false,Result = value, Error = error, ErrorType = errorType };
 
 	}

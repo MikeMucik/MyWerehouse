@@ -10,5 +10,5 @@ using MyWerehouse.Application.Picking.Services;
 namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 {
 	public record ExecuteHandPickingCommand(Guid PalletIdSource,
-		Guid IssueId, int Quantity, string UserId, int NumberRamp):IRequest<AppResult<ProcessPickingActionResult>>;	
+		Guid IssueId, int PickedQuantity, string UserId, int RampNumber):IRequest<AppResult<ProcessPickingActionResult>>;
 }

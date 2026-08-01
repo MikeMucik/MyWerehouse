@@ -30,24 +30,24 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		public async Task<AppResult<Unit>> Handle(AddPalletToReceiptCommand request, CancellationToken ct)
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
-			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
+			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 			var rampNumber = receipt.RampNumber;
 			var now = _dateTimeProvider.UtcNow;
 			receipt.StartReceiving(now, request.DTO.UserId);
 			var newId = await _palletRepo.GetNextPalletIdAsync();
 
 			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
-			if (location == null) return AppResult<Unit>.Fail($"Lokalizacja o numerze {rampNumber} nie została znaleziona", ErrorType.NotFound);
+			if (location == null) return AppResult<Unit>.Fail($"Location {rampNumber} was not found.");
 			
 			var pallet = Pallet.Create(newId, rampNumber, now);
 			if (request.DTO.ProductsOnPallet.Count != 1)
 			{
-				return AppResult<Unit>.Fail($"Paleta przyjmowana może mieć tylko jeden produkt", ErrorType.Conflict);
+				return AppResult<Unit>.Fail($"A receiving pallet can contain only one product.", ErrorType.Conflict);
 			}
 			var product = request.DTO.ProductsOnPallet.Single();
 
 			if (!await _productRepo.IsExistProduct(product.ProductId))
-				return AppResult<Unit>.Fail($"Produkt o numerze {product.ProductId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Product {product.ProductId} does not exist.");
 
 			pallet.AddProduct(product.ProductId, product.Quantity, now, product.BestBefore);
 			
@@ -55,7 +55,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 			pallet.AssignToReceipt(receipt.Id, snapShot, request.DTO.UserId);
 			_palletRepo.AddPallet(pallet);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Paleta {pallet.Id} została dodana do przyjęcia {request.ReceiptId}");
+			return AppResult<Unit>.Success(Unit.Value, $"Pallet {pallet.Id} was added to receipt {request.ReceiptId}.");
 		}
 	}
 }

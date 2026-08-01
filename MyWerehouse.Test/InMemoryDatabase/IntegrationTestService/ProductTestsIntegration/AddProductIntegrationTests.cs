@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			//Act&Assert
 			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
-			Assert.Contains("Uzupe³nij dane - wysokoœæ", ex.Message);
+			Assert.Contains("Product height must be greater than zero.", ex.Message);
 		}
 		[Fact]
 		public async Task AddNewProductAsync_ShouldReturnAppResultError_WhenDataNameExist()
@@ -97,7 +97,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains("Produkt o tej nazwie ju¿ istnieje.", result.Error);
+			Assert.Contains("A product with this name already exists.", result.Error);
 			Assert.Equal(ErrorType.NotFound, result.ErrorType);
 		}
 		[Fact]
@@ -118,7 +118,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			//Act&Assert
 			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
-			Assert.Contains("Uzupe³nij dane - SKU", ex.Message);
+			Assert.Contains("Product SKU is required.", ex.Message);
 		}
 	}
 }

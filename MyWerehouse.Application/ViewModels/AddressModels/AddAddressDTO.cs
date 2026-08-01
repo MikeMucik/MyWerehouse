@@ -31,26 +31,26 @@ namespace MyWerehouse.Application.ViewModels.AddressModels
 		{
 			RuleFor(a => a.City)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - miasto");
+				.WithMessage("City is required.");
 			RuleFor(a => a.Region)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - województwo");
+				.WithMessage("Region is required.");
 			RuleFor(a => a.PostalCode)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - numer pocztowy");
+				.WithMessage("Postal code is required.");
 			RuleFor(a => a.StreetName)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - nazwa ulicy");
+				.WithMessage("Street name is required.");
 			RuleFor(a => a.StreetNumber)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - numer domu/lokalu");
+				.WithMessage("Street number is required.");
 			RuleFor(a => a.Country)
 				.NotEmpty()
-				.WithMessage("Uzupełnij dane - nazwa państwa");
+				.WithMessage("Country is required.");
 			RuleFor(a => a.Phone)
 				.NotNull()
 				.NotEqual(0)
-				.WithMessage("Uzupełnij dane - numer telefonu");
+				.WithMessage("Phone number is required.");
 		}
 	}
 }

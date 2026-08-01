@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			_categoryService.AddCategoryAsync(categoryDTO));
 			var result = _context.Categories.Count();
 			Assert.Equal(quantity, result);
-			Assert.Contains("Podaj nazwê kategorii.", ex.Message);
+			Assert.Contains("Category name is required.", ex.Message);
 		}
 		[Fact]
 		public async Task AddCategory_ShouldNotAddCategory_WhenRepeatedInput()
@@ -90,7 +90,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			var resultBase = _context.Categories.Count();
 			Assert.Equal(_context.Categories.Count(), resultBase);
 			Assert.Equal(ErrorType.Conflict, result.ErrorType);
-			Assert.Contains("Kategoria o tej nazwie ju¿ istnieje.", result.Error);
+			Assert.Contains("A category with this name already exists.", result.Error);
 			Assert.Equal(quantity, resultBase);
 		}
 		[Fact]
@@ -164,7 +164,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(id,updatedCategory));
 			//Assert
 			Assert.NotNull(ex);	
-			Assert.Contains("Podaj nazwê kategorii.", ex.Message);			
+			Assert.Contains("Category name is required.", ex.Message);
 		}
 	}
 }

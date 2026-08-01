@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -133,7 +133,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				RampNumber = locationBase.Id,
 
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
 			Assert.True(resultPicking.IsSuccess);
@@ -153,7 +158,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert 3 - result
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -203,7 +208,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.True(resultReversePicking.IsSuccess);
 			Assert.NotNull(resultReversePicking.Result);
 			Assert.True(resultReversePicking.Result.Success);
-			Assert.Contains("Dodano towar do palety źródłowej", resultReversePicking.Result.Message);
+			Assert.Contains("Product was returned to the source pallet.", resultReversePicking.Result.Message);
 			Assert.Equal(pallet2.Id, resultReversePicking.Result.PalletId);
 			var palletAfterRerversePicking = await DbContext.Pallets
 				.Include(pp=>pp.ProductsOnPallet)
@@ -290,7 +295,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				ProductId = product.Id,
 				RampNumber = 100100,
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert
 			Assert.NotNull(resultPicking);
@@ -307,7 +317,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert 3 result
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -348,7 +358,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.True(resultReversePicking.IsSuccess);
 			Assert.NotNull(resultReversePicking.Result);
 			Assert.True(resultReversePicking.Result.Success);
-			Assert.Contains("Dodano towar do nowej palety.", resultReversePicking.Result.Message);
+			Assert.Contains("Product was added to a new pallet.", resultReversePicking.Result.Message);
 			var palletAfteReversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.PalletNumber == "Q0002");
 
 			Assert.NotNull(palletAfteReversePicking);
@@ -436,7 +446,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 					RampNumber = 100100,
 
 				}; 
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
 			Assert.NotNull(resultPicking);
@@ -453,7 +468,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert 3
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -492,7 +507,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Pallets.Add(pallet3);
 			await DbContext.SaveChangesAsync();
 			var existingPallet = await DbContext.Pallets.SingleAsync(x => x.PalletNumber == "P3");
-			var list = new List<Pallet> { existingPallet };
+			var list = new List<Guid> { existingPallet.Id };
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
 				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
@@ -502,7 +517,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.True(resultReversePicking.IsSuccess);
 			Assert.NotNull(resultReversePicking.Result);
 			Assert.True(resultReversePicking.Result.Success);
-			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
+			Assert.Contains("Product was added.", resultReversePicking.Result.Message);
 			var palletAfterReversePicking = await DbContext.Pallets.FirstOrDefaultAsync(p => p.PalletNumber == "P3");
 			var listPalletIdsToAdd = resultReversePicking.Result.PalletWithAddedProduct
 				.Select(x => x.PalletId)
@@ -597,7 +612,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				RampNumber = 100100,
 
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
 			Assert.True(resultPicking.IsSuccess);
@@ -617,7 +637,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert 3
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -660,7 +680,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Pallets.Add(pallet3);
 			await DbContext.SaveChangesAsync();
 			var existingPallet = await DbContext.Pallets.SingleAsync(x => x.PalletNumber == "P3");
-			var list = new List<Pallet> { existingPallet };			
+			var list = new List<Guid> { existingPallet.Id };			
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
 				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
@@ -670,7 +690,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.True(resultReversePicking.IsSuccess);
 			Assert.NotNull(resultReversePicking.Result);
 			Assert.True(resultReversePicking.Result.Success);
-			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
+			Assert.Contains("Product was added.", resultReversePicking.Result.Message);
 			var palletAfterReversePicking = await DbContext.Pallets
 				.Include(pp=>pp.ProductsOnPallet)
 				.FirstOrDefaultAsync(p => p.PalletNumber == "P3");
@@ -776,7 +796,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				RampNumber = 100100,
 
 			};
-			var doPicking = new DoPlannedPickingCommand(toPicking, "UserPicking");
+			var doPicking = new DoPlannedPickingCommand(
+				toPicking.Id,
+				toPicking.SourcePalletId!.Value,
+				toPicking.PickedQuantity,
+				toPicking.RampNumber,
+				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			
 			//Assert 2.1
@@ -808,7 +833,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				RampNumber = 100100,
 
 			};
-			var doPicking1 = new DoPlannedPickingCommand(toPicking1, "UserPicking1");
+			var doPicking1 = new DoPlannedPickingCommand(
+				toPicking1.Id,
+				toPicking1.SourcePalletId!.Value,
+				toPicking1.PickedQuantity,
+				toPicking1.RampNumber,
+				"UserPicking1");
 			var resultPicking1 = await Mediator.Send(doPicking1);
 			//Assert 2.2
 			Assert.True(resultPicking1.IsSuccess);
@@ -823,7 +853,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var result = await Mediator.Send(new CancelIssueCommand(issueToCancelId, "UserC"));
 			//Assert 3
 			Assert.True(result.IsSuccess);
-			Assert.Contains("Anulowano zlecenie", result.Message);
+			Assert.Contains("was cancelled.", result.Message);
 			var cancelledIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -876,7 +906,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Pallets.Add(pallet3);
 			await	DbContext.SaveChangesAsync();			
 			var existingPallet =await DbContext.Pallets.SingleAsync(x => x.PalletNumber == "P3");
-			var list = new List<Pallet> { existingPallet};
+			var list = new List<Guid> { existingPallet.Id };
 			//Act 4 wykonanie dekompletacji
 			var resultReversePicking = await Mediator.Send(
 				new ExecuteReversePickingCommand(task.Id, ReversePickingStrategy.AddToExistingPallet,
@@ -886,7 +916,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.True(resultReversePicking.IsSuccess);
 			Assert.NotNull(resultReversePicking.Result);
 			Assert.True(resultReversePicking.Result.Success);
-			Assert.Contains("Dodano towar.", resultReversePicking.Result.Message);
+			Assert.Contains("Product was added.", resultReversePicking.Result.Message);
 			var palletAfterReversePicking = await DbContext.Pallets
 				.Include(pp=>pp.ProductsOnPallet)
 				.SingleAsync(p => p.PalletNumber == "P3");
@@ -928,4 +958,4 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(3, history1.Count());
 		}
 	}
-}	
+}

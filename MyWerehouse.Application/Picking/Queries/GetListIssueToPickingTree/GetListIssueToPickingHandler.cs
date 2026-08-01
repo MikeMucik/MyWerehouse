@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree
 				.ToListAsync(ct);
 			if (data.Count == 0)
 			{
-				return AppResult<List<PickingGuideLineDTO>>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
+				return AppResult<List<PickingGuideLineDTO>>.Fail("No picking items to display.");
 			}
 			var result = data
 				.GroupBy(x => x.ClientId)

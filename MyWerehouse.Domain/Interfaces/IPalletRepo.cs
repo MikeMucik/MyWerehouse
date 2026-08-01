@@ -15,11 +15,12 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId);
 		Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber);
 		Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId);
-		Task<List<Pallet>> GetAvailableFullPallets(Guid productId,int fullPallet, DateOnly? minBestBefore, int neededPallets);
+		Task<List<Pallet>> GetMissingFullPallets(Guid productId,int fullPallet, DateOnly? minBestBefore, int neededPallets);
 		Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId);
 		Task<Pallet?> GetPickingPalletByIssueId(Guid issueId);			
 		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);				
 		Task<string> GetNextPalletIdAsync();		
-		Task<Pallet?> CheckOccupancyAsync(int locationId); 																
+		Task<Pallet?> CheckOccupancyAsync(int locationId);
+		Task<List<Pallet>> GetAvailablePalletsForReversePickingAsync(Guid productId, DateOnly? bestBefore, Guid sourceId, int cartonsPerPallet);
 	}
 }

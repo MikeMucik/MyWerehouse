@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -107,7 +107,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Equal("Załadunek zatwierdzony, zasoby uaktulanione.", result.Message);
+			Assert.Equal("Loading confirmed and inventory updated.", result.Message);
 
 			//sprawdzenie zmian w Issue
 			var issueFromDb = await DbContext.Issues
@@ -193,7 +193,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Equal($"Zamówienie nie zostało znalezione.", result.Error);
+			Assert.Equal($"Issue was not found.", result.Error);
 		}
 		[Fact]
 		public async Task ConfirmIssueAfterLoading_ThrowExceptionNotEndedLoading_WhenNotAllPalletIsLoaded()
@@ -319,7 +319,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Equal("Załadunek zatwierdzony, zasoby uaktulanione.", result.Message);
+			Assert.Equal("Loading confirmed and inventory updated.", result.Message);
 
 			// Sprawdzenie zmian w bazie
 			var updatedIssue = await DbContext.Issues

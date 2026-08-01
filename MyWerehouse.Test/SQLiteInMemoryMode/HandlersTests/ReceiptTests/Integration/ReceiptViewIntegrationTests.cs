@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains($"Przyjęcie o numerze {receiptId9} nie zostało znalezione.", result.Error);
+			Assert.Contains($"Receipt {receiptId9} was not found.", result.Error);
 		}
 
 		//Testy multi

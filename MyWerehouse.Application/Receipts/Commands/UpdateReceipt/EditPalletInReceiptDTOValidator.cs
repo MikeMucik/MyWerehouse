@@ -15,19 +15,19 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		{
 			RuleFor(p => p.Status)
 				.NotEmpty()
-				.WithMessage("Paleta musi mieć status.");
+				.WithMessage("Pallet status is required.");
 			RuleFor(p => p.DateReceived)
 				.NotEmpty()
-				.WithMessage("Paleta musi mieć datę utworzenia.");
+				.WithMessage("Pallet receipt date is required.");
 			RuleFor(p => p.LocationId)
 				.GreaterThan(0)
-				.WithMessage("Paleta musi mieć lokalizację.");
+				.WithMessage("Pallet location is required.");
 			RuleFor(p => p.ProductsOnPallet)
 				.NotEmpty()
-				.WithMessage("Paleta musi zawierać towar.");
+				.WithMessage("Pallet must contain at least one product.");
 			RuleFor(p => p.ProductsOnPallet)
 				.Must(a => a.Count() == 1)
-				.WithMessage("Paleta w przyjęciu może mieć tylko jeden rodzaj towaru.");
+				.WithMessage("A received pallet may contain only one product type.");
 			RuleForEach(p => p.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)
 				.When(p => p.ProductsOnPallet != null && p.ProductsOnPallet.Count > 0);

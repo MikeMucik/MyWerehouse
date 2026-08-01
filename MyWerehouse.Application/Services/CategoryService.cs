@@ -49,18 +49,18 @@ namespace MyWerehouse.Application.Services
 			}
 			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) != null)
 			{
-				return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);
+				return AppResult<Unit>.Fail("A category with this name already exists.", ErrorType.Conflict);
 			}
 			var category = _mapper.Map<Category>(categoryDTO);
 			_categoryRepo.AddCategory(category);
 			await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<Unit>.Success(Unit.Value, "Dodano kategorię.");
+			return AppResult<Unit>.Success(Unit.Value, "Category added.");
 		}
 
 		public async Task<AppResult<Unit>> DeleteCategoryAsync(int id)
 		{
 			var category = await _categoryRepo.GetCategoryByIdAsync(id);
-			if (category == null) return AppResult<Unit>.Fail($"Kategoria o ID {id} nie została znaleziona", ErrorType.NotFound);
+			if (category == null) return AppResult<Unit>.Fail($"Category {id} was not found.");
 			var filter = new ProductSearchFilter
 			{
 				CategoryId = id,
@@ -70,14 +70,14 @@ namespace MyWerehouse.Application.Services
 			{
 				await _categoryRepo.SwitchOffCategoryAsync(id);
 				await _werehouseDbContext.SaveChangesAsync();
-				return AppResult<Unit>.Success(Unit.Value, "Kategoria została wyłączona.");
+				return AppResult<Unit>.Success(Unit.Value, "Category disabled.");
 			}
 			else
 			{
 				_categoryRepo.DeleteCategory(category);
 
 				await _werehouseDbContext.SaveChangesAsync();
-				return AppResult<Unit>.Success(Unit.Value, "Kategoria została usunięta.");
+				return AppResult<Unit>.Success(Unit.Value, "Category deleted.");
 			}
 		}
 		public async Task<AppResult<Unit>> UpdateCategoryAsync(int id, CategoryDTO categoryDTO)
@@ -94,13 +94,13 @@ namespace MyWerehouse.Application.Services
 				var categoryWithSameName = await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name);
 				if (categoryWithSameName != null && categoryWithSameName.Id == existingCategory.Id)
 				{
-					return AppResult<Unit>.Fail("Kategoria o tej nazwie już istnieje.", ErrorType.Conflict);
+					return AppResult<Unit>.Fail("A category with this name already exists.", ErrorType.Conflict);
 				}
 				existingCategory.Name = categoryDTO.Name;
 				await _werehouseDbContext.SaveChangesAsync();
-				return AppResult<Unit>.Success(Unit.Value, "Kategorię zaktualizowano.");
+				return AppResult<Unit>.Success(Unit.Value, "Category updated.");
 			}
-			else return AppResult<Unit>.Fail($"Brak kategori o numerze {id}", ErrorType.NotFound);
+			else return AppResult<Unit>.Fail($"Category {id} was not found.");
 		}
 
 		public async Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageNumber, int pageSize, CancellationToken ct)
@@ -119,7 +119,7 @@ namespace MyWerehouse.Application.Services
 			var result = await _categoryRepo.GetCategoryByIdAsync(id);
 			if (result == null)
 			{
-				return AppResult<CategoryViewDTO>.Fail("Nie znaleziono kategorii.", ErrorType.NotFound);
+				return AppResult<CategoryViewDTO>.Fail("Category was not found.");
 			}
 			var categoryDTO = _mapper.Map<CategoryViewDTO>(result);
 			return AppResult<CategoryViewDTO>.Success(categoryDTO);

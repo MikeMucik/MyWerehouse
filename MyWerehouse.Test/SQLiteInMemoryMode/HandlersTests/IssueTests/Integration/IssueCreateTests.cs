@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -111,7 +111,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(resultForIssue.Result);
 			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
-			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Message);
+			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			var issue = await DbContext.Issues.FirstOrDefaultAsync();
 			Assert.NotNull(issue);
@@ -193,7 +193,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(resultForIssue.Result);
 			var result = resultForIssue.Result.First();
 			Assert.True(result.Success);
-			Assert.Contains($"Towar {product.SKU} został dołączony do zlecenia.", result.Message);
+			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			var issue = await DbContext.Issues.FirstOrDefaultAsync();
 			Assert.NotNull(issue);
@@ -497,7 +497,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(resultForIssue.Result);
 			var result = resultForIssue.Result.First();			
 			Assert.False(result.Success);
-			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
+			Assert.Contains($"Insufficient quantity of product {product.Id}. The product was not added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Items.First().Quantity, result.QuantityRequest);
 			var stock = 30; //Quantity P1+P2+P3
@@ -547,7 +547,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var result = resultForIssue.Result.First();
 			// Assert
 			Assert.False(result.Success);
-			Assert.Contains($"Nie wystarczająca ilość produktu o numerze {product.Id}. Asortyment nie został dodany do zlecenia.", result.Message);
+			Assert.Contains($"Insufficient quantity of product {product.Id}. The product was not added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(issueItem.Items.First().Quantity, result.QuantityRequest);
 			var stock = 20; //Quantity P1+P2 P3 BestBeforeWrong

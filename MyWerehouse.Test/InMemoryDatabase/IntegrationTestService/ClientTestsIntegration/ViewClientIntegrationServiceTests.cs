@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
 			Assert.Null(result.Result);
-			Assert.Contains($"Nieprawidłowy numer client {clientId}.", result.Error);
+			Assert.Contains($"Invalid client ID: {clientId}.", result.Error);
 		}
 		[Fact]
 		public async Task GetAllClientsAsync_ShouldReturnFirst3Client_WhenDataExist()

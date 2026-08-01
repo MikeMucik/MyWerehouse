@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +30,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingT
 			var result = await reversePickingOrdered
 				.ProjectTo<ReversePickingDTO>(_mapper.ConfigurationProvider)
 				.ToPagedResultAsync(query.PageNumber,query.PageSize,ct);
-			if(result.TotalCount == 0)return AppResult<PagedResult<ReversePickingDTO>>.Fail("Nie ma zadań dekompletacji", ErrorType.NotFound);
+			if(result.TotalCount == 0)return AppResult<PagedResult<ReversePickingDTO>>.Fail("No reverse picking tasks were found.");
 			return AppResult<PagedResult<ReversePickingDTO>>.Success(result); 
 		}
 	}

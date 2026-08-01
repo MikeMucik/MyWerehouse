@@ -14,14 +14,14 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 		{
 			RuleFor(x => x.DTO.ClientId)
 				.MustAsync(async (id, ct) => await clientRepo.IsClientExistAsync(id))
-				.WithMessage("Klient nie istnieje.");
+				.WithMessage("The selected client does not exist.");
 			RuleFor(x => x.DTO.ClientId)
-				.GreaterThan(0).WithMessage("Numer klienta wymagany");
+				.GreaterThan(0).WithMessage("Client ID must be greater than zero.");
 			RuleFor(l => l.DTO.RampNumber)
 				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id))
-				.WithMessage("Numer rampy nie istnieje.");
+				.WithMessage("The selected ramp does not exist.");
 			RuleFor(x => x.DTO.PerformedBy)
-				.NotEmpty().WithMessage("Użytkownik wymagany.");
+				.NotEmpty().WithMessage("User is required.");
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			var now = _dateTimeProvider.UtcNow;
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("Issue was not found.");
 			var listPallet = new List<Pallet>();
 			//anulowanie zlecenia dla pełnych palet
 			var listPalletsOfIssue = issue.Pallets.ToList();
@@ -51,7 +51,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			foreach (var p in restPallets)
 			{
 				var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId); 
-				if (!resultReverse.Success) return AppResult<Unit>.Fail(resultReverse.Message, ErrorType.NotFound);
+				if (!resultReverse.Success) return AppResult<Unit>.Fail(resultReverse.Message);
 			}
 			//usuń alokacje/pickingTask jeśli nie zrobione				
 			var virtualPallets = await _issueRepo.GetVirtualPalletsAsync(request.IssueId);
@@ -79,7 +79,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			}
 			issue.Cancel(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Anulowano zlecenie {request.IssueId}.");
+			return AppResult<Unit>.Success(Unit.Value, $"Issue {request.IssueId} was cancelled.");
 		}
 	}
 }

@@ -1,4 +1,4 @@
-using MyWerehouse.Domain.Common;
+﻿using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Issuing.IssueExceptions
 {

@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking;
 using MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingToDo;
@@ -25,9 +25,9 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> Execute(
 			Guid id, ReversePickingStrategy strategy,
 			Guid pickingPalletId, string userId,
-			List<Pallet> pallets, int? rampNumber )
+			List<Guid> palletsIds, int? rampNumber )
 			=> (await _mediator.Send(new ExecuteReversePickingCommand(id, strategy,
-				pickingPalletId, userId, pallets, rampNumber)))
+				pickingPalletId, userId, palletsIds, rampNumber)))
 			.ToActionResult();
 
 		[HttpGet]

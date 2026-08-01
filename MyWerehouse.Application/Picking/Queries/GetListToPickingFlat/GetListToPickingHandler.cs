@@ -25,7 +25,7 @@ namespace MyWerehouse.Application.Picking.Queries.GetListToPickingFlat
 
 			if (data.Count == 0)
 			{
-				return AppResult<List<ProductToIssueDTO>>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
+				return AppResult<List<ProductToIssueDTO>>.Fail("No picking items to display.");
 			}
 			var result = data.Select(x => new ProductToIssueDTO
 			{

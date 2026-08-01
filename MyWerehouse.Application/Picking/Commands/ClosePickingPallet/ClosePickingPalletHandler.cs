@@ -23,14 +23,14 @@ namespace MyWerehouse.Application.Picking.Commands.ClosePickingPallet
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
 			if (pallet == null)
-				return AppResult<Unit>.Fail("Wskazana paleta nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("The specified pallet does not exist.");
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione do którego ma należeć paleta.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("The issue for this pallet was not found.");
 			pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location.ToSnapshot());
 			//drukowanie etykiety
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Zamknięto paletę, dołączono do zlecenia {issue.IssueNumber}.");
+			return AppResult<Unit>.Success(Unit.Value, $"Pallet was closed and added to issue {issue.IssueNumber}.");
 		}
 	}
 }

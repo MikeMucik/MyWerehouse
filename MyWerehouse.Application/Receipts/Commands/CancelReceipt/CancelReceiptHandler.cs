@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 		public async Task<AppResult<Unit>> Handle(CancelReceiptCommand request, CancellationToken ct)
 		{
 			var receipt = await _receiptRepo.GetReceipForCanceltByIdAsync(request.ReceiptId);
-			if (receipt == null) return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
+			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 
 			var listPalletsOfReceipt = await _palletRepo.GetPalletsByReceiptId(request.ReceiptId);
 			//logika do domeny
@@ -30,7 +30,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 			{			
 				if (!pallet.CanBeCancelled())
 				{
-					return AppResult<Unit>.Fail("Nie można anulować przyjęcia, palety w obiegu magazynu.", ErrorType.Conflict);
+					return AppResult<Unit>.Fail("The receipt cannot be cancelled because its pallets are already in warehouse circulation.", ErrorType.Conflict);
 				}
 			}
 			foreach (var pallet in listPalletsOfReceipt)
@@ -39,7 +39,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 			}
 			receipt.Cancel(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, "Anulowano przyjęcie wraz z paletami z bazy");
+			return AppResult<Unit>.Success(Unit.Value, "Receipt and its pallets were cancelled.");
 		}
 	}
 }

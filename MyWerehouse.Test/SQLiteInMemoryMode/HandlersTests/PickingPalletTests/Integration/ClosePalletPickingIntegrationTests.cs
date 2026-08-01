@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -110,7 +110,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var history = DbContext.HistoryPallet.SingleOrDefault(p => p.PalletId == pickingPallet.Id);
 			Assert.NotNull(history);
 			Assert.Equal(ReasonForPallet.ToLoad, history.Reason);
-			Assert.Contains("Zamknięto paletę, dołączono do zlecenia", result.Message);
+			Assert.Contains("Pallet was closed and added to issue", result.Message);
 		}
 		[Fact]
 		public async Task ClosePalletPicking_ShouldReturnErrorInfo_WhenPalletAlreadyAssigned()

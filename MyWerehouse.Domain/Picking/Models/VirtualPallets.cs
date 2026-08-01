@@ -39,6 +39,17 @@ namespace MyWerehouse.Domain.Picking.Models
 		public static VirtualPallet Create(Guid palletId, int initialQuantity, int locationId, DateTime moveDate)
 			=> new VirtualPallet(palletId, initialQuantity, locationId, moveDate);
 
+		private VirtualPallet(Pallet pallet, int initialQuantity, int locationId, DateTime moveDate)
+		{
+			Id = Guid.NewGuid();
+			Pallet = pallet;
+			PalletId = pallet.Id;
+			InitialPalletQuantity = initialQuantity;
+			LocationId = locationId;
+			DateMoved = moveDate;
+		}
+		public static VirtualPallet CreateFromPallet(Pallet pallet, int initialQuantity, int locationId, DateTime moveDate)
+			=> new VirtualPallet(pallet, initialQuantity, locationId, moveDate);
 		private VirtualPallet(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime date)
 		{
 			Id = id;
@@ -46,18 +57,20 @@ namespace MyWerehouse.Domain.Picking.Models
 			InitialPalletQuantity = initialQuantity;
 			LocationId = locationId;
 			DateMoved = date;
-		}
+		}		
 
 		public static VirtualPallet CreateForSeed(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime dateMoved)
 			=> new VirtualPallet(id, palletId, initialQuantity, locationId, dateMoved);
-		public void ChangeToAvailable(string userId, string snapShot)
+		public bool ChangeToAvailable(string userId, string snapShot)
 		{
 			var pickingTasks = this.PickingTasks;
 			if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
 			{
 				Pallet.ChangeStatus(PalletStatus.Available);
-				Pallet.AddHistory(Histories.Models.ReasonForPallet.ReversePicking, userId, snapShot);
+				Pallet.AddHistory(ReasonForPallet.ReversePicking, userId, snapShot);
+				return true;
 			}
+			return false;
 		}
 		public bool CanBeDeletedAfterReallocation()
 		{

@@ -14,7 +14,7 @@ namespace MyWerehouse.Domain.Interfaces
 	{
 		void AddIssue(Issue issue);
 		void DeleteIssue(Issue issue);	
-		Task<Issue?> GetIssueByIdAsync(Guid id);
+		Task<Issue?> GetIssueByIdAsync(Guid id);		
 		Task<Issue?> GetIssueByIdForModifyAsync(Guid id);
 		Task<Issue?> GetIssueForViewIncludedByIdAsync(Guid id);		
 		Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids);

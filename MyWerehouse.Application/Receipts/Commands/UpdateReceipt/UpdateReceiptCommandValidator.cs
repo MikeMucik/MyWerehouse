@@ -17,25 +17,25 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		{
 			RuleFor(r => r.Id)
 				.NotEqual(Guid.Empty)
-				.WithMessage("Przyjęcie musi mieć swój numer.");
+				.WithMessage("Receipt ID is required.");
 			RuleFor(x => x.DTO.ClientId)
 				.MustAsync(async (id, ct) => await clientRepo.IsClientExistAsync(id))
-				.WithMessage("Wybrany klient nie istnieje.");
+				.WithMessage("The selected client does not exist.");
 			RuleFor(r => r.DTO.ClientId)
 				.GreaterThan(0)
-				.WithMessage("Przyjęcie musi mieć numer klienta.");
+				.WithMessage("Client ID must be greater than zero.");
 			RuleFor(p => p.DTO.RampNumber)
 				.GreaterThan(0)
-				.WithMessage("Paleta musi mieć lokalizację.");
+				.WithMessage("Receipt ramp is required.");
 			RuleFor(l => l.DTO.RampNumber)
 				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id))
-				.WithMessage("Wybrana rampa nie istnieje.");
+				.WithMessage("The selected ramp does not exist.");
 			RuleFor(r => r.DTO.Pallets)
 				.NotEmpty()
-				.WithMessage("Przyjęcie musi zawierać przyjęte palety.");
+				.WithMessage("Receipt must contain at least one pallet.");
 			RuleFor(r => r.DTO.PerformedBy)
 				.NotEmpty()
-				.WithMessage("Przyjecie musi zawierać użytkownika.");
+				.WithMessage("User is required.");
 			RuleForEach(p => p.DTO.Pallets)
 				.SetValidator(palletValidator)
 				.When(p => p.DTO.Pallets != null && p.DTO.Pallets.Any());

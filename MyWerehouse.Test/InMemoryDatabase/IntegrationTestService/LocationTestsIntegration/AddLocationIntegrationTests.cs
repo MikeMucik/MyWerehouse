@@ -32,7 +32,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.Equal(1, result.Result);
-			Assert.Contains("Dodano lokalizacje.", result.Message);
+			Assert.Contains("Location added.", result.Message);
 		}
 		[Fact]
 		public async Task AddLocation_ShouldReturnErrorInfo_WhenLocationExist()
@@ -55,7 +55,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			var result2 = await _locationService.AddLocationServiceAsync(locationDTO);
 			Assert.NotNull(result2);
 			Assert.False(result2.IsSuccess);
-			Assert.Contains("Lokalizacja o zadanych parametrach już istnieje.", result2.Error);
+			Assert.Contains("A location with these coordinates already exists.", result2.Error);
 		}
 		[Fact]
 		public async Task PrepareAndAddManyLocation_ShouldAddLocationsToBase_WhenListCorrect()
@@ -77,7 +77,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			//Assert
 			Assert.NotNull(resultAdding);
 			Assert.True(resultAdding.IsSuccess);
-			Assert.Contains("Dodano zbiór lokalizacji.", resultAdding.Message);
+			Assert.Contains("Locations added.", resultAdding.Message);
 		}
 		[Fact]
 		public async Task PrepareAndAddManyLocation_ReturnError_WhenLocationExist()
@@ -113,7 +113,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			//Assert
 			Assert.NotNull(resultAdding);
 			Assert.False(resultAdding.IsSuccess);
-			Assert.Contains($"Lokalizacja o parametrach Bay = 1, Aisle = 1, Position = 1, Height = 1 już istnieje.", resultAdding.Error);
+			Assert.Contains($"A location with Bay = 1, Aisle = 1, Position = 1, Height = 1 already exists.", resultAdding.Error);
 		}
 	}
 }

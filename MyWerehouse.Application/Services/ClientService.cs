@@ -70,7 +70,7 @@ namespace MyWerehouse.Application.Services
 				Id = id
 			};
 			var client = await _clientRepo.GetClientByIdAsync(id);
-			if (client == null) return AppResult<Unit>.Fail($"Klient o numerze {id} nie istnieje.", ErrorType.NotFound);
+			if (client == null) return AppResult<Unit>.Fail($"Client {id} does not exist.");
 			var filterReceipt = new IssueReceiptSearchFilter
 			{
 				ClientId = filter.Id
@@ -93,7 +93,7 @@ namespace MyWerehouse.Application.Services
 			var client = await _clientRepo.GetClientToEditAsync(id);
 			if (client == null)
 			{
-				return AppResult<ClientDTO>.Fail($"Brak klienta o numerze {id}", ErrorType.NotFound);
+				return AppResult<ClientDTO>.Fail($"Client {id} was not found.");
 			}
 			var clientDTO = _mapper.Map<ClientDTO>(client);
 			return AppResult<ClientDTO>.Success(clientDTO);
@@ -101,7 +101,7 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient)
 		{
 			var existingClient = await _clientRepo.GetClientToEditAsync(id);
-			if (existingClient == null) return AppResult<Unit>.Fail("Nie znaleziono klienta.", ErrorType.NotFound);
+			if (existingClient == null) return AppResult<Unit>.Fail("Client was not found.");
 			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);
 			if (!validationResult.IsValid)
 			{
@@ -135,7 +135,7 @@ namespace MyWerehouse.Application.Services
 			}
 			else
 			{
-				return AppResult<DetailsOfClientDTO>.Fail($"Nieprawidłowy numer client {id}.", ErrorType.NotFound);
+				return AppResult<DetailsOfClientDTO>.Fail($"Invalid client ID: {id}.");
 			}
 		}
 

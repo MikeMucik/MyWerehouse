@@ -23,8 +23,8 @@ namespace MyWerehouse.Application.ViewModels.CategoryModels
 	{
 		public CategoryDTOValidation()
 		{			
-			RuleFor(g => g.Name).NotNull().WithMessage("Podaj nazwę kategorii.");
-			RuleFor(g => g.Name).Must(value=> !string.IsNullOrEmpty(value)).WithMessage("Podaj nazwę kategorii.");
+			RuleFor(g => g.Name).NotNull().WithMessage("Category name is required.");
+			RuleFor(g => g.Name).Must(value=> !string.IsNullOrEmpty(value)).WithMessage("Category name is required.");
 		}
 	}
 }

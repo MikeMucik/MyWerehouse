@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -98,14 +98,14 @@ namespace MyWerehouse.Domain.Issuing.Models
 			return item?.Quantity ?? 0;
 		}
 
-		public void AddIssueItem(Guid productId, int quantity, DateOnly bestBefore, DateTime createdAt)
+		public void AddIssueItem(Guid productId, int quantity, DateOnly? bestBefore, DateTime createdAt)
 		{
 			var existing = IssueItems.FirstOrDefault(x => x.ProductId == productId);
 			if (existing != null)
 			{
 				throw new ProductAlreadyExistDomainException(productId);
 			}
-			if (quantity <= 0) throw new IssueExceptions.InvalidQuantityDomainException(quantity, Id, IssueNumber);
+			if (quantity <= 0) throw new InvalidQuantityIssueItemDomainException(quantity, Id, IssueNumber);
 			var item = new IssueItem(Id, productId, quantity, bestBefore, createdAt);
 			this.IssueItems.Add(item);
 		}
@@ -119,6 +119,20 @@ namespace MyWerehouse.Domain.Issuing.Models
 			if (IssueStatus != IssueStatus.Pending &&
 				IssueStatus != IssueStatus.RequiresCorrection &&
 				IssueStatus != IssueStatus.New)
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
+			;
+		}
+
+		public void StartEmergencyPicking()
+		{
+			if (IssueStatus == IssueStatus.New)
+			{
+				IssueStatus = IssueStatus.Pending;
+			}
+			if (IssueStatus != IssueStatus.Pending &&
+				IssueStatus != IssueStatus.InProgress)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
@@ -218,7 +232,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			AddHistory(userId);
 		}
 
-		public void ReplacePalletInIssue(Pallet oldPallet, Pallet newPallet, string userId)
+		public void ReplacePalletInIssue(Pallet oldPallet, Pallet newPallet, string userId, DateOnly? bestBefore)
 		{
 			if (IssueStatus != IssueStatus.ConfirmedToLoad &&
 				IssueStatus != IssueStatus.Pending)
@@ -261,9 +275,12 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				throw new ProductOnPalletsAreNotTheSameAmountDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().Quantity, newPallet.ProductsOnPallet.Single().Quantity);
 			}
-			if (oldPallet.ProductsOnPallet.Single().BestBefore != newPallet.ProductsOnPallet.Single().BestBefore)
+			if (bestBefore != null)
 			{
-				throw new ProductOnPalletsAreNotTheSameBBDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().BestBefore, newPallet.ProductsOnPallet.Single().BestBefore);
+				if (bestBefore > newPallet.ProductsOnPallet.Single().BestBefore)
+				{
+					throw new ProductOnPalletsAreNotTheSameBBDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().BestBefore, newPallet.ProductsOnPallet.Single().BestBefore);
+				}
 			}
 			newPallet.ReserveToIssue(Id, userId, newPallet.Location.ToSnapshot());
 			this.AttachPallet(newPallet);
@@ -393,18 +410,18 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public ReallocationPreparation PrepareForReallocation(int clientId, string userId, DateTime now)
 		{
 			this.ChangeClient(clientId);
-			// Od³¹czamy poprzednie palety i anulujemy dotychczasowe zadania pickingu przed ponown¹ alokacj¹.
+			// OdÅ‚Ä…czamy poprzednie palety i anulujemy dotychczasowe zadania pickingu przed ponownÄ… alokacjÄ….
 			var reusablePallets = new List<Pallet>();
 			var listOldPallets = Pallets.ToList();
 			foreach (var pallet in listOldPallets)
 			{
 				DetachPallet(pallet);
-				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.Correction);
-				pallet.ChangeStatus(PalletStatus.LockedForIssue);// Palety pozostaj¹ zablokowane, ¿eby nie zosta³y u¿yte równolegle w innym zleceniu.
+				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.Correction);
+				pallet.ChangeStatus(PalletStatus.LockedForIssue);// Palety pozostajÄ… zablokowane, Å¼eby nie zostaÅ‚y uÅ¼yte rÃ³wnolegle w innym zleceniu.
 				reusablePallets.Add(pallet);
 			}
 			var listOldPickingTask = PickingTasks.ToList();
-			// Anulujemy poprzednie zadania pickingu przed ponown¹ alokacj¹.
+			// Anulujemy poprzednie zadania pickingu przed ponownÄ… alokacjÄ….
 			foreach (var pickingTask in listOldPickingTask)
 			{
 				RemovePickingTask(pickingTask);
@@ -432,5 +449,33 @@ namespace MyWerehouse.Domain.Issuing.Models
 			return true;
 		}
 
+		public void CompletePickingPlanned(bool missingQuantityAllocated, Pallet sourcePallet, string userId)
+		{
+			if (IssueStatus == IssueStatus.Pending)
+			{
+				this.ChangeStatus(IssueStatus.InProgress);
+			}
+			if (!missingQuantityAllocated)
+			{
+				this.ChangeStatus(IssueStatus.PickingShortage);
+			}
+			sourcePallet.ChangeStatus(PalletStatus.OnHold);
+			sourcePallet.AddHistory(ReasonForPallet.Correction, userId, sourcePallet.Location.ToSnapshot());
+		}
+		public void CompletePicking()
+		{
+			if (IssueStatus == IssueStatus.Pending)
+			{
+				this.ChangeStatus(IssueStatus.InProgress);
+			}
+		}
+		public void AssignPallets(IEnumerable<Pallet> pallets, string userId)
+		{
+			foreach (var pallet in pallets)
+			{
+				var snapShot = pallet.Location.ToSnapshot();
+				pallet.ReserveToIssue(Id, userId, snapShot);
+			}
+		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,15 +14,15 @@ namespace MyWerehouse.Application.Issues.DTOs
 		public IssueItemDTOValidator(IProductRepo productRepo, IDateTimeProvider dateTimeProvider)
 		{
 			RuleFor(x => x.ProductId)
-				.NotEqual(Guid.Empty).WithMessage("Nieprawidłowy numer produktu");
+				.NotEqual(Guid.Empty).WithMessage("Product ID is invalid.");
 			RuleFor(x => x.ProductId)
 				.MustAsync(async (id, ct) => await productRepo.IsExistProduct(id))
-				.WithMessage("Produkt nie istnieje.");
+				.WithMessage("The selected product does not exist.");
 			RuleFor(x => x.Quantity)
-				.GreaterThan(0).WithMessage("Ilość produktu musi być większa dod zera");
+				.GreaterThan(0).WithMessage("Product quantity must be greater than zero.");
 			RuleFor(x => x.BestBefore)
-				.Must(date => date > dateTimeProvider.Today)
-				.WithMessage("Data do spożycia musi być datą z przyszłości");
+				.Must(date => date ==null || date > dateTimeProvider.Today)
+				.WithMessage("Best-before date must be in the future.");
 		}
 	}
 }

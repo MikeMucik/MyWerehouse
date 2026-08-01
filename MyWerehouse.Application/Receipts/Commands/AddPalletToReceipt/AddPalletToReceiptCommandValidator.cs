@@ -15,26 +15,26 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 			RuleFor(p => p.ReceiptId)
 				.NotNull()
 				.NotEmpty()
-				.WithMessage("Paleta musi mieć numer przyjęcia");
+				.WithMessage("Receipt ID is required.");
 			RuleFor(p => p.DTO.ReceiptNumber)
 				.GreaterThan(0)
-				.WithMessage("Paleta musi mieć numer przyjęcia");
+				.WithMessage("Receipt number is required.");
 			RuleFor(p => p.DTO.ProductsOnPallet)
 				.NotEmpty()
-				.WithMessage("Paleta musi zawierać towar/y");
+				.WithMessage("Pallet must contain at least one product.");
 			RuleFor(p => p.DTO.ProductsOnPallet)
 				.Must(po => po.Select(p => p.ProductId)
 				.Distinct().Count() <= 1)
-				.WithMessage("Paleta przyjmowana może mieć tylko jeden rodzaj produktu");
+				.WithMessage("A received pallet may contain only one product type.");
 			RuleFor(p => p.DTO.ProductsOnPallet)
 				.Must(po => po.Select(po => po.BestBefore)
 				.Distinct()
 				.Count() <= 1)
-				.WithMessage("Produkt musi mieć jedną datą BestBefore"); ;
+				.WithMessage("Products on a pallet must have a single best-before date."); ;
 			RuleForEach(p => p.DTO.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)
 				.When(p => p.DTO.ProductsOnPallet != null && p.DTO.ProductsOnPallet.Count > 0)
-				.WithMessage("Paleta musi zawierać towar/y"); 
-		}	
+				.WithMessage("Pallet must contain at least one product.");
+		}
 	}
 }

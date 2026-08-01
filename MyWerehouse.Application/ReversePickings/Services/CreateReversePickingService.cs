@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,18 +34,19 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				return ReversePickingResult.Ok();
 			var listTasks = new List<ReversePickingTask>();
 			var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
-			if (pallet == null) return ReversePickingResult.Fail($"Paleta o numerze {palletId} nie istnieje.");
+			if (pallet == null) return ReversePickingResult.Fail($"Pallet {palletId} does not exist.");
 			var issue = pallet.Issue;
-			if (issue == null) return ReversePickingResult.Fail("Brak zlecenia wydania.");
+			if (issue == null) return ReversePickingResult.Fail("Issue was not found.");
 			issue.EnsureCanBeCancelled();
 			var pickingTasksOfPickingPallet = await _pickingTaskRepo.GetPickingTasksByPickingPalletIdAsync(palletId);
 			if (pickingTasksOfPickingPallet.Count == 0)
-				return ReversePickingResult.Fail("Brak alokacji dla palety. Paleta nie do dekompletacji.");
-			foreach (var pickingTaskToReverse in pickingTasksOfPickingPallet)
+				return ReversePickingResult.Fail("The pallet has no allocation and cannot be reverse-picked.");
+			foreach (var pickingTask in pickingTasksOfPickingPallet)
 			{
 				listTasks.Add(
-					ReversePickingTask.Create(palletId, pickingTaskToReverse.VirtualPallet!.PalletId, pickingTaskToReverse.ProductId, pickingTaskToReverse.BestBefore,
-					pickingTaskToReverse.PickedQuantity, pickingTaskToReverse.Id, userId, nowDateOnly));					
+					ReversePickingTask.Create(palletId, pickingTask.VirtualPallet!.PalletId, pickingTask.ProductId,
+					pickingTask.VirtualPallet.Pallet.ProductsOnPallet.Single().BestBefore,
+					pickingTask.PickedQuantity, pickingTask.Id, userId, nowDateOnly));					
 			}
 			foreach (var task in listTasks)
 			{

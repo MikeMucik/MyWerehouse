@@ -21,11 +21,11 @@ namespace MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt
 		{
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
 			if (receipt == null)
-				return AppResult<Unit>.Fail($"Przyjęcie o numerze {request.ReceiptId} nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 
 			receipt.CompletePhysicalReceipt(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(cancellationToken);
-			return AppResult<Unit>.Success(Unit.Value, "Zakończono fizyczne przyjęcie - gotowe do weryfikacji");
+			return AppResult<Unit>.Success(Unit.Value, "Physical receipt completed and ready for verification.");
 		}
 	}
 }

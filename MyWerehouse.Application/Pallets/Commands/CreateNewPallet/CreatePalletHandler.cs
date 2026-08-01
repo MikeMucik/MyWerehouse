@@ -25,7 +25,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 		public async Task<AppResult<Unit>> Handle(CreatePalletCommand request, CancellationToken ct)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
-			if (location == null) return AppResult<Unit>.Fail("Wskazana rampa nie istnieje.", ErrorType.NotFound);
+			if (location == null) return AppResult<Unit>.Fail("The specified ramp does not exist.");
 			var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
 			var now = _dateTimeProvider.UtcNow;
 			var pallet = Pallet.Create(newIdForPallet, request.RampNumber, now);
@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToWarehouse(location.Id, snapShot, request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Dodano paletę {newIdForPallet} do stanu magazynowego, uaktualniono stan magazynowy.");
+			return AppResult<Unit>.Success(Unit.Value, $"Pallet {newIdForPallet} was added to warehouse stock and inventory was updated.");
 		}
 	}
 }

@@ -28,13 +28,13 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLift
 			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(dateStart, dateEnd);
 			if (palletsIds.Count == 0)
 			{
-				return AppResult<List<PickingPalletWithLocationDTO>>.Fail("Brak palet do wyświetlenia.", ErrorType.NotFound);
+				return AppResult<List<PickingPalletWithLocationDTO>>.Fail("No pallets to display.");
 			}
 			foreach (var id in palletsIds)
 			{
 				var pallet = await _palletRepo.GetPalletByIdAsync(id);
 				if (pallet == null)
-					return AppResult<List<PickingPalletWithLocationDTO>>.Fail($"Brak palety w systemie {id}.", ErrorType.NotFound);
+					return AppResult<List<PickingPalletWithLocationDTO>>.Fail($"Pallet {id} was not found.");
 				var locationName = pallet.Location;
 				var fullLocation = locationName.ToSnapshot();
 				var item = new PickingPalletWithLocationDTO

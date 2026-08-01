@@ -25,7 +25,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 			var now = _dateTimeProvider.UtcNow;
 			var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issueToDelete == null)
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("Issue was not found.");
 			switch (issueToDelete.IssueStatus)
 			{
 				case IssueStatus.New:
@@ -36,10 +36,10 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 					issueToDelete.CancelIssue(request.UserId, now);
 					break;
 				default:
-					return AppResult<Unit>.Fail($"Zlecenia {issueToDelete.Id} nie można anulować.", ErrorType.Conflict);
+					return AppResult<Unit>.Fail($"Issue {issueToDelete.Id} cannot be cancelled.", ErrorType.Conflict);
 			}
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Usunięto zamówienie o numerze {issueToDelete.Id}.");
+			return AppResult<Unit>.Success(Unit.Value, $"Issue {issueToDelete.Id} was deleted.");
 		}
 	}
 }

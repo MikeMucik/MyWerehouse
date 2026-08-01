@@ -1,4 +1,4 @@
-using MyWerehouse.Domain.Inventories.Models;
+﻿using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Products.ProductsExceptions;
 
 namespace MyWerehouse.Domain.Products.Models
@@ -88,6 +88,12 @@ namespace MyWerehouse.Domain.Products.Models
 			CategoryId = categoryId;
 			CartonsPerPallet = cartonsPerPallet;
 			Details = ProductDetail.CreateDetails(Id, length, height, width, weight, description);
+		}
+
+		public int CalculateFullPalletCount(int quantityCartons)
+		{
+			var numberPallets = quantityCartons / CartonsPerPallet;
+			return numberPallets;
 		}
 	}
 }

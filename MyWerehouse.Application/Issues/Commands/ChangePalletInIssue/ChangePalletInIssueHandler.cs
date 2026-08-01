@@ -23,16 +23,17 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 			//Można podmieniać tylko palety z jednym towarem, nie palety kompletacyjne			
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("Issue was not found.");
 			var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(request.OldPalletId);
 			if (palletToRemoveFromIssue is null)
-				return AppResult<Unit>.Fail($"Paleta którą chcesz podmienić o numerze {request.OldPalletId} nie istnieje.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Pallet {request.OldPalletId}, which should be replaced, does not exist.");
 			var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(request.NewPalletId);
 			if (palletToAddingIssue is null)
-				return AppResult<Unit>.Fail($"Paleta na którą chcesz wymienić o numerze {request.NewPalletId} nie istnieje.", ErrorType.NotFound);
-			issue.ReplacePalletInIssue(palletToRemoveFromIssue, palletToAddingIssue, request.UserId);
+				return AppResult<Unit>.Fail($"Replacement pallet {request.NewPalletId} does not exist.");
+			var bestBefore = issue.IssueItems.Single(x=>x.ProductId == palletToRemoveFromIssue.ProductsOnPallet.Single().ProductId).BestBefore;
+			issue.ReplacePalletInIssue(palletToRemoveFromIssue, palletToAddingIssue, request.UserId, bestBefore);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, "Podmieniono palety.");
+			return AppResult<Unit>.Success(Unit.Value, "Pallets were replaced.");
 		}
 	}
 }

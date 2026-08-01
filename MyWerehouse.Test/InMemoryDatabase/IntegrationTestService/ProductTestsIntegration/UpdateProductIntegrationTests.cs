@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -84,7 +84,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 
 			};
 			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct));
-			Assert.Contains("Uzupełnij dane - nazwa", e.Message);
+			Assert.Contains("Product name is required.", e.Message);
 
 		}
 		[Fact]
@@ -112,7 +112,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct));
 
-			Assert.Contains("Uzupełnij dane - długość", e.Message);
+			Assert.Contains("Product length must be greater than zero.", e.Message);
 		}
 		[Fact]
 		public async Task UpdateProductAsync_ThrowsDomainException_WhenNotProperDataLength()

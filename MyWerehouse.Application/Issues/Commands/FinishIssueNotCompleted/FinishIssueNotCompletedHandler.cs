@@ -20,11 +20,11 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 		{
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("Issue was not found.");
 			var palletsReturn = issue.RemoveNotLoadedPallets(request.UserId);
 			issue.FinishIssueNotCompleted(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Zamknięto wydanie {request.IssueId}.");
+			return AppResult<Unit>.Success(Unit.Value, $"Issue {request.IssueId} was closed.");
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,7 @@ namespace MyWerehouse.Application.Issues.DTOs
 		public string ProductName { get; init; } = string.Empty;
 		public string ProductSKU { get; init; } = string.Empty;
 		public int Quantity { get; init; }
-		public DateOnly BestBefore { get; init; }
+		public DateOnly? BestBefore { get; init; }
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<IssueItem, IssueItemViewDTO>()

@@ -14,11 +14,11 @@ using MyWerehouse.Infrastructure;
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIntegration
 {
 	public class UpdateClientIntegrationTests : ClientIntegrationCommand
-	{	
+	{
 		[Fact]
 		public async Task UpdateClient_ShouldChangeData_WhenDataValid()
 		{
-			//Arrange			
+			//Arrange
 			var address = new Address
 			{
 				Id = 10,
@@ -64,16 +64,16 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "test1",
 				FullName = "test",
 				Addresses = new[] { addressU }
-			};			
-				await _clientService.UpdateClientAsync(id,updatedClient);			
-			//Assert			
+			};
+				await _clientService.UpdateClientAsync(id,updatedClient);
+			//Assert
 				var result = _context.Clients
 					.Include(x => x.Addresses)
 					.FirstOrDefault(x => x.Id == updatingClient.Id);
 				Assert.NotNull(result);
 				Assert.Equal(updatedClient.Name, result.Name);
 				Assert.Equal(updatedClient.Addresses.First().Country, result.Addresses.First().Country);
-				Assert.Equal(updatedClient.Addresses.First().City, result.Addresses.First().City);			
+				Assert.Equal(updatedClient.Addresses.First().City, result.Addresses.First().City);
 		}
 		[Fact]
 		public async Task UpdateClient_ShouldThrowValidationException_WhenAddresHasNoPhoneNumber()
@@ -125,14 +125,14 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "test1",
 				FullName = "test",
 				Addresses = new[] { addressU }
-			};					
+			};
 				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient));
-				Assert.Contains("tele", ex.Message);			
+				Assert.Contains("Phone number is required.", ex.Message);
 		}
 		[Fact]
 		public async Task UpdateClient_ShouldThrowValidationException_WhenAddresHasNoEmail()
 		{
-			//Arrange			
+			//Arrange
 			var address = new Address
 			{
 				Id = 30,
@@ -181,7 +181,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Addresses = new[] { addressU }
 			};
 				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient));
-				Assert.Contains("email", ex.Message);			
+				Assert.Contains("Client email is required.", ex.Message);
 		}
 	}
 }

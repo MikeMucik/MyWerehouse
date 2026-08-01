@@ -48,7 +48,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		
 		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid)
 		{
-			return await _werehouseDbContext.PickingTasks.SingleOrDefaultAsync(a => a.Id == guid);
+			return await _werehouseDbContext.PickingTasks
+				.Include(v=>v.VirtualPallet)
+				.SingleOrDefaultAsync(a => a.Id == guid);
 		}
 		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId)
 		{
@@ -85,6 +87,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(x=>x.VirtualPallet != null)
 				.Include(x=>x.VirtualPallet!)
 					.ThenInclude(xp=>xp.Pallet)
+						.ThenInclude(p=>p.ProductsOnPallet)
 				.ToListAsync();
 		}
 

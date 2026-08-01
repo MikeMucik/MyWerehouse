@@ -20,10 +20,10 @@ namespace MyWerehouse.Application.Issues.Commands.ConfirmIssueAfterLoading
 		{
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("Issue was not found.");
 			issue.ConfirmAfterLoading(request.ConfirmedBy);
 			await _dbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, "Załadunek zatwierdzony, zasoby uaktulanione.");
+			return AppResult<Unit>.Success(Unit.Value, "Loading confirmed and inventory updated.");
 		}
 	}
 }

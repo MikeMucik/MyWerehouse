@@ -29,14 +29,14 @@ namespace MyWerehouse.Application.Services
 		{
 			if (await _locationRepo.ExistsByCoordinatesAsync(locationDTO.Bay, locationDTO.Aisle, locationDTO.Position, locationDTO.Height))
 			{
-				return AppResult<int>.Fail("Lokalizacja o zadanych parametrach już istnieje.",ErrorType.Conflict);
+				return AppResult<int>.Fail("A location with these coordinates already exists.",ErrorType.Conflict);
 			}
 			var location = _mapper.Map<Location>(locationDTO);
 
 			var result = _locationRepo.AddLocation(location);
 
 			await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<int>.Success(result.Id, "Dodano lokalizacje.");
+			return AppResult<int>.Success(result.Id, "Location added.");
 		}
 		public async Task<AppResult<Unit>> DeleteLocationServiceAsync(int id)
 		{
@@ -44,28 +44,28 @@ namespace MyWerehouse.Application.Services
 			var isEmpty = await _palletRepo.CheckOccupancyAsync(id);
 			if (isEmpty != null)
 			{
-				return AppResult<Unit>.Fail("Miejsce paletowe nie jest puste nie można skasować", ErrorType.Conflict);
+				return AppResult<Unit>.Fail("The pallet location is not empty and cannot be deleted.", ErrorType.Conflict);
 			}
 			var location = await _locationRepo.GetLocationByIdAsync(id);
 			if (location == null)
 			{
-				return AppResult<Unit>.Fail($"Lokalizacja o numerze {id} nie została znaleziona", ErrorType.NotFound);
+				return AppResult<Unit>.Fail($"Location {id} was not found.");
 			}
 			_locationRepo.DeleteLocation(location);
 			await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<Unit>.Success(Unit.Value, "Operacja zakończyła się sukcesem");
+			return AppResult<Unit>.Success(Unit.Value, "Operation completed successfully.");
 		}
 		public async Task<AppResult<LocationDTO>> GetLocationServiceAsync(int id)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(id);
-			if (location == null) return AppResult<LocationDTO>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
+			if (location == null) return AppResult<LocationDTO>.Fail("No location data to display.");
 			var locationDTO = _mapper.Map<LocationDTO>(location);
 			return AppResult<LocationDTO>.Success(locationDTO);
 		}
 		public async Task<AppResult<Location>> FindLocationAsync(int bay, int aisle, int position, int height)
 		{
 			var location = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
-			if (location is null) return AppResult<Location>.Fail($"Nie ma lokalizacji o żądanych parametrach B:{bay}, A:{aisle}, P:{position}, H:{height}", ErrorType.NotFound);
+			if (location is null) return AppResult<Location>.Fail($"No location matches the requested coordinates B:{bay}, A:{aisle}, P:{position}, H:{height}.");
 			return AppResult<Location>.Success(location);
 		}
 
@@ -73,7 +73,7 @@ namespace MyWerehouse.Application.Services
 		{
 			var list = new List<LocationDTO>();
 			var locations = _locationRepo.CreateListLocationForBay(bay, startAisle, endAisle, amountPosition, amountHeigt);
-			if (locations == null) return AppResult<List<LocationDTO>>.Fail("Brak elementów do wyświetlenia", ErrorType.NotFound);
+			if (locations == null) return AppResult<List<LocationDTO>>.Fail("No location data to display.");
 
 			foreach (var location in locations)
 			{
@@ -88,7 +88,7 @@ namespace MyWerehouse.Application.Services
 			{
 				if (await _locationRepo.ExistsByCoordinatesAsync(location.Bay, location.Aisle, location.Position, location.Height))
 				{
-					return AppResult<Unit>.Fail($"Lokalizacja o parametrach Bay = {location.Bay}, Aisle = {location.Aisle}, Position = {location.Position}, Height = {location.Height} już istnieje.", ErrorType.Conflict);
+					return AppResult<Unit>.Fail($"A location with Bay = {location.Bay}, Aisle = {location.Aisle}, Position = {location.Position}, Height = {location.Height} already exists.", ErrorType.Conflict);
 				}
 			}
 			foreach (var locationDTO in locations.ToList())
@@ -97,7 +97,7 @@ namespace MyWerehouse.Application.Services
 				_locationRepo.AddLocation(location);
 			}
 			await _werehouseDbContext.SaveChangesAsync();
-			return AppResult<Unit>.Success(Unit.Value, "Dodano zbiór lokalizacji.");
+			return AppResult<Unit>.Success(Unit.Value, "Locations added.");
 		}
 	}
 }

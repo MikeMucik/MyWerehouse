@@ -21,10 +21,10 @@ namespace MyWerehouse.Application.Issues.Commands.CompletedLoadIssue
 		{
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
-				return AppResult<Unit>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);
+				return AppResult<Unit>.Fail("Issue was not found.");
 			issue.CompletedLoad(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			return AppResult<Unit>.Success(Unit.Value, $"Zakończono załadunek {request.IssueId}.");
+			return AppResult<Unit>.Success(Unit.Value, $"Loading completed for issue {request.IssueId}.");
 		}
 	}
 }

@@ -8,5 +8,4 @@ using MyWerehouse.Domain.Pallets.Models;
 namespace MyWerehouse.Domain.Issuing.Models
 {
 	public record ReallocationPreparation(List<Pallet> Pallets, List<Guid> ListPalletsIds);
-	
 }

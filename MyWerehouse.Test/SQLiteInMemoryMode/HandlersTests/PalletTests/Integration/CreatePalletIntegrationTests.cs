@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -52,7 +52,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var product = CreateProduct("Test");
 			var location = CreateLocation(0);
 			var inventory = CreateInventory();
-			
+
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
@@ -71,18 +71,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			};
 			//Act
 			var result = await Mediator.Send(new CreatePalletCommand(newPallet,1, "user"));
-			
+
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Contains("do stanu magazynowego, uaktualniono stan magazynowy", result.Message);
-			
+			Assert.Contains("was added to warehouse stock and inventory was updated.", result.Message);
+
 			// weryfikacja, że paleta faktycznie została utworzona w bazie
 			var palletInDb = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.FirstOrDefaultAsync();
 
-			Assert.NotNull(palletInDb);			
+			Assert.NotNull(palletInDb);
 
 			Assert.Single(palletInDb.ProductsOnPallet);
 			Assert.Equal(product.Id, palletInDb.ProductsOnPallet.First().ProductId);
@@ -106,7 +106,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var category = CreateCategory();
 			var product = CreateProduct("Test");
 			var location = CreateLocation(0);
-			var inventory = CreateInventory();			
+			var inventory = CreateInventory();
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
@@ -127,7 +127,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var ex = await Assert.ThrowsAsync<ValidationException>(() =>
 				Mediator.Send(new CreatePalletCommand(newPallet,1, "UserP")));
 			//Assert
-			Assert.Contains("Ilość produktu musi być większa od zera", ex.Message);
+			Assert.Contains("Product quantity must be greater than zero.", ex.Message);
 		}
 		[Fact]
 		public async Task CreatePallet_ThrowExcptionValidation_WhenProductNotExist()
@@ -137,7 +137,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var product = CreateProduct("Test");
 			var location = CreateLocation(0);
 			var inventory = CreateInventory();
-			
+
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Products.Add(product);
@@ -157,7 +157,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			};
 			//Act&Assert
 			var ex = await Assert.ThrowsAsync<ValidationException>(()=> Mediator.Send(new CreatePalletCommand(newPallet, 1, "user")));
-			Assert.Contains("Wybrany product nie istnieje.", ex.Message);			
+			Assert.Contains("The selected product does not exist.", ex.Message);
 		}
 	}
 }

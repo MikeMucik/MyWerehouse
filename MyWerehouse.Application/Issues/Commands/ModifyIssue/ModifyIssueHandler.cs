@@ -35,7 +35,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			var resultList = new List<AssignProductToIssueResult>();
 			var issue = await _issueRepo.GetIssueByIdForModifyAsync(request.Id);
 			if (issue == null)
-				return AppResult<List<AssignProductToIssueResult>>.Fail("Zamówienie nie zostało znalezione.", ErrorType.NotFound);			
+				return AppResult<List<AssignProductToIssueResult>>.Fail("Issue was not found.");
 			var mode = issue.DetremineModificationMode();
 			
 			if (mode == IssueModificationMode.Reallocation)
@@ -48,7 +48,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			}
 			else
 			{
-				return AppResult<List<AssignProductToIssueResult>>.Fail($"Nie można zaktualizować zlecenia {issue.Id}, status: {issue.IssueStatus}", ErrorType.Conflict);
+				return AppResult<List<AssignProductToIssueResult>>.Fail($"Issue {issue.Id} cannot be updated in status {issue.IssueStatus}.", ErrorType.Conflict);
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				await transaction.CreateSavepointAsync(savePointName, ct);
 				try
 				{
-					var result = await _assignProductToIssueAsync.AssignProductToIssue(issue, product,
+					var result = await _assignProductToIssueAsync.AssignGoodsToIssue(issue, product,
 						IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy);
 
 					if (!result.Success) //niepowodzenie biznesowe
@@ -95,7 +95,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 					await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
 					await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
 
-					resultList.Add(AssignProductToIssueResult.Fail($"Wystąpił błąd {ex.Message}", product.ProductId));
+					resultList.Add(AssignProductToIssueResult.Fail($"An error occurred: {ex.Message}", product.ProductId));
 					anyFailure = true;
 				}
 			}
@@ -140,7 +140,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				if (newQuantity < 0)
 				{
 					hasNegativeDiff = true;
-					errorMessage.Add($"Produkt {productId}: Nie można zmniejszyć z {oldQuantity} do {product.Quantity} (różnica : {newQuantity}). Zlecenie jest już zatwierdzone do załadunku");
+					errorMessage.Add($"Product {productId}: quantity cannot be decreased from {oldQuantity} to {product.Quantity} (difference: {newQuantity}). The issue has already been approved for loading.");
 					continue;
 				}
 				if (newQuantity > 0)
@@ -165,7 +165,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			{
 				var resultListNoQuantitesChange = new List<AssignProductToIssueResult>
 					{
-						AssignProductToIssueResult.Ok("Brak zmian w ilościach - zlecenie bez modyfikacji.")
+						AssignProductToIssueResult.Ok("No quantity changes were detected; the issue was not modified.")
 					};
 				return AppResult<List<AssignProductToIssueResult>>.Success(resultListNoQuantitesChange);
 			}
@@ -177,13 +177,13 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			};
 			var receiverFromCreate = await _mediator.Send(new CreateIssueCommand(dataForNewIssue, request.DateToSend), ct);
 			if (receiverFromCreate is null || receiverFromCreate.IsSuccess is false || receiverFromCreate.Result is null)
-				return AppResult<List<AssignProductToIssueResult>>.Fail("Nie udało się utworzyć nowego zlecenia.", ErrorType.Conflict);
+				return AppResult<List<AssignProductToIssueResult>>.Fail("The supplementary issue could not be created.", ErrorType.Conflict);
 		var	resultList = receiverFromCreate.Result;
 			foreach (var result in resultList)
 			{
 				if (result.Success)
 				{
-					result.Message += " (Dodatkowe zlecenie na ostatnią chwilę - stare jest w realizacji).";
+					result.Message += " (A last-minute supplementary issue was created because the original issue is already in progress.)";
 				}
 			}
 			return AppResult<List<AssignProductToIssueResult>>.Success(resultList);

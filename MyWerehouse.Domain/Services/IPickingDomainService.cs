@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
@@ -11,8 +12,9 @@ namespace MyWerehouse.Domain.Services
 	public interface IPickingDomainService
 	{		
 		PickingTask GetSingleHandPickingTask(IReadOnlyCollection<PickingTask> tasks, Guid issueId, Guid productId);
-		PickingCompletion DetermineCompletion(int requestedQuantity, int pickedQuantity);
-		void ReduceAllocation(IReadOnlyCollection<PickingTask> tasks, int quantity, string userId, DateTime now);
+
+		(int QuantityToPick, DateOnly? BestBefore) ReallocateForEmergencyPicking(IReadOnlyCollection<PickingTask> tasks,
+			int availableQuantity, string userId, DateTime now, Guid issueId, Guid productId, Guid palletId, string palletNumber);
 
 	}
 }

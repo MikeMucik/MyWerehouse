@@ -1,4 +1,4 @@
-namespace MyWerehouse.Test
+﻿namespace MyWerehouse.Test
 {
 	public static class TestDates
 	{

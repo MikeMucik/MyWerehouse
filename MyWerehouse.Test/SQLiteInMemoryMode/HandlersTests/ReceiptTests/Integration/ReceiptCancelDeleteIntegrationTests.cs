@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var result = await Mediator.Send(new CancelReceiptCommand(receipt.Id, "user"));
 			//Assert	
 			Assert.NotNull(result);
-			Assert.Contains("Anulowano przyjęcie wraz z paletami z bazy", result.Message);
+			Assert.Contains("Receipt and its pallets were cancelled.", result.Message);
 			var receiptE = DbContext.Receipts.FirstOrDefault(r => r.Id == receipt.Id);
 			Assert.NotNull(receiptE);
 			Assert.Equal(ReceiptStatus.Cancelled, receiptE.ReceiptStatus);
@@ -120,7 +120,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var result = await Mediator.Send(new DeleteDraftReceiptCommand(receipt.Id, "user"));
 			//Assert	
 			Assert.NotNull(result);
-			Assert.Contains("Usunięto przyjęcie z bazy", result.Message);
+			Assert.Contains("Receipt was deleted.", result.Message);
 		}
 		[Fact]
 		public async Task DeleteReceiptAsync_ThrowException_WhenWrongReceiptStatus()

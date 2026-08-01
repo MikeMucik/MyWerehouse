@@ -31,7 +31,6 @@ namespace MyWerehouse.Domain.Inventories.Models
 			=> new Inventory(productId, quantity, dateTime);
 		public void ApplyChangeInInventory(int quantity, DateTime dateTime)
 		{
-
 			var newQuantity = Quantity + quantity;
 
 			if (newQuantity < 0)
@@ -42,5 +41,4 @@ namespace MyWerehouse.Domain.Inventories.Models
 			Quantity = newQuantity;
 		}
 	}
-
 }

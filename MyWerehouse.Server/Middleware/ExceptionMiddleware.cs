@@ -55,15 +55,22 @@ namespace MyWerehouse.Server.Middleware
 			};
 			return context.Response.WriteAsJsonAsync(response);
 		}
-		private static Task HandleDomainException(HttpContext context, Exception ex)
+		private static Task HandleDomainException(HttpContext context, DomainException ex)
 		{
-			context.Response.StatusCode = StatusCodes.Status409Conflict;
+			var (statusCode, title) = ex.ErrorType switch
+			{
+				ErrorType.NotFound => (StatusCodes.Status404NotFound, "Resource not found"),
+				ErrorType.Validation => (StatusCodes.Status400BadRequest, "Validation error"),
+				_ => (StatusCodes.Status409Conflict, "Business rule violation")
+			};
+
+			context.Response.StatusCode = statusCode;
 			context.Response.ContentType = "application/problem+json";
 			var response = new ProblemDetails
 			{
-				Title = "Business rule violation",
+				Title = title,
 				Detail = ex.Message,
-				Status = StatusCodes.Status409Conflict,
+				Status = statusCode,
 			};
 			return context.Response.WriteAsJsonAsync(response);
 		}

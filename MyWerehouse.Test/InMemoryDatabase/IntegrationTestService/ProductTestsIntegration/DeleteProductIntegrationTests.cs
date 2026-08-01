@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -89,7 +89,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Act&Assert
 			var result =await _productService.DeleteProductAsync(productId);			
 			Assert.NotNull(result);
-			Assert.Contains("Brak produktu o tym numerze", result.Error);
+			Assert.Contains("No product with this ID was found.", result.Error);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -142,13 +142,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.Products.AddRange(product1, product2);
 			DbContext.SaveChanges();
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
-			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
+			sourcePallet1.AddProductForTests(product2.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 
 			var sourcePallet2 = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
+			sourcePallet2.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 
 			var sourcePallet3 = Pallet.CreateForTests("Q1002", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
-			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(300)));
+			sourcePallet3.AddProductForTests(product1.Id, 15, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(400)));
 
 			var issueId = Guid.NewGuid();
 
@@ -195,7 +195,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				BestBefore = pickingTask2.BestBefore,
 			};
 			//Act 1 
-			var result1 = await Mediator.Send(new DoPlannedPickingCommand(pickingTaskDTO, "user1st"));
+			var result1 = await Mediator.Send(new DoPlannedPickingCommand(
+				pickingTaskDTO.Id,
+				pickingTaskDTO.SourcePalletId!.Value,
+				pickingTaskDTO.PickedQuantity,
+				pickingTaskDTO.RampNumber,
+				"user1st"));
 			Assert.True(result1.IsSuccess);
 			//Act 
 			var result = await Mediator.Send(new FinishPlannedPickingPrepareToHandPickingCommand("user", null, null));
@@ -297,7 +302,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				BestBefore = pickingTask1.BestBefore,
 			};
 			//Act 1 
-			var result1 = await Mediator.Send(new DoPlannedPickingCommand(pickingTask1DTO, "user1st"));
+			var result1 = await Mediator.Send(new DoPlannedPickingCommand(
+				pickingTask1DTO.Id,
+				pickingTask1DTO.SourcePalletId!.Value,
+				pickingTask1DTO.PickedQuantity,
+				pickingTask1DTO.RampNumber,
+				"user1st"));
 			//Assert 1
 			Assert.True(result1.IsSuccess);
 			var task1 = DbContext.PickingTasks.Single(t=>t.Id == pickingTask1.Id);			
@@ -318,7 +328,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				RampNumber = 100100,
 				BestBefore = pickingTask2.BestBefore,
 			};
-			var result2 = await Mediator.Send(new DoPlannedPickingCommand(pickingTask2DTO, "user1st"));
+			var result2 = await Mediator.Send(new DoPlannedPickingCommand(
+				pickingTask2DTO.Id,
+				pickingTask2DTO.SourcePalletId!.Value,
+				pickingTask2DTO.PickedQuantity,
+				pickingTask2DTO.RampNumber,
+				"user1st"));
 			Assert.True(result2.IsSuccess);
 			var task2 = DbContext.PickingTasks.Single(t => t.Id == pickingTask2.Id);
 			

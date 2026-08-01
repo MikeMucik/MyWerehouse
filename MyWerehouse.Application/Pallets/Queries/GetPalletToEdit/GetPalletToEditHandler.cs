@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 		public async Task<AppResult<ShowPalletToEditDTO>> Handle(GetPalletToEditQuery request, CancellationToken ct)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
-			if (pallet == null) return AppResult<ShowPalletToEditDTO>.Fail("Brak palety do update", ErrorType.NotFound);
+			if (pallet == null) return AppResult<ShowPalletToEditDTO>.Fail("No pallet was found to update.");
 
 			var palletDTO = _mapper.Map<ShowPalletToEditDTO>(pallet);
 			return AppResult<ShowPalletToEditDTO>.Success(palletDTO);

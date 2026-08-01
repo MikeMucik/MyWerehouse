@@ -16,16 +16,16 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 		{
 			RuleFor(p => p.DTO)
 				.NotNull()
-				.WithMessage("Dane palety są wymagane");
+				.WithMessage("Pallet data is required.");
 			RuleFor(p => p.DTO.ProductsOnPallet)
 				.NotNull()
-				.WithMessage("Paleta musi zawierać produkty");
+				.WithMessage("Pallet must contain at least one product.");
 			RuleFor(p => p.RampNumber)
 				.GreaterThan(0)
-				.WithMessage("Paleta musi mieć lokalizację");
+				.WithMessage("Pallet location is required.");
 			RuleFor(p => p.RampNumber)
 				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id))
-				.WithMessage("Wybrana rampa nie istnieje.");
+				.WithMessage("The selected ramp does not exist.");
 			RuleForEach(p => p.DTO.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)
 				.When(p => p.DTO.ProductsOnPallet != null && p.DTO.ProductsOnPallet.Count > 0);

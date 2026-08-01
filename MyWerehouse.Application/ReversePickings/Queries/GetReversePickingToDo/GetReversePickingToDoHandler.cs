@@ -28,19 +28,16 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 		public async Task<AppResult<ReversePickingDetailsDTO>> Handle(GetReversePickingToDoQuery query, CancellationToken ct)
 		{
 			var reversePickingTask = await _reversePickingRepo.GetReversePickingAsync(query.ReversePickingTaskId);
-			if (reversePickingTask == null) return AppResult<ReversePickingDetailsDTO>.Fail("Nie znaleziono zadania dekompletacyjnego.", ErrorType.NotFound);
+			if (reversePickingTask == null) return AppResult<ReversePickingDetailsDTO>.Fail("Reverse picking task was not found.");
 
 			var pickingTask = reversePickingTask.PickingTask;
 			var reversePickingDTO = _mapper.Map<ReversePickingDTO>(reversePickingTask);
 			var remainingQuantity = pickingTask.PickedQuantity;
 			var product = await _productRepo.GetProductByIdAsync(pickingTask.ProductId);
-			if (product == null) return AppResult<ReversePickingDetailsDTO>.Fail($"Produkt o numerze {pickingTask.ProductId} nie istnieje.", ErrorType.NotFound);
-
-			if (product.CartonsPerPallet == 0) return AppResult<ReversePickingDetailsDTO>.Fail($"Produkt {pickingTask.ProductId} nie ma ustawionej ilosci kartonów na paletę. Popraw produkt", ErrorType.Conflict);
-			
+			if (product == null) return AppResult<ReversePickingDetailsDTO>.Fail($"Product {pickingTask.ProductId} does not exist.");
+			if (product.CartonsPerPallet == 0) return AppResult<ReversePickingDetailsDTO>.Fail($"Product {pickingTask.ProductId} has no cartons-per-pallet value. Update the product.", ErrorType.Conflict);
 			var sourcePallet = pickingTask.VirtualPallet?.Pallet;
-			if (sourcePallet == null)	return AppResult<ReversePickingDetailsDTO>.Fail("Paleta źródłowa nie istnieje.", ErrorType.NotFound);
-			
+			if (sourcePallet == null) return AppResult<ReversePickingDetailsDTO>.Fail("Source pallet does not exist.");
 			// czy można dołączyć do palety z której pobierano
 			bool addSource = false;
 			if (sourcePallet.Status == PalletStatus.Available || sourcePallet.Status == PalletStatus.ToPicking)
@@ -48,29 +45,21 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				addSource = true;
 			}
 			//czy istnieje paleta/y do której można dodać
-			var filtr = new PalletSearchFilter
-			{
-				ProductId = pickingTask.ProductId,
-				BestBeforeFrom = pickingTask.BestBefore,
-			};
-			var palletsWithProduct = _palletRepo.GetPalletsByFilter(filtr)
-				.Where(p =>
-				p.Receipt != null)
-				.Where(p => p.Status == PalletStatus.Available);	
-			var notFullPallets = await palletsWithProduct
-				.Where(p => p.ProductsOnPallet.Single().Quantity < product.CartonsPerPallet)
-				.OrderByDescending(p => p.ProductsOnPallet.Single().Quantity)
-				.ToListAsync(ct);
+			var palletsFromBase = await _palletRepo.GetAvailablePalletsForReversePickingAsync(pickingTask.ProductId,
+				reversePickingTask.BestBefore, sourcePallet.Id, product.CartonsPerPallet);
 			//lista palet do których dodamy
 			bool canAddedtoExist = false;
 			bool unpickComplete = false;
-			var listPalletsToAdd = new List<Pallet>();
-			foreach (var pallet in notFullPallets)
+			//var listPalletsToAdd = new List<Pallet>();
+			var listPalletsToAdd = new List<Guid>();
+			//foreach (var pallet in notFullPallets)
+			foreach (var pallet in palletsFromBase)
 			{
 				if (remainingQuantity <= 0) break;
 				var palletLackQuantity = product.CartonsPerPallet - pallet.ProductsOnPallet.Single().Quantity;
 				remainingQuantity -= palletLackQuantity;
-				listPalletsToAdd.Add(pallet);
+				//listPalletsToAdd.Add(pallet);
+				listPalletsToAdd.Add(pallet.Id);
 				canAddedtoExist = true;
 				if (remainingQuantity <= 0)
 				{

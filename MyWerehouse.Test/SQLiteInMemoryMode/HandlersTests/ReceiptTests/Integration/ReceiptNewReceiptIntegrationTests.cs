@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,7 +92,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 				RampNumber = 1
 			};
 			var ex = await Assert.ThrowsAsync <ValidationException>(()=> Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
-			Assert.Contains("Użytkownik wymagany.", ex.Message);
+			Assert.Contains("User is required.", ex.Message);
 			
 		}
 		[Fact]
@@ -114,7 +114,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			};
 			//Act&Assert
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new CreateReceiptPlanCommand(newPalletDto)));
-			Assert.Contains("Klient nie istnieje.", ex.Message);
+			Assert.Contains("The selected client does not exist.", ex.Message);
 		}
 		
 	}

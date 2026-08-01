@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter
 			var result = await palletsOrdered
 				.ProjectTo<PalletSimplyDTO>(_mapper.ConfigurationProvider)
 				.ToPagedResultAsync(request.CurrentPage,request.PageSize,ct);
-			if (result.TotalCount == 0) return AppResult<PagedResult<PalletSimplyDTO>>.Fail("Brak palety/palet o zadanych parametrach", ErrorType.NotFound);
+			if (result.TotalCount == 0) return AppResult<PagedResult<PalletSimplyDTO>>.Fail("No pallets match the specified criteria.");
 			return AppResult<PagedResult<PalletSimplyDTO>>.Success(result);
 		}
 	}

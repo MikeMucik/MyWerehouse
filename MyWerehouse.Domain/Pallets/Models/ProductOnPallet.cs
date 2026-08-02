@@ -65,8 +65,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void SetBestBefore(DateOnly? bestBefore)
 		{
 			BestBefore = bestBefore;
-		}
-		
+		}		
 	}
-
 }

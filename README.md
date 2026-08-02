@@ -18,6 +18,19 @@ The API is hosted on the Azure App Service F1 plan. After a period of inactivity
 
 If Swagger UI does not load immediately, please wait and try again. The application status can be checked using the [`GET /api/health`](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/api/health) endpoint. An HTTP 200 response confirms that the API has started.
 
+## Demo data
+
+The public API can be populated with fictional data by setting `DemoData__Enabled=true` in the application environment. When enabled, the application applies pending EF Core migrations and runs an idempotent demo-data seeder during startup. The seeder skips execution when the marker product `DEMO-COF-001` already exists.
+
+The dataset includes four products, two clients, warehouse locations, available pallets, a verified receipt, operation histories, and the following outbound scenarios:
+
+- issue `900001` with an allocated planned-picking task;
+- issue `900002` with a manual-picking task;
+- issue `900003` ready for loading;
+- issue `900004` cancelled with an ongoing reverse-picking task.
+
+Demo products use SKUs beginning with `DEMO-`, and demo pallets use numbers beginning with `DEMO-`.
+
 ## Features
 
 - Goods receipts
@@ -54,6 +67,28 @@ graph LR
 ```
 
 The Application layer currently references Infrastructure because several handlers and services use the concrete EF Core context. Removing this dependency is part of the planned migration towards Clean Architecture.
+
+## Current refactoring status
+
+This repository represents a working checkpoint during an ongoing migration of business logic from the Application layer into the Domain layer. The application remains runnable and covered by automated tests, but the architecture is intentionally in a transitional state.
+
+Recent changes have focused on:
+
+- moving issue reallocation, pallet assignment, and picking rules into domain entities and domain services;
+- handling planned, emergency, manual, partial, and reverse picking more consistently;
+- allowing goods from different best-before batches when each batch satisfies the outbound order requirement;
+- preserving picking and pallet history when an issue is modified or cancelled;
+- cancelling outstanding picking tasks and creating reverse-picking tasks for goods that were already picked.
+
+### Error handling during the transition
+
+Both `AppResult` and `DomainException` currently expose several error categories. This duplication is temporary and reflects the gradual migration:
+
+- `AppResult` is still used for application-level failures and use cases that must return a combined result for multiple products instead of stopping at the first failure;
+- `DomainException` is used when an entity or domain service rejects an operation that violates a business rule;
+- the exception middleware translates domain exceptions into consistent HTTP responses.
+
+As more rules move into the Domain layer, the responsibility of `AppResult` will be reduced and error-to-HTTP mapping will remain at the API boundary.
 
 ## Solution structure
 

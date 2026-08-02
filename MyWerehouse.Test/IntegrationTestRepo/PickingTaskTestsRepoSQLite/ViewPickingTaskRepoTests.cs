@@ -86,8 +86,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(6,result.Count);
+			Assert.Equal(4, result.Count);
 			Assert.All(result, a => Assert.Equal(issueId, a.IssueId));
+			Assert.All(result, a => Assert.True(
+				a.PickingStatus == PickingStatus.Allocated ||
+				a.PickingStatus == PickingStatus.CorrectionPicking));
 		}
 		[Fact]
 		public async Task ByProductIdAndDates_GetPickingTasksProductIdAsync_ReturnList()

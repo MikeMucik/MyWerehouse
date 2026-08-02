@@ -38,6 +38,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			var issue = pallet.Issue;
 			if (issue == null) return ReversePickingResult.Fail("Issue was not found.");
 			issue.EnsureCanBeCancelled();
+
 			var pickingTasksOfPickingPallet = await _pickingTaskRepo.GetPickingTasksByPickingPalletIdAsync(palletId);
 			if (pickingTasksOfPickingPallet.Count == 0)
 				return ReversePickingResult.Fail("The pallet has no allocation and cannot be reverse-picked.");

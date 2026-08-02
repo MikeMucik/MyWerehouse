@@ -132,9 +132,11 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id)
 		{
-			return await _werehouseDbContext.PickingTasks
+			return await _werehouseDbContext.PickingTasks					
 				.Where(x => x.IssueId == id)
 				.Where(x => x.VirtualPallet != null)
+				.Include(x => x.VirtualPallet!.Pallet)
+				.Include(x => x.VirtualPallet!.PickingTasks)
 				.Select(x => x.VirtualPallet!)				
 				.Distinct()
 				.ToListAsync();

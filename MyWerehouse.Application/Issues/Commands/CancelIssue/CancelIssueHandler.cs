@@ -10,6 +10,7 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Services;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CancelIssue
@@ -19,7 +20,8 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		IVirtualPalletRepo virtualPalletRepo,
 		WerehouseDbContext werehouseDbContext,
 		ICreateReversePickingService createReversePickingService,
-		IDateTimeProvider dateTimeProvider
+		IDateTimeProvider dateTimeProvider,
+		IPickingDomainService pickingDomainService
 			) : IRequestHandler<CancelIssueCommand, AppResult<Unit>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
@@ -28,55 +30,37 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly ICreateReversePickingService _createReversePickingService = createReversePickingService;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
 		public async Task<AppResult<Unit>> Handle(CancelIssueCommand request, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
-			var listPallet = new List<Pallet>();
-			//anulowanie zlecenia dla pełnych palet
-			var listPalletsOfIssue = issue.Pallets.ToList();
-			foreach (var pallet in listPalletsOfIssue)
+			issue.EnsureCanBeCancelled();
+			var palletsToReversepicking = issue.ReturnPickingPallets();		
+			foreach (var p in palletsToReversepicking)
 			{
-				if (pallet.ReceiptId != null)//paleta kompletacyjna nie ma ReceiptId tylko palety z przyjęcia
-				{
-					//issue.DetachPallet(pallet, request.UserId); // nie odłączam by mieć spis palet dla anulowanego zlecenia do historii
-					pallet.DetachFromIssue(request.UserId, pallet.Location.ToSnapshot(), Domain.Histories.Models.ReasonForPallet.CancelIssue);
-					listPallet.Add(pallet);
-				}
-			}
-			//palety kompletacyjne i zadania pickingu 
-			var restPallets = issue.Pallets.Except(listPallet).ToList();
-			foreach (var p in restPallets)
-			{
-				var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId); 
+				var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId);
 				if (!resultReverse.Success) return AppResult<Unit>.Fail(resultReverse.Message);
-			}
-			//usuń alokacje/pickingTask jeśli nie zrobione				
+			}				
 			var virtualPallets = await _issueRepo.GetVirtualPalletsAsync(request.IssueId);
-			if (virtualPallets != null)
+			var result = _pickingDomainService.ListVirtualPalletPickingTaskToCancel(virtualPallets, issue.Id, request.UserId, now);
+			foreach (var virtualPalletToCancel in result.Item1)
 			{
-				foreach (var vp in virtualPallets)
-				{
-					var pickingTaskToRemove = vp.PickingTasks
-						.Where(a => a.PickingStatus == PickingStatus.Allocated && a.IssueId == issue.Id)
-						.ToList();
-					foreach (var pickingTask in pickingTaskToRemove)
-					{
-						pickingTask.Cancel(request.UserId, now);
-
-						vp.PickingTasks.Remove(pickingTask);
-						_pickingTaskRepo.DeletePickingTask(pickingTask);
-					}
-					//usuń virtualPallet jeśli należy tylko do tego zlecenia
-					if (vp.PickingTasks.Count == 0)
-					{
-						_virtualPalletRepo.DeleteVirtualPalletPicking(vp);
-						vp.Pallet.ChangeStatus(PalletStatus.Available);
-					}
-				}
+				_virtualPalletRepo.DeleteVirtualPalletPicking(virtualPalletToCancel);
 			}
+			foreach (var pickingTaksToCancel in result.Item2)
+			{
+				_pickingTaskRepo.DeletePickingTask(pickingTaksToCancel);
+			}
+			var pickinkHandTasksToCancel = await _pickingTaskRepo.GetHandPickingTask(issue.Id);
+			foreach (var handTask in pickinkHandTasksToCancel)
+			{
+				handTask.Cancel(request.UserId, now);
+				_pickingTaskRepo.DeletePickingTask(handTask);
+			}
+			issue.DetachPallets(request.UserId);
 			issue.Cancel(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Issue {request.IssueId} was cancelled.");

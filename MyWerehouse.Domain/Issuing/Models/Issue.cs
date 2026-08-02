@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -227,6 +227,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
+
 			IssueStatus = IssueStatus.Cancelled;
 			PerformedBy = userId;
 			AddHistory(userId);
@@ -277,7 +278,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			if (bestBefore != null)
 			{
-				if (bestBefore > newPallet.ProductsOnPallet.Single().BestBefore)
+				if (bestBefore > newPallet.ProductsOnPallet.Single().BestBefore || newPallet.ProductsOnPallet.Single().BestBefore == null)
 				{
 					throw new ProductOnPalletsAreNotTheSameBBDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().BestBefore, newPallet.ProductsOnPallet.Single().BestBefore);
 				}
@@ -386,7 +387,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		//Nowe metody
 		public void EnsureCanBeCancelled()
 		{
-			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled)
+			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled|| IssueStatus == IssueStatus.IsShipped)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
@@ -476,6 +477,27 @@ namespace MyWerehouse.Domain.Issuing.Models
 				var snapShot = pallet.Location.ToSnapshot();
 				pallet.ReserveToIssue(Id, userId, snapShot);
 			}
+		}
+		public void DetachPallets(string userId)
+		{			
+			foreach (var pallet in Pallets)
+			{
+				if (pallet.ReceiptId != null)
+				{
+					//issue.DetachPallet(pallet, request.UserId); // nie odłączam by mieć spis palet dla anulowanego zlecenia do historii
+					pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
+				}				
+			}			
+		}
+		public List<Pallet> ReturnPickingPallets()
+		{
+			var list = new List<Pallet>();
+			foreach (var item in Pallets)
+			{
+				if (item.ReceiptId == null)
+				list.Add(item);
+			}
+			return list;
 		}
 	}
 }

@@ -81,7 +81,7 @@ namespace MyWerehouse.Domain.Picking.Models
 			Guid? pickingPalletId, DateOnly? pickingDay, int pickedQuantity) =>
 			new PickingTask(id, virtualPalletId, issueId, requestedQuantity, pickingStatus, productId, bestBefore, pickingPalletId, pickingDay, pickedQuantity);
 
-		public static PickingTask CreatePickingTaskForIssue(VirtualPallet vp, Issue issue, int quantity, Guid productId,DateOnly pickingDate,  DateOnly? bestBefore, string userId, DateTime now)
+		public static PickingTask CreatePickingTaskForIssue(VirtualPallet vp, Issue issue, int quantity, Guid productId, DateOnly pickingDate, DateOnly? bestBefore, string userId, DateTime now)
 		{
 			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated, productId,
 						bestBefore, null, pickingDate, 0);  // PickingDay jest wyliczany jako dwa dni przed planowaną wysyłką.
@@ -210,7 +210,7 @@ namespace MyWerehouse.Domain.Picking.Models
 					palletId);
 		}
 		public void BeginExecuteHandPicking(int pickedQuantity)
-		{			
+		{
 			if (pickedQuantity > RequestedQuantity)
 			{
 				throw new TooHighValueDomainException(RequestedQuantity, pickedQuantity);
@@ -227,6 +227,6 @@ namespace MyWerehouse.Domain.Picking.Models
 			{
 				PickingStatus = PickingStatus.Cancelled;
 			}
-		}
+		}		
 	}
 }

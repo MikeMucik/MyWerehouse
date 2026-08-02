@@ -251,6 +251,62 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 		}
 		[Fact]
+		public async Task CancelIssue_ShouldRemoveAvailableHandPickingTaskWithoutVirtualPallet()
+		{
+			// Arrange
+			var client = CreateClient();
+			var category = CreateCategory();
+			var product = CreateProduct("Prod1");
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			await DbContext.SaveChangesAsync();
+
+			var issue = Issue.CreateForSeed(
+				Guid.NewGuid(),
+				1,
+				client.Id,
+				TestDates.UtcNow,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)),
+				"User1",
+				IssueStatus.InProgress,
+				null);
+
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+
+			var availableTask = PickingTask.Create(
+				null,
+				issue.Id,
+				8,
+				PickingStatus.Available,
+				product.Id,
+				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)),
+				null,
+				DateOnly.FromDateTime(TestDates.UtcNow),
+				0);
+
+			DbContext.PickingTasks.Add(availableTask);
+			await DbContext.SaveChangesAsync();
+
+			Assert.Null(availableTask.VirtualPalletId);
+
+			// Act
+			var result = await Mediator.Send(new CancelIssueCommand(issue.Id, "UserC"));
+
+			// Assert
+			Assert.True(result.IsSuccess);
+			Assert.Equal(IssueStatus.Cancelled, issue.IssueStatus);
+			Assert.False(await DbContext.PickingTasks.AnyAsync(t => t.Id == availableTask.Id));
+
+			var historyPicking = await DbContext.HistoryPickings.SingleAsync(h =>
+				h.PickingTaskId == availableTask.Id && h.PerformedBy == "UserC");
+			Assert.Equal(issue.Id, historyPicking.IssueId);
+			Assert.Equal(PickingStatus.Available, historyPicking.StatusBefore);
+			Assert.Equal(PickingStatus.Cancelled, historyPicking.StatusAfter);
+		}
+
+		[Fact]
 		public async Task CancelIssue_ShouldRestorePalletsAvailabilityAndMadeReversePickingTask_WhenPalletsAsignmentAndPickingTaskDone()
 		{
 			// Arrange – setup initial data

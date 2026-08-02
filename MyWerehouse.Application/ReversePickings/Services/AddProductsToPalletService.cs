@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,7 +51,6 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			return ReversePickingResult.Ok("Product was returned to the source pallet.", reversePicking.ProductId, reversePicking.SourcePalletId);
 		}
 		public async Task<ReversePickingResult> AddToExistingPallet(ReversePickingTask task,
-			//List<Pallet> pallets,
 			List<Guid> pallets,
 			string userId)
 		{
@@ -64,10 +63,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			var cartonsOnPallet = product.CartonsPerPallet;
 			if (pallets.Count == 0)
 				return ReversePickingResult.Fail("No pallets are available for replenishment.");
-
-			//if (pallets.Any(p => p.ProductsOnPallet.Single().Quantity >= cartonsOnPallet))
-			//	return ReversePickingResult.Fail("Cannot replenish a full pallet.");
-
+	
 			var listPalletToAddProduct = new List<PalletProductQuantityDTO>();
 			foreach (var pallet in pallets)
 			{
@@ -78,16 +74,9 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				{
 					return ReversePickingResult.Fail("Problem with pallet, pallet missing.");
 				}
-				var resultAdding = palletToAdd.AddReversePickedProduct(task.ProductId, task.BestBefore, quantityToAdded, cartonsOnPallet, userId, palletToAdd.Location.ToSnapshot());
+				var resultAdding = palletToAdd.AddReversePickedProduct(task.ProductId, task.BestBefore,
+					quantityToAdded, cartonsOnPallet, userId, palletToAdd.Location.ToSnapshot());
 				quantityToAdded = resultAdding.Item1;
-				//var quantityOnPallet = pallet.ProductsOnPallet.Single().Quantity;
-				//var freeSpace = cartonsOnPallet - quantityOnPallet;
-				//if (freeSpace <= 0) continue;
-				//var addedAmount = Math.Min(quantityToAdded, freeSpace);
-				//pallet.ProductsOnPallet.Single().IncreaseQuantity(addedAmount);
-				//quantityToAdded -= addedAmount;
-				//pallet.AddHistory(ReasonForPallet.ReversePicking, userId, pallet.Location.ToSnapshot());
-				
 				var productToAdd = new PalletProductQuantityDTO
 				{
 					PalletId = pallet,

@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 		public async Task<AppResult<ReversePickingResult>> Handle(ExecuteReversePickingCommand command, CancellationToken ct)
-		{			
+		{
 			var reversePicking = await _reversePickingRepo.GetReversePickingAsync(command.TaskReversedId);
 			if (reversePicking is null)
 			{
@@ -67,15 +67,15 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					}
 					result = await _addProductsToPalletService.AddToExistingPallet(reversePicking, command.PalletsIds, command.UserId);
 					if (!result.Success) return Fail(result.Message);
-										
+
 					break;
 				case ReversePickingStrategy.AddToNewPallet:
-					
+
 					if (command.RampNumber == null)
 					{
 						return AppResult<ReversePickingResult>.Fail("Reverse picking location was not provided.", ErrorType.Validation);
 					}
-					var location =await _locationRepo.GetLocationByIdAsync(command.RampNumber.Value);
+					var location = await _locationRepo.GetLocationByIdAsync(command.RampNumber.Value);
 					if (location == null)
 					{
 						return AppResult<ReversePickingResult>.Fail("The specified location is invalid.");
@@ -95,6 +95,6 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			reversePicking.AddHistory(command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
 			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<ReversePickingResult>.Success(result);
-		}		
+		}
 	}
 }

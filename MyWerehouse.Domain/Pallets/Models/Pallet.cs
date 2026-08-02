@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -123,7 +123,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 				else
 				{
 					existing.SetQuantity(pop.Quantity);
-					//existing.SetBestBefore(pop.BestBefore);
 				}
 			}
 		}
@@ -289,7 +288,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public ProductOnPallet GetProductOnPallet(Guid productId, DateOnly? bestBefore)
 		{
 			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId
-			&&(bestBefore == null|| p.BestBefore >= bestBefore));
+			&& (bestBefore == null || p.BestBefore >= bestBefore));
 			if (product.Count() > 1)
 			{
 				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
@@ -426,20 +425,28 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			if (bestBefore != null)
 			{
+				if (ProductsOnPallet.Single().BestBefore == null)
+				{
+					throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
+				}
 				if (ProductsOnPallet.Single().BestBefore < bestBefore)
 				{
 					throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
 				}
 			}
-			//else if (bestBefore == null)
-			//{
-			//	throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
-			//}
 		}
-		public (int,int) AddReversePickedProduct(Guid productId, DateOnly? bestBefore,
+		public (int, int) AddReversePickedProduct(Guid productId, DateOnly? bestBefore,
 			int quantity, int cartonsPerPallet, string userId, string snapshot)
 		{
-			if(ProductsOnPallet.Count != 1)
+			if (Status != PalletStatus.Available)
+			{
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+			}
+			if (ReceiptId == null)
+			{
+				throw new PalletIsNotForReverseDomainException(Id, PalletNumber);
+			}
+			if (ProductsOnPallet.Count != 1)
 			{
 				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
 			}
@@ -448,12 +455,9 @@ namespace MyWerehouse.Domain.Pallets.Models
 			{
 				throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
 			}
-			if(bestBefore != null)
+			if (productOnaPallet.BestBefore != bestBefore)
 			{
-				if(productOnaPallet.BestBefore != bestBefore)
-				{
-					throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
-				}
+				throw new NotCorrectDateBestBeforeDomainException(Id, PalletNumber);
 			}
 			if (productOnaPallet.Quantity >= cartonsPerPallet)
 			{
@@ -464,7 +468,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			productOnaPallet.IncreaseQuantity(addedQuantity);
 			quantity -= addedQuantity;
 			AddHistory(ReasonForPallet.ReversePicking, userId, snapshot);
-			return(quantity, addedQuantity);
+			return (quantity, addedQuantity);
 		}
 	}
 }

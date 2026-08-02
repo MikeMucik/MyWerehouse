@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,15 +50,12 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 			//lista palet do których dodamy
 			bool canAddedtoExist = false;
 			bool unpickComplete = false;
-			//var listPalletsToAdd = new List<Pallet>();
 			var listPalletsToAdd = new List<Guid>();
-			//foreach (var pallet in notFullPallets)
 			foreach (var pallet in palletsFromBase)
 			{
 				if (remainingQuantity <= 0) break;
 				var palletLackQuantity = product.CartonsPerPallet - pallet.ProductsOnPallet.Single().Quantity;
 				remainingQuantity -= palletLackQuantity;
-				//listPalletsToAdd.Add(pallet);
 				listPalletsToAdd.Add(pallet.Id);
 				canAddedtoExist = true;
 				if (remainingQuantity <= 0)

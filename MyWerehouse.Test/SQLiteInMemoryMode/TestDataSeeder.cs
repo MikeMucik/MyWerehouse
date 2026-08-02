@@ -170,19 +170,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			{
 				context.PickingTasks.AddRange(
 					PickingTask.CreateForSeed(pickingId1, vpId1, issueId2, 20, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 0),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 0),
 				PickingTask.CreateForSeed(pickingId2, vpId1, issueId2, 20, PickingStatus.Picked, productId2,
-				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 20),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 20),
 
 				PickingTask.CreateForSeed(pickingId3, vpId2, issueId2, 50, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-5)), 0),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-5)), 0),
 
 				PickingTask.CreateForSeed(pickingId4, vpId3, issueId2, 100, PickingStatus.Allocated, productId1,
-				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 0),
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 0),
 				PickingTask.CreateForSeed(pickingId5, vpId3, issueId2, 10, PickingStatus.Picked, productId1,
-				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 10),
-				PickingTask.CreateForSeed(pickingId6, vpId1, issueId2, 20, PickingStatus.Allocated, productId2,
-				DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 10)
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 10),
+				PickingTask.CreateForSeed(pickingId6, vpId1, issueId2, 10, PickingStatus.Allocated, productId2,
+				DateOnly.FromDateTime(TestDates.TodayDateTime.AddMonths(3)), null, DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23).AddDays(-2)), 0)
 					);
 			}
 

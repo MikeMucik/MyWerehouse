@@ -6,6 +6,7 @@ using MyWerehouse.Application;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Infrastructure.Persistence.Seeding;
 using MyWerehouse.Server.Middleware;
 
 
@@ -44,6 +45,14 @@ builder.Services.AddSwaggerGen(c =>
 WebApplication app;
 
 app = builder.Build();
+
+if (builder.Configuration.GetValue<bool>("DemoData:Enabled"))
+{
+	using var scope = app.Services.CreateScope();
+	var dbContext = scope.ServiceProvider.GetRequiredService<WerehouseDbContext>();
+	await dbContext.Database.MigrateAsync();
+	await DemoDataSeeder.SeedAsync(dbContext);
+}
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwagger();

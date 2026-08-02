@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Picking.PickingExceptions;
-using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Domain.Services
 {
@@ -78,6 +79,59 @@ namespace MyWerehouse.Domain.Services
 					pickingTask.Cancel(userId, now);
 				}
 			}
+		}
+
+		public IReadOnlyList<PickingTask> PrepareHandPickingTasks(IReadOnlyCollection<PickingTask> activeTasks,Guid issueId, string userId, DateTime now, DateOnly pickingDay)
+		{			
+			var listToDoTasks = new List<PickingTask>();
+			var list = activeTasks
+					.GroupBy(p => p.ProductId)
+					.Select(g => new
+					{
+						g.Key,
+						TotalQuantity = g.Sum(p => p.RequestedQuantity),
+						BestBefore = g.First().BestBefore
+					}).ToList();
+			foreach (var task in list)
+			{
+				var taskToDo = PickingTask.Create(null, issueId, task.TotalQuantity, PickingStatus.Available, task.Key,
+					task.BestBefore, null, pickingDay, 0);
+				listToDoTasks.Add(taskToDo);
+			}
+			foreach (var task in activeTasks)
+			{
+				task.Cancel(userId, now);
+			}
+			return listToDoTasks;
+		}
+
+		public (List<VirtualPallet>, List<PickingTask>) ListVirtualPalletPickingTaskToCancel(IReadOnlyCollection<VirtualPallet> listVirtualPallets, Guid issueId, string userId, DateTime now)
+		{
+			var listPickingTaskToCancel = new List<PickingTask>();
+			var listVirtualPalletsToCancel = new List<VirtualPallet>();
+			foreach (var vp in listVirtualPallets)
+			{
+				var pickingTaskToRemove = vp.PickingTasks
+					.Where(a => (a.PickingStatus == PickingStatus.Allocated
+					|| a.PickingStatus == PickingStatus.Available ||
+					a.PickingStatus == PickingStatus.CorrectionPicking)&& a.IssueId == issueId)
+					.ToList();
+				foreach (var pickingTask in pickingTaskToRemove)
+				{
+					pickingTask.Cancel(userId, now);
+
+					vp.PickingTasks.Remove(pickingTask);
+					listPickingTaskToCancel.Add(pickingTask);
+				}
+				//usuń virtualPallet jeśli należy tylko do tego zlecenia
+				if (vp.PickingTasks.Count == 0)
+				{					
+					vp.Pallet.ChangeStatus(PalletStatus.Available);
+					listVirtualPalletsToCancel.Add(vp);
+				}
+			}
+			return (listVirtualPalletsToCancel, listPickingTaskToCancel);
+			//throw new NotImplementedException();
 		}
 	}
 }

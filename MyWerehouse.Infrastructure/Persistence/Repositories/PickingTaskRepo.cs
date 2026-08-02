@@ -76,6 +76,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
 				.Where(a => a.IssueId == issueId)
+				.Where(t => t.PickingStatus == PickingStatus.Allocated ||
+				t.PickingStatus == PickingStatus.CorrectionPicking)
 				.ToListAsync();
 			return result;
 		}
@@ -127,6 +129,13 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					Quantity = p.Sum(q => q.RequestedQuantity)
 				});
 			return list;
+		}
+
+		public async Task<List<PickingTask>> GetHandPickingTask(Guid issueId)
+		{
+			return await _werehouseDbContext.PickingTasks
+				.Where(p => p.IssueId == issueId && p.VirtualPallet == null && p.PickingStatus == PickingStatus.Available)
+				.ToListAsync(); 
 		}
 	}
 }

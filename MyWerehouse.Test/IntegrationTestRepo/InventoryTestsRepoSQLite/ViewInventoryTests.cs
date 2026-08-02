@@ -70,7 +70,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			//Act
 			var result =await _inventoryRepo.GetQuantityProductReservedForPickingAsync(productId2, bestBefore);
 			//Assert
-			Assert.Equal(110, result);
+			Assert.Equal(100, result);
 		}
 		[Fact]
 		public async Task ReturnAmount_GetQuantityProductReservedForIssueAsync_GiveProperQuantity()
@@ -93,7 +93,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			//Act
 			var result = await _inventoryRepo.GetAvailableQuantityAsync(productId2, bestBefore);
 			//Assert
-			Assert.Equal(640, result);
+			Assert.Equal(650, result);
 		}
 		[Fact]
 		public async Task ReturnAmount_GetQuantityForProductAsync_GiveBackQuantity()

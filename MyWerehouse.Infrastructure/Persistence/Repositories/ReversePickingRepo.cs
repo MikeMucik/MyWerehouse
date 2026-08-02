@@ -44,7 +44,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public IQueryable<ReversePickingTask> GetReversePickings()
 		{
-			return _werehouseDbContext.ReversePickings.Where(r => r.Status != ReversePickingStatus.Completed);
+			return _werehouseDbContext.ReversePickings
+				.Where(r => r.Status != ReversePickingStatus.Completed);
 		}
 
 		public Task<List<Guid>> GetPalletsIdsByDate(DateOnly start, DateOnly end)

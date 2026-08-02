@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Domain.Interfaces
@@ -19,5 +20,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId);
 		Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to);
 		IQueryable<PickingTaskFlat> GetPickingTaskFlats(DateOnly start, DateOnly end);
+		Task<List<PickingTask>> GetHandPickingTask(Guid issueId);
 	}
 }

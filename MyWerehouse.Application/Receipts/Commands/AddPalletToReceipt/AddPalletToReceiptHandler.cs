@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -17,7 +18,8 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		IPalletRepo palletRepo,
 		IProductRepo productRepo,
 		ILocationRepo locationRepo,
-		IDateTimeProvider dateTimeProvider
+		IDateTimeProvider dateTimeProvider,
+		IPalletNumberAllocator palletNumberAllocator
 			) : IRequestHandler<AddPalletToReceiptCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
@@ -26,6 +28,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPalletNumberAllocator _palletNumberAllocator = palletNumberAllocator;
 
 		public async Task<AppResult<Unit>> Handle(AddPalletToReceiptCommand request, CancellationToken ct)
 		{
@@ -34,7 +37,8 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 			var rampNumber = receipt.RampNumber;
 			var now = _dateTimeProvider.UtcNow;
 			receipt.StartReceiving(now, request.DTO.UserId);
-			var newId = await _palletRepo.GetNextPalletIdAsync();
+			//var newId = await _palletRepo.GetNextPalletNumberAsync();
+			var newId = (await _palletNumberAllocator.ReserveAsync(1, ct)).Single();
 
 			var location = await _locationRepo.GetLocationByIdAsync(rampNumber);
 			if (location == null) return AppResult<Unit>.Fail($"Location {rampNumber} was not found.");

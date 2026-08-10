@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
@@ -15,15 +16,17 @@ using MyWerehouse.Domain.Products.Models;
 namespace MyWerehouse.Application.Picking.Services
 {
 	public class ExecuteProcessPickingService(IPalletRepo palletRepo,
-		ILocationRepo locationRepo, IProductRepo productRepo, IDateTimeProvider dateTimeProvider) : IExecuteProcessPickingService
+		ILocationRepo locationRepo, IProductRepo productRepo,
+		IDateTimeProvider dateTimeProvider, IPalletNumberAllocator palletNumberAllocator) : IExecuteProcessPickingService
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPalletNumberAllocator _palletNumberAllocator = palletNumberAllocator;
 
 		public async Task<ProcessPickingActionResult> ExecuteProcessPicking(Pallet sourcePallet, PickingTask pickingTask,
-			int quantityToPick, string userId, int locationId)
+			int quantityToPick, string userId, int locationId, CancellationToken ct)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(locationId);
 			if (location == null) return ProcessPickingActionResult.Fail("Ramp was not found.");
@@ -31,7 +34,7 @@ namespace MyWerehouse.Application.Picking.Services
 			
 			var productOnSourcePallet = sourcePallet.GetProductOnPallet(pickingTask.ProductId, pickingTask.BestBefore);
 			var pickingPallet = await GetOrCreatePickingPallet(pickingTask.IssueId, pickingTask.ProductId, quantityToPick, userId,
-				pickingTask, locationId, snapshotPickingPallet, sourcePallet, productOnSourcePallet.BestBefore);
+				pickingTask, locationId, snapshotPickingPallet, sourcePallet, productOnSourcePallet.BestBefore, ct);
 			var productSKU = await _productRepo.GetSKUForProductAsync(pickingTask.ProductId);
 			var snapshotSourcePallet = sourcePallet.Location.ToSnapshot();
 			sourcePallet.PickProduct(productOnSourcePallet, quantityToPick, userId, snapshotSourcePallet);
@@ -48,14 +51,14 @@ namespace MyWerehouse.Application.Picking.Services
 		}
 		
 		public async Task<CreateNewPickingPalletResult> GetOrCreatePickingPallet(Guid issueId, Guid productId, int quantity, string userId,
-		PickingTask pickingTask, int locationId, string snapShot, Pallet palletSource, DateOnly? bestBefore)
+		PickingTask pickingTask, int locationId, string snapShot, Pallet palletSource, DateOnly? bestBefore, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
-			//var bestBefore = palletSource.ProductsOnPallet.Single().BestBefore;
 			var oldPallet = await _palletRepo.GetPickingPalletByIssueId(issueId);
 			if (oldPallet is null)
 			{
-				var newNumberPallet = await _palletRepo.GetNextPalletIdAsync();
+				//var newNumberPallet = await _palletRepo.GetNextPalletNumberAsync();
+				var newNumberPallet = (await _palletNumberAllocator.ReserveAsync(1, ct)).Single();
 				var newPickingPallet = Pallet.CreatePickingPallet(newNumberPallet, locationId, now, productId, quantity, bestBefore);
 				var palletId = _palletRepo.AddPallet(newPickingPallet);
 				newPickingPallet.ReserveToIssue(issueId, userId, snapShot);

@@ -13,7 +13,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 	{
 		public void Configure(EntityTypeBuilder<HistoryPalletDetail> entity)
 		{
-
 			entity.HasOne(md => md.HistoryPallet)
 			.WithMany(pm => pm.HistoryPalletDetails)
 			.HasForeignKey(md => md.HistoryPalletId);

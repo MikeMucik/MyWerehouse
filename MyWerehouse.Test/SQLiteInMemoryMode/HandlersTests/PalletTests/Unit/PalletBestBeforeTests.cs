@@ -80,11 +80,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Unit
                 PalletStatus.Available, Guid.NewGuid(), null);
             pallet.AddProduct(productId, 5, TestDates.UtcNow, null);
 
-            var result = pallet.AddReversePickedProduct(
+            var (RestQuantity, AddedQuantity) = pallet.AddReversePickedProduct(
                 productId, null, 4, 10, "user", "location");
 
-            Assert.Equal(0, result.Item1);
-            Assert.Equal(4, result.Item2);
+            Assert.Equal(0, RestQuantity);
+            Assert.Equal(4, AddedQuantity);
             Assert.Equal(9, pallet.ProductsOnPallet.Single().Quantity);
         }
     }

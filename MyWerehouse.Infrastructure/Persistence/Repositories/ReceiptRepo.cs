@@ -46,9 +46,13 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.ThenInclude(l => l.Location)
 				.FirstOrDefaultAsync(r => r.Id == id);
 		}
-		public async Task<Receipt?> GetReceipForCanceltByIdAsync(Guid id)
+		public async Task<Receipt?> GetReceipForCancelByIdAsync(Guid id)
 		{
 			return await _werehouseDbContext.Receipts
+				.Include(p=>p.Pallets)
+					.ThenInclude(p=>p.PalletHistory)
+				.Include(p => p.Pallets)
+					.ThenInclude(p => p.Location)
 				.FirstOrDefaultAsync(r => r.Id == id);
 		}
 		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)

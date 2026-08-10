@@ -29,6 +29,7 @@ namespace MyWerehouse.Application
 			services.AddScoped<IClientService, ClientService>();
 			services.AddScoped<ILocationService, LocationService>();
 			services.AddScoped<IProductService, ProductService>();
+			services.AddScoped<IPalletNumberAllocator, PalletNumberAllocator>();
 						
 			services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
@@ -40,8 +41,7 @@ namespace MyWerehouse.Application
 			services.AddScoped<IExecuteProcessPickingService, ExecuteProcessPickingService>();
 			services.AddScoped<IGetProductCountService, GetProductCountService>();
 			services.AddScoped<IGetNumberPalletsAndRestService, GetNumberPalletsAndRestService>();
-			services.AddScoped<IAssignProductToIssueService, AssignProductToIssueAsyncService>();
-			services.AddScoped<IComparePlanToPreparedService, ComparePlanToPreparedService>();
+			services.AddScoped<IAssignProductToIssueService, AssignProductToIssueAsyncService>();			
 			services.AddScoped<IAddProductsToPalletService, AddProductsToPalletService>();
 			services.AddScoped<ICreateReversePickingService, CreateReversePickingService>();
 			

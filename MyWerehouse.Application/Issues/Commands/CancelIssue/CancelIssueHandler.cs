@@ -46,11 +46,11 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			}				
 			var virtualPallets = await _issueRepo.GetVirtualPalletsAsync(request.IssueId);
 			var result = _pickingDomainService.ListVirtualPalletPickingTaskToCancel(virtualPallets, issue.Id, request.UserId, now);
-			foreach (var virtualPalletToCancel in result.Item1)
+			foreach (var virtualPalletToCancel in result.VirtualPallets)
 			{
 				_virtualPalletRepo.DeleteVirtualPalletPicking(virtualPalletToCancel);
 			}
-			foreach (var pickingTaksToCancel in result.Item2)
+			foreach (var pickingTaksToCancel in result.PickingTasks)
 			{
 				_pickingTaskRepo.DeletePickingTask(pickingTaksToCancel);
 			}

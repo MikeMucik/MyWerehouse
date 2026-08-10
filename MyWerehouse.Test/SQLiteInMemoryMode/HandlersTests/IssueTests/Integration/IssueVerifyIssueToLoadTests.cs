@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
@@ -151,6 +152,94 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.All(savedIssue.Pallets, p => Assert.True(p.ProductsOnPallet.Any()));
 		}
 		[Fact]
+		public async Task VerifyIssueToLoadAsync_ShouldConditionallyApprove_WhenStatusPickingShortage()
+		{
+			//Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Cat");
+			var location = CreateLocation(1);
+			var product = CreateProduct("Prod1", "SKU1", 1);
+
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.SaveChanges();
+
+			var issueId = Guid.NewGuid();
+			var issueItem = IssueItem.CreateForSeed(1, issueId, product.Id, 20,
+				new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1));
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+				DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.PickingShortage,
+				new List<IssueItem> { issueItem });
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
+			DbContext.Pallets.Add(pallet);
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+
+			//Act
+			var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
+
+			//Assert
+			Assert.True(result.IsSuccess);
+			Assert.Equal("Issue was conditionally approved with incomplete picking.", result.Message);
+			var comparison = Assert.Single(result.Result!);
+			Assert.True(comparison.Success);
+			Assert.Contains("conditionally", comparison.Message);
+			Assert.Equal(product.Id, comparison.ProductId);
+			Assert.Equal(product.SKU, comparison.SKU);
+
+			var issueAfter = await DbContext.Issues.FindAsync(issue.Id);
+			Assert.NotNull(issueAfter);
+			Assert.Equal(IssueStatus.ConfirmedToLoad, issueAfter.IssueStatus);
+		}
+		[Fact]
+		public async Task VerifyIssueToLoadAsync_ShouldFail_WhenStatusPickingShortageAndPreparedQuantityIsGreater()
+		{
+			//Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Cat");
+			var location = CreateLocation(1);
+			var product = CreateProduct("Prod1", "SKU1", 1);
+
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.SaveChanges();
+
+			var issueId = Guid.NewGuid();
+			var issueItem = IssueItem.CreateForSeed(1, issueId, product.Id, 20,
+				new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1));
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+				DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.PickingShortage,
+				new List<IssueItem> { issueItem });
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
+			pallet.AddProduct(product.Id, 30, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
+			DbContext.Pallets.Add(pallet);
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+
+			//Act
+			var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
+
+			//Assert
+			Assert.False(result.IsSuccess);
+			Assert.Equal("Issue was not approved.", result.Error);
+			Assert.Equal(ErrorType.Validation, result.ErrorType);
+			var comparison = Assert.Single(result.Result!);
+			Assert.False(comparison.Success);
+			Assert.Equal(20, comparison.QuantityRequest);
+			Assert.Equal(30, comparison.QuantityPrepared);
+
+			var issueAfter = await DbContext.Issues.FindAsync(issue.Id);
+			Assert.NotNull(issueAfter);
+			Assert.Equal(IssueStatus.PickingShortage, issueAfter.IssueStatus);
+		}
+		[Fact]
 		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenWrongStatusPallets()
 		{
 			//Arrange
@@ -179,14 +268,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
 			await DbContext.SaveChangesAsync();
-			//Act
-			var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
-			//Assert
-			Assert.NotNull(result);
-			Assert.False(result.IsSuccess);
-			Assert.NotNull(result.Result);
-			Assert.Contains("Issue was not approved.", result.Error);
-			Assert.Contains(result.Result, x => x.Message.Contains("Not all pallets to be loaded have the required status."));
+			//Act&Assert
+			var ex = await Assert.ThrowsAsync<PalletsNotReadyToLoadDomainException>(() => Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123")));
+			Assert.Contains("Not all pallets are ready to load", ex.Message);
+			
+			////Act
+			//var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
+			////Assert
+			//Assert.NotNull(result);
+			//Assert.False(result.IsSuccess);
+			//Assert.NotNull(result.Result);
+			//Assert.Contains("Issue was not approved.", result.Error);
+			//Assert.Contains(result.Result, x => x.Message.Contains("Not all pallets to be loaded have the required status."));
 
 		}
 		[Fact]

@@ -71,6 +71,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task DoPlannedPicking_ShouldPicked30UnitsCreateNewPickingPallet_When40UnitsAreAvailable()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1001;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product = CreateProduct("Prod A", "666");
@@ -129,6 +132,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
 			Assert.True(result.Result.NewPalletCreated);
+			Assert.Equal("Q1001", result.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
 
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask.Id);
@@ -157,6 +161,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task DoPicking_ShouldArchiveSourcePallet_WhenTakedWholePallet()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1001;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product = CreateProduct("Prod A", "666");
@@ -213,6 +220,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
 			Assert.True(result.Result.NewPalletCreated);
+			Assert.Equal("Q1001", result.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
 
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask.Id);

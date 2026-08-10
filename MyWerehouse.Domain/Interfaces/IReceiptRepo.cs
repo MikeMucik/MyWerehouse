@@ -14,7 +14,7 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeleteReceipt(Receipt receipt); 
 		Task<Receipt?> GetReceiptByIdAsync(Guid id);
 		Task<Receipt?> GetReceiptWithAllIncludesByIdAsync(Guid id);
-		Task<Receipt?> GetReceipForCanceltByIdAsync(Guid id);
+		Task<Receipt?> GetReceipForCancelByIdAsync(Guid id);
 		IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter);
 		Task<int> GetNextNumberOfReceipt();
 	}

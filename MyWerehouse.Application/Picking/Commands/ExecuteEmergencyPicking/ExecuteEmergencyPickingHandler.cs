@@ -79,7 +79,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 			}
 			var newPickingTask = newPickingTaskInfo.PickingTask.Single();
 			var resultProccessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, newPickingTask,
-				quantityToPick, request.UserId, request.RampNumber);
+				quantityToPick, request.UserId, request.RampNumber, ct);
 			if (!resultProccessPicking.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(

@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
@@ -16,12 +17,14 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		IPalletRepo palletRepo,
 		IProductRepo productRepo,
 		IVirtualPalletRepo virtualPalletRepo,
-		IDateTimeProvider dateTimeProvider) : IAddProductsToPalletService
+		IDateTimeProvider dateTimeProvider,
+		IPalletNumberAllocator palletNumberAllocator) : IAddProductsToPalletService
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPalletNumberAllocator _palletNumberAllocator = palletNumberAllocator;
 
 		public async Task<ReversePickingResult> AddProductsToSourcePallet(ReversePickingTask reversePicking, string userId)
 		{
@@ -76,7 +79,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				}
 				var resultAdding = palletToAdd.AddReversePickedProduct(task.ProductId, task.BestBefore,
 					quantityToAdded, cartonsOnPallet, userId, palletToAdd.Location.ToSnapshot());
-				quantityToAdded = resultAdding.Item1;
+				quantityToAdded = resultAdding.RestQuantity;
 				var productToAdd = new PalletProductQuantityDTO
 				{
 					PalletId = pallet,
@@ -84,7 +87,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 					ProductId = product.Id,
 					ProductName = product.Name,
 					ProductSKU = product.SKU,
-					Quantity = resultAdding.Item2,
+					Quantity = resultAdding.AddedQuantity,
 				};
 				listPalletToAddProduct.Add(productToAdd);
 			}
@@ -95,9 +98,10 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			return ReversePickingResult.Ok("Product was added.", listPalletToAddProduct);
 		}
 
-		public async Task<ReversePickingResult> AddToNewPallet(ReversePickingTask task, string userId, int locationId, string snapShot)
+		public async Task<ReversePickingResult> AddToNewPallet(ReversePickingTask task, string userId, int locationId, string snapShot, CancellationToken ct)
 		{
-			var newNumber = await _palletRepo.GetNextPalletIdAsync();
+			//var newNumber = await _palletRepo.GetNextPalletNumberAsync();
+			var newNumber = (await _palletNumberAllocator.ReserveAsync(1, ct)).Single();
 			var now = _dateTimeProvider.UtcNow;
 			var newPallet = Pallet.Create(newNumber, locationId, now);
 			newPallet.AddProduct(task.ProductId, task.Quantity, now, task.BestBefore);

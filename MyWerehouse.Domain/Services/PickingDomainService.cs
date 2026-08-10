@@ -105,7 +105,7 @@ namespace MyWerehouse.Domain.Services
 			return listToDoTasks;
 		}
 
-		public (List<VirtualPallet>, List<PickingTask>) ListVirtualPalletPickingTaskToCancel(IReadOnlyCollection<VirtualPallet> listVirtualPallets, Guid issueId, string userId, DateTime now)
+		public (List<VirtualPallet> VirtualPallets, List<PickingTask> PickingTasks) ListVirtualPalletPickingTaskToCancel(IReadOnlyCollection<VirtualPallet> listVirtualPallets, Guid issueId, string userId, DateTime now)
 		{
 			var listPickingTaskToCancel = new List<PickingTask>();
 			var listVirtualPalletsToCancel = new List<VirtualPallet>();
@@ -131,7 +131,6 @@ namespace MyWerehouse.Domain.Services
 				}
 			}
 			return (listVirtualPalletsToCancel, listPickingTaskToCancel);
-			//throw new NotImplementedException();
 		}
 	}
 }

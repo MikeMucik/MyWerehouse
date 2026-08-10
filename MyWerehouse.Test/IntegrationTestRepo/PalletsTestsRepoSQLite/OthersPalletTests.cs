@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
@@ -14,35 +15,24 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 	public class OthersPalletTests: TestBase
 	{		
 		[Fact]
-		public async Task NextId_GetNextPalletIdAsync_ReturnNextId()
+		public async Task ReservePalletNumbersAsync_ShouldReturnFirstNumberAndAdvanceCounter()
 		{
 			//Arrange
-			var location1 = new Location
-			{
-				Bay = 1,
-				Aisle = 1,
-				Position = 1,
-				Height = 1
-			};
-			var location2 = new Location
-			{
-				Bay = 2,
-				Aisle = 1,
-				Position = 1,
-				Height = 1
-			};
-			DbContext.Locations.AddRange(location1, location2);
-			var pallet1 = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, null);			
-			var pallet2 = Pallet.CreateForTests("Q1011", TestDates.UtcNow, 2, PalletStatus.Available, null, null);			
-			DbContext.Pallets.AddRange(pallet1, pallet2);
-			DbContext.SaveChanges();
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1012;
+			await DbContext.SaveChangesAsync();
 			var palletRepo = new PalletRepo(DbContext);
-			DbContext.SaveChanges();
+
 			//Act
-			var result =await palletRepo.GetNextPalletIdAsync();
+			var result = await palletRepo.ReservePalletNumbersAsync(3);
+			var updatedCounter = await DbContext.PalletNumberCounters
+				.AsNoTracking()
+				.SingleAsync(x => x.Name == "Pallet");
+
 			//Assert
-			Assert.NotEmpty(result);
-			Assert.Equal("Q1012", result);
+			Assert.Equal(1012, result);
+			Assert.Equal(1015, updatedCounter.NextNumber);
 		}		
 	}
 }

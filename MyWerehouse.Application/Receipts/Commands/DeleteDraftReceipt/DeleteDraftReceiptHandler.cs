@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt
 
 		public async Task<AppResult<Unit>> Handle(DeleteDraftReceiptCommand request, CancellationToken ct)
 		{
-			var receipt = await _receiptRepo.GetReceipForCanceltByIdAsync(request.ReceiptId);
+			var receipt = await _receiptRepo.GetReceipForCancelByIdAsync(request.ReceiptId);
 			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 			receipt.Delete(request.UserId);
 			_receiptRepo.DeleteReceipt(receipt);

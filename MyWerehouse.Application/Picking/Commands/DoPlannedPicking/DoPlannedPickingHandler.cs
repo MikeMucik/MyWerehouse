@@ -46,7 +46,7 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 			pickingTaskToChange.EnsureSourcePallet(sourcePallet.Id);
 			var neededQuantity = pickingTaskToChange.RequestedQuantity;
 			var pickedQuantity = request.PickedQuantity;
-			var resultProccesPicking = await _processPickingActionService.ExecuteProcessPicking(sourcePallet,pickingTaskToChange, request.PickedQuantity, request.UserId,  request.RampNumber);
+			var resultProccesPicking = await _processPickingActionService.ExecuteProcessPicking(sourcePallet,pickingTaskToChange, request.PickedQuantity, request.UserId,  request.RampNumber, ct);
 			if (!resultProccesPicking.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(resultProccesPicking.Message, ErrorType.Conflict);

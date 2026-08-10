@@ -48,6 +48,8 @@ namespace MyWerehouse.Infrastructure.Persistence
 		public DbSet<ReversePickingTask> ReversePickings { get; set; }
 		public DbSet<VirtualPallet> VirtualPallets { get; set; }
 
+		public DbSet<PalletNumberCounter> PalletNumberCounters { get; set; }
+		
 		public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
 		{
 			await DispatherDomainEventAsync();
@@ -106,7 +108,7 @@ namespace MyWerehouse.Infrastructure.Persistence
 			modelBuilder.ApplyConfiguration(new ReceiptConfiguration());
 			modelBuilder.ApplyConfiguration(new ReversePickingConfiguration());
 			modelBuilder.ApplyConfiguration(new VirtualPalletConfiguration());
-
+			modelBuilder.ApplyConfiguration(new PalletNumberCounterConfiguration());
 			base.OnModelCreating(modelBuilder);
 		}
 	}

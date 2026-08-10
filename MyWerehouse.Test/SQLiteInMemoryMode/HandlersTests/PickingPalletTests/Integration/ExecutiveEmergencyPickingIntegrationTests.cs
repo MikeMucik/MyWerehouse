@@ -68,6 +68,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveEmergencyPicking_ShouldPickedProductFromNewSource_WhenNotPickingPlanned()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1002;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product1 = CreateProduct("Prod A", "666");
@@ -113,6 +116,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Equal("Product was added to the issue.", result.Message);
 
 			Assert.True(result.Result.NewPalletCreated);
+			Assert.Equal("Q1002", result.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
 
 			// ✅ Paleta została zaktualizowana
@@ -265,6 +269,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveEmergencyPicking_CreateNewVirtualPallet_WhenNoVirtualPallet()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1002;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product1 = CreateProduct("Prod A", "666");
@@ -307,6 +314,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Equal("Product was added to the issue.", result.Message);
 
 			Assert.True(result.Result.NewPalletCreated);
+			Assert.Equal("Q1002", result.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
 
 			// ✅ Paleta została zaktualizowana

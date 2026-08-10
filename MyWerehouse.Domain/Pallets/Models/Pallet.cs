@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -435,7 +435,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 				}
 			}
 		}
-		public (int, int) AddReversePickedProduct(Guid productId, DateOnly? bestBefore,
+		public (int RestQuantity, int AddedQuantity) AddReversePickedProduct(Guid productId, DateOnly? bestBefore,
 			int quantity, int cartonsPerPallet, string userId, string snapshot)
 		{
 			if (Status != PalletStatus.Available)

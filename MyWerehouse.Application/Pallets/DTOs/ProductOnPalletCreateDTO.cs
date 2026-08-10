@@ -16,5 +16,10 @@ namespace MyWerehouse.Application.Pallets.DTOs
 		public int Quantity { get; init; }
 		public DateTime DateAdded { get; init; }
 		public DateOnly? BestBefore { get; init; } 
+		public void Mapping(Profile profile)
+		{
+			profile.CreateMap<ProductOnPalletCreateDTO,  ProductOnPallet>()
+				.ReverseMap();
+		}
 	}
 }

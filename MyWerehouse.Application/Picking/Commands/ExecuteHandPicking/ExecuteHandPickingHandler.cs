@@ -35,8 +35,6 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
-
-
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteHandPickingCommand command, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
@@ -80,7 +78,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 					ErrorType.Conflict);
 			}
 			var newPickingTask = newPickingTaskInfo.PickingTask.Single();
-			var resultProcessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, newPickingTask, command.PickedQuantity, command.UserId, command.RampNumber);
+			var resultProcessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, newPickingTask, command.PickedQuantity, command.UserId, command.RampNumber, ct);
 			if (!resultProcessPicking.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(resultProcessPicking.Message, ErrorType.Conflict);

@@ -68,6 +68,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldPicked_WhenNoVirtualPallet()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1002;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product1 = CreateProduct("Prod A", "666");
@@ -162,6 +165,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldPicked_WhenVirtualPalletExist()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1002;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product1 = CreateProduct("Prod A", "666");
@@ -257,6 +263,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldPickedPartial_WhenNoVirtualPallet()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1002;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product1 = CreateProduct("Prod A", "666");
@@ -390,6 +399,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldCompletePickingFromTwoPallets_WhenFirstPalletHasInsufficientStock()
 		{
 			// Arrange
+			var counter = await DbContext.PalletNumberCounters
+				.SingleAsync(x => x.Name == "Pallet");
+			counter.NextNumber = 1002;
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product = CreateProduct("Prod A", "666");
@@ -433,6 +445,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.True(firstResult.IsSuccess);
 			Assert.NotNull(firstResult.Result);
 			Assert.True(firstResult.Result.NewPalletCreated);
+			Assert.Equal("Q1002", firstResult.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", firstResult.Result.Message);
 
 			Assert.True(secondResult.IsSuccess);

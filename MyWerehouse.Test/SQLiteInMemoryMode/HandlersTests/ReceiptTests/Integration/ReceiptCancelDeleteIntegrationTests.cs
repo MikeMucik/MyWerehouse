@@ -7,6 +7,7 @@ using MyWerehouse.Application.Receipts.Commands.CancelReceipt;
 using MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
@@ -103,6 +104,50 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			Assert.Equal(2, DbContext.Products.Count());
 			Assert.Equal(1, DbContext.Categories.Count());
 			Assert.Equal(1, DbContext.Clients.Count());
+		}
+		[Theory]
+		[InlineData(ReceiptStatus.InProgress)]
+		[InlineData(ReceiptStatus.PhysicallyCompleted)]
+		public async Task CancelReceipt_ThrowException_WhenPalletIsAlreadyInWarehouseCirculation(
+			ReceiptStatus receiptStatus)
+		{
+			//Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product = CreateProduct("Test", "666666");
+			var location = CreateLocation(1, 1);
+			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U001",
+				new DateTime(2025, 6, 6), receiptStatus, 1);
+			var cancellablePallet = Pallet.CreateForTests(
+				"Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			cancellablePallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
+			cancellablePallet.AddHistory(ReasonForPallet.Received, "user", "location");
+
+			var circulatingPallet = Pallet.CreateForTests(
+				"Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			circulatingPallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
+			circulatingPallet.AddHistory(ReasonForPallet.Received, "user", "location");
+			circulatingPallet.AddHistory(ReasonForPallet.Moved, "user", "location");
+
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Pallets.AddRange(cancellablePallet, circulatingPallet);
+			DbContext.Clients.Add(client);
+			DbContext.Receipts.Add(receipt);
+			DbContext.Locations.Add(location);
+			await DbContext.SaveChangesAsync();
+
+			//Act&Assert
+			var exception = await Assert.ThrowsAsync<CannotCancelReceiptDomainException>(
+				() => Mediator.Send(new CancelReceiptCommand(receipt.Id, "user")));
+
+			Assert.Equal(receipt.Id, exception.Id);
+			Assert.Equal(receipt.ReceiptNumber, exception.ReceiptNumber);
+			Assert.Equal(receiptStatus, receipt.ReceiptStatus);
+			Assert.Equal(receipt.Id, cancellablePallet.ReceiptId);
+			Assert.Equal(PalletStatus.Available, cancellablePallet.Status);
+			Assert.Equal(receipt.Id, circulatingPallet.ReceiptId);
+			Assert.Equal(PalletStatus.Available, circulatingPallet.Status);
 		}
 		[Fact]
 		public async Task DeleteReceipt_ShouldRemoveFromBase_WhenDraftReceipt()

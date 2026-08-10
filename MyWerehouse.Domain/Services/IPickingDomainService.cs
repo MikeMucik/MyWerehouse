@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
-using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Domain.Services
@@ -17,7 +15,7 @@ namespace MyWerehouse.Domain.Services
 			int availableQuantity, string userId, DateTime now, Guid issueId, Guid productId, Guid palletId, string palletNumber);
 		IReadOnlyList<PickingTask> PrepareHandPickingTasks(IReadOnlyCollection<PickingTask> activeTasks, Guid issueId, string userId,
 		DateTime now, DateOnly pickingDay);
-		(List<VirtualPallet>, List<PickingTask>) ListVirtualPalletPickingTaskToCancel(IReadOnlyCollection<VirtualPallet> listVirtualPallets,Guid issueId, string userId, DateTime now);
+		(List<VirtualPallet> VirtualPallets, List<PickingTask> PickingTasks) ListVirtualPalletPickingTaskToCancel(IReadOnlyCollection<VirtualPallet> listVirtualPallets,Guid issueId, string userId, DateTime now);
 
 	}
 }

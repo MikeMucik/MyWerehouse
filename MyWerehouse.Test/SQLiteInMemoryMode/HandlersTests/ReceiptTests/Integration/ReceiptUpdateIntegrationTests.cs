@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
-using FluentValidation;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Common;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
+using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
+using MyWerehouse.Domain.Receiving.ReceivingExceptions;
+using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integration
 {
@@ -64,7 +67,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 				Position = position
 			};
 		}
-
 		[Fact]
 		public async Task UpdateReceipt_ShouldCancelOldPalletAndAddNewPallet_WhenNewPalletIsProvided()
 		{
@@ -153,7 +155,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var allMovements = await DbContext.HistoryPallet.Where(x => x.PalletStatus != PalletStatus.Cancelled).ToListAsync();
 			Assert.Single(allMovements); // jeden ruch powinien być utworzony			
 		}
-
 		[Fact]
 		public async Task UpdateReceipt_ShouldChangeClient_WhenDifferentClientIsProvided()
 		{
@@ -229,9 +230,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			Assert.True(result.IsSuccess);
 			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == receipt.Id);
 			Assert.Equal(clientNew.Id, updatedReceipt.ClientId);
-
 		}
-
 		[Fact]
 		public async Task UpdateReceipt_ShouldCancelRemovedPalletAndUpdateRemainingPalletQuantity()
 		{
@@ -324,7 +323,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var allMovements = await DbContext.HistoryPallet.Where(x => x.PalletStatus != PalletStatus.Cancelled).ToListAsync();
 			Assert.Single(allMovements);
 		}
-
 		[Fact]
 		public async Task UpdateReceipt_ShouldThrowValidationException_WhenPalletContainsMoreThanOneProduct()
 		{
@@ -512,6 +510,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		public async Task UpdateReceipt_ShouldAddAndRemovePallet_WhenNewPalletWithoutIdIsProvided()
 		{
 			//Arrange
+			var lastNumberPallet = await DbContext.PalletNumberCounters.SingleAsync(x => x.Name == "Pallet");
+			lastNumberPallet.NextNumber = 2001;				
 			var client = CreateClient();
 			var category = CreateCategory("Category");
 			var product = CreateProduct("Test", "666666");
@@ -597,6 +597,160 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var removedPallet = DbContext.Pallets.FirstOrDefault(x => x.PalletNumber == "Q2000");
 			Assert.NotNull(removedPallet);
 			Assert.Equal(PalletStatus.Cancelled, removedPallet.Status);
+		}
+		[Fact]
+		public async Task UpdateReceipt_ShouldAddTwoNewPalletsWithDifferentNumbers()
+		{
+			//Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product = CreateProduct("Test", "666666");
+			var location = CreateLocation(1, 1);
+			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U001",
+				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
+			await DbContext.SaveChangesAsync();
+
+			var updatingReceipt = new UpdateReceiptDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "U100",
+				RampNumber = location.Id,
+				Pallets = new List<EditPalletInReceiptDTO>
+				{
+					new()
+					{
+						LocationId = location.Id,
+						Status = PalletStatus.Receiving,
+						DateReceived = TestDates.Now,
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						{
+							new()
+							{
+								ProductId = product.Id,
+								Quantity = 100,
+								DateAdded = TestDates.Now,
+							}
+						}
+					},
+					new()
+					{
+						LocationId = location.Id,
+						Status = PalletStatus.Receiving,
+						DateReceived = TestDates.Now,
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						{
+							new()
+							{
+								ProductId = product.Id,
+								Quantity = 200,
+								DateAdded = TestDates.Now,
+							}
+						}
+					}
+				}
+			};
+
+			//Act
+			var result = await Mediator.Send(new UpdateReceiptCommand(receipt.Id, updatingReceipt));
+
+			//Assert
+			Assert.True(result.IsSuccess);
+			var addedPallets = await DbContext.Pallets
+				.Where(p => p.ReceiptId == receipt.Id)
+				.ToListAsync();
+			Assert.Equal(2, addedPallets.Count);
+			Assert.Equal(2, addedPallets.Select(p => p.PalletNumber).Distinct().Count());
+			Assert.All(addedPallets, p => Assert.Equal(PalletStatus.Receiving, p.Status));
+		}
+		[Fact]
+		public async Task UpdateReceipt_ShouldThrowDomainException_WhenPalletBelongsToAnotherReceipt()
+		{
+			//Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Category");
+			var product = CreateProduct("Test", "666666");
+			var location = CreateLocation(1, 1);
+			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U001",
+				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			var anotherReceipt = Receipt.CreateForSeed(Guid.NewGuid(), 2, 1, "U002",
+				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			var receiptPallet = Pallet.CreateForTests(
+				"Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
+			receiptPallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
+			var anotherReceiptPallet = Pallet.CreateForTests(
+				"Q2000", TestDates.UtcNow, 1, PalletStatus.Receiving, anotherReceipt.Id, null);
+			anotherReceiptPallet.AddProduct(product.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
+
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.AddRange(receipt, anotherReceipt);
+			DbContext.Pallets.AddRange(receiptPallet, anotherReceiptPallet);
+			await DbContext.SaveChangesAsync();
+
+			var updatingReceipt = new UpdateReceiptDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "U100",
+				RampNumber = location.Id,
+				Pallets = new List<EditPalletInReceiptDTO>
+				{
+					new()
+					{
+						Id = receiptPallet.Id,
+						PalletNumber = receiptPallet.PalletNumber,
+						ReceiptId = receipt.Id,
+						LocationId = location.Id,
+						Status = PalletStatus.Receiving,
+						DateReceived = TestDates.Now,
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						{
+							new()
+							{
+								ProductId = product.Id,
+								PalletId = receiptPallet.Id,
+								Quantity = 50,
+								DateAdded = TestDates.Now,
+							}
+						}
+					},
+					new()
+					{
+						Id = anotherReceiptPallet.Id,
+						PalletNumber = anotherReceiptPallet.PalletNumber,
+						ReceiptId = anotherReceipt.Id,
+						LocationId = location.Id,
+						Status = PalletStatus.Receiving,
+						DateReceived = TestDates.Now,
+						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						{
+							new()
+							{
+								ProductId = product.Id,
+								PalletId = anotherReceiptPallet.Id,
+								Quantity = 200,
+								DateAdded = TestDates.Now,
+							}
+						}
+					}
+				}
+			};
+
+			//Act&Assert
+			await Assert.ThrowsAnyAsync<PalletDoesNotBelongToReceiptDomainException>(
+				() => Mediator.Send(new UpdateReceiptCommand(receipt.Id, updatingReceipt)));
+
+			Assert.Equal(ReceiptStatus.Planned, receipt.ReceiptStatus);
+			Assert.Equal(100, receiptPallet.ProductsOnPallet.Single().Quantity);
+			Assert.Equal(receipt.Id, receiptPallet.ReceiptId);
+			Assert.Equal(anotherReceipt.Id, anotherReceiptPallet.ReceiptId);
 		}
 		[Fact]
 		public async Task UpdateReceipt_ShouldReturnErrorInfo_WhenPalletListIsEmpty()

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,6 @@ namespace MyWerehouse.Application.ReversePickings.Services
 	{
 		Task<ReversePickingResult> AddProductsToSourcePallet(ReversePickingTask task, string userId);
 		Task<ReversePickingResult> AddToExistingPallet(ReversePickingTask task, List<Guid> pallets, string userId);
-		Task<ReversePickingResult> AddToNewPallet(ReversePickingTask task, string userId, int rampNumber, string snapShot);
+		Task<ReversePickingResult> AddToNewPallet(ReversePickingTask task, string userId, int rampNumber, string snapShot, CancellationToken ct);
 	}
 }

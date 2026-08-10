@@ -131,20 +131,44 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return result;
 		}
 
-		public async Task<string> GetNextPalletIdAsync()
-		{
-			var lastPallet = await _werehouseDbContext.Pallets
-				.Where(static p => p.PalletNumber.StartsWith("Q"))
-				.OrderByDescending(p => p.PalletNumber)
-				.FirstOrDefaultAsync();
+		//public async Task<string> GetNextPalletNumberAsync()
+		//{
+		//	var lastPallet = await _werehouseDbContext.Pallets
+		//		.Where(static p => p.PalletNumber.StartsWith("Q"))
+		//		.OrderByDescending(p => p.PalletNumber)
+		//		.FirstOrDefaultAsync();
 
-			int lastNumber = 0;
-			if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))
+		//	int lastNumber = 0;
+		//	if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))
+		//	{
+		//		lastNumber = parsed;
+		//	}
+		//	string nextId = $"Q{(lastNumber + 1).ToString("D4")}";
+		//	return nextId;
+		//}
+
+		public async Task<int> ReservePalletNumbersAsync(int count)
+		{
+			ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
+
+			while (true)
 			{
-				lastNumber = parsed;
+				var counter = await _werehouseDbContext.PalletNumberCounters
+					.AsNoTracking()
+					.SingleAsync(x => x.Name == "Pallet");
+
+				var firstNumber = counter.NextNumber;
+				var nextFreeNumber = firstNumber + count;
+
+				//mechanizm zapobiegający dubla i ustawiający nową wartość
+				var affectedRows = await _werehouseDbContext.PalletNumberCounters
+						.Where(x =>	x.Name == "Pallet" && x.NextNumber == firstNumber)
+						.ExecuteUpdateAsync(setters =>
+						setters.SetProperty(x => x.NextNumber,nextFreeNumber));
+
+				if (affectedRows == 1)
+					return firstNumber;
 			}
-			string nextId = $"Q{(lastNumber + 1).ToString("D4")}";
-			return nextId;
 		}
 
 		public async Task<Pallet?> CheckOccupancyAsync(int locationId)
@@ -220,8 +244,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			var pallets = await _werehouseDbContext.Pallets
 				.Include(p => p.Location)
 				.Include(p => p.ProductsOnPallet)
-				.Where(a => a.ProductsOnPallet.Count == 1 && a.ProductsOnPallet.Any(pp => pp.ProductId == productId && pp.BestBefore == bestBefore)				 
-				&& a.Receipt != null && a.Status == PalletStatus.Available && a.Id != sourceId&&
+				.Where(a => a.ProductsOnPallet.Count == 1 && a.ProductsOnPallet.Any(pp => pp.ProductId == productId && pp.BestBefore == bestBefore)
+				&& a.Receipt != null && a.Status == PalletStatus.Available && a.Id != sourceId &&
 				a.ProductsOnPallet.Single().Quantity < cartonsPerPallet)
 				.OrderByDescending(p => p.ProductsOnPallet.Single().Quantity)
 				.ToListAsync();

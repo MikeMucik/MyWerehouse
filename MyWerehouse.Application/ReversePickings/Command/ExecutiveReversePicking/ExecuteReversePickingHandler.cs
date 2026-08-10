@@ -81,7 +81,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 						return AppResult<ReversePickingResult>.Fail("The specified location is invalid.");
 					}
 					var snapShot = location.ToSnapshot();
-					result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId, command.RampNumber!.Value, snapShot);
+					result = await _addProductsToPalletService.AddToNewPallet(reversePicking, command.UserId, command.RampNumber!.Value, snapShot, ct);
 					if (!result.Success) return Fail(result.Message);
 					break;
 				default:

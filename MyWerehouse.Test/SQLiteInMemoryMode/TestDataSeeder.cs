@@ -58,8 +58,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			var location4 = new Location { Id = 20, Aisle = 3, Bay = 3, Position = 4, Height = 5 };
 			if (!context.Locations.Any())
 			{
-
 				context.Locations.AddRange(location1, location2, location3, location4);
+			}
+			context.SaveChanges();
+
+			if (!context.PalletNumberCounters.Any())
+			{
+				context.PalletNumberCounters.Add(
+					new PalletNumberCounter { Name = "Pallet", NextNumber = 5001 });
 			}
 			context.SaveChanges();
 			// 2. Dane zależne od powyższych

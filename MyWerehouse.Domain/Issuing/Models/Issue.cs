@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +16,7 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Receiving.Events;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MyWerehouse.Domain.Issuing.Models
 {
@@ -387,7 +388,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		//Nowe metody
 		public void EnsureCanBeCancelled()
 		{
-			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled|| IssueStatus == IssueStatus.IsShipped)
+			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.IsShipped)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
@@ -479,15 +480,15 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 		}
 		public void DetachPallets(string userId)
-		{			
+		{
 			foreach (var pallet in Pallets)
 			{
 				if (pallet.ReceiptId != null)
 				{
 					//issue.DetachPallet(pallet, request.UserId); // nie odłączam by mieć spis palet dla anulowanego zlecenia do historii
 					pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
-				}				
-			}			
+				}
+			}
 		}
 		public List<Pallet> ReturnPickingPallets()
 		{
@@ -495,9 +496,36 @@ namespace MyWerehouse.Domain.Issuing.Models
 			foreach (var item in Pallets)
 			{
 				if (item.ReceiptId == null)
-				list.Add(item);
+					list.Add(item);
 			}
 			return list;
+		}
+		public (bool IsMatching, int PreparedQuantity, int OrderedQuantity, DateOnly? BestBefore) CompareGoods(Guid productId)
+		{
+			var orderedGood = this.IssueItems
+				.Single(i => i.ProductId == productId);
+			var quantityOrdered = orderedGood.Quantity;
+			var bestBeforeRequired = orderedGood.BestBefore;
+			var quantityPrepared = this.Pallets
+				.SelectMany(p => p.ProductsOnPallet)
+				.Where(pp => pp.ProductId == productId && (bestBeforeRequired == null
+				|| pp.BestBefore >= bestBeforeRequired))
+				.Sum(pp => pp.Quantity);
+			if (quantityOrdered == quantityPrepared)
+			{
+				return (true,quantityPrepared, quantityOrdered, bestBeforeRequired);
+			}			
+			return (false, quantityPrepared, quantityOrdered, bestBeforeRequired);
+		}
+		public void CheckPalletsInIssue()
+		{
+			foreach (var pallet in Pallets)
+			{
+				if(pallet.Status != PalletStatus.ToIssue)
+				{
+					throw new PalletsNotReadyToLoadDomainException();
+				}
+			}
 		}
 	}
 }

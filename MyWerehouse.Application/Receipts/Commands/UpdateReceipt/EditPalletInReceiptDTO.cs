@@ -21,5 +21,10 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletCreateDTO>();
 		public Guid? ReceiptId { get; init; }
 	
+		public void Mapping(Profile profile)
+		{
+			profile.CreateMap<EditPalletInReceiptDTO, Pallet>()
+				.ReverseMap();
+		}
 	}
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -14,19 +15,20 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
 	public class CreatePalletHandler(WerehouseDbContext werehouseDbContext,
-		IPalletRepo palletRepo, ILocationRepo locationRepo, IDateTimeProvider dateTimeProvider)
+		IPalletRepo palletRepo, ILocationRepo locationRepo, IDateTimeProvider dateTimeProvider, IPalletNumberAllocator palletNumberAllocator)
 		: IRequestHandler<CreatePalletCommand, AppResult<Unit>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPalletNumberAllocator _palletNumberAllocator = palletNumberAllocator;
 
 		public async Task<AppResult<Unit>> Handle(CreatePalletCommand request, CancellationToken ct)
 		{
 			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
 			if (location == null) return AppResult<Unit>.Fail("The specified ramp does not exist.");
-			var newIdForPallet = await _palletRepo.GetNextPalletIdAsync();
+			var newIdForPallet = (await _palletNumberAllocator.ReserveAsync(1, ct)).Single();
 			var now = _dateTimeProvider.UtcNow;
 			var pallet = Pallet.Create(newIdForPallet, request.RampNumber, now);
 			foreach (var product in request.DTO.ProductsOnPallet)

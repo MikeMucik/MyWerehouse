@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 
 		public async Task<AppResult<Unit>> Handle(CancelReceiptCommand request, CancellationToken ct)
 		{
-			var receipt = await _receiptRepo.GetReceipForCancelByIdAsync(request.ReceiptId);
+			var receipt = await _receiptRepo.GetReceipForCancelByIdAsync(request.ReceiptId, ct);
 			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 			receipt.Cancel(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);

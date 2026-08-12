@@ -24,7 +24,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 				.GreaterThan(0)
 				.WithMessage("Pallet location is required.");
 			RuleFor(p => p.RampNumber)
-				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id))
+				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id, ct))
 				.WithMessage("The selected ramp does not exist.");
 			RuleForEach(p => p.DTO.ProductsOnPallet)
 				.SetValidator(productOnPalletValidator)

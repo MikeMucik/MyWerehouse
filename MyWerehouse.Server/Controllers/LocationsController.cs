@@ -16,23 +16,23 @@ namespace MyWerehouse.Server.Controllers
 			_locationService = locationService;
 		}
 		[HttpGet("{id:int}")]
-		public async Task<IActionResult> Get(int id)
-			=> (await _locationService.GetLocationServiceAsync(id))
+		public async Task<IActionResult> Get(int id, CancellationToken ct)
+			=> (await _locationService.GetLocationServiceAsync(id, ct))
 			.ToActionResult();
 
 		[HttpPost]
-		public async Task<IActionResult> Create(LocationDTO locationDto)
-			=> (await _locationService.AddLocationServiceAsync(locationDto))
+		public async Task<IActionResult> Create(LocationDTO locationDto, CancellationToken ct)
+			=> (await _locationService.AddLocationServiceAsync(locationDto, ct))
 			.ToActionResult();
 
 		[HttpDelete("{id:int}")]
-		public async Task<IActionResult> Delete(int id)
-			=> (await _locationService.DeleteLocationServiceAsync(id))
+		public async Task<IActionResult> Delete(int id, CancellationToken ct)
+			=> (await _locationService.DeleteLocationServiceAsync(id, ct))
 			.ToActionResult();
 
 		[HttpPost("bulk")]//zatwierdzenie prepare
-		public async Task<IActionResult> Bulk(List<LocationDTO> locations)
-			=> (await _locationService.CreateManyLocation(locations))
+		public async Task<IActionResult> Bulk(List<LocationDTO> locations, CancellationToken ct)
+			=> (await _locationService.CreateManyLocation(locations, ct))
 			.ToActionResult();
 
 		[HttpPost("preview")] //ile regałów alejek etc
@@ -41,8 +41,8 @@ namespace MyWerehouse.Server.Controllers
 			.ToActionResult();
 
 		[HttpGet("search")]
-		public async Task<IActionResult> Search(int bay, int aisle, int position, int height)
-			=> (await _locationService.FindLocationAsync(bay, aisle, position, height))
+		public async Task<IActionResult> Search(int bay, int aisle, int position, int height, CancellationToken ct)
+			=> (await _locationService.FindLocationAsync(bay, aisle, position, height, ct))
 			.ToActionResult();
 	}
 }

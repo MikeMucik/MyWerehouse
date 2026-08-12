@@ -17,17 +17,16 @@ namespace MyWerehouse.Server.Controllers
 		{
 			_mediator = mediator;
 		}
-		
+
 		[HttpGet("pallets/{palletNumber}")]
-		public async Task<IActionResult> GetPalletHistory(string palletNumber)
+		public async Task<IActionResult> GetPalletHistory(string palletNumber, CancellationToken ct)
 		{
 			var query = new GetPalletHistoryQuery
 			{
 				PalletNumber = palletNumber
 			};
-			return (await _mediator.Send(query)).ToActionResult();
+			return (await _mediator.Send(query, ct)).ToActionResult();
 		}
-				
+
 	}
 }
-

@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 
 		public async Task<AppResult<PrepareCorrectedPickingResult>> Handle(PrepareEmergencyPickingQuery request, CancellationToken ct)
 		{
-			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
+			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId, ct);
 			//Nie wyjątek bo to częsta sytuacja w rzeczywistości
 			if (pallet == null)
 			{
@@ -36,16 +36,16 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 			{
 				return AppResult<PrepareCorrectedPickingResult>.Fail("The pallet is not suitable for picking because it contains different products.", ErrorType.Validation);
 			}
-					
+
 			var product = pallet.ProductsOnPallet.FirstOrDefault();
 			if (product == null)
 			{
 				return AppResult<PrepareCorrectedPickingResult>.Fail("The pallet is empty.");
 			}
-			// Logika wyszukiwania pasujących zleceń				
+			// Logika wyszukiwania pasujących zleceń
 			var timeFrom = request.Start;
-			var timeTo = request.End;			
-			var pickingTasks  = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo);
+			var timeTo = request.End;
+			var pickingTasks  = await _pickingTaskRepo.GetPickingTasksProductIdAsync(product.ProductId, timeFrom, timeTo, ct);
 			var grouped = pickingTasks
 				.Where(i =>	i.Issue.IssueStatus == IssueStatus.New ||
 							i.Issue.IssueStatus == IssueStatus.Pending ||

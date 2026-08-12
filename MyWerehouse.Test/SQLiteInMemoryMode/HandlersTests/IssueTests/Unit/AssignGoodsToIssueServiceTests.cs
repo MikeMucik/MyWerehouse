@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moq;
-using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Application.Picking.Services;
@@ -19,10 +18,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 		private static readonly DateOnly BestBefore = new(2027, 6, 30);
 
 		private readonly Mock<IAddPickingTaskToIssueService> _addPickingTaskToIssueService = new();
-		private readonly Mock<IGetProductCountService> _getProductCountService = new();
 		private readonly Mock<IVirtualPalletRepo> _virtualPalletRepo = new();
 		private readonly Mock<IProductRepo> _productRepo = new();
 		private readonly Mock<IPalletRepo> _palletRepo = new();
+		private readonly Mock<IInventoryRepo> _inventoryRepo = new();
 
 		[Fact]
 		public async Task FullPalletIsAvailable_AssignGoodsToIssue_ReturnsSuccessAndReservesPallet()
@@ -35,16 +34,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			var service = CreateService();
 
 			_productRepo
-				.Setup(x => x.GetProductByIdAsync(product.Id))
+				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			_getProductCountService
-				.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//_getProductCountService
+			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//	.ReturnsAsync(100);
+			_inventoryRepo
+				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(100);
 			_palletRepo
-				.Setup(x => x.GetMissingFullPallets(product.Id, product.CartonsPerPallet, BestBefore, 1))
+				.Setup(x => x.GetMissingFullPallets(product.Id, product.CartonsPerPallet, BestBefore, 1, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(new List<Pallet> { pallet });
 			_virtualPalletRepo
-				.Setup(x => x.GetVirtualPalletsByBBAsync(product.Id, BestBefore))
+				.Setup(x => x.GetVirtualPalletsByBBAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(new List<VirtualPallet>());
 
 			//Act
@@ -53,7 +55,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 				issueItem,
 				IssueAllocationPolicy.FullPalletFirst,
 				null,
-				UserId);
+				UserId,
+				CancellationToken.None);
 
 			//Assert
 			Assert.True(result.Success);
@@ -71,7 +74,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 					It.IsAny<Guid>(),
 					It.IsAny<int>(),
 					It.IsAny<DateOnly?>(),
-					It.IsAny<string>()),
+					It.IsAny<string>(),
+					It.IsAny<CancellationToken>()),
 				Times.Never);
 		}
 
@@ -85,7 +89,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			var service = CreateService();
 
 			_productRepo
-				.Setup(x => x.GetProductByIdAsync(productId))
+				.Setup(x => x.GetProductByIdAsync(productId, It.IsAny<CancellationToken>()))
 				.ReturnsAsync((Product?)null);
 
 			//Act
@@ -94,7 +98,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 				issueItem,
 				IssueAllocationPolicy.FullPalletFirst,
 				null,
-				UserId);
+				UserId,
+				CancellationToken.None);
 
 			//Assert
 			Assert.False(result.Success);
@@ -112,10 +117,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			var service = CreateService();
 
 			_productRepo
-				.Setup(x => x.GetProductByIdAsync(product.Id))
+				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			_getProductCountService
-				.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//_getProductCountService
+			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//	.ReturnsAsync(80);
+			_inventoryRepo
+				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(80);
 
 			//Act
@@ -124,7 +132,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 				issueItem,
 				IssueAllocationPolicy.FullPalletFirst,
 				null,
-				UserId);
+				UserId,
+				CancellationToken.None);
 
 			//Assert
 			Assert.False(result.Success);
@@ -146,19 +155,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			var service = CreateService();
 
 			_productRepo
-				.Setup(x => x.GetProductByIdAsync(product.Id))
+				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			_getProductCountService
-				.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//_getProductCountService
+			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//	.ReturnsAsync(100);
+			_inventoryRepo
+				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(100);
-
 			//Act
 			var result = await service.AssignGoodsToIssue(
 				issue,
 				issueItem,
 				unsupportedPolicy,
 				null,
-				UserId);
+				UserId,
+				CancellationToken.None);
 
 			//Assert
 			Assert.False(result.Success);
@@ -176,25 +188,28 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			var service = CreateService();
 
 			_productRepo
-				.Setup(x => x.GetProductByIdAsync(product.Id))
+				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			_getProductCountService
-				.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//_getProductCountService
+			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//	.ReturnsAsync(150);
+			_inventoryRepo
+				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(150);
-
 			//Act
 			var result = await service.AssignGoodsToIssue(
 				issue,
 				issueItem,
 				IssueAllocationPolicy.FullPalletFirst,
 				new List<Pallet> { oversizedPallet },
-				UserId);
+				UserId,
+				CancellationToken.None);
 
 			//Assert
 			Assert.False(result.Success);
 			Assert.Equal("Allocated more product than requested.", result.Message);
 			_virtualPalletRepo.Verify(
-				x => x.GetVirtualPalletsByBBAsync(It.IsAny<Guid>(), It.IsAny<DateOnly>()),
+				x => x.GetVirtualPalletsByBBAsync(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()),
 				Times.Never);
 		}
 
@@ -209,13 +224,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			const string pickingFailure = "Picking task cannot be created.";
 
 			_productRepo
-				.Setup(x => x.GetProductByIdAsync(product.Id))
+				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			_getProductCountService
-				.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//_getProductCountService
+			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
+			//	.ReturnsAsync(50);
+			_inventoryRepo
+				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(50);
 			_virtualPalletRepo
-				.Setup(x => x.GetVirtualPalletsByBBAsync(product.Id, BestBefore))
+				.Setup(x => x.GetVirtualPalletsByBBAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(new List<VirtualPallet>());
 			_addPickingTaskToIssueService
 				.Setup(x => x.AddPickingTasksToIssue(
@@ -225,7 +243,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 					product.Id,
 					50,
 					BestBefore,
-					UserId))
+					UserId,
+					It.IsAny<CancellationToken>()))
 				.ReturnsAsync(AddPickingTaskToIssueResult.Fail(pickingFailure));
 
 			//Act
@@ -234,7 +253,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 				issueItem,
 				IssueAllocationPolicy.FullPalletFirst,
 				null,
-				UserId);
+				UserId,
+				CancellationToken.None);
 
 			//Assert
 			Assert.False(result.Success);
@@ -249,10 +269,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 		{
 			return new AssignProductToIssueAsyncService(
 				_addPickingTaskToIssueService.Object,
-				_getProductCountService.Object,
+				//_getProductCountService.Object,
 				_virtualPalletRepo.Object,
 				_productRepo.Object,
-				_palletRepo.Object);
+				_palletRepo.Object,
+				_inventoryRepo.Object);
 		}
 
 		private static Product CreateProduct(int cartonsPerPallet)

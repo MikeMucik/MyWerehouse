@@ -28,7 +28,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			var pickingId1 = Guid.Parse("11111111-1111-2222-1111-111111111111");
 			var pickingTaskId = pickingId1;
 			//Act
-			var result = await _pickingTaskRepo.GetPickingTaskAsync(pickingTaskId);
+			var result = await _pickingTaskRepo.GetPickingTaskAsync(pickingTaskId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(receiptId2, result.IssueId);
@@ -40,13 +40,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		public void ByVirtualPalletAndDatePicking_GetPickingTaskListAsync_ReturnList()
 		{
 			//Arrange
-			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");			
+			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			var date =DateOnly.FromDateTime( TestDates.UtcNow);
 			//Act
 			var result =  _pickingTaskRepo.GetPickingTaskList(vpId1, date);
 			//Assert
 			Assert.NotNull(result);
-			Assert.NotEmpty(result); 
+			Assert.NotEmpty(result);
 			// wszystkie alokacje mają właściwy VirtualPallet
 			Assert.All(result, a => Assert.Equal(vpId1, a.VirtualPalletId));
 			// wszystkie alokacje mają status Allocated
@@ -67,7 +67,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			var issueId = receiptId2;
 			var productId = Guid.Parse("00000000-0000-0000-0002-000000000000");;
 			//Act
-			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId);
+			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(issueId, productId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -80,9 +80,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 		{
 			//Arrange
 			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
-			var issueId = receiptId2;			
+			var issueId = receiptId2;
 			//Act
-			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issueId);
+			var result = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issueId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -99,7 +99,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			var dateStart =DateOnly.FromDateTime( TestDates.UtcNow);
 			var dateEnd = DateOnly.FromDateTime(TestDates.UtcNow).AddDays(1);
 			//Act
-			var result = await _pickingTaskRepo.GetPickingTasksProductIdAsync(productId2, dateStart, dateEnd);
+			var result = await _pickingTaskRepo.GetPickingTasksProductIdAsync(productId2, dateStart, dateEnd, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);

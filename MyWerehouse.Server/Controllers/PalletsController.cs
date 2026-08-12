@@ -25,46 +25,46 @@ namespace MyWerehouse.Server.Controllers
 		}
 		// stworzenie palety
 		[HttpPost]
-		public async Task<IActionResult> Create(CreatePalletCommand command)
+		public async Task<IActionResult> Create(CreatePalletCommand command, CancellationToken ct)
 		{
-			var result = await _mediator.Send(command);
+			var result = await _mediator.Send(command, ct);
 			return result.ToActionResult();
 		}
 		// dane palety Guid
 		[HttpGet("{id:guid}")]
-		public async Task<IActionResult> Get(Guid id)
-			=> (await _mediator.Send(new GetPalletQuery(id))).ToActionResult();
-		
+		public async Task<IActionResult> Get(Guid id, CancellationToken ct)
+			=> (await _mediator.Send(new GetPalletQuery(id), ct)).ToActionResult();
+
 		// dane palety Palletnumber
 		[HttpGet("by-number/{palletNumber}")]
-		public async Task<IActionResult> GetByPalletNumber(string palletNumber)
-			=> (await _mediator.Send(new GetPalletByPalletNumberQuery(palletNumber))).ToActionResult();
-		
+		public async Task<IActionResult> GetByPalletNumber(string palletNumber, CancellationToken ct)
+			=> (await _mediator.Send(new GetPalletByPalletNumberQuery(palletNumber), ct)).ToActionResult();
+
 		// paleta do edycji
 		[HttpGet("{id:guid}/edit")]
-		public async Task<IActionResult> GetForEdit(Guid id)
-			=> (await _mediator.Send(new GetPalletToEditQuery(id))).ToActionResult();		
+		public async Task<IActionResult> GetForEdit(Guid id, CancellationToken ct)
+			=> (await _mediator.Send(new GetPalletToEditQuery(id), ct)).ToActionResult();
 
 		// update palety
 		[HttpPut("{id:guid}")]
-		public async Task<IActionResult> Update(Guid id, Application.Pallets.Commands.UpdatePallet.EditPalletDTO dto)
-			=> (await _mediator.Send(new UpdatePalletCommand(id, dto))).ToActionResult();
+		public async Task<IActionResult> Update(Guid id, Application.Pallets.Commands.UpdatePallet.EditPalletDTO dto, CancellationToken ct)
+			=> (await _mediator.Send(new UpdatePalletCommand(id, dto), ct)).ToActionResult();
 
 		// zmiana lokacji
 		[HttpPost("{id:guid}/change-location")]
-		public async Task<IActionResult> ChangeLocation(Guid id, int destinationLocation, string userId, bool forced)
-			=> (await _mediator.Send(new ChangeLocationPalletCommand(id, destinationLocation, userId, forced)))
+		public async Task<IActionResult> ChangeLocation(Guid id, int destinationLocation, string userId, bool forced, CancellationToken ct)
+			=> (await _mediator.Send(new ChangeLocationPalletCommand(id, destinationLocation, userId, forced), ct))
 			.ToActionResult();
 
 		// oznacz jako załadowana i być może też zmień na id
 		[HttpPost("{id:guid}/mark-loaded")]
-		public async Task<IActionResult> MarkLoaded(Guid id, string userId)
-			=> (await _mediator.Send(new MarkAsLoadedCommand(id, userId)))
+		public async Task<IActionResult> MarkLoaded(Guid id, string userId, CancellationToken ct)
+			=> (await _mediator.Send(new MarkAsLoadedCommand(id, userId), ct))
 			.ToActionResult();
 
 		// filtr / lista
 		[HttpGet("search")]
-		public async Task<IActionResult> Search([FromQuery] FindPalletsByFilterQuery query)
-			=> (await _mediator.Send(query)).ToActionResult();
+		public async Task<IActionResult> Search([FromQuery] FindPalletsByFilterQuery query, CancellationToken ct)
+			=> (await _mediator.Send(query, ct)).ToActionResult();
 	}
 }

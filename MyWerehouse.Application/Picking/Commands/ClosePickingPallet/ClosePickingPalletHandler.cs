@@ -21,10 +21,10 @@ namespace MyWerehouse.Application.Picking.Commands.ClosePickingPallet
 
 		public async Task<AppResult<Unit>> Handle(ClosePickingPalletCommand request, CancellationToken ct)
 		{
-			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
+			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId, ct);
 			if (pallet == null)
 				return AppResult<Unit>.Fail("The specified pallet does not exist.");
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("The issue for this pallet was not found.");
 			pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location.ToSnapshot());

@@ -17,28 +17,28 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(CreateProductDTO productDto)
-			=> (await _productService.AddProductAsync(productDto))
+		public async Task<IActionResult> Create(CreateProductDTO productDto, CancellationToken ct)
+			=> (await _productService.AddProductAsync(productDto, ct))
 			.ToActionResult();
 
 		[HttpGet("{id:guid}/edit")]
-		public async Task<IActionResult> GetForEdit(Guid id)
-			=> (await _productService.GetProductToEditAsync(id))
+		public async Task<IActionResult> GetForEdit(Guid id, CancellationToken ct)
+			=> (await _productService.GetProductToEditAsync(id, ct))
 			.ToActionResult();
 
 		[HttpPut("{id:guid}")]
-		public async Task<IActionResult> Update(Guid id, EditProductDTO productDto)
-			=> (await _productService.UpdateProductAsync(id, productDto))
+		public async Task<IActionResult> Update(Guid id, EditProductDTO productDto, CancellationToken ct)
+			=> (await _productService.UpdateProductAsync(id, productDto, ct))
 			.ToActionResult();
-		
+
 		[HttpDelete("{id:guid}")]
-		public async Task<IActionResult> Delete(Guid id)
-			=> (await _productService.DeleteProductAsync(id))
+		public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+			=> (await _productService.DeleteProductAsync(id, ct))
 			.ToActionResult();
 
 		[HttpGet("{id:guid}")]
-		public async Task<IActionResult> GetById(Guid id)
-			=> (await _productService.DetailsOfProductAsync(id))
+		public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+			=> (await _productService.DetailsOfProductAsync(id, ct))
 			.ToActionResult();
 
 		[HttpGet]

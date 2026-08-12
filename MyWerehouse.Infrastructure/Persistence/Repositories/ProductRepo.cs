@@ -26,46 +26,46 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Remove(product);
 		}
-		public async Task<Product?> GetProductByIdAsync(Guid id)
+		public async Task<Product?> GetProductByIdAsync(Guid id, CancellationToken ct)
 		{
 			if (id == Guid.Empty)
 			{
 				return null;
 			}
 			var product = await _werehouseDbContext.Products
-				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false);
+				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false, ct);
 			return product;
 		}
 
-		public async Task<string?> GetSKUForProductAsync(Guid id)
+		public async Task<string?> GetSKUForProductAsync(Guid id, CancellationToken ct)
 		{
 			if (id == Guid.Empty)
 			{
 				return null;
 			}
 			var product = await _werehouseDbContext.Products
-				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false);
+				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false, ct);
 			return product!.SKU;//required
 		}
-		public async Task<Product?> GetProductToEditAsync(Guid id)
+		public async Task<Product?> GetProductToEditAsync(Guid id, CancellationToken ct)
 		{
 			if (id != Guid.Empty)
 			{
 				var product = await _werehouseDbContext.Products
 					.Include(p => p.Details)
-					.FirstOrDefaultAsync(p => p.Id == id);
+					.FirstOrDefaultAsync(p => p.Id == id, ct);
 				return product;
 			}
 			return null;
 		}
-		public async Task<Product?> GetProductDetailsAsync(Guid id)
+		public async Task<Product?> GetProductDetailsAsync(Guid id, CancellationToken ct)
 		{
 			if (id != Guid.Empty)
 			{
 				var product = await _werehouseDbContext.Products
 					.Include(p => p.Category)
 					.Include(p => p.Details)
-					.FirstOrDefaultAsync(p => p.Id == id);
+					.FirstOrDefaultAsync(p => p.Id == id, ct);
 				return product;
 			}
 			return null;
@@ -79,7 +79,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var result = _werehouseDbContext.Products
 				.AsQueryable();
-			
+
 			if (!string.IsNullOrEmpty(filter.ProductName))
 			{
 				result = result.Where(p => p.Name != null && p.Name.StartsWith(filter.ProductName));
@@ -124,10 +124,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return result;
 		}
 
-		public async Task<bool> IsExistProduct(Guid id)
+		public async Task<bool> IsExistProduct(Guid id, CancellationToken ct)
 		{
-			if (await _werehouseDbContext.Products.FindAsync(id) != null) { return true; }
+			if (await _werehouseDbContext.Products.FindAsync([id], ct) != null) { return true; }
 			return false;
-		}		
+		}
 	}
 }

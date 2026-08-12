@@ -13,7 +13,7 @@ using Xunit.Sdk;
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTestsIntegration
 {
 	public class AddDeleteUpdateCategoryIntegrationTests : CategoryIntegrationCommand
-	{		
+	{
 		[Fact]
 		public async Task AddCategory_ShouldAddCategory_WhenValidInput()
 		{
@@ -25,7 +25,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 
 			};
 			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
-			
+
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
 			_context.SaveChanges();
@@ -34,7 +34,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Name = "newCategory"
 			};
 			//Act
-			await _categoryService.AddCategoryAsync(categoryDTO);
+			await _categoryService.AddCategoryAsync(categoryDTO, CancellationToken.None);
 			//Assert
 			var result = _context.Categories.FirstOrDefault(c => c.Name == category.Name);
 			Assert.NotNull(result);
@@ -49,7 +49,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Name = "TestCategory"
 			};
 			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
-			
+
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
 			_context.SaveChanges();
@@ -60,7 +60,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			//Act&Assert
 			var quantity = _context.Categories.Count();
 			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-			_categoryService.AddCategoryAsync(categoryDTO));
+			_categoryService.AddCategoryAsync(categoryDTO, CancellationToken.None));
 			var result = _context.Categories.Count();
 			Assert.Equal(quantity, result);
 			Assert.Contains("Category name is required.", ex.Message);
@@ -75,7 +75,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 				Name = "TestCategory"
 			};
 			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
-			
+
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
 			_context.SaveChanges();
@@ -85,7 +85,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			};
 			//Act
 			var quantity = _context.Categories.Count();
-			var result = await _categoryService.AddCategoryAsync(categoryDTO);
+			var result = await _categoryService.AddCategoryAsync(categoryDTO, CancellationToken.None);
 			//Assert
 			var resultBase = _context.Categories.Count();
 			Assert.Equal(_context.Categories.Count(), resultBase);
@@ -106,7 +106,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			_context.SaveChanges();
 			var categoryId = 3;
 			//Act
-			await _categoryService.DeleteCategoryAsync(categoryId);
+			await _categoryService.DeleteCategoryAsync(categoryId, CancellationToken.None);
 			//Assert
 			var result = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
 			Assert.Null(result);
@@ -122,13 +122,13 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 
 			};
 			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
-			
+
 			_context.Products.Add(product);
 			_context.Categories.Add(category);
 			_context.SaveChanges();
 			var categoryId = 1;
 			//Act
-			await _categoryService.DeleteCategoryAsync(categoryId);
+			await _categoryService.DeleteCategoryAsync(categoryId, CancellationToken.None);
 			//Assert
 			var result = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
 			Assert.NotNull(result);
@@ -138,32 +138,32 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 		[Fact]
 		public async Task UpdateCategory_ShouldChangeName_WhenValidName()
 		{
-			//Arrange			
+			//Arrange
 			var updatingCategory = new Category { Id = 66, Name = "ToUpdateCategoryAsync" };
 			_context.Categories.Add(updatingCategory);
 			_context.SaveChanges();
 			//Act
 			var id = 66;
 			var updatedCategory = new CategoryDTO { Name = "NewTestCategoryAsync1" };
-			await _categoryService.UpdateCategoryAsync(id, updatedCategory);
+			await _categoryService.UpdateCategoryAsync(id, updatedCategory, CancellationToken.None);
 			//Assert
 			var result = _context.Categories.Find(updatingCategory.Id);
 			Assert.NotNull(result);
 			Assert.Equal(updatedCategory.Name, result.Name);
 		}
-		
+
 		[Fact]
 		public async Task UpdateCategory_ShouldThrowValidationException_WhenNameIsEMpty() {
-			//Arrange			
+			//Arrange
 			var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };
 			_context.Categories.Add(updatingCategory);
 			_context.SaveChanges();
 			//Act&Assert
 			var id = 88;
 			var updatedCategory = new CategoryDTO { Name = "" };
-			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(id,updatedCategory));
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(id,updatedCategory, CancellationToken.None));
 			//Assert
-			Assert.NotNull(ex);	
+			Assert.NotNull(ex);
 			Assert.Contains("Category name is required.", ex.Message);
 		}
 	}

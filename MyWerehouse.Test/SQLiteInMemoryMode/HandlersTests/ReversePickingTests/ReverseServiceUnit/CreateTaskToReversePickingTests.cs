@@ -75,7 +75,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var _reversePickingRepo = new ReversePickingRepo(DbContext);
 			var _providerDateTime = new TestDateTimeProvider();
 			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo, _providerDateTime);
-			
+
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Clients.Add(client);
@@ -86,16 +86,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
 			var sourcePallet = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToPicking, null, null);
 			sourcePallet.AddProductForTests(product.Id, 60, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
-			
+
 			var pickingPallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
 			pickingPallet.AddProductForTests(product.Id, 40, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
-			
+
 			DbContext.Pallets.AddRange(sourcePallet, pickingPallet);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
-			
+
 			var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), sourcePallet.Id, 100, sourcePallet.Location.Id, new DateTime(2025, 8, 12));
-			
+
 			var pickinTaskGuid = Guid.NewGuid();
 			var pickingTask = PickingTask.CreateForSeed(pickinTaskGuid, virtualPallet.Id, issueId, 40,
 				PickingStatus.Picked, product.Id, DateOnly.FromDateTime(TestDates.UtcNow.AddMonths(12)),
@@ -104,10 +104,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.VirtualPallets.AddRange(virtualPallet);
 			DbContext.SaveChanges();
 			//Act
-			
-			await _createReversePickingTask.CreateReversePicking(pickingPallet.Id, "UserReverse");
+
+			await _createReversePickingTask.CreateReversePicking(pickingPallet.Id, "UserReverse", CancellationToken.None);
 			DbContext.SaveChanges();
-			//Assert			
+			//Assert
 			var taskReverse = DbContext.ReversePickings.SingleOrDefault();
 			Assert.NotNull(taskReverse);
 
@@ -140,7 +140,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var _reversePickingRepo = new ReversePickingRepo(DbContext);
 			var _providerDateTime = new TestDateTimeProvider();
 			var _createReversePickingTask = new CreateReversePickingService(_palletRepo, _pickingTaskRepo, _reversePickingRepo, _providerDateTime);
-			
+
 			DbContext.Categories.Add(category);
 			DbContext.Locations.Add(location);
 			DbContext.Clients.Add(client);
@@ -151,13 +151,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DateOnly.FromDateTime( TestDates.UtcNow.AddDays(1)), "TestUser", IssueStatus.Pending, null);
 			var sourcePallet1 = Pallet.CreateForTests("Q1000", new DateTime(2025, 8, 8), 1, PalletStatus.ToIssue, null, issueId);
 			sourcePallet1.AddProductForTests(product.Id, 100, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.Now.AddMonths(24)));
-			
+
 			DbContext.Pallets.AddRange(sourcePallet1);
 			DbContext.Issues.AddRange(issue);
 			await DbContext.SaveChangesAsync();
 
 			//Act & Assert
-			var result = await _createReversePickingTask.CreateReversePicking(sourcePallet1.Id, "UserReverse");
+			var result = await _createReversePickingTask.CreateReversePicking(sourcePallet1.Id, "UserReverse", CancellationToken.None);
 			DbContext.SaveChanges();
 			Assert.Contains("The pallet has no allocation and cannot be reverse-picked.", result.Message);
 		}

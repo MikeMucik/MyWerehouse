@@ -48,7 +48,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			//Arrange
 			var clientId = 10;
 			//Act
-			var result = await _clientService.DetailsOfClientAsync(clientId);
+			var result = await _clientService.DetailsOfClientAsync(clientId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			//Arrange
 			var clientId = 100;
 			//Act
-			var result = await _clientService.DetailsOfClientAsync(clientId);
+			var result = await _clientService.DetailsOfClientAsync(clientId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
@@ -74,8 +74,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 		public async Task GetAllClientsAsync_ShouldReturnFirst3Client_WhenDataExist()
 		{
 			//Arrange&Act
-			var ct = CancellationToken.None;
-			var result = await _clientService.GetAllClientsAsync(1, 3, ct);
+			var result = await _clientService.GetAllClientsAsync(1, 3, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -90,9 +89,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			{
 				Name = "Client"
 			};
-			var ct = CancellationToken.None;
 			//Act
-			var result = await _clientService.GetClientsByFilterAsync(1, 3, filter, ct);
+			var result = await _clientService.GetClientsByFilterAsync(1, 3, filter, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -107,9 +105,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			{
 				FullName = "FullNameTestAddress1"
 			};
-			var ct = CancellationToken.None;
 			//Act
-			var result = await _clientService.GetClientsByFilterAsync(1, 3, filter, ct);
+			var result = await _clientService.GetClientsByFilterAsync(1, 3, filter, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -124,9 +121,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			{
 				Name = "Test1111"
 			};
-			var ct = CancellationToken.None;
 			//Act
-			var result = await _clientService.GetClientsByFilterAsync(1, 3, filter, ct);
+			var result = await _clientService.GetClientsByFilterAsync(1, 3, filter, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -135,4 +131,3 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 		}
 	}
 }
-

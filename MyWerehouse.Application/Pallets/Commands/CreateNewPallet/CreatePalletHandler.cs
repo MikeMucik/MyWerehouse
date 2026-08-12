@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 
 		public async Task<AppResult<Unit>> Handle(CreatePalletCommand request, CancellationToken ct)
 		{
-			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber);
+			var location = await _locationRepo.GetLocationByIdAsync(request.RampNumber, ct);
 			if (location == null) return AppResult<Unit>.Fail("The specified ramp does not exist.");
 			var newIdForPallet = (await _palletNumberAllocator.ReserveAsync(1, ct)).Single();
 			var now = _dateTimeProvider.UtcNow;

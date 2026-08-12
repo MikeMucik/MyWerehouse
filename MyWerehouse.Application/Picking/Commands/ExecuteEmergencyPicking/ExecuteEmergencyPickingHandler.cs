@@ -33,24 +33,24 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteEmergencyPickingCommand request, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
-			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
+			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId, ct);
 			if (pallet == null)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Pallet {request.PalletId} does not exist.");
 			}
 			var palletItem = pallet.EnsureCanBeUsedForPicking();
-						
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Issue {request.IssueId} was not found.");
 			}
 			issue.StartEmergencyPicking();
-			
+
 			// Oblicz, ile faktycznie można/trzeba skompletować
-			var pickingTasksForIssue = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(request.IssueId, palletItem.ProductId);
+			var pickingTasksForIssue = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(request.IssueId, palletItem.ProductId, ct);
 			if (pickingTasksForIssue.Count == 0) return AppResult<ProcessPickingActionResult>.Fail($"Picking task does not exist.");
-			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(request.PalletId);
+			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(request.PalletId, ct);
 			var availableQuantity = virtualPallet?.RemainingQuantity ?? palletItem.Quantity;
 			if (availableQuantity == 0)
 			{
@@ -61,7 +61,6 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 			var quantityToPick = reallocation.QuantityToPick;
 			//czy paleta ma dobrą BB
 			pallet.IsCorrectDate(reallocation.BestBefore);
-			
 			// W obecnym flow paleta trafia bezpośrednio do ToPicking; osobna akcja zmiany statusu może być dodana później.
 			if (virtualPallet == null)
 			{
@@ -69,8 +68,8 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 				virtualPallet = VirtualPallet.Create(pallet.Id, palletItem.Quantity, pallet.LocationId, now);
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			}
-			
-			var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, palletItem.ProductId, quantityToPick, reallocation.BestBefore, request.UserId);
+
+			var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, palletItem.ProductId, quantityToPick, reallocation.BestBefore, request.UserId, ct);
 			if (!newPickingTaskInfo.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(

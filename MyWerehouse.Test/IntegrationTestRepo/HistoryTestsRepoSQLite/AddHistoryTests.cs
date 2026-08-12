@@ -382,7 +382,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			};
 
 			var historyReversePickingRepo = new HistoryReversePickingRepo(DbContext);
-			var ct = CancellationToken.None;
 			//Act
 			historyReversePickingRepo.AddHistoryReversePicking(historyReversePicking);
 			DbContext.SaveChanges();

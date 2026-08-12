@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 		public async Task<AppResult<Unit>> Handle(DeleteIssueCommand request, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
-			var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issueToDelete == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			switch (issueToDelete.IssueStatus)

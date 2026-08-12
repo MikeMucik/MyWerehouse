@@ -33,11 +33,11 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 		{
 			var now = _dateTimeProvider.UtcNow;
 			var resultList = new List<AssignProductToIssueResult>();
-			var issue = await _issueRepo.GetIssueByIdForModifyAsync(request.Id);
+			var issue = await _issueRepo.GetIssueByIdForModifyAsync(request.Id, ct);
 			if (issue == null)
 				return AppResult<List<AssignProductToIssueResult>>.Fail("Issue was not found.");
 			var mode = issue.DetremineModificationMode();
-			
+
 			if (mode == IssueModificationMode.Reallocation)
 			{
 				return await ReallocateIssue(issue, request, now, ct);
@@ -69,7 +69,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				try
 				{
 					var result = await _assignProductToIssueAsync.AssignGoodsToIssue(issue, product,
-						IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy);
+						IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy, ct);
 
 					if (!result.Success) //niepowodzenie biznesowe
 					{
@@ -104,7 +104,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				// Usuwamy tylko puste VirtualPallets; fizyczne palety wracają do dostępnych.
 				foreach (var item in oldPallets.ListPalletsIds)
 				{
-					var vp = await _virtualRepo.GetVirtualPalletByIdAsync(item);
+					var vp = await _virtualRepo.GetVirtualPalletByIdAsync(item, ct);
 					if (vp!.CanBeDeletedAfterReallocation())
 					{
 						vp.Pallet?.ChangeStatus(PalletStatus.Available);
@@ -130,7 +130,7 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			var newQuantities = new List<IssueItemDTO>();
 			var hasNegativeDiff = false;
 			var errorMessage = new List<string>();
-			
+
 			foreach (var product in request.DTO.IssueItems)
 			{
 				var productId = product.ProductId;

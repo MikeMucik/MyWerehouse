@@ -7,16 +7,12 @@ using MediatR;
 using MyWerehouse.Domain.Clients.ClientsExceptions;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Inventories.Events;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Receiving.Events;
 using MyWerehouse.Domain.Receiving.ReceivingExceptions;
-using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Domain.Receiving.Models
 {
@@ -216,7 +212,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 					throw new PalletDoesNotBelongToReceiptDomainException(Id, ReceiptNumber, item.PalletId, item.PalletNumber!);//istniejąca paleta nie może nie mieć palletNumber
 				}
 			}
-			//List palet do usunięcia z bazy danych 
+			//List palet do usunięcia z bazy danych
 			var incomingPalletsIds = pallets
 				.Select(p => p.PalletId)
 				.Where(id => id != Guid.Empty)
@@ -227,7 +223,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 			//Usuwanie z bazy danych niepotrzebnych pallet
 			foreach (var pallet in palletToDelete)
 			{
-				DetachPallet(pallet);//musi być żeby stworzyć dobrą historię					
+				DetachPallet(pallet);//musi być żeby stworzyć dobrą historię
 				pallet.DetachFromReceipt(userId, pallet.Location.ToSnapshot());
 			}
 			var existingPallets = Pallets.ToDictionary(p => p.Id);

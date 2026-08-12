@@ -10,7 +10,7 @@ using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers
 {
-	
+
 	[ApiController]
 	[Route("api/reverse-pickings")]
 	public class ReversePickingsController : ControllerBase
@@ -25,23 +25,23 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> Execute(
 			Guid id, ReversePickingStrategy strategy,
 			Guid pickingPalletId, string userId,
-			List<Guid> palletsIds, int? rampNumber )
+			List<Guid> palletsIds, int? rampNumber, CancellationToken ct)
 			=> (await _mediator.Send(new ExecuteReversePickingCommand(id, strategy,
-				pickingPalletId, userId, palletsIds, rampNumber)))
+				pickingPalletId, userId, palletsIds, rampNumber), ct))
 			.ToActionResult();
 
 		[HttpGet]
-		public async Task<IActionResult> Tasks ([FromQuery] GetListReversePickingToDoQuery query)
-			=> (await _mediator.Send(query)).ToActionResult();
+		public async Task<IActionResult> Tasks ([FromQuery] GetListReversePickingToDoQuery query, CancellationToken ct)
+			=> (await _mediator.Send(query, ct)).ToActionResult();
 
 		[HttpGet("{id:guid}")]
-		public async Task<IActionResult> TaskOptions(Guid id)
-			=> (await _mediator.Send(new GetReversePickingToDoQuery(id)))
+		public async Task<IActionResult> TaskOptions(Guid id, CancellationToken ct)
+			=> (await _mediator.Send(new GetReversePickingToDoQuery(id), ct))
 			.ToActionResult();
 
 		[HttpGet("available-pallets")]
-		public async Task<IActionResult> PalletsForReservePicking([FromQuery] ListPalletsForForkLifterReservePickingQuery query)
-			=> (await _mediator.Send(query))
+		public async Task<IActionResult> PalletsForReservePicking([FromQuery] ListPalletsForForkLifterReservePickingQuery query, CancellationToken ct)
+			=> (await _mediator.Send(query, ct))
 			.ToActionResult();
 	}
 }

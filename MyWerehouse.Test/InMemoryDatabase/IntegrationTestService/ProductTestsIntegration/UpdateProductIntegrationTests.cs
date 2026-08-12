@@ -14,11 +14,11 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 {
 	public class UpdateProductIntegrationTests : ProductIntegrationCommand
 	{
-		
+
 		[Fact]
 		public async Task UpdateProductAsync_ChangeData_WhenProperData()
 		{
-			// Arrange		
+			// Arrange
 			var category = new Category
 			{
 				Name = "qwe"
@@ -29,7 +29,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			};
 			_context.Categories.AddRange(category, category1);
 			_context.SaveChanges();
-			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56,1, 1, 1, 1, "Test");			
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56,1, 1, 1, 1, "Test");
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act
@@ -47,8 +47,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Description = "TestOk",
 				CartonsPerPallet =56
 			};
-			await _productService.UpdateProductAsync(id, updatedProduct);
-			//Assert			
+			await _productService.UpdateProductAsync(id, updatedProduct, CancellationToken.None);
+			//Assert
 			var result = _context.Products
 				.Include(d => d.Details)
 				.FirstOrDefault(x => x.Id == updatingProduct.Id);
@@ -63,8 +63,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		[Fact]
 		public async Task UpdateProductAsync_ThrowsException_WhenNotProperDataName()
 		{
-			// Arrange			
-			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56, 1, 1, 1, 1, "Test");					
+			// Arrange
+			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56, 1, 1, 1, 1, "Test");
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
 			//Act&Assert
@@ -83,14 +83,14 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CartonsPerPallet =56
 
 			};
-			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct));
+			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct, CancellationToken.None));
 			Assert.Contains("Product name is required.", e.Message);
 
 		}
 		[Fact]
 		public async Task UpdateProductAsync_ThrowsValidationException_WhenNoDataLength()
 		{
-			// Arrange			
+			// Arrange
 			var updatingProduct = Product.Create("Test", "dede", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 			_context.Products.Add(updatingProduct);
 			_context.SaveChanges();
@@ -108,16 +108,16 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				//Length = 10,
 				Description = "TestOk",
 				CartonsPerPallet =56,
-				
+
 			};
-			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct));
+			var e = await Assert.ThrowsAsync<ValidationException>(() => _productService.UpdateProductAsync(id, updatedProduct, CancellationToken.None));
 
 			Assert.Contains("Product length must be greater than zero.", e.Message);
 		}
 		[Fact]
 		public async Task UpdateProductAsync_ThrowsDomainException_WhenNotProperDataLength()
 		{
-			// Arrange		
+			// Arrange
 			var category = new Category
 			{
 				Name = "qwe"
@@ -147,7 +147,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Description = "TestOk",
 				CartonsPerPallet =56
 			};
-			var e = await Assert.ThrowsAsync<WrongLengthProductDomainException>(() => _productService.UpdateProductAsync(id, updatedProduct));
+			var e = await Assert.ThrowsAsync<WrongLengthProductDomainException>(() => _productService.UpdateProductAsync(id, updatedProduct, CancellationToken.None));
 
 			Assert.Contains("Not correct size of length(range: 1-120cm).", e.Message);
 		}

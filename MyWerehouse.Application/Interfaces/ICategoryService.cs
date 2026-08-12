@@ -11,11 +11,11 @@ using MyWerehouse.Application.ViewModels.CategoryModels;
 namespace MyWerehouse.Application.Interfaces
 {
 	public interface ICategoryService
-	{		
-		Task<AppResult<Unit>> AddCategoryAsync(CategoryDTO categoryDTO);		
-		Task<AppResult<Unit>> DeleteCategoryAsync(int id);
-		Task<AppResult<Unit>> UpdateCategoryAsync(int id, CategoryDTO categoryDTO);
+	{
+		Task<AppResult<Unit>> AddCategoryAsync(CategoryDTO categoryDTO, CancellationToken ct);
+		Task<AppResult<Unit>> DeleteCategoryAsync(int id, CancellationToken ct);
+		Task<AppResult<Unit>> UpdateCategoryAsync(int id, CategoryDTO categoryDTO, CancellationToken ct);
 		Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageNumber,int pageSize,  CancellationToken ct);
-		Task<AppResult<CategoryViewDTO>> GetCategoryByIdAsync(int id);
+		Task<AppResult<CategoryViewDTO>> GetCategoryByIdAsync(int id, CancellationToken ct);
 	}
 }

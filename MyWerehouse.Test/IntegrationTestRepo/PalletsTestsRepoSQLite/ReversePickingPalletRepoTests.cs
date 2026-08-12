@@ -61,7 +61,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 
             var repo = new PalletRepo(DbContext);
             var result = await repo.GetAvailablePalletsForReversePickingAsync(
-                product.Id, requiredBestBefore, source.Id, product.CartonsPerPallet);
+                product.Id, requiredBestBefore, source.Id, product.CartonsPerPallet, CancellationToken.None);
 
             var pallet = Assert.Single(result);
             Assert.Equal(matching.Id, pallet.Id);

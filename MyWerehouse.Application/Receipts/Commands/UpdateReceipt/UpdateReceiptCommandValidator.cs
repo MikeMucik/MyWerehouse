@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				.NotEqual(Guid.Empty)
 				.WithMessage("Receipt ID is required.");
 			RuleFor(x => x.DTO.ClientId)
-				.MustAsync(async (id, ct) => await clientRepo.IsClientExistAsync(id))
+				.MustAsync(async (id, ct) => await clientRepo.IsClientExistAsync(id, ct))
 				.WithMessage("The selected client does not exist.");
 			RuleFor(r => r.DTO.ClientId)
 				.GreaterThan(0)
@@ -28,7 +28,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				.GreaterThan(0)
 				.WithMessage("Receipt ramp is required.");
 			RuleFor(l => l.DTO.RampNumber)
-				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id))
+				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id, ct))
 				.WithMessage("The selected ramp does not exist.");
 			RuleFor(r => r.DTO.Pallets)
 				.NotEmpty()

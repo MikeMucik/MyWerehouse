@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 		public async Task<AppResult<Unit>> Handle(CreateReceiptPlanCommand request, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
-			var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt();
+			var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt(ct);
 				var receipt = Receipt.Create(receiptNumber, request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber, now);
 				_receiptRepo.AddReceipt(receipt);
 				receipt.Create(request.DTO.PerformedBy);

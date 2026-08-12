@@ -12,6 +12,6 @@ namespace MyWerehouse.Application.Issues.IssueServices
 	public interface IAssignProductToIssueService
 	{
 		Task<AssignProductToIssueResult> AssignGoodsToIssue(Issue issue, IssueItemDTO issueItem, IssueAllocationPolicy policy,
-		List<Pallet>? oldAssignedPallets, string userId);
+		List<Pallet>? oldAssignedPallets, string userId, CancellationToken ct);
 	}
 }

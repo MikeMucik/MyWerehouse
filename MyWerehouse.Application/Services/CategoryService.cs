@@ -40,64 +40,64 @@ namespace MyWerehouse.Application.Services
 			_validator = validator;
 		}
 
-		public async Task<AppResult<Unit>> AddCategoryAsync(CategoryDTO categoryDTO)
+		public async Task<AppResult<Unit>> AddCategoryAsync(CategoryDTO categoryDTO, CancellationToken ct)
 		{
-			var validationResult = await _validator.ValidateAsync(categoryDTO);
+			var validationResult = await _validator.ValidateAsync(categoryDTO, ct);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name) != null)
+			if (await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name, ct) != null)
 			{
 				return AppResult<Unit>.Fail("A category with this name already exists.", ErrorType.Conflict);
 			}
 			var category = _mapper.Map<Category>(categoryDTO);
 			_categoryRepo.AddCategory(category);
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Category added.");
 		}
 
-		public async Task<AppResult<Unit>> DeleteCategoryAsync(int id)
+		public async Task<AppResult<Unit>> DeleteCategoryAsync(int id, CancellationToken ct)
 		{
-			var category = await _categoryRepo.GetCategoryByIdAsync(id);
+			var category = await _categoryRepo.GetCategoryByIdAsync(id, ct);
 			if (category == null) return AppResult<Unit>.Fail($"Category {id} was not found.");
 			var filter = new ProductSearchFilter
 			{
 				CategoryId = id,
 			};
 			var products = _productRepo.FindProducts(filter);
-			if (await products.AnyAsync())
+			if (await products.AnyAsync(ct))
 			{
-				await _categoryRepo.SwitchOffCategoryAsync(id);
-				await _werehouseDbContext.SaveChangesAsync();
+				await _categoryRepo.SwitchOffCategoryAsync(id, ct);
+				await _werehouseDbContext.SaveChangesAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, "Category disabled.");
 			}
 			else
 			{
 				_categoryRepo.DeleteCategory(category);
 
-				await _werehouseDbContext.SaveChangesAsync();
+				await _werehouseDbContext.SaveChangesAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, "Category deleted.");
 			}
 		}
-		public async Task<AppResult<Unit>> UpdateCategoryAsync(int id, CategoryDTO categoryDTO)
+		public async Task<AppResult<Unit>> UpdateCategoryAsync(int id, CategoryDTO categoryDTO, CancellationToken ct)
 		{
-			var validationResult = await _validator.ValidateAsync(categoryDTO);
+			var validationResult = await _validator.ValidateAsync(categoryDTO, ct);
 			if (validationResult != null)
 				if (!validationResult.IsValid)
 				{
 					throw new ValidationException(validationResult.Errors);
 				}
-			var existingCategory = await _categoryRepo.GetCategoryByIdAsync(id);
+			var existingCategory = await _categoryRepo.GetCategoryByIdAsync(id, ct);
 			if (existingCategory != null)
 			{
-				var categoryWithSameName = await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name);
+				var categoryWithSameName = await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name, ct);
 				if (categoryWithSameName != null && categoryWithSameName.Id == existingCategory.Id)
 				{
 					return AppResult<Unit>.Fail("A category with this name already exists.", ErrorType.Conflict);
 				}
 				existingCategory.Name = categoryDTO.Name;
-				await _werehouseDbContext.SaveChangesAsync();
+				await _werehouseDbContext.SaveChangesAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, "Category updated.");
 			}
 			else return AppResult<Unit>.Fail($"Category {id} was not found.");
@@ -114,9 +114,9 @@ namespace MyWerehouse.Application.Services
 			return AppResult<PagedResult<CategoryViewDTO>>.Success(result);
 		}
 
-		public async Task<AppResult<CategoryViewDTO>> GetCategoryByIdAsync(int id)
+		public async Task<AppResult<CategoryViewDTO>> GetCategoryByIdAsync(int id, CancellationToken ct)
 		{
-			var result = await _categoryRepo.GetCategoryByIdAsync(id);
+			var result = await _categoryRepo.GetCategoryByIdAsync(id, ct);
 			if (result == null)
 			{
 				return AppResult<CategoryViewDTO>.Fail("Category was not found.");

@@ -16,7 +16,7 @@ namespace MyWerehouse.Domain.Services
 	public class PickingDomainService : IPickingDomainService
 	{
 		public PickingDomainService() { }
-		
+
 		public PickingTask GetSingleHandPickingTask(IReadOnlyCollection<PickingTask> tasks, Guid issueId, Guid productId)
 		{
 			if (tasks.Any(x => x.PickingStatus == PickingStatus.Allocated || x.PickingStatus == PickingStatus.CorrectionPicking))
@@ -25,7 +25,7 @@ namespace MyWerehouse.Domain.Services
 			}
 			var handTasks = tasks
 				.Where(x => x.PickingStatus == PickingStatus.Available
-				&& x.VirtualPalletId == null && x.RequestedQuantity > 0 )
+				&& x.VirtualPalletId == null && x.RequestedQuantity > 0)
 				.ToList();
 			if (handTasks.Count == 0)
 			{
@@ -81,8 +81,8 @@ namespace MyWerehouse.Domain.Services
 			}
 		}
 
-		public IReadOnlyList<PickingTask> PrepareHandPickingTasks(IReadOnlyCollection<PickingTask> activeTasks,Guid issueId, string userId, DateTime now, DateOnly pickingDay)
-		{			
+		public IReadOnlyList<PickingTask> PrepareHandPickingTasks(IReadOnlyCollection<PickingTask> activeTasks, Guid issueId, string userId, DateTime now, DateOnly pickingDay)
+		{
 			var listToDoTasks = new List<PickingTask>();
 			var list = activeTasks
 					.GroupBy(p => p.ProductId)
@@ -114,7 +114,7 @@ namespace MyWerehouse.Domain.Services
 				var pickingTaskToRemove = vp.PickingTasks
 					.Where(a => (a.PickingStatus == PickingStatus.Allocated
 					|| a.PickingStatus == PickingStatus.Available ||
-					a.PickingStatus == PickingStatus.CorrectionPicking)&& a.IssueId == issueId)
+					a.PickingStatus == PickingStatus.CorrectionPicking) && a.IssueId == issueId)
 					.ToList();
 				foreach (var pickingTask in pickingTaskToRemove)
 				{
@@ -125,12 +125,40 @@ namespace MyWerehouse.Domain.Services
 				}
 				//usuń virtualPallet jeśli należy tylko do tego zlecenia
 				if (vp.PickingTasks.Count == 0)
-				{					
+				{
 					vp.Pallet.ChangeStatus(PalletStatus.Available);
 					listVirtualPalletsToCancel.Add(vp);
 				}
 			}
 			return (listVirtualPalletsToCancel, listPickingTaskToCancel);
+		}
+
+		public PickingAllocationResult Allocate(Issue issue, IReadOnlyCollection<VirtualPallet> virtualPallets, Guid productId, int requestedQuantity, DateOnly? bestBefore, string userId, DateTime now)
+		{
+			var pickingTasks = new List<PickingTask>();
+			var quantity = requestedQuantity;
+			var allocatedQuantity = 0;
+			foreach (var vp in virtualPallets)
+			{
+				var taken = Math.Min(quantity, vp.RemainingQuantity);
+				if (taken <= 0) continue;
+				var pickingTask = PickingTask.CreatePickingTaskForIssue(
+					vp, issue, taken, productId, issue.IssueDateTimeSend.AddDays(-2), bestBefore, userId, now);
+
+				pickingTasks.Add(pickingTask);
+				quantity -= taken;
+				allocatedQuantity += taken;
+				if (quantity <= 0)//tu raczej == 0
+				{
+					break;
+				}
+			}
+			return new PickingAllocationResult
+			(
+				PickingTasks: pickingTasks,
+				AllocatedQuantity: allocatedQuantity,
+				RemainingQuantity: quantity
+			);
 		}
 	}
 }

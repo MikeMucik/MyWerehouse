@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Receiving.ReceivingExceptions
 		public Guid Id { get;}
 		public int ReceiptNumber { get; }
 		public CannotCancelReceiptDomainException(Guid id, int receiptNumber)
-			: base($"It is not possible to cancel the receipt{id}, {receiptNumber} of a pallet already in the warehouse circulation.")
+			: base($"Cannot cancel receipt {id}, {receiptNumber}, pallets are already in stock circulation.")
 		{
 			Id = id;
 			ReceiptNumber = receiptNumber;

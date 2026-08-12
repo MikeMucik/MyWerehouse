@@ -28,12 +28,12 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 		private readonly ILocationRepo _locationRepo = locationRepo;
 		public async Task<AppResult<ReversePickingResult>> Handle(ExecuteReversePickingCommand command, CancellationToken ct)
 		{
-			var reversePicking = await _reversePickingRepo.GetReversePickingAsync(command.TaskReversedId);
+			var reversePicking = await _reversePickingRepo.GetReversePickingAsync(command.TaskReversedId, ct);
 			if (reversePicking is null)
 			{
 				return AppResult<ReversePickingResult>.Fail("Reverse picking task was not found.");
 			}
-			var pickingPallet = await _palletRepo.GetPalletByIdAsync(command.PickingPalletId);
+			var pickingPallet = await _palletRepo.GetPalletByIdAsync(command.PickingPalletId, ct);
 			if (pickingPallet == null)
 			{
 				return AppResult<ReversePickingResult>.Fail("Pallet for reverse picking was not found.");
@@ -57,7 +57,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			switch (command.Strategy)
 			{
 				case ReversePickingStrategy.ReturnToSource:
-					result = await _addProductsToPalletService.AddProductsToSourcePallet(reversePicking, command.UserId);
+					result = await _addProductsToPalletService.AddProductsToSourcePallet(reversePicking, command.UserId, ct);
 					if (!result.Success) return Fail(result.Message);
 					break;
 				case ReversePickingStrategy.AddToExistingPallet:
@@ -65,7 +65,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					{
 						return AppResult<ReversePickingResult>.Fail("No pallets were provided for receiving the product.");
 					}
-					result = await _addProductsToPalletService.AddToExistingPallet(reversePicking, command.PalletsIds, command.UserId);
+					result = await _addProductsToPalletService.AddToExistingPallet(reversePicking, command.PalletsIds, command.UserId, ct);
 					if (!result.Success) return Fail(result.Message);
 
 					break;
@@ -75,7 +75,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 					{
 						return AppResult<ReversePickingResult>.Fail("Reverse picking location was not provided.", ErrorType.Validation);
 					}
-					var location = await _locationRepo.GetLocationByIdAsync(command.RampNumber.Value);
+					var location = await _locationRepo.GetLocationByIdAsync(command.RampNumber.Value, ct);
 					if (location == null)
 					{
 						return AppResult<ReversePickingResult>.Fail("The specified location is invalid.");

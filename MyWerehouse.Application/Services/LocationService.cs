@@ -25,9 +25,9 @@ namespace MyWerehouse.Application.Services
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 
-		public async Task<AppResult<int>> AddLocationServiceAsync(LocationDTO locationDTO)
+		public async Task<AppResult<int>> AddLocationServiceAsync(LocationDTO locationDTO, CancellationToken ct)
 		{
-			if (await _locationRepo.ExistsByCoordinatesAsync(locationDTO.Bay, locationDTO.Aisle, locationDTO.Position, locationDTO.Height))
+			if (await _locationRepo.ExistsByCoordinatesAsync(locationDTO.Bay, locationDTO.Aisle, locationDTO.Position, locationDTO.Height, ct))
 			{
 				return AppResult<int>.Fail("A location with these coordinates already exists.",ErrorType.Conflict);
 			}
@@ -35,36 +35,36 @@ namespace MyWerehouse.Application.Services
 
 			var result = _locationRepo.AddLocation(location);
 
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<int>.Success(result.Id, "Location added.");
 		}
-		public async Task<AppResult<Unit>> DeleteLocationServiceAsync(int id)
+		public async Task<AppResult<Unit>> DeleteLocationServiceAsync(int id, CancellationToken ct)
 		{
 			//warunek czy jest puste
-			var isEmpty = await _palletRepo.CheckOccupancyAsync(id);
+			var isEmpty = await _palletRepo.CheckOccupancyAsync(id, ct);
 			if (isEmpty != null)
 			{
 				return AppResult<Unit>.Fail("The pallet location is not empty and cannot be deleted.", ErrorType.Conflict);
 			}
-			var location = await _locationRepo.GetLocationByIdAsync(id);
+			var location = await _locationRepo.GetLocationByIdAsync(id, ct);
 			if (location == null)
 			{
 				return AppResult<Unit>.Fail($"Location {id} was not found.");
 			}
 			_locationRepo.DeleteLocation(location);
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Operation completed successfully.");
 		}
-		public async Task<AppResult<LocationDTO>> GetLocationServiceAsync(int id)
+		public async Task<AppResult<LocationDTO>> GetLocationServiceAsync(int id, CancellationToken ct)
 		{
-			var location = await _locationRepo.GetLocationByIdAsync(id);
+			var location = await _locationRepo.GetLocationByIdAsync(id, ct);
 			if (location == null) return AppResult<LocationDTO>.Fail("No location data to display.");
 			var locationDTO = _mapper.Map<LocationDTO>(location);
 			return AppResult<LocationDTO>.Success(locationDTO);
 		}
-		public async Task<AppResult<Location>> FindLocationAsync(int bay, int aisle, int position, int height)
+		public async Task<AppResult<Location>> FindLocationAsync(int bay, int aisle, int position, int height, CancellationToken ct)
 		{
-			var location = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
+			var location = await _locationRepo.FindLocationAsync(bay, aisle, position, height, ct);
 			if (location is null) return AppResult<Location>.Fail($"No location matches the requested coordinates B:{bay}, A:{aisle}, P:{position}, H:{height}.");
 			return AppResult<Location>.Success(location);
 		}
@@ -82,11 +82,11 @@ namespace MyWerehouse.Application.Services
 			}
 			return AppResult<List<LocationDTO>>.Success(list);
 		}
-		public async Task<AppResult<Unit>> CreateManyLocation(List<LocationDTO> locations)
+		public async Task<AppResult<Unit>> CreateManyLocation(List<LocationDTO> locations, CancellationToken ct)
 		{
 			foreach (var location in locations)
 			{
-				if (await _locationRepo.ExistsByCoordinatesAsync(location.Bay, location.Aisle, location.Position, location.Height))
+				if (await _locationRepo.ExistsByCoordinatesAsync(location.Bay, location.Aisle, location.Position, location.Height, ct))
 				{
 					return AppResult<Unit>.Fail($"A location with Bay = {location.Bay}, Aisle = {location.Aisle}, Position = {location.Position}, Height = {location.Height} already exists.", ErrorType.Conflict);
 				}
@@ -96,7 +96,7 @@ namespace MyWerehouse.Application.Services
 				var location = _mapper.Map<Location>(locationDTO);
 				_locationRepo.AddLocation(location);
 			}
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Locations added.");
 		}
 	}

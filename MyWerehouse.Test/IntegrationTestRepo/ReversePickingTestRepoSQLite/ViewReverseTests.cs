@@ -29,7 +29,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 
 			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");
 			//Act
-			var result = await _reversePickingRepo.GetReversePickingAsync(id);
+			var result = await _reversePickingRepo.GetReversePickingAsync(id, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(pickingId2, result.PickingTaskId);
@@ -37,7 +37,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 			Assert.Equal(productId1, result.ProductId);
 			Assert.Equal(10, result.Quantity);
 			Assert.Equal("UserR", result.UserId);
-		}		
+		}
 		[Fact]
 		public void ShowReversePicking_ReturnRecords_GetReversePickings()
 		{

@@ -10,6 +10,6 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IHistoryReversePickingRepo
 	{
 		void AddHistoryReversePicking(HistoryReversePicking historyReversePicking);
-		Task<List<HistoryReversePicking>> GetHistoryReversePickings();
+		Task<List<HistoryReversePicking>> GetHistoryReversePickings(CancellationToken ct);
 	}
 }

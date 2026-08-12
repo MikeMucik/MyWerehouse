@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CompletePhysicalReceipt
 
 		public async Task<AppResult<Unit>> Handle(CompletePhysicalReceiptCommand request, CancellationToken cancellationToken)
 		{
-			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
+			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId, cancellationToken);
 			if (receipt == null)
 				return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 

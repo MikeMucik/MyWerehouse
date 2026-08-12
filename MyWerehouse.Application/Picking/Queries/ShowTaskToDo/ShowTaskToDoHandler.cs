@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.Picking.Queries.ShowTaskToDo
 
 		public async Task<AppResult<PagedResult<PickingTaskDTO>>> Handle(ShowTaskToDoQuery request, CancellationToken ct)
 		{
-			var palletVirtualId = await _virtualPalletRepo.GetVirtualPalletIdFromPalletIdAsync(request.PalletSourceScannedId);
+			var palletVirtualId = await _virtualPalletRepo.GetVirtualPalletIdFromPalletIdAsync(request.PalletSourceScannedId, ct);
 			var pickingTasks =  _pickingTaskRepo.GetPickingTaskList(palletVirtualId, request.PickingDate)
 				.AsNoTracking();
 			var pickingTaskOrdered = pickingTasks.OrderBy(t => t.Id);

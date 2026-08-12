@@ -25,9 +25,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		public async Task GetPallet_GetPalletByIdAsync_ReturnSimplyData()
 		{
 			//Arrange
-			var paletId =  Guid.Parse("00000000-0001-1111-0000-000000000000");			
+			var paletId =  Guid.Parse("00000000-0001-1111-0000-000000000000");
 			//Act
-			var result =await _palletRepo.GetPalletByIdAsync(paletId);			
+			var result =await _palletRepo.GetPalletByIdAsync(paletId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(PalletStatus.Available, result.Status);
@@ -39,16 +39,16 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		[Fact]
 		public async Task GetPallet_GetPalletWithProductsAsync_ReturnPalletWithProduct()
 		{
-			//Arrange			
+			//Arrange
 			var paletId =  Guid.Parse("00000000-0001-1111-0000-000000000000");
 			//Act
-			var result = await _palletRepo.GetPalletByIdAsync(paletId);
+			var result = await _palletRepo.GetPalletByIdAsync(paletId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(50, result.ProductsOnPallet.First(p => p.Id == 1).Quantity);
 			Assert.Equal(new DateTime(2024, 2, 2), result.ProductsOnPallet.First(p => p.Id == 1).DateAdded);
 		}
-		
+
 		[Fact]
 		public void SearchPallets_FindPalletsByProductId_ReturnList()
 		{
@@ -125,7 +125,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Act
 			var result = _palletRepo.GetPalletsByFilter(locationAisle);
 			//Assert
-			Assert.Equal(0, result.Count());			
+			Assert.Equal(0, result.Count());
 		}
 		[Fact]
 		public void SearchPalletsReceipt_GetPalletsByFilter_ReturnList()
@@ -144,12 +144,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 
 			foreach (var pallet in result)
 			{
-				Assert.NotNull(pallet.Receipt); 
+				Assert.NotNull(pallet.Receipt);
 				Assert.Equal(10, pallet.Receipt.ClientId);
 				Assert.Contains(result, p => p.PalletNumber == "Q1000");
 				Assert.Contains(result, p => p.PalletNumber == "Q1001");
-				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1010"); 				
-				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1002"); 				
+				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1010");
+				Assert.DoesNotContain(result, p => p.PalletNumber == "Q1002");
 			}
 		}
 		[Fact]
@@ -164,7 +164,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			var result = _palletRepo.GetPalletsByFilter(clientId).ToList();
 			//Assert
 			Assert.NotNull(result);
-			Assert.NotEmpty(result); 
+			Assert.NotEmpty(result);
 			Assert.Contains(result, p => p.PalletNumber == "Q1001");
 			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 			foreach (var pallet in result)
@@ -192,7 +192,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			Assert.NotEmpty(result);
 			foreach (var pallet in result)
 			{
-				Assert.NotNull(pallet.Receipt);			
+				Assert.NotNull(pallet.Receipt);
 				Assert.Equal("U001", pallet.Receipt.PerformedBy);
 			}
 		}
@@ -222,26 +222,26 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			var fullPallet = 50;
 			DateOnly date = new DateOnly(2024,2,2);
 			//Act
-			var result =await _palletRepo.GetMissingFullPallets(productId1, fullPallet, date, 1);
+			var result =await _palletRepo.GetMissingFullPallets(productId1, fullPallet, date, 1, CancellationToken.None);
 			//Assert
-			Assert.NotNull(result);					
-			Assert.Single(result);			
-			Assert.Contains(result, p => p.PalletNumber == "Q1000");							
+			Assert.NotNull(result);
+			Assert.Single(result);
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 		}
 		[Fact]
 		public async Task ReturnPalletsByProductIdAndDate_GetAvailablePalletsExcluding_ReturnList()
 		{
 			//Arrange
-			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");			
+			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
 			DateOnly date = new DateOnly(2024, 2, 2);
 			var list = new HashSet<Guid>();
 			//Act
-			var result = await _palletRepo.GetAvailablePalletsExcluding(productId2, date, list);
+			var result = await _palletRepo.GetAvailablePalletsExcluding(productId2, date, list, CancellationToken.None);
 			//Assert
-			Assert.NotNull(result);						
+			Assert.NotNull(result);
 			Assert.Equal(2, result.Count());
-			Assert.Contains(result, p => p.PalletNumber == "Q1002");						
-			Assert.Contains(result, p => p.PalletNumber == "Q1000");						
+			Assert.Contains(result, p => p.PalletNumber == "Q1002");
+			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 		}
 		[Fact]
 		public async Task ReturnPalletsByProductIdAndDateListPallets_GetAvailablePalletsExcluding_ReturnList()
@@ -254,7 +254,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			};
 			DateOnly date = new(2024, 2, 2);
 			//Act
-			var result = await _palletRepo.GetAvailablePalletsExcluding(productId2, date, list);
+			var result = await _palletRepo.GetAvailablePalletsExcluding(productId2, date, list, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Single( result);
@@ -265,11 +265,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		{
 			//Arrange
 			var location = 1;
-			//Act 
-			var result = await _palletRepo.CheckOccupancyAsync(location);
+			//Act
+			var result = await _palletRepo.CheckOccupancyAsync(location, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
-			Assert.True(result.PalletNumber == "Q1000" || result.PalletNumber == "Q1001");			
+			Assert.True(result.PalletNumber == "Q1000" || result.PalletNumber == "Q1001");
 		}
 	}
 }

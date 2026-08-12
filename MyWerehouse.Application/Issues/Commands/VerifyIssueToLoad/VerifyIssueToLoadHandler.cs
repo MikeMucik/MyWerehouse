@@ -23,36 +23,33 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 
 		public async Task<AppResult<List<ComparePlanToPreparedResult>>> Handle(VerifyIssueToLoadCommand request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Issue was not found.");
 			//check requested amount = prepered amount
 			var listOfProduct = issue.IssueItems.Select(x => x.ProductId);
 			var resultComparing = new List<ComparePlanToPreparedResult>();
-			var isConditional = issue.IssueStatus == IssueStatus.PickingShortage;
-			if (!isConditional)
-			{
-				issue.CheckPalletsInIssue();
-			}
+			bool isConditional = false;
 			foreach (var productId in listOfProduct)
 			{
-				var product = await _productRepo.GetProductByIdAsync(productId);
+				var product = await _productRepo.GetProductByIdAsync(productId, ct);
 				if (product == null)
 				{
 					return AppResult<List<ComparePlanToPreparedResult>>.Fail("Product does not exist.");
+				}				
+				var issueVerifyResult = issue.CompareGoods(productId);
+				if (!issueVerifyResult.IsMatching && issueVerifyResult.IsConditional)
+				{
+					resultComparing.Add(ComparePlanToPreparedResult.Ok($"Prepared product conditionally added to the issue.", productId, product.SKU));
+					isConditional = true;
 				}
-				var (isMatching, preparedQuantity, orderedQuantity, bestBefore) = issue.CompareGoods(productId);
-				if (isMatching)
+				else if (issueVerifyResult.IsMatching)
 				{
 					resultComparing.Add(ComparePlanToPreparedResult.Ok("Prepared product matches the issue.", productId, product.SKU));
 				}
-				else if (isConditional && preparedQuantity < orderedQuantity)
-				{
-					resultComparing.Add(ComparePlanToPreparedResult.Ok($"Prepared product conditionally added to the issue.", productId, product.SKU));
-				}
 				else
 				{
-					resultComparing.Add(ComparePlanToPreparedResult.Fail($"Prepared product does not match the issue. Requested {orderedQuantity} with best-before date {bestBefore}, but prepared {preparedQuantity}. Check pallet quantities and best-before dates.", productId, product.SKU, orderedQuantity, preparedQuantity));
+					resultComparing.Add(ComparePlanToPreparedResult.Fail($"Prepared product does not match the issue. Requested {issueVerifyResult.OrderedQuantity} with best-before date {issueVerifyResult.BestBefore}, but prepared {issueVerifyResult.PreparedQuantity}. Check pallet quantities and best-before dates.", productId, product.SKU, issueVerifyResult.OrderedQuantity, issueVerifyResult.PreparedQuantity));
 				}
 			}
 			if (resultComparing.Any(a => a.Success == false))
@@ -61,7 +58,15 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 			}
 			issue.VerifyToLoad(request.UserId);
 			await _werehouseDbContext.SaveChangesAsync(ct);
-			var message = isConditional ? "Issue was conditionally approved with incomplete picking." : "Issue approved.";
+			string message;
+			if (isConditional)
+			{
+				message = "Issue was conditionally approved with incomplete picking.";
+			}
+			else
+			{
+				message = "Issue approved.";
+			};
 			return AppResult<List<ComparePlanToPreparedResult>>.Success(resultComparing, message);
 		}
 	}

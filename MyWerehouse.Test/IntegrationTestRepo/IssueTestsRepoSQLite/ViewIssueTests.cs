@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			var issueId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
 			var id = issueId2;
 			//Act
-			var result = await _issueRepo.GetIssueByIdAsync(id);
+			var result = await _issueRepo.GetIssueByIdAsync(id, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(id, result.Id);
@@ -111,7 +111,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			};
 
 			//Act
-			var result = await _issueRepo.GetIssuesByIdsAsync(list);
+			var result = await _issueRepo.GetIssuesByIdsAsync(list, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -134,7 +134,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			Assert.Contains(result, p => p.PalletNumber == "Q1000");
 			Assert.Contains(result, p => p.PalletNumber == "Q1000" && p.LocationId == 1);
 			Assert.Contains(result, p => p.PalletNumber == "Q1001" && p.LocationId == 1);
-			Assert.Contains(result, p => p.PalletNumber == "Q2000" && p.LocationId == 3);	
+			Assert.Contains(result, p => p.PalletNumber == "Q2000" && p.LocationId == 3);
 		}
 	}
 }

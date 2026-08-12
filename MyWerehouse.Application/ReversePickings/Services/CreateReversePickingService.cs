@@ -27,19 +27,19 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			_dateTimeProvider = dateTimeProvider;
 		}
 
-		public async Task<ReversePickingResult> CreateReversePicking(Guid palletId, string userId)
+		public async Task<ReversePickingResult> CreateReversePicking(Guid palletId, string userId, CancellationToken ct)
 		{
-			var nowDateOnly = _dateTimeProvider.Today;    
-			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId))
+			var nowDateOnly = _dateTimeProvider.Today;
+			if (await _reversePickingRepo.ExistsForPickingPalletAsync(palletId, ct))
 				return ReversePickingResult.Ok();
 			var listTasks = new List<ReversePickingTask>();
-			var pallet = await _palletRepo.GetPalletByIdAsync(palletId);
+			var pallet = await _palletRepo.GetPalletByIdAsync(palletId, ct);
 			if (pallet == null) return ReversePickingResult.Fail($"Pallet {palletId} does not exist.");
 			var issue = pallet.Issue;
 			if (issue == null) return ReversePickingResult.Fail("Issue was not found.");
 			issue.EnsureCanBeCancelled();
 
-			var pickingTasksOfPickingPallet = await _pickingTaskRepo.GetPickingTasksByPickingPalletIdAsync(palletId);
+			var pickingTasksOfPickingPallet = await _pickingTaskRepo.GetPickingTasksByPickingPalletIdAsync(palletId, ct);
 			if (pickingTasksOfPickingPallet.Count == 0)
 				return ReversePickingResult.Fail("The pallet has no allocation and cannot be reverse-picked.");
 			foreach (var pickingTask in pickingTasksOfPickingPallet)
@@ -47,7 +47,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				listTasks.Add(
 					ReversePickingTask.Create(palletId, pickingTask.VirtualPallet!.PalletId, pickingTask.ProductId,
 					pickingTask.VirtualPallet.Pallet.ProductsOnPallet.Single().BestBefore,
-					pickingTask.PickedQuantity, pickingTask.Id, userId, nowDateOnly));					
+					pickingTask.PickedQuantity, pickingTask.Id, userId, nowDateOnly));
 			}
 			foreach (var task in listTasks)
 			{

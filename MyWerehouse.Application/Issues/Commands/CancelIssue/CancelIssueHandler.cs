@@ -34,17 +34,17 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		public async Task<AppResult<Unit>> Handle(CancelIssueCommand request, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			issue.EnsureCanBeCancelled();
-			var palletsToReversepicking = issue.ReturnPickingPallets();		
+			var palletsToReversepicking = issue.ReturnPickingPallets();
 			foreach (var p in palletsToReversepicking)
 			{
-				var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId);
+				var resultReverse = await _createReversePickingService.CreateReversePicking(p.Id, request.UserId, ct);
 				if (!resultReverse.Success) return AppResult<Unit>.Fail(resultReverse.Message);
-			}				
-			var virtualPallets = await _issueRepo.GetVirtualPalletsAsync(request.IssueId);
+			}
+			var virtualPallets = await _issueRepo.GetVirtualPalletsAsync(request.IssueId, ct);
 			var result = _pickingDomainService.ListVirtualPalletPickingTaskToCancel(virtualPallets, issue.Id, request.UserId, now);
 			foreach (var virtualPalletToCancel in result.VirtualPallets)
 			{
@@ -54,7 +54,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			{
 				_pickingTaskRepo.DeletePickingTask(pickingTaksToCancel);
 			}
-			var pickinkHandTasksToCancel = await _pickingTaskRepo.GetHandPickingTask(issue.Id);
+			var pickinkHandTasksToCancel = await _pickingTaskRepo.GetHandPickingTask(issue.Id, ct);
 			foreach (var handTask in pickinkHandTasksToCancel)
 			{
 				handTask.Cancel(request.UserId, now);

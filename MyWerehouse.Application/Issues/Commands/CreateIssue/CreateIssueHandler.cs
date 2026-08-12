@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 			IsolationLevel.Serializable, ct);
 			var now = _dateTimeProvider.UtcNow;
 			var addedProducts = new List<AssignProductToIssueResult>();
-			var issueNumber = await _issueRepo.GetNextNumberOfIssue();
+			var issueNumber = await _issueRepo.GetNextNumberOfIssue(ct);
 			var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.SendDate, now, request.DTO.PerformedBy);
 
 			foreach (var item in request.DTO.Items)
@@ -41,7 +41,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 				try
 				{
 					var result = await _assignProductToIssueService.AssignGoodsToIssue(issue, item,
-						IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy);
+						IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy, ct);
 					if (result.Success != false)
 					{
 						issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore, now);

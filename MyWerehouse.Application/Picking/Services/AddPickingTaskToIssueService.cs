@@ -8,6 +8,7 @@ using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Services;
 
 namespace MyWerehouse.Application.Picking.Services
 {
@@ -18,77 +19,78 @@ namespace MyWerehouse.Application.Picking.Services
 		private readonly IPalletRepo _palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo;
 		private readonly IDateTimeProvider _dateTimeProvider;
+		private readonly IPickingDomainService _pickingDomainService;
 		public AddPickingTaskToIssueService(
 			IProductRepo productRepo,
 			IVirtualPalletRepo virtualPalletRepo,
 			IPalletRepo palletRepo,
 			IPickingTaskRepo pickingTaskRepo,
-			IDateTimeProvider dateTimeProvider)
+			IDateTimeProvider dateTimeProvider,
+			IPickingDomainService pickingDomainService)
 		{
 			_productRepo = productRepo;
 			_virtualPalletRepo = virtualPalletRepo;
 			_palletRepo = palletRepo;
 			_pickingTaskRepo = pickingTaskRepo;
 			_dateTimeProvider = dateTimeProvider;
+			_pickingDomainService = pickingDomainService;
 		}
 
-		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet vp, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
+		public async Task<AddPickingTaskToIssueResult> AddOnePickingTaskToIssue(VirtualPallet vp, Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
+			var sourcePallet = await _palletRepo.GetPalletByIdAsync(vp.PalletId, ct);
+			if (sourcePallet == null)
+				return AddPickingTaskToIssueResult.Fail("Source pallet was not found.");
 			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated,
 				productId, bestBefore, null, issue.IssueDateTimeSend.AddDays(-2), 0);
 			_pickingTaskRepo.AddPickingTask(pickingTask);
-			var sourcePallet = await _palletRepo.GetPalletByIdAsync(vp.PalletId);
-			if (sourcePallet == null)
-				return AddPickingTaskToIssueResult.Fail("Source pallet was not found.");
+
 			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0, now);
 			return AddPickingTaskToIssueResult.Ok(pickingTask);
 		}
 		public async Task<AddPickingTaskToIssueResult> AddPickingTasksToIssue(List<Pallet>? pallets, List<VirtualPallet>? virtualPallets,
-			Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId)
+			Issue issue, Guid productId, int quantity, DateOnly? bestBefore, string userId, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
 			virtualPallets ??= [];
-			// Palety nie są zapisane w bazie, bo cały proces odbywa się w jednym handlerze przed SaveChanges.			
-			var pickingTasks = new List<PickingTask>(); //dla result 			
-			//z dostępnych palet do pickingu	
-			foreach (var vp in virtualPallets)
+			// Palety nie są zapisane w bazie, bo cały proces odbywa się w jednym handlerze przed SaveChanges.
+			var pickingTasks = new List<PickingTask>(); //dla result
+			//z dostępnych palet do pickingu
+			var resultAllocation = _pickingDomainService.Allocate(issue, virtualPallets, productId,	quantity,
+				bestBefore,	userId,	now);
+			pickingTasks.AddRange(resultAllocation.PickingTasks);
+			quantity = resultAllocation.RemainingQuantity;
+			//new pallets for picking
+			if (quantity > 0)
 			{
-				var taken = Math.Min(quantity, vp.RemainingQuantity);
-				if (taken <= 0) continue;
-				var pickingTask = PickingTask.CreatePickingTaskForIssue(
-					vp, issue, taken, productId, issue.IssueDateTimeSend.AddDays(-2), bestBefore, userId, now);
-				_pickingTaskRepo.AddPickingTask(pickingTask);
-				pickingTasks.Add(pickingTask);
-				quantity -= taken;
-				if (quantity <= 0)
-					break;					
+				var usedPalletsId = pallets?
+					.Select(p => p.Id)
+					.ToHashSet() ?? new HashSet<Guid>();
+				var availablePallets = await _palletRepo.GetAvailablePalletsExcluding(productId, bestBefore, usedPalletsId, ct);
+
+				foreach (var palletToPicking in availablePallets)
+				{
+					if (quantity <= 0) break;
+					var virtualPallet = VirtualPallet.CreateFromPallet(palletToPicking,	palletToPicking.ProductsOnPallet.Single().Quantity,
+						palletToPicking.LocationId,	now);
+					palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //from new pallet for picking
+					var addedVirtualPallet = _virtualPalletRepo.AddPalletToPicking(virtualPallet);
+					var allocationFromNewPallet = _pickingDomainService.Allocate(issue,	[addedVirtualPallet], productId,
+						quantity, bestBefore, userId, now);
+					pickingTasks.AddRange(allocationFromNewPallet.PickingTasks);
+					quantity = allocationFromNewPallet.RemainingQuantity;
+				}
 			}
-			//new pallets for picking					
-			var usedPalletsId = pallets?
-				.Select(p => p.Id)
-				.ToHashSet() ?? new HashSet<Guid>();
-			var availablePallets = await _palletRepo.GetAvailablePalletsExcluding(productId, bestBefore, usedPalletsId);
-			
-			foreach (var palletToPicking in availablePallets)
+			//dodawanie na koniec zadań kompletacyjnych
+			foreach (var task in pickingTasks)
 			{
-				if (quantity <= 0) break;
-				var virtualPallet = VirtualPallet.CreateFromPallet(palletToPicking, palletToPicking.ProductsOnPallet.Single().Quantity, palletToPicking.LocationId, now);
-				palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //from new pallet for picking
-				var vp = _virtualPalletRepo.AddPalletToPicking(virtualPallet);
-				var taken = Math.Min(quantity, vp.RemainingQuantity);
-				if (taken <= 0) continue;
-				var pickingTask = PickingTask.CreatePickingTaskForIssue(
-					vp, issue, taken, productId, issue.IssueDateTimeSend.AddDays(-2), bestBefore, userId, now);
-				_pickingTaskRepo.AddPickingTask(pickingTask);
-				pickingTasks.Add(pickingTask);
-				quantity -= taken;
-				if (quantity <= 0) break;				
+				_pickingTaskRepo.AddPickingTask(task);
 			}
 			//if there is not enough product, a message will be sent to the user - for DoPlannedPicking
 			if (quantity > 0)
 			{
-				var productSKU = await _productRepo.GetSKUForProductAsync(productId);
+				var productSKU = await _productRepo.GetSKUForProductAsync(productId, ct);
 				return AddPickingTaskToIssueResult.Fail($"No more stock is available for product {productSKU}; a picking task cannot be created.");
 			}
 			return AddPickingTaskToIssueResult.Ok(pickingTasks);

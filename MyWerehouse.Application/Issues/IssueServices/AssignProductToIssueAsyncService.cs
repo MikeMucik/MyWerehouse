@@ -1,10 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Picking.Services;
 using MyWerehouse.Domain.Interfaces;
@@ -16,21 +15,21 @@ namespace MyWerehouse.Application.Issues.IssueServices
 {
 	public class AssignProductToIssueAsyncService(
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
-		IGetProductCountService getProductCountService,
 		IVirtualPalletRepo virtualPalletRepo,
 		IProductRepo productRepo,
-		IPalletRepo palletRepo) : IAssignProductToIssueService
+		IPalletRepo palletRepo,
+		IInventoryRepo inventoryRepo) : IAssignProductToIssueService
 	{
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
-		private readonly IGetProductCountService _getProductCountService = getProductCountService;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;
 		public async Task<AssignProductToIssueResult> AssignGoodsToIssue(Issue issue, IssueItemDTO issueItem, IssueAllocationPolicy policy,
-			List<Pallet>? oldAssignedPallets, string userId)
+			List<Pallet>? oldAssignedPallets, string userId, CancellationToken ct)
 		{
 			issue.BeginAllocation();
-			var product = await _productRepo.GetProductByIdAsync(issueItem.ProductId);
+			var product = await _productRepo.GetProductByIdAsync(issueItem.ProductId, ct);
 			if (product == null)
 			{
 				return AssignProductToIssueResult.Fail("The specified product does not exist.", issueItem.ProductId);
@@ -38,7 +37,13 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			oldAssignedPallets ??= [];//pełne palety z wskazanym produktem anulowane przy modyfikacji zlecenia, ale trzymane tymczasowo tylko do tej operacji
 			var oldPalletCount = oldAssignedPallets.Count;
 			//1. dostępność towaru	- walidacja
-			var totalAvailable = await _getProductCountService.GetProductCountAsync(issueItem.ProductId, issueItem.BestBefore);
+			//dostępne z bazy
+			var globallyAvailable = await _inventoryRepo.GetAllocatableQuantityAsync(issueItem.ProductId, issueItem.BestBefore, ct);
+			//dostepne z listy updateowanych, chwilowo wstrzymanych
+			var reusableQuantity = oldAssignedPallets
+				.Sum(p => p.GetProductQuantity(issueItem.ProductId));
+			//całkowita suma dostępnych
+			var totalAvailable = globallyAvailable + reusableQuantity;
 			if (issueItem.Quantity > totalAvailable)
 			{
 				return AssignProductToIssueResult.Fail($"Insufficient quantity of product {issueItem.ProductId}. The product was not added to the issue."
@@ -53,7 +58,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				case IssueAllocationPolicy.FullPalletFirst:
 					requiredFullPallets = product.CalculateFullPalletCount(issueItem.Quantity);
 					missingPalletsCount = requiredFullPallets - oldPalletCount;
-					palletFullSelected = await SelectFullPallets(product, issueItem.BestBefore, oldAssignedPallets, requiredFullPallets, missingPalletsCount);
+					palletFullSelected = await SelectFullPallets(product, issueItem.BestBefore, oldAssignedPallets, requiredFullPallets, missingPalletsCount, ct);
 					break;
 
 				default:
@@ -61,15 +66,17 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			}
 			var quantityFromPallets = palletFullSelected.Sum(p => p.GetProductQuantity(issueItem.ProductId));
 			var rest = issueItem.Quantity - quantityFromPallets;// ta linijka potrzebna
+			
+			//tu błąd aplikacji a nie użytkownika więc wyjątek domenowy
 			if (rest < 0) return AssignProductToIssueResult.Fail("Allocated more product than requested.");
 			//3. pobierz dostępne virtualPallet;
-			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(issueItem.ProductId, issueItem.BestBefore);
+			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(issueItem.ProductId, issueItem.BestBefore, ct);
 			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
 			if (rest > 0)
 			{
 				var newPickingTaskFromRest = await _addPickingTaskToIssueService.AddPickingTasksToIssue(
 					palletFullSelected, availableVirtualPalletsQuery, issue,
-					issueItem.ProductId, rest, issueItem.BestBefore, userId);
+					issueItem.ProductId, rest, issueItem.BestBefore, userId, ct);
 				if (newPickingTaskFromRest.Success is false)
 				{
 					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
@@ -79,12 +86,12 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			return AssignProductToIssueResult.Ok($"Product {product.SKU} was added to the issue.", issueItem.ProductId, product.SKU, palletFullSelected);
 		}
 		//pełne palety first
-		private async Task<List<Pallet>> SelectFullPallets(Product product, DateOnly? bestBefore, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount)
+		private async Task<List<Pallet>> SelectFullPallets(Product product, DateOnly? bestBefore, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount, CancellationToken ct)
 		{
 			List<Pallet> missingPallets = [];
 			if (missingPalletsCount > 0)
 			{
-				missingPallets = await _palletRepo.GetMissingFullPallets(product.Id, product!.CartonsPerPallet, bestBefore, missingPalletsCount);
+				missingPallets = await _palletRepo.GetMissingFullPallets(product.Id, product!.CartonsPerPallet, bestBefore, missingPalletsCount, ct);
 			}
 			// Czy tą operację lepiej zrobic na Dictionary ?
 			List<Pallet> allNecessaryPallets = [.. reusablePalletsForProduct

@@ -12,14 +12,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 	[Collection("QueryCollection")]
 	public class ViewReceiptTests
 
-	{		
+	{
 		private readonly ReceiptRepo _receiptRepo;
 		private readonly QueryTestSQLFixture _fixture;
 		public ViewReceiptTests(QueryTestSQLFixture fixture)
 		{
-			_fixture = fixture;			
+			_fixture = fixture;
 			_receiptRepo = new ReceiptRepo(_fixture.DbContext);
-		}		
+		}
 		[Fact]
 		public async Task GetReceiptByIdAsync_ShowReceiptById()
 		{
@@ -27,7 +27,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReceiptTestRepoSQLite
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			Guid ReceiptId = receiptId1;
 			//Act
-			var result =await _receiptRepo.GetReceiptByIdAsync(ReceiptId);
+			var result =await _receiptRepo.GetReceiptByIdAsync(ReceiptId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(ReceiptId, result.Id);

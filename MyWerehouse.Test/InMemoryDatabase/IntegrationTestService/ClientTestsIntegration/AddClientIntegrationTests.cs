@@ -35,8 +35,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act
-			var result = await _clientService.AddClientAsync(client);
-			//Assert			
+			var result = await _clientService.AddClientAsync(client, CancellationToken.None);
+			//Assert
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
 			Assert.Equal(client.Email, resultClient.Email);
@@ -77,8 +77,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act
-			var result = await _clientService.AddClientAsync(client);
-			//Assert			
+			var result = await _clientService.AddClientAsync(client, CancellationToken.None);
+			//Assert
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Name == client.Name);
 			Assert.NotNull(resultClient);
 			Assert.Equal(client.Email, resultClient.Email);
@@ -110,7 +110,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act&Assert
-			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
+			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client, CancellationToken.None));
 			Assert.Contains("Postal code is required.", exceptionMessage.Message);
 		}
 		[Fact]
@@ -136,7 +136,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				Description = "description",
 			};
 			//Act&Assert
-			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client));
+			var exceptionMessage = await Assert.ThrowsAsync<ValidationException>(() => _clientService.AddClientAsync(client, CancellationToken.None));
 			Assert.Contains("Client name is required.", exceptionMessage.Message);
 		}
 	}

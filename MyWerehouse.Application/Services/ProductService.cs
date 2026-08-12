@@ -56,19 +56,19 @@ namespace MyWerehouse.Application.Services
 			_dateTimeProvider = dateTimeProvider;
 		}
 
-		public async Task<AppResult<Guid>> AddProductAsync(CreateProductDTO productDTO)
+		public async Task<AppResult<Guid>> AddProductAsync(CreateProductDTO productDTO, CancellationToken ct)
 		{
-			var validationResult = _createProductValidator.Validate(productDTO);
+			var validationResult = await _createProductValidator.ValidateAsync(productDTO, ct);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
 			var existingProduct = _productRepo.FindProducts(new ProductSearchFilter { ProductName = productDTO.Name });
-			if (await existingProduct.AnyAsync())
+			if (await existingProduct.AnyAsync(ct))
 			{
 				return AppResult<Guid>.Fail("A product with this name already exists.");
 			}
-			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
+			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId, ct);
 			if (existCategory == null)
 			{
 				return AppResult<Guid>.Fail($"Category {productDTO.CategoryId} does not exist.");
@@ -91,12 +91,12 @@ namespace MyWerehouse.Application.Services
 			var product = _productRepo.AddProduct(productPrepare);
 			var inventory = Inventory.CreateStockItem(product.Id, 0, _dateTimeProvider.UtcNow);
 			_inventoryRepo.AddInventory(inventory);
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Guid>.Success(product.Id);
 		}
-		public async Task<AppResult<Unit>> DeleteProductAsync(Guid id)
+		public async Task<AppResult<Unit>> DeleteProductAsync(Guid id, CancellationToken ct)
 		{
-			var product = await _productRepo.GetProductByIdAsync(id);
+			var product = await _productRepo.GetProductByIdAsync(id, ct);
 			if (product == null)
 			{
 				return AppResult<Unit>.Fail("No product with this ID was found.");
@@ -106,7 +106,7 @@ namespace MyWerehouse.Application.Services
 				ProductId = id
 			};
 			var receipt = _receiptRepo.GetReceiptByFilter(filter);
-			if (await receipt.AnyAsync())
+			if (await receipt.AnyAsync(ct))
 			{
 				product.Hide();
 			}
@@ -114,28 +114,28 @@ namespace MyWerehouse.Application.Services
 			{
 				_productRepo.DeleteProduct(product);
 			}
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<AppResult<EditProductDTO>> GetProductToEditAsync(Guid id)
+		public async Task<AppResult<EditProductDTO>> GetProductToEditAsync(Guid id, CancellationToken ct)
 		{
-			var product = await _productRepo.GetProductToEditAsync(id);
+			var product = await _productRepo.GetProductToEditAsync(id, ct);
 			var productDTO = _mapper.Map<EditProductDTO>(product);
 			return AppResult<EditProductDTO>.Success(productDTO);
 		}
-		public async Task<AppResult<Unit>> UpdateProductAsync(Guid id, EditProductDTO productDTO)
+		public async Task<AppResult<Unit>> UpdateProductAsync(Guid id, EditProductDTO productDTO, CancellationToken ct)
 		{
-			var validationResult = _productValidator.Validate(productDTO);
+			var validationResult = await _productValidator.ValidateAsync(productDTO, ct);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var existingProduct = await _productRepo.GetProductToEditAsync(id);
+			var existingProduct = await _productRepo.GetProductToEditAsync(id, ct);
 			if (existingProduct == null)
 			{
 				return AppResult<Unit>.Fail($"Product {id} does not exist.");
 			}
-			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId);
+			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId, ct);
 			if (existCategory == null)
 			{
 				return AppResult<Unit>.Fail($"Category {productDTO.CategoryId} does not exist.");
@@ -154,12 +154,12 @@ namespace MyWerehouse.Application.Services
 				productDTO.Width,
 				productDTO.Weight,
 				productDTO.Description);
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id)
+		public async Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id, CancellationToken ct)
 		{
-			var product = await _productRepo.GetProductDetailsAsync(id);
+			var product = await _productRepo.GetProductDetailsAsync(id, ct);
 			if (product == null) return AppResult<DetailsOfProductDTO>.Fail("No product data to display.");
 			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
 

@@ -9,14 +9,14 @@ using MyWerehouse.Domain.Clients.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IClientRepo
-	{		
-		int AddClient (Client client);		
+	{
+		int AddClient (Client client);
 		void DeleteClient(Client client);
-		void SwitchOffClient(Client client);		
-		Task<Client?> GetClientByIdAsync (int id); 				
-		Task<Client?> GetClientToEditAsync (int id); 				
+		void SwitchOffClient(Client client);
+		Task<Client?> GetClientByIdAsync (int id, CancellationToken ct);
+		Task<Client?> GetClientToEditAsync (int id, CancellationToken ct);
 		IQueryable<Client> GetAllClients();
 		IQueryable<Client> GetClients (ClientSearchFilter clientFilter);
-		Task<bool> IsClientExistAsync(int clientId);
+		Task<bool> IsClientExistAsync(int clientId, CancellationToken ct);
 	}
 }

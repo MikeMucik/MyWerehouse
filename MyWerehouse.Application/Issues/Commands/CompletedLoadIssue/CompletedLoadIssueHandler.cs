@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Issues.Commands.CompletedLoadIssue
 
 		public async Task<AppResult<Unit>> Handle(CompletedLoadIssueCommand request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			issue.CompletedLoad(request.UserId);

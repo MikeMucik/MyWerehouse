@@ -18,24 +18,24 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public void AddHistoryPallet(HistoryPallet historyPallet)
 		{
-			_werehouseDbContext.HistoryPallet.Add(historyPallet);			
-		}		
-		
-		public async Task<bool> CanDeletePalletAsync(Guid id)
+			_werehouseDbContext.HistoryPallet.Add(historyPallet);
+		}
+
+		public async Task<bool> CanDeletePalletAsync(Guid id, CancellationToken ct)
 		{
 			int movementCount = await _werehouseDbContext.HistoryPallet
 				.Where(p => p.PalletId == id)
 				.Take(2)
-				.CountAsync();
+				.CountAsync(ct);
 			return movementCount <= 1;
 		}
 
-		public async Task<List<HistoryPallet>> GetHistoryPallet(string PalletNumber)
+		public async Task<List<HistoryPallet>> GetHistoryPallet(string PalletNumber, CancellationToken ct)
 		{
 			var query = await _werehouseDbContext.HistoryPallet
 				.Include(hd=>hd.HistoryPalletDetails)
 				.Where(p=>p.PalletNumber == PalletNumber)
-				.ToListAsync();
+				.ToListAsync(ct);
 			return query;
 		}
 	}

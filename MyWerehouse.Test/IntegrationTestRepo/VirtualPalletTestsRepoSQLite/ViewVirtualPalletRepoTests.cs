@@ -27,11 +27,11 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
 
 			//Act
-			var result = await _virtualPalletRepo.GetVirtualPalletsAsync(productId2);
+			var result = await _virtualPalletRepo.GetVirtualPalletsAsync(productId2, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(2, result.Count); // powinny być dwie palety: Q1100 i Q1101 
+			Assert.Equal(2, result.Count); // powinny być dwie palety: Q1100 i Q1101
 
 			// Paleta Q1100
 			var pallet1 = result.FirstOrDefault(vp => vp.Pallet.PalletNumber == "Q1100");
@@ -66,7 +66,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			var startDate = TestDates.UtcNow.AddDays(-2);
 			var endDate = TestDates.UtcNow.AddDays(1);
 			//Act
-			var result = await _virtualPalletRepo.GetVirtualPalletsByTimeAsync(startDate, endDate);
+			var result = await _virtualPalletRepo.GetVirtualPalletsByTimeAsync(startDate, endDate, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -81,7 +81,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			Assert.All(result, v =>
 				Assert.InRange(v.DateMoved, startDate, endDate));
 		}
-		
+
 		[Fact]
 		public async Task TakeVirtualPalletsByPickingDates_GetVirtualPallets_ReturnList()
 		{
@@ -111,7 +111,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			var palletId = palletGuid5;
 			//Act
-			var result = await _virtualPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletId);
+			var result = await _virtualPalletRepo.GetVirtualPalletIdFromPalletIdAsync(palletId, CancellationToken.None);
 			//Assert
 			Assert.NotEqual(Guid.Empty, result);
 			Assert.Equal(vpId1, result);
@@ -122,7 +122,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			//Arrange
 			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
 			//Act
-			var result = await _virtualPalletRepo.GetVirtualPalletByIdAsync(vpId1);
+			var result = await _virtualPalletRepo.GetVirtualPalletByIdAsync(vpId1, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.IsType<VirtualPallet>(result);

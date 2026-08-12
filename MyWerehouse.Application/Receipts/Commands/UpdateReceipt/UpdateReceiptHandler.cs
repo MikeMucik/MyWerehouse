@@ -44,9 +44,9 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		}
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
-			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia	
+			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
 			var now = _dateTimeProvider.UtcNow;
-			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.Id);
+			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.Id, ct);
 			if (existingReceipt == null)
 				return AppResult<Unit>.Fail($"Receipt was not found.");
 			//Sprawdzenie czy wszystkie rodzaje towaru istnieją w bazie
@@ -56,10 +56,10 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				.ToList();
 			foreach (var item in listProducts)
 			{
-				if (!await _productRepo.IsExistProduct(item))
+				if (!await _productRepo.IsExistProduct(item, ct))
 					return AppResult<Unit>.Fail($"Product {item} does not exist.");
 			}
-			var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber);
+			var location = await _locationRepo.GetLocationByIdAsync(request.DTO.RampNumber, ct);
 			if (location == null)
 			{
 				return AppResult<Unit>.Fail($"Location not exists.");
@@ -76,17 +76,17 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 					Quantity: pallet.ProductsOnPallet.Single().Quantity,
 					BestBefore: pallet.ProductsOnPallet.Single().BestBefore,
 					DateAdded: now
-				);				
+				);
 				palletsToUpdate.Add(palletTT);
 			}
 			var addingPallets = existingReceipt.StartUpdateReceipt(palletsToUpdate, request.DTO.PerformedBy);
 			var listOfNewPalletNumbers = await _palletNumberAllocator.ReserveAsync(addingPallets.Count, ct);
-			//to poniżej do domeny ? z wyjściem tylko listy do zapisania
+
 			for (var i = 0; i < addingPallets.Count; i++)
 			{
 				var newPalletNumber = listOfNewPalletNumbers[i];
 				var palletToAdd = addingPallets[i];
-				var pallet = Pallet.Create(newPalletNumber, request.DTO.RampNumber, now);	
+				var pallet = Pallet.Create(newPalletNumber, request.DTO.RampNumber, now);
 				pallet.AddProduct(palletToAdd.ProductId,palletToAdd.Quantity, now, palletToAdd.BestBefore);
 				_palletRepo.AddPallet(pallet);
 				pallet.AssignToReceipt(existingReceipt.Id, snapShot, request.DTO.PerformedBy);

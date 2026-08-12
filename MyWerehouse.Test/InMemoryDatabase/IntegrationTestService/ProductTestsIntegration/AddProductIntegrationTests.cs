@@ -35,8 +35,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Description = "500",
 				CartonsPerPallet =56
 			};
-			//Act			
-			var result = await _productService.AddProductAsync(productNew);
+			//Act
+			var result = await _productService.AddProductAsync(productNew, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -47,7 +47,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			Assert.Equal(productNew.SKU, product.SKU);
 			Assert.Equal(productNew.CategoryId, product.CategoryId);
 
-			Assert.Equal(productNew.Description, product.Details.Description);			
+			Assert.Equal(productNew.Description, product.Details.Description);
 			Assert.Equal(productNew.Length, product.Details.Length);
 			Assert.Equal(productNew.Height, product.Details.Height);
 			Assert.Equal(productNew.Weight, product.Details.Weight);
@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Description = "500",
 			};
 			//Act&Assert
-			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
+			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew, CancellationToken.None));
 			Assert.Contains("Product height must be greater than zero.", ex.Message);
 		}
 		[Fact]
@@ -77,7 +77,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		{
 			//Arrange
 			var product = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
-			
+
 			_context.Products.Add(product);
 			_context.SaveChanges();
 			var productNew = new CreateProductDTO
@@ -93,7 +93,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				CartonsPerPallet =56
 			};
 			//Act
-			var result = await _productService.AddProductAsync(productNew);
+			var result = await _productService.AddProductAsync(productNew, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
@@ -117,7 +117,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 				Description = "500",
 			};
 			//Act&Assert
-			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew));
+			var ex =await Assert.ThrowsAsync<ValidationException>(() => _productService.AddProductAsync(productNew, CancellationToken.None));
 			Assert.Contains("Product SKU is required.", ex.Message);
 		}
 	}

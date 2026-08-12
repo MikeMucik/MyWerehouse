@@ -27,7 +27,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 				Height = 1,
 			};
 			//Act
-			var result = await _locationService.AddLocationServiceAsync(locationDTO);
+			var result = await _locationService.AddLocationServiceAsync(locationDTO, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -46,13 +46,13 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 				Height = 1,
 			};
 			//Act 1
-			var result1 = await _locationService.AddLocationServiceAsync(locationDTO);
+			var result1 = await _locationService.AddLocationServiceAsync(locationDTO, CancellationToken.None);
 			//Assert 1
 			Assert.NotNull(result1);
 			Assert.True(result1.IsSuccess);
 			Assert.Equal(1, result1.Result);
 			//Act 2
-			var result2 = await _locationService.AddLocationServiceAsync(locationDTO);
+			var result2 = await _locationService.AddLocationServiceAsync(locationDTO, CancellationToken.None);
 			Assert.NotNull(result2);
 			Assert.False(result2.IsSuccess);
 			Assert.Contains("A location with these coordinates already exists.", result2.Error);
@@ -73,7 +73,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			Assert.True(result.IsSuccess);
 			Assert.IsType<List<LocationDTO>>(result.Result);
 			//Act 2
-			var resultAdding = await _locationService.CreateManyLocation(result.Result);
+			var resultAdding = await _locationService.CreateManyLocation(result.Result, CancellationToken.None);
 			//Assert
 			Assert.NotNull(resultAdding);
 			Assert.True(resultAdding.IsSuccess);
@@ -91,7 +91,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 				Height = 1,
 			};
 			//Act 1
-			var result1 = await _locationService.AddLocationServiceAsync(locationDTO);
+			var result1 = await _locationService.AddLocationServiceAsync(locationDTO, CancellationToken.None);
 			//Assert 1
 			Assert.NotNull(result1);
 			Assert.True(result1.IsSuccess);
@@ -109,7 +109,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			Assert.True(result.IsSuccess);
 			Assert.IsType<List<LocationDTO>>(result.Result);
 			//Act 2
-			var resultAdding = await _locationService.CreateManyLocation(result.Result);
+			var resultAdding = await _locationService.CreateManyLocation(result.Result, CancellationToken.None);
 			//Assert
 			Assert.NotNull(resultAdding);
 			Assert.False(resultAdding.IsSuccess);

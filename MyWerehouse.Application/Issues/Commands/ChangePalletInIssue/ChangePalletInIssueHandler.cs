@@ -20,14 +20,14 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 
 		public async Task<AppResult<Unit>> Handle(ChangePalletInIssueCommand request, CancellationToken ct)
 		{
-			//Można podmieniać tylko palety z jednym towarem, nie palety kompletacyjne			
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			//Można podmieniać tylko palety z jednym towarem, nie palety kompletacyjne
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
-			var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(request.OldPalletId);
+			var palletToRemoveFromIssue = await _palletRepo.GetPalletByIdAsync(request.OldPalletId, ct);
 			if (palletToRemoveFromIssue is null)
 				return AppResult<Unit>.Fail($"Pallet {request.OldPalletId}, which should be replaced, does not exist.");
-			var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(request.NewPalletId);
+			var palletToAddingIssue = await _palletRepo.GetPalletByIdAsync(request.NewPalletId, ct);
 			if (palletToAddingIssue is null)
 				return AppResult<Unit>.Fail($"Replacement pallet {request.NewPalletId} does not exist.");
 			var bestBefore = issue.IssueItems.Single(x=>x.ProductId == palletToRemoveFromIssue.ProductsOnPallet.Single().ProductId).BestBefore;

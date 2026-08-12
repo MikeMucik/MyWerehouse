@@ -53,30 +53,30 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, client.Id, "U005",
 			TestDates.UtcNow, ReceiptStatus.Verified, location.Id);
 			var pallet = Pallet.CreateForTests("Q1234", TestDates.Now, location.Id, PalletStatus.Receiving, receipt.Id, null);
-			pallet.AddProduct(product1.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));	
+			pallet.AddProduct(product1.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			_context.Receipts.Add(receipt);
 			_context.Pallets.Add(pallet);
-			_context.SaveChanges();			
+			_context.SaveChanges();
 			var productId = product1.Id;
 			//Act
-			await _productService.DeleteProductAsync(product1.Id);
+			await _productService.DeleteProductAsync(product1.Id, CancellationToken.None);
 			//Assert
 			var result = _context.Products.FirstOrDefault(p => p.Id == product1.Id);
 			Assert.NotNull(result);
 			Assert.True(result.IsDeleted);
 		}
-		
+
 		[Fact]
 		public async Task DeleteProductAsync_ShouldDeleteFrom_WhenProductNotUsed()
 		{
 			//Arrange
 			var product1 = Product.Create("Test", "666666", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
-			
+
 			_context.Products.Add(product1);
 			_context.SaveChanges();
-			
+
 			//Act
-			await _productService.DeleteProductAsync(product1.Id);
+			await _productService.DeleteProductAsync(product1.Id, CancellationToken.None);
 			//Assert
 			var product = _context.Products.FirstOrDefault(p => p.Id == product1.Id);
 			Assert.Null(product);
@@ -87,7 +87,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var productId =Guid.Parse("00000000-0000-0000-0000-000000000000");
 			//Act&Assert
-			var result =await _productService.DeleteProductAsync(productId);			
+			var result =await _productService.DeleteProductAsync(productId, CancellationToken.None);
 			Assert.NotNull(result);
 			Assert.Contains("No product with this ID was found.", result.Error);
 		}

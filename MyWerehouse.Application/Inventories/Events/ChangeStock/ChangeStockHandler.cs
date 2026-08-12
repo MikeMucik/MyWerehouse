@@ -19,22 +19,22 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 		{
 			if (!notification.Changes.Any()) { return; }
 			var productIds = notification.Changes.Select(c => c.ProductId).ToList();
-			var inventories = await _inventoryRepo.GetInventoriesForProductsAsync(productIds);
+			var inventories = await _inventoryRepo.GetInventoriesForProductsAsync(productIds, cancellationToken);
 			var inventoryDict = inventories.ToDictionary(i => i.ProductId);
-			
+
 			foreach (var change in notification.Changes)
 			{
 				inventoryDict.TryGetValue(change.ProductId, out var inventory);
 					if (inventory == null)
 				{
 					var newInventory = Inventory.CreateStockItem(change.ProductId,
-						change.Quantity, _dateTimeProvider.UtcNow);					
+						change.Quantity, _dateTimeProvider.UtcNow);
 					_inventoryRepo.AddInventory(newInventory);
 				}
 				else
-				{	
+				{
 					inventory.ApplyChangeInInventory(change.Quantity, _dateTimeProvider.UtcNow);
-				}				
+				}
 			}
 		}
 	}

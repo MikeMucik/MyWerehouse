@@ -9,11 +9,11 @@ using Xunit;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 {
-	[Collection("QueryCollection")] 
+	[Collection("QueryCollection")]
 	public class ViewCategoryTestsRepo
 	{
 		private readonly CategoryRepo _categoryRepo;
-		private readonly QueryTestSQLFixture _fixture;  
+		private readonly QueryTestSQLFixture _fixture;
 
 		public ViewCategoryTestsRepo(QueryTestSQLFixture fixture)
 		{
@@ -25,17 +25,17 @@ namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 		public void ShowAllCategories_GetAllCategories_ReturnList()
 		{
 			// Arrange & Act
-			var result = _categoryRepo.GetAllCategories(); 
+			var result = _categoryRepo.GetAllCategories();
 			// Assert
 			Assert.NotNull(result);
-			Assert.Equal(3, result.Count());  
+			Assert.Equal(3, result.Count());
 		}
 
 		[Fact]
 		public async Task ShowCategoryById_GetCategoryByIdAsync()
 		{
 			// Arrange & Act
-			var result =await _categoryRepo.GetCategoryByIdAsync(1);
+			var result = await _categoryRepo.GetCategoryByIdAsync(1, CancellationToken.None);
 			// Assert
 			Assert.NotNull(result);
 			Assert.Equal(1, result.Id);
@@ -45,10 +45,10 @@ namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 		public async Task ShowCategoryByName_GetCategoryByNameAsync()
 		{
 			// Arrange & Act
-			var result = await _categoryRepo.GetCategoryByNameAsync("TestCategory");
+			var result = await _categoryRepo.GetCategoryByNameAsync("TestCategory", CancellationToken.None);
 			// Assert
 			Assert.NotNull(result);
 			Assert.Equal(1, result.Id);
-		}		
+		}
 	}
 }

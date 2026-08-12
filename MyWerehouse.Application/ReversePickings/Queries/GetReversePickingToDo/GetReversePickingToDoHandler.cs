@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,13 +27,13 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 
 		public async Task<AppResult<ReversePickingDetailsDTO>> Handle(GetReversePickingToDoQuery query, CancellationToken ct)
 		{
-			var reversePickingTask = await _reversePickingRepo.GetReversePickingAsync(query.ReversePickingTaskId);
+			var reversePickingTask = await _reversePickingRepo.GetReversePickingAsync(query.ReversePickingTaskId, ct);
 			if (reversePickingTask == null) return AppResult<ReversePickingDetailsDTO>.Fail("Reverse picking task was not found.");
 
 			var pickingTask = reversePickingTask.PickingTask;
 			var reversePickingDTO = _mapper.Map<ReversePickingDTO>(reversePickingTask);
 			var remainingQuantity = pickingTask.PickedQuantity;
-			var product = await _productRepo.GetProductByIdAsync(pickingTask.ProductId);
+			var product = await _productRepo.GetProductByIdAsync(pickingTask.ProductId, ct);
 			if (product == null) return AppResult<ReversePickingDetailsDTO>.Fail($"Product {pickingTask.ProductId} does not exist.");
 			if (product.CartonsPerPallet == 0) return AppResult<ReversePickingDetailsDTO>.Fail($"Product {pickingTask.ProductId} has no cartons-per-pallet value. Update the product.", ErrorType.Conflict);
 			var sourcePallet = pickingTask.VirtualPallet?.Pallet;
@@ -46,7 +46,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 			}
 			//czy istnieje paleta/y do której można dodać
 			var palletsFromBase = await _palletRepo.GetAvailablePalletsForReversePickingAsync(pickingTask.ProductId,
-				reversePickingTask.BestBefore, sourcePallet.Id, product.CartonsPerPallet);
+				reversePickingTask.BestBefore, sourcePallet.Id, product.CartonsPerPallet, ct);
 			//lista palet do których dodamy
 			bool canAddedtoExist = false;
 			bool unpickComplete = false;

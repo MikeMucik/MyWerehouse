@@ -25,17 +25,17 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return pallet.Id;
 		}
 
-		public async Task<Pallet?> GetPalletByIdAsync(Guid palletId)
+		public async Task<Pallet?> GetPalletByIdAsync(Guid palletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Include(p => p.Location)
 				.Include(p => p.Receipt)
 				.Include(p => p.Issue)
-				.FirstOrDefaultAsync(p => p.Id == palletId);
+				.FirstOrDefaultAsync(p => p.Id == palletId, ct);
 		}
 
-		public async Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId)
+		public async Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
@@ -44,13 +44,13 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(p => p.Location)
 				.Include(p => p.Receipt)
 				.Include(p => p.Issue)
-				.FirstOrDefaultAsync(p => p.Id == palletId);
+				.FirstOrDefaultAsync(p => p.Id == palletId, ct);
 		}
 
-		public async Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber)
+		public async Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
-				.FirstOrDefaultAsync(p => p.PalletNumber == palletNumber);
+				.FirstOrDefaultAsync(p => p.PalletNumber == palletNumber, ct);
 		}
 		public IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter)
 		{
@@ -131,23 +131,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return result;
 		}
 
-		//public async Task<string> GetNextPalletNumberAsync()
-		//{
-		//	var lastPallet = await _werehouseDbContext.Pallets
-		//		.Where(static p => p.PalletNumber.StartsWith("Q"))
-		//		.OrderByDescending(p => p.PalletNumber)
-		//		.FirstOrDefaultAsync();
-
-		//	int lastNumber = 0;
-		//	if (lastPallet != null && int.TryParse(lastPallet.PalletNumber.AsSpan(1), out var parsed))
-		//	{
-		//		lastNumber = parsed;
-		//	}
-		//	string nextId = $"Q{(lastNumber + 1).ToString("D4")}";
-		//	return nextId;
-		//}
-
-		public async Task<int> ReservePalletNumbersAsync(int count)
+		public async Task<int> ReservePalletNumbersAsync(int count, CancellationToken ct)
 		{
 			ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
 
@@ -155,7 +139,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				var counter = await _werehouseDbContext.PalletNumberCounters
 					.AsNoTracking()
-					.SingleAsync(x => x.Name == "Pallet");
+					.SingleAsync((x => x.Name == "Pallet"), ct);
 
 				var firstNumber = counter.NextNumber;
 				var nextFreeNumber = firstNumber + count;
@@ -164,37 +148,37 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				var affectedRows = await _werehouseDbContext.PalletNumberCounters
 						.Where(x =>	x.Name == "Pallet" && x.NextNumber == firstNumber)
 						.ExecuteUpdateAsync(setters =>
-						setters.SetProperty(x => x.NextNumber,nextFreeNumber));
+						setters.SetProperty(x => x.NextNumber,nextFreeNumber), ct);
 
 				if (affectedRows == 1)
 					return firstNumber;
 			}
 		}
 
-		public async Task<Pallet?> CheckOccupancyAsync(int locationId)
+		public async Task<Pallet?> CheckOccupancyAsync(int locationId, CancellationToken ct)
 		{
-			var pallet = await _werehouseDbContext.Pallets.FirstOrDefaultAsync(p => p.LocationId == locationId);
+			var pallet = await _werehouseDbContext.Pallets.FirstOrDefaultAsync(p => p.LocationId == locationId, ct);
 			return pallet;
 		}
 
-		public async Task<Pallet?> GetPickingPalletByIssueId(Guid issueId)
+		public async Task<Pallet?> GetPickingPalletByIssueId(Guid issueId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
 					.Include(p => p.ProductsOnPallet)
 					.Where(p => p.IssueId == issueId && p.Status == PalletStatus.Picking)
-					.FirstOrDefaultAsync();
+					.FirstOrDefaultAsync(ct);
 		}
 
-		public async Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId)
+		public async Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Include(m => m.PalletHistory)
 				.Where(p => p.ReceiptId == reciptId)
-				.ToListAsync();
+				.ToListAsync(ct);
 		}
 
-		public async Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId)
+		public async Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId, CancellationToken ct)
 		{
 			var pallets = await _werehouseDbContext.Pallets
 				.Include(l => l.Location)
@@ -217,11 +201,11 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ThenBy(p => p.LocationId)
 				.ThenBy(p => p.DateReceived)
 				.Take(10)//nie bierz wszystkich
-				.ToListAsync();
+				.ToListAsync(ct);
 			return pallets;
 		}
 
-		public async Task<List<Pallet>> GetMissingFullPallets(Guid productId, int fullPallet, DateOnly? minBestBefore, int neededPallets)
+		public async Task<List<Pallet>> GetMissingFullPallets(Guid productId, int fullPallet, DateOnly? minBestBefore, int neededPallets, CancellationToken ct)
 		{
 			var pallets = await _werehouseDbContext.Pallets
 				.Where(p => (p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
@@ -236,10 +220,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ThenBy(x => x.Location)
 				.Take(neededPallets)
 				.Include(p => p.ProductsOnPallet)
-				.ToListAsync();
+				.ToListAsync(ct);
 			return pallets;
 		}
-		public async Task<List<Pallet>> GetAvailablePalletsForReversePickingAsync(Guid productId, DateOnly? bestBefore, Guid sourceId, int cartonsPerPallet)
+		public async Task<List<Pallet>> GetAvailablePalletsForReversePickingAsync(Guid productId, DateOnly? bestBefore, Guid sourceId, int cartonsPerPallet, CancellationToken ct)
 		{
 			var pallets = await _werehouseDbContext.Pallets
 				.Include(p => p.Location)
@@ -248,7 +232,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				&& a.Receipt != null && a.Status == PalletStatus.Available && a.Id != sourceId &&
 				a.ProductsOnPallet.Single().Quantity < cartonsPerPallet)
 				.OrderByDescending(p => p.ProductsOnPallet.Single().Quantity)
-				.ToListAsync();
+				.ToListAsync(ct);
 			return pallets;
 		}
 	}

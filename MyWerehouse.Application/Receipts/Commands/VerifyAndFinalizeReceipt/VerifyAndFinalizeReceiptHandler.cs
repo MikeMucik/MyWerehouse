@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 
 		public async Task<AppResult<Unit>> Handle(VerifyAndFinalizeReceiptCommand request, CancellationToken cancellationToken)
 		{
-			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId);
+			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId, cancellationToken);
 			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 
 			// W obecnej wersji portfolio weryfikacja oznacza ręczne potwierdzenie zgodności przyjęcia.

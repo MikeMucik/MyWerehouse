@@ -13,14 +13,14 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IIssueRepo
 	{
 		void AddIssue(Issue issue);
-		void DeleteIssue(Issue issue);	
-		Task<Issue?> GetIssueByIdAsync(Guid id);		
-		Task<Issue?> GetIssueByIdForModifyAsync(Guid id);
-		Task<Issue?> GetIssueForViewIncludedByIdAsync(Guid id);		
-		Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids);
+		void DeleteIssue(Issue issue);
+		Task<Issue?> GetIssueByIdAsync(Guid id, CancellationToken ct);
+		Task<Issue?> GetIssueByIdForModifyAsync(Guid id, CancellationToken ct);
+		Task<Issue?> GetIssueForViewIncludedByIdAsync(Guid id, CancellationToken ct);
+		Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids, CancellationToken ct);
 		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
 		IQueryable<Pallet> GetPalletsByIssueId(Guid id);
-		Task<int> GetNextNumberOfIssue();
-		Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id);
+		Task<int> GetNextNumberOfIssue(CancellationToken ct);
+		Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id, CancellationToken ct);
 	}
 }

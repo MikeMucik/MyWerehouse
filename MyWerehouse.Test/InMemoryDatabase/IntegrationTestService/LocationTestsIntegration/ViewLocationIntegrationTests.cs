@@ -28,7 +28,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 		public async Task FindLocation_ShouldReturnLocationForParameters()
 		{
 			//Arrange&Act
-			var result = await _locationService.FindLocationAsync(1, 1, 1, 1);
+			var result = await _locationService.FindLocationAsync(1, 1, 1, 1, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -37,7 +37,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 		public async Task GetLocation_ShouldReturnLocationDTOForId()
 		{
 			//Arrange&Act
-			var result = await _locationService.GetLocationServiceAsync(1);
+			var result = await _locationService.GetLocationServiceAsync(1, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);

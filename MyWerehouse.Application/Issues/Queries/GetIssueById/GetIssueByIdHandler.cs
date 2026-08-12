@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 		}
 		public async Task<AppResult<IssueDTO>> Handle(GetIssueByIdQuery request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueForViewIncludedByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueForViewIncludedByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<IssueDTO>.Fail("Issue was not found.");
 			var issueDTO = _mapper.Map<IssueDTO>(issue);

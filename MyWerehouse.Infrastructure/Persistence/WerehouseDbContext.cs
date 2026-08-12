@@ -30,9 +30,9 @@ namespace MyWerehouse.Infrastructure.Persistence
 		public DbSet<Client> Clients { get; set; }
 		public DbSet<HistoryIssue> HistoryIssues { get; set; }
 		public DbSet<HistoryIssueDetail> HistoryIssueDetails { get; set; }
-		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }																
-		public DbSet<HistoryReceiptDetail> HistoryReceiptDetails { get; set; }															
-		public DbSet<HistoryPicking> HistoryPickings { get; set; }	
+		public DbSet<HistoryReceipt> HistoryReceipts { get; set; }
+		public DbSet<HistoryReceiptDetail> HistoryReceiptDetails { get; set; }
+		public DbSet<HistoryPicking> HistoryPickings { get; set; }
 		public DbSet<HistoryReversePicking> HistoryReversePickings { get; set; }
 		public DbSet<Inventory> Inventories { get; set; }
 		public DbSet<Issue> Issues { get; set; }
@@ -49,13 +49,13 @@ namespace MyWerehouse.Infrastructure.Persistence
 		public DbSet<VirtualPallet> VirtualPallets { get; set; }
 
 		public DbSet<PalletNumberCounter> PalletNumberCounters { get; set; }
-		
+
 		public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
 		{
-			await DispatherDomainEventAsync();
+			await DispatherDomainEventAsync(ct);
 			return await base.SaveChangesAsync(ct);
 		}
-		private async Task DispatherDomainEventAsync()
+		private async Task DispatherDomainEventAsync(CancellationToken ct)
 		{
 			var domainEntities = ChangeTracker
 				.Entries<AggregateRoots>()
@@ -78,14 +78,14 @@ namespace MyWerehouse.Infrastructure.Persistence
 
 			foreach (var domainEvent in domainEvents)
 			{
-				await _publisher.Publish(domainEvent);
+				await _publisher.Publish(domainEvent, ct);
 			}
 		}
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			var provider = Database.ProviderName;
 
-			modelBuilder.ApplyConfiguration(new AddressConfiguration(provider));			
+			modelBuilder.ApplyConfiguration(new AddressConfiguration(provider));
 			modelBuilder.ApplyConfiguration(new CategoryConfiguration(provider));
 			modelBuilder.ApplyConfiguration(new ClientConfiguration(provider));
 			modelBuilder.ApplyConfiguration(new HistoryIssueConfiguration());
@@ -94,7 +94,7 @@ namespace MyWerehouse.Infrastructure.Persistence
 			modelBuilder.ApplyConfiguration(new HistoryReceiptDetailConfiguration());
 			modelBuilder.ApplyConfiguration(new HistoryPickingConfiguration());
 			modelBuilder.ApplyConfiguration(new HistoryReversePickingConfiguration());
-			modelBuilder.ApplyConfiguration(new InventoryConfiguration());			
+			modelBuilder.ApplyConfiguration(new InventoryConfiguration());
 			modelBuilder.ApplyConfiguration(new IssueConfiguration());
 			modelBuilder.ApplyConfiguration(new IssueItemConfiguration());
 			modelBuilder.ApplyConfiguration(new LocationConfiguration());

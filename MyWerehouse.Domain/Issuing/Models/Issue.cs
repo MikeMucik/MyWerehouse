@@ -16,7 +16,6 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Receiving.Events;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MyWerehouse.Domain.Issuing.Models
 {
@@ -485,7 +484,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				if (pallet.ReceiptId != null)
 				{
-					//issue.DetachPallet(pallet, request.UserId); // nie odłączam by mieć spis palet dla anulowanego zlecenia do historii
+					// Nie odłączam palety, aby zachować jej wpis w historii anulowanego zlecenia.
 					pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
 				}
 			}
@@ -500,8 +499,13 @@ namespace MyWerehouse.Domain.Issuing.Models
 			}
 			return list;
 		}
-		public (bool IsMatching, int PreparedQuantity, int OrderedQuantity, DateOnly? BestBefore) CompareGoods(Guid productId)
+		public IssueVerifyResult CompareGoods(Guid productId)
 		{
+			var isConditional = false;
+			if (IssueStatus != IssueStatus.PickingShortage)
+			{
+				CheckPalletsInIssue();
+			}			
 			var orderedGood = this.IssueItems
 				.Single(i => i.ProductId == productId);
 			var quantityOrdered = orderedGood.Quantity;
@@ -511,17 +515,18 @@ namespace MyWerehouse.Domain.Issuing.Models
 				.Where(pp => pp.ProductId == productId && (bestBeforeRequired == null
 				|| pp.BestBefore >= bestBeforeRequired))
 				.Sum(pp => pp.Quantity);
+			if(quantityPrepared <  quantityOrdered && IssueStatus == IssueStatus.PickingShortage) {isConditional = true;}
 			if (quantityOrdered == quantityPrepared)
 			{
-				return (true,quantityPrepared, quantityOrdered, bestBeforeRequired);
-			}			
-			return (false, quantityPrepared, quantityOrdered, bestBeforeRequired);
+				return new IssueVerifyResult(true, isConditional, quantityPrepared, quantityOrdered, bestBeforeRequired);
+			}
+			return new IssueVerifyResult(false, isConditional, quantityPrepared, quantityOrdered, bestBeforeRequired);
 		}
 		public void CheckPalletsInIssue()
 		{
 			foreach (var pallet in Pallets)
 			{
-				if(pallet.Status != PalletStatus.ToIssue)
+				if (pallet.Status != PalletStatus.ToIssue)
 				{
 					throw new PalletsNotReadyToLoadDomainException();
 				}

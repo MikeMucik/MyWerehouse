@@ -25,14 +25,14 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLift
 			var dateStart = query.Start ?? _dateTimeProvider.Today.AddDays(-1);
 			var dateEnd = query.End ?? _dateTimeProvider.Today;
 
-			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(dateStart, dateEnd);
+			var palletsIds = await _reversePickingRepo.GetPalletsIdsByDate(dateStart, dateEnd, ct);
 			if (palletsIds.Count == 0)
 			{
 				return AppResult<List<PickingPalletWithLocationDTO>>.Fail("No pallets to display.");
 			}
 			foreach (var id in palletsIds)
 			{
-				var pallet = await _palletRepo.GetPalletByIdAsync(id);
+				var pallet = await _palletRepo.GetPalletByIdAsync(id, ct);
 				if (pallet == null)
 					return AppResult<List<PickingPalletWithLocationDTO>>.Fail($"Pallet {id} was not found.");
 				var locationName = pallet.Location;

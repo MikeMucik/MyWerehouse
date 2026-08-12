@@ -26,7 +26,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		private readonly IPalletNumberAllocator _palletNumberAllocator = palletNumberAllocator;
 
-		public async Task<ReversePickingResult> AddProductsToSourcePallet(ReversePickingTask reversePicking, string userId)
+		public async Task<ReversePickingResult> AddProductsToSourcePallet(ReversePickingTask reversePicking, string userId, CancellationToken ct)
 		{
 			var sourcePallet = reversePicking.PickingTask.VirtualPallet?.Pallet;
 			if (sourcePallet == null)
@@ -42,7 +42,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 				return ReversePickingResult.Fail("Source pallet has an invalid status.");
 			}
 			sourcePallet.AddHistory(ReasonForPallet.ReversePicking, userId, sourcePallet.Location.ToSnapshot());
-			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(sourcePallet.Id);
+			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(sourcePallet.Id, ct);
 			if (virtualPallet != null)
 			{
 				var availabilityPallet = virtualPallet.ChangeToAvailable(userId, sourcePallet.Location.ToSnapshot());
@@ -55,10 +55,11 @@ namespace MyWerehouse.Application.ReversePickings.Services
 		}
 		public async Task<ReversePickingResult> AddToExistingPallet(ReversePickingTask task,
 			List<Guid> pallets,
-			string userId)
+			string userId,
+			CancellationToken ct)
 		{
 			var quantityToAdded = task.Quantity;
-			var product = await _productRepo.GetProductByIdAsync(task.ProductId);
+			var product = await _productRepo.GetProductByIdAsync(task.ProductId, ct);
 			if (product == null)
 			{
 				return ReversePickingResult.Fail("Product does not exist.");
@@ -66,20 +67,20 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			var cartonsOnPallet = product.CartonsPerPallet;
 			if (pallets.Count == 0)
 				return ReversePickingResult.Fail("No pallets are available for replenishment.");
-	
+
 			var listPalletToAddProduct = new List<PalletProductQuantityDTO>();
 			foreach (var pallet in pallets)
 			{
 				if (quantityToAdded <= 0)
 					break;
-				var palletToAdd = await _palletRepo.GetPalletByIdAsync(pallet);
+				var palletToAdd = await _palletRepo.GetPalletByIdAsync(pallet, ct);
 				if (palletToAdd == null)
 				{
 					return ReversePickingResult.Fail("Problem with pallet, pallet missing.");
 				}
-				var resultAdding = palletToAdd.AddReversePickedProduct(task.ProductId, task.BestBefore,
+				var (RestQuantity, AddedQuantity) = palletToAdd.AddReversePickedProduct(task.ProductId, task.BestBefore,
 					quantityToAdded, cartonsOnPallet, userId, palletToAdd.Location.ToSnapshot());
-				quantityToAdded = resultAdding.RestQuantity;
+				quantityToAdded = RestQuantity;
 				var productToAdd = new PalletProductQuantityDTO
 				{
 					PalletId = pallet,
@@ -87,7 +88,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 					ProductId = product.Id,
 					ProductName = product.Name,
 					ProductSKU = product.SKU,
-					Quantity = resultAdding.AddedQuantity,
+					Quantity = AddedQuantity,
 				};
 				listPalletToAddProduct.Add(productToAdd);
 			}
@@ -100,7 +101,6 @@ namespace MyWerehouse.Application.ReversePickings.Services
 
 		public async Task<ReversePickingResult> AddToNewPallet(ReversePickingTask task, string userId, int locationId, string snapShot, CancellationToken ct)
 		{
-			//var newNumber = await _palletRepo.GetNextPalletNumberAsync();
 			var newNumber = (await _palletNumberAllocator.ReserveAsync(1, ct)).Single();
 			var now = _dateTimeProvider.UtcNow;
 			var newPallet = Pallet.Create(newNumber, locationId, now);

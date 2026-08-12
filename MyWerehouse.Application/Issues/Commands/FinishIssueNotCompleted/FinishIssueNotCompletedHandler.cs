@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 
 		public async Task<AppResult<Unit>> Handle(FinishIssueNotCompletedCommand request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			var palletsReturn = issue.RemoveNotLoadedPallets(request.UserId);

@@ -11,15 +11,15 @@ namespace MyWerehouse.Domain.Interfaces
 	public interface IPickingTaskRepo
 	{
 		void AddPickingTask(PickingTask pickingTask);
-		Task AddPickingTaskAsync(PickingTask pickingTask);
+		Task AddPickingTaskAsync(PickingTask pickingTask, CancellationToken ct);
 		void DeletePickingTask(PickingTask pickingTask);
 		IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateOnly pickingDate);
-		Task<PickingTask?> GetPickingTaskAsync(Guid guid);
-		Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId);
-		Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId);
-		Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId);
-		Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to);
+		Task<PickingTask?> GetPickingTaskAsync(Guid guid, CancellationToken ct);
+		Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId, CancellationToken ct);
+		Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId, CancellationToken ct);
+		Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId, CancellationToken ct);
+		Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to, CancellationToken ct);
 		IQueryable<PickingTaskFlat> GetPickingTaskFlats(DateOnly start, DateOnly end);
-		Task<List<PickingTask>> GetHandPickingTask(Guid issueId);
+		Task<List<PickingTask>> GetHandPickingTask(Guid issueId, CancellationToken ct);
 	}
 }

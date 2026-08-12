@@ -16,10 +16,10 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPalletByPalletNumber
 	{
 		private readonly IMapper _mapper = mapper;
 		private readonly IPalletRepo _palletRepo = palletRepo;
-		
+
 		public async Task<AppResult<PalletSimplyDTO>> Handle(GetPalletByPalletNumberQuery request, CancellationToken ct)
 		{
-			var pallet = await _palletRepo.GetPalletByPalletNumberAsync(request.PalletNumber);
+			var pallet = await _palletRepo.GetPalletByPalletNumberAsync(request.PalletNumber, ct);
 			if(pallet == null)
 			{
 				return AppResult<PalletSimplyDTO>.Fail("Pallet does not exist.");

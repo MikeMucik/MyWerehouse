@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 
 		public async Task<AppResult<MarkPalletAsLoadedResponseDTO>> Handle(MarkAsLoadedCommand request, CancellationToken ct)
 		{
-			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId);
+			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId, ct);
 			if (pallet == null)
 				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail($"The specified pallet does not exist.");
 			pallet.MarkAsLoaded(request.UserId, pallet.Location.ToSnapshot());

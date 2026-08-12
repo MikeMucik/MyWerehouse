@@ -22,9 +22,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			_werehouseDbContext.HistoryReversePickings.Add(historyReversePicking);
 		}
 
-		public async Task<List<HistoryReversePicking>> GetHistoryReversePickings()
+		public async Task<List<HistoryReversePicking>> GetHistoryReversePickings(CancellationToken ct)
 		{
-			return await _werehouseDbContext.HistoryReversePickings.ToListAsync();
+			return await _werehouseDbContext.HistoryReversePickings.ToListAsync(ct);
 		}
 	}
 }

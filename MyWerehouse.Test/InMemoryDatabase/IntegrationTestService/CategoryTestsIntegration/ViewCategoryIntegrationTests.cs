@@ -35,9 +35,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			//Arrange
 			var pageSize = 5;
 			var pagenumber = 1;
-			var ct = CancellationToken.None;
 			//Act
-			var result = await _categoryService.GetCategoriesAsync(pagenumber, pageSize, ct);
+			var result = await _categoryService.GetCategoriesAsync(pagenumber, pageSize, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);

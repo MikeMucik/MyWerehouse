@@ -37,7 +37,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 				Height = 1,
 			};
 			//Act 1
-			var result = await _locationService.AddLocationServiceAsync(locationDTO);
+			var result = await _locationService.AddLocationServiceAsync(locationDTO, CancellationToken.None);
 			//Assert 1
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -45,7 +45,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			Assert.Contains("Location added.", result.Message);
 			var locationId = 1;
 			//Act
-			var resultDeleting = await _locationService.DeleteLocationServiceAsync(locationId);
+			var resultDeleting = await _locationService.DeleteLocationServiceAsync(locationId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(resultDeleting);
 			Assert.True(resultDeleting.IsSuccess);
@@ -73,7 +73,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 				Height = 1,
 			};
 			//Act 1
-			var result = await _locationService.AddLocationServiceAsync(locationDTO);
+			var result = await _locationService.AddLocationServiceAsync(locationDTO, CancellationToken.None);
 			//Assert 1
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -82,7 +82,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTests
 			var locationId = 1;
 
 			//Act
-			var resultDeleting = await _locationService.DeleteLocationServiceAsync(locationId);
+			var resultDeleting = await _locationService.DeleteLocationServiceAsync(locationId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(resultDeleting);
 			Assert.False(resultDeleting.IsSuccess);

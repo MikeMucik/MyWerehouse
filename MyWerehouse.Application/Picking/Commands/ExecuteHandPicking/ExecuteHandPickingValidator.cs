@@ -16,7 +16,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 				.Cascade(CascadeMode.Stop)
 				.GreaterThan(0)
 				.WithMessage("Picking location must be specified.")
-				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id))
+				.MustAsync(async (id, ct) => await locationRepo.ReceivingRampExistsAsync(id, ct))
 				.WithMessage("The selected location does not exist.");
 			RuleFor(p => p.PalletIdSource)
 				.NotEmpty()

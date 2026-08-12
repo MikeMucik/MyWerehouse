@@ -17,14 +17,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		{
 			var _context = fixture.Context;
 			_palletMovementRepo = new HistoryPalletRepo(_context);
-		}		
+		}
 		[Fact]
 		public async Task GetHistoryPallet_ReturnHistory()
 		{
 			//Arrange
 			var palletNumber = "Q1000";
 			//Act
-			var result =await _palletMovementRepo.GetHistoryPallet(palletNumber);
+			var result =await _palletMovementRepo.GetHistoryPallet(palletNumber, CancellationToken.None);
 			// Assert
 			Assert.NotNull(result);
 			Assert.Equal(2, result.Count);
@@ -47,20 +47,20 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 		[Fact]
 		public async Task CanDeletePalletAsync_ReturnFalse_IsCanDelete()
 		{
-			//Arrange		  
+			//Arrange
 			var palletId =Guid.Parse("00000000-0001-1111-0000-000000000000");
 			//Act
-			var result =await _palletMovementRepo.CanDeletePalletAsync(palletId);
+			var result =await _palletMovementRepo.CanDeletePalletAsync(palletId, CancellationToken.None);
 			//Assert
 			Assert.False(result);
-		}		
+		}
 		[Fact]
 		public async Task IsCanDelete_CanDeletePalletAsync_ReturnTrue()
 		{
 			//Arrange
 			var palletId = Guid.Parse("00000000-0002-1111-0000-000000000000");
 			//Act
-			var result = await _palletMovementRepo.CanDeletePalletAsync(palletId);
+			var result = await _palletMovementRepo.CanDeletePalletAsync(palletId, CancellationToken.None);
 			//Assert
 			Assert.True(result);
 		}

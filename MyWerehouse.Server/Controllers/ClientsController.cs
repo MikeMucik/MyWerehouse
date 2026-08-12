@@ -17,25 +17,25 @@ namespace MyWerehouse.Server.Controllers
 			_clientService = clientService;
 		}
 		[HttpPost]
-		public async Task<IActionResult> Create(AddClientDTO clientDto)
-			=> (await _clientService.AddClientAsync(clientDto))
+		public async Task<IActionResult> Create(AddClientDTO clientDto, CancellationToken ct)
+			=> (await _clientService.AddClientAsync(clientDto, ct))
 			.ToActionResult();
 
 		[HttpDelete("{id:int}")]
-		public async Task<IActionResult> Delete(int id)
-			=> (await _clientService.DeleteClientAsync(id))
+		public async Task<IActionResult> Delete(int id, CancellationToken ct)
+			=> (await _clientService.DeleteClientAsync(id, ct))
 			.ToActionResult();
 
 		[HttpPut("{id:int}")]
-		public async Task<IActionResult> Update(int id, UpdateClientDTO clientDto)
-			=> (await _clientService.UpdateClientAsync(id, clientDto))
+		public async Task<IActionResult> Update(int id, UpdateClientDTO clientDto, CancellationToken ct)
+			=> (await _clientService.UpdateClientAsync(id, clientDto, ct))
 			.ToActionResult();
 
 		[HttpGet("{id:int}")]
-		public async Task<IActionResult> GetById(int id)
-			=> (await _clientService.GetClientByIdAsync(id))
+		public async Task<IActionResult> GetById(int id, CancellationToken ct)
+			=> (await _clientService.GetClientByIdAsync(id, ct))
 			.ToActionResult();
-		
+
 		[HttpGet]
 		public async Task<IActionResult> GetAll(
 			[FromQuery]	int pageNumber = 1,
@@ -51,6 +51,6 @@ namespace MyWerehouse.Server.Controllers
 			[FromQuery] int pageSize = 10,
 			CancellationToken ct = default)
 			=> (await _clientService.GetClientsByFilterAsync(pageNumber, pageSize, filter, ct))
-			.ToActionResult();		
+			.ToActionResult();
 	}
 }

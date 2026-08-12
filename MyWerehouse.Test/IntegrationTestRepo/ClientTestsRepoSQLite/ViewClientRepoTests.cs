@@ -27,7 +27,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite
 			//Arrange
 			var id = 10;
 			//Act
-			var result = await _clientRepo.GetClientByIdAsync(id);
+			var result = await _clientRepo.GetClientByIdAsync(id, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(id, result.Id);
@@ -41,7 +41,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite
 			//Arrange
 			var id = -1;
 			//Act
-			var result = await _clientRepo.GetClientByIdAsync(id);
+			var result = await _clientRepo.GetClientByIdAsync(id, CancellationToken.None);
 			//Assert
 			Assert.Null(result);
 		}

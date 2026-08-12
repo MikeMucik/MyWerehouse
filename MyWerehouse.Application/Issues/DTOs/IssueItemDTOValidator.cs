@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +16,7 @@ namespace MyWerehouse.Application.Issues.DTOs
 			RuleFor(x => x.ProductId)
 				.NotEqual(Guid.Empty).WithMessage("Product ID is invalid.");
 			RuleFor(x => x.ProductId)
-				.MustAsync(async (id, ct) => await productRepo.IsExistProduct(id))
+				.MustAsync(async (id, ct) => await productRepo.IsExistProduct(id, ct))
 				.WithMessage("The selected product does not exist.");
 			RuleFor(x => x.Quantity)
 				.GreaterThan(0).WithMessage("Product quantity must be greater than zero.");

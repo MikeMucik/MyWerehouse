@@ -26,9 +26,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Locations.Remove(location);
 		}
-		public async Task<Location?> GetLocationByIdAsync(int locationId)
+		public async Task<Location?> GetLocationByIdAsync(int locationId, CancellationToken ct)
 		{
-			return await _werehouseDbContext.Locations.FindAsync(locationId);
+			return await _werehouseDbContext.Locations.FindAsync([locationId], ct);
 		}
 		public IQueryable<Location> GetAllAvailableLocations()
 		{
@@ -37,17 +37,17 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.OrderBy(l => l.Id);
 			return locations;
 		}
-		public async Task<Location?> FindLocationAsync(int Bay, int Aisle, int Position, int Height)
+		public async Task<Location?> FindLocationAsync(int Bay, int Aisle, int Position, int Height, CancellationToken ct)
 		{
 			var location = await _werehouseDbContext.Locations
 				.FirstOrDefaultAsync(x => x.Bay == Bay &&
 								x.Aisle == Aisle &&
 								x.Position == Position &&
-								x.Height == Height);
+								x.Height == Height, ct);
 			if (location == null) return null;
 			return location;
 		}
-		
+
 		public IEnumerable<Location> CreateListLocationForBay(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{
 			var locations = new List<Location>();
@@ -71,20 +71,20 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return locations;
 		}
 
-		public async Task<bool> ReceivingRampExistsAsync(int locationId)
+		public async Task<bool> ReceivingRampExistsAsync(int locationId, CancellationToken ct)
 		{
-			if (await _werehouseDbContext.Locations.FindAsync(locationId) != null) { return true; }
+			if (await _werehouseDbContext.Locations.FindAsync([locationId], ct) != null) { return true; }
 			return false;
 		}
 
-		public async Task<bool> ExistsByCoordinatesAsync(int bay, int aisle, int position, int height)
+		public async Task<bool> ExistsByCoordinatesAsync(int bay, int aisle, int position, int height, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Locations.AnyAsync(x =>
 			x.Bay == bay &&
 			x.Aisle == aisle &&
 			x.Position == position &&
-			x.Height == height
-			);			
+			x.Height == height,
+			ct);
 		}
 	}
 }

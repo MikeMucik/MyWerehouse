@@ -21,9 +21,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.PickingTasks.Add(pickingTask);
 		}
-		public async Task AddPickingTaskAsync(PickingTask pickingTask)
+		public async Task AddPickingTaskAsync(PickingTask pickingTask, CancellationToken ct)
 		{
-			await _werehouseDbContext.PickingTasks.AddAsync(pickingTask);
+			await _werehouseDbContext.PickingTasks.AddAsync(pickingTask, ct);
 		}
 		public void DeletePickingTask(PickingTask pickingTask)
 		{
@@ -32,7 +32,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateOnly pickingDate)
 		{
 			var pickingTask = _werehouseDbContext.PickingTasks
-				
+
 				.Include(a => a.VirtualPallet!)
 					.ThenInclude(b => b.Pallet)
 						.ThenInclude(c => c.ProductsOnPallet)
@@ -45,22 +45,22 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					p.PickingStatus == PickingStatus.Allocated);
 			return pickingTask;
 		}
-		
-		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid)
+
+		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid, CancellationToken ct)
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Include(v=>v.VirtualPallet)
-				.SingleOrDefaultAsync(a => a.Id == guid);
+				.SingleOrDefaultAsync(a => a.Id == guid, ct);
 		}
-		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId)
+		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId, CancellationToken ct)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
 				.Where(a => a.IssueId == issueId && a.ProductId == productId)
-				.ToListAsync();
+				.ToListAsync(ct);
 			return result;
 		}
-		public async Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to)
+		public async Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to, CancellationToken ct)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
@@ -68,21 +68,21 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				(a.PickingStatus == PickingStatus.Allocated || a.PickingStatus == PickingStatus.CorrectionPicking) &&
 				a.RequestedQuantity > a.PickedQuantity &&
 				a.Issue.IssueDateTimeSend >= from && a.Issue.IssueDateTimeSend <= to)
-				.ToListAsync();
+				.ToListAsync(ct);
 			return result;
 		}
-		public async Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId)
+		public async Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId, CancellationToken ct)
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
 				.Where(a => a.IssueId == issueId)
 				.Where(t => t.PickingStatus == PickingStatus.Allocated ||
 				t.PickingStatus == PickingStatus.CorrectionPicking)
-				.ToListAsync();
+				.ToListAsync(ct);
 			return result;
 		}
 
-		public async Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId)
+		public async Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Where(x => x.PickingPalletId == pickingPalletId)
@@ -90,7 +90,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(x=>x.VirtualPallet!)
 					.ThenInclude(xp=>xp.Pallet)
 						.ThenInclude(p=>p.ProductsOnPallet)
-				.ToListAsync();
+				.ToListAsync(ct);
 		}
 
 		public IQueryable<PickingTaskFlat> GetPickingTaskFlats(DateOnly start, DateOnly end)
@@ -131,11 +131,11 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return list;
 		}
 
-		public async Task<List<PickingTask>> GetHandPickingTask(Guid issueId)
+		public async Task<List<PickingTask>> GetHandPickingTask(Guid issueId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Where(p => p.IssueId == issueId && p.VirtualPallet == null && p.PickingStatus == PickingStatus.Available)
-				.ToListAsync(); 
+				.ToListAsync(ct);
 		}
 	}
 }

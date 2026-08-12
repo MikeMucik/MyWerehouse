@@ -10,15 +10,15 @@ using MyWerehouse.Domain.Products.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IProductRepo
-	{		
-		Product AddProduct(Product product);		
-		void DeleteProduct(Product product);					
-		Task<Product?> GetProductByIdAsync(Guid id);
-		Task<string?> GetSKUForProductAsync(Guid id);
-		Task<Product?> GetProductToEditAsync(Guid id);
-		Task<Product?> GetProductDetailsAsync(Guid id);
-		IQueryable<Product> GetAllProducts();		
-		IQueryable<Product> FindProducts(ProductSearchFilter filter);		
-		Task<bool> IsExistProduct(Guid id);
+	{
+		Product AddProduct(Product product);
+		void DeleteProduct(Product product);
+		Task<Product?> GetProductByIdAsync(Guid id, CancellationToken ct);
+		Task<string?> GetSKUForProductAsync(Guid id, CancellationToken ct);
+		Task<Product?> GetProductToEditAsync(Guid id, CancellationToken ct);
+		Task<Product?> GetProductDetailsAsync(Guid id, CancellationToken ct);
+		IQueryable<Product> GetAllProducts();
+		IQueryable<Product> FindProducts(ProductSearchFilter filter);
+		Task<bool> IsExistProduct(Guid id, CancellationToken ct);
 	}
 }

@@ -17,10 +17,10 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPallet
 		private readonly IMapper _mapper = mapper;
 		public async Task<AppResult<PalletDTO>> Handle(GetPalletQuery request, CancellationToken ct)
 		{
-			var pallet = await _palletRepo.GetPalletByIdFullInfoAsync(request.Id);
+			var pallet = await _palletRepo.GetPalletByIdFullInfoAsync(request.Id, ct);
 			var result = _mapper.Map<PalletDTO>(pallet);
 			return AppResult<PalletDTO>.Success(result);
 		}
 	}
-	
+
 }

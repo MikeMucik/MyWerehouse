@@ -47,14 +47,14 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 10, "U1234",
 			TestDates.UtcNow, ReceiptStatus.PhysicallyCompleted, 1);
-			
+
 			_context.Locations.Add(location);
 			_context.Receipts.Add(receipt);
 			_context.Clients.Add(client);
 			_context.SaveChanges();
 			var clientId = 10;
 			//Act
-			await _clientService.DeleteClientAsync(clientId);
+			await _clientService.DeleteClientAsync(clientId, CancellationToken.None);
 			//Assert
 			var resultClient = _context.Clients.FirstOrDefault(c => c.Id == clientId);
 			Assert.NotNull(resultClient);
@@ -88,7 +88,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			_context.SaveChanges();
 			var clientId = 10;
 			//Act
-			await _clientService.DeleteClientAsync(clientId);
+			await _clientService.DeleteClientAsync(clientId, CancellationToken.None);
 			//Assert
 			var result = _context.Clients.FirstOrDefault(c => c.Id == clientId);
 			Assert.Null(result);
@@ -99,7 +99,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			//Arrange
 			var clientId = 9891;
 			//Act
-			var result = await _clientService.DeleteClientAsync(clientId);
+			var result = await _clientService.DeleteClientAsync(clientId, CancellationToken.None);
 			//Assert
 			Assert.Equal($"Client {clientId} does not exist.", result.Error);
 		}

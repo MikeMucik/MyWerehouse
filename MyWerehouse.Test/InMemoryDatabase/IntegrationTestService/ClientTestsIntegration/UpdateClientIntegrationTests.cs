@@ -65,7 +65,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};
-				await _clientService.UpdateClientAsync(id,updatedClient);
+				await _clientService.UpdateClientAsync(id,updatedClient, CancellationToken.None);
 			//Assert
 				var result = _context.Clients
 					.Include(x => x.Addresses)
@@ -126,7 +126,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};
-				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient));
+				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient, CancellationToken.None));
 				Assert.Contains("Phone number is required.", ex.Message);
 		}
 		[Fact]
@@ -180,7 +180,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 				FullName = "test",
 				Addresses = new[] { addressU }
 			};
-				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient));
+				var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _clientService.UpdateClientAsync(id, updatedClient, CancellationToken.None));
 				Assert.Contains("Client email is required.", ex.Message);
 		}
 	}

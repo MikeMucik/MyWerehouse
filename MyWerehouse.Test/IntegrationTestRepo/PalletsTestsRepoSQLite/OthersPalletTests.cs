@@ -13,7 +13,7 @@ using MyWerehouse.Test.SQLiteInMemoryMode;
 namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 {
 	public class OthersPalletTests: TestBase
-	{		
+	{
 		[Fact]
 		public async Task ReservePalletNumbersAsync_ShouldReturnFirstNumberAndAdvanceCounter()
 		{
@@ -23,9 +23,8 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			counter.NextNumber = 1012;
 			await DbContext.SaveChangesAsync();
 			var palletRepo = new PalletRepo(DbContext);
-
 			//Act
-			var result = await palletRepo.ReservePalletNumbersAsync(3);
+			var result = await palletRepo.ReservePalletNumbersAsync(3, CancellationToken.None);
 			var updatedCounter = await DbContext.PalletNumberCounters
 				.AsNoTracking()
 				.SingleAsync(x => x.Name == "Pallet");
@@ -33,6 +32,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			//Assert
 			Assert.Equal(1012, result);
 			Assert.Equal(1015, updatedCounter.NextNumber);
-		}		
+		}
 	}
 }

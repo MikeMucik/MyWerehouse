@@ -43,7 +43,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			//Act
-			var result = await _productService.DetailsOfProductAsync(productId1);
+			var result = await _productService.DetailsOfProductAsync(productId1, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -57,7 +57,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var productId9 = Guid.Parse("00000000-0000-0000-0009-000000000000");
 			//Act
-			var result = await _productService.DetailsOfProductAsync(productId9);
+			var result = await _productService.DetailsOfProductAsync(productId9, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			//Act
-			var result = await _productService.GetProductToEditAsync(productId1);
+			var result = await _productService.GetProductToEditAsync(productId1, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -82,9 +82,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var pageSize = 2;
 			var pageNumber = 1;
-			var ct = CancellationToken.None;
 			//Act
-			var result = await _productService.GetProductsAsync(pageNumber, pageSize, ct);
+			var result = await _productService.GetProductsAsync(pageNumber, pageSize, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -98,13 +97,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var pageSize = 3;
 			var pageNumber = 1;
-			var ct = CancellationToken.None;
 			var filter = new ProductSearchFilter
 			{
 				ProductName = "Test",
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, ct);
+			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -118,13 +116,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var pageSize = 3;
 			var pageNumber = 1;
-			var ct = CancellationToken.None;
 			var filter = new ProductSearchFilter
 			{
 
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, ct);
+			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -138,13 +135,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Arrange
 			var pageSize = 3;
 			var pageNumber = 1;
-			var ct = CancellationToken.None;
 			var filter = new ProductSearchFilter
 			{
 				Length = 1000,
 			};
 			//Act
-			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, ct);
+			var result = await _productService.FindProductsByFilterAsync(pageNumber, pageSize, filter, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);

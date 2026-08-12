@@ -31,16 +31,16 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
 		{
-			var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskId);
+			var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskId, ct);
 			if (pickingTaskToChange == null)
 				return AppResult<ProcessPickingActionResult>.Fail("Picking task was not found.");
 			var issueId = pickingTaskToChange.IssueId;
-			var issue = await _issueRepo.GetIssueByIdAsync(issueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(issueId, ct);
 			if (issue == null)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail("Issue was not found.");
 			}
-			var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.SourcePalletId);
+			var sourcePallet = await _palletRepo.GetPalletByIdAsync(request.SourcePalletId, ct);
 			if (sourcePallet == null)
 				return AppResult<ProcessPickingActionResult>.Fail($"Pallet {request.SourcePalletId} does not exist.");
 			pickingTaskToChange.EnsureSourcePallet(sourcePallet.Id);
@@ -61,7 +61,7 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 			{
 				var newQuantityToPickingTask = neededQuantity - pickedQuantity;
 				var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTasksToIssue(null, null,
-					issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId);
+					issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId, ct);
 				var partialResult = new ProcessPickingActionResult
 				{
 					Success = true,

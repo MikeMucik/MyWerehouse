@@ -26,7 +26,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			//Arrange
 			var locationId = 1;
 			//Act
-			var result = await _locationRepo.GetLocationByIdAsync(locationId);
+			var result = await _locationRepo.GetLocationByIdAsync(locationId, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(locationId, result.Id);
@@ -38,7 +38,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 		[Fact]
 		public void GetEmptyLocation_GetAllAvailableLocations_ReturnList()
 		{
-			//Arrange&Act			
+			//Arrange&Act
 			var result = _locationRepo.GetAllAvailableLocations();
 			//Assert
 			Assert.NotNull(result);
@@ -55,7 +55,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			int position = 3;
 			int height = 4;
 			//Act
-			var result = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
+			var result = await _locationRepo.FindLocationAsync(bay, aisle, position, height, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.Equal(1, result.Id);
@@ -69,7 +69,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 			int position = 3;
 			int height = 4;
 			//Act
-			var result = await _locationRepo.FindLocationAsync(bay, aisle, position, height);
+			var result = await _locationRepo.FindLocationAsync(bay, aisle, position, height, CancellationToken.None);
 			//Assert
 			Assert.Null(result);
 		}

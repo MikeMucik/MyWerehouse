@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Issues.Commands.ConfirmIssueAfterLoading
 
 		public async Task<AppResult<Unit>> Handle(ConfirmIssueAfterLoadingCommand request, CancellationToken ct)
 		{
-			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId);
+			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			issue.ConfirmAfterLoading(request.ConfirmedBy);

@@ -25,8 +25,8 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Issues.Remove(issue);
 		}
-		
-		public async Task<Issue?> GetIssueByIdAsync(Guid id)
+
+		public async Task<Issue?> GetIssueByIdAsync(Guid id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
@@ -34,9 +34,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(i => i.Pallets)
 					.ThenInclude(p => p.ProductsOnPallet)
 				.Include(i => i.IssueItems)
-				.FirstOrDefaultAsync(i => i.Id == id);
+				.FirstOrDefaultAsync(i => i.Id == id, ct);
 		}
-		public async Task<Issue?> GetIssueByIdForModifyAsync(Guid id)
+		public async Task<Issue?> GetIssueByIdForModifyAsync(Guid id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(i => i.Pallets)
@@ -45,9 +45,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.ThenInclude(p => p.ProductsOnPallet)
 				.Include(i => i.IssueItems)
 				.Include(i=>i.PickingTasks)
-				.FirstOrDefaultAsync(i => i.Id == id);
+				.FirstOrDefaultAsync(i => i.Id == id, ct);
 		}
-		public async Task<Issue?> GetIssueForViewIncludedByIdAsync(Guid id)
+		public async Task<Issue?> GetIssueForViewIncludedByIdAsync(Guid id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Issues
 				.Include(c => c.Client)
@@ -58,13 +58,13 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 						.ThenInclude(pp => pp.Product)
 				.Include(i => i.IssueItems)
 					.ThenInclude(pp => pp.Product)
-				.FirstOrDefaultAsync(i => i.Id == id);
+				.FirstOrDefaultAsync(i => i.Id == id, ct);
 		}
-		public async Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids)
+		public async Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Issues
 				.Where(i => i.IssueStatus != IssueStatus.Archived && ids.Contains(i.Id))
-				.ToListAsync();
+				.ToListAsync(ct);
 		}
 		public IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter)
 		{
@@ -100,7 +100,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				var end = filter.CreateDateEnd ?? DateTime.UtcNow;
 
 				result = result.Where(i => i.IssueDateTimeCreate >= start && i.IssueDateTimeCreate <= end);
-			}			
+			}
 			if (filter.SendDateStart != null)
 			{
 				var start = filter.SendDateStart;
@@ -124,22 +124,22 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return list;
 		}
 
-		public async Task<int> GetNextNumberOfIssue()
+		public async Task<int> GetNextNumberOfIssue(CancellationToken ct)
 		{
-			var number = await _werehouseDbContext.Issues.MaxAsync(x => (int?)x.IssueNumber) ?? 0;
+			var number = await _werehouseDbContext.Issues.MaxAsync(x => (int?)x.IssueNumber, ct) ?? 0;
 			return number + 1;
 		}
 
-		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id)
+		public async Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id, CancellationToken ct)
 		{
-			return await _werehouseDbContext.PickingTasks					
+			return await _werehouseDbContext.PickingTasks
 				.Where(x => x.IssueId == id)
 				.Where(x => x.VirtualPallet != null)
 				.Include(x => x.VirtualPallet!.Pallet)
 				.Include(x => x.VirtualPallet!.PickingTasks)
-				.Select(x => x.VirtualPallet!)				
+				.Select(x => x.VirtualPallet!)
 				.Distinct()
-				.ToListAsync();
+				.ToListAsync(ct);
 		}
 	}
 }

@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.Pallets.DTOs
 				.NotEqual(Guid.Empty)
 				.WithMessage("Product ID is required.");
 			RuleFor(pp => pp.ProductId)
-				.MustAsync(async (id, ct) => await productRepo.IsExistProduct(id))
+				.MustAsync(async (id, ct) => await productRepo.IsExistProduct(id, ct))
 				.WithMessage("The selected product does not exist.");
 			RuleFor(pp => pp.Quantity)
 				.GreaterThan(0)

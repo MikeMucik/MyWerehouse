@@ -5,7 +5,7 @@ using MyWerehouse.Server.Extensions;
 
 namespace MyWerehouse.Server.Controllers
 {
-	
+
 	[ApiController]
 	[Route("api/categories")]
 	public class CategoriesController(ICategoryService categoryService) : ControllerBase
@@ -14,23 +14,23 @@ namespace MyWerehouse.Server.Controllers
 
 		//Dodaj kategorię
 		[HttpPost]
-		public async Task<IActionResult> Create(CategoryDTO categoryDto)		
-			=> (await _categoryService.AddCategoryAsync(categoryDto))
+		public async Task<IActionResult> Create(CategoryDTO categoryDto, CancellationToken ct)
+			=> (await _categoryService.AddCategoryAsync(categoryDto, ct))
 				.ToActionResult();
 
 		[HttpGet("{id:int}")]
-		public async Task<IActionResult> Get(int id)
-			=> (await _categoryService.GetCategoryByIdAsync(id))
+		public async Task<IActionResult> Get(int id, CancellationToken ct)
+			=> (await _categoryService.GetCategoryByIdAsync(id, ct))
 			.ToActionResult();
 
 		[HttpPut("{id:int}")]
-		public async Task<IActionResult> Update(int id, CategoryDTO categoryDto)
-			=> (await _categoryService.UpdateCategoryAsync(id, categoryDto))
+		public async Task<IActionResult> Update(int id, CategoryDTO categoryDto, CancellationToken ct)
+			=> (await _categoryService.UpdateCategoryAsync(id, categoryDto, ct))
 			.ToActionResult();
 
 		[HttpDelete("{id:int}")]
-		public async Task<IActionResult> Delete(int id)
-			=> (await _categoryService.DeleteCategoryAsync(id))
+		public async Task<IActionResult> Delete(int id, CancellationToken ct)
+			=> (await _categoryService.DeleteCategoryAsync(id, ct))
 			.ToActionResult();
 
 		[HttpGet]
@@ -39,6 +39,6 @@ namespace MyWerehouse.Server.Controllers
 			[FromQuery] int size = 10,
 			CancellationToken ct = default)
 			=> (await _categoryService.GetCategoriesAsync(page, size, ct))
-			.ToActionResult();		
+			.ToActionResult();
 	}
 }

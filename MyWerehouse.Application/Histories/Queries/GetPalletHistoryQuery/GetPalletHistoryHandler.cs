@@ -23,18 +23,18 @@ namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 			{
 				return AppResult<PalletHistoryDTO>.Fail("Pallet number was not provided.", ErrorType.Validation);
 			}
-			var pallet = await _palletRepo.GetPalletByPalletNumberAsync(query.PalletNumber);
+			var pallet = await _palletRepo.GetPalletByPalletNumberAsync(query.PalletNumber, ct);
 			if (pallet == null)
 			{
 				return AppResult<PalletHistoryDTO>.Fail($"Pallet {query.PalletNumber} does not exist.");
 			}
-			
-			var history = await _palletMovementRepo.GetHistoryPallet(query.PalletNumber);
+
+			var history = await _palletMovementRepo.GetHistoryPallet(query.PalletNumber, ct);
 
 			var historyOrdered = history.OrderBy(x => x.MovementDate);
 
 			var result = _mapper.Map<List<HistoryPalletDTO>>(historyOrdered);
-						
+
 			var historyForPallet = new PalletHistoryDTO
 			{
 				Id = pallet.Id,

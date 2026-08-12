@@ -8,9 +8,9 @@ using MyWerehouse.Domain.Histories.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IHistoryPalletRepo
-	{		
+	{
 		void AddHistoryPallet(HistoryPallet palletMovement);
-		Task< List<HistoryPallet>> GetHistoryPallet(string PalletNumber);
-		Task<bool> CanDeletePalletAsync(Guid palletId);
+		Task< List<HistoryPallet>> GetHistoryPallet(string PalletNumber, CancellationToken ct);
+		Task<bool> CanDeletePalletAsync(Guid palletId, CancellationToken ct);
 	}
 }

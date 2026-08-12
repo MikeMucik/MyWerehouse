@@ -17,21 +17,21 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public ClientRepo(WerehouseDbContext werehouseDbContext)
 		{
 			_werehouseDbContext = werehouseDbContext;
-		}		
+		}
 		public int AddClient(Client client)
 		{
-			_werehouseDbContext.Clients.Add(client);			
+			_werehouseDbContext.Clients.Add(client);
 			return client.Id;
-		}		
+		}
 		public void DeleteClient(Client client)
-		{			
-				_werehouseDbContext.Remove(client);					
+		{
+				_werehouseDbContext.Remove(client);
 		}
 		public void SwitchOffClient(Client client)
 		{
-				client.IsDeleted = true;			
-		}			
-		public async Task<Client?> GetClientByIdAsync(int id)
+				client.IsDeleted = true;
+		}
+		public async Task<Client?> GetClientByIdAsync(int id, CancellationToken ct)
 		{
 			if (id > 0)
 			{
@@ -39,7 +39,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 						.Include(c => c.Addresses)
 						.Include(c => c.Issues)
 						.Include(c => c.Receipts)
-						.SingleOrDefaultAsync(c => c.Id == id);
+						.SingleOrDefaultAsync(c => c.Id == id, ct);
 				if (client != null)
 				{
 					if (client.IsDeleted == false)
@@ -50,12 +50,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return null;
 		}
-		public async Task<Client?> GetClientToEditAsync(int id)
-		{			
+		public async Task<Client?> GetClientToEditAsync(int id, CancellationToken ct)
+		{
 				var client = await _werehouseDbContext.Clients
 						.Include(c => c.Addresses)
-						.SingleOrDefaultAsync(c => c.Id == id);				
-						return client;			
+						.SingleOrDefaultAsync(c => c.Id == id, ct);
+						return client;
 		}
 		public IQueryable<Client> GetClients(ClientSearchFilter clientFilter)
 		{
@@ -64,7 +64,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 			if (!string.IsNullOrEmpty(clientFilter.Name))
 			{
-				result = result.Where(c => c.Name != null && c.Name.StartsWith(clientFilter.Name));				
+				result = result.Where(c => c.Name != null && c.Name.StartsWith(clientFilter.Name));
 			}
 
 			if (!string.IsNullOrEmpty(clientFilter.Email))
@@ -84,17 +84,17 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			// wyszukiwanie po składowych adresu
 			if (!string.IsNullOrEmpty(clientFilter.Country))
 			{
-				result = result.Where(c => c.Addresses.Any(a => a.Country != null && a.Country.StartsWith(clientFilter.Country)));				
+				result = result.Where(c => c.Addresses.Any(a => a.Country != null && a.Country.StartsWith(clientFilter.Country)));
 			}
 
 			if (!string.IsNullOrEmpty(clientFilter.City))
 			{
-				result = result.Where(c => c.Addresses.Any(a => a.City != null && a.City.StartsWith(clientFilter.City)));				
+				result = result.Where(c => c.Addresses.Any(a => a.City != null && a.City.StartsWith(clientFilter.City)));
 			}
 
 			if (!string.IsNullOrEmpty(clientFilter.Region))
 			{
-				result = result.Where(c => c.Addresses.Any(a => a.Region != null && a.Region.StartsWith(clientFilter.Region)));				
+				result = result.Where(c => c.Addresses.Any(a => a.Region != null && a.Region.StartsWith(clientFilter.Region)));
 			}
 
 			if (clientFilter.Phone != 0 && clientFilter.Phone != null)
@@ -116,7 +116,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				result = result.Where(c => c.Addresses.Any(a => a.StreetNumber != null && a.StreetNumber.StartsWith(clientFilter.StreetNumber)));
 			}
-			
+
 			return result;
 		}
 		public IQueryable<Client> GetAllClients()
@@ -124,9 +124,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return _werehouseDbContext.Clients.Where(p => p.IsDeleted == false);
 		}
 
-		public async Task< bool> IsClientExistAsync(int clientId)
+		public async Task< bool> IsClientExistAsync(int clientId, CancellationToken ct)
 		{
-			if (await _werehouseDbContext.Clients.FindAsync(clientId) != null) { return true; } return false;
+			if (await _werehouseDbContext.Clients.FindAsync([clientId], ct) != null) { return true; } return false;
 		}
 	}
 }

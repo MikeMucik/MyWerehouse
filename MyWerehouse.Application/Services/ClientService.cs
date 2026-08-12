@@ -31,8 +31,8 @@ namespace MyWerehouse.Application.Services
 		private readonly IIssueRepo _issueRepo;
 		private readonly WerehouseDbContext _werehouseDbContext;
 		private readonly IValidator<AddClientDTO> _addClientValidator;
-		private readonly IValidator<UpdateClientDTO> _updateClientValidator;		
-		
+		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
+
 		public ClientService(
 			IClientRepo clientRepo,
 			IMapper mapper,
@@ -50,26 +50,26 @@ namespace MyWerehouse.Application.Services
 			_addClientValidator = addClientValidator;
 			_updateClientValidator = updateClientValidator;
 		}
-		
-		public async Task<AppResult<int>> AddClientAsync(AddClientDTO addClient)
+
+		public async Task<AppResult<int>> AddClientAsync(AddClientDTO addClient, CancellationToken ct)
 		{
-			var validationResult = await _addClientValidator.ValidateAsync(addClient);
+			var validationResult = await _addClientValidator.ValidateAsync(addClient, ct);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
 			var client = _mapper.Map<Client>(addClient);
 			var id = _clientRepo.AddClient(client);
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<int>.Success(id);
 		}
-		public async Task<AppResult<Unit>> DeleteClientAsync(int id)
+		public async Task<AppResult<Unit>> DeleteClientAsync(int id, CancellationToken ct)
 		{
 			var filter = new ClientSearchFilter
 			{
 				Id = id
 			};
-			var client = await _clientRepo.GetClientByIdAsync(id);
+			var client = await _clientRepo.GetClientByIdAsync(id, ct);
 			if (client == null) return AppResult<Unit>.Fail($"Client {id} does not exist.");
 			var filterReceipt = new IssueReceiptSearchFilter
 			{
@@ -77,7 +77,7 @@ namespace MyWerehouse.Application.Services
 			};
 			var receipt = _receiptRepo.GetReceiptByFilter(filterReceipt);
 			var issue = _issueRepo.GetIssuesByFilter(filterReceipt);
-			if (!await receipt.AnyAsync() && !await issue.AnyAsync())
+			if (!await receipt.AnyAsync(ct) && !await issue.AnyAsync(ct))
 			{
 				_clientRepo.DeleteClient(client);
 			}
@@ -85,12 +85,12 @@ namespace MyWerehouse.Application.Services
 			{
 				_clientRepo.SwitchOffClient(client);
 			}
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
-		public async Task<AppResult<ClientDTO>> GetClientByIdAsync(int id)
+		public async Task<AppResult<ClientDTO>> GetClientByIdAsync(int id, CancellationToken ct)
 		{
-			var client = await _clientRepo.GetClientToEditAsync(id);
+			var client = await _clientRepo.GetClientToEditAsync(id, ct);
 			if (client == null)
 			{
 				return AppResult<ClientDTO>.Fail($"Client {id} was not found.");
@@ -98,20 +98,20 @@ namespace MyWerehouse.Application.Services
 			var clientDTO = _mapper.Map<ClientDTO>(client);
 			return AppResult<ClientDTO>.Success(clientDTO);
 		}
-		public async Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient)
+		public async Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient, CancellationToken ct)
 		{
-			var existingClient = await _clientRepo.GetClientToEditAsync(id);
+			var existingClient = await _clientRepo.GetClientToEditAsync(id, ct);
 			if (existingClient == null) return AppResult<Unit>.Fail("Client was not found.");
-			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient);
+			var validationResult = await _updateClientValidator.ValidateAsync(updatedClient, ct);
 			if (!validationResult.IsValid)
 			{
 				throw new ValidationException(validationResult.Errors);
-			}			
+			}
 			existingClient.Email = updatedClient.Email;
 			existingClient.Description = updatedClient.Description;
 			existingClient.FullName = updatedClient.FullName;
 			existingClient.Name = updatedClient.Name;
-			
+
 			CollectionSynchronizer.SynchronizeCollection(
 			 existingClient.Addresses,
 			 updatedClient.Addresses,
@@ -121,13 +121,13 @@ namespace MyWerehouse.Application.Services
 			 (dto, entity) => _mapper.Map(dto, entity), // Jak aktualizować
 			entity => existingClient.Addresses.Remove(entity)//Jak usuwać adresy
 			 );
-			await _werehouseDbContext.SaveChangesAsync();
+			await _werehouseDbContext.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
 
-		public async Task<AppResult<DetailsOfClientDTO>> DetailsOfClientAsync(int id)
+		public async Task<AppResult<DetailsOfClientDTO>> DetailsOfClientAsync(int id, CancellationToken ct)
 		{
-			var client = await _clientRepo.GetClientByIdAsync(id);
+			var client = await _clientRepo.GetClientByIdAsync(id, ct);
 			if (client != null)
 			{
 				var clientToShow = _mapper.Map<DetailsOfClientDTO>(client);

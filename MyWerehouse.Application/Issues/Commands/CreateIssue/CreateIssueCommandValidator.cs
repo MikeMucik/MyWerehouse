@@ -16,7 +16,7 @@ namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 			RuleFor(x => x.DTO.ClientId)
 				.GreaterThan(0).WithMessage("Client ID must be greater than zero.");
 			RuleFor(x => x.DTO.ClientId)
-				.MustAsync(async (id, ct) => await clientRepo.IsClientExistAsync(id))
+				.MustAsync(async (id, ct) => await clientRepo.IsClientExistAsync(id, ct))
 				.WithMessage("The selected client does not exist.");
 			RuleFor(x => x.DTO.PerformedBy)
 				.NotEmpty().WithMessage("User is required.");

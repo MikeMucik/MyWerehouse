@@ -12,17 +12,17 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
-	public class UpdatePalletHandler(IPalletRepo palletRepo,		
+	public class UpdatePalletHandler(IPalletRepo palletRepo,
 		WerehouseDbContext werehouseDbContext,
 		IProductRepo productRepo) : IRequestHandler<UpdatePalletCommand, AppResult<Unit>>
 	{
-		private readonly IPalletRepo _palletRepo = palletRepo;		
+		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IProductRepo _productRepo = productRepo;
 
 		public async Task<AppResult<Unit>> Handle(UpdatePalletCommand request, CancellationToken ct)
 		{
-			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.Id);
+			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.Id, ct);
 			if (existingPallet == null)
 				return AppResult<Unit>.Fail("The specified pallet does not exist.");
 			if(existingPallet.Issue != null)
@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			}
 			foreach (var pop in request.UpdatingPallet.ProductsOnPallet)
 			{
-				if (!await _productRepo.IsExistProduct(pop.ProductId))
+				if (!await _productRepo.IsExistProduct(pop.ProductId, ct))
 					return AppResult<Unit>.Fail($"The specified product does not exist.");
 			}
 			var updatedProducts1 = new List<ProductOnPallet>();

@@ -26,16 +26,16 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Remove(receipt);
 		}
-		public async Task<Receipt?> GetReceiptByIdAsync(Guid id)
+		public async Task<Receipt?> GetReceiptByIdAsync(Guid id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Receipts
 				.Include(r => r.Pallets)
 					.ThenInclude(pr => pr.ProductsOnPallet)
 				.Include(l=>l.Pallets)//do swaggera by mógł zrobić snpaShot
 					.ThenInclude(l=>l.Location)
-				.FirstOrDefaultAsync(r => r.Id == id);
+				.FirstOrDefaultAsync(r => r.Id == id, ct);
 		}
-		public async Task<Receipt?> GetReceiptWithAllIncludesByIdAsync(Guid id)
+		public async Task<Receipt?> GetReceiptWithAllIncludesByIdAsync(Guid id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Receipts
 				.Include(c=>c.Client)
@@ -44,20 +44,20 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 						.ThenInclude(pro=>pro.Product)
 				.Include(l => l.Pallets)
 					.ThenInclude(l => l.Location)
-				.FirstOrDefaultAsync(r => r.Id == id);
+				.FirstOrDefaultAsync(r => r.Id == id, ct);
 		}
-		public async Task<Receipt?> GetReceipForCancelByIdAsync(Guid id)
+		public async Task<Receipt?> GetReceipForCancelByIdAsync(Guid id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Receipts
 				.Include(p=>p.Pallets)
 					.ThenInclude(p=>p.PalletHistory)
 				.Include(p => p.Pallets)
 					.ThenInclude(p => p.Location)
-				.FirstOrDefaultAsync(r => r.Id == id);
+				.FirstOrDefaultAsync(r => r.Id == id, ct);
 		}
 		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)
 		{
-			var result = _werehouseDbContext.Receipts				
+			var result = _werehouseDbContext.Receipts
 				.AsQueryable();
 			if (filter.ReceiptNumber != null && filter.ReceiptNumber != 0)
 			{
@@ -71,7 +71,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			{
 				result = result.Where(i => i.Client.Name == filter.ClientName);
 			}
-			if (filter.ProductId.HasValue)			
+			if (filter.ProductId.HasValue)
 			{
 				result = result.Where(i => i.Pallets.Any(ip => ip.ProductsOnPallet.Any(ipp => ipp.ProductId == filter.ProductId)));
 			}
@@ -93,9 +93,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return result;
 		}
 
-		public async Task<int> GetNextNumberOfReceipt()
+		public async Task<int> GetNextNumberOfReceipt(CancellationToken ct)
 		{
-			var number = await _werehouseDbContext.Receipts.MaxAsync(x => (int?)x.ReceiptNumber) ??0;
+			var number = await _werehouseDbContext.Receipts.MaxAsync(x => (int?)x.ReceiptNumber, ct) ??0;
 			return number + 1;
 		}
 	}

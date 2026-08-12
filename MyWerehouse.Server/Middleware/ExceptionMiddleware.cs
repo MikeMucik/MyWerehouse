@@ -18,22 +18,29 @@ namespace MyWerehouse.Server.Middleware
 			try
 			{
 				await _next(context);
-			}					
+			}
 			catch (DomainException ex)
 			{
 				_logger.LogWarning(ex, "Domain exception while processing request {Method} {Path}",
 					context.Request.Method, context.Request.Path);
 
-				await HandleDomainException(context, ex);				
+				await HandleDomainException(context, ex);
 			}
 			catch (FluentValidation.ValidationException ex)
 			{
-				await HandleValidationException(context, ex);				
+				await HandleValidationException(context, ex);
+			}
+			catch (OperationCanceledException)when (context.RequestAborted.IsCancellationRequested)
+			{
+				_logger.LogDebug(
+					"Requested was cancelled:{Method}, {Path}",
+					context.Request.Method,
+					context.Request.Path);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Unhandled exception occurred while processing request {Method} {Path}",
-					context.Request.Method, context.Request.Path);				
+					context.Request.Method, context.Request.Path);
 
 				await HandleExceptionAsync(context);
 			}
@@ -50,7 +57,7 @@ namespace MyWerehouse.Server.Middleware
 			context.Response.ContentType = "application/problem+json";
 			var response = new ValidationProblemDetails(errors)
 			{
-				Title = "Validation error",				
+				Title = "Validation error",
 				Status = StatusCodes.Status400BadRequest
 			};
 			return context.Response.WriteAsJsonAsync(response);
@@ -85,7 +92,7 @@ namespace MyWerehouse.Server.Middleware
 				Detail = "Unexpected Error"
 			};
 			response.Extensions["traceId"] = context.TraceIdentifier;
-			await context.Response.WriteAsJsonAsync(response);	
+			await context.Response.WriteAsJsonAsync(response);
 		}
 	}
 }

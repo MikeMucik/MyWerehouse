@@ -9,19 +9,18 @@ using MyWerehouse.Domain.Pallets.Models;
 namespace MyWerehouse.Domain.Interfaces
 {
 	public interface IPalletRepo
-	{		
-		Guid AddPallet(Pallet pallet);				
-		Task<Pallet?> GetPalletByIdAsync(Guid palletId);	
-		Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId);
-		Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber);
-		Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId);
-		Task<List<Pallet>> GetMissingFullPallets(Guid productId,int fullPallet, DateOnly? minBestBefore, int neededPallets);
-		Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId);
-		Task<Pallet?> GetPickingPalletByIssueId(Guid issueId);			
-		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);				
-		//Task<string> GetNextPalletNumberAsync();
-		Task<int> ReservePalletNumbersAsync(int count);
-		Task<Pallet?> CheckOccupancyAsync(int locationId);
-		Task<List<Pallet>> GetAvailablePalletsForReversePickingAsync(Guid productId, DateOnly? bestBefore, Guid sourceId, int cartonsPerPallet);
+	{
+		Guid AddPallet(Pallet pallet);
+		Task<Pallet?> GetPalletByIdAsync(Guid palletId, CancellationToken ct);
+		Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId, CancellationToken ct);
+		Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber, CancellationToken ct);
+		Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId, CancellationToken ct);
+		Task<List<Pallet>> GetMissingFullPallets(Guid productId,int fullPallet, DateOnly? minBestBefore, int neededPallets, CancellationToken ct);
+		Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId, CancellationToken ct);
+		Task<Pallet?> GetPickingPalletByIssueId(Guid issueId, CancellationToken ct);
+		IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter);
+		Task<int> ReservePalletNumbersAsync(int count, CancellationToken ct);
+		Task<Pallet?> CheckOccupancyAsync(int locationId, CancellationToken ct);
+		Task<List<Pallet>> GetAvailablePalletsForReversePickingAsync(Guid productId, DateOnly? bestBefore, Guid sourceId, int cartonsPerPallet, CancellationToken ct);
 	}
 }

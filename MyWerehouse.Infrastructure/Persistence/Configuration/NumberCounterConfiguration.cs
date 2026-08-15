@@ -9,21 +9,20 @@ using MyWerehouse.Domain.Common.ValueObject;
 
 namespace MyWerehouse.Infrastructure.Persistence.Configuration
 {
-	public class PalletNumberCounterConfiguration :IEntityTypeConfiguration<PalletNumberCounter>
+	public class NumberCounterConfiguration :IEntityTypeConfiguration<NumberCounter>
 	{		
-		public void Configure(EntityTypeBuilder<PalletNumberCounter> entity)
+		public void Configure(EntityTypeBuilder<NumberCounter> entity)
 		{
 			entity.HasKey(n => n.Name);
 
 			entity.Property(n => n.Name)
 				.HasMaxLength(30);
 
-			entity.HasData(new PalletNumberCounter
+			entity.HasData(new NumberCounter
 			{
 				Name = "Pallet",
 				NextNumber = 1
 			});
-
 		}
 	}
 }

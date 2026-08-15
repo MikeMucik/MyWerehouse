@@ -510,7 +510,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		public async Task UpdateReceipt_ShouldAddAndRemovePallet_WhenNewPalletWithoutIdIsProvided()
 		{
 			//Arrange
-			var lastNumberPallet = await DbContext.PalletNumberCounters.SingleAsync(x => x.Name == "Pallet");
+			var lastNumberPallet = await DbContext.NumberCounters.SingleAsync(x => x.Name == "Pallet");
 			lastNumberPallet.NextNumber = 2001;				
 			var client = CreateClient();
 			var category = CreateCategory("Category");

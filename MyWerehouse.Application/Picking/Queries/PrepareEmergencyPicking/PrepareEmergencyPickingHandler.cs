@@ -9,7 +9,6 @@ using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 {
@@ -22,26 +21,11 @@ namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 		public async Task<AppResult<PrepareCorrectedPickingResult>> Handle(PrepareEmergencyPickingQuery request, CancellationToken ct)
 		{
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId, ct);
-			//Nie wyjątek bo to częsta sytuacja w rzeczywistości
 			if (pallet == null)
 			{
 				return AppResult<PrepareCorrectedPickingResult>.Fail($"Pallet was not found in warehouse stock.");
 			}
-			if (pallet.Status == PalletStatus.Archived || pallet.Status == PalletStatus.OnHold)
-			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("The pallet is locked and cannot be processed.", ErrorType.Conflict);
-			}
-			var checkPallet = pallet.ProductsOnPallet.Count;
-			if (checkPallet > 1)
-			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("The pallet is not suitable for picking because it contains different products.", ErrorType.Validation);
-			}
-
-			var product = pallet.ProductsOnPallet.FirstOrDefault();
-			if (product == null)
-			{
-				return AppResult<PrepareCorrectedPickingResult>.Fail("The pallet is empty.");
-			}
+			var product = pallet.EnsureCanBeUsedForPicking();//to jest walidacja palety źródło
 			// Logika wyszukiwania pasujących zleceń
 			var timeFrom = request.Start;
 			var timeTo = request.End;

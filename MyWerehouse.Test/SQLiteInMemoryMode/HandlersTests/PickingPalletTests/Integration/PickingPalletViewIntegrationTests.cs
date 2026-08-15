@@ -18,7 +18,8 @@ using MyWerehouse.Application.Picking.Queries.GetListToPickingFlat;
 using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
 using MyWerehouse.Application.Picking.Queries.ShowTaskToDo;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.Integration
@@ -51,6 +52,41 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Equal("Provide the issue number to continue.", result.Result.Message);
 			Assert.NotNull(result.Result.IssueOptions);
 			Assert.Single(result.Result.IssueOptions);
+		}
+
+		[Theory]
+		[InlineData(PalletStatus.OnHold)]
+		[InlineData(PalletStatus.Archived)]
+		[InlineData(PalletStatus.ToIssue)]
+		public async Task PrepareEmergencyPicking_ShouldFail_WhenPalletStatusDoesNotAllowPicking(PalletStatus palletStatus)
+		{
+			// Arrange
+			using var scope = _fixture.CreateIsolatedScope();
+			var context = scope.ServiceProvider.GetRequiredService<WerehouseDbContext>();
+			var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+			await using var transaction = await context.Database.BeginTransactionAsync();
+			try
+			{
+				var palletId = Guid.Parse("00000000-0008-1111-0000-000000000000");
+				var pallet = await context.Pallets.SingleAsync(p => p.Id == palletId);
+				pallet.ChangeStatus(palletStatus);
+				await context.SaveChangesAsync();
+
+				var today = DateOnly.FromDateTime(TestDates.UtcNow);
+				var tomorrow = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1));
+
+				// Act
+				var exception = await Assert.ThrowsAsync<InvalidPalletStatusDomainException>(() =>
+					mediator.Send(new PrepareEmergencyPickingQuery(palletId, today, tomorrow)));
+
+				// Assert
+				Assert.Equal(palletId, exception.PalletId);
+				Assert.Equal(pallet.PalletNumber, exception.PalletNumber);
+			}
+			finally
+			{
+				await transaction.RollbackAsync();
+			}
 		}
 
 		[Fact]
@@ -133,16 +169,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		}
 
 		[Fact]
-		public async Task PrepareEmergencyPicking_ReturnInfoDifferentProducts_WhenPalletWithManyProducts()
+		public async Task PrepareEmergencyPicking_ShouldThrow_WhenPalletContainsManyProducts()
 		{
 			// Arrange
-			var palletGuid9 = Guid.Parse("00000000-0009-1111-0000-000000000000");		
-			var query = new PrepareEmergencyPickingQuery(palletGuid9, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(0)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)));			
+			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");		
+			var query = new PrepareEmergencyPickingQuery(palletGuid1, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(0)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)));			
 			// Act			
-			var result = await _mediator.Send(query);
+			var exception = await Assert.ThrowsAsync<PalletMustContainSingleProductLineDomainException>(() =>
+				_mediator.Send(query));
 			// Assert
-			Assert.False(result.IsSuccess);
-			Assert.Contains("The pallet is not suitable for picking because it contains different products.", result.Error);
+			Assert.Equal(palletGuid1, exception.PalletId);
+			Assert.Equal("Q1000", exception.PalletNumber);
 		}
 		
 		[Fact]

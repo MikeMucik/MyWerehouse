@@ -18,14 +18,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 		public async Task ReservePalletNumbersAsync_ShouldReturnFirstNumberAndAdvanceCounter()
 		{
 			//Arrange
-			var counter = await DbContext.PalletNumberCounters
+			var counter = await DbContext.NumberCounters
 				.SingleAsync(x => x.Name == "Pallet");
 			counter.NextNumber = 1012;
 			await DbContext.SaveChangesAsync();
 			var palletRepo = new PalletRepo(DbContext);
 			//Act
 			var result = await palletRepo.ReservePalletNumbersAsync(3, CancellationToken.None);
-			var updatedCounter = await DbContext.PalletNumberCounters
+			var updatedCounter = await DbContext.NumberCounters
 				.AsNoTracking()
 				.SingleAsync(x => x.Name == "Pallet");
 

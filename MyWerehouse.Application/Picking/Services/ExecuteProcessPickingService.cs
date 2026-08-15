@@ -54,6 +54,7 @@ namespace MyWerehouse.Application.Picking.Services
 			if (oldPallet is null)
 			{
 				var newNumberPallet = (await _palletNumberAllocator.ReserveAsync(1, ct)).Single();
+
 				var newPickingPallet = Pallet.CreatePickingPallet(newNumberPallet, locationId, now, productId, quantity, bestBefore);
 				var palletId = _palletRepo.AddPallet(newPickingPallet);
 				newPickingPallet.ReserveToIssue(issueId, userId, snapShot);

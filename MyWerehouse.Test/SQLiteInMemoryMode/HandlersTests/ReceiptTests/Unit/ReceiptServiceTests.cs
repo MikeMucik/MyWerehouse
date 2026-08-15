@@ -138,7 +138,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 		public async Task ProperDataOneAddedOneRemoveOnePalletsAndClient_UpdatePalletToReceiptAsync_AddedToBase()
 		{
 			//Arrange
-			var lastPalletNumber = await DbContext.PalletNumberCounters.SingleOrDefaultAsync(x=>x.Name == "Pallet");
+			var lastPalletNumber = await DbContext.NumberCounters.SingleOrDefaultAsync(x=>x.Name == "Pallet");
 			lastPalletNumber!.NextNumber = 1001;
 			var address = new Address
 			{

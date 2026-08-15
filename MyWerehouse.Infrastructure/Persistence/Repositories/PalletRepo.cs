@@ -137,7 +137,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 			while (true)
 			{
-				var counter = await _werehouseDbContext.PalletNumberCounters
+				var counter = await _werehouseDbContext.NumberCounters
 					.AsNoTracking()
 					.SingleAsync((x => x.Name == "Pallet"), ct);
 
@@ -145,7 +145,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				var nextFreeNumber = firstNumber + count;
 
 				//mechanizm zapobiegający dubla i ustawiający nową wartość
-				var affectedRows = await _werehouseDbContext.PalletNumberCounters
+				var affectedRows = await _werehouseDbContext.NumberCounters
 						.Where(x =>	x.Name == "Pallet" && x.NextNumber == firstNumber)
 						.ExecuteUpdateAsync(setters =>
 						setters.SetProperty(x => x.NextNumber,nextFreeNumber), ct);

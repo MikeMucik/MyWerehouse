@@ -29,7 +29,7 @@ The dataset includes four products, two clients, warehouse locations, available 
 - issue `900003` ready for loading;
 - issue `900004` cancelled with an ongoing reverse-picking task.
 
-Demo products use SKUs beginning with `DEMO-`, and demo pallets use numbers beginning with `DEMO-`.
+Demo products use SKUs beginning with `DEMO-`. Demo pallets follow the production numbering scheme and are created sequentially as `Q0001` through `Q0008`; the next pallet created by the application receives `Q0009`.
 
 ## Features
 

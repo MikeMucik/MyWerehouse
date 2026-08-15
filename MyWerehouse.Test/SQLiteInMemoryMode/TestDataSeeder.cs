@@ -62,10 +62,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			}
 			context.SaveChanges();
 
-			if (!context.PalletNumberCounters.Any())
+			if (!context.NumberCounters.Any())
 			{
-				context.PalletNumberCounters.Add(
-					new PalletNumberCounter { Name = "Pallet", NextNumber = 5001 });
+				context.NumberCounters.Add(
+					new NumberCounter { Name = "Pallet", NextNumber = 5001 });
 			}
 			context.SaveChanges();
 			// 2. Dane zależne od powyższych

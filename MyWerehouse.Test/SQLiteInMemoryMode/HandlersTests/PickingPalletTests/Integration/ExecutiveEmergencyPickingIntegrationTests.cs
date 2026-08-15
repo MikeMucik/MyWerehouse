@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveEmergencyPicking_ShouldPickedProductFromNewSource_WhenNotPickingPlanned()
 		{
 			// Arrange
-			var counter = await DbContext.PalletNumberCounters
+			var counter = await DbContext.NumberCounters
 				.SingleAsync(x => x.Name == "Pallet");
 			counter.NextNumber = 1002;
 			var client = CreateClient();
@@ -269,7 +269,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveEmergencyPicking_CreateNewVirtualPallet_WhenNoVirtualPallet()
 		{
 			// Arrange
-			var counter = await DbContext.PalletNumberCounters
+			var counter = await DbContext.NumberCounters
 				.SingleAsync(x => x.Name == "Pallet");
 			counter.NextNumber = 1002;
 			var client = CreateClient();

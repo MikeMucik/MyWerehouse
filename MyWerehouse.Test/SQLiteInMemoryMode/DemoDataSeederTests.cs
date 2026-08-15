@@ -1,4 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure.Persistence.Seeding;
@@ -15,7 +17,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			Assert.Equal(4, await DbContext.Products.CountAsync(p => p.SKU.StartsWith("DEMO-")));
 			Assert.Equal(2, await DbContext.Clients.CountAsync(c => c.Email.StartsWith("demo.")));
 			Assert.Equal(4, await DbContext.Issues.CountAsync(i => i.IssueNumber >= 900001 && i.IssueNumber <= 900004));
-			Assert.Equal(8, await DbContext.Pallets.CountAsync(p => p.PalletNumber.StartsWith("DEMO-")));
+			var demoPalletNumbers = await DbContext.Pallets
+				.OrderBy(p => p.PalletNumber)
+				.Select(p => p.PalletNumber)
+				.ToListAsync();
+			Assert.Equal(
+				["Q0001", "Q0002", "Q0003", "Q0004", "Q0005", "Q0006", "Q0007", "Q0008"],
+				demoPalletNumbers);
+
+			var counter = await DbContext.NumberCounters
+				.AsNoTracking()
+				.SingleAsync(c => c.Name == "Pallet");
+			Assert.Equal(9, counter.NextNumber);
+
+			var allocator = _provider.GetRequiredService<IPalletNumberAllocator>();
+			var nextPalletNumber = Assert.Single(await allocator.ReserveAsync(1, CancellationToken.None));
+			Assert.Equal("Q0009", nextPalletNumber);
 			Assert.Equal(3, await DbContext.PickingTasks.CountAsync());
 			Assert.Single(await DbContext.ReversePickings.ToListAsync());
 
@@ -38,6 +55,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			Assert.Equal(productCount, await DbContext.Products.CountAsync());
 			Assert.Equal(issueCount, await DbContext.Issues.CountAsync());
 			Assert.Equal(palletCount, await DbContext.Pallets.CountAsync());
+			Assert.Equal(10, await DbContext.NumberCounters
+				.Where(c => c.Name == "Pallet")
+				.Select(c => c.NextNumber)
+				.SingleAsync());
 		}
 	}
 }

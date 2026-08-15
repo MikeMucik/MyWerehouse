@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
@@ -17,6 +17,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Seeding
 	{
 		private const string MarkerSku = "DEMO-COF-001";
 		private const string DemoUser = "demo.user";
+		private const int NextDemoPalletNumber = 9;
 
 		public static async Task SeedAsync(WerehouseDbContext dbContext, CancellationToken ct = default)
 		{
@@ -29,6 +30,21 @@ namespace MyWerehouse.Infrastructure.Persistence.Seeding
 
 				await using var transaction = await dbContext.Database.BeginTransactionAsync(ct);
 				var now = DateTime.UtcNow;
+				var palletNumberCounter = await dbContext.NumberCounters
+					.SingleOrDefaultAsync(counter => counter.Name == "Pallet", ct);
+
+				if (palletNumberCounter is null)
+				{
+					dbContext.NumberCounters.Add(new NumberCounter
+					{
+						Name = "Pallet",
+						NextNumber = NextDemoPalletNumber
+					});
+				}
+				else if (palletNumberCounter.NextNumber < NextDemoPalletNumber)
+				{
+					palletNumberCounter.NextNumber = NextDemoPalletNumber;
+				}
 
 				var food = new Category { Name = "Demo Food" };
 				var household = new Category { Name = "Demo Household" };
@@ -112,21 +128,21 @@ namespace MyWerehouse.Infrastructure.Persistence.Seeding
 				var teaBb2 = DateOnly.FromDateTime(now.AddDays(180));
 				var pastaBb = DateOnly.FromDateTime(now.AddDays(365));
 
-				var fullCoffee = CreatePallet("30000000-0000-0000-0000-000000000001", "DEMO-P001",
+				var fullCoffee = CreatePallet("30000000-0000-0000-0000-000000000001", "Q0001",
 					now, locations[0].Id, PalletStatus.LockedForIssue, receipt.Id, plannedIssue.Id, coffee.Id, 20, coffeeBb1);
-				var plannedSource = CreatePallet("30000000-0000-0000-0000-000000000002", "DEMO-P002",
+				var plannedSource = CreatePallet("30000000-0000-0000-0000-000000000002", "Q0002",
 					now, locations[1].Id, PalletStatus.ToPicking, receipt.Id, null, coffee.Id, 20, coffeeBb2);
-				var teaPallet1 = CreatePallet("30000000-0000-0000-0000-000000000003", "DEMO-P003",
+				var teaPallet1 = CreatePallet("30000000-0000-0000-0000-000000000003", "Q0003",
 					now, locations[2].Id, PalletStatus.Available, receipt.Id, null, tea.Id, 15, teaBb1);
-				var teaPallet2 = CreatePallet("30000000-0000-0000-0000-000000000004", "DEMO-P004",
+				var teaPallet2 = CreatePallet("30000000-0000-0000-0000-000000000004", "Q0004",
 					now, locations[3].Id, PalletStatus.Available, receipt.Id, null, tea.Id, 15, teaBb2);
-				var loadingPallet = CreatePallet("30000000-0000-0000-0000-000000000005", "DEMO-P005",
+				var loadingPallet = CreatePallet("30000000-0000-0000-0000-000000000005", "Q0005",
 					now, locations[4].Id, PalletStatus.ToIssue, receipt.Id, loadingIssue.Id, pasta.Id, 24, pastaBb);
-				var detergentPallet = CreatePallet("30000000-0000-0000-0000-000000000006", "DEMO-P006",
+				var detergentPallet = CreatePallet("30000000-0000-0000-0000-000000000006", "Q0006",
 					now, locations[5].Id, PalletStatus.Available, receipt.Id, null, detergent.Id, 18, null);
-				var reverseSource = CreatePallet("30000000-0000-0000-0000-000000000007", "DEMO-P007",
+				var reverseSource = CreatePallet("30000000-0000-0000-0000-000000000007", "Q0007",
 					now, locations[6].Id, PalletStatus.ToPicking, receipt.Id, null, coffee.Id, 15, coffeeBb1);
-				var reversePickingPallet = CreatePallet("30000000-0000-0000-0000-000000000008", "DEMO-Q001",
+				var reversePickingPallet = CreatePallet("30000000-0000-0000-0000-000000000008", "Q0008",
 					now, locations[7].Id, PalletStatus.ReversePicking, null, reverseIssue.Id, coffee.Id, 5, coffeeBb1);
 
 				var plannedVirtualPallet = VirtualPallet.CreateForSeed(

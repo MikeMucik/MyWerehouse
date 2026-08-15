@@ -68,7 +68,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldPicked_WhenNoVirtualPallet()
 		{
 			// Arrange
-			var counter = await DbContext.PalletNumberCounters
+			var counter = await DbContext.NumberCounters
 				.SingleAsync(x => x.Name == "Pallet");
 			counter.NextNumber = 1002;
 			var client = CreateClient();
@@ -165,7 +165,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldPicked_WhenVirtualPalletExist()
 		{
 			// Arrange
-			var counter = await DbContext.PalletNumberCounters
+			var counter = await DbContext.NumberCounters
 				.SingleAsync(x => x.Name == "Pallet");
 			counter.NextNumber = 1002;
 			var client = CreateClient();
@@ -263,7 +263,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldPickedPartial_WhenNoVirtualPallet()
 		{
 			// Arrange
-			var counter = await DbContext.PalletNumberCounters
+			var counter = await DbContext.NumberCounters
 				.SingleAsync(x => x.Name == "Pallet");
 			counter.NextNumber = 1002;
 			var client = CreateClient();
@@ -399,7 +399,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		public async Task ExecutiveHandPicking_ShouldCompletePickingFromTwoPallets_WhenFirstPalletHasInsufficientStock()
 		{
 			// Arrange
-			var counter = await DbContext.PalletNumberCounters
+			var counter = await DbContext.NumberCounters
 				.SingleAsync(x => x.Name == "Pallet");
 			counter.NextNumber = 1002;
 			var client = CreateClient();

@@ -15,14 +15,21 @@ namespace MyWerehouse.Application.Issues.IssueServices
 		public int QuantityRequest { get; init; }
 		public int QuantityPrepared { get; init; }
 		public ComparePlanToPreparedResult() { }
-		public static ComparePlanToPreparedResult Ok(string message, Guid productId, string sku)
+		public static ComparePlanToPreparedResult Ok(
+			string message,
+			Guid productId,
+			string sku,
+			int quantityRequest,
+			int quantityPrepared)
 		{
 			return new ComparePlanToPreparedResult
 			{
 				Success = true,
 				Message = message,
 				ProductId = productId,
-				SKU = sku
+				SKU = sku,
+				QuantityRequest = quantityRequest,
+				QuantityPrepared = quantityPrepared
 			};
 		}
 		public static ComparePlanToPreparedResult Fail(string message,

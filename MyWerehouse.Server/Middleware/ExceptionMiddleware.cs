@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Domain.Common;
+using MyWerehouse.Server.ApiProblemDetails;
 
 namespace MyWerehouse.Server.Middleware
 {
@@ -25,6 +26,7 @@ namespace MyWerehouse.Server.Middleware
 					context.Request.Method, context.Request.Path);
 
 				await HandleDomainException(context, ex);
+				
 			}
 			catch (FluentValidation.ValidationException ex)
 			{
@@ -64,23 +66,16 @@ namespace MyWerehouse.Server.Middleware
 		}
 		private static Task HandleDomainException(HttpContext context, DomainException ex)
 		{
-			var (statusCode, title) = ex.ErrorType switch
-			{
-				ErrorType.NotFound => (StatusCodes.Status404NotFound, "Resource not found"),
-				ErrorType.Validation => (StatusCodes.Status400BadRequest, "Validation error"),
-				_ => (StatusCodes.Status409Conflict, "Business rule violation")
-			};
+			var response = ApiProblemDetailsFactory.Create(
+					ex.ErrorType,
+					ex.Message);
 
-			context.Response.StatusCode = statusCode;
+			context.Response.StatusCode =
+				response.Status ?? StatusCodes.Status500InternalServerError;
 			context.Response.ContentType = "application/problem+json";
-			var response = new ProblemDetails
-			{
-				Title = title,
-				Detail = ex.Message,
-				Status = statusCode,
-			};
 			return context.Response.WriteAsJsonAsync(response);
 		}
+		
 		private static async Task HandleExceptionAsync(HttpContext context)
 		{
 			context.Response.StatusCode = StatusCodes.Status500InternalServerError;

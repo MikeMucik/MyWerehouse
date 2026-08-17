@@ -43,6 +43,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLift
 					PalletNumber = pallet.PalletNumber,
 					LocationId = pallet.LocationId,
 					LocationName = fullLocation,
+					Status = pallet.Status,
 				};
 				list.Add(item);
 			}

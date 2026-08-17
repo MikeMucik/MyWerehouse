@@ -29,6 +29,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
+				.ThenInclude(p => p.Product)
 				.Include(p => p.Location)
 				.Include(p => p.Receipt)
 				.Include(p => p.Issue)
@@ -146,9 +147,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 				//mechanizm zapobiegający dubla i ustawiający nową wartość
 				var affectedRows = await _werehouseDbContext.NumberCounters
-						.Where(x =>	x.Name == "Pallet" && x.NextNumber == firstNumber)
+						.Where(x => x.Name == "Pallet" && x.NextNumber == firstNumber)
 						.ExecuteUpdateAsync(setters =>
-						setters.SetProperty(x => x.NextNumber,nextFreeNumber), ct);
+						setters.SetProperty(x => x.NextNumber, nextFreeNumber), ct);
 
 				if (affectedRows == 1)
 					return firstNumber;

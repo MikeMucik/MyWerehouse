@@ -461,7 +461,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			}
 			if (productOnaPallet.Quantity >= cartonsPerPallet)
 			{
-				throw new InvalidQuantityDomainException(Id);
+				throw new PalletCapacityExceededDomainException(Id);
 			}
 			var freeSpace = cartonsPerPallet - productOnaPallet.Quantity;
 			var addedQuantity = Math.Min(freeSpace, quantity);

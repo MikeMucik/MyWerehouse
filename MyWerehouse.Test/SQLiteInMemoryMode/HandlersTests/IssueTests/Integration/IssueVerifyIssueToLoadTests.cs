@@ -105,6 +105,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(2, savedIssue.Pallets.Count);
 			Assert.Single(savedIssue.IssueItems);
 			Assert.All(savedIssue.Pallets, p => Assert.True(p.ProductsOnPallet.Any()));
+			var comparison = Assert.Single(result.Result!);
+			Assert.Equal(20, comparison.QuantityRequest);
+			Assert.Equal(20, comparison.QuantityPrepared);
 		}
 		[Fact]
 		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenStatusInProgress()
@@ -190,6 +193,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Contains("conditionally", comparison.Message);
 			Assert.Equal(product.Id, comparison.ProductId);
 			Assert.Equal(product.SKU, comparison.SKU);
+			Assert.Equal(20, comparison.QuantityRequest);
+			Assert.Equal(10, comparison.QuantityPrepared);
 
 			var issueAfter = await DbContext.Issues.FindAsync(issue.Id);
 			Assert.NotNull(issueAfter);

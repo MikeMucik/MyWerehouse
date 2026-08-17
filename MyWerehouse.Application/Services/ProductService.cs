@@ -120,6 +120,10 @@ namespace MyWerehouse.Application.Services
 		public async Task<AppResult<EditProductDTO>> GetProductToEditAsync(Guid id, CancellationToken ct)
 		{
 			var product = await _productRepo.GetProductToEditAsync(id, ct);
+			if (product == null)
+			{
+				return AppResult<EditProductDTO>.Fail($"Product {id} does not exist.");
+			}
 			var productDTO = _mapper.Map<EditProductDTO>(product);
 			return AppResult<EditProductDTO>.Success(productDTO);
 		}

@@ -165,6 +165,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Equal(ReasonForPallet.Moved, movement.Reason);
 		}
 		[Fact]
+		public async Task GetMissingPallet_ReturnNotFound()
+		{
+			//Arrange
+			var missingPalletId = Guid.NewGuid();
+			//Act
+			var result = await _mediator.Send(new GetPalletQuery(missingPalletId));
+			//Assert
+			Assert.False(result.IsSuccess);
+			Assert.Null(result.Result);
+			Assert.Equal(ErrorType.NotFound, result.ErrorType);
+			Assert.Equal($"Pallet {missingPalletId} does not exist.", result.Error);
+		}
+		[Fact]
 		public async Task GetPalletByPalletnumber_ReturnPallet()
 		{
 			//Arrange

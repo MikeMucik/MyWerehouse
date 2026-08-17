@@ -121,6 +121,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
 			Assert.Equal(2, result.Result.Count);
+			var handTaskForProduct1 = Assert.Single(result.Result, x => x.ProductId == product1.Id);
+			var handTaskForProduct2 = Assert.Single(result.Result, x => x.ProductId == product2.Id);
+			Assert.Equal(issue.IssueNumber, handTaskForProduct1.IssueNumber);
+			Assert.Equal(product1.SKU, handTaskForProduct1.SKU);
+			Assert.Equal(issue.IssueNumber, handTaskForProduct2.IssueNumber);
+			Assert.Equal(product2.SKU, handTaskForProduct2.SKU);
 			var resultForProduct1 = DbContext.PickingTasks.Single(x => x.ProductId == product1.Id && x.IssueId == issue.Id && x.PickingStatus == PickingStatus.Available);
 			var resultForProduct2 = DbContext.PickingTasks.Single(x => x.ProductId == product2.Id && x.IssueId == issue.Id && x.PickingStatus == PickingStatus.Available);
 			Assert.Equal(25, resultForProduct1.RequestedQuantity);
@@ -191,7 +197,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = pickingTask2.PickingStatus,
 				SourcePalletId = pickingTask2.VirtualPallet.PalletId,
 				SourcePalletNumber = pickingTask2.VirtualPallet.Pallet.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask2.BestBefore,
 			};
 			//Act 1 
@@ -199,7 +204,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1st"));
 			Assert.True(result1.IsSuccess);
 			//Act 
@@ -298,7 +303,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = pickingTask1.PickingStatus,
 				SourcePalletId = pickingTask1.VirtualPallet.PalletId,
 				SourcePalletNumber = pickingTask1.VirtualPallet.Pallet.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
 			//Act 1 
@@ -306,7 +310,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				pickingTask1DTO.Id,
 				pickingTask1DTO.SourcePalletId!.Value,
 				pickingTask1DTO.PickedQuantity,
-				pickingTask1DTO.RampNumber,
+				100100,
 				"user1st"));
 			//Assert 1
 			Assert.True(result1.IsSuccess);
@@ -325,14 +329,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = pickingTask2.PickingStatus,
 				SourcePalletId = pickingTask2.VirtualPallet.PalletId,
 				SourcePalletNumber = pickingTask2.VirtualPallet.Pallet.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask2.BestBefore,
 			};
 			var result2 = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTask2DTO.Id,
 				pickingTask2DTO.SourcePalletId!.Value,
 				pickingTask2DTO.PickedQuantity,
-				pickingTask2DTO.RampNumber,
+				100100,
 				"user1st"));
 			Assert.True(result2.IsSuccess);
 			var task2 = DbContext.PickingTasks.Single(t => t.Id == pickingTask2.Id);

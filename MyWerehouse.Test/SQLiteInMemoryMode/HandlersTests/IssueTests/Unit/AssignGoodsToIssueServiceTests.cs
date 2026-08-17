@@ -62,8 +62,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			Assert.True(result.Success);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal(product.SKU, result.SKU);
+			Assert.NotNull(result.AssignedPallets);
 			Assert.Single(result.AssignedPallets);
 			Assert.Same(pallet, result.AssignedPallets.Single());
+			Assert.Equal(100, result.QuantityRequest);
+			Assert.Equal(100, result.QuantityOnStock);
 			Assert.Equal(PalletStatus.LockedForIssue, pallet.Status);
 			Assert.Equal(issue.Id, pallet.IssueId);
 			_addPickingTaskToIssueService.Verify(
@@ -104,6 +107,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			//Assert
 			Assert.False(result.Success);
 			Assert.Equal(productId, result.ProductId);
+			Assert.Equal(100, result.QuantityRequest);
+			Assert.Null(result.QuantityOnStock);
 			Assert.Equal("The specified product does not exist.", result.Message);
 		}
 
@@ -174,6 +179,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 
 			//Assert
 			Assert.False(result.Success);
+			Assert.Equal(product.Id, result.ProductId);
+			Assert.Equal(product.SKU, result.SKU);
+			Assert.Equal(100, result.QuantityRequest);
+			Assert.Equal(100, result.QuantityOnStock);
 			Assert.Equal($"Allocation policy {unsupportedPolicy} is not supported.", result.Message);
 		}
 
@@ -195,7 +204,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			//	.ReturnsAsync(150);
 			_inventoryRepo
 				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
-				.ReturnsAsync(150);
+				.ReturnsAsync(0);
 			//Act
 			var result = await service.AssignGoodsToIssue(
 				issue,
@@ -207,6 +216,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 
 			//Assert
 			Assert.False(result.Success);
+			Assert.Equal(product.Id, result.ProductId);
+			Assert.Equal(product.SKU, result.SKU);
+			Assert.Equal(100, result.QuantityRequest);
+			Assert.Equal(150, result.QuantityOnStock);
 			Assert.Equal("Allocated more product than requested.", result.Message);
 			_virtualPalletRepo.Verify(
 				x => x.GetVirtualPalletsByBBAsync(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()),

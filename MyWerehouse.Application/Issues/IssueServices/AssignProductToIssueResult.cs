@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Pallets.Models;
 
@@ -11,13 +12,28 @@ namespace MyWerehouse.Application.Issues.IssueServices
 	{
 		public bool Success { get; init; }
 		public string Message { get; set; } = string.Empty;
-		public Guid ProductId { get; init; }
-		public string SKU { get; init; } = string.Empty;
-		public IReadOnlyList<Pallet> AssignedPallets { get; init; } = [];
-		public int QuantityRequest { get; init; }
-		public int QuantityOnStock { get; init; }
+		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+		public Guid? ProductId { get; init; }
+
+		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+		public string? SKU { get; init; } 
+
+		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+		public IReadOnlyList<Pallet>? AssignedPallets { get; init; } 
+
+		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+		public int? QuantityRequest { get; init; }
+
+		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+		public int? QuantityOnStock { get; init; }
 		public AssignProductToIssueResult() { }
-		public static AssignProductToIssueResult Ok(string message, Guid productId, string sku, IReadOnlyList<Pallet> pallets)
+		public static AssignProductToIssueResult Ok(
+			string message,
+			Guid productId,
+			string sku,
+			IReadOnlyList<Pallet> pallets,
+			int quantityRequest,
+			int quantityOnStock)
 		{
 			return new AssignProductToIssueResult
 			{
@@ -25,7 +41,9 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				Message = message,
 				ProductId = productId,
 				SKU = sku,
-				AssignedPallets = pallets
+				AssignedPallets = pallets,
+				QuantityRequest = quantityRequest,
+				QuantityOnStock = quantityOnStock
 			};
 		}
 
@@ -36,22 +54,18 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				Success = true,
 				Message = message
 			};
-		}
-		public static AssignProductToIssueResult Fail(string message)
-		{
-			return new AssignProductToIssueResult
-			{
-				Success = false,
-				Message = message
-			};
-		}
-		public static AssignProductToIssueResult Fail(string message, Guid productNotAdded)
+		}		
+		public static AssignProductToIssueResult Fail(
+			string message,
+			Guid productNotAdded,
+			int quantityRequest)
 		{
 			return new AssignProductToIssueResult
 			{
 				Success = false,
 				Message = message,
-				ProductId = productNotAdded,				
+				ProductId = productNotAdded,
+				QuantityRequest = quantityRequest
 			};
 		}
 		public static AssignProductToIssueResult Fail(

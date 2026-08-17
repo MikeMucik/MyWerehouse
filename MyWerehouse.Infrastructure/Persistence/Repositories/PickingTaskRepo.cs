@@ -39,7 +39,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(i => i.Issue)
 				.Where(p =>
 					p.VirtualPalletId == palletPickingId &&
-					DateOnly.FromDateTime( p.Issue.IssueDateTimeCreate) >= pickingDate.AddDays(-14) &&//ustalenie biznesowe
+					DateOnly.FromDateTime(p.Issue.IssueDateTimeCreate) >= pickingDate.AddDays(-14) &&//ustalenie biznesowe
 					p.Issue.IssueDateTimeSend >= pickingDate &&
 					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2) &&
 					p.PickingStatus == PickingStatus.Allocated);
@@ -49,7 +49,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid, CancellationToken ct)
 		{
 			return await _werehouseDbContext.PickingTasks
-				.Include(v=>v.VirtualPallet)
+				.Include(v => v.VirtualPallet)
 				.SingleOrDefaultAsync(a => a.Id == guid, ct);
 		}
 		public async Task<List<PickingTask>> GetPickingTasksByIssueIdProductIdAsync(Guid issueId, Guid productId, CancellationToken ct)
@@ -75,6 +75,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			var result = await _werehouseDbContext.PickingTasks
 				.Include(i => i.Issue)
+				.Include(p => p.Product)
 				.Where(a => a.IssueId == issueId)
 				.Where(t => t.PickingStatus == PickingStatus.Allocated ||
 				t.PickingStatus == PickingStatus.CorrectionPicking)
@@ -86,10 +87,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			return await _werehouseDbContext.PickingTasks
 				.Where(x => x.PickingPalletId == pickingPalletId)
-				.Where(x=>x.VirtualPallet != null)
-				.Include(x=>x.VirtualPallet!)
-					.ThenInclude(xp=>xp.Pallet)
-						.ThenInclude(p=>p.ProductsOnPallet)
+				.Where(x => x.VirtualPallet != null)
+				.Include(x => x.VirtualPallet!)
+					.ThenInclude(xp => xp.Pallet)
+						.ThenInclude(p => p.ProductsOnPallet)
 				.ToListAsync(ct);
 		}
 

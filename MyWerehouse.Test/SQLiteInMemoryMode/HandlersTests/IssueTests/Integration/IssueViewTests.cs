@@ -38,6 +38,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
+			Assert.Equal(2, result.Result.IssueNumber);
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal("U002", result.Result.PerformedBy);
 			Assert.Equal(DateOnly.FromDateTime(TestDates.UtcNow.AddHours(23)), result.Result.IssueDateTimeSend);
@@ -60,6 +61,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
+			Assert.Equal(2, result.Result.IssueNumber);
 			Assert.Equal(11, result.Result.ClientId);
 			Assert.Equal(2, result.Result.IssueItems.Count);
 			Assert.Equal("U002", result.Result.PerformedBy);

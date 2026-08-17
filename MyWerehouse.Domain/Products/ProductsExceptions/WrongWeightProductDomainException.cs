@@ -9,6 +9,7 @@ namespace MyWerehouse.Domain.Products.ProductsExceptions
 {
 public class WrongWeightProductDomainException: DomainException
 	{
-		public WrongWeightProductDomainException() : base("Not correct weight (range: 1-50000g).") { }
+		public WrongWeightProductDomainException()
+			: base("Not correct weight (range: 1-50000g).", Common.ValueObject.ErrorType.Validation) { }
 	}
 }

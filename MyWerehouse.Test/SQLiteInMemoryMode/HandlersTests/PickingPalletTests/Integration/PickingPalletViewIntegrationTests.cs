@@ -199,6 +199,41 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.IsType<PagedResult<PickingTaskDTO>>(result.Result);
 			Assert.NotEmpty(result.Result.Items);
 		}
+
+		[Fact]
+		public async Task ShowTaskToDo_ShouldReturnEmptyPagedResult_WhenNoTasksMatchDate()
+		{
+			// Arrange
+			var pallet = Guid.Parse("00000000-0005-1111-0000-000000000000");
+			var dateWithoutTasks = TestDates.Today.AddYears(1);
+			var query = new ShowTaskToDoQuery(pallet, dateWithoutTasks, 1, 10);
+
+			// Act
+			var result = await _mediator.Send(query);
+
+			// Assert
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
+			Assert.Empty(result.Result.Items);
+			Assert.Equal(0, result.Result.TotalCount);
+		}
+
+		[Fact]
+		public async Task ShowTaskToDo_ShouldUseToday_WhenPickingDateIsMissing()
+		{
+			// Arrange
+			var pallet = Guid.Parse("00000000-0005-1111-0000-000000000000");
+			var query = new ShowTaskToDoQuery(pallet, null, 1, 10);
+
+			// Act
+			var result = await _mediator.Send(query);
+
+			// Assert
+			Assert.True(result.IsSuccess);
+			Assert.NotNull(result.Result);
+			Assert.NotEmpty(result.Result.Items);
+		}
+
 		[Fact]
 		public async Task GetListToPicking_ReturnListForPickingTask()
 		{			

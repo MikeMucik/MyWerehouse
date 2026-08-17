@@ -118,6 +118,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.True(result.Result.NewPalletCreated);
 			Assert.Equal("Q1002", result.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
+			Assert.Equal(10, result.Result.RequestedQuantity);
+			Assert.Equal(10, result.Result.PickedQuantity);
+			Assert.Equal(0, result.Result.MissingQuantity);
 
 			// ✅ Paleta została zaktualizowana
 			var updatedPallet = await DbContext.Pallets

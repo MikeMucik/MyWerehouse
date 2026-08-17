@@ -20,6 +20,10 @@ namespace MyWerehouse.Application.Inventories.Queries.GetInventory
 		public async Task<AppResult<InventoryDTO>> Handle(GetInventoryQuery request, CancellationToken ct)
 		{
 			var inventory = await _inventoryRepo.GetInventoryForProductAsync(request.ProductId, ct);
+			if (inventory == null)
+			{
+				return AppResult<InventoryDTO>.Fail($"Inventory for product {request.ProductId} does not exist.");
+			}
 			var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
 			return AppResult<InventoryDTO>.Success(inventoryDTO);
 		}

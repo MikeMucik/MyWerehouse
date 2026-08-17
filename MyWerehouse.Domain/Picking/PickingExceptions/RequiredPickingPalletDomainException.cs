@@ -11,6 +11,6 @@ namespace MyWerehouse.Domain.Picking.PickingExceptions
 	public class RequiredPickingPalletDomainException : DomainException
 	{
 		public RequiredPickingPalletDomainException()
-			:base ("Picking pallet id is required.") { }
+			:base ("Picking pallet id is required.", Common.ValueObject.ErrorType.Validation) { }
 	}
 }

@@ -51,7 +51,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 					_virtualPalletRepo.DeleteVirtualPalletPicking(virtualPallet);
 				}
 			}
-			return ReversePickingResult.Ok("Product was returned to the source pallet.", reversePicking.ProductId, reversePicking.SourcePalletId);
+			return ReversePickingResult.Ok("Product was returned to the source pallet.", reversePicking.ProductId, reversePicking.SourcePalletId, sourcePallet.PalletNumber);
 		}
 		public async Task<ReversePickingResult> AddToExistingPallet(ReversePickingTask task,
 			List<Guid> pallets,
@@ -96,7 +96,7 @@ namespace MyWerehouse.Application.ReversePickings.Services
 			{
 				return ReversePickingResult.Fail("Product was not added.");
 			}
-			return ReversePickingResult.Ok("Product was added.", listPalletToAddProduct);
+			return ReversePickingResult.Ok("Product was added.",product.Id, listPalletToAddProduct);
 		}
 
 		public async Task<ReversePickingResult> AddToNewPallet(ReversePickingTask task, string userId, int locationId, string snapShot, CancellationToken ct)

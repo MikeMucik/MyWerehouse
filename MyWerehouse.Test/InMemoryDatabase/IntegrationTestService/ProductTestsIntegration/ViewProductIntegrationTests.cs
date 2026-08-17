@@ -77,6 +77,19 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			Assert.IsType<AppResult<EditProductDTO>>(result);
 		}
 		[Fact]
+		public async Task ShowMissingProduct_GetProductToEditAsync_ReturnNotFound()
+		{
+			//Arrange
+			var missingProductId = Guid.NewGuid();
+			//Act
+			var result = await _productService.GetProductToEditAsync(missingProductId, CancellationToken.None);
+			//Assert
+			Assert.False(result.IsSuccess);
+			Assert.Null(result.Result);
+			Assert.Equal(ErrorType.NotFound, result.ErrorType);
+			Assert.Equal($"Product {missingProductId} does not exist.", result.Error);
+		}
+		[Fact]
 		public async Task ShowProducts_GetProductsAsync_ReturnList()
 		{
 			//Arrange

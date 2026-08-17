@@ -45,12 +45,13 @@ namespace MyWerehouse.Application.ReversePickings.DTOs
 			};
 		}
 				
-		public static ReversePickingResult Ok(string message, List<PalletProductQuantityDTO> palletWithAddedProduct)
+		public static ReversePickingResult Ok(string message, Guid productId, List<PalletProductQuantityDTO> palletWithAddedProduct)
 		{
 			return new ReversePickingResult
 			{
 				Success = true,
 				Message = message,
+				ProductId = productId,
 				PalletWithAddedProduct = palletWithAddedProduct
 			};
 		}

@@ -1,46 +1,55 @@
 ﻿# MyWarehouse
 
-MyWarehouse is a REST API for managing warehouse operations. It models inbound receipts, pallet storage, inventory, outbound orders, picking, reverse picking, and operation history.
+[![.NET build and tests](https://github.com/MikeMucik/MyWerehouse/actions/workflows/dotnet.yml/badge.svg?branch=master&event=push)](https://github.com/MikeMucik/MyWerehouse/actions/workflows/dotnet.yml)
+[![Hosted on Azure](https://img.shields.io/badge/hosted%20on-Azure%20App%20Service-0078D4?logo=microsoftazure&logoColor=white)](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html)
+[![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 
-The project uses a layered architecture, CQRS, and a domain model inspired by Domain-Driven Design. It is being gradually refactored to reduce coupling between the Application and Infrastructure layers.
+MyWarehouse is a deployed ASP.NET Core REST API that models real warehouse
+operations: receiving, pallet storage, inventory, outbound orders, picking,
+loading, reverse picking, and operation history.
 
-The repository name uses "MyWerehouse" for historical reasons; the project is presented as MyWarehouse.
+The project demonstrates a pragmatic layered architecture with CQRS,
+domain-driven business rules, Entity Framework Core, Azure SQL, automated
+testing, and deployment to Azure App Service.
 
-## Links
-
-- [GitHub repository](https://github.com/MikeMucik/MyWerehouse)
-- [Swagger UI on Azure](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html)
-- [GitHub Actions workflow](https://github.com/MikeMucik/MyWerehouse/actions)
+[**Open live Swagger**](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html)
+[CI workflow](https://github.com/MikeMucik/MyWerehouse/actions/workflows/dotnet.yml)
 
 ## Azure demo availability
 
-The API is hosted on the Azure App Service F1 plan. After a period of inactivity, the application may be stopped by Azure, so the first request can take approximately 40 seconds.
+> **Azure F1 cold start:** after inactivity, the first request may take approximately
+> 40 seconds. Use the Apihealth endpoint 
+> to wake up the application.
 
-If Swagger UI does not load immediately, please wait and try again. The application status can be checked using the [`GET /api/health`](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/api/health) endpoint. An HTTP 200 response confirms that the API has started.
+<details>
+<summary>How to wake up the Azure demo</summary>
 
-## Demo data
+![ApiHealth endpoint returning HTTP 200](docs/images/ApiHealth.png)
 
-The public API can be populated with fictional data by setting `DemoData__Enabled=true` in the application environment. When enabled, the application applies pending EF Core migrations and runs an idempotent demo-data seeder during startup. The seeder skips execution when the marker product `DEMO-COF-001` already exists.
+</details>
+## What this project demonstrates
 
-The dataset includes four products, two clients, warehouse locations, available pallets, a verified receipt, operation histories, and the following outbound scenarios:
+- Complete warehouse flow: Receipt → Inventory → Issue → Picking → Loading
+- Planned, emergency, manual, partial, and reverse picking
+- Domain-controlled state transitions and business invariants
+- Best-before batch handling and pallet allocation
+- Atomic, concurrency-safe pallet number reservation
+- Operation history created through domain events
+- 347 automated tests covering handlers, repositories, validation, mappings,
+  and business workflows
+- Hosting on Azure App Service and Azure SQL, with CI provided by GitHub Actions
 
-- issue `900001` with an allocated planned-picking task;
-- issue `900002` with a manual-picking task;
-- issue `900003` ready for loading;
-- issue `900004` cancelled with an ongoing reverse-picking task.
+## Ready-to-explore demo scenarios
 
-Demo products use SKUs beginning with `DEMO-`. Demo pallets follow the production numbering scheme and are created sequentially as `Q0001` through `Q0008`; the next pallet created by the application receives `Q0009`.
+| Issue | Scenario |
+|---|---|
+| `900001` | Outbound order with an allocated planned-picking task |
+| `900002` | Outbound order prepared for manual picking |
+| `900003` | Completed picking, ready for loading |
+| `900004` | Cancelled order with an active reverse-picking task |
 
-## Features
-
-- Goods receipts
-- Inventory management
-- Pallet and warehouse location management
-- Outbound order processing
-- Product allocation
-- Planned, emergency, and manual picking
-- Reverse picking
-- Operation history
+Demo products use SKUs beginning with `DEMO-`. Demo pallets are numbered
+sequentially from `Q0001` to `Q0008`.
 
 ## API documentation
 
@@ -66,29 +75,32 @@ graph LR
     Infrastructure --> Domain
 ```
 
-The Application layer currently references Infrastructure because several handlers and services use the concrete EF Core context. Removing this dependency is part of the planned migration towards Clean Architecture.
+The direct Application-to-Infrastructure dependency reflects the current
+architecture milestone and is the main boundary scheduled for the next
+large-scale refactoring.
 
-## Current refactoring status
+## Current architecture milestone
 
-This repository represents a working checkpoint during an ongoing migration of business logic from the Application layer into the Domain layer. The application remains runnable and covered by automated tests, but the architecture is intentionally in a transitional state.
+The current release represents a complete and deployable milestone. Core warehouse
+workflows are implemented, hosted on Azure, and covered by automated tests.
 
-Recent changes have focused on:
+Business invariants and state transitions are implemented in domain entities
+and domain services. Application handlers coordinate use cases, persistence,
+and workflows that span multiple entities. This division is intentional:
+cross-aggregate orchestration remains in the Application layer when moving it
+into the Domain would introduce additional complexity without a meaningful benefit.
 
-- moving issue reallocation, pallet assignment, and picking rules into domain entities and domain services;
-- handling planned, emergency, manual, partial, and reverse picking more consistently;
-- allowing goods from different best-before batches when each batch satisfies the outbound order requirement;
-- preserving picking and pallet history when an issue is modified or cancelled;
-- cancelling outstanding picking tasks and creating reverse-picking tasks for goods that were already picked.
+The solution is being incrementally evolved toward Clean Architecture. The next
+major architectural milestone is removing the Application layer's direct
+dependency on Infrastructure while preserving the current division between
+domain rules and application-level orchestration.
 
-### Error handling during the transition
+### Error handling
 
-Both `AppResult` and `DomainException` currently expose several error categories. This duplication is temporary and reflects the gradual migration:
-
-- `AppResult` is still used for application-level failures and use cases that must return a combined result for multiple products instead of stopping at the first failure;
-- `DomainException` is used when an entity or domain service rejects an operation that violates a business rule;
-- the exception middleware translates domain exceptions into consistent HTTP responses.
-
-As more rules move into the Domain layer, the responsibility of `AppResult` will be reduced and error-to-HTTP mapping will remain at the API boundary.
+- `DomainException` represents violations of business invariants.
+- `AppResult` represents application-level outcomes, including operations that
+  aggregate results for multiple products.
+- Exception middleware translates domain failures into consistent HTTP responses.
 
 ## Solution structure
 
@@ -178,18 +190,10 @@ Receipt → Pallet → Inventory → Issue → Picking → Loading
 5. Allocate pallets and picking tasks.
 6. Complete picking and loading.
 
-## Known limitation
+## Roadmap
 
-- Identity is registered, but endpoints are not protected yet.
-- Application still references Infrastructure in selected handlers.
-
-## Future improvements
-
-- Complete the migration to Clean Architecture by removing the Application layer's dependency on Infrastructure.
-- Add authentication and authorization.
-- Add containerized deployment support.
-- Extend pallet allocation policies.
-- Add warehouse workload planning.
-- Gradually reduce dependency on AutoMapper.
-- Add additional issue allocation policies, such as FEFO-based allocation.
-
+- Complete the transition to Clean Architecture by removing the Application
+  layer's direct dependency on Infrastructure.
+- Add authentication and role-based authorization.
+- Add containerized local and deployment support.
+- Introduce additional allocation policies, including FEFO.

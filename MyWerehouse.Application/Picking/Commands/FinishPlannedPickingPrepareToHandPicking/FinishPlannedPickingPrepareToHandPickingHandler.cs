@@ -45,7 +45,7 @@ namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareTo
 			var listOfIssues = await _issueRepo.GetIssuesByFilter(filtr).ToListAsync(ct);
 			foreach (var issue in listOfIssues)
 			{
-				var reducedList =	await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issue.Id, ct);
+				var reducedList = await _pickingTaskRepo.GetPickingTasksByIssueIdAsync(issue.Id, ct);
 				var listHandTasks = _pickingDomainService.PrepareHandPickingTasks(reducedList, issue.Id, command.UserId, now, _dateTimeProvider.Today);
 
 				foreach (var handTask in listHandTasks)

@@ -9,6 +9,7 @@ namespace MyWerehouse.Domain.Products.ProductsExceptions
 {
 	public class PalletCartonQuantityMustBePositiveDomainException : DomainException
 	{
-		public PalletCartonQuantityMustBePositiveDomainException():base("Cartons on pallet must be more than zero.") { }
+		public PalletCartonQuantityMustBePositiveDomainException()
+			:base("Cartons on pallet must be more than zero.", Common.ValueObject.ErrorType.Validation) { }
 	}
 }

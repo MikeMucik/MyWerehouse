@@ -25,6 +25,7 @@ namespace MyWerehouse.Application.Issues.Queries.IssueProductsSummary
 				.Select(x => new SummaryProductsIssueDTO
 				{
 					Id = x.Id,
+					IssueNumber = x.IssueNumber,
 					ClientId = x.ClientId,
 					PerformedBy = x.PerformedBy,
 					IssueItems = x.IssueItems

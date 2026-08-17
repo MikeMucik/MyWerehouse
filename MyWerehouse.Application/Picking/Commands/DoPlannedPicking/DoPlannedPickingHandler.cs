@@ -18,8 +18,7 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 		IIssueRepo issueRepo,
 		WerehouseDbContext werehouseDbContext,
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
-		IExecuteProcessPickingService processPickingActionService,
-		IPickingDomainService pickingDomainService)
+		IExecuteProcessPickingService processPickingActionService)
 		: IRequestHandler<DoPlannedPickingCommand, AppResult<ProcessPickingActionResult>>
 	{
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
@@ -28,7 +27,6 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IExecuteProcessPickingService _processPickingActionService = processPickingActionService;
-		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
 		public async Task<AppResult<ProcessPickingActionResult>> Handle(DoPlannedPickingCommand request, CancellationToken ct)
 		{
 			var pickingTaskToChange = await _pickingTaskRepo.GetPickingTaskAsync(request.PickingTaskId, ct);
@@ -62,40 +60,29 @@ namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking
 				var newQuantityToPickingTask = neededQuantity - pickedQuantity;
 				var newVirtualPallet = await _addPickingTaskToIssueService.AddPickingTasksToIssue(null, null,
 					issue, pickingTaskToChange.ProductId, newQuantityToPickingTask, pickingTaskToChange.BestBefore, request.UserId, ct);
-				var partialResult = new ProcessPickingActionResult
-				{
-					Success = true,
-					NewPalletCreated = resultProccesPicking.NewPalletCreated,
-					PalletId = resultProccesPicking.PalletId,
-					PalletNumber = resultProccesPicking.PalletNumber,
-					RequestedQuantity = neededQuantity,
-					PickedQuantity = pickedQuantity,
-					MissingQuantity = newQuantityToPickingTask,
-				};
 				issue.CompletePickingPlanned(newVirtualPallet.Success, sourcePallet, request.UserId);
-
 				if (newVirtualPallet.Success == false)
 				{
 					await _werehouseDbContext.SaveChangesAsync(ct);
 
-					partialResult.Message =
+					resultProccesPicking.Message =
 					$"Partial picking completed. Picked {pickedQuantity} of {neededQuantity}. " +
 					$"Missing quantity: {newQuantityToPickingTask}. No stock is available. " +
 					"Create a new issue for the missing quantity when stock becomes available. " +
 					$"The issue status was changed to {IssueStatus.PickingShortage}.";
 
 					return AppResult<ProcessPickingActionResult>.Success(
-						partialResult,
+						resultProccesPicking,
 						newVirtualPallet.Message);
 				}
 				//pallet lock with non-conformity
 				await _werehouseDbContext.SaveChangesAsync(ct);
-				partialResult.Message =
+				resultProccesPicking.Message =
 				$"Partial picking completed. Picked {pickedQuantity} of {neededQuantity}. " +
 				$"Missing quantity: {newQuantityToPickingTask}. An additional picking task was created.";
 
 				return AppResult<ProcessPickingActionResult>.Success(
-					partialResult,
+					resultProccesPicking,
 					"Picking task was completed partially. Request new source pallets to continue picking.");
 			}
 		}

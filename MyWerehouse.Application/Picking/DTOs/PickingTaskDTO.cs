@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.Picking.DTOs
 		public int PickedQuantity { get; init; }//faktyczna pobrana ilość
 		public PickingStatus PickingStatus { get; init; }
 		public DateOnly? BestBefore { get; init; }
-		public int RampNumber { get; init; } //lokalizacja pickingu
+		//public int RampNumber { get; init; } //lokalizacja pickingu ustawiamy gdy ją wykonujemy
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<PickingTask, PickingTaskDTO>()

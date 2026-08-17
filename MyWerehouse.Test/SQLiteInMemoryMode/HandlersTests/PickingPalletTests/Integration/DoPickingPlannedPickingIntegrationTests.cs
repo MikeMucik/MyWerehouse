@@ -117,14 +117,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id,
 				SourcePalletNumber = sourcePallet.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1"));
 
 			// Assert
@@ -134,6 +133,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.True(result.Result.NewPalletCreated);
 			Assert.Equal("Q1001", result.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
+			Assert.Equal(pickingTaskDTO.RequestedQuantity, result.Result.RequestedQuantity);
+			Assert.Equal(pickingTaskDTO.PickedQuantity, result.Result.PickedQuantity);
+			Assert.Equal(0, result.Result.MissingQuantity);
 
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask.Id);
 			var updatedSourcePallet = await DbContext.Pallets
@@ -206,14 +208,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet.Id,
 				SourcePalletNumber = sourcePallet.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1"));
 			// Assert
 			Assert.NotNull(result);
@@ -296,14 +297,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1"));
 			// Assert
 			Assert.NotNull(result);
@@ -311,6 +311,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(result.Result);
 			Assert.False(result.Result.NewPalletCreated);
 			Assert.Contains("Add the product to the existing picking pallet. Product:", result.Result.Message);
+			Assert.Equal(pickingTaskDTO.RequestedQuantity, result.Result.RequestedQuantity);
+			Assert.Equal(pickingTaskDTO.PickedQuantity, result.Result.PickedQuantity);
+			Assert.Equal(0, result.Result.MissingQuantity);
 
 			var updatedPickingTask = await DbContext.PickingTasks.FindAsync(pickingTask1.Id);
 			var updatedSourcePallet = await DbContext.Pallets
@@ -384,14 +387,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1"));
 			// Assert
 			Assert.NotNull(result);
@@ -471,14 +473,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1"));
 			// Assert
 			Assert.NotNull(result);
@@ -577,14 +578,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1"));
 			// Assert
 			Assert.NotNull(result);
@@ -594,6 +594,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			Assert.False(result.Result.NewPalletCreated);
 			Assert.Contains("Partial picking completed. Picked ", result.Result.Message);
+			Assert.Equal(pickingTaskDTO.RequestedQuantity, result.Result.RequestedQuantity);
+			Assert.Equal(pickingTaskDTO.PickedQuantity, result.Result.PickedQuantity);
+			Assert.Equal(
+				pickingTaskDTO.RequestedQuantity - pickingTaskDTO.PickedQuantity,
+				result.Result.MissingQuantity);
 		}
 
 		[Fact]
@@ -648,14 +653,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
 			var result = await Mediator.Send(new DoPlannedPickingCommand(
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1"));
 			// Assert
 			Assert.NotNull(result);
@@ -712,7 +716,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				PickingStatus = PickingStatus.Allocated,
 				SourcePalletId = sourcePallet1.Id,
 				SourcePalletNumber = sourcePallet1.PalletNumber,
-				RampNumber = 100100,
 				BestBefore = pickingTask1.BestBefore,
 			};
 
@@ -720,7 +723,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				pickingTaskDTO.Id,
 				pickingTaskDTO.SourcePalletId!.Value,
 				pickingTaskDTO.PickedQuantity,
-				pickingTaskDTO.RampNumber,
+				100100,
 				"user1")));
 			Assert.Contains($"Cannot pick {pickingTaskDTO.PickedQuantity} more than requested quantity {pickingTaskDTO.RequestedQuantity}.", ex.Message);
 		}

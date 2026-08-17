@@ -9,6 +9,7 @@ namespace MyWerehouse.Domain.Products.ProductsExceptions
 {
 	public	class WrongWidthProductDomainException : DomainException
 	{
-		public WrongWidthProductDomainException() : base("Not correct size of width (range: 1-120cm).") { }
+		public WrongWidthProductDomainException() 
+			: base("Not correct size of width (range: 1-120cm).", Common.ValueObject.ErrorType.Validation) { }
 	}
 }

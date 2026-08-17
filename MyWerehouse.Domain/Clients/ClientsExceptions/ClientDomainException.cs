@@ -9,6 +9,6 @@ namespace MyWerehouse.Domain.Clients.ClientsExceptions
 {
 	public class ClientDomainException : DomainException
 	{
-		public ClientDomainException():base("Client number must greater than zero. ") { }
+		public ClientDomainException():base("Client number must greater than zero. ", Common.ValueObject.ErrorType.Validation) { }
 	}
 }

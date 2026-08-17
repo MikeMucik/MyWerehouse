@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -113,6 +113,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.True(result.Success);
 			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
+			Assert.Equal(product.SKU, result.SKU);
+			Assert.Equal(26, result.QuantityRequest);
+			Assert.Equal(29, result.QuantityOnStock);
+			Assert.NotNull(result.AssignedPallets);
+			Assert.Equal(2, result.AssignedPallets.Count);
 			var issue = await DbContext.Issues.FirstOrDefaultAsync();
 			Assert.NotNull(issue);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);

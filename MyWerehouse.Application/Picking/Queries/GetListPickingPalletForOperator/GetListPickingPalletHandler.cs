@@ -8,7 +8,6 @@ using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Queries.GetListPickingPallet;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Picking.Queries.GetListPickingPalletForOperator
 {

@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Picking.PickingExceptions
 		public Guid PalletIdFromTask { get; }
 		public Guid PalletIdFromUser { get; }
 		public InvalidSourcePalletDomainException(Guid pickingTaskId, Guid palletIdFromTask, Guid palletIdFromUser)
-			: base ($"Pallet {palletIdFromUser} provided by the user does not belong to picking task {pickingTaskId}, should be pallet {palletIdFromTask}.")
+			: base ($"Pallet {palletIdFromUser} provided by the user does not belong to picking task {pickingTaskId}, should be pallet {palletIdFromTask}.", Common.ValueObject.ErrorType.Validation)
 		{
 			PickingTaskId = pickingTaskId;
 			PalletIdFromTask = palletIdFromTask;

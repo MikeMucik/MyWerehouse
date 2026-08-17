@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
+using MyWerehouse.Domain.Common.ValueObject;
 
 namespace MyWerehouse.Domain.Picking.PickingExceptions
 {
@@ -12,7 +13,7 @@ namespace MyWerehouse.Domain.Picking.PickingExceptions
 		public Guid IssueId { get; }
 		public Guid ProductId { get; }
 		public PickingTaskNotFoundDomainException(Guid issueId, Guid productId)
-			: base($"Not found task.")
+			: base($"Not found task.", ErrorType.NotFound)
 		{
 			IssueId = issueId;
 			ProductId = productId;

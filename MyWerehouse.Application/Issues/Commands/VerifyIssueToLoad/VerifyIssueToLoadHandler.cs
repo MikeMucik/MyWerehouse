@@ -7,7 +7,6 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
@@ -40,12 +39,22 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 				var issueVerifyResult = issue.CompareGoods(productId);
 				if (!issueVerifyResult.IsMatching && issueVerifyResult.IsConditional)
 				{
-					resultComparing.Add(ComparePlanToPreparedResult.Ok($"Prepared product conditionally added to the issue.", productId, product.SKU));
+					resultComparing.Add(ComparePlanToPreparedResult.Ok(
+						"Prepared product conditionally added to the issue.",
+						productId,
+						product.SKU,
+						issueVerifyResult.OrderedQuantity,
+						issueVerifyResult.PreparedQuantity));
 					isConditional = true;
 				}
 				else if (issueVerifyResult.IsMatching)
 				{
-					resultComparing.Add(ComparePlanToPreparedResult.Ok("Prepared product matches the issue.", productId, product.SKU));
+					resultComparing.Add(ComparePlanToPreparedResult.Ok(
+						"Prepared product matches the issue.",
+						productId,
+						product.SKU,
+						issueVerifyResult.OrderedQuantity,
+						issueVerifyResult.PreparedQuantity));
 				}
 				else
 				{

@@ -133,13 +133,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletNumber = "P2",
 				SourcePalletId = pallet2.Id,
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPicking = new DoPlannedPickingCommand(
 				toPicking.Id,
 				toPicking.SourcePalletId!.Value,
 				toPicking.PickedQuantity,
-				toPicking.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert
@@ -264,13 +263,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet3.Id,
 				SourcePalletNumber = "P3",
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPicking = new DoPlannedPickingCommand(
 				toPicking.Id,
 				toPicking.SourcePalletId!.Value,
 				toPicking.PickedQuantity,
-				toPicking.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2.1
@@ -297,13 +295,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet2.Id,
 				SourcePalletNumber = "P2",
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPickingSecond = new DoPlannedPickingCommand(
 				toPickingSecond.Id,
 				toPickingSecond.SourcePalletId!.Value,
 				toPickingSecond.PickedQuantity,
-				toPickingSecond.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPickingSecond = await Mediator.Send(doPickingSecond);
 			//Assert 2.2
@@ -430,13 +427,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet2.Id,
 				SourcePalletNumber = "P2",
 				ProductId = product.Id,
-				RampNumber = locationBase.Id,
 			};
 			var doPicking = new DoPlannedPickingCommand(
 				toPicking.Id,
 				toPicking.SourcePalletId!.Value,
 				toPicking.PickedQuantity,
-				toPicking.RampNumber,
+				locationBase.Id,
 				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
@@ -576,13 +572,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet4.Id,
 				SourcePalletNumber = "P4",
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPicking = new DoPlannedPickingCommand(
 				toPicking.Id,
 				toPicking.SourcePalletId!.Value,
 				toPicking.PickedQuantity,
-				toPicking.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2
@@ -718,13 +713,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet3.Id,
 				SourcePalletNumber = "P3",
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPicking = new DoPlannedPickingCommand(
 				toPicking.Id,
 				toPicking.SourcePalletId!.Value,
 				toPicking.PickedQuantity,
-				toPicking.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2.1
@@ -751,13 +745,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet2.Id,
 				SourcePalletNumber = "P2",
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPickingSecond = new DoPlannedPickingCommand(
 				toPickingSecond.Id,
 				toPickingSecond.SourcePalletId!.Value,
 				toPickingSecond.PickedQuantity,
-				toPickingSecond.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPickingSecond = await Mediator.Send(doPickingSecond);
 			//Assert 2.2
@@ -896,13 +889,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet3.Id,
 				SourcePalletNumber = "P3",
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPicking = new DoPlannedPickingCommand(
 				toPicking.Id,
 				toPicking.SourcePalletId!.Value,
 				toPicking.PickedQuantity,
-				toPicking.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2.1
@@ -929,13 +921,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 				SourcePalletId = pallet2.Id,
 				SourcePalletNumber = "P2",
 				ProductId = product.Id,
-				RampNumber = 100100,
 			};
 			var doPickingSecond = new DoPlannedPickingCommand(
 				toPickingSecond.Id,
 				toPickingSecond.SourcePalletId!.Value,
 				toPickingSecond.PickedQuantity,
-				toPickingSecond.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPickingSecond = await Mediator.Send(doPickingSecond);
 			//Assert 2.2
@@ -1008,8 +999,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.NotEmpty(listForOperator.Result);
 			Assert.Single(listForOperator.Result);
 			var pickingPalletToTakeDown = listForOperator.Result.Single();
+			Assert.Equal(pickingPallet.Id, pickingPalletToTakeDown.PalletId);
+			Assert.Equal(pickingPallet.PalletNumber, pickingPalletToTakeDown.PalletNumber);
 			Assert.Equal(100100, pickingPalletToTakeDown.LocationId);
 			Assert.Equal("1-1-6-1", pickingPalletToTakeDown.LocationName);
+			Assert.Equal(PalletStatus.Picking, pickingPalletToTakeDown.Status);
 		}
 	}
 }

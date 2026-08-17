@@ -32,7 +32,10 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			var product = await _productRepo.GetProductByIdAsync(issueItem.ProductId, ct);
 			if (product == null)
 			{
-				return AssignProductToIssueResult.Fail("The specified product does not exist.", issueItem.ProductId);
+				return AssignProductToIssueResult.Fail(
+					"The specified product does not exist.",
+					issueItem.ProductId,
+					issueItem.Quantity);
 			}
 			oldAssignedPallets ??= [];//pełne palety z wskazanym produktem anulowane przy modyfikacji zlecenia, ale trzymane tymczasowo tylko do tej operacji
 			var oldPalletCount = oldAssignedPallets.Count;
@@ -62,13 +65,26 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					break;
 
 				default:
-					return AssignProductToIssueResult.Fail($"Allocation policy {policy} is not supported.");
+					return AssignProductToIssueResult.Fail(
+						$"Allocation policy {policy} is not supported.",
+						issueItem.ProductId,
+						product.SKU,
+						issueItem.Quantity,
+						totalAvailable);
 			}
 			var quantityFromPallets = palletFullSelected.Sum(p => p.GetProductQuantity(issueItem.ProductId));
 			var rest = issueItem.Quantity - quantityFromPallets;// ta linijka potrzebna
 			
 			//tu błąd aplikacji a nie użytkownika więc wyjątek domenowy
-			if (rest < 0) return AssignProductToIssueResult.Fail("Allocated more product than requested.");
+			if (rest < 0)
+			{
+				return AssignProductToIssueResult.Fail(
+					"Allocated more product than requested.",
+					issueItem.ProductId,
+					product.SKU,
+					issueItem.Quantity,
+					totalAvailable);
+			}
 			//3. pobierz dostępne virtualPallet;
 			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(issueItem.ProductId, issueItem.BestBefore, ct);
 			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
@@ -83,7 +99,13 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				}
 			}
 			issue.AssignPallets(palletFullSelected, userId);
-			return AssignProductToIssueResult.Ok($"Product {product.SKU} was added to the issue.", issueItem.ProductId, product.SKU, palletFullSelected);
+			return AssignProductToIssueResult.Ok(
+				$"Product {product.SKU} was added to the issue.",
+				issueItem.ProductId,
+				product.SKU,
+				palletFullSelected,
+				issueItem.Quantity,
+				totalAvailable);
 		}
 		//pełne palety first
 		private async Task<List<Pallet>> SelectFullPallets(Product product, DateOnly? bestBefore, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount, CancellationToken ct)

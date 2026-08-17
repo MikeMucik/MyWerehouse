@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Picking.PickingExceptions
 		public int RequestedValue { get; }
 		public int PickedValue { get; }
 		public TooHighValueDomainException(int requestedValue, int pickedValue)
-			:base($"Cannot pick {pickedValue} more than requested quantity {requestedValue}.")
+			:base($"Cannot pick {pickedValue} more than requested quantity {requestedValue}.", Common.ValueObject.ErrorType.Validation)
 		{
 			RequestedValue = requestedValue;
 			PickedValue = pickedValue;

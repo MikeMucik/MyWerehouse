@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,9 +18,12 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPallet
 		public async Task<AppResult<PalletDTO>> Handle(GetPalletQuery request, CancellationToken ct)
 		{
 			var pallet = await _palletRepo.GetPalletByIdFullInfoAsync(request.Id, ct);
+			if (pallet == null)
+			{
+				return AppResult<PalletDTO>.Fail($"Pallet {request.Id} does not exist.");
+			}
 			var result = _mapper.Map<PalletDTO>(pallet);
 			return AppResult<PalletDTO>.Success(result);
 		}
 	}
-
 }

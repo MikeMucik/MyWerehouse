@@ -107,6 +107,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(result.Result);
 			Assert.True(result.Result.NewPalletCreated);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
+			Assert.Equal(20, result.Result.RequestedQuantity);
+			Assert.Equal(20, result.Result.PickedQuantity);
+			Assert.Equal(0, result.Result.MissingQuantity);
 
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);

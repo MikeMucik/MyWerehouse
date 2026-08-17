@@ -8,7 +8,6 @@ namespace MyWerehouse.Application.Picking.Queries.GetListToPickingFlat
 {
 	public class ProductToIssueDTO
 	{
-		public int Id { get; init; }
 		public int ClientIdOut { get; init; }
 		public Guid IssueId { get; init; }
 		public int IssueNumber { get; init; }

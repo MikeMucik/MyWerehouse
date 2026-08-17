@@ -362,14 +362,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				PickedQuantity = 8,
 				SourcePalletId = pallet2.Id,
 				SourcePalletNumber = "P2",
-				ProductId = product.Id,
-				RampNumber = 100100
+				ProductId = product.Id
 			};
 			var doPicking = new DoPlannedPickingCommand(
 				toPicking.Id,
 				toPicking.SourcePalletId!.Value,
 				toPicking.PickedQuantity,
-				toPicking.RampNumber,
+				100100,
 				"UserPicking");
 			var resultPicking = await Mediator.Send(doPicking);
 			//Assert 2

@@ -33,16 +33,19 @@ namespace MyWerehouse.Application.Picking.Services
 				pickingTask, locationId, snapshotPickingPallet, sourcePallet, productOnSourcePallet.BestBefore, ct);
 			var productSKU = await _productRepo.GetSKUForProductAsync(pickingTask.ProductId, ct);
 			var snapshotSourcePallet = sourcePallet.Location.ToSnapshot();
+
 			sourcePallet.PickProduct(productOnSourcePallet, quantityToPick, userId, snapshotSourcePallet);
 			if (pickingPallet.NewPalletCreated)
 			{
 				return ProcessPickingActionResult.OkWithNewPallet(pickingPallet.PalletId, pickingPallet.PalletNumber,
-					$"Take a new pallet for the issue. Product: {productSKU}, quantity: {quantityToPick}.");
+					$"Take a new pallet for the issue. Product: {productSKU}, quantity: {quantityToPick}.",
+				 pickingTask.RequestedQuantity, quantityToPick);
 			}
 			else
 			{
 				return ProcessPickingActionResult.Ok(pickingPallet.PalletId, pickingPallet.PalletNumber,
-					$"Add the product to the existing picking pallet. Product: {productSKU}, quantity: {quantityToPick}.");
+					$"Add the product to the existing picking pallet. Product: {productSKU}, quantity: {quantityToPick}.",
+				pickingTask.RequestedQuantity, quantityToPick);
 			}
 		}
 

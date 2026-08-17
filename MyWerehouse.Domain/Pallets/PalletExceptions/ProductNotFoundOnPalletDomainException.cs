@@ -13,7 +13,7 @@ namespace MyWerehouse.Domain.Pallets.PalletExceptions
 		public string PalletNumber { get; }
 		public Guid ProductId { get; }
 		public ProductNotFoundOnPalletDomainException(Guid palletId, string palletNumber, Guid productId)
-			:base($"Not found product {productId} on Pallet. Expected one.")
+			:base($"Not found product {productId} on Pallet. Expected one.", Common.ValueObject.ErrorType.Validation)
 		{
 			PalletId = palletId;
 			PalletNumber = palletNumber;

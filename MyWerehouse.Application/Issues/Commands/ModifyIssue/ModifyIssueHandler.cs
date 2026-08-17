@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Linq;
 using Azure.Core;
 using MediatR;
@@ -54,75 +54,88 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 
 		private async Task<AppResult<List<AssignProductToIssueResult>>> ReallocateIssue(Issue issue, ModifyIssueCommand request, DateTime now, CancellationToken ct)
 		{
-			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-			var oldPallets = issue.PrepareForReallocation(request.DTO.ClientId, request.DTO.PerformedBy, now);
-			await _werehouseDbContext.SaveChangesAsync(ct);
-
-			var anyFailure = false;
-			var anySuccess = false;
-			var resultList = new List<AssignProductToIssueResult>();
-			foreach (var product in request.DTO.IssueItems)
+			var strategy = _werehouseDbContext.Database.CreateExecutionStrategy();
+			return await strategy.ExecuteAsync(async () =>
 			{
-				var reusablePalletsForProduct = oldPallets.Pallets.Where(p => p.ContainsProduct(product.ProductId)).ToList();
-				var savePointName = $"BeforeProduct_{product.ProductId}_{Guid.NewGuid()}";
-				await transaction.CreateSavepointAsync(savePointName, ct);
-				try
-				{
-					var result = await _assignProductToIssueAsync.AssignGoodsToIssue(issue, product,
-						IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy, ct);
+				await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
 
-					if (!result.Success) //niepowodzenie biznesowe
+				if (issue == null)
+				{
+					return AppResult<List<AssignProductToIssueResult>>.Fail("Issue was not found.");
+				}
+				
+				var oldPallets = issue.PrepareForReallocation(request.DTO.ClientId, request.DTO.PerformedBy, now);
+				await _werehouseDbContext.SaveChangesAsync(ct);
+
+				var anyFailure = false;
+				var anySuccess = false;
+				var resultList = new List<AssignProductToIssueResult>();
+				foreach (var product in request.DTO.IssueItems)
+				{
+					var reusablePalletsForProduct = oldPallets.Pallets.Where(p => p.ContainsProduct(product.ProductId)).ToList();
+					var savePointName = Guid.NewGuid().ToString("N"); ;
+					await transaction.CreateSavepointAsync(savePointName, ct);
+					try
+					{
+						var result = await _assignProductToIssueAsync.AssignGoodsToIssue(issue, product,
+							IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy, ct);
+
+						if (!result.Success) //niepowodzenie biznesowe
+						{
+							await transaction.RollbackToSavepointAsync(savePointName, ct);
+							await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
+							await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
+							await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
+
+							resultList.Add(result);
+							anyFailure = true;
+							continue;
+						}
+						var palletAssigned = result.AssignedPallets?.ToList() ?? [];					
+						issue.CompleteReallocation(palletAssigned, reusablePalletsForProduct);
+						anySuccess = true;
+						resultList.Add(result);
+					}
+
+					catch (DomainException ex)
 					{
 						await transaction.RollbackToSavepointAsync(savePointName, ct);
 						await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
 						await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
 
-						resultList.Add(result);
+						resultList.Add(AssignProductToIssueResult.Fail(
+							$"An error occurred: {ex.Message}",
+							product.ProductId,
+							product.Quantity));
 						anyFailure = true;
-						continue;
 					}
-					var palletAssigned = result.AssignedPallets.ToList();
-					issue.CompleteReallocation(palletAssigned, reusablePalletsForProduct);
-					anySuccess = true;
-					resultList.Add(result);
 				}
-
-				catch (DomainException ex)
+				if (oldPallets.ListPalletsIds.Count != 0)
 				{
-					await transaction.RollbackToSavepointAsync(savePointName, ct);
-					await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
-					await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
-					await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
-
-					resultList.Add(AssignProductToIssueResult.Fail($"An error occurred: {ex.Message}", product.ProductId));
-					anyFailure = true;
-				}
-			}
-			if (oldPallets.ListPalletsIds.Count != 0)
-			{
-				// Usuwamy tylko puste VirtualPallets; fizyczne palety wracają do dostępnych.
-				foreach (var item in oldPallets.ListPalletsIds)
-				{
-					var vp = await _virtualRepo.GetVirtualPalletByIdAsync(item, ct);
-					if (vp!.CanBeDeletedAfterReallocation())
+					// Usuwamy tylko puste VirtualPallets; fizyczne palety wracają do dostępnych.
+					foreach (var item in oldPallets.ListPalletsIds)
 					{
-						vp.Pallet?.ChangeStatus(PalletStatus.Available);
-						_virtualRepo.DeleteVirtualPalletPicking(vp);
+						var vp = await _virtualRepo.GetVirtualPalletByIdAsync(item, ct);
+						if (vp!.CanBeDeletedAfterReallocation())
+						{
+							vp.Pallet?.ChangeStatus(PalletStatus.Available);
+							_virtualRepo.DeleteVirtualPalletPicking(vp);
+						}
 					}
 				}
-			}
-			if (anySuccess)
-			{
-				issue.MarkAllocationCompleted(request.DTO.PerformedBy);
-			}
-			if (anyFailure)
-			{
-				issue.MarkAllocationNotCompleted(issue.PerformedBy);
-			}
-			await _werehouseDbContext.SaveChangesAsync(ct);
-			await transaction.CommitAsync(ct);
-			return AppResult<List<AssignProductToIssueResult>>.Success(resultList);
+				if (anySuccess)
+				{
+					issue.MarkAllocationCompleted(request.DTO.PerformedBy);
+				}
+				if (anyFailure)
+				{
+					issue.MarkAllocationNotCompleted(issue.PerformedBy);
+				}
+				await _werehouseDbContext.SaveChangesAsync(ct);
+				await transaction.CommitAsync(ct);
+				return AppResult<List<AssignProductToIssueResult>>.Success(resultList);
+			});
 		}
 
 		private async Task<AppResult<List<AssignProductToIssueResult>>> CreateSupplementaryIssue(Issue issue, ModifyIssueCommand request, DateTime now, CancellationToken ct)

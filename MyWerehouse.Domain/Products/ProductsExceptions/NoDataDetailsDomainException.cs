@@ -9,6 +9,7 @@ namespace MyWerehouse.Domain.Products.ProductsExceptions
 {
 public class NoDataDetailsDomainException :DomainException
 	{
-		public NoDataDetailsDomainException():base("Inavalid data details for product.") { }
+		public NoDataDetailsDomainException()
+			:base("Inavalid data details for product.", Common.ValueObject.ErrorType.Validation) { }
 	}
 }

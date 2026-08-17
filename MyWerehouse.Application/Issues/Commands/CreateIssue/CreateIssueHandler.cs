@@ -11,7 +11,7 @@ using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Domain.Products.ProductsExceptions;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CreateIssue
@@ -19,54 +19,66 @@ namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 	public class CreateIssueHandler(WerehouseDbContext werehouseDbContext,
 		IIssueRepo issueRepo,
 		IAssignProductToIssueService assignProductToIssueService,
-		IDateTimeProvider dateTimeProvider) : IRequestHandler<CreateIssueCommand, AppResult<List<AssignProductToIssueResult>>>
+		IDateTimeProvider dateTimeProvider,
+		IProductRepo productRepo) : IRequestHandler<CreateIssueCommand, AppResult<List<AssignProductToIssueResult>>>
 	{
 		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IAssignProductToIssueService _assignProductToIssueService = assignProductToIssueService;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IProductRepo _productRepo = productRepo;
 		public async Task<AppResult<List<AssignProductToIssueResult>>> Handle(CreateIssueCommand request, CancellationToken ct)
 		{
-			await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(
-			IsolationLevel.Serializable, ct);
-			var now = _dateTimeProvider.UtcNow;
-			var addedProducts = new List<AssignProductToIssueResult>();
-			var issueNumber = await _issueRepo.GetNextNumberOfIssue(ct);
-			var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.SendDate, now, request.DTO.PerformedBy);
-
-			foreach (var item in request.DTO.Items)
+			var strategy = _werehouseDbContext.Database.CreateExecutionStrategy();
+			return await strategy.ExecuteAsync(async () =>
 			{
-				var savePoint = $"BeforeProduct_{item.ProductId}_{Guid.NewGuid}";
-				await transaction.CreateSavepointAsync(savePoint, ct);
-				try
+				await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(
+				IsolationLevel.Serializable, ct);
+				var now = _dateTimeProvider.UtcNow;
+				var addedProducts = new List<AssignProductToIssueResult>();
+				var issueNumber = await _issueRepo.GetNextNumberOfIssue(ct);
+				var issue = Issue.Create(issueNumber, request.DTO.ClientId, request.SendDate, now, request.DTO.PerformedBy);
+
+				foreach (var item in request.DTO.Items)
 				{
-					var result = await _assignProductToIssueService.AssignGoodsToIssue(issue, item,
-						IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy, ct);
-					if (result.Success != false)
+					var savePoint = Guid.NewGuid().ToString("N");					
+					await transaction.CreateSavepointAsync(savePoint, ct);
+
+					try
 					{
-						issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore, now);
+						var result = await _assignProductToIssueService.AssignGoodsToIssue(issue, item,
+							IssueAllocationPolicy.FullPalletFirst, null, request.DTO.PerformedBy, ct);
+						
+						if (result.Success != false)
+						{
+							issue.AddIssueItem(item.ProductId, item.Quantity, item.BestBefore, now);
+						}						
+						addedProducts.Add(result);
 					}
-					addedProducts.Add(result);
-				}
-				catch (DomainException ex)
-				{
-					await transaction.RollbackToSavepointAsync(savePoint, ct);
-					await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
-					await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
-					await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
+					catch (DomainException ex)
+					{
+						await transaction.RollbackToSavepointAsync(savePoint, ct);
+						await _werehouseDbContext.Entry(issue).ReloadAsync(ct);
+						await _werehouseDbContext.Entry(issue).Collection(i => i.Pallets).LoadAsync(ct);
+						await _werehouseDbContext.Entry(issue).Collection(i => i.PickingTasks).LoadAsync(ct);
 
-					addedProducts.Add(AssignProductToIssueResult.Fail($"An error occurred: {ex.Message}", item.ProductId));
+						addedProducts.Add(AssignProductToIssueResult.Fail(
+							$"An error occurred: {ex.Message}",
+							item.ProductId, 
+							item.Quantity));
+					}
 				}
-			}
-			if (addedProducts.Any(r => r.Success == false))
-			{
-				issue.ChangeStatus(IssueStatus.RequiresCorrection);
-			}
-			_issueRepo.AddIssue(issue);
-			issue.AddHistory(request.DTO.PerformedBy);
-			await _werehouseDbContext.SaveChangesAsync(ct);
-			await transaction.CommitAsync(ct);
-			return AppResult<List<AssignProductToIssueResult>>.Success(addedProducts);
+				if (addedProducts.Any(r => r.Success == false))
+				{
+					issue.ChangeStatus(IssueStatus.RequiresCorrection);
+				}
+				_issueRepo.AddIssue(issue);
+				issue.AddHistory(request.DTO.PerformedBy);
+				await _werehouseDbContext.SaveChangesAsync(ct);
+				await transaction.CommitAsync(ct);
+				return AppResult<List<AssignProductToIssueResult>>.Success(addedProducts);
+
+			});
 		}
 	}
 }

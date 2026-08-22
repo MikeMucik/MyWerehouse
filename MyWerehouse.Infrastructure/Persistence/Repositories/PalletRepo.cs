@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {
@@ -18,13 +17,11 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-
 		public Guid AddPallet(Pallet pallet)
 		{
 			_werehouseDbContext.Pallets.Add(pallet);
 			return pallet.Id;
 		}
-
 		public async Task<Pallet?> GetPalletByIdAsync(Guid palletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
@@ -35,7 +32,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(p => p.Issue)
 				.FirstOrDefaultAsync(p => p.Id == palletId, ct);
 		}
-
 		public async Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
@@ -47,7 +43,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(p => p.Issue)
 				.FirstOrDefaultAsync(p => p.Id == palletId, ct);
 		}
-
 		public async Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
@@ -131,7 +126,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			}
 			return result;
 		}
-
 		public async Task<int> ReservePalletNumbersAsync(int count, CancellationToken ct)
 		{
 			ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
@@ -158,10 +152,10 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public async Task<Pallet?> CheckOccupancyAsync(int locationId, CancellationToken ct)
 		{
-			var pallet = await _werehouseDbContext.Pallets.FirstOrDefaultAsync(p => p.LocationId == locationId, ct);
+			var pallet = await _werehouseDbContext.Pallets
+				.FirstOrDefaultAsync(p => p.LocationId == locationId, ct);
 			return pallet;
 		}
-
 		public async Task<Pallet?> GetPickingPalletByIssueId(Guid issueId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
@@ -169,7 +163,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.Where(p => p.IssueId == issueId && p.Status == PalletStatus.Picking)
 					.FirstOrDefaultAsync(ct);
 		}
-
 		public async Task<List<Pallet>> GetPalletsByReceiptId(Guid reciptId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
@@ -178,15 +171,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(p => p.ReceiptId == reciptId)
 				.ToListAsync(ct);
 		}
-
-		public async Task<List<Pallet>> GetAvailablePalletsExcluding(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId, CancellationToken ct)
+		public async Task<List<PalletAllocationCandidate>> GetCandidates(Guid productId, DateOnly? bestBefore, HashSet<Guid> excludedId, CancellationToken ct)
 		{
-			var pallets = await _werehouseDbContext.Pallets
-				.Include(l => l.Location)
-				.Include(p => p.ProductsOnPallet)
+			var candidates = await _werehouseDbContext.Pallets
 				.Where(p => !excludedId.Contains(p.Id))
 				.Where(p =>
-					(p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
+					(p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) && p.ProductsOnPallet.Count == 1 &&
 					p.ProductsOnPallet.Any(pp =>
 						pp.ProductId == productId &&
 					(bestBefore == null || pp.BestBefore >= bestBefore)
@@ -201,15 +191,38 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.Min(pp => pp.Quantity))
 				.ThenBy(p => p.LocationId)
 				.ThenBy(p => p.DateReceived)
-				.Take(10)//nie bierz wszystkich
+				.ThenBy(p=>p.Id)
+				.Select(p=> new PalletAllocationCandidate(
+					p.Id,
+					p.ProductsOnPallet
+					.Where(x=>x.ProductId == productId)
+					.Sum(x=>x.Quantity)))
 				.ToListAsync(ct);
-			return pallets;
+			return candidates;
 		}
+		public async Task<List<Pallet>> GetSelectedPallets(List<Guid> guids, CancellationToken ct)
+		{
+			var pallets = await _werehouseDbContext.Pallets
+				.Include(l=>l.Location)
+				.Include(pp=>pp.ProductsOnPallet)
+				.Where(p=> guids.Contains(p.Id))
+				.ToListAsync(ct);
+			var order = new Dictionary<Guid, int>();
 
+			for (var index = 0; index < guids.Count; index++)
+			{
+				var palletId = guids[index];
+				order[palletId] = index;
+			}
+
+			return pallets
+				.OrderBy(pallet => order[pallet.Id])
+				.ToList();
+		}
 		public async Task<List<Pallet>> GetMissingFullPallets(Guid productId, int fullPallet, DateOnly? minBestBefore, int neededPallets, CancellationToken ct)
 		{
 			var pallets = await _werehouseDbContext.Pallets
-				.Where(p => (p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) &&
+				.Where(p => (p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock) && p.ProductsOnPallet.Count ==1 &&
 					p.ProductsOnPallet.Any(pp => pp.ProductId == productId &&
 					(minBestBefore == null || pp.BestBefore >= minBestBefore) && pp.Quantity == fullPallet
 				))

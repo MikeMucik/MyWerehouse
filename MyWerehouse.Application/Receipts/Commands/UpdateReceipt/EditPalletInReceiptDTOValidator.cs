@@ -11,7 +11,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
 	public class EditPalletInReceiptDTOValidator : AbstractValidator<EditPalletInReceiptDTO>
 	{
-		public EditPalletInReceiptDTOValidator(IValidator<ProductOnPalletCreateDTO> productOnPalletValidator)
+		public EditPalletInReceiptDTOValidator(IValidator<ProductOnPalletUpdateDTO> productOnPalletValidator)
 		{
 			RuleFor(p => p.Status)
 				.NotEmpty()

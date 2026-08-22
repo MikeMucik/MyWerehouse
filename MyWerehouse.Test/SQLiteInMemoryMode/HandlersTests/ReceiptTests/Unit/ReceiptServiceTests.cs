@@ -110,7 +110,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 						LocationId = 1,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -223,7 +223,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 						LocationId = initailLocation.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{

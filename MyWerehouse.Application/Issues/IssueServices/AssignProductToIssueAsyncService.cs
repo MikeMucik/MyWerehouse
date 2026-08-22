@@ -28,11 +28,10 @@ namespace MyWerehouse.Application.Issues.IssueServices
 		public async Task<AssignProductToIssueResult> AssignGoodsToIssue(Issue issue, IssueItemDTO issueItem, IssueAllocationPolicy policy,
 			List<Pallet>? oldAssignedPallets, string userId, CancellationToken ct)
 		{
-			issue.BeginAllocation();
 			var product = await _productRepo.GetProductByIdAsync(issueItem.ProductId, ct);
 			if (product == null)
 			{
-				return AssignProductToIssueResult.Fail(
+				return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber,
 					"The specified product does not exist.",
 					issueItem.ProductId,
 					issueItem.Quantity);
@@ -45,13 +44,13 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			//dostepne z listy updateowanych, chwilowo wstrzymanych
 			var reusableQuantity = oldAssignedPallets
 				.Sum(p => p.GetProductQuantity(issueItem.ProductId));
-			//całkowita suma dostępnych
 			var totalAvailable = globallyAvailable + reusableQuantity;
 			if (issueItem.Quantity > totalAvailable)
 			{
-				return AssignProductToIssueResult.Fail($"Insufficient quantity of product {issueItem.ProductId}. The product was not added to the issue."
+				return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber, $"Insufficient quantity of product {issueItem.ProductId}. The product was not added to the issue."
 						, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
 			}
+			issue.BeginAllocation();
 			//2. Przydzielanie pełnych lub/z datą palet
 			var requiredFullPallets = 0;
 			var palletFullSelected = new List<Pallet>();
@@ -65,7 +64,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					break;
 
 				default:
-					return AssignProductToIssueResult.Fail(
+					return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber,
 						$"Allocation policy {policy} is not supported.",
 						issueItem.ProductId,
 						product.SKU,
@@ -73,12 +72,11 @@ namespace MyWerehouse.Application.Issues.IssueServices
 						totalAvailable);
 			}
 			var quantityFromPallets = palletFullSelected.Sum(p => p.GetProductQuantity(issueItem.ProductId));
-			var rest = issueItem.Quantity - quantityFromPallets;// ta linijka potrzebna
-			
-			//tu błąd aplikacji a nie użytkownika więc wyjątek domenowy
+			var rest = issueItem.Quantity - quantityFromPallets;
+			// zabezpieczenie przed błędnym planem alokacji
 			if (rest < 0)
 			{
-				return AssignProductToIssueResult.Fail(
+				return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber,
 					"Allocated more product than requested.",
 					issueItem.ProductId,
 					product.SKU,
@@ -95,11 +93,11 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					issueItem.ProductId, rest, issueItem.BestBefore, userId, ct);
 				if (newPickingTaskFromRest.Success is false)
 				{
-					return AssignProductToIssueResult.Fail(newPickingTaskFromRest.Message, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
+					return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber, newPickingTaskFromRest.Message, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
 				}
 			}
 			issue.AssignPallets(palletFullSelected, userId);
-			return AssignProductToIssueResult.Ok(
+			return AssignProductToIssueResult.Ok(issue.Id, issue.IssueNumber,
 				$"Product {product.SKU} was added to the issue.",
 				issueItem.ProductId,
 				product.SKU,
@@ -115,7 +113,6 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			{
 				missingPallets = await _palletRepo.GetMissingFullPallets(product.Id, product!.CartonsPerPallet, bestBefore, missingPalletsCount, ct);
 			}
-			// Czy tą operację lepiej zrobic na Dictionary ?
 			List<Pallet> allNecessaryPallets = [.. reusablePalletsForProduct
 				.Concat(missingPallets)
 				.DistinctBy(p => p.Id)

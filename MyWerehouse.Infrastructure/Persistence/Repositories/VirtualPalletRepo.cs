@@ -49,13 +49,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync(ct);
 			return list;
 		}
-
 		public IQueryable<VirtualPallet> GetVirtualPalletsByTimePickingTask(DateOnly start, DateOnly end)
 		{
 			var list = _werehouseDbContext.VirtualPallets
 				.Include(a => a.PickingTasks)
 				.Include(p => p.Pallet)
-					.ThenInclude(l=>l.Location)
+					.ThenInclude(l => l.Location)
 				.Where(vp =>
 				vp.PickingTasks.Any(pt =>
 				pt.PickingDay <= end && pt.PickingDay >= start && pt.PickingStatus == PickingStatus.Allocated));
@@ -71,26 +70,32 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<VirtualPallet?> GetVirtualPalletByIdAsync(Guid? palletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.VirtualPallets
-				.Include(p=>p.PickingTasks)
+				.Include(p => p.PickingTasks)
+				.Include(p => p.Pallet)
 				.FirstAsync(p => p.Id == palletId, ct);
 		}
-
 		public async Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly? bestBefore, CancellationToken ct)
 		{
 			return await _werehouseDbContext.VirtualPallets
-				.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId
-				&&(bestBefore == null|| v.Pallet.ProductsOnPallet.First().BestBefore >= bestBefore))
+				.Where(v => v.Pallet.ProductsOnPallet.First().ProductId == productId && v.Pallet.ProductsOnPallet.Count == 1
+				&& (bestBefore == null || v.Pallet.ProductsOnPallet.First().BestBefore >= bestBefore))
+				.OrderBy(v =>	v.Pallet.ProductsOnPallet.First().BestBefore?? DateOnly.MaxValue)
+					.ThenBy(v =>
+						v.InitialPalletQuantity -
+						(v.PickingTasks.Sum(t => (int?)t.RequestedQuantity) ?? 0))
+					.ThenBy(v => v.LocationId)
+					.ThenBy(v => v.DateMoved)
+					.ThenBy(v => v.Id)
 				.Include(p => p.PickingTasks)
-				.Include(p=>p.Pallet)
-					.ThenInclude(l=>l.Location)
+				.Include(p => p.Pallet)
+					.ThenInclude(l => l.Location)
 				.ToListAsync(ct);
 		}
-
 		public async Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.VirtualPallets
-				.Include(p=>p.PickingTasks)
-				.FirstOrDefaultAsync(v=>v.PalletId == palletId, ct);
+				.Include(p => p.PickingTasks)
+				.FirstOrDefaultAsync(v => v.PalletId == palletId, ct);
 		}
 	}
 }

@@ -296,7 +296,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Assert
 			Assert.True(result.IsSuccess);
-			Assert.Equal(IssueStatus.Cancelled, issue.IssueStatus);
+			var issueStatus = await DbContext.Issues
+				.AsNoTracking()
+				.Where(i => i.Id == issue.Id)
+				.Select(i => i.IssueStatus)
+				.SingleAsync();
+			Assert.Equal(IssueStatus.Cancelled, issueStatus);
 			Assert.False(await DbContext.PickingTasks.AnyAsync(t => t.Id == availableTask.Id));
 
 			var historyPicking = await DbContext.HistoryPickings.SingleAsync(h =>

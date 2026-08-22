@@ -15,6 +15,6 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
 		public required string UserId { get; init; }
-		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletCreateDTO>();				
+		public ICollection<ProductOnPalletUpdateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletUpdateDTO>();
 	}	
 }

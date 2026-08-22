@@ -103,7 +103,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -212,7 +212,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -273,7 +273,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -363,7 +363,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -423,7 +423,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -487,7 +487,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -548,7 +548,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = 1,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -563,7 +563,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = 1,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -628,7 +628,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -643,7 +643,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -710,7 +710,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{
@@ -729,7 +729,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 						LocationId = location.Id,
 						Status = PalletStatus.Receiving,
 						DateReceived = TestDates.Now,
-						ProductsOnPallet = new List<ProductOnPalletCreateDTO>
+						ProductsOnPallet = new List<ProductOnPalletUpdateDTO>
 						{
 							new()
 							{

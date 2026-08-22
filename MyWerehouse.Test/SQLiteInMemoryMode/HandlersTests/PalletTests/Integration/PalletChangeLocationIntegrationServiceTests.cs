@@ -175,8 +175,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Contains($"Pallet {pallet1.Id} was moved to the location. ", result.Message);
 
 			// sprawdzamy, że obie palety siedzą w tej samej lokalizacji
-			var movedPallet = DbContext.Pallets.First(x => x.Id == palletId);
-			var existingPallet = DbContext.Pallets.First(x => x.Id == pallet2.Id);
+			var movedPallet = DbContext.Pallets.AsNoTracking().First(x => x.Id == palletId);
+			var existingPallet = DbContext.Pallets.AsNoTracking().First(x => x.Id == pallet2.Id);
 
 			Assert.Equal(destinationLocation, movedPallet.LocationId);
 			Assert.Equal(destinationLocation, existingPallet.LocationId);

@@ -54,41 +54,63 @@ namespace MyWerehouse.Application.Picking.Services
 		{
 			var now = _dateTimeProvider.UtcNow;
 			virtualPallets ??= [];
-			// Palety nie są zapisane w bazie, bo cały proces odbywa się w jednym handlerze przed SaveChanges.
-			var pickingTasks = new List<PickingTask>(); //dla result
-			//z dostępnych palet do pickingu
-			var resultAllocation = _pickingDomainService.Allocate(issue, virtualPallets, productId,	quantity,
-				bestBefore,	userId,	now);
-			pickingTasks.AddRange(resultAllocation.PickingTasks);
-			quantity = resultAllocation.RemainingQuantity;
-			//new pallets for picking
-			if (quantity > 0)
+			var pickingTasks = new List<PickingTask>();
+			var virtualPalletsAll = new List<VirtualPallet>();
+			virtualPalletsAll.AddRange(virtualPallets);
+			var sumFromVirtualPallets = 0;
+			foreach (var vp in virtualPallets)
+			{
+				var quantityFromOldVirtualPallets = vp.RemainingQuantity;
+				sumFromVirtualPallets += quantityFromOldVirtualPallets;
+			}
+			var quantityForNewVirtualPallet = quantity - sumFromVirtualPallets;
+			if (quantityForNewVirtualPallet > 0)
 			{
 				var usedPalletsId = pallets?
 					.Select(p => p.Id)
 					.ToHashSet() ?? new HashSet<Guid>();
-				var availablePallets = await _palletRepo.GetAvailablePalletsExcluding(productId, bestBefore, usedPalletsId, ct);
+
+				var candidates = await _palletRepo.GetCandidates(productId, bestBefore, usedPalletsId, ct);
+				var selectedIds = new List<Guid>();
+				var remaining = quantityForNewVirtualPallet;
+				foreach (var candidate in candidates)
+				{
+					if (remaining <= 0)
+					{
+						break;
+					}
+					selectedIds.Add(candidate.PalletId);
+					remaining -= candidate.Quantity;
+				}
+				if (remaining > 0)
+				{
+					var productSku = await _productRepo.GetSKUForProductAsync(productId, ct);
+
+					return AddPickingTaskToIssueResult.Fail(
+						$"No more stock is available for product {productSku}; " +
+						"a picking task cannot be created.");
+				}
+				var availablePallets = await _palletRepo.GetSelectedPallets(selectedIds, ct);
 
 				foreach (var palletToPicking in availablePallets)
 				{
-					if (quantity <= 0) break;
-					var virtualPallet = VirtualPallet.CreateFromPallet(palletToPicking,	palletToPicking.ProductsOnPallet.Single().Quantity,
-						palletToPicking.LocationId,	now);
-					palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot()); //from new pallet for picking
+					if (quantityForNewVirtualPallet <= 0) break;
+					var virtualPallet = VirtualPallet.CreateFromPallet(palletToPicking, palletToPicking.ProductsOnPallet.Single().Quantity,
+						palletToPicking.LocationId, now);
+					palletToPicking.AssignToPicking(userId, palletToPicking.Location.ToSnapshot());
 					var addedVirtualPallet = _virtualPalletRepo.AddPalletToPicking(virtualPallet);
-					var allocationFromNewPallet = _pickingDomainService.Allocate(issue,	[addedVirtualPallet], productId,
-						quantity, bestBefore, userId, now);
-					pickingTasks.AddRange(allocationFromNewPallet.PickingTasks);
-					quantity = allocationFromNewPallet.RemainingQuantity;
+					virtualPalletsAll.Add(addedVirtualPallet);
+					quantityForNewVirtualPallet -= addedVirtualPallet.RemainingQuantity;
 				}
 			}
-			//dodawanie na koniec zadań kompletacyjnych
-			foreach (var task in pickingTasks)
+			var resultAllocation = _pickingDomainService.Allocate(issue, virtualPalletsAll, productId, quantity, bestBefore, userId, now);
+			foreach (var task in resultAllocation.PickingTasks)
 			{
 				_pickingTaskRepo.AddPickingTask(task);
 			}
+			pickingTasks.AddRange(resultAllocation.PickingTasks);
 			//if there is not enough product, a message will be sent to the user - for DoPlannedPicking
-			if (quantity > 0)
+			if (resultAllocation.RemainingQuantity > 0)
 			{
 				var productSKU = await _productRepo.GetSKUForProductAsync(productId, ct);
 				return AddPickingTaskToIssueResult.Fail($"No more stock is available for product {productSKU}; a picking task cannot be created.");

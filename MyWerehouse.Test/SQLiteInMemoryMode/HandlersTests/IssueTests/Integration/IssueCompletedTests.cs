@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Issues.Commands.CompletedIssue;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -97,7 +98,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
+			var issueStatus = await DbContext.Issues
+				.AsNoTracking()
+				.Where(i => i.Id == issue.Id)
+				.Select(i => i.IssueStatus)
+				.SingleAsync();
+			Assert.Equal(IssueStatus.IsShipped, issueStatus);
 		}
 
 		[Fact]
@@ -137,7 +143,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.NotEqual(IssueStatus.IsShipped, issue.IssueStatus);
+			Assert.False(await DbContext.Issues.AsNoTracking().AnyAsync(i => i.Id == issue.Id));
 		}
 		[Fact]
 		public async Task CompletedLoadIssue_ShouldReturnError_WhenNotAllPalletLoaded()

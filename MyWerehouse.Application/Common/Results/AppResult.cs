@@ -14,17 +14,17 @@ namespace MyWerehouse.Application.Common.Results
 		public string? Error { get; private set; }
 		public string? Message { get; private set; }
 		public ErrorType ErrorType { get; private set; }
-		private AppResult() { }		
+		private AppResult() { }
 		public static AppResult<T> Success(T value, string message) =>
-			new AppResult<T> { IsSuccess = true, Message= message,  Result = value };
+			new AppResult<T> { IsSuccess = true, Message = message, Result = value };
 		public static AppResult<T> Success(T value) =>
 			new AppResult<T> { IsSuccess = true, Result = value };
-		
+
 		public static AppResult<T> Fail(string error, ErrorType errorType = ErrorType.NotFound) =>
 			new AppResult<T> { IsSuccess = false, Error = error, ErrorType = errorType };
 
-		public static AppResult<T> Fail(string error,T value, ErrorType errorType = ErrorType.NotFound) =>
-			new AppResult<T> { IsSuccess = false,Result = value, Error = error, ErrorType = errorType };
+		public static AppResult<T> Fail(string error, T value, ErrorType errorType = ErrorType.NotFound) =>
+			new AppResult<T> { IsSuccess = false, Result = value, Error = error, ErrorType = errorType };
 
 	}
 }

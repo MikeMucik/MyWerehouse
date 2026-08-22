@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,7 +56,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		[Fact]
 		public async Task UpdatePallet_ShouldIncreasingQuantity_WhenProperData()
 		{
-			//Arange	
+			//Arange
 			var category = CreateCategory();
 			var product = CreateProduct(productId, "Test", "666666");
 			var product1 = CreateProduct(productId1, "Test11", "67777");
@@ -81,13 +81,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = TestDates.Now,
 					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)),
-				}),(new ProductOnPalletCreateDTO
+				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
@@ -173,7 +173,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		[Fact]
 		public async Task UpdatePallet_ShouldDecreasingQuantity_WhenProperData()
 		{
-			//Arange	
+			//Arange
 			var category = CreateCategory();
 			var product1 = CreateProduct(productId, "Test", "666666");
 			var product2 = CreateProduct(productId1, "Test11", "67777");
@@ -204,13 +204,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 50,
 					DateAdded = TestDates.Now,
 					BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)),
-				}),(new ProductOnPalletCreateDTO
+				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 100,
@@ -292,7 +292,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		[Fact]
 		public async Task UpdatePallet_ShouldChangeData_WhenProperDataAddTwoNewProducts()
 		{
-			//Arange	
+			//Arange
 			var category = CreateCategory();
 			var product = CreateProduct(productId, "Test", "666666");
 			var product1 = CreateProduct(productId1, "Test11", "67777");
@@ -317,26 +317,26 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
 				ProductsOnPallet = [
-					(new ProductOnPalletCreateDTO
+					(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),
-					(new ProductOnPalletCreateDTO
+					(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) }),
-					(new ProductOnPalletCreateDTO
+					(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 5, 4) }),
-					(new ProductOnPalletCreateDTO
+					(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product3.Id,
 					Quantity = 100,
@@ -366,7 +366,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		[Fact]
 		public async Task UpdatePallet_ShouldKeepDataReceipt_WhenProperData()
 		{
-			//Arange	
+			//Arange
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -410,13 +410,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletCreateDTO
+				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
@@ -447,7 +447,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		[Fact]
 		public async Task UpdatePallet_ShouldThrowValidationError_WhenPalletInIssue()
 		{
-			//Arange	
+			//Arange
 			var address = new Address
 			{
 				City = "Warsaw",
@@ -493,13 +493,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletCreateDTO
+				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
@@ -518,7 +518,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		[Fact]
 		public async Task UpdatePallet_ThrowValidationException_NoNumberProductQuantityZeroWrongBB()
 		{
-			//Arange	
+			//Arange
 			var category = CreateCategory();
 			var product = CreateProduct(productId, "Test", "666666");
 			var product1 = CreateProduct(productId1, "Test11", "67777");
@@ -541,20 +541,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				LocationId = 1,
 				Status = PalletStatus.ToPicking,
 				UserId = "usert",
-				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletCreateDTO
+				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
-				(new ProductOnPalletCreateDTO
+				(new ProductOnPalletUpdateDTO
 				{
 					Quantity = 0,
 					DateAdded = TestDates.Now,
@@ -570,7 +570,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		[Fact]
 		public async Task UpdatePallet_ThrowValidationException_NoStatusNoLocation()
 		{
-			//Arange		
+			//Arange
 			var category = CreateCategory();
 			var product = CreateProduct(productId, "Test", "666666");
 			var product1 = CreateProduct(productId1, "Test11", "67777");
@@ -590,20 +590,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var updatedPallet = new EditPalletDTO
 			{
 				UserId = "user",
-				ProductsOnPallet = [ ( new ProductOnPalletCreateDTO
+				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
-				}),(new ProductOnPalletCreateDTO
+				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
 					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
-				(new ProductOnPalletCreateDTO
+				(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +17,6 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
-		//public string UserId { get; init; } = string.Empty;
 		public ICollection<ProductOnPalletDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletDTO>();
 
 		public void Mapping(Profile profile)

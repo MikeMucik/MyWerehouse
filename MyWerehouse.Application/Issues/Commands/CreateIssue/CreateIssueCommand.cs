@@ -10,5 +10,5 @@ using MyWerehouse.Application.Issues.IssueServices;
 namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 {
 	public record CreateIssueCommand(CreateIssueDTO DTO, DateOnly SendDate)
-		: IRequest<AppResult<List<AssignProductToIssueResult>>>;	
+		: IRequest<AppResult<IssueCreateModifyResult>>;
 }

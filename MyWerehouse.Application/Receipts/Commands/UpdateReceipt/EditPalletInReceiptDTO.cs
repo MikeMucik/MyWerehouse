@@ -18,7 +18,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;
-		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletCreateDTO>();
+		public ICollection<ProductOnPalletUpdateDTO> ProductsOnPallet { get; init; } = new List<ProductOnPalletUpdateDTO>();
 		public Guid? ReceiptId { get; init; }
 	}
 }

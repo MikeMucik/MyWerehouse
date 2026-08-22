@@ -10,7 +10,7 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
 	public class UpdatePalletCommandValidator :AbstractValidator<UpdatePalletCommand>
 	{
-		public UpdatePalletCommandValidator(IValidator<ProductOnPalletCreateDTO> productOnPalletValidator)
+		public UpdatePalletCommandValidator(IValidator<ProductOnPalletUpdateDTO> productOnPalletValidator)
 		{
 			RuleFor(p => p.UpdatingPallet.Status)
 				.NotEmpty()

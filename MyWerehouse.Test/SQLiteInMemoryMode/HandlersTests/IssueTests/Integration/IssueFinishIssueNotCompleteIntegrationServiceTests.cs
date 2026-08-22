@@ -95,10 +95,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
-			Assert.Equal(PalletStatus.Available, notLoadedPallet.Status);
-			Assert.Null(notLoadedPallet.IssueId);
 			var updatedIssue = await DbContext.Issues
+				.AsNoTracking()
 				.Include(i => i.Pallets)
 				.FirstOrDefaultAsync(i => i.Id == issueId);
 
@@ -106,7 +104,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(IssueStatus.IsShipped, updatedIssue.IssueStatus);
 
 			// sprawdź czy P2 została usunięta z przypisania do zlecenia:
-			var palletP2 = await DbContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "P2");
+			var palletP2 = await DbContext.Pallets
+				.AsNoTracking()
+				.FirstOrDefaultAsync(x => x.PalletNumber == "P2");
 			Assert.NotNull(palletP2);
 			Assert.Equal(PalletStatus.Available, palletP2.Status);
 			Assert.Null(palletP2.IssueId);
@@ -134,7 +134,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Contains(loadingHistories.Details, h => h.PalletNumber == "P1");
 
 			// Sprawdź, że status i wykonawca się zgadzają			
-			Assert.Equal(IssueStatus.IsShipped, issue.IssueStatus);
+			Assert.Equal(IssueStatus.IsShipped, updatedIssue.IssueStatus);
 			Assert.Equal(performedBy, updatedIssue.PerformedBy);
 		}
 	}

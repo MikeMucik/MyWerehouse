@@ -149,9 +149,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
-			Assert.Single(result.Result);
-			Assert.True(result.Result.Single().Success);
-			Assert.Equal(product.Id, result.Result.Single().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Single(result.Result.Results);
+			Assert.True(result.Result.Results.Single().Success);
+			Assert.Equal(product.Id, result.Result.Results.Single().ProductId);
 
 			var p2After = DbContext.Pallets.AsNoTracking().Single(p => p.PalletNumber == "P2");
 			// bezpieczeństwo — potwierdzamy faktyczną zmianę statusu
@@ -263,9 +264,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(vp.InitialPalletQuantity - vp.PickingTasks.Sum(a => a.RequestedQuantity), vp.RemainingQuantity);
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
-			Assert.Single(result.Result);
-			Assert.True(result.Result.First().Success);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Single(result.Result.Results);
+			Assert.True(result.Result.Results.First().Success);
+			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
 
 			//Assert
 			var historyPallets = DbContext.HistoryPallet
@@ -383,9 +385,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(1, vp.RemainingQuantity);
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
-			Assert.Single(result.Result);
-			Assert.True(result.Result.First().Success);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Single(result.Result.Results);
+			Assert.True(result.Result.Results.First().Success);
+			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
 		}
 		[Fact]
 		public async Task ModifyIssue_ShouldMakeNewIssue_WhenIssueConfirmedToLoadAndOldIssueExist()
@@ -500,9 +503,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
-			Assert.Single(result.Result);
-			Assert.True(result.Result.First().Success);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Single(result.Result.Results);
+			Assert.True(result.Result.Results.First().Success);
+			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
 		}
 
 		[Fact]
@@ -591,12 +595,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
-			Assert.Equal(2, result.Result.Count);
-			Assert.False(result.Result.First().Success);
-			Assert.True(result.Result.Last().Success);
-			Assert.Contains($"Insufficient quantity of product {product1.Id}", result.Result.First().Message);
-			Assert.Equal(product1.Id, result.Result.First().ProductId);
-			Assert.Equal(product2.Id, result.Result.Last().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Equal(2, result.Result.Results.Count);
+			Assert.False(result.Result.Results.First().Success);
+			Assert.True(result.Result.Results.Last().Success);
+			Assert.Contains($"Insufficient quantity of product {product1.Id}", result.Result.Results.First().Message);
+			Assert.Equal(product1.Id, result.Result.Results.First().ProductId);
+			Assert.Equal(product2.Id, result.Result.Results.Last().ProductId);
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 		}
 
@@ -692,13 +697,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
-			Assert.Equal(2, result.Result.Count);
-			Assert.True(result.Result.First().Success);
-			Assert.True(result.Result.Last().Success);
-			Assert.Contains($"Product {product1.SKU} was added to the issue.", result.Result.First().Message);
-			Assert.Contains($"Product {product2.SKU} was added to the issue.", result.Result.Last().Message);
-			Assert.Equal(product1.Id, result.Result.First().ProductId);
-			Assert.Equal(product2.Id, result.Result.Last().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Equal(2, result.Result.Results.Count);
+			Assert.True(result.Result.Results.First().Success);
+			Assert.True(result.Result.Results.Last().Success);
+			Assert.Contains($"Product {product1.SKU} was added to the issue.", result.Result.Results.First().Message);
+			Assert.Contains($"Product {product2.SKU} was added to the issue.", result.Result.Results.Last().Message);
+			Assert.Equal(product1.Id, result.Result.Results.First().ProductId);
+			Assert.Equal(product2.Id, result.Result.Results.Last().ProductId);
 
 			var updatedIssue1 = DbContext.Issues
 				.Include(i => i.Pallets)
@@ -820,13 +826,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
-			Assert.Equal(2, result.Result.Count);
-			Assert.True(result.Result.First().Success);
-			Assert.True(result.Result.Last().Success);
-			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Result.First().Message);
-			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Result.Last().Message);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
-			Assert.Equal(product1.Id, result.Result.Last().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Equal(2, result.Result.Results.Count);
+			Assert.True(result.Result.Results.First().Success);
+			Assert.True(result.Result.Results.Last().Success);
+			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Result.Results.First().Message);
+			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Result.Results.Last().Message);
+			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
+			Assert.Equal(product1.Id, result.Result.Results.Last().ProductId);
 
 			var updatedIssue1 = DbContext.Issues
 				.Include(i => i.Pallets)
@@ -936,10 +943,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
-			Assert.Single(result.Result);
-			Assert.False(result.Result.First().Success);
-			Assert.Contains($"Insufficient quantity of product {product.Id}", result.Result.First().Message);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Single(result.Result.Results);
+			Assert.False(result.Result.Results.First().Success);
+			Assert.Contains($"Insufficient quantity of product {product.Id}", result.Result.Results.First().Message);
+			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
 		}
 		[Fact]
 		public async Task ModifyIssueAsync_WrongStatusPallet()
@@ -1005,10 +1013,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result);
-			Assert.Single(result.Result);
-			Assert.False(result.Result.First().Success);
-			Assert.Contains($"Insufficient quantity of product {product.Id}. The product was not added to the issue.", result.Result.First().Message);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Single(result.Result.Results);
+			Assert.False(result.Result.Results.First().Success);
+			Assert.Contains($"Insufficient quantity of product {product.Id}. The product was not added to the issue.", result.Result.Results.First().Message);
+			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
 		}
 		[Fact]
 		public async Task ModifyIssueAsync_NotIssue_ThrowsException()
@@ -1136,9 +1145,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.NotNull(result.Result);
-			Assert.Equal(2, result.Result.Count);
-			Assert.False(result.Result.First(x => x.ProductId == product1.Id).Success);
-			Assert.True(result.Result.First(x => x.ProductId == product2.Id).Success);
+			Assert.NotNull(result.Result.Results);
+			Assert.Equal(2, result.Result.Results.Count);
+			Assert.False(result.Result.Results.First(x => x.ProductId == product1.Id).Success);
+			Assert.True(result.Result.Results.First(x => x.ProductId == product2.Id).Success);
 			// Assert – sprawdź Issue
 			var updatedIssue = DbContext.Issues
 				.Include(i => i.Pallets)
@@ -1267,12 +1277,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal("User2", updatedIssue.PerformedBy);
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
-			Assert.Equal(2, result.Result.Count);
-			Assert.False(result.Result.First().Success);
-			Assert.True(result.Result.Last().Success);
-			Assert.Contains($"Insufficient quantity of product {product.Id}", result.Result.First().Message);
-			Assert.Equal(product.Id, result.Result.First().ProductId);
-			Assert.Equal(product1.Id, result.Result.Last().ProductId);
+			Assert.NotNull(result.Result.Results);
+			Assert.Equal(2, result.Result.Results.Count);
+			Assert.False(result.Result.Results.First().Success);
+			Assert.True(result.Result.Results.Last().Success);
+			Assert.Contains($"Insufficient quantity of product {product.Id}", result.Result.Results.First().Message);
+			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
+			Assert.Equal(product1.Id, result.Result.Results.Last().ProductId);
 		}
 	}
 }

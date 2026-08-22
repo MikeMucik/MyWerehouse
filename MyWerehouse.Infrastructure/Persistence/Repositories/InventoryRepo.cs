@@ -45,7 +45,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			// 1. pełne dostępne palety
 			var fullPalletsQuery = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
-				.Where(p => p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock)
+				.Where(p => (p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock)&& p.ProductsOnPallet.Count ==1)
 				.AsQueryable();
 
 			if (bestBefore.HasValue)
@@ -63,7 +63,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			// 2. palety rozbite (ToPicking)
 			var pickingQuery = _werehouseDbContext.VirtualPallets
 				.Include(pp => pp.Pallet)
-				.Where(pp => pp.Pallet.Status == PalletStatus.ToPicking &&
+				.Where(pp => pp.Pallet.Status == PalletStatus.ToPicking && pp.Pallet.ProductsOnPallet.Count == 1&&
 							 pp.Pallet.ProductsOnPallet.Any(pop => pop.ProductId == productId));
 
 			if (bestBefore.HasValue)

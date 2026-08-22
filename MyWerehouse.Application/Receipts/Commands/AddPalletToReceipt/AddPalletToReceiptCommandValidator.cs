@@ -16,9 +16,6 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 				.NotNull()
 				.NotEmpty()
 				.WithMessage("Receipt ID is required.");
-			RuleFor(p => p.DTO.ReceiptNumber)
-				.GreaterThan(0)
-				.WithMessage("Receipt number is required.");
 			RuleFor(p => p.DTO.ProductsOnPallet)
 				.NotEmpty()
 				.WithMessage("Pallet must contain at least one product.");

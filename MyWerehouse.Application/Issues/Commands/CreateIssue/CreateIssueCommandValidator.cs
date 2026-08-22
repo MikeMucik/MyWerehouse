@@ -22,7 +22,11 @@ namespace MyWerehouse.Application.Issues.Commands.CreateIssue
 				.NotEmpty().WithMessage("User is required.");
 			RuleForEach(x => x.DTO.Items).SetValidator(itemValidator);
 			RuleFor(x => x.DTO.Items)
-				.NotEmpty().WithMessage("An issue must contain at least one product.");
+				.Cascade(CascadeMode.Stop)
+				.NotEmpty()
+				.WithMessage("An issue must contain at least one product.")
+				.Must(items => items.Select(item => item.ProductId).Distinct().Count() == items.Count)
+				.WithMessage("The same product cannot appear more than once in an issue.");
 		}
 	}
 }

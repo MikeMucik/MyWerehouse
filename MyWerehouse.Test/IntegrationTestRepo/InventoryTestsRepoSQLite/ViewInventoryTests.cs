@@ -62,7 +62,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			Assert.False(result);
 		}
 		[Fact]
-		public async Task ReturnAmount_GetAvailableQuantityAsync_GiveBackQuantity()
+		public async Task GetAllocatableQuantityAsync_IgnoresPalletContainingDifferentProducts()
 		{
 			//Arrange
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
@@ -71,7 +71,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.InventoryTestsRepoSQLite
 			//Act
 			var result = await _inventoryRepo.GetAllocatableQuantityAsync(productId2, bestBefore, CancellationToken.None);
 			//Assert
-			Assert.Equal(650, result);
+			Assert.Equal(450, result);
 		}
 	}
 }

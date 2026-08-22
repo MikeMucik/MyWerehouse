@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -109,7 +109,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(resultForIssue);
 			Assert.True(resultForIssue.IsSuccess);
 			Assert.NotNull(resultForIssue.Result);
-			var result = resultForIssue.Result.First();
+			Assert.NotNull(resultForIssue.Result.Results);
+			var result = resultForIssue.Result.Results.First();
 			Assert.True(result.Success);
 			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
@@ -196,7 +197,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(resultForIssue);
 			Assert.True(resultForIssue.IsSuccess);
 			Assert.NotNull(resultForIssue.Result);
-			var result = resultForIssue.Result.First();
+			Assert.NotNull(resultForIssue.Result.Results);
+			var result = resultForIssue.Result.Results.First();
 			Assert.True(result.Success);
 			Assert.Contains($"Product {product.SKU} was added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
@@ -500,7 +502,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert
 			Assert.NotNull(resultForIssue);
 			Assert.NotNull(resultForIssue.Result);
-			var result = resultForIssue.Result.First();			
+			Assert.NotNull(resultForIssue.Result.Results);
+			var result = resultForIssue.Result.Results.First();
 			Assert.False(result.Success);
 			Assert.Contains($"Insufficient quantity of product {product.Id}. The product was not added to the issue.", result.Message);
 			Assert.Equal(product.Id, result.ProductId);
@@ -549,7 +552,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert
 			Assert.NotNull(resultForIssue);
 			Assert.NotNull(resultForIssue.Result);
-			var result = resultForIssue.Result.First();
+			Assert.NotNull(resultForIssue.Result.Results);
+			var result = resultForIssue.Result.Results.First();
 			// Assert
 			Assert.False(result.Success);
 			Assert.Contains($"Insufficient quantity of product {product.Id}. The product was not added to the issue.", result.Message);

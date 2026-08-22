@@ -24,6 +24,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 {
 	public class ExecutiveReversePickingTests : TestBase
 	{
+		private async Task<PalletStatus> GetPalletStatusFromDatabaseAsync(Guid palletId)
+		{
+			return await DbContext.Pallets
+				.AsNoTracking()
+				.Where(p => p.Id == palletId)
+				.Select(p => p.Status)
+				.SingleAsync();
+		}
+
 		private static Client CreateClient()
 		{
 			var address = new Address
@@ -114,7 +123,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var issue = DbContext.Issues.Include(i => i.Pallets).Single();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
-			Assert.Equal(PalletStatus.ToPicking, pallet2.Status);
+			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
 			Assert.NotEmpty(pickingTasksToDo);
 			Assert.Single(pickingTasksToDo);
@@ -182,7 +191,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal("UserC", task.UserId);
 
 			// Assert 3– Pallets restored
-			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
+			var palletP1 = await DbContext.Pallets.AsNoTracking().FirstAsync(p => p.PalletNumber == "P1");
 			Assert.Equal(PalletStatus.Available, palletP1.Status);
 			Assert.Null(palletP1.IssueId);
 			Assert.Equal(1, palletP1.LocationId);
@@ -279,7 +288,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
-			Assert.Equal(PalletStatus.ToPicking, pallet2.Status);
+			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
 			Assert.NotEmpty(pickingTasksToDo);
 			Assert.Single(pickingTasksToDo);
@@ -430,7 +439,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
-			Assert.Equal(PalletStatus.ToPicking, pallet2.Status);
+			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
 			Assert.NotEmpty(pickingTasksToDo);
 			Assert.Single(pickingTasksToDo);
@@ -599,8 +608,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
-			Assert.Equal(PalletStatus.ToPicking, pallet2.Status);
-			Assert.Equal(PalletStatus.ToPicking, pallet4.Status);
+			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
+			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet4.Id));
 			var pickingTaskToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
 			Assert.NotEmpty(pickingTaskToDo);
 			Assert.Equal(2, pickingTaskToDo.Count);
@@ -781,8 +790,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var issue = DbContext.Issues.Include(i => i.Pallets).Single();
 			Assert.Single(issue.Pallets); // powinien być przypisany P1
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.Single().Status);
-			Assert.Equal(PalletStatus.ToPicking, pallet2.Status);
-			Assert.Equal(PalletStatus.ToPicking, pallet4.Status);
+			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
+			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet4.Id));
 			var pickingTaskToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
 			Assert.NotEmpty(pickingTaskToDo);
 			Assert.Equal(2, pickingTaskToDo.Count);
@@ -893,16 +902,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.Equal(ReversePickingStatus.Ongoing, task1.Status);
 			Assert.Equal("UserC", task.UserId);
 			// Assert 3– Pallets restored
-			var palletP1 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P1");
+			var palletP1 = await DbContext.Pallets.AsNoTracking().FirstAsync(p => p.PalletNumber == "P1");
 			Assert.Equal(PalletStatus.Available, palletP1.Status);
 			Assert.Null(palletP1.IssueId);
 			Assert.Equal(1, palletP1.LocationId);
 
-			var palletP2 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P2");
+			var palletP2 = await DbContext.Pallets.AsNoTracking().FirstAsync(p => p.PalletNumber == "P2");
 			Assert.Equal(PalletStatus.ToPicking, palletP2.Status);
 
-			var palletP4 = await DbContext.Pallets.FirstAsync(p => p.PalletNumber == "P4");
-			Assert.Equal(PalletStatus.ToPicking, palletP2.Status);
+			var palletP4 = await DbContext.Pallets.AsNoTracking().FirstAsync(p => p.PalletNumber == "P4");
+			Assert.Equal(PalletStatus.ToPicking, palletP4.Status);
 
 			//ArrangeFor Act4
 			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.Available, receipt.Id, null);

@@ -26,7 +26,11 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 				.GreaterThan(DateOnly.FromDateTime(DateTime.MinValue)).WithMessage("Issue date is invalid.");
 			RuleForEach(x => x.DTO.IssueItems).SetValidator(itemValidator);
 			RuleFor(x => x.DTO.IssueItems)
-				.NotEmpty().WithMessage("An issue must contain at least one product.");
+				.Cascade(CascadeMode.Stop)
+				.NotEmpty()
+				.WithMessage("An issue must contain at least one product.")
+				.Must(items => items.Select(item => item.ProductId).Distinct().Count() == items.Count)
+				.WithMessage("The same product cannot appear more than once in an issue.");
 		}
 	}
 }

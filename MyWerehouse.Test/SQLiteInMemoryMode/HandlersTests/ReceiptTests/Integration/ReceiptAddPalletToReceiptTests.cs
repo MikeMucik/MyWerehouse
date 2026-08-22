@@ -85,8 +85,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			{
 				ProductsOnPallet = [new() { ProductId = product.Id, Quantity = 10, }],
 				UserId = "U001",
-				ReceiptNumber = receipt.ReceiptNumber,
-				ReceiptId = receipt.Id,
+				//ReceiptNumber = receipt.ReceiptNumber,
+				//ReceiptId = receipt.Id,
 			};
 
 			var result = await Mediator.Send(new AddPalletToReceiptCommand(receipt.Id, newPalletDto));

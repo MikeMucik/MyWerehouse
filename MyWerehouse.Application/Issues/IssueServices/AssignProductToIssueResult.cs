@@ -11,6 +11,8 @@ namespace MyWerehouse.Application.Issues.IssueServices
 	public sealed class AssignProductToIssueResult
 	{
 		public bool Success { get; init; }
+		public Guid IssueId { get; init; }
+		public int IssueNumber { get; init; }
 		public string Message { get; set; } = string.Empty;
 		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 		public Guid? ProductId { get; init; }
@@ -28,6 +30,8 @@ namespace MyWerehouse.Application.Issues.IssueServices
 		public int? QuantityOnStock { get; init; }
 		public AssignProductToIssueResult() { }
 		public static AssignProductToIssueResult Ok(
+			Guid issueId,
+			int issueNumber,
 			string message,
 			Guid productId,
 			string sku,
@@ -38,6 +42,8 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			return new AssignProductToIssueResult
 			{
 				Success = true,
+				IssueId = issueId,
+				IssueNumber = issueNumber,
 				Message = message,
 				ProductId = productId,
 				SKU = sku,
@@ -56,6 +62,8 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			};
 		}		
 		public static AssignProductToIssueResult Fail(
+			Guid issueId,
+			int issueNumber,
 			string message,
 			Guid productNotAdded,
 			int quantityRequest)
@@ -63,12 +71,16 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			return new AssignProductToIssueResult
 			{
 				Success = false,
+				IssueId = issueId,
+				IssueNumber = issueNumber,
 				Message = message,
 				ProductId = productNotAdded,
 				QuantityRequest = quantityRequest
 			};
 		}
 		public static AssignProductToIssueResult Fail(
+			Guid issueId,
+			int issueNumber,
 			string message,
 			Guid productNotAdded,
 			string sku,
@@ -78,6 +90,8 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			return new AssignProductToIssueResult
 			{
 				Success = false,
+				IssueId = issueId,
+				IssueNumber = issueNumber,
 				Message = message,
 				ProductId = productNotAdded,
 				SKU = sku,

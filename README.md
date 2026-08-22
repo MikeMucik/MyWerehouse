@@ -13,13 +13,14 @@ domain-driven business rules, Entity Framework Core, Azure SQL, automated
 testing, and deployment to Azure App Service.
 
 [**Open live Swagger**](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html)
+[Wake up the Azure application](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/api/health)
 [CI workflow](https://github.com/MikeMucik/MyWerehouse/actions/workflows/dotnet.yml)
 
 ## Azure demo availability
 
 > **Azure F1 cold start:** after inactivity, the first request may take approximately
-> 40 seconds. Use the Apihealth endpoint 
-> to wake up the application.
+> 60 seconds. Open the [`api/health`](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/api/health)
+> endpoint first to wake up the application, then open Swagger.
 
 <details>
 <summary>How to wake up the Azure demo</summary>
@@ -27,6 +28,7 @@ testing, and deployment to Azure App Service.
 ![ApiHealth endpoint returning HTTP 200](docs/images/ApiHealth.png)
 
 </details>
+
 ## What this project demonstrates
 
 - Complete warehouse flow: Receipt → Inventory → Issue → Picking → Loading
@@ -35,7 +37,7 @@ testing, and deployment to Azure App Service.
 - Best-before batch handling and pallet allocation
 - Atomic, concurrency-safe pallet number reservation
 - Operation history created through domain events
-- 347 automated tests covering handlers, repositories, validation, mappings,
+- 349 automated tests covering handlers, repositories, validation, mappings,
   and business workflows
 - Hosting on Azure App Service and Azure SQL, with CI provided by GitHub Actions
 
@@ -101,6 +103,28 @@ domain rules and application-level orchestration.
 - `AppResult` represents application-level outcomes, including operations that
   aggregate results for multiple products.
 - Exception middleware translates domain failures into consistent HTTP responses.
+
+### Outbound allocation and transaction behavior
+
+Issue creation and modification return one result for each requested product.
+An expected shortage for one product does not discard successful allocations for
+the remaining products; the issue is saved with a status indicating that it
+requires correction.
+
+The allocation process:
+
+1. validates the allocatable quantity before changing domain entities;
+2. assigns suitable full pallets first;
+3. uses quantities already available on virtual pallets;
+4. creates picking tasks from the smallest suitable single-product pallets for
+   the remaining quantity;
+5. applies the allocation only after the complete plan for a product is valid.
+
+Create and modify operations run inside serializable transactions. SQL Server
+transient-failure retries are enabled for Azure SQL cold starts, and each retry
+attempt begins with a clean EF Core change tracker. Unexpected domain or
+infrastructure exceptions abort the complete transaction, while expected
+per-product shortages are returned as regular product results.
 
 ## Solution structure
 

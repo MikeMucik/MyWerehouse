@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-using System.Numerics;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;

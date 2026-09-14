@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MyWerehouse.Application.Inventories.Queries.GetInventories;
 using MyWerehouse.Application.Inventories.Queries.GetInventory;
 using MyWerehouse.Server.Extensions;
 
@@ -17,5 +18,17 @@ namespace MyWerehouse.Server.Controllers
 			var result = await _mediator.Send(new GetInventoryQuery(id), ct);
 			return result.ToActionResult();
 		}
+
+		[HttpGet]
+		public async Task<IActionResult> GetAll([FromQuery] int page = 1,
+			[FromQuery] int size = 10,
+			CancellationToken ct = default)
+		{
+			var query = new GetInventoriesQuery(PageNumber : page, PageSize: size);
+			var result = await _mediator.Send(query, ct);
+			return result.	ToActionResult();
+		}			 
+
+
 	}
 }

@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
-using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 {

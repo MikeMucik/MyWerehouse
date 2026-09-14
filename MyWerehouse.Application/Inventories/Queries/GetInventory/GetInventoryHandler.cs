@@ -1,31 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.DTOs;
-using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventory
 {
-	public class GetInventoryHandler(IInventoryRepo inventoryRepo,
-		IMapper mapper) : IRequestHandler<GetInventoryQuery, AppResult<InventoryDTO>>
+	public class GetInventoryHandler(IInventoryReadService inventoryReadService) : IRequestHandler<GetInventoryQuery, AppResult<InventoryDTO>>
 	{
-		public readonly IInventoryRepo _inventoryRepo = inventoryRepo;
-		public readonly IMapper _mapper = mapper;
+		public readonly IInventoryReadService _inventoryReadService = inventoryReadService;
 
 		public async Task<AppResult<InventoryDTO>> Handle(GetInventoryQuery request, CancellationToken ct)
 		{
-			var inventory = await _inventoryRepo.GetInventoryForProductAsync(request.ProductId, ct);
+			var inventory = await _inventoryReadService.GetInventory(request.ProductId, ct);
 			if (inventory == null)
 			{
 				return AppResult<InventoryDTO>.Fail($"Inventory for product {request.ProductId} does not exist.");
-			}
-			var inventoryDTO = _mapper.Map<InventoryDTO>(inventory);
-			return AppResult<InventoryDTO>.Success(inventoryDTO);
+			}			
+			return AppResult<InventoryDTO>.Success(inventory);
 		}
 	}
 }

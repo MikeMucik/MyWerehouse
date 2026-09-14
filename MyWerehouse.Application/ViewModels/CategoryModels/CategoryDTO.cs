@@ -1,23 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using FluentValidation;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Application.ViewModels.ClientModels;
+﻿using FluentValidation;
 using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.ViewModels.CategoryModels
 {
-	public class CategoryDTO : IMapFrom<Category>
+	public class CategoryDTO 
 	{		
-		public required string Name { get; init; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Category, CategoryDTO>().ReverseMap();				
-		}		
+		public required string Name { get; init; }			
 	}
 	public class CategoryDTOValidation : AbstractValidator<CategoryDTO>
 	{

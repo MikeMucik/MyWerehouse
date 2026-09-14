@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using MyWerehouse.Application.Common.Behaviors;
-using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Application.Picking.Services;
@@ -27,9 +19,7 @@ namespace MyWerehouse.Application
 			services.AddScoped<IClientService, ClientService>();
 			services.AddScoped<ILocationService, LocationService>();
 			services.AddScoped<IProductService, ProductService>();
-			services.AddScoped<IPalletNumberAllocator, PalletNumberAllocator>();
-
-			services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+			services.AddScoped<IPalletNumberAllocator, PalletNumberAllocator>();		
 
 			services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);
 			services.AddValidatorsFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);

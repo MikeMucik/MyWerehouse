@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Application.Receipts.Commands.UpdateReceipt;
-using MyWerehouse.Domain.Receiving.Models;
+﻿using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceiptById
 {

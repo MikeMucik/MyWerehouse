@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Histories.Models;
+﻿using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {
-	public	class ReceiptHistoryDTO : IMapFrom<HistoryReceipt>
+	public	class ReceiptHistoryDTO
 	{
 		public int Id { get; set; }
 		public DateTime ReceiptDateTime { get; set; }
@@ -18,10 +11,5 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public ReceiptStatus ReceiptStatus { get; set; }
 		public string PerformedBy { get; set; } = string.Empty;
 		public ICollection<PalletListDTO> ListDTOs { get; set; } = new List<PalletListDTO>();
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<HistoryReceipt, ReceiptHistoryDTO>()
-				.ForMember(dest => dest.ListDTOs, opt => opt.Ignore());
-		}
 	}
 }

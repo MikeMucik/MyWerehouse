@@ -1,16 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using FluentValidation;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Issuing.Models;
+﻿using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.DTOs
 {
-	public record IssueItemDTO : IMapFrom<IssueItem> 
+	public record IssueItemDTO 
 	{	
 		public Guid ProductId { get; init; }
 		public int Quantity { get; init; }

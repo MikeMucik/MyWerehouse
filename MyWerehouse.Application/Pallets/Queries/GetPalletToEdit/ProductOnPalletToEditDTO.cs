@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Pallets.Models;
-
-namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
+﻿namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 {
 	public class ProductOnPalletToEditDTO 
 	{
@@ -15,7 +6,6 @@ namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 		public string ProductName { get; init; } = string.Empty;
 		public string SKU { get; init; } = string.Empty;
 		public DateTime DateAdded { get; init; }
-
 		public int Quantity { get; init; }
 		public DateOnly? BestBefore { get; init; }		
 	}

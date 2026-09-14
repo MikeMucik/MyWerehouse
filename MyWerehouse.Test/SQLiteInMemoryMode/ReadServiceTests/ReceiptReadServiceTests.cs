@@ -1,4 +1,4 @@
-using MyWerehouse.Application.Common.Pagination;
+﻿using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Domain.Receiving.Models;

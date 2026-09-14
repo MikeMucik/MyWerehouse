@@ -1,22 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Pallets.Models;
+﻿using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.DTOs
 {
-	public class PalletSimplyDTO : IMapFrom<Pallet>
+	public class PalletSimplyDTO
 	{
 		public Guid Id { get; init; }
 		public string PalletNumber { get; init; } = string.Empty;
-		public PalletStatus Status { get; init; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Pallet,  PalletSimplyDTO>();
-		}
+		public PalletStatus Status { get; init; }		
 	}
 }

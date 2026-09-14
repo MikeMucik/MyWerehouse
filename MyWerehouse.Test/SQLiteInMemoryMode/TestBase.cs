@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MyWerehouse.Application;
-using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Infrastructure;
@@ -27,8 +19,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 		public readonly ServiceProvider _provider;
 		public readonly WerehouseDbContext DbContext;
 		public readonly IMediator Mediator;
-
-		protected readonly IMapper _mapper;
 		public TestBase()
 		{
 			_connection = new SqliteConnection("DataSource=:memory:");
@@ -47,13 +37,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			services.AddScoped<IReceiptReadService, ReceiptReadService>();
 			services.AddScoped<IPickingReadService, PickingReadService>();
 			services.AddScoped<IReversePickingReadService, ReversePickingReadService>();
+			services.AddScoped<IInventoryReadService, InventoryReadService>();
+			services.AddScoped<IHistoryReadService,  HistoryReadService>();
 
 			services.AddInfrastructure();
 			services.RemoveAll<IDateTimeProvider>();
 			services.AddSingleton<IDateTimeProvider, TestDateTimeProvider>();//stały czas dla testów
-			services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 			_provider = services.BuildServiceProvider();
-			_mapper = _provider.GetRequiredService<IMapper>();
 			DbContext = _provider.GetRequiredService<WerehouseDbContext>();
 			Mediator = _provider.GetRequiredService<IMediator>();
 			DbContext.Database.EnsureCreated();

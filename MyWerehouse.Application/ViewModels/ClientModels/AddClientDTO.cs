@@ -1,29 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
-using MyWerehouse.Application.Common.Mapping;
 using MyWerehouse.Application.ViewModels.AddressModels;
-using MyWerehouse.Domain.Clients.Models;
 
 namespace MyWerehouse.Application.ViewModels.ClientModels
 {
-	public class AddClientDTO :IMapFrom<Client>
+	public class AddClientDTO
 	{
 		public required string Name { get; set; }
 		public required string Email { get; set; } 
 		public required string Description { get; set; } 
 		[MaxLength(250)]
 		public required string FullName { get; set; } 
-		public ICollection<AddressDTO> Addresses { get; set; } = new List<AddressDTO>();
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<AddClientDTO, Client>();
-		}
+		public ICollection<AddressDTO> Addresses { get; set; } = new List<AddressDTO>();		
 	}
 	public class AddClientDTOValidation : AbstractValidator<AddClientDTO>
 	{

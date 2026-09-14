@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
-using MyWerehouse.Domain.Receiving.Models;
+﻿using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
-	public class UpdateReceiptDTO : IMapFrom<Receipt>
+	public class UpdateReceiptDTO 
 	{		
 		public int ClientId { get; init; }
 		public DateTime ReceiptDateTime { get; init; }

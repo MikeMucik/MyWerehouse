@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using FluentValidation;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Application.Histories.DTOs;
-using MyWerehouse.Application.Pallets.DTOs;
+﻿using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet

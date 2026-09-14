@@ -29,14 +29,5 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.CountAsync(ct);
 			return movementCount <= 1;
 		}
-
-		public async Task<List<HistoryPallet>> GetHistoryPallet(string PalletNumber, CancellationToken ct)
-		{
-			var query = await _werehouseDbContext.HistoryPallet
-				.Include(hd=>hd.HistoryPalletDetails)
-				.Where(p=>p.PalletNumber == PalletNumber)
-				.ToListAsync(ct);
-			return query;
-		}
 	}
 }

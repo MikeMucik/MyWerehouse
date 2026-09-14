@@ -1,39 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
+using MyWerehouse.Application.Common.Pagination;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.DTOs;
-using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventories
 {
-	public class GetInventoriesHandler(IInventoryRepo inventoryRepo,
-		IMapper mapper) : IRequestHandler<GetInventoriesQuery, ListOfInventoryDTO>
-	{		
-		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;
-		private readonly IMapper _mapper = mapper;
+	public class GetInventoriesHandler(IInventoryReadService inventoryReadService) : IRequestHandler<GetInventoriesQuery, AppResult< PagedResult<InventoryDTO>>>
+	{
+		private readonly IInventoryReadService _inventoryReadService = inventoryReadService;
 
-		public async Task<ListOfInventoryDTO> Handle (GetInventoriesQuery request, CancellationToken ct)
+		public async Task<AppResult<PagedResult<InventoryDTO>>> Handle(GetInventoriesQuery request, CancellationToken ct)
 		{
-			var inventories = _inventoryRepo.GetAllInventory()
-				.OrderBy(i => i.ProductId)
-				.ProjectTo<InventoryDTO>(_mapper.ConfigurationProvider);
-			var inventoriesToShow = await inventories
-				.Skip(request.PageSize * (request.PageNumber - 1))
-				.Take(request.PageSize)
-				.ToListAsync(ct);
-			return new ListOfInventoryDTO()
-			{
-				InventoryDTOs = inventoriesToShow,
-				PageSize = request.PageSize,
-				PageNumber = request.PageNumber,
-				Count =await inventories.CountAsync(ct)
-			};
+			var inventories = await _inventoryReadService.GetInventories(request.PageNumber, request.PageSize, ct);
+			return AppResult<PagedResult<InventoryDTO>>.Success(inventories);		
 		}
 	}
 }

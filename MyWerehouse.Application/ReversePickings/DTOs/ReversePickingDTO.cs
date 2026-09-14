@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.ReversePickings.Models;
+﻿using MyWerehouse.Domain.ReversePickings.Models;
 
 namespace MyWerehouse.Application.ReversePickings.DTOs
 {

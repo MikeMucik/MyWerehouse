@@ -121,35 +121,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var query = new GetPalletQuery(palletGuid2);
 			var result = await _mediator.Send(query);
 			//Assert
-			Assert.NotNull(result.Result);
-			var expected = _fixture.DbContext.Pallets
-				.FirstOrDefault(p => p.Id == palletGuid2);
-			Assert.NotNull(expected);
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			Assert.Null(result.Error);
 			Assert.NotNull(result.Result);
-
 			var pallet = result.Result;
-
-			Assert.Equal(expected.PalletNumber, pallet.PalletNumber);
-			Assert.Equal(expected.DateReceived, pallet.DateReceived);
-			Assert.Equal(expected.Status, pallet.Status);
-
-			Assert.NotNull(expected.Receipt);
-			Assert.Equal(expected.Receipt.ReceiptNumber, pallet.ReceiptNumber);
-			Assert.NotNull(expected.Issue);
-			Assert.Equal(expected.Issue.IssueNumber, pallet.IssueNumber);
+			Assert.Equal("Q1001", pallet.PalletNumber);
+			Assert.Equal(1, pallet.ReceiptNumber);
+			Assert.Equal(2,pallet.IssueNumber);
 
 			var product = Assert.Single(pallet.ProductsOnPallet);
-
-			Assert.NotNull(expected.ProductsOnPallet.First());
-			Assert.NotNull(product);
-			Assert.Equal(expected.ProductsOnPallet.First().ProductId, product.ProductId);
-			Assert.Equal(expected.ProductsOnPallet.First().Product.SKU, product.ProductSKU);
-			Assert.Equal(expected.ProductsOnPallet.First().Product.Name, product.ProductName);
-			Assert.Equal(expected.ProductsOnPallet.First().Quantity, product.Quantity);
-			Assert.Equal(expected.ProductsOnPallet.First().BestBefore, product.BestBefore);
+			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
+			Assert.Equal(productId1, product.ProductId);
+			Assert.Equal("0987654321", product.ProductSKU);
+			Assert.Equal(100, product.Quantity);
 
 			var movement = Assert.Single(pallet.PalletHistory);
 

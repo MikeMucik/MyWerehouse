@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using FluentValidation;
-using MyWerehouse.Application.Common.Mapping;
+﻿using FluentValidation;
 using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.ViewModels.ProductModels
 {
-	public class EditProductDTO : IMapFrom<Product>
+	public class EditProductDTO 
 	{
 		public Guid Id { get; init; }
 		public required string Name { get; init; }
@@ -23,17 +16,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 		public int Width { get; init; } //cm
 		public int Weight { get; init; } //kg
 		public required string Description { get; init; }
-		
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Product, EditProductDTO>()
-				.ForMember(dest => dest.Length, opt => opt.MapFrom(static src => src.Details!.Length))
-				.ForMember(dest => dest.Height, opt => opt.MapFrom(static src => src.Details!.Height))
-				.ForMember(dest => dest.Width, opt => opt.MapFrom(static src => src.Details!.Width))
-				.ForMember(dest => dest.Weight, opt => opt.MapFrom(static src => src.Details!.Weight))
-				.ForMember(dest => dest.Description, opt => opt.MapFrom(static src => src.Details!.Description))
-				.ReverseMap();
-		}
+				
 	}
 	public class EditProductDTOValidation : AbstractValidator<EditProductDTO>
 	{

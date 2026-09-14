@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using FluentValidation;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Common.ValueObject;
+﻿using FluentValidation;
 
 namespace MyWerehouse.Application.ViewModels.AddressModels
 {
-	public class AddressDTO : IMapFrom<Address>
+	public class AddressDTO 
 	{
 		public int Id { get; init; }
 		public required string Country { get; init; } 
@@ -20,12 +12,7 @@ namespace MyWerehouse.Application.ViewModels.AddressModels
 		public required string PostalCode { get; init; } 
 		public required string StreetName { get; init; } 
 		public required string StreetNumber { get; init; } 
-		public string? AdditionalEmail { get; init; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Address, AddressDTO>()
-				.ReverseMap();
-		}
+		public string? AdditionalEmail { get; init; }		
 	}
 	public class AddressDTOValidation : AbstractValidator<AddressDTO>
 	{

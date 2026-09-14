@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Pagination;
 
 namespace MyWerehouse.Application.Histories.DTOs
@@ -16,7 +12,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public int? ReceiptNumber { get; set; }
 		public Guid? IssueId { get; set; }
 		public int? IssueNumber { get; set; }
-		public List<HistoryPalletDTO> PalletMovementsDTO { get; set; } = new List<HistoryPalletDTO>();
+		public PagedResult<HistoryPalletDTO> PalletMovementsDTO { get; set; } = new PagedResult<HistoryPalletDTO>();
 	}
 }
 

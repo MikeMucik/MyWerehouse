@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Issuing.Models;
-
-namespace MyWerehouse.Application.Issues.DTOs
+﻿namespace MyWerehouse.Application.Issues.DTOs
 {
 	public class IssueItemViewDTO
 	{

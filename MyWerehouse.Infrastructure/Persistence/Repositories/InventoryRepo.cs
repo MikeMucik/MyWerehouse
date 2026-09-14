@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Pallets.Models;
@@ -22,17 +16,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext.Inventories.Add(inventory);
 		}
-		public async Task<Inventory?> GetInventoryForProductAsync(Guid productId, CancellationToken ct)//pobranie danych/ilość dla produktu z ostatniej aktualizacji
-		{
-			var result = await _werehouseDbContext.Inventories
-				.Include(i => i.Product)
-				.SingleOrDefaultAsync(p => p.ProductId == productId, ct);
-			return result;
-		}
-		public IQueryable<Inventory> GetAllInventory()
-		{
-			return _werehouseDbContext.Inventories;
-		}
+		
 		public async Task<bool> HasStockAsync(Guid productId, int quantity, CancellationToken ct)
 		{
 			var quantityBased = await _werehouseDbContext.Inventories

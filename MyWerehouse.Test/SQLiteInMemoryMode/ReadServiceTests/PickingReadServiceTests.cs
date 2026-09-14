@@ -25,7 +25,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.ReadServiceTests
 		public PickingReadServiceTests()
 		{
 			TestDataSeeder.SeedDatabase(DbContext);
-			//DbContext.ChangeTracker.Clear();
+			DbContext.ChangeTracker.Clear();
 			_pickingReadService = new PickingReadService(DbContext);
 		}
 

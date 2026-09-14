@@ -19,12 +19,16 @@ namespace MyWerehouse.Server.Controllers
 		}
 
 		[HttpGet("pallets/{palletNumber}")]
-		public async Task<IActionResult> GetPalletHistory(string palletNumber, CancellationToken ct)
+		public async Task<IActionResult> GetPalletHistory(
+			string palletNumber,
+			[FromQuery] int pageNumber = 1,
+			[FromQuery] int pageSize = 10,
+			CancellationToken ct = default)
 		{
-			var query = new GetPalletHistoryQuery
-			{
-				PalletNumber = palletNumber
-			};
+			var query = new GetPalletHistoryQuery(
+				PalletNumber: palletNumber,
+				PageNumber: pageNumber,
+				PageSize: pageSize);
 			return (await _mediator.Send(query, ct)).ToActionResult();
 		}
 

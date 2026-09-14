@@ -1,28 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Net.Sockets;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Common.Utils;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
-using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
-using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Receiving.Filters;
-using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Services
 {

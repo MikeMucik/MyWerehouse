@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Histories.Models;
+﻿using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {
-	public class PickingPalletHistoryDTO : IMapFrom<HistoryPicking>
+	public class PickingPalletHistoryDTO
 	{
 		public int Id { get; set; }
 		public int? PickingTaskId { get; set; }									  //[JsonIgnore] // Ignoruj przy serializacji
@@ -22,10 +15,6 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public PickingStatus StatusBefore { get; set; }
 		public PickingStatus StatusAfter { get; set; }
 		public string PerformedBy { get; set; } = string.Empty;
-		public DateTime DateTime { get; set; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<HistoryPicking, PickingPalletHistoryDTO>();
-		}
+		public DateTime DateTime { get; set; }		
 	}
 }

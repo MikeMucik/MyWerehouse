@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using FluentAssertions;
-using MyWerehouse.Application.Picking.DTOs;
+﻿using FluentAssertions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -16,7 +8,6 @@ using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Application.Picking.Queries.GetListToPickingFlat;
 using MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree;
 using MyWerehouse.Domain.Services;
-using System.Collections.ObjectModel;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.PickingPalletServiceUnit
 {

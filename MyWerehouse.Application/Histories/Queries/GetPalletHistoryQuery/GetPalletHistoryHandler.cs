@@ -1,52 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Histories.DTOs;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 {
-	public class GetPalletHistoryHandler(IHistoryPalletRepo palletMovementRepo, IMapper mapper, IPalletRepo palletRepo)
+	public class GetPalletHistoryHandler(IHistoryReadService historyReadService)
 		: IRequestHandler<GetPalletHistoryQuery, AppResult<PalletHistoryDTO>>
 	{
-		private readonly IHistoryPalletRepo _palletMovementRepo = palletMovementRepo;
-		private readonly IMapper _mapper = mapper;
-		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IHistoryReadService _historyReadService = historyReadService;
 		public async Task<AppResult<PalletHistoryDTO>> Handle(GetPalletHistoryQuery query, CancellationToken ct)
-		{
-			if (String.IsNullOrEmpty(query.PalletNumber))
+		{		
+			var history = await _historyReadService.GetHistoryPallet(query.PalletNumber, query.PageNumber, query.PageSize, ct);
+
+			if (history == null)
 			{
-				return AppResult<PalletHistoryDTO>.Fail("Pallet number was not provided.", ErrorType.Validation);
+				return AppResult<PalletHistoryDTO>.Fail("None history to show.");
 			}
-			var pallet = await _palletRepo.GetPalletByPalletNumberAsync(query.PalletNumber, ct);
-			if (pallet == null)
-			{
-				return AppResult<PalletHistoryDTO>.Fail($"Pallet {query.PalletNumber} does not exist.");
-			}
-
-			var history = await _palletMovementRepo.GetHistoryPallet(query.PalletNumber, ct);
-
-			var historyOrdered = history.OrderBy(x => x.MovementDate);
-
-			var result = _mapper.Map<List<HistoryPalletDTO>>(historyOrdered);
-
-			var historyForPallet = new PalletHistoryDTO
-			{
-				Id = pallet.Id,
-				PalletNumber = pallet.PalletNumber,
-				DateReceived = pallet.DateReceived,
-				ReceiptId = pallet.Receipt?.Id,
-				ReceiptNumber = pallet.Receipt?.ReceiptNumber,
-				IssueId = pallet.Issue?.Id,
-				IssueNumber = pallet.Issue?.IssueNumber,
-				PalletMovementsDTO = result
-			};
-			return AppResult<PalletHistoryDTO>.Success(historyForPallet);
+			return AppResult<PalletHistoryDTO>.Success(history);
 		}
 	}
 }

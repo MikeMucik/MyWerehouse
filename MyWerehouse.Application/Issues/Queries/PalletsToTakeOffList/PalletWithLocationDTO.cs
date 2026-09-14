@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Pallets.Models;
+﻿using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.PalletsToTakeOffList
 {

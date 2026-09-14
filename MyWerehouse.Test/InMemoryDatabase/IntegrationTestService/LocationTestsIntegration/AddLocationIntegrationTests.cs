@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.ViewModels.LocationModels;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure.Persistence;
-using MyWerehouse.Test.SQLiteInMemoryMode;
+﻿using MyWerehouse.Application.ViewModels.LocationModels;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTestsIntegration
 {

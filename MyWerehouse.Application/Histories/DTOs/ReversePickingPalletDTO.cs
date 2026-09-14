@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Histories.Models;
+﻿using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.ReversePickings.Models;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {
-	public class ReversePickingPalletDTO :IMapFrom<HistoryReversePicking>
+	public class ReversePickingPalletDTO
 	{
 		public int Id { get; set; }
 		public int ReversePickingId { get; set; }
@@ -22,10 +15,6 @@ namespace MyWerehouse.Application.Histories.DTOs
 		public ReversePickingStatus? StatusBefore { get; set; }
 		public ReversePickingStatus StatusAfter { get; set; }
 		public string PerformedBy { get; set; } = string.Empty;
-		public DateTime DateTime { get; set; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<HistoryReversePicking, ReversePickingPalletDTO>();
-		}
+		public DateTime DateTime { get; set; }		
 	}
 }

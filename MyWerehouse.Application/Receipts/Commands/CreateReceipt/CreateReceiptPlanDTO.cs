@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Receiving.Models;
+﻿using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 {
-	public class CreateReceiptPlanDTO : IMapFrom<Receipt>
+	public class CreateReceiptPlanDTO 
 	{
 		public int ClientId { get; init; }
 		public DateTime ReceiptDateTime { get; init; }

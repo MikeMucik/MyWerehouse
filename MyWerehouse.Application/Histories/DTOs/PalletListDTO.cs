@@ -1,24 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Histories.Models;
-
+﻿
 namespace MyWerehouse.Application.Histories.DTOs
 {
-	public class PalletListDTO : IMapFrom<HistoryReceiptDetail>, IMapFrom<HistoryIssueDetail>
-								
+	public class PalletListDTO 								
 	{
 		public string PalletId { get; set; } = string.Empty;
 		public int LocationId { get; set; }
-		public string LocationSnapShot { get; set; } = string.Empty;
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<HistoryReceiptDetail, PalletListDTO>();
-			profile.CreateMap<HistoryIssueDetail, PalletListDTO>();
-		}
+		public string LocationSnapShot { get; set; } = string.Empty;		
 	}
 }

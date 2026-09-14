@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Pallets.Models;
+﻿using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.DTOs
 {
-	public class ProductOnPalletCreateDTO : IMapFrom<ProductOnPallet>
+	public class ProductOnPalletCreateDTO
 	{
 		public Guid ProductId { get; init; }
 		public int Quantity { get; init; }

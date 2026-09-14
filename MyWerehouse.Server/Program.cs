@@ -49,6 +49,8 @@ builder.Services.AddScoped<IIssueReadService, IssueReadService>();
 builder.Services.AddScoped<IReceiptReadService, ReceiptReadService>();
 builder.Services.AddScoped<IPickingReadService, PickingReadService>();
 builder.Services.AddScoped<IReversePickingReadService, ReversePickingReadService>();
+builder.Services.AddScoped<IInventoryReadService, InventoryReadService>();
+builder.Services.AddScoped<IHistoryReadService, HistoryReadService>();
 
 //enum string swagger
 builder.Services.AddControllers()

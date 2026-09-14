@@ -1,4 +1,4 @@
-using MyWerehouse.Domain.Products.Filters;
+﻿using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Server.ServicesToInfrastructure;
 

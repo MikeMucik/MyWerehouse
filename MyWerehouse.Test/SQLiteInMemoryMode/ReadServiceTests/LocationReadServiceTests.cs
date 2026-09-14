@@ -1,4 +1,4 @@
-using MyWerehouse.Server.ServicesToInfrastructure;
+﻿using MyWerehouse.Server.ServicesToInfrastructure;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.ReadServiceTests
 {

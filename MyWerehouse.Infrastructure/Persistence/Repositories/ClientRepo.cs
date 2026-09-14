@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Interfaces;
 
@@ -18,18 +17,17 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		{
 			_werehouseDbContext = werehouseDbContext;
 		}
-		public int AddClient(Client client)
+		public void AddClient(Client client)
 		{
 			_werehouseDbContext.Clients.Add(client);
-			return client.Id;
 		}
 		public void DeleteClient(Client client)
 		{
-				_werehouseDbContext.Remove(client);
+			_werehouseDbContext.Remove(client);
 		}
 		public void SwitchOffClient(Client client)
 		{
-				client.IsDeleted = true;
+			client.IsDeleted = true;
 		}
 		public async Task<Client?> GetClientByIdAsync(int id, CancellationToken ct)
 		{
@@ -52,81 +50,20 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public async Task<Client?> GetClientToEditAsync(int id, CancellationToken ct)
 		{
-				var client = await _werehouseDbContext.Clients
-						.Include(c => c.Addresses)
-						.SingleOrDefaultAsync(c => c.Id == id, ct);
-						return client;
-		}
-		public IQueryable<Client> GetClients(ClientSearchFilter clientFilter)
-		{
-			var result = _werehouseDbContext.Clients
-				.Where(p => p.IsDeleted == false);
-
-			if (!string.IsNullOrEmpty(clientFilter.Name))
-			{
-				result = result.Where(c => c.Name != null && c.Name.StartsWith(clientFilter.Name));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.Email))
-			{
-				result = result.Where(c => c.Email != null && c.Email.StartsWith(clientFilter.Email));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.Description))
-			{
-				result = result.Where(c => c.Description != null && c.Description.Contains(clientFilter.Description));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.FullName))
-			{
-				result = result.Where(c => c.FullName != null && c.FullName.StartsWith(clientFilter.FullName));
-			}
-			// wyszukiwanie po składowych adresu
-			if (!string.IsNullOrEmpty(clientFilter.Country))
-			{
-				result = result.Where(c => c.Addresses.Any(a => a.Country != null && a.Country.StartsWith(clientFilter.Country)));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.City))
-			{
-				result = result.Where(c => c.Addresses.Any(a => a.City != null && a.City.StartsWith(clientFilter.City)));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.Region))
-			{
-				result = result.Where(c => c.Addresses.Any(a => a.Region != null && a.Region.StartsWith(clientFilter.Region)));
-			}
-
-			if (clientFilter.Phone != 0 && clientFilter.Phone != null)
-			{
-				result = result.Where(c => c.Addresses.Any(a => a.Phone == clientFilter.Phone));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.PostalCode))
-			{
-				result = result.Where(c => c.Addresses.Any(a => a.PostalCode != null && a.PostalCode.StartsWith(clientFilter.PostalCode)));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.StreetName))
-			{
-				result = result.Where(c => c.Addresses.Any(a => a.StreetName != null && a.StreetName.StartsWith(clientFilter.StreetName)));
-			}
-
-			if (!string.IsNullOrEmpty(clientFilter.StreetNumber))
-			{
-				result = result.Where(c => c.Addresses.Any(a => a.StreetNumber != null && a.StreetNumber.StartsWith(clientFilter.StreetNumber)));
-			}
-
-			return result;
-		}
-		public IQueryable<Client> GetAllClients()
-		{
-			return _werehouseDbContext.Clients.Where(p => p.IsDeleted == false);
+			var client = await _werehouseDbContext.Clients
+					.Where(x => x.IsDeleted == false)
+					.Include(c => c.Addresses)
+					.SingleOrDefaultAsync(c => c.Id == id, ct);
+			return client;
 		}
 
-		public async Task< bool> IsClientExistAsync(int clientId, CancellationToken ct)
+		public async Task<bool> IsClientExistAsync(int clientId, CancellationToken ct)
 		{
-			if (await _werehouseDbContext.Clients.FindAsync([clientId], ct) != null) { return true; } return false;
+			var client =await _werehouseDbContext.Clients.Where(x => x.IsDeleted == false)
+				.FirstOrDefaultAsync(x=>x.Id == clientId, ct);
+			if (client != null)
+			{ return true; }
+			return false;
 		}
 	}
 }

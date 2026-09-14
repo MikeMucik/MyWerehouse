@@ -4,40 +4,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Domain.Products.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Services
 {
 	public class CategoryService : ICategoryService
 	{
+		private	readonly IUnitOfWork _unitOfWork;
 		private readonly ICategoryRepo _categoryRepo;
 		private readonly IProductRepo _productRepo;
-		private readonly IMapper _mapper;
 		private readonly IValidator<CategoryDTO> _validator;
-		private readonly WerehouseDbContext _werehouseDbContext;
+		private readonly ICategoryReadService _categoryReadService;
 		public CategoryService(
+			IUnitOfWork unitOfWork,
 			ICategoryRepo categoryRepo,
-			IMapper mapper,
-			WerehouseDbContext werehouseDbContext,
 			IProductRepo productRepo,
-			IValidator<CategoryDTO> validator)
+			IValidator<CategoryDTO> validator,
+			ICategoryReadService categoryReadService)
 		{
+			_unitOfWork = unitOfWork;
 			_categoryRepo = categoryRepo;
-			_mapper = mapper;
-			_werehouseDbContext = werehouseDbContext;
 			_productRepo = productRepo;
 			_validator = validator;
+			_categoryReadService = categoryReadService;
 		}
 
 		public async Task<AppResult<Unit>> AddCategoryAsync(CategoryDTO categoryDTO, CancellationToken ct)
@@ -51,9 +47,12 @@ namespace MyWerehouse.Application.Services
 			{
 				return AppResult<Unit>.Fail("A category with this name already exists.", ErrorType.Conflict);
 			}
-			var category = _mapper.Map<Category>(categoryDTO);
+			var category = new Category
+			{
+				Name = categoryDTO.Name
+			};
 			_categoryRepo.AddCategory(category);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Category added.");
 		}
 
@@ -61,22 +60,16 @@ namespace MyWerehouse.Application.Services
 		{
 			var category = await _categoryRepo.GetCategoryByIdAsync(id, ct);
 			if (category == null) return AppResult<Unit>.Fail($"Category {id} was not found.");
-			var filter = new ProductSearchFilter
-			{
-				CategoryId = id,
-			};
-			var products = _productRepo.FindProducts(filter);
-			if (await products.AnyAsync(ct))
+			if (await _productRepo.HasProductsInCategory(id, ct))
 			{
 				await _categoryRepo.SwitchOffCategoryAsync(id, ct);
-				await _werehouseDbContext.SaveChangesAsync(ct);
+				await _unitOfWork.SaveChangesAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, "Category disabled.");
 			}
 			else
 			{
 				_categoryRepo.DeleteCategory(category);
-
-				await _werehouseDbContext.SaveChangesAsync(ct);
+				await _unitOfWork.SaveChangesAsync(ct); 
 				return AppResult<Unit>.Success(Unit.Value, "Category deleted.");
 			}
 		}
@@ -92,12 +85,12 @@ namespace MyWerehouse.Application.Services
 			if (existingCategory != null)
 			{
 				var categoryWithSameName = await _categoryRepo.GetCategoryByNameAsync(categoryDTO.Name, ct);
-				if (categoryWithSameName != null && categoryWithSameName.Id == existingCategory.Id)
+				if (categoryWithSameName != null && categoryWithSameName.Id != existingCategory.Id)
 				{
 					return AppResult<Unit>.Fail("A category with this name already exists.", ErrorType.Conflict);
 				}
 				existingCategory.Name = categoryDTO.Name;
-				await _werehouseDbContext.SaveChangesAsync(ct);
+				await _unitOfWork.SaveChangesAsync(ct);
 				return AppResult<Unit>.Success(Unit.Value, "Category updated.");
 			}
 			else return AppResult<Unit>.Fail($"Category {id} was not found.");
@@ -105,12 +98,8 @@ namespace MyWerehouse.Application.Services
 
 		public async Task<AppResult<PagedResult<CategoryViewDTO>>> GetCategoriesAsync(int pageNumber, int pageSize, CancellationToken ct)
 		{
-			var categories = _categoryRepo.GetAllCategories();
-			var orderedCategories = categories
-				.OrderBy(c => c.Name);
-			var result = await orderedCategories
-				.ProjectTo<CategoryViewDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync(pageNumber, pageSize, ct);
+			var result = await _categoryReadService.GetCategoriesAsync(pageNumber, pageSize, ct);
+			
 			return AppResult<PagedResult<CategoryViewDTO>>.Success(result);
 		}
 
@@ -121,7 +110,10 @@ namespace MyWerehouse.Application.Services
 			{
 				return AppResult<CategoryViewDTO>.Fail("Category was not found.");
 			}
-			var categoryDTO = _mapper.Map<CategoryViewDTO>(result);
+			var categoryDTO = new CategoryViewDTO
+			{
+				Name = result.Name,
+			};
 			return AppResult<CategoryViewDTO>.Success(categoryDTO);
 		}
 	}

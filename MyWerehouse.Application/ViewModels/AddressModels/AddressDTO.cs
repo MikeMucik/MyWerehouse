@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Common.ValueObject;
 
 namespace MyWerehouse.Application.ViewModels.AddressModels
 {
-	public class EditAddressDTO : IMapFrom<Address>
+	public class AddressDTO : IMapFrom<Address>
 	{
 		public int Id { get; init; }
 		public required string Country { get; init; } 
@@ -20,15 +20,16 @@ namespace MyWerehouse.Application.ViewModels.AddressModels
 		public required string PostalCode { get; init; } 
 		public required string StreetName { get; init; } 
 		public required string StreetNumber { get; init; } 
+		public string? AdditionalEmail { get; init; }
 		public void Mapping(Profile profile)
 		{
-			profile.CreateMap<Address, EditAddressDTO>()
+			profile.CreateMap<Address, AddressDTO>()
 				.ReverseMap();
 		}
 	}
-	public class EditAddressDTOValidation : AbstractValidator<EditAddressDTO>
+	public class AddressDTOValidation : AbstractValidator<AddressDTO>
 	{
-		public EditAddressDTOValidation()
+		public AddressDTOValidation()
 		{
 			RuleFor(a => a.City)
 				.NotNull()

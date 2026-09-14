@@ -206,7 +206,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			//Assert 4
 			Assert.NotNull(resultGetView);
 			Assert.NotNull(resultGetView.Result);
-			Assert.Single(resultGetView.Result.Items);
+			var reversePickingDTO = Assert.Single(resultGetView.Result.Items);
+			Assert.Equal(pickingPallet.PalletNumber, reversePickingDTO.PickingPalletNumber);
+			Assert.Equal(pallet2.PalletNumber, reversePickingDTO.SourcePalletNumber);
+			Assert.Equal(product.SKU, reversePickingDTO.ProductSKU);
 		}
 		[Fact]
 		public async Task GetListReversePickingToDo_ShouldReturnList_WhenTwoPickingTaskDone()
@@ -377,7 +380,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.True(resultGetView.IsSuccess);
 			Assert.NotNull(resultGetView.Result);
 			Assert.Equal(2, resultGetView.Result.Items.Count);
-		}		
+			Assert.All(resultGetView.Result.Items, reversePickingDTO =>
+			{
+				Assert.Equal(pickingPallet.PalletNumber, reversePickingDTO.PickingPalletNumber);
+				Assert.Equal(product.SKU, reversePickingDTO.ProductSKU);
+			});
+			Assert.Contains(resultGetView.Result.Items,
+				reversePickingDTO => reversePickingDTO.SourcePalletNumber == pallet2.PalletNumber);
+			Assert.Contains(resultGetView.Result.Items,
+				reversePickingDTO => reversePickingDTO.SourcePalletNumber == pallet3.PalletNumber);
+		}
 		[Fact]
 		public async Task GetReturnReverseTask_ShouldReturnInfoOptionsToSourceAvailable()
 		{

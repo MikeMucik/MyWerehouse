@@ -166,5 +166,57 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 			Assert.NotNull(ex);
 			Assert.Contains("Category name is required.", ex.Message);
 		}
+
+		[Fact]
+		public async Task UpdateCategory_ShouldSucceed_WhenNameBelongsToSameCategory()
+		{
+			// Arrange
+			var category = new Category
+			{
+				Id = 101,
+				Name = "SameCategoryName"
+			};
+			_context.Categories.Add(category);
+			await _context.SaveChangesAsync();
+
+			// Act
+			var result = await _categoryService.UpdateCategoryAsync(
+				category.Id,
+				new CategoryDTO { Name = category.Name },
+				CancellationToken.None);
+
+			// Assert
+			Assert.True(result.IsSuccess);
+			Assert.Equal("SameCategoryName", category.Name);
+		}
+
+		[Fact]
+		public async Task UpdateCategory_ShouldReturnConflict_WhenNameBelongsToAnotherCategory()
+		{
+			// Arrange
+			var category = new Category
+			{
+				Id = 102,
+				Name = "OriginalCategoryName"
+			};
+			var categoryWithOccupiedName = new Category
+			{
+				Id = 103,
+				Name = "OccupiedCategoryName"
+			};
+			_context.Categories.AddRange(category, categoryWithOccupiedName);
+			await _context.SaveChangesAsync();
+
+			// Act
+			var result = await _categoryService.UpdateCategoryAsync(
+				category.Id,
+				new CategoryDTO { Name = categoryWithOccupiedName.Name },
+				CancellationToken.None);
+
+			// Assert
+			Assert.False(result.IsSuccess);
+			Assert.Equal(ErrorType.Conflict, result.ErrorType);
+			Assert.Equal("OriginalCategoryName", category.Name);
+		}
 	}
 }

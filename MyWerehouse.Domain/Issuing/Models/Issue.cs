@@ -526,7 +526,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			foreach (var pallet in Pallets)
 			{
-				if (pallet.Status != PalletStatus.ToIssue)
+				if (pallet.Status != PalletStatus.ToIssue && pallet.Status != PalletStatus.LockedForIssue)
 				{
 					throw new PalletsNotReadyToLoadDomainException();
 				}

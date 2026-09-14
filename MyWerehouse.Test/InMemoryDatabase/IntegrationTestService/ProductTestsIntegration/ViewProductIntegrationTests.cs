@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
+using MyWerehouse.Server;
+using MyWerehouse.Server.ServicesToInfrastructure;
 using MyWerehouse.Test.InMemoryDatabase.Common;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsIntegration
@@ -17,8 +20,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 	[Collection("QueryCollectionInMemory")]
 	public class ViewProductIntegrationTests : CommandTestBase
 	{
-		private readonly ProductService _productService;
+		private readonly ProductService _productService;		
 		private readonly ProductRepo _productRepo;
+		protected readonly IUnitOfWork _unitOfWork;
+		protected readonly IProductReadService _productReadService;
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly ICategoryRepo _categoryRepo;
 		private readonly IReceiptRepo _receiptRepo;
@@ -29,13 +34,15 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 		{
 			var _context = fixture.Context;
 			_productRepo = new ProductRepo(_context);
+			_unitOfWork = new UnitOfWork(_context);
+			_productReadService = new ProductReadService(_context);
 			_inventoryRepo = new InventoryRepo(_context);
 			_categoryRepo = new CategoryRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_createProductValidator = new AddProductDTOValidation();
 			_productValidator = new EditProductDTOValidation();
 
-			_productService = new ProductService(_productRepo, _mapper, _context, _inventoryRepo, _categoryRepo, _receiptRepo, _createProductValidator, _productValidator, new TestDateTimeProvider());
+			_productService = new ProductService(_productRepo, _unitOfWork, _productReadService, _inventoryRepo, _categoryRepo, _receiptRepo, _createProductValidator, _productValidator, new TestDateTimeProvider());
 		}
 		[Fact]
 		public async Task ShowProductDetails_DetailsOfProductAsync_ReturnData()

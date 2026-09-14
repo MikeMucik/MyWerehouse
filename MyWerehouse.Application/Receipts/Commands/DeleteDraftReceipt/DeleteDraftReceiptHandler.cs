@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt
 {
-	public class DeleteDraftReceiptHandler(WerehouseDbContext werehouseDbContext,
+	public class DeleteDraftReceiptHandler(IUnitOfWork unitOfWork,
 		IReceiptRepo receiptRepo
 		) : IRequestHandler<DeleteDraftReceiptCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
 
 		public async Task<AppResult<Unit>> Handle(DeleteDraftReceiptCommand request, CancellationToken ct)
@@ -23,7 +24,7 @@ namespace MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt
 			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 			receipt.Delete(request.UserId);
 			_receiptRepo.DeleteReceipt(receipt);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Receipt was deleted.");
 		}
 	}

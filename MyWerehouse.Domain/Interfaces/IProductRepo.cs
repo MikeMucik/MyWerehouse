@@ -16,9 +16,8 @@ namespace MyWerehouse.Domain.Interfaces
 		Task<Product?> GetProductByIdAsync(Guid id, CancellationToken ct);
 		Task<string?> GetSKUForProductAsync(Guid id, CancellationToken ct);
 		Task<Product?> GetProductToEditAsync(Guid id, CancellationToken ct);
-		Task<Product?> GetProductDetailsAsync(Guid id, CancellationToken ct);
-		IQueryable<Product> GetAllProducts();
-		IQueryable<Product> FindProducts(ProductSearchFilter filter);
+		Task<bool> AlreadyExist(string name, string sku);
 		Task<bool> IsExistProduct(Guid id, CancellationToken ct);
+		Task<bool> HasProductsInCategory(int categoryId,CancellationToken ct);
 	}
 }

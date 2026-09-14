@@ -6,23 +6,21 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.Commands.UpdatePallet;
 using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.Queries.GetPalletToEdit
 {
-	public class GetPalletToEditHandler(IPalletRepo palletRepo, IMapper mapper) : IRequestHandler<GetPalletToEditQuery, AppResult<ShowPalletToEditDTO>>
+	public class GetPalletToEditHandler(IPalletReadService palletReadService) : IRequestHandler<GetPalletToEditQuery, AppResult<ShowPalletToEditDTO>>
 	{
-		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IMapper _mapper = mapper;
+		private readonly IPalletReadService _palletReadService = palletReadService;
 
 		public async Task<AppResult<ShowPalletToEditDTO>> Handle(GetPalletToEditQuery request, CancellationToken ct)
 		{
-			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId, ct);
+			var pallet = await _palletReadService.ShowPalletToEditAsync(request.PalletId, ct);
 			if (pallet == null) return AppResult<ShowPalletToEditDTO>.Fail("No pallet was found to update.");
-
-			var palletDTO = _mapper.Map<ShowPalletToEditDTO>(pallet);
-			return AppResult<ShowPalletToEditDTO>.Success(palletDTO);
+			return AppResult<ShowPalletToEditDTO>.Success(pallet);
 		}
 	}
 }

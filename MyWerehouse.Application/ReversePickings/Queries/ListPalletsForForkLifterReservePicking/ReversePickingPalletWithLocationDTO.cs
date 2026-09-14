@@ -9,7 +9,7 @@ using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking
 { 
-	public class PickingPalletWithLocationDTO 
+	public class ReversePickingPalletWithLocationDTO 
 	{
 		public Guid PalletId { get; init; }
 		public string PalletNumber { get; init; } = string.Empty;

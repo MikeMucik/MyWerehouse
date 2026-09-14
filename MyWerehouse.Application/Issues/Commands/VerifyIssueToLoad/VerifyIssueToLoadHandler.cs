@@ -5,20 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 {
 	public class VerifyIssueToLoadHandler(
 		IIssueRepo issueRepo,
 		IProductRepo productRepo,
-		WerehouseDbContext werehouseDbContext) : IRequestHandler<VerifyIssueToLoadCommand, AppResult<List<ComparePlanToPreparedResult>>>
+		IUnitOfWork unitOfWork) : IRequestHandler<VerifyIssueToLoadCommand, AppResult<List<ComparePlanToPreparedResult>>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IProductRepo _productRepo = productRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		public async Task<AppResult<List<ComparePlanToPreparedResult>>> Handle(VerifyIssueToLoadCommand request, CancellationToken ct)
 		{
@@ -66,7 +66,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 				return AppResult<List<ComparePlanToPreparedResult>>.Fail("Issue was not approved.", resultComparing, ErrorType.Validation);
 			}
 			issue.VerifyToLoad(request.UserId);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			string message;
 			if (isConditional)
 			{

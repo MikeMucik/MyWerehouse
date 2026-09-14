@@ -1,27 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Application.Interfaces;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceiptById
 {
-	public class GetReceiptByIdHandler(IMapper mapper, IReceiptRepo receiptRepo) : IRequestHandler<GetReceiptByIdQuery, AppResult<ReceiptDTO>>
+	public class GetReceiptByIdHandler(IReceiptReadService receiptReadService) : IRequestHandler<GetReceiptByIdQuery, AppResult<ReceiptDTO>>
 	{
-		private readonly IMapper _mapper = mapper;
-		private readonly IReceiptRepo _receiptRepo = receiptRepo;
+		private readonly IReceiptReadService _receiptReadService = receiptReadService;
 
 		public async Task<AppResult<ReceiptDTO>> Handle(GetReceiptByIdQuery request, CancellationToken cancellationToken)
 		{
-			var receipt = await _receiptRepo.GetReceiptWithAllIncludesByIdAsync(request.ReceiptId, cancellationToken);
+			var receipt = await _receiptReadService.GetReceiptById(request.ReceiptId, cancellationToken);
 			if (receipt == null) return AppResult<ReceiptDTO>.Fail($"Receipt {request.ReceiptId} was not found.");
-
-			var receiptDTO = _mapper.Map<ReceiptDTO>(receipt);
-			return AppResult<ReceiptDTO>.Success(receiptDTO);
+			return AppResult<ReceiptDTO>.Success(receipt);
 		}
 	}
 }

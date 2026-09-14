@@ -13,9 +13,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MyWerehouse.Application;
 using MyWerehouse.Application.Common.Mapping;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Server.ServicesToInfrastructure;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode
 {
@@ -38,6 +40,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			opt.UseSqlite(_connection));
 			services.AddLogging(config => config.AddConsole());
 			services.AddApplication();
+			services.AddScoped<IUnitOfWork, MyWerehouse.Server.UnitOfWork>();
+			//refactor clean architecture
+			services.AddScoped<IPalletReadService, PalletReadService>();
+			services.AddScoped<IIssueReadService, IssueReadService>();
+			services.AddScoped<IReceiptReadService, ReceiptReadService>();
+			services.AddScoped<IPickingReadService, PickingReadService>();
+			services.AddScoped<IReversePickingReadService, ReversePickingReadService>();
+
 			services.AddInfrastructure();
 			services.RemoveAll<IDateTimeProvider>();
 			services.AddSingleton<IDateTimeProvider, TestDateTimeProvider>();//stały czas dla testów

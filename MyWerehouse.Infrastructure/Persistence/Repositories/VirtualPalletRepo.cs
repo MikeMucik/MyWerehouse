@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
@@ -48,24 +43,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(p => p.DateMoved >= start && p.DateMoved <= end)
 				.ToListAsync(ct);
 			return list;
-		}
-		public IQueryable<VirtualPallet> GetVirtualPalletsByTimePickingTask(DateOnly start, DateOnly end)
-		{
-			var list = _werehouseDbContext.VirtualPallets
-				.Include(a => a.PickingTasks)
-				.Include(p => p.Pallet)
-					.ThenInclude(l => l.Location)
-				.Where(vp =>
-				vp.PickingTasks.Any(pt =>
-				pt.PickingDay <= end && pt.PickingDay >= start && pt.PickingStatus == PickingStatus.Allocated));
-			return list;
-		}
-		public async Task<Guid> GetVirtualPalletIdFromPalletIdAsync(Guid palletId, CancellationToken ct)
-		{
-			var palletPicking = await _werehouseDbContext.VirtualPallets
-				.FirstOrDefaultAsync(p => p.PalletId == palletId, ct);
-			if (palletPicking == null) { return Guid.Empty; }
-			return palletPicking.Id;
 		}
 		public async Task<VirtualPallet?> GetVirtualPalletByIdAsync(Guid? palletId, CancellationToken ct)
 		{

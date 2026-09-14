@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.LocationModels;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Warehouse.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Services
 {
 	public class LocationService(ILocationRepo locationRepo,
-		IMapper mapper,
-		IPalletRepo palletRepo,
-		WerehouseDbContext werehouseDbContext) : ILocationService
+		ILocationReadService locationReadService,
+		IPalletRepo palletRepo,		
+		IUnitOfWork unitOfWork) : ILocationService
 	{
 		private readonly ILocationRepo _locationRepo = locationRepo;
-		private readonly IMapper _mapper = mapper;
+		private readonly ILocationReadService _locationReadService = locationReadService;
 		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		public async Task<AppResult<int>> AddLocationServiceAsync(LocationDTO locationDTO, CancellationToken ct)
 		{
@@ -31,11 +28,16 @@ namespace MyWerehouse.Application.Services
 			{
 				return AppResult<int>.Fail("A location with these coordinates already exists.",ErrorType.Conflict);
 			}
-			var location = _mapper.Map<Location>(locationDTO);
-
+			var location = new Location
+			{
+				Bay = locationDTO.Bay,
+				Aisle = locationDTO.Aisle,
+				Height = locationDTO.Height,
+				Position = locationDTO.Position,
+			};
 			var result = _locationRepo.AddLocation(location);
 
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<int>.Success(result.Id, "Location added.");
 		}
 		public async Task<AppResult<Unit>> DeleteLocationServiceAsync(int id, CancellationToken ct)
@@ -52,21 +54,20 @@ namespace MyWerehouse.Application.Services
 				return AppResult<Unit>.Fail($"Location {id} was not found.");
 			}
 			_locationRepo.DeleteLocation(location);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Operation completed successfully.");
 		}
 		public async Task<AppResult<LocationDTO>> GetLocationServiceAsync(int id, CancellationToken ct)
 		{
-			var location = await _locationRepo.GetLocationByIdAsync(id, ct);
-			if (location == null) return AppResult<LocationDTO>.Fail("No location data to display.");
-			var locationDTO = _mapper.Map<LocationDTO>(location);
-			return AppResult<LocationDTO>.Success(locationDTO);
+			var location = await _locationReadService.GetLocationByIdAsync(id, ct);			
+			if (location == null) return AppResult<LocationDTO>.Fail("No location data to display.");			
+			return AppResult<LocationDTO>.Success(location);
 		}
-		public async Task<AppResult<Location>> FindLocationAsync(int bay, int aisle, int position, int height, CancellationToken ct)
+		public async Task<AppResult<int>> FindLocationIdAsync(int bay, int aisle, int position, int height, CancellationToken ct)
 		{
-			var location = await _locationRepo.FindLocationAsync(bay, aisle, position, height, ct);
-			if (location is null) return AppResult<Location>.Fail($"No location matches the requested coordinates B:{bay}, A:{aisle}, P:{position}, H:{height}.");
-			return AppResult<Location>.Success(location);
+			var location = await _locationReadService.FindLocationIdAsync(bay, aisle, position, height, ct);
+			if (location is null) return AppResult<int>.Fail($"No location matches the requested coordinates B:{bay}, A:{aisle}, P:{position}, H:{height}.");
+			return AppResult<int>.Success((int)location);
 		}
 
 		public AppResult<List<LocationDTO>> PrepareLocations(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
@@ -77,7 +78,13 @@ namespace MyWerehouse.Application.Services
 
 			foreach (var location in locations)
 			{
-				var locationFrom = _mapper.Map<LocationDTO>(location);
+				var locationFrom = new LocationDTO
+				{
+					Bay = location.Bay,
+					Aisle = location.Aisle,
+					Height = location.Height,
+					Position = location.Position,
+				};
 				list.Add(locationFrom);
 			}
 			return AppResult<List<LocationDTO>>.Success(list);
@@ -93,10 +100,16 @@ namespace MyWerehouse.Application.Services
 			}
 			foreach (var locationDTO in locations.ToList())
 			{
-				var location = _mapper.Map<Location>(locationDTO);
+				var location = new Location
+				{
+					Bay = locationDTO.Bay,
+					Aisle = locationDTO.Aisle,
+					Height = locationDTO.Height,
+					Position = locationDTO.Position,
+				};
 				_locationRepo.AddLocation(location);
 			}
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Locations added.");
 		}
 	}

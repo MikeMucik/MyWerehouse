@@ -8,40 +8,28 @@ using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {
-	public class UpdateReceiptHandler : IRequestHandler<UpdateReceiptCommand, AppResult<Unit>>
+	public class UpdateReceiptHandler(IUnitOfWork unitOfWork,
+		IReceiptRepo receiptRepo,
+		IPalletRepo palletRepo,
+		IProductRepo productRepo,
+		ILocationRepo locationRepo,
+		IDateTimeProvider dateTimeProvider,
+		IPalletNumberAllocator palletNumberAllocator) : IRequestHandler<UpdateReceiptCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		private readonly IReceiptRepo _receiptRepo;
-		private readonly IPalletRepo _palletRepo;
-		private readonly IProductRepo _productRepo;
-		private readonly ILocationRepo _locationRepo;
-		private readonly IDateTimeProvider _dateTimeProvider;
-		private readonly IPalletNumberAllocator _palletNumberAllocator;
-		public UpdateReceiptHandler(WerehouseDbContext werehouseDbContext,
-			IReceiptRepo receiptRepo,
-			IPalletRepo palletRepo,
-			IProductRepo productRepo,
-			ILocationRepo locationRepo,
-			IDateTimeProvider dateTimeProvider,
-			IPalletNumberAllocator palletNumberAllocator)
-		{
-			_werehouseDbContext = werehouseDbContext;
-			_receiptRepo = receiptRepo;
-			_palletRepo = palletRepo;
-			_productRepo = productRepo;
-			_locationRepo = locationRepo;
-			_dateTimeProvider = dateTimeProvider;
-			_palletNumberAllocator = palletNumberAllocator;
-		}
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
+		private readonly IReceiptRepo _receiptRepo = receiptRepo;
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IProductRepo _productRepo = productRepo;
+		private readonly ILocationRepo _locationRepo = locationRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPalletNumberAllocator _palletNumberAllocator = palletNumberAllocator;
+
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
 			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
@@ -93,7 +81,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				existingReceipt.AttachPallet(pallet);
 			}
 			existingReceipt.UpdateReceipt(request.DTO.PerformedBy, request.DTO.ClientId, now);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Receipt {existingReceipt.ReceiptNumber} was updated.");
 		}
 	}

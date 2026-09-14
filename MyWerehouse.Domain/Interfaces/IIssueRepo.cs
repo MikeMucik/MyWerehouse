@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Receiving.Filters;
 
 namespace MyWerehouse.Domain.Interfaces
 {
@@ -16,11 +12,10 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeleteIssue(Issue issue);
 		Task<Issue?> GetIssueByIdAsync(Guid id, CancellationToken ct);
 		Task<Issue?> GetIssueByIdForModifyAsync(Guid id, CancellationToken ct);
-		Task<Issue?> GetIssueForViewIncludedByIdAsync(Guid id, CancellationToken ct);
 		Task<List<Issue>> GetIssuesByIdsAsync(List<Guid> ids, CancellationToken ct);
-		IQueryable<Issue> GetIssuesByFilter(IssueReceiptSearchFilter filter);
-		IQueryable<Pallet> GetPalletsByIssueId(Guid id);
+		Task<List<Issue>> GetIssuesByDates(DateOnly? startDate, DateOnly? endDate, CancellationToken ct);
 		Task<int> GetNextNumberOfIssue(CancellationToken ct);
 		Task<List<VirtualPallet>> GetVirtualPalletsAsync(Guid id, CancellationToken ct);
+		Task<bool> HasIssueClient(int clientId, CancellationToken ct);
 	}
 }

@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 {
-	public class FinishIssueNotCompletedHandler(WerehouseDbContext werehouseDbContext,
+	public class FinishIssueNotCompletedHandler(IUnitOfWork unitOfWork,
 		IIssueRepo issueRepo) : IRequestHandler<FinishIssueNotCompletedCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
 		public async Task<AppResult<Unit>> Handle(FinishIssueNotCompletedCommand request, CancellationToken ct)
@@ -23,7 +20,7 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 				return AppResult<Unit>.Fail("Issue was not found.");
 			var palletsReturn = issue.RemoveNotLoadedPallets(request.UserId);
 			issue.FinishIssueNotCompleted(request.UserId);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Issue {request.IssueId} was closed.");
 		}
 	}

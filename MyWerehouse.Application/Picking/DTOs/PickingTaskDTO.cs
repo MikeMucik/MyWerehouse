@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using MyWerehouse.Application.Common.Mapping;
-using MyWerehouse.Domain.Picking.Models;
+﻿using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Picking.DTOs
 {
-	public class PickingTaskDTO : IMapFrom<PickingTask>
+	public class PickingTaskDTO 
 	{
 		public Guid Id { get; init; }
 		public Guid IssueId { get; init; }
@@ -16,14 +14,6 @@ namespace MyWerehouse.Application.Picking.DTOs
 		public int RequestedQuantity { get; init; }
 		public int PickedQuantity { get; init; }//faktyczna pobrana ilość
 		public PickingStatus PickingStatus { get; init; }
-		public DateOnly? BestBefore { get; init; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<PickingTask, PickingTaskDTO>()
-				.ForMember(dest => dest.IssueNumber, opt => opt.MapFrom(static src => src.Issue.IssueNumber))
-				.ForMember(dest=>dest.SourcePalletId, opt=> opt.MapFrom(static src => src.VirtualPallet!.PalletId))		
-				.ForMember(dest=>dest.SourcePalletNumber, opt=> opt.MapFrom(static src => src.VirtualPallet!.Pallet!.PalletNumber))
-				.ForMember(dest=>dest.SKU, opt=>opt.MapFrom(static src => src.Product.SKU));			
-		}
+		public DateOnly? BestBefore { get; init; }	
 	}
 }

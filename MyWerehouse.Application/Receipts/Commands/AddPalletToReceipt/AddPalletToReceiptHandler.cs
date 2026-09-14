@@ -13,7 +13,7 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 {
-	public class AddPalletToReceiptHandler(WerehouseDbContext werehouseDbContext,
+	public class AddPalletToReceiptHandler(IUnitOfWork unitOfWork,
 		IReceiptRepo receiptRepo,
 		IPalletRepo palletRepo,
 		IProductRepo productRepo,
@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 		IPalletNumberAllocator palletNumberAllocator
 			) : IRequestHandler<AddPalletToReceiptCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IProductRepo _productRepo = productRepo;
@@ -57,7 +57,7 @@ namespace MyWerehouse.Application.Receipts.Commands.AddPalletToReceipt
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToReceipt(receipt.Id, snapShot, request.DTO.UserId);
 			_palletRepo.AddPallet(pallet);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Pallet {pallet.Id} was added to receipt {request.ReceiptId}.");
 		}
 	}

@@ -1,52 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.ViewModels.ClientModels;
-using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Clients.Filters;
-using MyWerehouse.Application.Common.Utils;
-using MyWerehouse.Application.Common.Results;
 using MediatR;
-using MyWerehouse.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Common.Utils;
+using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
+using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
+using MyWerehouse.Application.ViewModels.AddressModels;
+using MyWerehouse.Application.ViewModels.ClientModels;
+using MyWerehouse.Domain.Clients.Filters;
+using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Receiving.Filters;
+using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Services
 {
 	public class ClientService : IClientService
 	{
-		private readonly IClientRepo _clientRepo;
-		private readonly IMapper _mapper;
+		private readonly IClientRepo _clientRepo;		
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IIssueRepo _issueRepo;
-		private readonly WerehouseDbContext _werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork;
+		private readonly IClientReadService _clientReadService;
 		private readonly IValidator<AddClientDTO> _addClientValidator;
 		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
 
 		public ClientService(
-			IClientRepo clientRepo,
-			IMapper mapper,
+			IClientRepo clientRepo,			
 			IReceiptRepo receiptRepo,
 			IIssueRepo issueRepo,
-			WerehouseDbContext werehouseDbContext,
+			IUnitOfWork unitOfWork,
+			IClientReadService clientReadService,
 			IValidator<AddClientDTO> addClientValidator,
 			IValidator<UpdateClientDTO> updateClientValidator)
 		{
-			_clientRepo = clientRepo;
-			_mapper = mapper;
+			_clientRepo = clientRepo;			
 			_receiptRepo = receiptRepo;
 			_issueRepo = issueRepo;
-			_werehouseDbContext = werehouseDbContext;
+			_unitOfWork = unitOfWork;
+			_clientReadService = clientReadService;
 			_addClientValidator = addClientValidator;
 			_updateClientValidator = updateClientValidator;
 		}
@@ -58,26 +61,40 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var client = _mapper.Map<Client>(addClient);
-			var id = _clientRepo.AddClient(client);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			var addresses = new List<Address>();
+			foreach (var address in addClient.Addresses)
+			{
+				var item = new Address
+				{
+					Country = address.Country,
+					City = address.City,
+					Region = address.Region,
+					Phone = address.Phone,
+					PostalCode = address.PostalCode,
+					StreetName = address.StreetName,
+					StreetNumber = address.StreetNumber,
+					AdditionalEmail = address.AdditionalEmail,
+				};
+				addresses.Add(item);
+			}
+			var client = new Client
+			{
+				Name = addClient.Name,
+				Email = addClient.Email,
+				Description = addClient.Description,
+				FullName = addClient.FullName,
+				Addresses = addresses,
+			};
+			_clientRepo.AddClient(client);
+			await _unitOfWork.SaveChangesAsync(ct);
+			var id = client.Id;
 			return AppResult<int>.Success(id);
 		}
 		public async Task<AppResult<Unit>> DeleteClientAsync(int id, CancellationToken ct)
 		{
-			var filter = new ClientSearchFilter
-			{
-				Id = id
-			};
 			var client = await _clientRepo.GetClientByIdAsync(id, ct);
 			if (client == null) return AppResult<Unit>.Fail($"Client {id} does not exist.");
-			var filterReceipt = new IssueReceiptSearchFilter
-			{
-				ClientId = filter.Id
-			};
-			var receipt = _receiptRepo.GetReceiptByFilter(filterReceipt);
-			var issue = _issueRepo.GetIssuesByFilter(filterReceipt);
-			if (!await receipt.AnyAsync(ct) && !await issue.AnyAsync(ct))
+			if (!await _issueRepo.HasIssueClient(id, ct) && !await _receiptRepo.HasReceiptClient(id, ct))
 			{
 				_clientRepo.DeleteClient(client);
 			}
@@ -85,18 +102,17 @@ namespace MyWerehouse.Application.Services
 			{
 				_clientRepo.SwitchOffClient(client);
 			}
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
 		public async Task<AppResult<ClientDTO>> GetClientByIdAsync(int id, CancellationToken ct)
 		{
-			var client = await _clientRepo.GetClientToEditAsync(id, ct);
+			var client = await _clientReadService.GetClientByIdAsync(id, ct);
 			if (client == null)
 			{
 				return AppResult<ClientDTO>.Fail($"Client {id} was not found.");
 			}
-			var clientDTO = _mapper.Map<ClientDTO>(client);
-			return AppResult<ClientDTO>.Success(clientDTO);
+			return AppResult<ClientDTO>.Success(client);
 		}
 		public async Task<AppResult<Unit>> UpdateClientAsync(int id, UpdateClientDTO updatedClient, CancellationToken ct)
 		{
@@ -112,26 +128,63 @@ namespace MyWerehouse.Application.Services
 			existingClient.FullName = updatedClient.FullName;
 			existingClient.Name = updatedClient.Name;
 
-			CollectionSynchronizer.SynchronizeCollection(
-			 existingClient.Addresses,
-			 updatedClient.Addresses,
-			 a => a.Id, // Klucz dla adresu
-			 a => a.Id, // Klucz dla AddressDTO
-			 dto => _mapper.Map<Address>(dto), // Jak dodać nowy
-			 (dto, entity) => _mapper.Map(dto, entity), // Jak aktualizować
-			entity => existingClient.Addresses.Remove(entity)//Jak usuwać adresy
-			 );
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			var existingMap = existingClient.Addresses.ToDictionary(a => a.Id);
+			var incomingItems = updatedClient.Addresses.ToList();
+
+			var incomingIds = incomingItems
+				.Where(a => a.Id != 0)
+				.Select(a => a.Id)
+				.ToHashSet();
+
+			foreach (var incomingItem in incomingItems)
+			{
+				if (incomingItem.Id == 0)
+				{
+					existingClient.Addresses.Add(new Address
+					{
+						Country = incomingItem.Country,
+						City = incomingItem.City,
+						Region = incomingItem.Region,
+						AdditionalEmail = incomingItem.AdditionalEmail,
+						Phone = incomingItem.Phone,
+						PostalCode = incomingItem.PostalCode,
+						StreetName = incomingItem.StreetName,
+						StreetNumber = incomingItem.StreetNumber,
+					});
+					continue;
+				}
+				//jeśli jest taki adres(po Id) to podmień wartości
+				if (!existingMap.TryGetValue(incomingItem.Id, out var address))
+				{
+					return AppResult<Unit>.Fail($"Address {incomingItem.Id} was not found.");
+				}
+				address.Country = incomingItem.Country;
+				address.City = incomingItem.City;
+				address.Region = incomingItem.Region;
+				address.AdditionalEmail = incomingItem.AdditionalEmail;
+				address.Phone = incomingItem.Phone;
+				address.PostalCode = incomingItem.PostalCode;
+				address.StreetName = incomingItem.StreetName;
+				address.StreetNumber = incomingItem.StreetNumber;
+			}
+			var addressesToRemove = existingMap.Values
+				.Where(address => !incomingIds.Contains(address.Id))
+				.ToList();
+			foreach (var address in addressesToRemove)
+			{
+				existingClient.Addresses.Remove(address);
+			}
+
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
 
 		public async Task<AppResult<DetailsOfClientDTO>> DetailsOfClientAsync(int id, CancellationToken ct)
 		{
-			var client = await _clientRepo.GetClientByIdAsync(id, ct);
+			var client = await _clientReadService.DetailsOdClientAsync(id, ct);
 			if (client != null)
 			{
-				var clientToShow = _mapper.Map<DetailsOfClientDTO>(client);
-				return AppResult<DetailsOfClientDTO>.Success(clientToShow);
+				return AppResult<DetailsOfClientDTO>.Success(client);
 			}
 			else
 			{
@@ -139,26 +192,14 @@ namespace MyWerehouse.Application.Services
 			}
 		}
 
-		public async Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageNumber , int pageSize, ClientSearchFilter filter, CancellationToken ct)
+		public async Task<AppResult<PagedResult<ClientDTO>>> GetClientsByFilterAsync(int pageNumber, int pageSize, ClientSearchFilter filter, CancellationToken ct)
 		{
-
-			var clients = _clientRepo.GetClients(filter);
-			var clientsOrdered = clients
-				.OrderBy(p => p.Id);
-			var result = await clientsOrdered
-				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync(pageNumber, pageSize, ct);
-
+			var result = await _clientReadService.GetClientsByFilterAsync(pageNumber, pageSize, filter, ct);
 			return AppResult<PagedResult<ClientDTO>>.Success(result);
 		}
-		public async Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageNumber,int pageSize,  CancellationToken ct)
+		public async Task<AppResult<PagedResult<ClientDTO>>> GetAllClientsAsync(int pageNumber, int pageSize, CancellationToken ct)
 		{
-			var clients = _clientRepo.GetAllClients();
-			var clientsOrdered = clients
-			.OrderBy(p => p.Id);
-			var result = await clientsOrdered
-				.ProjectTo<ClientDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync(pageNumber, pageSize, ct);
+			var result = await _clientReadService.GetAllClientsAsync(pageNumber, pageSize, ct);
 			return AppResult<PagedResult<ClientDTO>>.Success(result);
 		}
 	}

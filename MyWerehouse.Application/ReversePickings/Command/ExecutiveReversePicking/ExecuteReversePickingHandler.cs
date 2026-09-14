@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.ReversePickings.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePicking
 {
-	public class ExecuteReversePickingHandler(WerehouseDbContext werehouseDbContext,
+	public class ExecuteReversePickingHandler(IUnitOfWork unitOfWork,
 		IReversePickingRepo reversePickingRepo,
 		IAddProductsToPalletService addProductsToPalletService,
 		IPalletRepo palletRepo,
 		ILocationRepo locationRepo
 		) : IRequestHandler<ExecuteReversePickingCommand, AppResult<ReversePickingResult>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IAddProductsToPalletService _addProductsToPalletService = addProductsToPalletService;
 		private readonly IPalletRepo _palletRepo = palletRepo;
@@ -93,7 +88,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			//zadanie dekompletacyjne
 			reversePicking.Complete();
 			reversePicking.AddHistory(command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<ReversePickingResult>.Success(result);
 		}
 	}

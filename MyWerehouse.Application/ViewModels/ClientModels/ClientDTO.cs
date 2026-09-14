@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 		public string Email { get; init; } = string.Empty;
 		public string Description { get; init; } = string.Empty;
 		public string FullName { get; init; } = string.Empty;
-		public ICollection<AddAddressDTO> Addresses { get; init; } = new List<AddAddressDTO>();
+		public ICollection<AddressDTO> Addresses { get; init; } = new List<AddressDTO>();
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Client, ClientDTO>()

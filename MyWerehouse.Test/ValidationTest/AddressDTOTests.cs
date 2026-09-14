@@ -14,8 +14,8 @@ namespace MyWerehouse.Test.ValidationTest
 		[Fact]
 		public void Add_Address_ProperDate_ShouldNotReturnValidationError()
 		{
-			var validator = new EditAddressDTOValidation();
-			var address = new EditAddressDTO
+			var validator = new AddressDTOValidation();
+			var address = new AddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -30,8 +30,8 @@ namespace MyWerehouse.Test.ValidationTest
 		[Fact]
 		public void Add_AddressInvalidCity_ShouldNotReturnValidationError()
 		{
-			var validator = new EditAddressDTOValidation();
-			var address = new EditAddressDTO
+			var validator = new AddressDTOValidation();
+			var address = new AddressDTO
 			{
 				City = "",
 				Country = "Poland",
@@ -41,13 +41,13 @@ namespace MyWerehouse.Test.ValidationTest
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			validator.TestValidate(address).ShouldHaveValidationErrorFor(nameof(EditAddressDTO.City));
+			validator.TestValidate(address).ShouldHaveValidationErrorFor(nameof(AddressDTO.City));
 		}
 		[Fact]
 		public void Add_AddressInvalidCountry_ShouldNotReturnValidationError()
 		{
-			var validator = new EditAddressDTOValidation();
-			var address = new EditAddressDTO
+			var validator = new AddressDTOValidation();
+			var address = new AddressDTO
 			{
 				City = "Warsaw",
 				Country = "",
@@ -57,7 +57,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Region = "Mazowieckie",
 				StreetNumber = "23/3"
 			};
-			validator.TestValidate(address).ShouldHaveValidationErrorFor(nameof(EditAddressDTO.Country));
+			validator.TestValidate(address).ShouldHaveValidationErrorFor(nameof(AddressDTO.Country));
 		}
 	}
 }

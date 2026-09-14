@@ -3,30 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.DTOs;
-using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter
 {
-	public class FindPalletsByFilterHandler(IPalletRepo palletRepo,
-		IMapper mapper) : IRequestHandler<FindPalletsByFilterQuery, AppResult<PagedResult<PalletSimplyDTO>>>
+	public class FindPalletsByFilterHandler(
+		IPalletReadService palletReadService) : IRequestHandler<FindPalletsByFilterQuery, AppResult<PagedResult<PalletSimplyDTO>>>
 	{
-		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IMapper _mapper = mapper;
+		private readonly IPalletReadService _palletReadService = palletReadService;
 		public async Task<AppResult<PagedResult<PalletSimplyDTO>>> Handle(FindPalletsByFilterQuery request, CancellationToken ct)
 		{
-			var pallets = _palletRepo.GetPalletsByFilter(request.Filter)
-				.AsNoTracking();
-			var palletsOrdered = pallets.OrderBy(p => p.Id);
-			var result = await palletsOrdered
-				.ProjectTo<PalletSimplyDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync(request.CurrentPage,request.PageSize,ct);
+			var result = await _palletReadService.GetPalletsByFilterAsync(request.Filter, request.CurrentPage, request.PageSize, ct);
+
 			if (result.TotalCount == 0) return AppResult<PagedResult<PalletSimplyDTO>>.Fail("No pallets match the specified criteria.");
 			return AppResult<PagedResult<PalletSimplyDTO>>.Success(result);
 		}

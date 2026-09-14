@@ -36,6 +36,8 @@ namespace MyWerehouse.Infrastructure
 			services.AddScoped<IReversePickingRepo, ReversePickingRepo>();
 
 			services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+			//services.
 			return services;
 		}
 	}

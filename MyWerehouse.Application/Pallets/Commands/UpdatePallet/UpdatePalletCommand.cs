@@ -8,5 +8,5 @@ using MyWerehouse.Application.Common.Results;
 
 namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
-	public record UpdatePalletCommand(Guid Id, EditPalletDTO UpdatingPallet) : IRequest<AppResult<Unit>>;
+	public record UpdatePalletCommand(Guid Id, UpdatePalletDTO UpdatingPallet) : IRequest<AppResult<Unit>>;
 }

@@ -14,6 +14,6 @@ namespace MyWerehouse.Domain.Interfaces
 		Task SwitchOffCategoryAsync(int idCategory, CancellationToken ct);
 		Task<Category?> GetCategoryByIdAsync(int id, CancellationToken ct);
 		Task<Category?> GetCategoryByNameAsync(string name, CancellationToken ct);
-		IQueryable<Category> GetAllCategories();
+		
 	}
 }

@@ -1,20 +1,19 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Picking.Services;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Services;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 {
 	public class ExecuteEmergencyPickingHandler(IPalletRepo palletRepo,
 		IPickingTaskRepo pickingTaskRepo,
 		IVirtualPalletRepo virtualPalletRepo,
-		WerehouseDbContext werehouseDbContext,
+		IUnitOfWork unitOfWork,
 		IIssueRepo issueRepo,
 		IAddPickingTaskToIssueService addPickingTaskToIssueService,
 		IExecuteProcessPickingService processPickingActionService,
@@ -24,7 +23,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
 		private readonly IExecuteProcessPickingService _processPickingActionService = processPickingActionService;
@@ -86,7 +85,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteEmergencyPicking
 					ErrorType.Conflict);
 			}
 			issue.CompletePicking();
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<ProcessPickingActionResult>.Success(resultProccessPicking, "Product was added to the issue.");
 		}
 	}

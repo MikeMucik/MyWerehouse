@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Azure.Core;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Picking.Services;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Services;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 {
 	public class ExecuteHandPickingHandler(IPalletRepo palletRepo,
 		IVirtualPalletRepo virtualPalletRepo,
-		WerehouseDbContext werehouseDbContext,
+		IUnitOfWork unitOfWork,
 		IIssueRepo issueRepo,
 		IExecuteProcessPickingService processPickingActionService,
 		IPickingDomainService pickingDomainService,
@@ -28,7 +22,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IExecuteProcessPickingService _processPickingActionService = processPickingActionService;
 		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
@@ -86,7 +80,7 @@ namespace MyWerehouse.Application.Picking.Commands.ExecuteHandPicking
 			}
 			pickingHandTask.CompleteHandPicking(command.PickedQuantity);
 			issue.CompletePicking();
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<ProcessPickingActionResult>.Success(resultProcessPicking, "Product was added to the issue.");
 		}
 	}

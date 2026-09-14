@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 {
 	public class DeleteIssueHandler(IIssueRepo issueRepo,
-		WerehouseDbContext werehouseDbContext,
+		IUnitOfWork unitOfWork,
 		IDateTimeProvider dateTimeProvider) : IRequestHandler<DeleteIssueCommand, AppResult<Unit>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<AppResult<Unit>> Handle(DeleteIssueCommand request, CancellationToken ct)
@@ -38,7 +35,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 				default:
 					return AppResult<Unit>.Fail($"Issue {issueToDelete.Id} cannot be cancelled.", ErrorType.Conflict);
 			}
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Issue {issueToDelete.Id} was deleted.");
 		}
 	}

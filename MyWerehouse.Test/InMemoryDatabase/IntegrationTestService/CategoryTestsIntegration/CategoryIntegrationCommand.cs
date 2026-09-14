@@ -7,6 +7,8 @@ using FluentValidation;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
+using MyWerehouse.Server;
+using MyWerehouse.Server.ServicesToInfrastructure;
 using MyWerehouse.Test.InMemoryDatabase.Common;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTestsIntegration
@@ -19,8 +21,10 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.CategoryTests
 		{
 			var _categoryRepo = new CategoryRepo(_context);
 			var _productRepo = new ProductRepo(_context);
+			var _unitOfWork = new UnitOfWork(_context);
 			_validator = new CategoryDTOValidation();
-			_categoryService = new CategoryService(_categoryRepo, _mapper, _context, _productRepo, _validator);
+			var _categoryReadServie = new CategoryReadService(_context);
+			_categoryService = new CategoryService(_unitOfWork, _categoryRepo, _productRepo, _validator, _categoryReadServie);
 		}
 	}
 }

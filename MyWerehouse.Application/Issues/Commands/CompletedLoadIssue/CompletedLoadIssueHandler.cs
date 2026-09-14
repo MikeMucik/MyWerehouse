@@ -5,16 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Commands.CompletedIssue;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CompletedLoadIssue
 {
-	public class CompletedLoadIssueHandler(WerehouseDbContext werehouseDbContext,
+	public class CompletedLoadIssueHandler(IUnitOfWork unitOfWork,
 		IIssueRepo issueRepo) : IRequestHandler<CompletedLoadIssueCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;	
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
 		public async Task<AppResult<Unit>> Handle(CompletedLoadIssueCommand request, CancellationToken ct)
@@ -23,7 +23,7 @@ namespace MyWerehouse.Application.Issues.Commands.CompletedLoadIssue
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			issue.CompletedLoad(request.UserId);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Loading completed for issue {request.IssueId}.");
 		}
 	}

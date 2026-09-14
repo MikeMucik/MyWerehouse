@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
 using MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter;
 using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Application.Pallets.Queries.GetPalletByPalletNumber;
@@ -42,7 +36,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.NotNull(result);
 			Assert.NotNull(result.Result);
 			Assert.Single(result.Result.ProductsOnPallet);
-			Assert.Equal(1, result.Result.LocationId);
+			//Assert.Equal(1, result.Result.LocationId);
 			Assert.Equal(PalletStatus.OnHold, result.Result.Status);
 			Assert.Equal(new DateTime(2020, 1, 1), result.Result.DateReceived);
 			var product1 = result.Result.ProductsOnPallet.Single(p => p.ProductId == productId1);
@@ -55,7 +49,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 		{
 			//Arrange
 			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
-					
+
 			var query = new GetPalletToEditQuery(palletGuid1);
 			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
@@ -91,7 +85,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				PageSize = 1,
 				CurrentPage = 1
 			};
-			var result =await _mediator.Send(query);
+			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotNull(result.Result);
@@ -112,7 +106,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				PageSize = 1,
 				CurrentPage = 1
 			};
-			var result =await _mediator.Send(query);
+			var result = await _mediator.Send(query);
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
@@ -129,7 +123,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			//Assert
 			Assert.NotNull(result.Result);
 			var expected = _fixture.DbContext.Pallets
-				.FirstOrDefault(p=>p.Id == palletGuid2);
+				.FirstOrDefault(p => p.Id == palletGuid2);
 			Assert.NotNull(expected);
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
@@ -138,21 +132,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 
 			var pallet = result.Result;
 
-			Assert.Equal(expected.Id, pallet.Id);
 			Assert.Equal(expected.PalletNumber, pallet.PalletNumber);
 			Assert.Equal(expected.DateReceived, pallet.DateReceived);
-			Assert.Equal(expected.LocationId, pallet.LocationId);
 			Assert.Equal(expected.Status, pallet.Status);
 
-			Assert.Equal(expected.ReceiptId, pallet.ReceiptId);
 			Assert.NotNull(expected.Receipt);
 			Assert.Equal(expected.Receipt.ReceiptNumber, pallet.ReceiptNumber);
-			Assert.Equal(expected.IssueId, pallet.IssueId);
 			Assert.NotNull(expected.Issue);
 			Assert.Equal(expected.Issue.IssueNumber, pallet.IssueNumber);
 
 			var product = Assert.Single(pallet.ProductsOnPallet);
 
+			Assert.NotNull(expected.ProductsOnPallet.First());
+			Assert.NotNull(product);
 			Assert.Equal(expected.ProductsOnPallet.First().ProductId, product.ProductId);
 			Assert.Equal(expected.ProductsOnPallet.First().Product.SKU, product.ProductSKU);
 			Assert.Equal(expected.ProductsOnPallet.First().Product.Name, product.ProductName);
@@ -189,7 +181,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.NotNull(result);
 			Assert.NotNull(result.Result);
 			Assert.True(result.IsSuccess);
-			var expected = _fixture.DbContext.Pallets.FirstOrDefault(p=>p.PalletNumber == palletNumber);
+			var expected = _fixture.DbContext.Pallets.FirstOrDefault(p => p.PalletNumber == palletNumber);
 			Assert.NotNull(expected);
 			Assert.Equal(expected.Id, result.Result.Id);
 		}

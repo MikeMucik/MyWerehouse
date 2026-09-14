@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -76,22 +76,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			//Act
 			var id = pallet.Id;
-			var updatedPallet = new EditPalletDTO
+			var updatedPallet = new UpdatePalletDTO
 			{
-				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = TestDates.Now,
 					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), })
 					]
 			};
@@ -107,7 +104,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Equal("Q1010", result.PalletNumber);
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
-			Assert.Equal(updatedPallet.LocationId, result.LocationId);
 
 			Assert.Equal(updatedPallet.ProductsOnPallet.Count, result.ProductsOnPallet.Count);
 			foreach (var dto in updatedPallet.ProductsOnPallet)
@@ -199,22 +195,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 
 			//Act
 			var id = pallet.Id;
-			var updatedPallet = new EditPalletDTO
+			var updatedPallet = new UpdatePalletDTO
 			{
-				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 50,
-					DateAdded = TestDates.Now,
 					BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)),
 				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)), })
 					]
 			};
@@ -235,7 +228,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.Equal("Q1010", result.PalletNumber);
 			Assert.NotNull(result);
 			Assert.Equal(updatedPallet.Status, result.Status);
-			Assert.Equal(updatedPallet.LocationId, result.LocationId);
 
 			Assert.Equal(updatedPallet.ProductsOnPallet.Count, result.ProductsOnPallet.Count);
 			foreach (var dto in updatedPallet.ProductsOnPallet)
@@ -311,9 +303,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			//Act
 			var id = pallet.Id;
-			var updatedPallet = new EditPalletDTO
+			var updatedPallet = new UpdatePalletDTO
 			{
-				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
 				ProductsOnPallet = [
@@ -321,26 +312,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),
 					(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) }),
 					(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 5, 4) }),
 					(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product3.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
@@ -405,22 +392,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			//Act
 			var id = pallet.Id;
-			var updatedPallet = new EditPalletDTO
+			var updatedPallet = new UpdatePalletDTO
 			{
-				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					]
 			};
@@ -488,22 +472,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			//Act
 			var id = pallet.Id;
-			var updatedPallet = new EditPalletDTO
+			var updatedPallet = new UpdatePalletDTO
 			{
-				LocationId = location.Id,
 				Status = PalletStatus.ToPicking,
 				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					]
 			};
@@ -536,28 +517,24 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			//Act&Assert
 			var id = pallet.Id;
-			var updatedPallet = new EditPalletDTO
+			var updatedPallet = new UpdatePalletDTO
 			{
-				LocationId = 1,
 				Status = PalletStatus.ToPicking,
 				UserId = "usert",
 				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
 				(new ProductOnPalletUpdateDTO
 				{
 					Quantity = 0,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2024, 5, 4) })
 					]
 			};
@@ -587,33 +564,29 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			DbContext.SaveChanges();
 			//Act&Assert
 			var id = pallet.Id;
-			var updatedPallet = new EditPalletDTO
+			var updatedPallet = new UpdatePalletDTO
 			{
 				UserId = "user",
 				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
 				{
 					ProductId = product.Id,
 					Quantity = 100,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 3)
 				}),(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product1.Id,
 					Quantity = 300,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 3, 4) })
 					,
 				(new ProductOnPalletUpdateDTO
 				{
 					ProductId = product2.Id,
 					Quantity = 200,
-					DateAdded = TestDates.Now,
 					BestBefore = new DateOnly(2027, 5, 4) })
 					]
 			};
 			var ex = await Assert.ThrowsAsync<ValidationException>(() => Mediator.Send(new UpdatePalletCommand(id, updatedPallet)));
 			Assert.Contains("Pallet status is required.", ex.Message);
-			Assert.Contains("Pallet location is required.", ex.Message);
 		}
 	}
 }

@@ -22,16 +22,10 @@ namespace MyWerehouse.Application.Pallets.DTOs
 			RuleFor(pp => pp.Quantity)
 				.GreaterThan(0)
 				.WithMessage("Product quantity must be greater than zero.");
-			RuleFor(pp => pp.DateAdded)
-				.NotNull()
-				.WithMessage("Product receipt date is required.");
 			RuleFor(pp => pp.BestBefore)
 				.GreaterThan(dateTimeProvider.Today)
 				.WithMessage("Best-before date must be later than today.")
 				.When(pp => pp.BestBefore != null);
-			RuleFor(p => p.PalletId)
-				.NotNull()
-				.WithMessage("Pallet Id is requierd");
 		}
 	}
 }

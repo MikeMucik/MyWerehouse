@@ -31,21 +31,11 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 			return await _werehouseDbContext.Receipts
 				.Include(r => r.Pallets)
 					.ThenInclude(pr => pr.ProductsOnPallet)
-				.Include(l=>l.Pallets)//do swaggera by mógł zrobić snpaShot
-					.ThenInclude(l=>l.Location)
-				.FirstOrDefaultAsync(r => r.Id == id, ct);
-		}
-		public async Task<Receipt?> GetReceiptWithAllIncludesByIdAsync(Guid id, CancellationToken ct)
-		{
-			return await _werehouseDbContext.Receipts
-				.Include(c=>c.Client)
-				.Include(r => r.Pallets)
-					.ThenInclude(pr => pr.ProductsOnPallet)
-						.ThenInclude(pro=>pro.Product)
 				.Include(l => l.Pallets)
 					.ThenInclude(l => l.Location)
 				.FirstOrDefaultAsync(r => r.Id == id, ct);
 		}
+		
 		public async Task<Receipt?> GetReceipForCancelByIdAsync(Guid id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Receipts
@@ -55,48 +45,23 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 					.ThenInclude(p => p.Location)
 				.FirstOrDefaultAsync(r => r.Id == id, ct);
 		}
-		public IQueryable<Receipt> GetReceiptByFilter(IssueReceiptSearchFilter filter)
-		{
-			var result = _werehouseDbContext.Receipts
-				.AsQueryable();
-			if (filter.ReceiptNumber != null && filter.ReceiptNumber != 0)
-			{
-				result = result.Where(i => i.ReceiptNumber == filter.ReceiptNumber);
-			}
-			if (filter.ClientId > 0)
-			{
-				result = result.Where(i => i.ClientId == filter.ClientId);
-			}
-			if (filter.ClientName != null)
-			{
-				result = result.Where(i => i.Client.Name == filter.ClientName);
-			}
-			if (filter.ProductId.HasValue)
-			{
-				result = result.Where(i => i.Pallets.Any(ip => ip.ProductsOnPallet.Any(ipp => ipp.ProductId == filter.ProductId)));
-			}
-			if (filter.ProductName != null)
-			{
-				result = result.Where(i => i.Pallets.Any(ip => ip.ProductsOnPallet.Any(ipp => ipp.Product.Name == filter.ProductName)));
-			}
-			if (filter.CreateDateStart != null)
-			{
-				var start = filter.CreateDateStart;
-				var end = filter.CreateDateEnd ?? DateTime.UtcNow;
-
-				result = result.Where(i => i.ReceiptDateTime >= start && i.ReceiptDateTime <= end);
-			}
-			if (filter.UserId != null)
-			{
-				result = result.Where(i => i.PerformedBy == filter.UserId);
-			}
-			return result;
-		}
-
+		
 		public async Task<int> GetNextNumberOfReceipt(CancellationToken ct)
 		{
 			var number = await _werehouseDbContext.Receipts.MaxAsync(x => (int?)x.ReceiptNumber, ct) ??0;
 			return number + 1;
+		}
+
+		public Task<bool> HasReceiptClient(int clientId, CancellationToken ct)
+		{
+			return _werehouseDbContext.Receipts
+				.AnyAsync(x => x.ClientId == clientId, ct);
+		}
+
+		public Task<bool> HasReceiptProduct(Guid productId, CancellationToken ct)
+		{
+			return _werehouseDbContext.Receipts
+				.AnyAsync(x => x.Pallets.Any(p => p.ProductsOnPallet.Any(pp=>pp.ProductId == productId)), ct);
 		}
 	}
 }

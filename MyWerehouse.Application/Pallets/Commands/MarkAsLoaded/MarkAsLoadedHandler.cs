@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
@@ -12,11 +13,12 @@ using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 {
-	public class MarkAsLoadedHandler(WerehouseDbContext werehouseDbContext,
+	public class MarkAsLoadedHandler(
+		IUnitOfWork unitOfWork,
 		IPalletRepo palletRepo,
 		IDateTimeProvider dateTimeProvider) : IRequestHandler<MarkAsLoadedCommand, AppResult<MarkPalletAsLoadedResponseDTO>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
@@ -26,7 +28,7 @@ namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 			if (pallet == null)
 				return AppResult<MarkPalletAsLoadedResponseDTO>.Fail($"The specified pallet does not exist.");
 			pallet.MarkAsLoaded(request.UserId, pallet.Location.ToSnapshot());
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			var respone = new MarkPalletAsLoadedResponseDTO
 			{
 				PalletId = pallet.Id,

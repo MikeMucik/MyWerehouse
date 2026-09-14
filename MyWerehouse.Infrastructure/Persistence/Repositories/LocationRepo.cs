@@ -36,17 +36,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(l => l.Pallets.Count() == 0)
 				.OrderBy(l => l.Id);
 			return locations;
-		}
-		public async Task<Location?> FindLocationAsync(int Bay, int Aisle, int Position, int Height, CancellationToken ct)
-		{
-			var location = await _werehouseDbContext.Locations
-				.FirstOrDefaultAsync(x => x.Bay == Bay &&
-								x.Aisle == Aisle &&
-								x.Position == Position &&
-								x.Height == Height, ct);
-			if (location == null) return null;
-			return location;
-		}
+		}		
 
 		public IEnumerable<Location> CreateListLocationForBay(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt)
 		{

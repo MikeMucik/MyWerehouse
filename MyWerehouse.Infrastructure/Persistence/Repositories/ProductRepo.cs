@@ -39,95 +39,40 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public async Task<string?> GetSKUForProductAsync(Guid id, CancellationToken ct)
 		{
-			if (id == Guid.Empty)
-			{
-				return null;
-			}
-			var product = await _werehouseDbContext.Products
-				.FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false, ct);
-			return product!.SKU;//required
+			return await _werehouseDbContext.Products
+				.Where(p=>!p.IsDeleted && p.Id == id)
+				.Select(p=>p.SKU)
+				.FirstOrDefaultAsync(ct);
 		}
 		public async Task<Product?> GetProductToEditAsync(Guid id, CancellationToken ct)
 		{
 			if (id != Guid.Empty)
 			{
 				var product = await _werehouseDbContext.Products
+					.Where(x => !x.IsDeleted)
 					.Include(p => p.Details)
 					.FirstOrDefaultAsync(p => p.Id == id, ct);
 				return product;
 			}
 			return null;
 		}
-		public async Task<Product?> GetProductDetailsAsync(Guid id, CancellationToken ct)
+		public Task<bool> IsExistProduct(Guid id, CancellationToken ct)
 		{
-			if (id != Guid.Empty)
-			{
-				var product = await _werehouseDbContext.Products
-					.Include(p => p.Category)
-					.Include(p => p.Details)
-					.FirstOrDefaultAsync(p => p.Id == id, ct);
-				return product;
-			}
-			return null;
+			return _werehouseDbContext.Products
+				.Where(x=>!x.IsDeleted)
+				.AnyAsync(p=>p.Id == id, ct);	
 		}
 
-		public IQueryable<Product> GetAllProducts()
+		public Task<bool> HasProductsInCategory(int categoryId, CancellationToken ct)
 		{
-			return _werehouseDbContext.Products.Where(p => p.IsDeleted == false);
-		}
-		public IQueryable<Product> FindProducts(ProductSearchFilter filter)
-		{
-			var result = _werehouseDbContext.Products
-				.AsQueryable();
-
-			if (!string.IsNullOrEmpty(filter.ProductName))
-			{
-				result = result.Where(p => p.Name != null && p.Name.StartsWith(filter.ProductName));
-
-			}
-			if (!string.IsNullOrEmpty(filter.SKU))
-			{
-				result = result.Where(p => p.SKU != null && p.SKU.StartsWith(filter.SKU));
-			}
-			if (!string.IsNullOrEmpty(filter.Category))
-			{
-				result = result.Where(p => p.Category.Name != null && p.Category.Name.StartsWith(filter.Category));
-			}
-			if (filter.CategoryId > 0)
-			{
-				result = result.Where(p => p.CategoryId == filter.CategoryId);
-			}
-			if (filter.Height.HasValue && filter.Height > 0)
-			{
-				result = result.Where(p =>
-				p.Details != null &&
-				p.Details.Height == filter.Height);
-			}
-			if (filter.Weight.HasValue && filter.Weight > 0)
-			{
-				result = result.Where(p =>
-				p.Details != null &&
-				p.Details.Weight == filter.Weight);
-			}
-			if (filter.Width.HasValue && filter.Width > 0)
-			{
-				result = result.Where(p =>
-				p.Details != null &&
-				p.Details.Width == filter.Width);
-			}
-			if (filter.Length.HasValue && filter.Length > 0)
-			{
-				result = result.Where(p =>
-				p.Details != null &&
-				p.Details.Length == filter.Length);
-			}
-			return result;
+			return _werehouseDbContext.Products
+					   .AnyAsync(p => p.CategoryId == categoryId, ct);
 		}
 
-		public async Task<bool> IsExistProduct(Guid id, CancellationToken ct)
+		public Task<bool> AlreadyExist(string name, string sku)
 		{
-			if (await _werehouseDbContext.Products.FindAsync([id], ct) != null) { return true; }
-			return false;
+			return _werehouseDbContext.Products
+				.AnyAsync(p => p.Name == name || p.SKU == sku);
 		}
 	}
 }

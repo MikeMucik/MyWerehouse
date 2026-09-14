@@ -13,7 +13,6 @@ namespace MyWerehouse.Domain.Interfaces
 		void DeleteLocation(Location location);
 		Task<Location?> GetLocationByIdAsync(int locationId, CancellationToken ct);
 		IQueryable<Location> GetAllAvailableLocations();
-		Task<Location?> FindLocationAsync(int Bay, int Aisle, int Position, int Height, CancellationToken ct);
 		IEnumerable<Location> CreateListLocationForBay(int Bay, int StartAisle, int EndAisle, int AmountPosition, int AmountHeight);
 		Task<bool> ReceivingRampExistsAsync(int locationId, CancellationToken ct);
 		Task<bool> ExistsByCoordinatesAsync(int bay, int aisle, int position, int height, CancellationToken ct);

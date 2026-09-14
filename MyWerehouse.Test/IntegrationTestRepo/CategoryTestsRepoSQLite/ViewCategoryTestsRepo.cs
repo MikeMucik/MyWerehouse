@@ -21,16 +21,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.CategoryTestsRepoSQLite
 			_categoryRepo = new CategoryRepo(_fixture.DbContext);
 		}
 
-		[Fact]
-		public void ShowAllCategories_GetAllCategories_ReturnList()
-		{
-			// Arrange & Act
-			var result = _categoryRepo.GetAllCategories();
-			// Assert
-			Assert.NotNull(result);
-			Assert.Equal(3, result.Count());
-		}
-
+		
 		[Fact]
 		public async Task ShowCategoryById_GetCategoryByIdAsync()
 		{

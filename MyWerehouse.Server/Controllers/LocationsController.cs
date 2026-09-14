@@ -42,7 +42,7 @@ namespace MyWerehouse.Server.Controllers
 
 		[HttpGet("search")]
 		public async Task<IActionResult> Search(int bay, int aisle, int position, int height, CancellationToken ct)
-			=> (await _locationService.FindLocationAsync(bay, aisle, position, height, ct))
+			=> (await _locationService.FindLocationIdAsync(bay, aisle, position, height, ct))
 			.ToActionResult();
 	}
 }

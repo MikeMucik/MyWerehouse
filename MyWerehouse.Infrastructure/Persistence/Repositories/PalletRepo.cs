@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
@@ -32,100 +31,12 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Include(p => p.Issue)
 				.FirstOrDefaultAsync(p => p.Id == palletId, ct);
 		}
-		public async Task<Pallet?> GetPalletByIdFullInfoAsync(Guid palletId, CancellationToken ct)
-		{
-			return await _werehouseDbContext.Pallets
-				.Include(p => p.ProductsOnPallet)
-					.ThenInclude(pp => pp.Product)
-				.Include(p => p.PalletHistory)
-				.Include(p => p.Location)
-				.Include(p => p.Receipt)
-				.Include(p => p.Issue)
-				.FirstOrDefaultAsync(p => p.Id == palletId, ct);
-		}
 		public async Task<Pallet?> GetPalletByPalletNumberAsync(string palletNumber, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Pallets
 				.FirstOrDefaultAsync(p => p.PalletNumber == palletNumber, ct);
 		}
-		public IQueryable<Pallet> GetPalletsByFilter(PalletSearchFilter filter)
-		{
-			var result = _werehouseDbContext.Pallets
-				.Include(a => a.ProductsOnPallet)
-				.Where(p => p.Status != PalletStatus.Archived);
-
-			if (!string.IsNullOrEmpty(filter.PalletNumber))
-			{
-				result = result.Where(p => p.PalletNumber == filter.PalletNumber);
-			}
-			if (filter.ProductId.HasValue)
-			{
-				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
-			}
-			if (!string.IsNullOrWhiteSpace(filter.ProductName))
-			{
-				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.Product != null &&
-				EF.Functions.Like(pp.Product.Name.ToLower(), $"%{filter.ProductName.ToLower()}%")));
-			}
-			if (!string.IsNullOrWhiteSpace(filter.SKU))
-			{
-				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.Product.SKU == filter.SKU));
-			}
-			if (filter.LocationBay > 0)
-			{
-				result = result.Where(p => p.Location.Bay == filter.LocationBay);
-			}
-			if (filter.LocationAisle > 0)
-			{
-				result = result.Where(p => p.Location.Aisle == filter.LocationAisle);
-			}
-			if (filter.LocationPosition > 0)
-			{
-				result = result.Where(p => p.Location.Position == filter.LocationPosition);
-			}
-			if (filter.LocationHeight > 0)
-			{
-				result = result.Where(p => p.Location.Height == filter.LocationHeight);
-			}
-			if (filter.PalletStatus.HasValue)
-			{
-				result = result.Where(p => p.Status == filter.PalletStatus);
-			}
-			if (filter.BestBeforeFrom != null || filter.BestBeforeTo != null)
-			{
-				var bestBeforeStart = filter.BestBeforeFrom ?? DateOnly.MinValue;
-				var bestBeforeEnd = filter.BestBeforeTo ?? DateOnly.MaxValue;
-				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.BestBefore >= bestBeforeStart && pp.BestBefore <= bestBeforeEnd));
-			}
-			if (filter.StartDate != null)
-			{
-				var start = filter.StartDate.Value;
-				var end = filter.EndDate ?? DateTime.Now;
-
-				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.DateAdded >= start && pp.DateAdded <= end));
-			}
-			if (filter.ClientIdIn != null)
-			{
-				result = result.Where(p => p.Receipt != null && p.Receipt.ClientId == filter.ClientIdIn);
-			}
-			if (filter.ClientIdOut != null)
-			{
-				result = result.Where(p => p.Issue != null && p.Issue.ClientId == filter.ClientIdOut);
-			}
-			if (!string.IsNullOrEmpty(filter.ReceiptUser))
-			{
-				result = result.Where(p => p.Receipt != null && p.Receipt.PerformedBy == filter.ReceiptUser);
-			}
-			if (!string.IsNullOrEmpty(filter.IssueUser))
-			{
-				result = result.Where(p => p.Issue != null && p.Issue.PerformedBy == filter.IssueUser);
-			}
-			return result;
-		}
+		
 		public async Task<int> ReservePalletNumbersAsync(int count, CancellationToken ct)
 		{
 			ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);

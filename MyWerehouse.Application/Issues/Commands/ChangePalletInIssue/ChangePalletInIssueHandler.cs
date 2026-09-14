@@ -5,16 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 {
-	public class ChangePalletInIssueHandler(WerehouseDbContext werehouseDbContext,
+	public class ChangePalletInIssueHandler(IUnitOfWork unitOfWork,
 		IIssueRepo issueRepo,
 		IPalletRepo palletRepo) : IRequestHandler<ChangePalletInIssueCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 
@@ -32,7 +32,7 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 				return AppResult<Unit>.Fail($"Replacement pallet {request.NewPalletId} does not exist.");
 			var bestBefore = issue.IssueItems.Single(x=>x.ProductId == palletToRemoveFromIssue.ProductsOnPallet.Single().ProductId).BestBefore;
 			issue.ReplacePalletInIssue(palletToRemoveFromIssue, palletToAddingIssue, request.UserId, bestBefore);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Pallets were replaced.");
 		}
 	}

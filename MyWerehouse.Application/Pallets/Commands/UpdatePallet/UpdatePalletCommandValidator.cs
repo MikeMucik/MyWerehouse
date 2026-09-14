@@ -15,9 +15,6 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			RuleFor(p => p.UpdatingPallet.Status)
 				.NotEmpty()
 				.WithMessage("Pallet status is required.");
-			RuleFor(p => p.UpdatingPallet.LocationId)
-				.GreaterThan(0)
-				.WithMessage("Pallet location is required.");
 			RuleFor(p => p.UpdatingPallet.ProductsOnPallet)
 				.NotEmpty()
 				.WithMessage("Pallet must contain at least one product.");

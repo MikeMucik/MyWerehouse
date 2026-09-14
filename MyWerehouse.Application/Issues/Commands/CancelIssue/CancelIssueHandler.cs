@@ -5,20 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Services;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 {
 	public class CancelIssueHandler(IIssueRepo issueRepo,
 		IPickingTaskRepo pickingTaskRepo,
-		IVirtualPalletRepo virtualPalletRepo,
-		WerehouseDbContext werehouseDbContext,
+		IVirtualPalletRepo virtualPalletRepo,IUnitOfWork unitOfWork,
 		ICreateReversePickingService createReversePickingService,
 		IDateTimeProvider dateTimeProvider,
 		IPickingDomainService pickingDomainService
@@ -27,7 +24,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
 		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly ICreateReversePickingService _createReversePickingService = createReversePickingService;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
@@ -62,7 +59,7 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 			}
 			issue.DetachPallets(request.UserId);
 			issue.Cancel(request.UserId);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Issue {request.IssueId} was cancelled.");
 		}
 	}

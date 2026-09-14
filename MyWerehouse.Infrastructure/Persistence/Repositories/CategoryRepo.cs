@@ -19,11 +19,11 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 
 		public void AddCategory(Category category)
 		{
-			 _werehouseDbContext.Categories.Add(category);
+			_werehouseDbContext.Categories.Add(category);
 		}
 		public void DeleteCategory(Category category)
 		{
-				_werehouseDbContext.Categories.Remove(category);
+			_werehouseDbContext.Categories.Remove(category);
 		}
 		public async Task SwitchOffCategoryAsync(int idCategory, CancellationToken ct)
 		{
@@ -35,15 +35,14 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public async Task<Category?> GetCategoryByIdAsync(int id, CancellationToken ct)
 		{
-			return await _werehouseDbContext.Categories.SingleOrDefaultAsync(c => c.Id == id, ct);
+			return await _werehouseDbContext.Categories
+				.Where(x=>x.IsDeleted ==  false)
+				.SingleOrDefaultAsync(c => c.Id == id, ct);
 		}
 		public async Task<Category?> GetCategoryByNameAsync(string name, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Categories.SingleOrDefaultAsync(c => c.Name == name, ct);
 		}
-		public IQueryable<Category> GetAllCategories()
-		{
-			return _werehouseDbContext.Categories;
-		}
+		
 	}
 }

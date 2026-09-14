@@ -1,43 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Application.Interfaces;
 
 namespace MyWerehouse.Application.Picking.Queries.GetListToPickingFlat
 {//Lista ile danego towaru dla danej alokacji Product's list by pickingTasks
  //klient -> zamówienie -> produkt -> ilośc -  płasko
-	public class GetListToPickingHandler(IPickingTaskRepo pickingTaskRepo) : IRequestHandler<GetListToPickingQuery, AppResult<List<ProductToIssueDTO>>>
+	public class GetListToPickingHandler(IPickingReadService pickingReadService) : IRequestHandler<GetListToPickingQuery, AppResult<List<ProductToIssueDTO>>>
 	{
-		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;	
+		private readonly IPickingReadService _pickingReadService = pickingReadService;
 
 		public async Task<AppResult<List<ProductToIssueDTO>>> Handle(GetListToPickingQuery request, CancellationToken ct)
 		{
-			var data = await _pickingTaskRepo.GetPickingTaskFlats(request.DateIssueStart, request.DateIssueEnd)
-				.OrderBy(x => x.ClientId)
-				.ThenBy(x => x.IssueId)
-				.ThenBy(x => x.ProductId)
-				.ToListAsync(ct);
+			var data = await _pickingReadService.GetProductToIssueList(request.DateIssueStart, request.DateIssueEnd, ct);
 
 			if (data.Count == 0)
 			{
 				return AppResult<List<ProductToIssueDTO>>.Fail("No picking items to display.");
-			}
-			var result = data.Select(x => new ProductToIssueDTO
-			{
-				ClientIdOut = x.ClientId,
-				IssueId = x.IssueId,
-				IssueNumber = x.IssueNumber,
-				ProductId = x.ProductId,
-				SKU = x.SKU,
-				Quantity = x.Quantity,
-			}).ToList();
-
-			return AppResult<List<ProductToIssueDTO>>.Success(result);
+			}			
+			return AppResult<List<ProductToIssueDTO>>.Success(data);
 		}
 	}
 }

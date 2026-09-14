@@ -110,6 +110,58 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(20, comparison.QuantityPrepared);
 		}
 		[Fact]
+		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenPalletsAreLockedForIssue()
+		{
+			//Arrange
+			var client = CreateClient();
+			var category = CreateCategory("Cat");
+			var location = CreateLocation(1);
+			var product = CreateProduct("Prod1", "SKU1", 1);
+
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.Add(product);
+			DbContext.Locations.Add(location);
+			DbContext.SaveChanges();
+			var issueId = Guid.NewGuid();
+			var issueItem = new List<IssueItem>{
+				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+			};
+			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.Pending, issueItem);
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issueId);
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issueId);
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+
+			DbContext.Pallets.AddRange(pallet1, pallet2);
+			DbContext.Issues.Add(issue);
+			await DbContext.SaveChangesAsync();
+			//Act
+			var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
+			//Assert
+			Assert.True(result.IsSuccess);
+			var issueAfter = DbContext.Issues.Find(issue.Id);
+			var pallet1After = DbContext.Pallets.Find(pallet1.Id);
+			var pallet2After = DbContext.Pallets.Find(pallet2.Id);
+			Assert.Equal(PalletStatus.ToIssue, pallet1After!.Status);
+			Assert.Equal(PalletStatus.ToIssue, pallet2After!.Status);
+			Assert.NotNull(issueAfter);
+			Assert.Equal(IssueStatus.ConfirmedToLoad, issueAfter.IssueStatus);
+			var savedIssue = await DbContext.Issues
+				.Include(i => i.Pallets).ThenInclude(p => p.ProductsOnPallet)
+				.Include(i => i.IssueItems)
+				.FirstOrDefaultAsync(i => i.Id == issue.Id);
+			Assert.NotNull(savedIssue);
+			Assert.Equal(2, savedIssue.Pallets.Count);
+			Assert.Single(savedIssue.IssueItems);
+			Assert.All(savedIssue.Pallets, p => Assert.True(p.ProductsOnPallet.Any()));
+			var comparison = Assert.Single(result.Result!);
+			Assert.Equal(20, comparison.QuantityRequest);
+			Assert.Equal(20, comparison.QuantityPrepared);
+		}
+		[Fact]
 		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenStatusInProgress()
 		{
 			//Arrange
@@ -245,7 +297,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(IssueStatus.PickingShortage, issueAfter.IssueStatus);
 		}
 		[Fact]
-		public async Task VerifyIssueToLoadAsync_ShouldChangeStatus_WhenWrongStatusPallets()
+		public async Task VerifyIssueToLoad_ShouldRejectIssue_WhenAssignedPalletIsAvailable()
 		{
 			//Arrange
 			var client = CreateClient();
@@ -264,7 +316,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
-			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issueId);
+			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, issueId);
 			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
@@ -277,14 +329,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var ex = await Assert.ThrowsAsync<PalletsNotReadyToLoadDomainException>(() => Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123")));
 			Assert.Contains("Not all pallets are ready to load", ex.Message);
 			
-			////Act
-			//var result = await Mediator.Send(new VerifyIssueToLoadCommand(issue.Id, "user123"));
-			////Assert
-			//Assert.NotNull(result);
-			//Assert.False(result.IsSuccess);
-			//Assert.NotNull(result.Result);
-			//Assert.Contains("Issue was not approved.", result.Error);
-			//Assert.Contains(result.Result, x => x.Message.Contains("Not all pallets to be loaded have the required status."));
 
 		}
 		[Fact]

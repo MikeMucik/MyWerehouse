@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Interfaces;
@@ -14,9 +11,7 @@ using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
-using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Common;
 
@@ -25,8 +20,8 @@ namespace MyWerehouse.Application.Services
 	public class ProductService : IProductService
 	{
 		private readonly IProductRepo _productRepo;
-		private readonly IMapper _mapper;
-		private readonly WerehouseDbContext _werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork;
+		private readonly IProductReadService _productReadService;
 		private readonly IInventoryRepo _inventoryRepo;
 		private readonly ICategoryRepo _categoryRepo;
 		private readonly IReceiptRepo _receiptRepo;
@@ -36,8 +31,8 @@ namespace MyWerehouse.Application.Services
 
 		public ProductService(
 			IProductRepo repo,
-			IMapper mapper,
-			WerehouseDbContext werehouseDbContext,
+			IUnitOfWork unitOfWork,
+			IProductReadService productReadService,
 			IInventoryRepo inventoryRepo,
 			ICategoryRepo categoryRepo,
 			IReceiptRepo receiptRepo,
@@ -46,8 +41,8 @@ namespace MyWerehouse.Application.Services
 			IDateTimeProvider dateTimeProvider)
 		{
 			_productRepo = repo;
-			_mapper = mapper;
-			_werehouseDbContext = werehouseDbContext;
+			_unitOfWork = unitOfWork;
+			_productReadService = productReadService;
 			_inventoryRepo = inventoryRepo;
 			_categoryRepo = categoryRepo;
 			_receiptRepo = receiptRepo;
@@ -63,10 +58,9 @@ namespace MyWerehouse.Application.Services
 			{
 				throw new ValidationException(validationResult.Errors);
 			}
-			var existingProduct = _productRepo.FindProducts(new ProductSearchFilter { ProductName = productDTO.Name });
-			if (await existingProduct.AnyAsync(ct))
+			if (await _productRepo.AlreadyExist(productDTO.Name, productDTO.SKU))
 			{
-				return AppResult<Guid>.Fail("A product with this name already exists.");
+				return AppResult<Guid>.Fail("A product with this name/SKU already exists.");
 			}
 			var existCategory = await _categoryRepo.GetCategoryByIdAsync(productDTO.CategoryId, ct);
 			if (existCategory == null)
@@ -91,7 +85,7 @@ namespace MyWerehouse.Application.Services
 			var product = _productRepo.AddProduct(productPrepare);
 			var inventory = Inventory.CreateStockItem(product.Id, 0, _dateTimeProvider.UtcNow);
 			_inventoryRepo.AddInventory(inventory);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Guid>.Success(product.Id);
 		}
 		public async Task<AppResult<Unit>> DeleteProductAsync(Guid id, CancellationToken ct)
@@ -101,12 +95,7 @@ namespace MyWerehouse.Application.Services
 			{
 				return AppResult<Unit>.Fail("No product with this ID was found.");
 			}
-			var filter = new IssueReceiptSearchFilter
-			{
-				ProductId = id
-			};
-			var receipt = _receiptRepo.GetReceiptByFilter(filter);
-			if (await receipt.AnyAsync(ct))
+			if (await _receiptRepo.HasReceiptProduct(id, ct))
 			{
 				product.Hide();
 			}
@@ -114,18 +103,17 @@ namespace MyWerehouse.Application.Services
 			{
 				_productRepo.DeleteProduct(product);
 			}
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
 		public async Task<AppResult<EditProductDTO>> GetProductToEditAsync(Guid id, CancellationToken ct)
 		{
-			var product = await _productRepo.GetProductToEditAsync(id, ct);
+			var product = await _productReadService.GetProductToEditAsync(id, ct);
 			if (product == null)
 			{
 				return AppResult<EditProductDTO>.Fail($"Product {id} does not exist.");
 			}
-			var productDTO = _mapper.Map<EditProductDTO>(product);
-			return AppResult<EditProductDTO>.Success(productDTO);
+			return AppResult<EditProductDTO>.Success(product);
 		}
 		public async Task<AppResult<Unit>> UpdateProductAsync(Guid id, EditProductDTO productDTO, CancellationToken ct)
 		{
@@ -158,36 +146,24 @@ namespace MyWerehouse.Application.Services
 				productDTO.Width,
 				productDTO.Weight,
 				productDTO.Description);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value);
 		}
 		public async Task<AppResult<DetailsOfProductDTO>> DetailsOfProductAsync(Guid id, CancellationToken ct)
 		{
-			var product = await _productRepo.GetProductDetailsAsync(id, ct);
+			var product = await _productReadService.DetailsOfProductAsync(id, ct);
 			if (product == null) return AppResult<DetailsOfProductDTO>.Fail("No product data to display.");
-			var productDTO = _mapper.Map<DetailsOfProductDTO>(product);
-
-			return AppResult<DetailsOfProductDTO>.Success(productDTO);
+			return AppResult<DetailsOfProductDTO>.Success(product);
 		}
 		public async Task<AppResult<PagedResult<ProductDTO>>> GetProductsAsync(int pageNumber, int pageSize, CancellationToken ct)
 		{
-			var products = _productRepo.GetAllProducts();
-			var productsOrdered = products
-			.OrderBy(p => p.Id);
-			var result = await productsOrdered
-				.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync(pageNumber, pageSize, ct);
-			return AppResult<PagedResult<ProductDTO>>.Success(result);
+			var products = await _productReadService.GetProductsAsync(pageNumber, pageSize, ct);
+			return AppResult<PagedResult<ProductDTO>>.Success(products);
 		}
 		public async Task<AppResult<PagedResult<ProductDTO>>> FindProductsByFilterAsync(int pageNumber, int pageSize, ProductSearchFilter filter, CancellationToken ct)
 		{
-			var products = _productRepo.FindProducts(filter);
-			var productsOrdered = products
-				.OrderBy(p => p.Id);
-			var result = await productsOrdered
-				.ProjectTo<ProductDTO>(_mapper.ConfigurationProvider)
-				.ToPagedResultAsync(pageNumber, pageSize, ct);
-			return AppResult<PagedResult<ProductDTO>>.Success(result);
+			var products = await _productReadService.FindProductsByFilterAsync(pageNumber, pageSize, filter, ct);
+			return AppResult<PagedResult<ProductDTO>>.Success(products);
 		}
 	}
 }

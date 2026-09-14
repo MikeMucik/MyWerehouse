@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Persistence;
@@ -13,16 +15,19 @@ using MyWerehouse.Infrastructure.Persistence;
 namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 {
 	public class UpdatePalletHandler(IPalletRepo palletRepo,
-		WerehouseDbContext werehouseDbContext,
-		IProductRepo productRepo) : IRequestHandler<UpdatePalletCommand, AppResult<Unit>>
+		IUnitOfWork unitOfWork,
+		IProductRepo productRepo,
+		IDateTimeProvider dateTimeProvider) : IRequestHandler<UpdatePalletCommand, AppResult<Unit>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IProductRepo _productRepo = productRepo;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
 		public async Task<AppResult<Unit>> Handle(UpdatePalletCommand request, CancellationToken ct)
 		{
 			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.Id, ct);
+			var date = _dateTimeProvider.TodayDateTime;
 			if (existingPallet == null)
 				return AppResult<Unit>.Fail("The specified pallet does not exist.");
 			if(existingPallet.Issue != null)
@@ -38,12 +43,12 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			foreach (var product in request.UpdatingPallet.ProductsOnPallet)
 			{
 				var updatetedProduct = ProductOnPallet.Create(product.ProductId,
-					product.PalletId, product.Quantity, product.DateAdded, product.BestBefore);
+					request.Id, product.Quantity, date, product.BestBefore);
 				updatedProducts1.Add(updatetedProduct);
 			}
 			var snapShot = existingPallet.Location.ToSnapshot();
 			existingPallet.Update(request.UpdatingPallet.UserId, updatedProducts1, request.UpdatingPallet.Status, snapShot);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Pallet {existingPallet.PalletNumber} was updated.");
 		}
 	}

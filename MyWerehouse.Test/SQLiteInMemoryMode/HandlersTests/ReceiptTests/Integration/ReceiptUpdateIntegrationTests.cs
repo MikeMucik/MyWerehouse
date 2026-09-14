@@ -109,7 +109,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product1.Id,
 								Quantity = 200,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -218,7 +217,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product.Id,
 								Quantity = 100,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -279,7 +277,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product1.Id,
 								Quantity = 50,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -369,13 +366,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product1.Id,
 								Quantity = 50,
-								DateAdded = TestDates.Now,
 							},
 							new()
 							{
 								ProductId = product.Id,
 								Quantity = 150,
-								DateAdded = TestDates.Now,
+								//DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -429,7 +425,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product1.Id,
 								Quantity = 200,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -492,9 +487,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							new()
 							{
 								ProductId = product1.Id,
-								PalletId = secondPallet.Id,
 								Quantity = 200,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -554,7 +547,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product.Id,
 								Quantity = 100,
-								DateAdded = TestDates.Now,
 							}
 						}
 					},
@@ -569,7 +561,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product1.Id,
 								Quantity = 200,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -634,7 +625,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product.Id,
 								Quantity = 100,
-								DateAdded = TestDates.Now,
 							}
 						}
 					},
@@ -649,7 +639,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							{
 								ProductId = product.Id,
 								Quantity = 200,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -715,9 +704,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							new()
 							{
 								ProductId = product.Id,
-								PalletId = receiptPallet.Id,
 								Quantity = 50,
-								DateAdded = TestDates.Now,
 							}
 						}
 					},
@@ -734,9 +721,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 							new()
 							{
 								ProductId = product.Id,
-								PalletId = anotherReceiptPallet.Id,
 								Quantity = 200,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}

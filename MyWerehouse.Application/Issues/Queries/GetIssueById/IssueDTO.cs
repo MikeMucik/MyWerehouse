@@ -10,7 +10,7 @@ using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 {
-	public class IssueDTO : IMapFrom<Issue>
+	public class IssueDTO 
 	{
 		public Guid Id { get; init; }
 		public int IssueNumber { get; init; }
@@ -21,12 +21,6 @@ namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 		public ICollection<PalletDTOIssue> Pallets { get; init; } = new List<PalletDTOIssue>();
 		public string PerformedBy { get; init; } = string.Empty;
 		public IssueStatus IssueStatus { get; init; }
-		public ICollection<IssueItemViewDTO> IssueItemsDTO { get; init; } = new List<IssueItemViewDTO>();
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<Issue, IssueDTO>()
-				.ForMember(dest => dest.PerformedBy, opt=>opt.MapFrom(src => src.PerformedBy))
-				.ForMember(dest => dest.IssueItemsDTO, opt => opt.MapFrom(src => src.IssueItems));
-		}
+		public ICollection<IssueItemViewDTO> IssueItems { get; init; } = new List<IssueItemViewDTO>();		
 	}
 }

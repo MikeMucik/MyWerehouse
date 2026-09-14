@@ -31,7 +31,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			var product = await _productRepo.GetProductByIdAsync(issueItem.ProductId, ct);
 			if (product == null)
 			{
-				return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber,
+				return AssignProductToIssueResult.Fail(
 					"The specified product does not exist.",
 					issueItem.ProductId,
 					issueItem.Quantity);
@@ -47,8 +47,12 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			var totalAvailable = globallyAvailable + reusableQuantity;
 			if (issueItem.Quantity > totalAvailable)
 			{
-				return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber, $"Insufficient quantity of product {issueItem.ProductId}. The product was not added to the issue."
-						, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
+				return AssignProductToIssueResult.Fail(
+					$"Insufficient quantity of product {issueItem.ProductId}. The product was not added to the issue.",
+					issueItem.ProductId,
+					product.SKU,
+					issueItem.Quantity,
+					totalAvailable);
 			}
 			issue.BeginAllocation();
 			//2. Przydzielanie pełnych lub/z datą palet
@@ -64,7 +68,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					break;
 
 				default:
-					return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber,
+					return AssignProductToIssueResult.Fail(
 						$"Allocation policy {policy} is not supported.",
 						issueItem.ProductId,
 						product.SKU,
@@ -76,7 +80,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			// zabezpieczenie przed błędnym planem alokacji
 			if (rest < 0)
 			{
-				return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber,
+				return AssignProductToIssueResult.Fail(
 					"Allocated more product than requested.",
 					issueItem.ProductId,
 					product.SKU,
@@ -93,11 +97,16 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					issueItem.ProductId, rest, issueItem.BestBefore, userId, ct);
 				if (newPickingTaskFromRest.Success is false)
 				{
-					return AssignProductToIssueResult.Fail(issue.Id, issue.IssueNumber, newPickingTaskFromRest.Message, issueItem.ProductId, product.SKU, issueItem.Quantity, totalAvailable);
+					return AssignProductToIssueResult.Fail(
+						newPickingTaskFromRest.Message,
+						issueItem.ProductId,
+						product.SKU,
+						issueItem.Quantity,
+						totalAvailable);
 				}
 			}
 			issue.AssignPallets(palletFullSelected, userId);
-			return AssignProductToIssueResult.Ok(issue.Id, issue.IssueNumber,
+			return AssignProductToIssueResult.Ok(
 				$"Product {product.SKU} was added to the issue.",
 				issueItem.ProductId,
 				product.SKU,

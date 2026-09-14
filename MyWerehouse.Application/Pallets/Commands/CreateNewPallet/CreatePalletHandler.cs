@@ -10,15 +10,14 @@ using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 {
-	public class CreatePalletHandler(WerehouseDbContext werehouseDbContext,
+	public class CreatePalletHandler(IUnitOfWork unitOfWork,
 		IPalletRepo palletRepo, ILocationRepo locationRepo, IDateTimeProvider dateTimeProvider, IPalletNumberAllocator palletNumberAllocator)
 		: IRequestHandler<CreatePalletCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
@@ -38,7 +37,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 			_palletRepo.AddPallet(pallet);
 			var snapShot = location.ToSnapshot();
 			pallet.AssignToWarehouse(location.Id, snapShot, request.UserId);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Pallet {newIdForPallet} was added to warehouse stock and inventory was updated.");
 		}
 	}

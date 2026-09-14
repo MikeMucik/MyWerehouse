@@ -5,15 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.ConfirmIssueAfterLoading
 {
-	public class ConfirmIssueAfterLoadingHandler(WerehouseDbContext dbContext,
+	public class ConfirmIssueAfterLoadingHandler(IUnitOfWork unitOfWork,
 		IIssueRepo issueRepo) : IRequestHandler<ConfirmIssueAfterLoadingCommand, AppResult<Unit>>
 	{
-		private readonly WerehouseDbContext _dbContext = dbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;	
 		private readonly IIssueRepo _issueRepo = issueRepo;
 
 		public async Task<AppResult<Unit>> Handle(ConfirmIssueAfterLoadingCommand request, CancellationToken ct)
@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Issues.Commands.ConfirmIssueAfterLoading
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			issue.ConfirmAfterLoading(request.ConfirmedBy);
-			await _dbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Loading confirmed and inventory updated.");
 		}
 	}

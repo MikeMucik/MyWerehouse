@@ -5,18 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 {
 	public class ChangeLocationPalletHandler(IPalletRepo palletRepo,
-		ILocationRepo locationRepo,
-		WerehouseDbContext werehouseDbContext) : IRequestHandler<ChangeLocationPalletCommand, AppResult<ChangeLocationResults>>
+		ILocationRepo locationRepo, 
+		IUnitOfWork unitOfWork) : IRequestHandler<ChangeLocationPalletCommand, AppResult<ChangeLocationResults>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly ILocationRepo _locationRepo = locationRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		public async Task<AppResult<ChangeLocationResults>> Handle(ChangeLocationPalletCommand request, CancellationToken ct)
 		{
 			// Zmiana lokalizacji może zmienić status palety w zależności od typu lokalizacji docelowej.
@@ -48,7 +49,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 			var oldSnapShot = pallet.Location.ToSnapshot();
 			var snapShot = location.ToSnapshot();
 			pallet.MoveToLocation(location.Id, snapShot, pallet.LocationId, oldSnapShot, request.UserId);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			var answerWhenFree = new ChangeLocationResults
 			{
 				Success = true,

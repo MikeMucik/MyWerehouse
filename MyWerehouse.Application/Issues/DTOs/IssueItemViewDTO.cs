@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,18 +9,12 @@ using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Issues.DTOs
 {
-	public class IssueItemViewDTO : IMapFrom<IssueItem>
+	public class IssueItemViewDTO
 	{
 		public Guid ProductId { get; init; }
 		public string ProductName { get; init; } = string.Empty;
 		public string ProductSKU { get; init; } = string.Empty;
 		public int Quantity { get; init; }
-		public DateOnly? BestBefore { get; init; }
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<IssueItem, IssueItemViewDTO>()
-				.ForMember(dest => dest.ProductName, opt => opt.MapFrom(static src => src.Product.Name))
-				.ForMember(dest => dest.ProductSKU, opt => opt.MapFrom(static src => src.Product.SKU));
-		}
+		public DateOnly? BestBefore { get; init; }		
 	}
 }

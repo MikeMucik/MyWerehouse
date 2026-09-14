@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.InMemoryDatabase.Common;
-using MyWerehouse.Test.SQLiteInMemoryMode;
-using Xunit;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite
 {
@@ -44,30 +41,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite
 			var result = await _clientRepo.GetClientByIdAsync(id, CancellationToken.None);
 			//Assert
 			Assert.Null(result);
-		}
-		[Fact]
-		public void ShowAllClient_GetAllClient_ReturnList()
-		{
-			//Arrange
-			//Act
-			var result = _clientRepo.GetAllClients();
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal(3, result.Count());
-		}
-		[Fact]
-		public void ShowClientsByPropertyAdressFullName_GetClients_ReturnList()
-		{
-			//Arrange
-			var fullNameCompany = new ClientSearchFilter
-			{
-				FullName = "FullNameTestAddress"
-			};
-			//Act
-			var result = _clientRepo.GetClients(fullNameCompany);
-			//Assert
-			Assert.NotNull(result);
-			Assert.Equal("ClientTest", result.First().Name);
-		}
+		}		
 	}
 }

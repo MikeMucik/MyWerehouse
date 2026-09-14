@@ -25,7 +25,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite
 			};
 			var clientRepo = new ClientRepo(DbContext);
 			//Act
-			var result = clientRepo.AddClient(client);
+			clientRepo.AddClient(client);
 			DbContext.SaveChanges();
 			//Assert		
 			var resultFull = DbContext.Clients.FirstOrDefault(c => c.Id == client.Id);
@@ -57,7 +57,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ClientTestsRepoSQLite
 			};
 			var clientRepo = new ClientRepo(DbContext);
 			//Act
-			var result = clientRepo.AddClient(client);
+			clientRepo.AddClient(client);
 			DbContext.SaveChanges();
 			//Assert
 			var resultFull = DbContext.Clients.FirstOrDefault(c => c.Id == client.Id);

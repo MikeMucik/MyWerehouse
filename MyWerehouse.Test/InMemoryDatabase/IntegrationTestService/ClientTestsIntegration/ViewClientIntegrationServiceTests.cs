@@ -5,12 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Domain.Clients.Filters;
+using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
+using MyWerehouse.Server;
+using MyWerehouse.Server.ServicesToInfrastructure;
 using MyWerehouse.Test.InMemoryDatabase.Common;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIntegration
@@ -23,10 +27,12 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 		private readonly ClientService _clientService;
 		private readonly IReceiptRepo _receiptRepo;
 		private readonly IIssueRepo _issueRepo;
+
+		private readonly IUnitOfWork _unitOfWork;
+		private readonly IClientReadService _clientReadService;
 		private readonly IValidator<AddClientDTO> _addClientValidator;
 		private readonly IValidator<UpdateClientDTO> _updateClientValidator;
-		private readonly IValidator<AddAddressDTO> _addAddressValidator;
-		private readonly IValidator<EditAddressDTO> _editAddressValidator;
+		private readonly IValidator<AddressDTO> _addAddressValidator;
 
 
 		public ClientIntegrationServiceView(InMemoryDatabaseFixtureExecutive fixture)
@@ -35,11 +41,14 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			_clientRepo = new ClientRepo(_context);
 			_receiptRepo = new ReceiptRepo(_context);
 			_issueRepo = new IssueRepo(_context);
-			_addAddressValidator = new AddAddressDTOValidation();
-			_editAddressValidator = new EditAddressDTOValidation();
+
+			_unitOfWork = new UnitOfWork(_context);
+			_clientReadService = new ClientReadService(_context);
+			_addAddressValidator = new AddressDTOValidation();
+			
 			_addClientValidator = new AddClientDTOValidation(_addAddressValidator);
-			_updateClientValidator = new UpdateClientDTOValidation(_editAddressValidator);
-			_clientService = new ClientService(_clientRepo, _mapper, _receiptRepo, _issueRepo, _context, _addClientValidator, _updateClientValidator);
+			_updateClientValidator = new UpdateClientDTOValidation(_addAddressValidator);
+			_clientService = new ClientService(_clientRepo, _receiptRepo, _issueRepo,_unitOfWork,_clientReadService, _addClientValidator, _updateClientValidator);
 		}
 
 		[Fact]
@@ -55,12 +64,48 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 			Assert.NotNull(result.Result);
 				Assert.Equal("ClientTest", result.Result.Name);
 			Assert.Equal("ClientDescription", result.Result.Description);
-			Assert.Equal("ConutryTest", result.Result.Address.First().Country);
+			Assert.Equal("ConutryTest", result.Result.Addresses.First().Country);
 		}
 		[Fact]
 		public async Task DetailsOfClientAsync_ShouldReturnError_WhenWrongId()
 		{
 			//Arrange
+			var clientId = 100;
+			//Act
+			var result = await _clientService.DetailsOfClientAsync(clientId, CancellationToken.None);
+			//Assert
+			Assert.NotNull(result);
+			Assert.False(result.IsSuccess);
+			Assert.Null(result.Result);
+			Assert.Contains($"Invalid client ID: {clientId}.", result.Error);
+		}
+		[Fact]
+		public async Task DetailsOfClientAsync_ShouldReturnNull_WhenHideClient()
+		{
+			//Arrange
+			var adrress = new Address
+			{
+				Country = "Poland",
+				City = "Przeźmierowo",
+				AdditionalEmail = "vef@fp.pl",
+				Phone = 34554345,
+				PostalCode = "12345",
+				Region = "lubuskie",
+				StreetName = "handlowa",
+				StreetNumber = "123"
+			};
+			var client = new Client
+			{
+				Id = 100,
+				IsDeleted = true,
+				Name = "Piłka",
+				FullName = "Piłka gumiana",
+				Email = "dd@gmail.com",
+				Description = "hjkofdiguhrnjkfigbuh",
+				Addresses = new[] { adrress }
+			};
+			_context.Clients.Add(client);
+			_context.SaveChanges();
 			var clientId = 100;
 			//Act
 			var result = await _clientService.DetailsOfClientAsync(clientId, CancellationToken.None);

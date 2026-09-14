@@ -10,13 +10,10 @@ using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories
 {
-	public class PickingTaskRepo : IPickingTaskRepo
+	public class PickingTaskRepo(WerehouseDbContext werehouseDbContext) : IPickingTaskRepo
 	{
-		private readonly WerehouseDbContext _werehouseDbContext;
-		public PickingTaskRepo(WerehouseDbContext werehouseDbContext)
-		{
-			_werehouseDbContext = werehouseDbContext;
-		}
+		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+
 		public void AddPickingTask(PickingTask pickingTask)
 		{
 			_werehouseDbContext.PickingTasks.Add(pickingTask);
@@ -28,24 +25,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public void DeletePickingTask(PickingTask pickingTask)
 		{
 			_werehouseDbContext.PickingTasks.Remove(pickingTask);
-		}
-		public IQueryable<PickingTask> GetPickingTaskList(Guid palletPickingId, DateOnly pickingDate)
-		{
-			var pickingTask = _werehouseDbContext.PickingTasks
-
-				.Include(a => a.VirtualPallet!)
-					.ThenInclude(b => b.Pallet)
-						.ThenInclude(c => c.ProductsOnPallet)
-				.Include(i => i.Issue)
-				.Where(p =>
-					p.VirtualPalletId == palletPickingId &&
-					DateOnly.FromDateTime(p.Issue.IssueDateTimeCreate) >= pickingDate.AddDays(-14) &&//ustalenie biznesowe
-					p.Issue.IssueDateTimeSend >= pickingDate &&
-					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2) &&
-					p.PickingStatus == PickingStatus.Allocated);
-			return pickingTask;
-		}
-
+		}		
 		public async Task<PickingTask?> GetPickingTaskAsync(Guid guid, CancellationToken ct)
 		{
 			return await _werehouseDbContext.PickingTasks
@@ -60,17 +40,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync(ct);
 			return result;
 		}
-		public async Task<List<PickingTask>> GetPickingTasksProductIdAsync(Guid productId, DateOnly from, DateOnly to, CancellationToken ct)
-		{
-			var result = await _werehouseDbContext.PickingTasks
-				.Include(i => i.Issue)
-				.Where(a => a.ProductId == productId &&
-				(a.PickingStatus == PickingStatus.Allocated || a.PickingStatus == PickingStatus.CorrectionPicking) &&
-				a.RequestedQuantity > a.PickedQuantity &&
-				a.Issue.IssueDateTimeSend >= from && a.Issue.IssueDateTimeSend <= to)
-				.ToListAsync(ct);
-			return result;
-		}
 		public async Task<List<PickingTask>> GetPickingTasksByIssueIdAsync(Guid issueId, CancellationToken ct)
 		{
 			var result = await _werehouseDbContext.PickingTasks
@@ -82,7 +51,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.ToListAsync(ct);
 			return result;
 		}
-
 		public async Task<List<PickingTask>> GetPickingTasksByPickingPalletIdAsync(Guid pickingPalletId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.PickingTasks
@@ -93,45 +61,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 						.ThenInclude(p => p.ProductsOnPallet)
 				.ToListAsync(ct);
 		}
-
-		public IQueryable<PickingTaskFlat> GetPickingTaskFlats(DateOnly start, DateOnly end)
-		{
-			var list = _werehouseDbContext.PickingTasks
-				.AsNoTracking()
-				.Where(x => x.PickingDay <= end &&
-				x.PickingDay >= start &&
-				(x.PickingStatus == PickingStatus.Allocated ||
-				x.PickingStatus == PickingStatus.Available))
-				.Select(q => new
-				{
-					q.Issue.ClientId,
-					q.IssueId,
-					q.Issue.IssueNumber,
-					q.ProductId,
-					q.Product.SKU,
-					q.RequestedQuantity
-				})
-				.Where(p => p.ProductId != Guid.Empty)
-				.GroupBy(p => new
-				{
-					p.ClientId,
-					p.IssueId,
-					p.IssueNumber,
-					p.ProductId,
-					p.SKU,
-				})
-				.Select(p => new PickingTaskFlat
-				{
-					ClientId = p.Key.ClientId,
-					IssueId = p.Key.IssueId,
-					IssueNumber = p.Key.IssueNumber,
-					ProductId = p.Key.ProductId,
-					SKU = p.Key.SKU,
-					Quantity = p.Sum(q => q.RequestedQuantity)
-				});
-			return list;
-		}
-
 		public async Task<List<PickingTask>> GetHandPickingTask(Guid issueId, CancellationToken ct)
 		{
 			return await _werehouseDbContext.PickingTasks

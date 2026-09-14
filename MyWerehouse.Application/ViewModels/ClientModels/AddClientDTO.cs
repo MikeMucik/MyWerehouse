@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 		public required string Description { get; set; } 
 		[MaxLength(250)]
 		public required string FullName { get; set; } 
-		public ICollection<AddAddressDTO> Addresses { get; set; } = new List<AddAddressDTO>();
+		public ICollection<AddressDTO> Addresses { get; set; } = new List<AddressDTO>();
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<AddClientDTO, Client>();
@@ -27,7 +27,7 @@ namespace MyWerehouse.Application.ViewModels.ClientModels
 	}
 	public class AddClientDTOValidation : AbstractValidator<AddClientDTO>
 	{
-		public AddClientDTOValidation(IValidator<AddAddressDTO> addressValidator)
+		public AddClientDTOValidation(IValidator<AddressDTO> addressValidator)
 		{			
 			RuleFor(c => c.Name)
 				.NotEmpty()

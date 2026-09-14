@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.Commands.ModifyIssue;
+using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
 using MyWerehouse.Application.Issues.DTOs;
+using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Common;
+using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using Xunit.Sdk;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integration
 {
@@ -74,7 +78,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var location1 = CreateLocation(2);
 			var product = CreateProduct("Prod1", 1);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, null);
-			pallet1.AddProduct(product.Id, 10,TestDates.UtcNow  , DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.Available, null, null);
 			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			DbContext.Clients.Add(client);
@@ -403,19 +407,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.ToPicking, null, null);
 			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
-			var issueId = Guid.NewGuid();
-			var issueOld = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-10),
-			DateOnly.FromDateTime(TestDates.Now.AddDays(2)), "userS", IssueStatus.InProgress, null);
+			var existingIssueId = Guid.NewGuid();
+			var existingIssueItem = IssueItem.CreateForSeed(1, existingIssueId, product.Id, 4, null, TestDates.UtcNow.AddDays(1));
+			var existingIssue = Issue.CreateForSeed(existingIssueId, 1, 1, TestDates.Now.AddDays(-10),
+			DateOnly.FromDateTime(TestDates.Now.AddDays(2)), "userS", IssueStatus.InProgress, [existingIssueItem]);
 			var virtualPallet = VirtualPallet.Create(pallet2.Id, pallet2.ProductsOnPallet.First().Quantity, 2, TestDates.UtcNow);
 			var pickingGuid = Guid.NewGuid();
-			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, issueId, 4, PickingStatus.Allocated, product.Id,
+			var pickingTask = PickingTask.CreateForSeed(pickingGuid, virtualPallet.Id, existingIssueId, 4, PickingStatus.Allocated, product.Id,
 				null, null, null, 0);
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
 			DbContext.Products.Add(product);
 			DbContext.Locations.AddRange(location, location1);
 			DbContext.Pallets.AddRange(pallet1, pallet2);
-			DbContext.Issues.AddRange(issueOld);
+			DbContext.Issues.AddRange(existingIssue);
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.VirtualPallets.Add(virtualPallet);
 			await DbContext.SaveChangesAsync();
@@ -434,15 +439,38 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert
 			Assert.NotNull(created);
 			Assert.True(created.IsSuccess);
-			var issue = DbContext.Issues.Include(i => i.Pallets).FirstOrDefault(i => i.IssueNumber == 2);//IssueNumber = 1 to stare issue
-			Assert.NotNull(issue);
-			issue.ChangeStatus(IssueStatus.ConfirmedToLoad);
-			//Assert
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
-			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
+			Assert.NotNull(created.Result);
+			var issueCreated = DbContext.Issues
+				.AsNoTracking()
+				.Include(i => i.Pallets)
+				.FirstOrDefault(i => i.IssueNumber == 2);//IssueNumber = 1 to stare początkowe issue
+			Assert.NotNull(issueCreated);
+			Assert.Single(issueCreated.Pallets); // powinien być przypisany P1
+			Assert.Equal(PalletStatus.LockedForIssue, issueCreated.Pallets.First().Status);
+			//Act1.1
+			var resultVerify = await Mediator.Send(new VerifyIssueToLoadCommand(issueCreated.Id, "userV"));
+			//Assert 1.1
+			Assert.True(resultVerify.IsSuccess);
+			var issueAfter = DbContext.Issues.Find(issueCreated.Id);
+			var pallet1After = DbContext.Pallets.Find(pallet1.Id);
+			Assert.Equal(PalletStatus.ToIssue, pallet1After!.Status);
+			Assert.NotNull(issueAfter);
+			Assert.Equal(IssueStatus.ConfirmedToLoad, issueAfter.IssueStatus);
+			var savedIssue = await DbContext.Issues
+				.Include(i => i.Pallets).ThenInclude(p => p.ProductsOnPallet)
+				.Include(i => i.IssueItems)
+				.FirstOrDefaultAsync(i => i.Id == issueCreated.Id);
+			Assert.NotNull(savedIssue);
+			Assert.Single(savedIssue.Pallets);
+			Assert.Single(savedIssue.IssueItems);
+			Assert.All(savedIssue.Pallets, p => Assert.True(p.ProductsOnPallet.Any()));
+			var comparison = Assert.Single(resultVerify.Result!);
+			Assert.Equal(10, comparison.QuantityRequest);
+			Assert.Equal(10, comparison.QuantityPrepared);
 
 			// Act 2 – update: zmieniamy zamówienie na 15 szt. (1 pełna paleta + 5 do pickingu)
-			var id = issue.Id;
+
+			var id = issueCreated.Id;
 			var dateToSend = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7));
 			var updateDto = new ModifyIssueDTO
 			{
@@ -458,13 +486,20 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			//Assert
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
-			var newIssueItems = DbContext.IssueItems.Where(i => i.IssueId == issue.Id).ToList();
-			foreach (var it in newIssueItems) { Console.WriteLine($"Item: ProductId={it.ProductId}, Quantity={it.Quantity}, BestBefore={it.BestBefore}"); }
-			// Assert – sprawdź Issue		
+			Assert.NotNull(result.Result);
+			var newIssueItems = DbContext.IssueItems.Where(i => i.IssueId == issueCreated.Id).ToList();
+			foreach (var it in newIssueItems)
+			{
+				Console.WriteLine($"Item: ProductId={it.ProductId}, Quantity={it.Quantity}, BestBefore={it.BestBefore}");
+			}
+			// Assert – sprawdź Issue		issueNumber 3 bo nowe uzupełniające
 			var newIssue = DbContext.Issues.First(i => i.IssueNumber == 3);
 			var newNumberGuid = DbContext.Issues.Single(i => i.IssueNumber == 3).Id;
 			var newIssueItems1 = DbContext.IssueItems.Where(i => i.IssueId == newNumberGuid).ToList();
-
+			Assert.NotEqual(issueCreated.Id, result.Result.IssueId);
+			Assert.Equal(result.Result.IssueId, newNumberGuid);
+			Assert.NotEqual(issueCreated.IssueNumber, result.Result.IssueNumber);
+			Assert.Equal(result.Result.IssueNumber, newIssue.IssueNumber);
 			Assert.NotNull(newIssue);  // Issue istnieje
 			Assert.Single(newIssueItems1);  // Dokładnie jeden!
 			Assert.Equal(product.Id, newIssueItems1.Single().ProductId);
@@ -592,7 +627,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				.Include(i => i.Pallets)
 				.First(i => i.Id == issue.Id);
 
-			
+
 
 			// Wynik metody UpdateIssueAsync powinien zawierać rezultat dla produktu
 			Assert.NotNull(result.Result.Results);
@@ -719,8 +754,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			Assert.Equal(2, palletsProd1.Count); // Powinny być 2 palety (np. P1 i P4)
 
-			var allocProd1 = updatedIssue1.PickingTasks.Single(a => a.ProductId == product1.Id);			
-			
+			var allocProd1 = updatedIssue1.PickingTasks.Single(a => a.ProductId == product1.Id);
+
 			Assert.Equal(1, allocProd1.RequestedQuantity);
 
 			// SPRAWDZENIE DLA PROD 2 (8 sztuk)
@@ -850,7 +885,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			var allocProd1 = updatedIssue1.PickingTasks.FirstOrDefault(a => a.ProductId == product.Id);
 			Assert.NotNull(allocProd1);
-			Assert.Equal(1, allocProd1.RequestedQuantity); 												  
+			Assert.Equal(1, allocProd1.RequestedQuantity);
 
 			// SPRAWDZENIE DLA PROD 2 (8 sztuk)
 			// Oczekujemy: 0 pełnych palet + alokacja na 8 sztuk
@@ -1155,7 +1190,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				.First(i => i.Id == issue.Id);
 			Assert.Equal(IssueStatus.RequiresCorrection, updatedIssue.IssueStatus);
 			Assert.Equal("User2", updatedIssue.PerformedBy);
-			
+
 			// Assert – alokacje przypisane do tego Issue (sprawdzamy tabelę PickingTasks)
 			var pickingTasksForIssue = DbContext.PickingTasks
 				.Include(a => a.VirtualPallet)
@@ -1177,7 +1212,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			Assert.Equal(8, vp.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(vp.InitialPalletQuantity - vp.PickingTasks.Sum(a => a.RequestedQuantity), vp.RemainingQuantity);
-						
+
 			// ACT UpdateIssueAsync
 			var p1After = DbContext.Pallets.AsNoTracking().Single(p => p.PalletNumber == "P1");
 			var p2After = DbContext.Pallets.AsNoTracking().Single(p => p.PalletNumber == "P2");
@@ -1284,6 +1319,160 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Contains($"Insufficient quantity of product {product.Id}", result.Result.Results.First().Message);
 			Assert.Equal(product.Id, result.Result.Results.First().ProductId);
 			Assert.Equal(product1.Id, result.Result.Results.Last().ProductId);
+		}
+
+		[Fact]
+		public async Task ModifyIssue_ShouldRollbackFirstSave_WhenReallocationThrowsException()
+		{
+			// Arrange – create an issue with one full pallet and one picking task
+			var client = CreateClient();
+			var category = CreateCategory("name");
+			var location1 = CreateLocation(1);
+			var location2 = CreateLocation(2);
+			var product = CreateProduct("Prod1", 1);
+
+			var pallet1 = Pallet.CreateForTests(
+				"P1",
+				TestDates.UtcNow,
+				locationId: 1,
+				PalletStatus.Available,
+				receiptId: null,
+				issueId: null);
+			pallet1.AddProduct(
+				product.Id,
+				quantity: 10,
+				TestDates.UtcNow,
+				TestDates.Today.AddDays(366));
+
+			var pallet2 = Pallet.CreateForTests(
+				"P2",
+				TestDates.UtcNow,
+				locationId: 2,
+				PalletStatus.Available,
+				receiptId: null,
+				issueId: null);
+			pallet2.AddProduct(
+				product.Id,
+				quantity: 10,
+				TestDates.UtcNow,
+				TestDates.Today.AddDays(366));
+
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Locations.AddRange(location1, location2);
+			DbContext.Products.Add(product);
+			DbContext.Pallets.AddRange(pallet1, pallet2);
+			await DbContext.SaveChangesAsync();
+
+			var createDto = new CreateIssueDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "User1",
+				Items =
+				[
+					new IssueItemDTO
+					{
+						ProductId = product.Id,
+						Quantity = 12,
+						BestBefore = TestDates.Today.AddDays(365)
+					}
+				]
+			};
+			var created = await Mediator.Send(new CreateIssueCommand(
+				createDto,
+				TestDates.Today.AddDays(7)));
+
+			Assert.True(created.IsSuccess);
+			Assert.NotNull(created.Result);
+			var issueId = created.Result.IssueId;
+
+			DbContext.ChangeTracker.Clear();
+			var pickingTaskBefore = await DbContext.PickingTasks
+				.AsNoTracking()
+				.SingleAsync(task => task.IssueId == issueId);
+			Assert.Equal(PickingStatus.Allocated, pickingTaskBefore.PickingStatus);
+
+			var expectedException = new InvalidOperationException(
+				"Controlled failure after the first SaveChangesAsync.");
+			var throwingAssignService = new Mock<IAssignProductToIssueService>();
+			throwingAssignService
+				.Setup(service => service.AssignGoodsToIssue(
+					It.IsAny<Issue>(),
+					It.IsAny<IssueItemDTO>(),
+					It.IsAny<IssueAllocationPolicy>(),
+					It.IsAny<List<Pallet>?>(),
+					It.IsAny<string>(),
+					It.IsAny<CancellationToken>()))
+				.ThrowsAsync(expectedException);
+
+			var handler = new ModifyIssueHandler(
+				_provider.GetRequiredService<IIssueRepo>(),
+				Mediator,
+				_provider.GetRequiredService<IUnitOfWork>(),
+				throwingAssignService.Object,
+				_provider.GetRequiredService<IVirtualPalletRepo>(),
+				_provider.GetRequiredService<IDateTimeProvider>());
+
+			var modifyDto = new ModifyIssueDTO
+			{
+				ClientId = client.Id,
+				PerformedBy = "User2",
+				IssueItems =
+				[
+					new IssueItemDTO
+					{
+						ProductId = product.Id,
+						Quantity = 15,
+						BestBefore = TestDates.Today.AddDays(365)
+					}
+				]
+			};
+
+			// Act – the exception occurs after PrepareForReallocation was saved
+			var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+				handler.Handle(
+					new ModifyIssueCommand(
+						issueId,
+						modifyDto,
+						TestDates.Today.AddDays(7)),
+					CancellationToken.None));
+
+			// Assert – read again after clearing stale tracked state
+			Assert.Same(expectedException, exception);
+			throwingAssignService.Verify(
+				service => service.AssignGoodsToIssue(
+					It.IsAny<Issue>(),
+					It.IsAny<IssueItemDTO>(),
+					It.IsAny<IssueAllocationPolicy>(),
+					It.IsAny<List<Pallet>?>(),
+					It.IsAny<string>(),
+					It.IsAny<CancellationToken>()),
+				Times.Once);
+
+			DbContext.ChangeTracker.Clear();
+			var issueAfterRollback = await DbContext.Issues
+				.AsNoTracking()
+				.Include(issue => issue.Pallets)
+				.SingleAsync(issue => issue.Id == issueId);
+			var pallet1AfterRollback = await DbContext.Pallets
+				.AsNoTracking()
+				.SingleAsync(pallet => pallet.Id == pallet1.Id);
+			var pallet2AfterRollback = await DbContext.Pallets
+				.AsNoTracking()
+				.SingleAsync(pallet => pallet.Id == pallet2.Id);
+			var pickingTaskAfterRollback = await DbContext.PickingTasks
+				.AsNoTracking()
+				.SingleAsync(task => task.Id == pickingTaskBefore.Id);
+
+			Assert.Equal(IssueStatus.Pending, issueAfterRollback.IssueStatus);
+			Assert.Equal("User1", issueAfterRollback.PerformedBy);
+			Assert.Single(issueAfterRollback.Pallets);
+			Assert.Equal(pallet1.Id, issueAfterRollback.Pallets.Single().Id);
+			Assert.Equal(issueId, pallet1AfterRollback.IssueId);
+			Assert.Equal(PalletStatus.LockedForIssue, pallet1AfterRollback.Status);
+			Assert.Null(pallet2AfterRollback.IssueId);
+			Assert.Equal(PalletStatus.ToPicking, pallet2AfterRollback.Status);
+			Assert.Equal(PickingStatus.Allocated, pickingTaskAfterRollback.PickingStatus);
 		}
 	}
 }

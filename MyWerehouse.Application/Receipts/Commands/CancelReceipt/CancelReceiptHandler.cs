@@ -5,23 +5,23 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.CancelReceipt
 {
 	public class CancelReceiptHandler(IReceiptRepo receiptRepo,
-		WerehouseDbContext werehouseDbContext) : IRequestHandler<CancelReceiptCommand, AppResult<Unit>>
+		IUnitOfWork unitOfWork) : IRequestHandler<CancelReceiptCommand, AppResult<Unit>>
 	{
 		private readonly IReceiptRepo _receiptRepo = receiptRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		public async Task<AppResult<Unit>> Handle(CancelReceiptCommand request, CancellationToken ct)
 		{
 			var receipt = await _receiptRepo.GetReceipForCancelByIdAsync(request.ReceiptId, ct);
 			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 			receipt.Cancel(request.UserId);
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, "Receipt and its pallets were cancelled.");
 		}
 	}

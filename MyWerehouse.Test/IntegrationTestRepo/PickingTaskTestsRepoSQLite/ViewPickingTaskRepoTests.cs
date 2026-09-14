@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Domain.Picking.Models;
+﻿using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
@@ -36,29 +30,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			Assert.NotNull(result.VirtualPallet);
 			Assert.Equal(3, result.VirtualPallet.LocationId);
 		}
-		[Fact]
-		public void ByVirtualPalletAndDatePicking_GetPickingTaskListAsync_ReturnList()
-		{
-			//Arrange
-			var vpId1 = Guid.Parse("22222222-1111-2222-1111-111111111111");
-			var date =DateOnly.FromDateTime( TestDates.UtcNow);
-			//Act
-			var result =  _pickingTaskRepo.GetPickingTaskList(vpId1, date);
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			// wszystkie alokacje mają właściwy VirtualPallet
-			Assert.All(result, a => Assert.Equal(vpId1, a.VirtualPalletId));
-			// wszystkie alokacje mają status Allocated
-			Assert.All(result, a => Assert.Equal(PickingStatus.Allocated, a.PickingStatus));
-
-			// wszystkie dotyczą zleceń na dziś lub jutro
-			Assert.All(result, a =>
-			{
-				var sendDate = a.Issue.IssueDateTimeSend;
-				Assert.Contains(sendDate, new[] { date, date.AddDays(1)});
-			});
-		}
+		
 		[Fact]
 		public async Task ByIssueAndProductId_GetPickingTasksByIssueIdProductIdAsync_ReturnList()
 		{
@@ -91,20 +63,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PickingTaskTestsRepoSQLite
 			Assert.All(result, a => Assert.True(
 				a.PickingStatus == PickingStatus.Allocated ||
 				a.PickingStatus == PickingStatus.CorrectionPicking));
-		}
-		[Fact]
-		public async Task ByProductIdAndDates_GetPickingTasksProductIdAsync_ReturnList()
-		{
-			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
-			var dateStart =DateOnly.FromDateTime( TestDates.UtcNow);
-			var dateEnd = DateOnly.FromDateTime(TestDates.UtcNow).AddDays(1);
-			//Act
-			var result = await _pickingTaskRepo.GetPickingTasksProductIdAsync(productId2, dateStart, dateEnd, CancellationToken.None);
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Equal(3, result.Count);
-			Assert.All(result, a => Assert.Equal(productId2, a.ProductId));
-		}
+		}		
 	}
 }

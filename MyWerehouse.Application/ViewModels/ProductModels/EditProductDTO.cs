@@ -12,6 +12,7 @@ namespace MyWerehouse.Application.ViewModels.ProductModels
 {
 	public class EditProductDTO : IMapFrom<Product>
 	{
+		public Guid Id { get; init; }
 		public required string Name { get; init; }
 		public required string SKU { get; init; }
 		public int CategoryId { get; init; }

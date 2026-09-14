@@ -114,10 +114,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 						{
 							new()
 							{
-								PalletId = pallet.Id,
 								ProductId = product1.Id,
 								Quantity = 1,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}
@@ -229,7 +227,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Unit
 							{
 								ProductId = initialProduct1.Id,
 								Quantity = 1,
-								DateAdded = TestDates.Now,
 							}
 						}
 					}

@@ -1,38 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Picking.Queries.GetListPickingPallet;
-using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Picking.Queries.GetListPickingPalletForOperator
 {
-	public class GetListPickingPalletHandler(IVirtualPalletRepo virtualPalletRepo)
+	public class GetListPickingPalletHandler(IPickingReadService pickingReadService)
 		: IRequestHandler<GetListPickingPalletQuery, AppResult<PagedResult<PickingPalletWithLocationDTO>>>
 	{
-		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
+		private readonly IPickingReadService _pickingReadService = pickingReadService;
 
 		public async Task<AppResult<PagedResult<PickingPalletWithLocationDTO>>> Handle(GetListPickingPalletQuery request, CancellationToken ct)
 		{
-			var palletsPicking = _virtualPalletRepo.GetVirtualPalletsByTimePickingTask(request.DateMovedStart, request.DateMovedEnd)
-				.OrderBy(v => v.LocationId)
-				.Select(v => new PickingPalletWithLocationDTO
-				{
-					PalletId = v.PalletId,
-					PalletNumber = v.Pallet.PalletNumber,
-					LocationId = v.LocationId,
-					AddedToPicking = v.DateMoved,
-					LocationName =
-					v.Location.Bay + "-" +
-					v.Location.Aisle + "-" +
-					v.Location.Position + "-" +
-					v.Location.Height
-				});
-			var query = await palletsPicking.ToPagedResultAsync(request.PageNumber, request.PageSize, ct);
+			var query = await _pickingReadService.GetSourcePalletList(request.DateMovedStart, request.DateMovedEnd, request.PageNumber, request.PageSize, ct);
 			return AppResult<PagedResult<PickingPalletWithLocationDTO>>.Success(query);
 		}
 	}

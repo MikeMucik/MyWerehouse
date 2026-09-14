@@ -16,9 +16,9 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientProperData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var addressValidator = new AddAddressDTOValidation();
+			var addressValidator = new AddressDTOValidation();
 			var validator = new AddClientDTOValidation(addressValidator);
-			var address = new AddAddressDTO
+			var address = new AddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -33,7 +33,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Name = "name",
 				FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddAddressDTO> { address },
+				Addresses = new List<AddressDTO> { address },
 				Description = "description",
 			};
 			//Act&Assert
@@ -43,9 +43,9 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientNotProperData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var addressValidator = new AddAddressDTOValidation();
+			var addressValidator = new AddressDTOValidation();
 			var validator = new AddClientDTOValidation(addressValidator);
-			var address = new AddAddressDTO
+			var address = new AddressDTO
 			{
 				City = "Warsaw",
 				Country = "Poland",
@@ -60,7 +60,7 @@ namespace MyWerehouse.Test.ValidationTest
 				Name = "name",
 				FullName = "",
 				Email = "email@wp.pl",
-				Addresses = new List<AddAddressDTO> { address },
+				Addresses = new List<AddressDTO> { address },
 				Description = "description",
 			};
 			//Act&Assert
@@ -70,14 +70,14 @@ namespace MyWerehouse.Test.ValidationTest
 		public void AddClientNoAddressData_ShouldNotReturnValidationError()
 		{
 			//Arrange
-			var addressValidator = new AddAddressDTOValidation();
+			var addressValidator = new AddressDTOValidation();
 			var validator = new AddClientDTOValidation(addressValidator);
 			var client = new AddClientDTO
 			{
 				Name = "name",
 				FullName = "fullname",
 				Email = "email@wp.pl",
-				Addresses = new List<AddAddressDTO> { },
+				Addresses = new List<AddressDTO> { },
 				Description = "description",
 			};
 			//Act&Assert

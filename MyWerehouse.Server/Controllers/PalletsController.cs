@@ -47,7 +47,7 @@ namespace MyWerehouse.Server.Controllers
 
 		// update palety
 		[HttpPut("{id:guid}")]
-		public async Task<IActionResult> Update(Guid id, Application.Pallets.Commands.UpdatePallet.EditPalletDTO dto, CancellationToken ct)
+		public async Task<IActionResult> Update(Guid id, Application.Pallets.Commands.UpdatePallet.UpdatePalletDTO dto, CancellationToken ct)
 			=> (await _mediator.Send(new UpdatePalletCommand(id, dto), ct)).ToActionResult();
 
 		// zmiana lokacji

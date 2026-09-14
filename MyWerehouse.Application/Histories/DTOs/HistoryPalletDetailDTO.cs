@@ -9,16 +9,9 @@ using MyWerehouse.Domain.Histories.Models;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {
-	public class HistoryPalletDetailDTO : IMapFrom<HistoryPalletDetail>
-	{
-		public int Id { get; set; }
-		public int PalletMovementId { get; set; }		
+	public class HistoryPalletDetailDTO 
+	{		
 		public Guid ProductId { get; set; }		
-		public int QuantityChange { get; set; } //+/-
-		public void Mapping(Profile profile)
-		{
-			profile.CreateMap<HistoryPalletDetail, HistoryPalletDetailDTO>()
-				.ForMember(dest=>dest.QuantityChange, opt=>opt.MapFrom(src=>src.QuantityChange));
-		}
+		public int QuantityChange { get; set; } //+/-		
 	}
 }

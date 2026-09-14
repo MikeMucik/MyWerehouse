@@ -23,6 +23,79 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 		private readonly Mock<IPalletRepo> _palletRepo = new();
 		private readonly Mock<IInventoryRepo> _inventoryRepo = new();
 
+		private AssignProductToIssueAsyncService CreateService()
+		{
+			return new AssignProductToIssueAsyncService(
+				_addPickingTaskToIssueService.Object,
+				_virtualPalletRepo.Object,
+				_productRepo.Object,
+				_palletRepo.Object,
+				_inventoryRepo.Object);
+		}
+
+		private static Product CreateProduct(int cartonsPerPallet)
+		{
+			return Product.CreateForTests(
+				Guid.NewGuid(),
+				"Test product",
+				"SKU-001",
+				TestDates.UtcNow,
+				1,
+				false,
+				cartonsPerPallet);
+		}
+
+		private static Issue CreateIssue()
+		{
+			return Issue.Create(
+				1,
+				1,
+				new DateOnly(2027, 7, 10),
+				TestDates.UtcNow,
+				UserId);
+		}
+
+		private static IssueItemDTO CreateIssueItem(Guid productId, int quantity)
+		{
+			return new IssueItemDTO
+			{
+				ProductId = productId,
+				Quantity = quantity,
+				BestBefore = BestBefore
+			};
+		}
+
+		private static Pallet CreatePallet(Guid productId, int quantity)
+		{
+			var pallet = Pallet.CreateForTests(
+				"P1000",
+				TestDates.UtcNow,
+				1,
+				PalletStatus.Available,
+				null,
+				null);
+			pallet.AddProductForTests(productId, quantity, TestDates.UtcNow, BestBefore);
+			return pallet;
+		}
+
+		private Pallet CreateTrackedPallet(Guid productId, int quantity)
+		{
+			var location = new Location
+			{
+				Id = 1,
+				Aisle = 1,
+				Bay = 1,
+				Position = 1,
+				Height = 1
+			};
+			var pallet = CreatePallet(productId, quantity);
+
+			DbContext.Attach(location);
+			DbContext.Attach(pallet);
+			DbContext.Entry(pallet).Reference(x => x.Location).CurrentValue = location;
+
+			return pallet;
+		}
 		[Fact]
 		public async Task FullPalletIsAvailable_AssignGoodsToIssue_ReturnsSuccessAndReservesPallet()
 		{
@@ -36,9 +109,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			_productRepo
 				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			//_getProductCountService
-			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
-			//	.ReturnsAsync(100);
 			_inventoryRepo
 				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(100);
@@ -124,9 +194,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			_productRepo
 				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			//_getProductCountService
-			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
-			//	.ReturnsAsync(80);
 			_inventoryRepo
 				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(80);
@@ -162,9 +229,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			_productRepo
 				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			//_getProductCountService
-			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
-			//	.ReturnsAsync(100);
 			_inventoryRepo
 				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(100);
@@ -199,9 +263,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			_productRepo
 				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(product);
-			//_getProductCountService
-			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
-			//	.ReturnsAsync(150);
 			_inventoryRepo
 				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(0);
@@ -238,10 +299,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 
 			_productRepo
 				.Setup(x => x.GetProductByIdAsync(product.Id, It.IsAny<CancellationToken>()))
-				.ReturnsAsync(product);
-			//_getProductCountService
-			//	.Setup(x => x.GetProductCountAsync(product.Id, BestBefore))
-			//	.ReturnsAsync(50);
+				.ReturnsAsync(product);;
 			_inventoryRepo
 				.Setup(x => x.GetAllocatableQuantityAsync(product.Id, BestBefore, It.IsAny<CancellationToken>()))
 				.ReturnsAsync(50);
@@ -278,79 +336,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Unit
 			Assert.Equal(50, result.QuantityOnStock);
 		}
 
-		private AssignProductToIssueAsyncService CreateService()
-		{
-			return new AssignProductToIssueAsyncService(
-				_addPickingTaskToIssueService.Object,
-				//_getProductCountService.Object,
-				_virtualPalletRepo.Object,
-				_productRepo.Object,
-				_palletRepo.Object,
-				_inventoryRepo.Object);
-		}
-
-		private static Product CreateProduct(int cartonsPerPallet)
-		{
-			return Product.CreateForTests(
-				Guid.NewGuid(),
-				"Test product",
-				"SKU-001",
-				TestDates.UtcNow,
-				1,
-				false,
-				cartonsPerPallet);
-		}
-
-		private static Issue CreateIssue()
-		{
-			return Issue.Create(
-				1,
-				1,
-				new DateOnly(2027, 7, 10),
-				TestDates.UtcNow,
-				UserId);
-		}
-
-		private static IssueItemDTO CreateIssueItem(Guid productId, int quantity)
-		{
-			return new IssueItemDTO
-			{
-				ProductId = productId,
-				Quantity = quantity,
-				BestBefore = BestBefore
-			};
-		}
-
-		private static Pallet CreatePallet(Guid productId, int quantity)
-		{
-			var pallet = Pallet.CreateForTests(
-				"P1000",
-				TestDates.UtcNow,
-				1,
-				PalletStatus.Available,
-				null,
-				null);
-			pallet.AddProductForTests(productId, quantity, TestDates.UtcNow, BestBefore);
-			return pallet;
-		}
-
-		private Pallet CreateTrackedPallet(Guid productId, int quantity)
-		{
-			var location = new Location
-			{
-				Id = 1,
-				Aisle = 1,
-				Bay = 1,
-				Position = 1,
-				Height = 1
-			};
-			var pallet = CreatePallet(productId, quantity);
-
-			DbContext.Attach(location);
-			DbContext.Attach(pallet);
-			DbContext.Entry(pallet).Reference(x => x.Location).CurrentValue = location;
-
-			return pallet;
-		}
+		
 	}
 }

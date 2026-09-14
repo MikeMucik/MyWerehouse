@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 
@@ -34,64 +33,12 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 		}
 
 		[Fact]
-		public void ShowIssueByIssueNumber_GetIssueByIdAsync_ReturnIssue()
+		public async Task ShowListIssuesDate_GetIssuesByDates_ReturnList()
 		{
-			//Arrange
-			var filter = new IssueReceiptSearchFilter
-			{
-				IssueNumber = 2
-			};
+			var sendDateStart = DateOnly.FromDateTime(TestDates.UtcNow);
+			var sendDateEnd = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1));
 			//Act
-			var result = _issueRepo.GetIssuesByFilter(filter);
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
-		}
-		[Fact]
-		public void ShowListIssuesByClient_GetIssuesByFilter_ReturnList()
-		{
-			//Arrange
-			var filter = new IssueReceiptSearchFilter
-			{
-				ClientId = 11
-			};
-			//Act
-			var result = _issueRepo.GetIssuesByFilter(filter);
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
-		}
-		[Fact]
-		public void ShowListIssuesByProduct_GetIssuesByFilter_ReturnList()
-		{
-			//Arrange
-			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
-
-			var filter = new IssueReceiptSearchFilter
-			{
-				ProductId = productId1
-			};
-			//Act
-			var result = _issueRepo.GetIssuesByFilter(filter);
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
-		}
-		[Fact]
-		public void ShowListIssuesDate_GetIssuesByFilter_ReturnList()
-		{
-			//Arrange
-			var filter = new IssueReceiptSearchFilter
-			{
-				SendDateStart = DateOnly.FromDateTime(TestDates.UtcNow),
-				SendDateEnd = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1))
-			};
-
-			//Act
-			var result = _issueRepo.GetIssuesByFilter(filter);
+			var result =await _issueRepo.GetIssuesByDates(sendDateStart, sendDateEnd, CancellationToken.None);
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
@@ -117,24 +64,6 @@ namespace MyWerehouse.Test.IntegrationTestRepo.IssueTestsRepoSQLite
 			Assert.NotEmpty(result);
 			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1000"));
 			Assert.Contains(result, p => p.Pallets.Any(i => i.PalletNumber == "Q1001"));
-		}
-		[Fact]
-		public void ShowListIssues_GetPalletByIssueIdAsync_ReturnListPalletWithLocation()
-		{
-			//Arrange
-			var receiptId2 = Guid.Parse("11111111-2111-1111-1111-111111111111");
-			var issueId = receiptId2;
-
-			//Act
-			var result = _issueRepo.GetPalletsByIssueId(issueId).ToList();
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.All(result, p => Assert.False(p.Id == Guid.Empty));
-			Assert.Contains(result, p => p.PalletNumber == "Q1000");
-			Assert.Contains(result, p => p.PalletNumber == "Q1000" && p.LocationId == 1);
-			Assert.Contains(result, p => p.PalletNumber == "Q1001" && p.LocationId == 1);
-			Assert.Contains(result, p => p.PalletNumber == "Q2000" && p.LocationId == 3);
-		}
+		}		
 	}
 }

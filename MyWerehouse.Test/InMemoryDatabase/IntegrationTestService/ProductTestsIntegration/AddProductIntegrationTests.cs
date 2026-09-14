@@ -97,7 +97,7 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsI
 			//Assert
 			Assert.NotNull(result);
 			Assert.False(result.IsSuccess);
-			Assert.Contains("A product with this name already exists.", result.Error);
+			Assert.Contains("A product with this name/SKU already exists.", result.Error);
 			Assert.Equal(ErrorType.NotFound, result.ErrorType);
 		}
 		[Fact]

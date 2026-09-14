@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Picking.Commands.ClosePickingPallet
 {
 	public class ClosePickingPalletHandler(IPalletRepo palletRepo,
 		IIssueRepo issueRepo,
-		WerehouseDbContext werehouseDbContext) : IRequestHandler<ClosePickingPalletCommand, AppResult<Unit>>
+		IUnitOfWork unitOfWork) : IRequestHandler<ClosePickingPalletCommand, AppResult<Unit>>
 	{
 		private readonly IPalletRepo _palletRepo = palletRepo;
 		private readonly IIssueRepo _issueRepo = issueRepo;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 		public async Task<AppResult<Unit>> Handle(ClosePickingPalletCommand request, CancellationToken ct)
 		{
@@ -29,7 +23,7 @@ namespace MyWerehouse.Application.Picking.Commands.ClosePickingPallet
 				return AppResult<Unit>.Fail("The issue for this pallet was not found.");
 			pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location.ToSnapshot());
 			//drukowanie etykiety
-			await _werehouseDbContext.SaveChangesAsync(ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Pallet was closed and added to issue {issue.IssueNumber}.");
 		}
 	}

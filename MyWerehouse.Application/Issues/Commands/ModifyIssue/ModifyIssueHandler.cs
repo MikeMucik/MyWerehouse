@@ -1,8 +1,8 @@
 ﻿using System.Data;
 using System.Linq;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.IssueServices;
@@ -10,21 +10,20 @@ using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 {
 	public class ModifyIssueHandler(
 		IIssueRepo issueRepo,
 		IMediator mediator,
-		WerehouseDbContext werehouseDbContext,
+		IUnitOfWork unitOfWork,
 		IAssignProductToIssueService assignProductToIssueAsync,
 		IVirtualPalletRepo virtualPalletRepo,
 		IDateTimeProvider dateTimeProvider) : IRequestHandler<ModifyIssueCommand, AppResult<IssueCreateModifyResult>>
 	{
 		private readonly IIssueRepo _issueRepo = issueRepo;
 		private readonly IMediator _mediator = mediator;
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IAssignProductToIssueService _assignProductToIssueAsync = assignProductToIssueAsync;
 		private readonly IVirtualPalletRepo _virtualRepo = virtualPalletRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
@@ -52,71 +51,69 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 
 		private async Task<AppResult<IssueCreateModifyResult>> ReallocateIssue(ModifyIssueCommand request, DateTime now, CancellationToken ct)
 		{
-			var strategy = _werehouseDbContext.Database.CreateExecutionStrategy();
-			return await strategy.ExecuteAsync(async () =>
-			{
-				_werehouseDbContext.ChangeTracker.Clear();
-				await using var transaction = await _werehouseDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-				var issue = await _issueRepo.GetIssueByIdForModifyAsync(request.Id, ct);
-				if (issue == null)
+			return await _unitOfWork.ExecuteInTransactionAsync(
+				async transactionCt =>
 				{
-					return AppResult<IssueCreateModifyResult>.Fail("Issue was not found.");
-				}
-				var oldPallets = issue.PrepareForReallocation(request.DTO.ClientId, request.DTO.PerformedBy, now);
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				var results = new List<AssignProductToIssueResult>();
-				var anyFailure = false;
-				var anySuccess = false;
-				foreach (var product in request.DTO.IssueItems)
-				{
-					var reusablePalletsForProduct = oldPallets.Pallets.Where(p => p.ContainsProduct(product.ProductId)).ToList();
-
-					var result = await _assignProductToIssueAsync.AssignGoodsToIssue(issue, product,
-						IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy, ct);
-
-					if (!result.Success) //niepowodzenie biznesowe
+					var issue = await _issueRepo.GetIssueByIdForModifyAsync(request.Id, transactionCt);
+					if (issue == null)
 					{
-						results.Add(result);
-						anyFailure = true;
-						continue;
+						return AppResult<IssueCreateModifyResult>.Fail("Issue was not found.");
 					}
-					var palletAssigned = result.AssignedPallets?.ToList() ?? [];
-					issue.CompleteReallocation(palletAssigned, reusablePalletsForProduct);
-					anySuccess = true;
-					results.Add(result);
-				}
-				if (oldPallets.ListPalletsIds.Count != 0)
-				{
-					// Usuwamy tylko puste VirtualPallets; fizyczne palety wracają do dostępnych.
-					foreach (var item in oldPallets.ListPalletsIds)
+					var oldPallets = issue.PrepareForReallocation(request.DTO.ClientId, request.DTO.PerformedBy, now);
+					await _unitOfWork.SaveChangesAsync(transactionCt);
+					var results = new List<AssignProductToIssueResult>();
+					var anyFailure = false;
+					var anySuccess = false;
+					foreach (var product in request.DTO.IssueItems)
 					{
-						var vp = await _virtualRepo.GetVirtualPalletByIdAsync(item, ct);
-						if (vp!.CanBeDeletedAfterReallocation())
+						var reusablePalletsForProduct = oldPallets.Pallets.Where(p => p.ContainsProduct(product.ProductId)).ToList();
+
+						var result = await _assignProductToIssueAsync.AssignGoodsToIssue(issue, product,
+							IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy, transactionCt);
+
+						if (!result.Success) //niepowodzenie biznesowe
 						{
-							vp.Pallet.ChangeStatus(PalletStatus.Available);
-							_virtualRepo.DeleteVirtualPalletPicking(vp);
+							results.Add(result);
+							anyFailure = true;
+							continue;
+						}
+						var palletAssigned = result.AssignedPallets?.ToList() ?? [];
+						issue.CompleteReallocation(palletAssigned, reusablePalletsForProduct);
+						anySuccess = true;
+						results.Add(result);
+					}
+					if (oldPallets.ListPalletsIds.Count != 0)
+					{
+						// Usuwamy tylko puste VirtualPallets; fizyczne palety wracają do dostępnych.
+						foreach (var item in oldPallets.ListPalletsIds)
+						{
+							var vp = await _virtualRepo.GetVirtualPalletByIdAsync(item, transactionCt);
+							if (vp!.CanBeDeletedAfterReallocation())
+							{
+								vp.Pallet.ChangeStatus(PalletStatus.Available);
+								_virtualRepo.DeleteVirtualPalletPicking(vp);
+							}
 						}
 					}
-				}
-				if (anySuccess)
-				{
-					issue.MarkAllocationCompleted(request.DTO.PerformedBy);
-				}
-				if (anyFailure)
-				{
-					issue.MarkAllocationNotCompleted(issue.PerformedBy);
-				}
-				await _werehouseDbContext.SaveChangesAsync(ct);
-				await transaction.CommitAsync(ct);
+					if (anySuccess)
+					{
+						issue.MarkAllocationCompleted(request.DTO.PerformedBy);
+					}
+					if (anyFailure)
+					{
+						issue.MarkAllocationNotCompleted(issue.PerformedBy);
+					}
+					await _unitOfWork.SaveChangesAsync(transactionCt);
 
-				var response = IssueCreateModifyResult.Ok(
-					issue.Id,
-					issue.IssueNumber,
-					"Issue was modified.",
-					results);
+					var response = new IssueCreateModifyResult(
+						issue.Id,
+						issue.IssueNumber,
+						"Issue was modified.",
+						results);
 
-				return AppResult<IssueCreateModifyResult>.Success(response);
-			});
+					return AppResult<IssueCreateModifyResult>.Success(response);
+
+				}, IsolationLevel.Serializable, ct);
 		}
 
 		private async Task<AppResult<IssueCreateModifyResult>> CreateSupplementaryIssue(
@@ -164,12 +161,12 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 			}
 			if (newQuantities.Count == 0)
 			{
-				var response = IssueCreateModifyResult.Ok(
+				var responseNotChange = new IssueCreateModifyResult(
 					issue.Id,
 					issue.IssueNumber,
 					"No quantity changes were detected; the issue was not modified.");
 
-				return AppResult<IssueCreateModifyResult>.Success(response);
+				return AppResult<IssueCreateModifyResult>.Success(responseNotChange);
 			}
 			var dataForNewIssue = new CreateIssueDTO
 			{
@@ -184,19 +181,15 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 					receiverFromCreate.Error ?? "The supplementary issue could not be created.",
 					ErrorType.Conflict);
 			}
-
-			var responseFromCreate = receiverFromCreate.Result;
-			foreach (var result in responseFromCreate.Results ?? [])
-			{
-				if (result.Success)
-				{
-					result.Message += " (A last-minute supplementary issue was created because the original issue is already in progress.)";
-				}
-			}
-			responseFromCreate.Message =
-				"A last-minute supplementary issue was created because the original issue is already in progress.";
-
-			return AppResult<IssueCreateModifyResult>.Success(responseFromCreate);
+			var cretedIssue = receiverFromCreate.Result;
+			var response = new IssueCreateModifyResult
+			(
+				cretedIssue.IssueId,
+				cretedIssue.IssueNumber,
+				"A last-minute supplementary issue was created because the original issue is already in progress.",
+				cretedIssue.Results
+			);
+			return AppResult<IssueCreateModifyResult>.Success(response);
 		}
 	}
 }

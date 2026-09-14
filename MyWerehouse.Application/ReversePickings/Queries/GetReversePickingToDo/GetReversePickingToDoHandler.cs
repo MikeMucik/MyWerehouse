@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Azure.Core;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.ReversePickings.DTOs;
+using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
@@ -18,12 +9,12 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 	public class GetReversePickingToDoHandler(IReversePickingRepo reversePickingRepo,
 		IPalletRepo palletRepo,
 		IProductRepo productRepo,
-		IMapper mapper) : IRequestHandler<GetReversePickingToDoQuery, AppResult<ReversePickingDetailsDTO>>
+		IReversePickingReadService reversePickingReadService) : IRequestHandler<GetReversePickingToDoQuery, AppResult<ReversePickingDetailsDTO>>
 	{
 		private readonly IReversePickingRepo _reversePickingRepo = reversePickingRepo;
 		private readonly IPalletRepo _palletRepo = palletRepo;
-		private readonly IProductRepo _productRepo = productRepo;
-		private readonly IMapper _mapper = mapper;
+		private readonly IProductRepo _productRepo = productRepo;	
+		private readonly IReversePickingReadService _reversePickingReadService = reversePickingReadService;
 
 		public async Task<AppResult<ReversePickingDetailsDTO>> Handle(GetReversePickingToDoQuery query, CancellationToken ct)
 		{
@@ -31,7 +22,6 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 			if (reversePickingTask == null) return AppResult<ReversePickingDetailsDTO>.Fail("Reverse picking task was not found.");
 
 			var pickingTask = reversePickingTask.PickingTask;
-			var reversePickingDTO = _mapper.Map<ReversePickingDTO>(reversePickingTask);
 			var remainingQuantity = pickingTask.PickedQuantity;
 			var product = await _productRepo.GetProductByIdAsync(pickingTask.ProductId, ct);
 			if (product == null) return AppResult<ReversePickingDetailsDTO>.Fail($"Product {pickingTask.ProductId} does not exist.");
@@ -64,16 +54,21 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 					break;
 				}
 			}
-			var respone = new ReversePickingDetailsDTO
+			var reverseDTO = await _reversePickingReadService.GetReversePicking(reversePickingTask.Id,	ct);
+			if (reverseDTO == null)
+			{
+				return AppResult<ReversePickingDetailsDTO>.Fail("No elements to show.");
+			}
+			var response = new ReversePickingDetailsDTO
 			{
 				AddToNewPallet = true,
 				CanReturnToSource = addSource,
 				CanAddToExistingPallet = canAddedtoExist,//muszą być oba lub żadne
 				ListPalletsToAdd = listPalletsToAdd,//muszą być oba lub żadne
 				PickingPalletCompletlyUnpicking = unpickComplete,
-				ReversePickingDTO = reversePickingDTO
-			};
-			return AppResult<ReversePickingDetailsDTO>.Success(respone);
+				ReversePickingDTO = reverseDTO
+			};			
+			return AppResult<ReversePickingDetailsDTO>.Success(response);
 		}
 	}
 }

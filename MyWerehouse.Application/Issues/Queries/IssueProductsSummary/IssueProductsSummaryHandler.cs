@@ -3,42 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using Azure.Core;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Infrastructure.Persistence;
+using MyWerehouse.Application.Interfaces;
 
 namespace MyWerehouse.Application.Issues.Queries.IssueProductsSummary
 {
-	public class IssueProductsSummaryHandler(WerehouseDbContext werehouseDbContext) : IRequestHandler<IssueProductsSummaryQuery, AppResult<SummaryProductsIssueDTO>>
+	public class IssueProductsSummaryHandler(IIssueReadService issueReadService) : IRequestHandler<IssueProductsSummaryQuery, AppResult<SummaryProductsIssueDTO>>
 	{
-		private readonly WerehouseDbContext _werehouseDbContext = werehouseDbContext;
+		private readonly IIssueReadService _issueReadService = issueReadService;
 
 		public async Task<AppResult<SummaryProductsIssueDTO>> Handle(IssueProductsSummaryQuery query, CancellationToken ct)
 		{
-			var dto = await _werehouseDbContext.Issues
-				.AsNoTracking()
-				.Where(i => i.Id == query.IssueId)
-				.Select(x => new SummaryProductsIssueDTO
-				{
-					Id = x.Id,
-					IssueNumber = x.IssueNumber,
-					ClientId = x.ClientId,
-					PerformedBy = x.PerformedBy,
-					IssueItems = x.IssueItems
-					 .Select(ii => new IssueItemViewDTO
-					 {
-						 ProductId = ii.ProductId,
-						 ProductName = ii.Product.Name,
-						 ProductSKU = ii.Product.SKU,
-						 Quantity = ii.Quantity,
-						 BestBefore = ii.BestBefore
-					 }).ToList(),
-						DateToSend = x.IssueDateTimeSend
-				}).FirstOrDefaultAsync(ct);
+			var dto = await _issueReadService.SummaryProductsIssue(query.IssueId, ct);
 			
 			if (dto == null)
 			{

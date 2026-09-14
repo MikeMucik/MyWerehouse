@@ -37,10 +37,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyWerehouse.Domain\MyWerehouse.Domain.csproj" />
-    <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Common\Interfaces\Persistence\" />
     <Folder Include="Inventories\Commands\ChangeQuantity\" />
     <Folder Include="Receipts\DTOs\" />
   </ItemGroup>

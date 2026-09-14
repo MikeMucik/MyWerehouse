@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Application.Pallets.Commands.MarkAsLoaded
 {

@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyWerehouse.Domain\MyWerehouse.Domain.csproj" />
+	  <ProjectReference Include="..\MyWerehouse.Application\MyWerehouse.Application.csproj"/>
   </ItemGroup>
 
 </Project>

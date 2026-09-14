@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Application.Common.Results;
 using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Domain.Inventories.Models;
-using MyWerehouse.Domain.Common;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
+using MyWerehouse.Application.Common.Interfaces;
 
 namespace MyWerehouse.Application.Services
 {

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 {

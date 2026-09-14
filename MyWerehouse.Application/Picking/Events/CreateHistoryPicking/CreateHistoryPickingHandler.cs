@@ -1,34 +1,36 @@
 ﻿using MediatR;
-using MyWerehouse.Domain.Common;
+using MyWerehouse.Application.Common.Events;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Events;
 
 namespace MyWerehouse.Application.Picking.Events.CreateHistoryPicking
 {
 	public class CreateHistoryPickingHandler(IHistoryPickingRepo historyPickingRepo, IDateTimeProvider dateTimeProvider)
-		: INotificationHandler<CreateHistoryPickingNotification>
+		: INotificationHandler<DomainEventNotification<CreateHistoryPickingNotification>>
 	{
 		private readonly IHistoryPickingRepo _historyPickingRepo = historyPickingRepo;		
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
-		public Task Handle(CreateHistoryPickingNotification request, CancellationToken ct)
-		{			
+		public Task Handle(DomainEventNotification<CreateHistoryPickingNotification> request, CancellationToken ct)
+		{
+			var domaintEvent = request.DomainEvent;
 			var history = new HistoryPicking
 			{			
-				PickingTaskId = request.PickingTaskId,
-				IssueNumber = request.IssueNumber,
-				PalletId = request.PalletId,
-				PalletNumber = request.PalletNumber,
-				PickingPalletId = request.PickingPalleId,
-				PickingPalletNumber = request.PickingPalletNumber,
-				IssueId = request.IssueId,
-				ProductId = request.ProductId,
-				QuantityAllocated = request.QuantityAllocated,
-				QuantityPicked = request.QuantityPicked,
-				StatusBefore = request.StatusBefore,
-				StatusAfter = request.StatusAfter,
-				PerformedBy = request.PerformedBy,
+				PickingTaskId = domaintEvent.PickingTaskId,
+				IssueNumber = domaintEvent.IssueNumber,
+				PalletId = domaintEvent.PalletId,
+				PalletNumber = domaintEvent.PalletNumber,
+				PickingPalletId = domaintEvent.PickingPalleId,
+				PickingPalletNumber = domaintEvent.PickingPalletNumber,
+				IssueId = domaintEvent.IssueId,
+				ProductId = domaintEvent.ProductId,
+				QuantityAllocated = domaintEvent.QuantityAllocated,
+				QuantityPicked = domaintEvent.QuantityPicked,
+				StatusBefore = domaintEvent.StatusBefore,
+				StatusAfter = domaintEvent.StatusAfter,
+				PerformedBy = domaintEvent.PerformedBy,
 				DateTime = _dateTimeProvider.UtcNow,
 			};
 			_historyPickingRepo.AddHistoryPicking(history);		

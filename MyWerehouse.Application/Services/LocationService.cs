@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.LocationModels;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Warehouse.Models;
 
 namespace MyWerehouse.Application.Services

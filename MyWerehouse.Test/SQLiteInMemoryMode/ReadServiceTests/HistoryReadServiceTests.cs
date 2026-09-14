@@ -1,5 +1,5 @@
-using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Server.ServicesToInfrastructure;
+﻿using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.ReadServiceTests
 {

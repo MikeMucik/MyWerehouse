@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moq;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Application.Picking.Services;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;

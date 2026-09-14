@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Receiving.Filters;
+﻿using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Infrastructure.Persistence.Repositories

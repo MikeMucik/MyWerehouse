@@ -40,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Interfaces\Persistence\" />
     <Folder Include="Inventories\Commands\ChangeQuantity\" />
     <Folder Include="Receipts\DTOs\" />
   </ItemGroup>

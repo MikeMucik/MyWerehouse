@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Common.ValueObject;
+﻿using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Events;

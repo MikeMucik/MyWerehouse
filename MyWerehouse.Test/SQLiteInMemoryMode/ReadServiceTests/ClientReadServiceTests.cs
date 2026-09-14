@@ -1,6 +1,6 @@
-using MyWerehouse.Domain.Clients.Filters;
+﻿using MyWerehouse.Domain.Clients.Filters;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Server.ServicesToInfrastructure;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.ReadServiceTests
 {

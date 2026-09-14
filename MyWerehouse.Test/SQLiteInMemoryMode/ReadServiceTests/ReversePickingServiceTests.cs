@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.ReversePickings.Models;
-using MyWerehouse.Server.ServicesToInfrastructure;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.ReadServiceTests
 {

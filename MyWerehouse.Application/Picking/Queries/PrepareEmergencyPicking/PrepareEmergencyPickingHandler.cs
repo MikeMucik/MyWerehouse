@@ -1,9 +1,9 @@
 ﻿using MediatR;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Picking.DTOs;
 using MyWerehouse.Application.Picking.Queries.PrepareCorrectedPicking;
-using MyWerehouse.Domain.Interfaces;
 
 namespace MyWerehouse.Application.Picking.Queries.PrepareEmergencyPicking
 {

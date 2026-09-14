@@ -5,11 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MyWerehouse.Application;
+using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Domain.Common;
 using MyWerehouse.Infrastructure;
+using MyWerehouse.Infrastructure.Common;
 using MyWerehouse.Infrastructure.Persistence;
-using MyWerehouse.Server.ServicesToInfrastructure;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode
 {
@@ -30,15 +31,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			opt.UseSqlite(_connection));
 			services.AddLogging(config => config.AddConsole());
 			services.AddApplication();
-			services.AddScoped<IUnitOfWork, MyWerehouse.Server.UnitOfWork>();
-			//refactor clean architecture
-			services.AddScoped<IPalletReadService, PalletReadService>();
-			services.AddScoped<IIssueReadService, IssueReadService>();
-			services.AddScoped<IReceiptReadService, ReceiptReadService>();
-			services.AddScoped<IPickingReadService, PickingReadService>();
-			services.AddScoped<IReversePickingReadService, ReversePickingReadService>();
-			services.AddScoped<IInventoryReadService, InventoryReadService>();
-			services.AddScoped<IHistoryReadService,  HistoryReadService>();
+			//services.AddScoped<IUnitOfWork, UnitOfWork>();
+			////refactor clean architecture
+			//services.AddScoped<IPalletReadService, PalletReadService>();
+			//services.AddScoped<IIssueReadService, IssueReadService>();
+			//services.AddScoped<IReceiptReadService, ReceiptReadService>();
+			//services.AddScoped<IPickingReadService, PickingReadService>();
+			//services.AddScoped<IReversePickingReadService, ReversePickingReadService>();
+			//services.AddScoped<IInventoryReadService, InventoryReadService>();
+			//services.AddScoped<IHistoryReadService,  HistoryReadService>();
 
 			services.AddInfrastructure();
 			services.RemoveAll<IDateTimeProvider>();

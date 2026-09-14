@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 
 namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 {

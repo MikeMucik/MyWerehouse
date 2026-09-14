@@ -4,28 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Application.Common.Events;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Domain.Inventories.Events;
 using MyWerehouse.Domain.Inventories.Models;
 
 namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 {
-	public class ChangeStockHandler(IInventoryRepo inventoryRepo, IDateTimeProvider dateTimeProvider) : INotificationHandler<ChangeStockNotification>
+	public class ChangeStockHandler(IInventoryRepo inventoryRepo, IDateTimeProvider dateTimeProvider)
+		: INotificationHandler<DomainEventNotification<ChangeStockNotification>>
 	{
 		private readonly IInventoryRepo _inventoryRepo = inventoryRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
-		public async Task Handle(ChangeStockNotification notification, CancellationToken cancellationToken)
+		public async Task Handle(DomainEventNotification<ChangeStockNotification> notification, CancellationToken cancellationToken)
 		{
-			if (!notification.Changes.Any()) { return; }
-			var productIds = notification.Changes.Select(c => c.ProductId).ToList();
+			var domaintEvent = notification.DomainEvent;
+
+			if (!domaintEvent.Changes.Any()) return;
+
+			//if (!notification.Changes.Any()) { return; }
+			var productIds = domaintEvent.Changes.Select(c => c.ProductId).ToList();
 			var inventories = await _inventoryRepo.GetInventoriesForProductsAsync(productIds, cancellationToken);
 			var inventoryDict = inventories.ToDictionary(i => i.ProductId);
 
-			foreach (var change in notification.Changes)
+			foreach (var change in domaintEvent.Changes)
 			{
 				inventoryDict.TryGetValue(change.ProductId, out var inventory);
-					if (inventory == null)
+				if (inventory == null)
 				{
 					var newInventory = Inventory.CreateStockItem(change.ProductId,
 						change.Quantity, _dateTimeProvider.UtcNow);

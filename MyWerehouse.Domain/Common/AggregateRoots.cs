@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
 
 namespace MyWerehouse.Domain.Common
 {
-	public interface IDomainEvent : INotification { }
+	public interface IDomainEvent  { }
 	public class AggregateRoots
 	{
 		private readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();

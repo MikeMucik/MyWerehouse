@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 

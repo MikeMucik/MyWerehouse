@@ -1,8 +1,8 @@
 ﻿using MediatR;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Picking.Services;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
 
 namespace MyWerehouse.Application.Picking.Commands.DoPlannedPicking

@@ -1,6 +1,6 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Common.ValueObject;
@@ -19,10 +19,13 @@ namespace MyWerehouse.Infrastructure.Persistence
 {
 	public class WerehouseDbContext : IdentityDbContext
 	{
-		private readonly IPublisher? _publisher;
-		public WerehouseDbContext(DbContextOptions<WerehouseDbContext> options, IPublisher? publisher) : base(options)
+		private readonly IDomainEventDispatcher? _dispatcher;
+		public WerehouseDbContext(
+			DbContextOptions<WerehouseDbContext> options,
+			IDomainEventDispatcher? dispatcher = null)
+			: base(options)
 		{
-			_publisher = publisher;
+			_dispatcher = dispatcher;
 		}
 		public DbSet<Address> Addresses { get; set; }
 		public DbSet<PickingTask> PickingTasks { get; set; }
@@ -68,18 +71,15 @@ namespace MyWerehouse.Infrastructure.Persistence
 				return;
 			}
 
-			if (_publisher == null) return;
+			if (_dispatcher == null) return;
 
 			var domainEvents = domainEntities
 				.SelectMany(x => x.DomainEvents)
 				.ToList();
 
 			domainEntities.ForEach(entity => entity.ClearDomainEvents());
-
-			foreach (var domainEvent in domainEvents)
-			{
-				await _publisher.Publish(domainEvent, ct);
-			}
+						
+				await _dispatcher.DispatchAsync(domainEvents, ct);			
 		}
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

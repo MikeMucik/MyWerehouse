@@ -1,8 +1,8 @@
 ﻿using MediatR;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 
 namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet

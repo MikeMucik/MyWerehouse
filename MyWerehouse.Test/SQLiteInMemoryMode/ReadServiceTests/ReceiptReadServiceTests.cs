@@ -2,7 +2,7 @@
 using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Domain.Receiving.Models;
-using MyWerehouse.Server.ServicesToInfrastructure;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.ReadServiceTests
 {

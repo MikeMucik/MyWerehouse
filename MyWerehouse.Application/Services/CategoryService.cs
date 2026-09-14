@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 using MediatR;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.CategoryModels;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Products.Models;
 
 namespace MyWerehouse.Application.Services

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.Services;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Services;
 
 namespace MyWerehouse.Application.Issues.Commands.CancelIssue

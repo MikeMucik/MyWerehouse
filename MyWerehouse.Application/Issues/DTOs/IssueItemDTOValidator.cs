@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 
 namespace MyWerehouse.Application.Issues.DTOs
 {

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Test.InMemoryDatabase.Common
@@ -18,7 +18,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.Common
 			var options = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase(Guid.NewGuid().ToString())
 				.Options;
-			var publisher = new Mock<IPublisher>();
+			//var publisher = new Mock<IPublisher>();
+			var publisher = new Mock<IDomainEventDispatcher>();
 			var mock = new Mock<WerehouseDbContext>(options, publisher.Object) { CallBase = true };
 			var context = mock.Object;
 			context.Database.EnsureCreated();

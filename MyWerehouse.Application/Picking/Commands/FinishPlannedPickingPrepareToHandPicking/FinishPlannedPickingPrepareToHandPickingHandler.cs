@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Picking.DTOs;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Services;
 using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
+using MyWerehouse.Application.Common.Interfaces;
 
 namespace MyWerehouse.Application.Picking.Commands.FinishPlannedPickingPrepareToHandPicking
 {

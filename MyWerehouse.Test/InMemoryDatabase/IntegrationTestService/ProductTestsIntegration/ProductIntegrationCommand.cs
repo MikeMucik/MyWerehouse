@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
-using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Infrastructure.Common;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
-using MyWerehouse.Server;
-using MyWerehouse.Server.ServicesToInfrastructure;
 using MyWerehouse.Test.InMemoryDatabase.Common;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ProductTestsIntegration

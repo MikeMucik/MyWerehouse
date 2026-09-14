@@ -1,9 +1,9 @@
 ﻿using MediatR;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Picking.Services;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Picking.Models;
 using MyWerehouse.Domain.Services;
 

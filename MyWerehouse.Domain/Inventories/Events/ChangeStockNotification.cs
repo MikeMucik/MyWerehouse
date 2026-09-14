@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
-using MyWerehouse.Domain.Common;
+﻿using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Inventories.Events
 {

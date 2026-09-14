@@ -3,7 +3,7 @@ using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Server.ServicesToInfrastructure;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.ReadServiceTests
 {

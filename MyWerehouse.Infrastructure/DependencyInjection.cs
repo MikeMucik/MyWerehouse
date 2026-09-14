@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
+using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Infrastructure.Common;
 using MyWerehouse.Infrastructure.Common.DateTimeProvider;
+using MyWerehouse.Infrastructure.Common.Events;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 
 namespace MyWerehouse.Infrastructure
@@ -14,7 +13,7 @@ namespace MyWerehouse.Infrastructure
 	public static class DependencyInjection
 	{
 		public static IServiceCollection AddInfrastructure(this IServiceCollection services)
-		{			
+		{
 			services.AddScoped<IPickingTaskRepo, PickingTaskRepo>();
 			services.AddScoped<ICategoryRepo, CategoryRepo>();
 			services.AddScoped<IClientRepo, ClientRepo>();
@@ -26,7 +25,7 @@ namespace MyWerehouse.Infrastructure
 
 			services.AddScoped<IInventoryRepo, InventoryRepo>();
 			services.AddScoped<IIssueRepo, IssueRepo>();
-			
+
 			services.AddScoped<ILocationRepo, LocationRepo>();
 			services.AddScoped<IHistoryPalletRepo, HistoryPalletRepo>();
 			services.AddScoped<IPalletRepo, PalletRepo>();
@@ -34,6 +33,21 @@ namespace MyWerehouse.Infrastructure
 			services.AddScoped<IProductRepo, ProductRepo>();
 			services.AddScoped<IReceiptRepo, ReceiptRepo>();
 			services.AddScoped<IReversePickingRepo, ReversePickingRepo>();
+
+			services.AddScoped<IUnitOfWork, UnitOfWork>();
+			services.AddScoped<ICategoryReadService, CategoryReadService>();
+			services.AddScoped<IClientReadService, ClientReadService>();
+			services.AddScoped<ILocationReadService, LocationReadService>();
+			services.AddScoped<IProductReadService, ProductReadService>();
+			services.AddScoped<IPalletReadService, PalletReadService>();
+			services.AddScoped<IIssueReadService, IssueReadService>();
+			services.AddScoped<IReceiptReadService, ReceiptReadService>();
+			services.AddScoped<IPickingReadService, PickingReadService>();
+			services.AddScoped<IReversePickingReadService, ReversePickingReadService>();
+			services.AddScoped<IInventoryReadService, InventoryReadService>();
+			services.AddScoped<IHistoryReadService, HistoryReadService>();
+
+			services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
 
 			services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 

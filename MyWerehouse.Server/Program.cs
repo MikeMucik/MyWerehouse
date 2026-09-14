@@ -4,7 +4,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Issuing.Models;
@@ -16,7 +15,6 @@ using MyWerehouse.Infrastructure;
 using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Infrastructure.Persistence.Seeding;
 using MyWerehouse.Server.Middleware;
-using MyWerehouse.Server.ServicesToInfrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,19 +36,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
-//refaktor clean architecture
-builder.Services.AddScoped<IUnitOfWork, MyWerehouse.Server.UnitOfWork>();
-builder.Services.AddScoped<ICategoryReadService, CategoryReadService>();
-builder.Services.AddScoped<IClientReadService, ClientReadService>();
-builder.Services.AddScoped<ILocationReadService, LocationReadService>();
-builder.Services.AddScoped<IProductReadService, ProductReadService>();
-builder.Services.AddScoped<IPalletReadService, PalletReadService>();
-builder.Services.AddScoped<IIssueReadService, IssueReadService>();
-builder.Services.AddScoped<IReceiptReadService, ReceiptReadService>();
-builder.Services.AddScoped<IPickingReadService, PickingReadService>();
-builder.Services.AddScoped<IReversePickingReadService, ReversePickingReadService>();
-builder.Services.AddScoped<IInventoryReadService, InventoryReadService>();
-builder.Services.AddScoped<IHistoryReadService, HistoryReadService>();
 
 //enum string swagger
 builder.Services.AddControllers()

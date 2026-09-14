@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Domain.Issuing.Models;
+﻿using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Picking.Models;

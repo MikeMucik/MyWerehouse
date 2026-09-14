@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Domain.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Picking.Models;
 

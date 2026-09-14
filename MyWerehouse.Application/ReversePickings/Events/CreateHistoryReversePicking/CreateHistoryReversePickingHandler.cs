@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Core;
 using MediatR;
-using MyWerehouse.Domain.Common;
+using MyWerehouse.Application.Common.Events;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.ReversePickings.Events;
 
 namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePicking
 {
-	public class CreateHistoryReversePickingHandler : INotificationHandler<CreateHistoryReversePickingNotification>
+	public class CreateHistoryReversePickingHandler
+		: INotificationHandler<DomainEventNotification<CreateHistoryReversePickingNotification>>
 	{
 		private readonly IHistoryReversePickingRepo _historyReversePickingRepo;
 		private readonly IPalletRepo _palletRepo;
@@ -23,15 +26,16 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 			_palletRepo = pallet;
 			_dateTimeProvider = dateTimeProvider;
 		}
-		public async Task Handle(CreateHistoryReversePickingNotification notification, CancellationToken ct)
+		public async Task Handle(DomainEventNotification<CreateHistoryReversePickingNotification> notification, CancellationToken ct)
 		{
-			var sourceTask = notification.PalletSourceId != null
-				? _palletRepo.GetPalletByIdAsync(notification.PalletSourceId.Value, ct)
+			var domaintEvent = notification.DomainEvent;
+			var sourceTask = domaintEvent.PalletSourceId != null
+				? _palletRepo.GetPalletByIdAsync(domaintEvent.PalletSourceId.Value, ct)
 				: Task.FromResult<Pallet?>(null);
-			var destinationTask = notification.PalletDestinationId != null
-				? _palletRepo.GetPalletByIdAsync(notification.PalletDestinationId.Value, ct)
+			var destinationTask = domaintEvent.PalletDestinationId != null
+				? _palletRepo.GetPalletByIdAsync(domaintEvent.PalletDestinationId.Value, ct)
 				: Task.FromResult<Pallet?>(null);
-			var pickingTask = _palletRepo.GetPalletByIdAsync(notification.PickingPalletId, ct);
+			var pickingTask = _palletRepo.GetPalletByIdAsync(domaintEvent.PickingPalletId, ct);
 			await Task.WhenAll(sourceTask, destinationTask, pickingTask);
 
 			var sourcePallet = sourceTask.Result;
@@ -40,21 +44,21 @@ namespace MyWerehouse.Application.ReversePickings.Events.CreateHistoryReversePic
 			ArgumentNullException.ThrowIfNull(pickingPallet);
 			var history = new HistoryReversePicking
 				{
-					ReversePickingId = notification.ReversePickingId,
-					PickingPalletId = notification.PickingPalletId,
+					ReversePickingId = domaintEvent.ReversePickingId,
+					PickingPalletId = domaintEvent.PickingPalletId,
 					PickingPalletNumber = pickingPallet.PalletNumber,
-					PalletSourceId = notification.PalletSourceId,
+					PalletSourceId = domaintEvent.PalletSourceId,
 					PalletSourceNumber = sourcePallet?.PalletNumber,
-					PalletDestinationId = notification.PalletDestinationId,
+					PalletDestinationId = domaintEvent.PalletDestinationId,
 					PalletDestinationNumber = destinationPallet?.PalletNumber,
-					IssueId = notification.IssueId,
-					IssueNumber = notification.IssueNumber,
-					ProductId = notification.ProductId,
+					IssueId = domaintEvent.IssueId,
+					IssueNumber = domaintEvent.IssueNumber,
+					ProductId = domaintEvent.ProductId,
 					DateTime = _dateTimeProvider.UtcNow,
-					PerformedBy = notification.UserId,
-					Quantity = notification.Quantity,
-					StatusBefore = notification.StatusBefore,
-					StatusAfter = notification.StatusAfter,
+					PerformedBy = domaintEvent.UserId,
+					Quantity = domaintEvent.Quantity,
+					StatusBefore = domaintEvent.StatusBefore,
+					StatusAfter = domaintEvent.StatusAfter,
 				};
 			_historyReversePickingRepo.AddHistoryReversePicking(history);
 		}

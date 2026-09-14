@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
-using MyWerehouse.Domain.Interfaces;
-using MyWerehouse.Infrastructure.Persistence;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
-using MyWerehouse.Server;
-using MyWerehouse.Server.ServicesToInfrastructure;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
 using MyWerehouse.Test.InMemoryDatabase.Common;
+using MyWerehouse.Infrastructure.Common;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIntegration
 {

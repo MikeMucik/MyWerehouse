@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.ReversePickings.DTOs;
-using MyWerehouse.Domain.Common;
-using MyWerehouse.Domain.Interfaces;
 using MyWerehouse.Domain.ReversePickings.Models;
 
 namespace MyWerehouse.Application.ReversePickings.Services

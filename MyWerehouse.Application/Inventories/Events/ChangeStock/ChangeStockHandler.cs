@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Interfaces;
@@ -20,10 +16,7 @@ namespace MyWerehouse.Application.Inventories.Events.ChangeStock
 		public async Task Handle(DomainEventNotification<ChangeStockNotification> notification, CancellationToken cancellationToken)
 		{
 			var domaintEvent = notification.DomainEvent;
-
 			if (!domaintEvent.Changes.Any()) return;
-
-			//if (!notification.Changes.Any()) { return; }
 			var productIds = domaintEvent.Changes.Select(c => c.ProductId).ToList();
 			var inventories = await _inventoryRepo.GetInventoriesForProductsAsync(productIds, cancellationToken);
 			var inventoryDict = inventories.ToDictionary(i => i.ProductId);

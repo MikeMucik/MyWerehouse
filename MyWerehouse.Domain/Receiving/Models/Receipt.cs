@@ -1,4 +1,4 @@
-﻿using MyWerehouse.Domain.Clients.ClientsExceptions;
+using MyWerehouse.Domain.Clients.ClientsExceptions;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
@@ -43,8 +43,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 		public static Receipt Create(int receiptNumber, int clientId, string performedBy, int rampNumber, DateTime createdAt)
 			=> new Receipt(receiptNumber, clientId, performedBy, rampNumber, createdAt);
 
-		//Tests
-		private Receipt(Guid id, int receiptNumber, int clientId,
+			private Receipt(Guid id, int receiptNumber, int clientId,
 			string performedBy, DateTime dateTime, ReceiptStatus receiptStatus, int rampNumber)
 		{
 			Id = id;
@@ -119,7 +118,6 @@ namespace MyWerehouse.Domain.Receiving.Models
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
 				throw new ReceiptAlreadyVerifyDomainException(Id, ReceiptNumber);
-
 
 			PerformedBy = userId;
 			ReceiptStatus = ReceiptStatus.Correction;

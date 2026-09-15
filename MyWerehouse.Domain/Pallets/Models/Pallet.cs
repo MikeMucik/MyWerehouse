@@ -23,8 +23,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public Guid Id { get; private set; }
 		public string PalletNumber { get; private set; } = string.Empty;
 		public DateTime DateReceived { get; private set; }
-		// Snapshot przechowywany jako string – uproszczenie pod potrzeby projektu/portfolio.
-		// W systemie produkcyjnym byłby to Value Object (np. LocationSnapshot).		
+		// Snapshot stored as a string – a simplification for the project/portfolio.
+		// In a production system, this would be a Value Object (e.g., LocationSnapshot).		
 		public int LocationId { get; private set; }
 		public Location Location { get; private set; } = null!;
 		public PalletStatus Status { get; private set; } = 0;
@@ -35,7 +35,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public Guid? IssueId { get; private set; }
 		public Issue? Issue { get; private set; }
 		[Timestamp]
-		public byte[] RowVersion { get; set; } = []; //działa tylko w M-SQL wymaga DbUpdateConcurrencyException											   
+		public byte[] RowVersion { get; set; } = []; //works only in M-SQL; requires DbUpdateConcurrencyException											   
 
 		private Pallet() { }
 
@@ -378,7 +378,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 					g.Sum(q => q.Quantity)));
 		}
 
-		//Nowe metody - logika  application -> domain
 		public static Pallet CreatePickingPallet(
 			string palletNumber,
 			int locationId,

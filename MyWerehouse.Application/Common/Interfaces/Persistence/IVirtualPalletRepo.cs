@@ -1,4 +1,4 @@
-﻿using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Picking.Models;
 
 namespace MyWerehouse.Application.Common.Interfaces.Persistence
 {
@@ -10,6 +10,6 @@ namespace MyWerehouse.Application.Common.Interfaces.Persistence
 		Task<List<VirtualPallet>> GetVirtualPalletsByTimeAsync(DateTime start, DateTime end, CancellationToken ct);
 		Task<List<VirtualPallet>> GetVirtualPalletsByBBAsync(Guid productId, DateOnly? bestBefore, CancellationToken ct);
 		Task<VirtualPallet?> GetVirtualPalletByIdAsync(Guid? palletId, CancellationToken ct);
-		Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId, CancellationToken ct);//add test repo
+		Task<VirtualPallet?> GetVirtualPalletByPalletIdAsync(Guid palletId, CancellationToken ct);
 	}
 }

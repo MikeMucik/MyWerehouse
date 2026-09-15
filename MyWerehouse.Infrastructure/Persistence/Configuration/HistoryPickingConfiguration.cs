@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +21,6 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 
 			entity.Property(a => a.StatusAfter)
 			.HasConversion<string>();
-			//// Indeks dla szybkiego wyszukiwania
 			entity.HasIndex(x => x.PalletId);
 			entity.HasIndex(x => x.PickingTaskId);
 			entity.HasIndex(x => x.IssueId);

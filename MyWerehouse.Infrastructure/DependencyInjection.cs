@@ -25,7 +25,6 @@ namespace MyWerehouse.Infrastructure
 
 			services.AddScoped<IInventoryRepo, InventoryRepo>();
 			services.AddScoped<IIssueRepo, IssueRepo>();
-
 			services.AddScoped<ILocationRepo, LocationRepo>();
 			services.AddScoped<IHistoryPalletRepo, HistoryPalletRepo>();
 			services.AddScoped<IPalletRepo, PalletRepo>();
@@ -35,6 +34,7 @@ namespace MyWerehouse.Infrastructure
 			services.AddScoped<IReversePickingRepo, ReversePickingRepo>();
 
 			services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 			services.AddScoped<ICategoryReadService, CategoryReadService>();
 			services.AddScoped<IClientReadService, ClientReadService>();
 			services.AddScoped<ILocationReadService, LocationReadService>();
@@ -51,7 +51,6 @@ namespace MyWerehouse.Infrastructure
 
 			services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
-			//services.
 			return services;
 		}
 	}

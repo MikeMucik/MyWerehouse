@@ -21,7 +21,7 @@ namespace MyWerehouse.Application.Receipts.Commands.VerifyAndFinalizeReceipt
 			var receipt = await _receiptRepo.GetReceiptByIdAsync(request.ReceiptId, cancellationToken);
 			if (receipt == null) return AppResult<Unit>.Fail($"Receipt {request.ReceiptId} was not found.");
 
-			// W obecnej wersji portfolio weryfikacja oznacza ręczne potwierdzenie zgodności przyjęcia.
+			// In the current version of the portfolio, verification means manual confirmation that the acceptance is compliant.
 			receipt.VerifiedReceipt(request.UserId);
 			await _unitOfWork.SaveChangesAsync(cancellationToken);
 			return AppResult<Unit>.Success(Unit.Value, "Receipt pallets were verified and are ready for use.");

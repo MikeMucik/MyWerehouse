@@ -6,42 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Picking\Commands\AddPickingTaskToIssue\**" />
-    <EmbeddedResource Remove="Picking\Commands\AddPickingTaskToIssue\**" />
-    <None Remove="Picking\Commands\AddPickingTaskToIssue\**" />
-  </ItemGroup>
-
 	<ItemGroup>
 		
 		<PackageReference Include="FluentValidation" Version="12.0.0" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
 		<PackageReference Include="MediatR" Version="11.1.0" />
 		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
-		<PackageReference Include="Microsoft.OpenApi" Version="1.6.23" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
 	</ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MyWerehouse.Domain\MyWerehouse.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Inventories\Commands\ChangeQuantity\" />
-    <Folder Include="Receipts\DTOs\" />
   </ItemGroup>
 
 </Project>

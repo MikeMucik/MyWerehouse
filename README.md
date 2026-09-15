@@ -8,7 +8,7 @@ MyWarehouse is a deployed ASP.NET Core REST API that models real warehouse
 operations: receiving, pallet storage, inventory, outbound orders, picking,
 loading, reverse picking, and operation history.
 
-The project demonstrates a pragmatic layered architecture with CQRS,
+The project demonstrates Clean Architecture with CQRS-style commands and queries alongside application services for CRUD operations,
 domain-driven business rules, Entity Framework Core, Azure SQL, automated
 testing, and deployment to Azure App Service.
 
@@ -37,8 +37,7 @@ testing, and deployment to Azure App Service.
 - Best-before batch handling and pallet allocation
 - Atomic, concurrency-safe pallet number reservation
 - Operation history created through domain events
-- 349 automated tests covering handlers, repositories, validation, mappings,
-  and business workflows
+- 416 automated tests covering handlers, repositories, validation and business workflows
 - Hosting on Azure App Service and Azure SQL, with CI provided by GitHub Actions
 
 ## Ready-to-explore demo scenarios
@@ -62,9 +61,9 @@ sequentially from `Q0001` to `Q0008`.
 The solution is divided into four main layers:
 
 - **Server** exposes the HTTP API, configures dependency injection, and handles exceptions.
-- **Application** implements use cases through commands, queries, handlers, application services, validation, and result types.
-- **Domain** contains entities, aggregates, domain rules, events, exceptions, and repository contracts.
-- **Infrastructure** provides the EF Core `DbContext`, entity configurations, migrations, and repository implementations.
+- **Application** implements use cases through commands, queries, handlers, application services, validation, result types and persistence abstractions.
+- **Domain** contains entities, aggregates, domain services, business rules, domain events and exceptions.
+- **Infrastructure** implements persistency abstractions and provides the EF Core `DbContext`, migrations, repositories, read projections and domain-event dispatching.
 
 The current project dependencies are shown below:
 
@@ -73,13 +72,11 @@ graph LR
     Server --> Application
     Server --> Infrastructure
     Application --> Domain
-    Application --> Infrastructure
+    Infrastructure --> Application
     Infrastructure --> Domain
 ```
 
-The direct Application-to-Infrastructure dependency reflects the current
-architecture milestone and is the main boundary scheduled for the next
-large-scale refactoring.
+
 
 ## Current architecture milestone
 
@@ -92,10 +89,9 @@ and workflows that span multiple entities. This division is intentional:
 cross-aggregate orchestration remains in the Application layer when moving it
 into the Domain would introduce additional complexity without a meaningful benefit.
 
-The solution is being incrementally evolved toward Clean Architecture. The next
-major architectural milestone is removing the Application layer's direct
-dependency on Infrastructure while preserving the current division between
-domain rules and application-level orchestration.
+The solution now follows Clean Architecture, with dependencies directed as shown in the diagram above.
+
+Read models are projected directly with LINQ in Infrastructure; the current codebase does not use AutoMapper.
 
 ### Error handling
 
@@ -120,20 +116,21 @@ The allocation process:
    the remaining quantity;
 5. applies the allocation only after the complete plan for a product is valid.
 
-Create and modify operations run inside serializable transactions. SQL Server
-transient-failure retries are enabled for Azure SQL cold starts, and each retry
-attempt begins with a clean EF Core change tracker. Unexpected domain or
-infrastructure exceptions abort the complete transaction, while expected
+Issue creation, issue modification and receipt creation run inside serializable
+transactions. To handle transient errors when Azure SQL resumes after inactivity,
+each transaction is executed through EF Core's retrying execution strategy. The
+EF Core change tracker is cleared before each attempt. Unexpected domain or
+infrastructure exceptions abort the entire transaction, while expected
 per-product shortages are returned as regular product results.
 
 ## Solution structure
 
 ```text
 MyWerehouse.Server/          Controllers, middleware, Swagger, and application startup
-MyWerehouse.Application/     Commands, queries, handlers, services, validation, and DTOs
-MyWerehouse.Domain/          Aggregates, entities, domain events, rules, and repository contracts
-MyWerehouse.Infrastructure/  EF Core DbContext, configurations, migrations, and repositories
-MyWerehouse.Test/            Integration, validation, mapping, and repository tests
+MyWerehouse.Application/     Use cases, services, validation, DTOs, and persistence abstractions
+MyWerehouse.Domain/          Aggregates, entities, domain services, rules and exceptions
+MyWerehouse.Infrastructure/  EF Core persistence, read services, configurations, migrations, adapters and repositories
+MyWerehouse.Test/            Handlers, services, validation, workflows and repository tests
 ```
 
 ## Technology stack
@@ -142,9 +139,8 @@ MyWerehouse.Test/            Integration, validation, mapping, and repository te
 - ASP.NET Core Web API
 - Entity Framework Core
 - SQL Server and Azure SQL
-- MediatR and CQRS
+- MediatR and CQRS-style commands and queries
 - FluentValidation
-- AutoMapper
 - Swagger / OpenAPI
 - xUnit and FluentAssertions
 - SQLite In-Memory and EF Core In-Memory
@@ -153,7 +149,7 @@ MyWerehouse.Test/            Integration, validation, mapping, and repository te
 
 ## Testing
 
-The automated test suite covers application handlers, repositories, validation, mappings, and warehouse business scenarios. Important workflows are tested against SQLite In-Memory using the real EF Core model and repository implementations. Simpler CRUD service tests use the EF Core In-Memory provider.
+The automated test suite covers application handlers, repositories, validation, and warehouse business scenarios. Important workflows are tested against SQLite In-Memory using the real EF Core model and repository implementations. Simpler CRUD service tests use the EF Core In-Memory provider.
 
 The GitHub Actions workflow restores dependencies, builds the solution in the Release configuration, and runs the test suite on every push and pull request to `master`.
 
@@ -214,10 +210,8 @@ Receipt → Pallet → Inventory → Issue → Picking → Loading
 5. Allocate pallets and picking tasks.
 6. Complete picking and loading.
 
-## Roadmap
+## Possible extensions
 
-- Complete the transition to Clean Architecture by removing the Application
-  layer's direct dependency on Infrastructure.
 - Add authentication and role-based authorization.
 - Add containerized local and deployment support.
-- Introduce additional allocation policies, including FEFO.
+- Introduce additional allocation policies.

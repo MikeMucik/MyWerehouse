@@ -18,9 +18,8 @@ namespace MyWerehouse.Test.InMemoryDatabase.Common
 			var options = new DbContextOptionsBuilder<WerehouseDbContext>()
 				.UseInMemoryDatabase(Guid.NewGuid().ToString())
 				.Options;
-			//var publisher = new Mock<IPublisher>();
-			var publisher = new Mock<IDomainEventDispatcher>();
-			var mock = new Mock<WerehouseDbContext>(options, publisher.Object) { CallBase = true };
+			var dispather = new Mock<IDomainEventDispatcher>();
+			var mock = new Mock<WerehouseDbContext>(options, dispather.Object) { CallBase = true };
 			var context = mock.Object;
 			context.Database.EnsureCreated();
 			SQLiteInMemoryMode.TestDataSeeder.SeedDatabase(context);

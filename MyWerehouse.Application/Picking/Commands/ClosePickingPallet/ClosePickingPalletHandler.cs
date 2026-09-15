@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Interfaces;
@@ -22,7 +22,7 @@ namespace MyWerehouse.Application.Picking.Commands.ClosePickingPallet
 			if (issue == null)
 				return AppResult<Unit>.Fail("The issue for this pallet was not found.");
 			pallet.CloseAndAddPickingPallet(request.IssueId, request.UserId, pallet.Location.ToSnapshot());
-			//drukowanie etykiety
+	
 			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Pallet was closed and added to issue {issue.IssueNumber}.");
 		}

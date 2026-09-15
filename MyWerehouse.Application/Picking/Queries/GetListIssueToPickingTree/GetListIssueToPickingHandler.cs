@@ -4,8 +4,8 @@ using MyWerehouse.Application.Interfaces;
 
 namespace MyWerehouse.Application.Picking.Queries.GetListIssueToPickingTree
 {
-	//Lista produkt ilość, na razie kilka raportów to bez dodatkowego repo etc.
-	//Lista ile danego towaru dla danego zlecenia drzewo
+	//Product quantity list; for now, just a few reports, so no additional repository etc.
+	//List showing the quantity of a specific item for a specific order (tree structure)
 	public class GetListIssueToPickingHandler(IPickingReadService pickingReadService
 		) : IRequestHandler<GetListIssueToPickingQuery, AppResult<List<PickingGuideLineDTO>>>
 	{

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Events;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
@@ -12,20 +7,20 @@ using MyWerehouse.Domain.Receiving.Events;
 
 namespace MyWerehouse.Application.Receipts.Events.CreateHistoryReceipt
 {
-	public class CreateHistoryReceiptHandler(IHistoryReceiptRepo historyReceiptRepo, IDateTimeProvider dateTimeProvider) 
+	public class CreateHistoryReceiptHandler(IHistoryReceiptRepo historyReceiptRepo, IDateTimeProvider dateTimeProvider)
 		: INotificationHandler<DomainEventNotification<AddHistoryReceiptNotification>>
-	{		
+	{
 		private readonly IHistoryReceiptRepo _historyReceiptRepo = historyReceiptRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
-		public Task Handle( DomainEventNotification<AddHistoryReceiptNotification> request, CancellationToken ct)
+		public Task Handle(DomainEventNotification<AddHistoryReceiptNotification> request, CancellationToken ct)
 		{
 			var domaintEvent = request.DomainEvent;
 			var details = domaintEvent.DetailDtos ?? Enumerable.Empty<HistoryReceiptIssueDetailDto>();
 			var history = new HistoryReceipt
 			{
 				ReceiptId = domaintEvent.ReceiptId,
-				ReceiptNumber= domaintEvent.ReceiptNumber,
+				ReceiptNumber = domaintEvent.ReceiptNumber,
 				ClientId = domaintEvent.ClientId,
 				StatusAfter = domaintEvent.ReceiptStatus,
 				PerformedBy = domaintEvent.UserId,

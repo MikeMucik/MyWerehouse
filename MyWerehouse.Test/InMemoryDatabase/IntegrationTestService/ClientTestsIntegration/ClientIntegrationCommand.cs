@@ -19,9 +19,9 @@ namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIn
 		protected readonly IIssueRepo _issueRepo;
 		protected readonly IUnitOfWork _unitOfWork;
 		protected readonly IClientReadService _clientReadService;
-		protected readonly IValidator<AddressDTO> _addressValidator; // Zadeklaruj		
-		protected readonly IValidator<UpdateClientDTO> _updateClientValidator; // Zadeklaruj
-		protected readonly IValidator<AddClientDTO> _addClientValidator; // Zadeklaruj
+		protected readonly IValidator<AddressDTO> _addressValidator; 	
+		protected readonly IValidator<UpdateClientDTO> _updateClientValidator; 
+		protected readonly IValidator<AddClientDTO> _addClientValidator; 
 		public ClientIntegrationCommand() : base()
 		{			
 			_clientRepo = new ClientRepo(_context);

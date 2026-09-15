@@ -1,4 +1,4 @@
-﻿using MyWerehouse.Domain.Clients.ClientsExceptions;
+using MyWerehouse.Domain.Clients.ClientsExceptions;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
@@ -303,8 +303,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		}
 
 		public void ChangeClient(int clientId)
-		{
-			//
+		{			
 			ClientId = clientId;
 		}
 
@@ -377,8 +376,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 					g.Key,
 					-g.Sum(q => q.Quantity)));
 		}
-
-		//Nowe metody
+		
 		public void EnsureCanBeCancelled()
 		{
 			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.IsShipped)

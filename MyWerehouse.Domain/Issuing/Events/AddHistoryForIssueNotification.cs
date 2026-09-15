@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,5 +16,5 @@ namespace MyWerehouse.Domain.Issuing.Events
 		IssueStatus IssueStatus,
 		string UserId,
 		IReadOnlyCollection<HistoryReceiptIssueDetailDto> DetailDtos,
-		IReadOnlyCollection<AddListItemsOfIssueDetailsDto> Detailsitems) : IDomainEvent;//do poprawy jak w receipt
+		IReadOnlyCollection<AddListItemsOfIssueDetailsDto> Detailsitems) : IDomainEvent;
 }

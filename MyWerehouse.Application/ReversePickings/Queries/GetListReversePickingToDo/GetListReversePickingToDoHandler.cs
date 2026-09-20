@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.DTOs;
+using MyWerehouse.Application.ReversePickings.Services;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.GetListReversePickingToDo
 {

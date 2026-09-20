@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.DTOs;
+using MyWerehouse.Application.Inventories.Services;
 using MyWerehouse.Infrastructure.Common;
 
 namespace MyWerehouse.Infrastructure.Persistence.ReadServices

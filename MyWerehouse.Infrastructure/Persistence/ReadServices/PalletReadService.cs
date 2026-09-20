@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Histories.DTOs;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Pallets.Queries.GetPallet;
 using MyWerehouse.Application.Pallets.Queries.GetPalletToEdit;
+using MyWerehouse.Application.Pallets.Services;
 using MyWerehouse.Domain.Pallets.Filters;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Infrastructure.Common;

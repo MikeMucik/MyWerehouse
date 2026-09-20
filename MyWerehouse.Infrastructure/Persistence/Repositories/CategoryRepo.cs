@@ -31,13 +31,15 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		public async Task<Category?> GetCategoryByIdAsync(int id, CancellationToken ct)
 		{
 			return await _werehouseDbContext.Categories
-				.Where(x=>x.IsDeleted ==  false)
+				.Where(x => x.IsDeleted == false)
 				.SingleOrDefaultAsync(c => c.Id == id, ct);
 		}
 		public async Task<Category?> GetCategoryByNameAsync(string name, CancellationToken ct)
 		{
-			return await _werehouseDbContext.Categories.SingleOrDefaultAsync(c => c.Name == name, ct);
+			return await _werehouseDbContext.Categories
+				.Where(x => x.IsDeleted == false)
+				.SingleOrDefaultAsync(c => c.Name == name, ct);
 		}
-		
+
 	}
 }

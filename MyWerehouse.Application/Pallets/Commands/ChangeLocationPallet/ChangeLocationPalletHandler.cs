@@ -1,7 +1,6 @@
-﻿using MediatR;
+using MediatR;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 
 namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 {

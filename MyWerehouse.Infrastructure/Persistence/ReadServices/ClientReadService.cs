@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Clients.Services;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
 using MyWerehouse.Application.ViewModels.AddressModels;

@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MyWerehouse.Domain.Common;
+using MyWerehouse.Domain.Common.ValueObject;
+
+namespace MyWerehouse.Domain.Pickings.PickingExceptions
+{
+	public class PickingTaskNotFoundDomainException : DomainException
+	{
+		public Guid IssueId { get; }
+		public Guid ProductId { get; }
+		public PickingTaskNotFoundDomainException(Guid issueId, Guid productId)
+			: base($"Not found task.", ErrorType.NotFound)
+		{
+			IssueId = issueId;
+			ProductId = productId;
+		}
+	}
+}

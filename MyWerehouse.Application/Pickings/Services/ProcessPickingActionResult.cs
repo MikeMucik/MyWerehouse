@@ -1,0 +1,56 @@
+﻿namespace MyWerehouse.Application.Pickings.Services
+{
+	public sealed class ProcessPickingActionResult
+	{
+		public bool Success { get; init; }
+		public bool NewPalletCreated { get; init; }
+		public string Message { get; set; } = string.Empty;
+		public int RequestedQuantity { get; init; }
+		public int PickedQuantity { get; init; }
+		public int MissingQuantity { get; init; }
+		public Guid PalletId { get; init; }
+		public string PalletNumber { get; init; } = string.Empty;
+		public ProcessPickingActionResult() { }
+		public static ProcessPickingActionResult Ok(Guid palletId
+			, string palletNumber, string message, int requestedQuantity
+			, int pickedQuantity)
+		{
+			return new ProcessPickingActionResult
+			{
+				Success = true,
+				NewPalletCreated = false,
+				PalletId = palletId,
+				PalletNumber = palletNumber,
+				Message = message,
+				RequestedQuantity = requestedQuantity,
+				PickedQuantity = pickedQuantity,				
+				MissingQuantity = requestedQuantity - pickedQuantity
+			};
+		}
+		public static ProcessPickingActionResult OkWithNewPallet(Guid palletId
+			, string palletNumber, string message, int requestedQuantity
+			, int pickedQuantity)
+		{
+			return new ProcessPickingActionResult
+			{
+				Success = true,
+				NewPalletCreated = true,
+				PalletId = palletId,
+				PalletNumber = palletNumber,
+				Message = message,
+				RequestedQuantity = requestedQuantity,
+				PickedQuantity = pickedQuantity,				
+				MissingQuantity = requestedQuantity - pickedQuantity
+			};
+		}
+
+		public static ProcessPickingActionResult Fail(string message)
+		{
+			return new ProcessPickingActionResult
+			{
+				Success = false,
+				Message = message
+			};
+		}
+	}
+}

@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.DTOs;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptById;
 using MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter;
+using MyWerehouse.Application.Receipts.Services;
 using MyWerehouse.Domain.Receiving.Filters;
 using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Infrastructure.Common;

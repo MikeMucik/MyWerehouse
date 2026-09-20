@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Inventories.DTOs;
+using MyWerehouse.Application.Inventories.Services;
 
 namespace MyWerehouse.Application.Inventories.Queries.GetInventories
 {

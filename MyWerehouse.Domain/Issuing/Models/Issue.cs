@@ -8,7 +8,7 @@ using MyWerehouse.Domain.Issuing.Events;
 using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.Receiving.Events;
 
 namespace MyWerehouse.Domain.Issuing.Models

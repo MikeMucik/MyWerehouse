@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 
 namespace MyWerehouse.Domain.Histories.Models
 {

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyWerehouse.Application.Common.Interfaces.Persistence;
+﻿using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Issues.DTOs;
-using MyWerehouse.Application.Picking.Services;
+using MyWerehouse.Application.Pickings.Services;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;

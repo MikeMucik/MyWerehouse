@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Locations.Services;
 using MyWerehouse.Application.ViewModels.LocationModels;
 using MyWerehouse.Server.Extensions;
 

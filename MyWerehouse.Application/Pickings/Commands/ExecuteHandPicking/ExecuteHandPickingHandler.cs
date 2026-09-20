@@ -1,0 +1,86 @@
+﻿using MediatR;
+using MyWerehouse.Application.Common.Interfaces;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.Pickings.Services;
+using MyWerehouse.Domain.Pickings.Models;
+using MyWerehouse.Domain.Services;
+
+namespace MyWerehouse.Application.Pickings.Commands.ExecuteHandPicking
+{
+	public class ExecuteHandPickingHandler(IPalletRepo palletRepo,
+		IVirtualPalletRepo virtualPalletRepo,
+		IUnitOfWork unitOfWork,
+		IIssueRepo issueRepo,
+		IExecuteProcessPickingService processPickingActionService,
+		IPickingDomainService pickingDomainService,
+		IDateTimeProvider dateTimeProvider,
+		IPickingTaskRepo pickingTaskRepo,
+		IAddPickingTaskToIssueService addPickingTaskToIssueService
+			) : IRequestHandler<ExecuteHandPickingCommand, AppResult<ProcessPickingActionResult>>
+	{
+		private readonly IPalletRepo _palletRepo = palletRepo;
+		private readonly IVirtualPalletRepo _virtualPalletRepo = virtualPalletRepo;
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
+		private readonly IIssueRepo _issueRepo = issueRepo;
+		private readonly IExecuteProcessPickingService _processPickingActionService = processPickingActionService;
+		private readonly IPickingDomainService _pickingDomainService = pickingDomainService;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IPickingTaskRepo _pickingTaskRepo = pickingTaskRepo;
+		private readonly IAddPickingTaskToIssueService _addPickingTaskToIssueService = addPickingTaskToIssueService;
+		public async Task<AppResult<ProcessPickingActionResult>> Handle(ExecuteHandPickingCommand command, CancellationToken ct)
+		{
+			var now = _dateTimeProvider.UtcNow;
+			var issue = await _issueRepo.GetIssueByIdAsync(command.IssueId, ct);
+			if (issue == null)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail($"Issue {command.IssueId} was not found.");
+			}
+
+			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource, ct);// W hand picking paleta źródłowa jest wskazywana ręcznie przez biuro.
+			if (pallet == null)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail($"Pallet {command.PalletIdSource} does not exist.");
+			}
+			var palletItem = pallet.EnsureCanBeUsedForPicking();
+
+			var tasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, palletItem.ProductId, ct);
+
+			var pickingHandTask = _pickingDomainService.GetSingleHandPickingTask(tasks, command.IssueId, palletItem.ProductId);//sprawdzenie czy został ainicjalizowana ręczna kompletacja
+
+			pickingHandTask.BeginExecuteHandPicking(command.PickedQuantity);
+			pallet.IsCorrectDate(pickingHandTask.BestBefore);
+			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(command.PalletIdSource, ct);
+			if (virtualPallet == null)
+			{
+				virtualPallet = VirtualPallet.Create(pallet.Id, palletItem.Quantity, pallet.LocationId, now);
+				pallet.AssignToPicking(command.UserId, pallet.Location.ToSnapshot());
+				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
+			}
+			// Dostępna ilość wynika ze stanu wirtualnej palety.
+			var availableQuantity = virtualPallet.RemainingQuantity;
+			if (command.PickedQuantity > availableQuantity)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail("The pallet contains less product than the requested picking quantity.", ErrorType.Conflict);
+			}
+
+			var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, palletItem.ProductId, command.PickedQuantity, pickingHandTask.BestBefore, command.UserId, ct);
+			if (!newPickingTaskInfo.Success)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail(
+					newPickingTaskInfo.Message,
+					ErrorType.Conflict);
+			}
+			var newPickingTask = newPickingTaskInfo.PickingTask.Single();
+			var resultProcessPicking = await _processPickingActionService.ExecuteProcessPicking(pallet, newPickingTask, command.PickedQuantity, command.UserId, command.RampNumber, ct);
+			if (!resultProcessPicking.Success)
+			{
+				return AppResult<ProcessPickingActionResult>.Fail(resultProcessPicking.Message, ErrorType.Conflict);
+			}
+			pickingHandTask.CompleteHandPicking(command.PickedQuantity);
+			issue.CompletePicking();
+			await _unitOfWork.SaveChangesAsync(ct);
+			return AppResult<ProcessPickingActionResult>.Success(resultProcessPicking, "Product was added to the issue.");
+		}
+	}
+}

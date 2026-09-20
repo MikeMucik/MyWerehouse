@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyWerehouse.Application.Picking.Commands.ClosePickingPallet;
+﻿using MyWerehouse.Application.Pickings.Commands.ClosePickingPallet;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 

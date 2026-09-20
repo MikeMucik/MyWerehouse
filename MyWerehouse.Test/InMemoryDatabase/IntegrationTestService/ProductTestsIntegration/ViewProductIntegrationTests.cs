@@ -1,8 +1,7 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Services;
+using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Infrastructure.Common;

@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.ReversePickings.Services;
 
 namespace MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking
 {

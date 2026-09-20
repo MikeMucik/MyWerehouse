@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Inventories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.ReversePickings.Models;
@@ -48,7 +42,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 				context.Categories.AddRange(
 					new Category { Id = 1, Name = "TestCategory", IsDeleted = false },
 					new Category { Id = 2, Name = "TestCategory1", IsDeleted = false },
-					new Category { Id = 3, Name = "ToDeleted", IsDeleted = false }
+					new Category { Id = 3, Name = "ToDeleted", IsDeleted = false },
+					new Category { Id = 4, Name = "SwitchOff", IsDeleted = true }
 				);
 			}
 

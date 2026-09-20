@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Application.ReversePickings.Queries.ListPalletsForForkLifterReservePicking;
+using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Infrastructure.Common;
 

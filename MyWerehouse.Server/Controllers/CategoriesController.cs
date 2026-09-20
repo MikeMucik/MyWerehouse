@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MyWerehouse.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using MyWerehouse.Application.Categories.Services;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Server.Extensions;
 

@@ -1,12 +1,15 @@
-﻿using FluentValidation;
+﻿using MyWerehouse.Application.Pallets.Services;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using MyWerehouse.Application.Categories.Services;
+using MyWerehouse.Application.Clients.Services;
 using MyWerehouse.Application.Common.Behaviors;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.IssueServices;
-using MyWerehouse.Application.Picking.Services;
+using MyWerehouse.Application.Locations.Services;
+using MyWerehouse.Application.Pickings.Services;
+using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Application.ReversePickings.Services;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Domain.Services;
 
 namespace MyWerehouse.Application

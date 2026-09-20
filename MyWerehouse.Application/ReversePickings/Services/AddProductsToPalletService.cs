@@ -1,11 +1,11 @@
-﻿using System;
+using MyWerehouse.Application.Pallets.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.DTOs;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Models;

@@ -1,10 +1,9 @@
-﻿using System.Data;
+using System.Data;
 using System.Linq;
 using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.DTOs;
 using MyWerehouse.Application.Issues.IssueServices;

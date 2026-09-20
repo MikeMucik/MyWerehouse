@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Receipts.Services;
 
 namespace MyWerehouse.Application.Receipts.Queries.GetReceiptsByFilter
 {

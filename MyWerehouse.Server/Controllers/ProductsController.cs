@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MyWerehouse.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Server.Extensions;

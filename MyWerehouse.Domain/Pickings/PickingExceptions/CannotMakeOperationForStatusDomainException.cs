@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MyWerehouse.Domain.Common;
+using MyWerehouse.Domain.Pickings.Models;
+
+namespace MyWerehouse.Domain.Pickings.PickingExceptions
+{
+	public class CannotMakeOperationForStatusDomainException : DomainException
+	{
+		public Guid PickingTaskId { get; }
+		public PickingStatus PickingStatus { get; }
+		public CannotMakeOperationForStatusDomainException(Guid pickingTaskId, PickingStatus pickingStatus)
+			:base($"Operation for task {pickingTaskId} is prohibited, status {pickingStatus}.")
+		{
+			PickingTaskId = pickingTaskId;
+			PickingStatus = pickingStatus;
+		}
+	}
+}

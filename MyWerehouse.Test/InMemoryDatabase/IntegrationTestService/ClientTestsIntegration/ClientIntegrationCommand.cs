@@ -1,13 +1,12 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
-using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Infrastructure.Persistence.ReadServices;
 using MyWerehouse.Test.InMemoryDatabase.Common;
 using MyWerehouse.Infrastructure.Common;
+using MyWerehouse.Application.Clients.Services;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.ClientTestsIntegration
 {

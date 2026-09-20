@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.DTOs;
+using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Application.Issues.Queries.GetIssueById;
 using MyWerehouse.Application.Issues.Queries.GetIssuesByFilter;
 using MyWerehouse.Application.Issues.Queries.IssueProductsSummary;

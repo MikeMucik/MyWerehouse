@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Histories.DTOs;
-using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Histories.Services;
 
 namespace MyWerehouse.Application.Histories.Queries.GetPalletHistoryQuery
 {

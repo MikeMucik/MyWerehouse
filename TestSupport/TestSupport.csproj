@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="9.0.6" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MyWerehouse.Application\MyWerehouse.Application.csproj" />
+    <ProjectReference Include="..\MyWerehouse.Domain\MyWerehouse.Domain.csproj" />
+    <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

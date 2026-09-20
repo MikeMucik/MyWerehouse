@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Services;
 using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Application.ViewModels.ClientModels;
 

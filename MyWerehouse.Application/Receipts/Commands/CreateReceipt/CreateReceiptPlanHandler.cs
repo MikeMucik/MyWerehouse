@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -8,7 +8,6 @@ using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Receiving.Models;
 
 namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt

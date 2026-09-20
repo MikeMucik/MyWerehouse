@@ -6,11 +6,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MyWerehouse.Application;
 using MyWerehouse.Application.Common.Interfaces;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Infrastructure;
-using MyWerehouse.Infrastructure.Common;
 using MyWerehouse.Infrastructure.Persistence;
-using MyWerehouse.Infrastructure.Persistence.ReadServices;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode
 {

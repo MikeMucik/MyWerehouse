@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Issues.IssueServices;
 
 namespace MyWerehouse.Application.Issues.Queries.GetIssueById
 {

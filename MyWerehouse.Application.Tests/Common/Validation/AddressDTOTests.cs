@@ -1,0 +1,57 @@
+﻿using FluentValidation.TestHelper;
+using MyWerehouse.Application.ViewModels.AddressModels;
+
+namespace MyWerehouse.Application.Tests.Common.Validation
+{
+	public class AddressDTOTests
+	{
+		[Fact]
+		public void Add_Address_ProperDate_ShouldNotReturnValidationError()
+		{
+			var validator = new AddressDTOValidation();
+			var address = new AddressDTO
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			validator.TestValidate(address).ShouldNotHaveAnyValidationErrors();
+		}
+		[Fact]
+		public void Add_AddressInvalidCity_ShouldNotReturnValidationError()
+		{
+			var validator = new AddressDTOValidation();
+			var address = new AddressDTO
+			{
+				City = "",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			validator.TestValidate(address).ShouldHaveValidationErrorFor(nameof(AddressDTO.City));
+		}
+		[Fact]
+		public void Add_AddressInvalidCountry_ShouldNotReturnValidationError()
+		{
+			var validator = new AddressDTOValidation();
+			var address = new AddressDTO
+			{
+				City = "Warsaw",
+				Country = "",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			validator.TestValidate(address).ShouldHaveValidationErrorFor(nameof(AddressDTO.Country));
+		}
+	}
+}

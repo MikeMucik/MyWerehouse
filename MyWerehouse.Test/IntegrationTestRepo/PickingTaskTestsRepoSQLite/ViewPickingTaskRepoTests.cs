@@ -1,4 +1,4 @@
-﻿using MyWerehouse.Domain.Picking.Models;
+﻿using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Test.SQLiteInMemoryMode;
 

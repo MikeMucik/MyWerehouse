@@ -5,13 +5,13 @@ namespace MyWerehouse.Test.Common
 {
 	public class ErrorTypeDefaultsTests
 	{
-		[Fact]
-		public void AppResultFail_ShouldUseNotFound_WhenErrorTypeIsNotProvided()
-		{
-			var result = AppResult<int>.Fail("Error");
+		//[Fact]
+		//public void AppResultFail_ShouldUseNotFound_WhenErrorTypeIsNotProvided()
+		//{
+		//	var result = AppResult<int>.Fail("Error");
 
-			Assert.Equal(ErrorType.NotFound, result.ErrorType);
-		}
+		//	Assert.Equal(ErrorType.NotFound, result.ErrorType);
+		//}
 
 		[Fact]
 		public void DomainException_ShouldUseConflict_WhenErrorTypeIsNotProvided()

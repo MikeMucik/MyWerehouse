@@ -846,7 +846,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.ToTable("ProductOnPallet");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.PickingTask", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Pickings.Models.PickingTask", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -890,7 +890,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.ToTable("PickingTasks");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.ReversePicking", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Pickings.Models.ReversePicking", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -933,7 +933,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.ToTable("ReversePickings");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.VirtualPallet", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Pickings.Models.VirtualPallet", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -1225,7 +1225,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MyWerehouse.Domain.Picking.Models.VirtualPallet", null)
+                    b.HasOne("MyWerehouse.Domain.Pickings.Models.VirtualPallet", null)
                         .WithMany("HistoryPicking")
                         .HasForeignKey("VirtualPalletId");
                 });
@@ -1339,7 +1339,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.PickingTask", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Pickings.Models.PickingTask", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Issuing.Models.Issue", "Issue")
                         .WithMany("PickingTasks")
@@ -1352,7 +1352,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                         .HasForeignKey("PickingPalletId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("MyWerehouse.Domain.Picking.Models.VirtualPallet", "VirtualPallet")
+                    b.HasOne("MyWerehouse.Domain.Pickings.Models.VirtualPallet", "VirtualPallet")
                         .WithMany("PickingTasks")
                         .HasForeignKey("VirtualPalletId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -1364,9 +1364,9 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("VirtualPallet");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.ReversePicking", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Pickings.Models.ReversePicking", b =>
                 {
-                    b.HasOne("MyWerehouse.Domain.Picking.Models.PickingTask", "PickingTask")
+                    b.HasOne("MyWerehouse.Domain.Pickings.Models.PickingTask", "PickingTask")
                         .WithMany()
                         .HasForeignKey("PickingTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1375,7 +1375,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("PickingTask");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.VirtualPallet", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Pickings.Models.VirtualPallet", b =>
                 {
                     b.HasOne("MyWerehouse.Domain.Warehouse.Models.Location", "Location")
                         .WithMany()
@@ -1477,7 +1477,7 @@ namespace MyWerehouse.Infrastructure.Migrations
                     b.Navigation("ProductsOnPallet");
                 });
 
-            modelBuilder.Entity("MyWerehouse.Domain.Picking.Models.VirtualPallet", b =>
+            modelBuilder.Entity("MyWerehouse.Domain.Pickings.Models.VirtualPallet", b =>
                 {
                     b.Navigation("HistoryPicking");
 

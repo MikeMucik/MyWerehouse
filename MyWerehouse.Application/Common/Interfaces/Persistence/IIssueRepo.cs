@@ -1,5 +1,5 @@
 ﻿using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 
 namespace MyWerehouse.Application.Common.Interfaces.Persistence
 {

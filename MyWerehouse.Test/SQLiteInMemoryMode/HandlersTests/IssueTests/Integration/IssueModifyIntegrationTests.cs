@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Issues.Commands.CreateIssue;
 using MyWerehouse.Application.Issues.Commands.ModifyIssue;
 using MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad;
@@ -16,7 +15,7 @@ using MyWerehouse.Application.Issues.IssueServices;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 

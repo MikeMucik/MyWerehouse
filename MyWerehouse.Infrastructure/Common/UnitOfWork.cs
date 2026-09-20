@@ -1,6 +1,6 @@
-﻿using System.Data;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
+using System.Data;
 using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Infrastructure.Persistence;
 
 namespace MyWerehouse.Infrastructure.Common

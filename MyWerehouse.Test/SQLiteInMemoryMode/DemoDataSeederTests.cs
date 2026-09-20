@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Pallets.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Domain.Issuing.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Infrastructure.Persistence.Seeding;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode

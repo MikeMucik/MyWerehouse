@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;

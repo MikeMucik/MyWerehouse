@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
-using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Products.Services;
 using MyWerehouse.Application.ViewModels.ProductModels;
 using MyWerehouse.Domain.Products.Filters;
 using MyWerehouse.Infrastructure.Common;

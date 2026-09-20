@@ -1,0 +1,82 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using MyWerehouse.Domain.Histories.Models;
+using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Warehouse.Models;
+
+
+namespace MyWerehouse.Domain.Pickings.Models
+{
+	public class VirtualPallet
+	{
+		public Guid Id { get; private set; }
+		public Guid PalletId { get; private set; }
+		public Pallet Pallet { get; private set; } = null!;
+		public int InitialPalletQuantity { get; private set; }
+		public int LocationId { get; private set; }
+		public Location Location { get; private set; } = null!;
+		public DateTime DateMoved { get; private set; }
+		public ICollection<PickingTask> PickingTasks { get; private set; } = new List<PickingTask>();
+		public ICollection<HistoryPicking> HistoryPicking { get; private set; } = new List<HistoryPicking>();
+		[NotMapped]
+		public int RemainingQuantity => InitialPalletQuantity - (PickingTasks?.Sum(a => a.RequestedQuantity) ?? 0);
+		private VirtualPallet() { }
+
+		private VirtualPallet(Guid palletId, int initialQuantity, int locationId, DateTime moveDate)
+		{
+			Id = Guid.NewGuid();
+			PalletId = palletId;
+			InitialPalletQuantity = initialQuantity;
+			LocationId = locationId;
+			DateMoved = moveDate;
+		}
+
+		public static VirtualPallet Create(Guid palletId, int initialQuantity, int locationId, DateTime moveDate)
+			=> new VirtualPallet(palletId, initialQuantity, locationId, moveDate);
+
+		private VirtualPallet(Pallet pallet, int initialQuantity, int locationId, DateTime moveDate)
+		{
+			Id = Guid.NewGuid();
+			Pallet = pallet;
+			PalletId = pallet.Id;
+			InitialPalletQuantity = initialQuantity;
+			LocationId = locationId;
+			DateMoved = moveDate;
+		}
+		public static VirtualPallet CreateFromPallet(Pallet pallet, int initialQuantity, int locationId, DateTime moveDate)
+			=> new VirtualPallet(pallet, initialQuantity, locationId, moveDate);
+		private VirtualPallet(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime date)
+		{
+			Id = id;
+			PalletId = palletId;
+			InitialPalletQuantity = initialQuantity;
+			LocationId = locationId;
+			DateMoved = date;
+		}		
+
+		public static VirtualPallet CreateForSeed(Guid id, Guid palletId, int initialQuantity, int locationId, DateTime dateMoved)
+			=> new VirtualPallet(id, palletId, initialQuantity, locationId, dateMoved);
+		public bool ChangeToAvailable(string userId, string snapShot)
+		{
+			var pickingTasks = this.PickingTasks;
+			if (!(pickingTasks.Any(t => t.PickingStatus == PickingStatus.Allocated)))
+			{
+				Pallet.ChangeStatus(PalletStatus.Available);
+				Pallet.AddHistory(ReasonForPallet.ReversePicking, userId, snapShot);
+				return true;
+			}
+			return false;
+		}
+		public bool CanBeDeletedAfterReallocation()
+		{
+			if (PickingTasks.Count == 0)
+				return true;
+			return false;
+		}
+	}
+}

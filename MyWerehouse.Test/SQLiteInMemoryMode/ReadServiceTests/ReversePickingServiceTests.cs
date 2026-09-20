@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Infrastructure.Persistence.ReadServices;
 

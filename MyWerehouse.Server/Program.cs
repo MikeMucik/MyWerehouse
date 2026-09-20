@@ -8,7 +8,7 @@ using MyWerehouse.Application.ViewModels.AddressModels;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.ReversePickings.Models;
 using MyWerehouse.Infrastructure;
@@ -86,3 +86,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+public partial class Program()
+{
+
+}

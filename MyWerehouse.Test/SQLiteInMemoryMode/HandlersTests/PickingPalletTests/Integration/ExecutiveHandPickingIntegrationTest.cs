@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Picking.Commands.ExecuteHandPicking;
+﻿using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Pickings.Commands.ExecuteHandPicking;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
-using MyWerehouse.Domain.Picking.Models;
-using MyWerehouse.Domain.Picking.PickingExceptions;
+using MyWerehouse.Domain.Pickings.Models;
+using MyWerehouse.Domain.Pickings.PickingExceptions;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.Integration
 {

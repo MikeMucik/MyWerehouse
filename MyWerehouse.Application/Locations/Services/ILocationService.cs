@@ -1,0 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MediatR;
+using MyWerehouse.Application.Common.Results;
+using MyWerehouse.Application.ViewModels.LocationModels;
+using MyWerehouse.Domain.Warehouse.Models;
+
+namespace MyWerehouse.Application.Locations.Services
+{
+	public interface ILocationService
+	{
+		Task<AppResult<int>> AddLocationServiceAsync(LocationDTO locationDTO, CancellationToken ct);
+		Task<AppResult<Unit>> DeleteLocationServiceAsync(int id, CancellationToken ct);
+		Task<AppResult<LocationDTO>> GetLocationServiceAsync(int id, CancellationToken ct);
+		Task<AppResult<int>> FindLocationIdAsync(int Bay, int Aisle, int Position, int Heigt, CancellationToken ct);
+		AppResult<List<LocationDTO>> PrepareLocations(int bay, int startAisle, int endAisle, int amountPosition, int amountHeigt);
+		Task<AppResult<Unit>> CreateManyLocation(List<LocationDTO> locations, CancellationToken ct);
+	}
+}

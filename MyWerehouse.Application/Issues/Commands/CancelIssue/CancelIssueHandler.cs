@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +7,6 @@ using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.ReversePickings.Services;
 using MyWerehouse.Domain.Services;
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Histories.DTOs;
-using MyWerehouse.Application.Interfaces;
+using MyWerehouse.Application.Histories.Services;
 using MyWerehouse.Infrastructure.Common;
 
 namespace MyWerehouse.Infrastructure.Persistence.ReadServices

@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="9.0.6" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.13" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="ReadServices\Clients\" />
+    <Folder Include="ReadServices\Histories\" />
+    <Folder Include="ReadServices\Inventories\" />
+    <Folder Include="ReadServices\Issues\" />
+    <Folder Include="ReadServices\Locations\" />
+    <Folder Include="ReadServices\Pallets\" />
+    <Folder Include="ReadServices\Pickings\" />
+    <Folder Include="ReadServices\Products\" />
+    <Folder Include="ReadServices\Receipts\" />
+    <Folder Include="ReadServices\ReversePickings\" />
+    <Folder Include="Repositories\Clients\" />
+    <Folder Include="Repositories\Histories\" />
+    <Folder Include="Repositories\Inventories\" />
+    <Folder Include="Repositories\Issues\" />
+    <Folder Include="Repositories\Locations\" />
+    <Folder Include="Repositories\Pallets\" />
+    <Folder Include="Repositories\Pickings\" />
+    <Folder Include="Repositories\Products\" />
+    <Folder Include="Repositories\Receipts\" />
+    <Folder Include="Repositories\ReversePickings\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MyWerehouse.Application\MyWerehouse.Application.csproj" />
+    <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
+    <ProjectReference Include="..\TestSupport\TestSupport.csproj" />
+  </ItemGroup>
+
+</Project>

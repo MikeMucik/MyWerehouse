@@ -1,12 +1,11 @@
-﻿using MyWerehouse.Application.Common.Interfaces.Persistence;
-using MyWerehouse.Application.Interfaces;
-using MyWerehouse.Application.Services;
+using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.ViewModels.LocationModels;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;
 using MyWerehouse.Infrastructure.Persistence.ReadServices;
 using MyWerehouse.Test.InMemoryDatabase.Common;
 using MyWerehouse.Infrastructure.Common;
+using MyWerehouse.Application.Locations.Services;
 
 namespace MyWerehouse.Test.InMemoryDatabase.IntegrationTestService.LocationTestsIntegration
 {

@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="FluentAssertions" Version="8.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.20" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Clients\" />
+    <Folder Include="Histories\" />
+    <Folder Include="Inventories\" />
+    <Folder Include="Issues\" />
+    <Folder Include="Locations\" />
+    <Folder Include="Pallets\" />
+    <Folder Include="Pickings\" />
+    <Folder Include="Products\" />
+    <Folder Include="Receipts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MyWerehouse.Application\MyWerehouse.Application.csproj" />
+    <ProjectReference Include="..\MyWerehouse.Infrastructure\MyWerehouse.Infrastructure.csproj" />
+    <ProjectReference Include="..\MyWerehouse.Server\MyWerehouse.Server.csproj" />
+    <ProjectReference Include="..\TestSupport\TestSupport.csproj" />
+  </ItemGroup>
+
+</Project>

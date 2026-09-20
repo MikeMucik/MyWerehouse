@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Common.Results;
-using MyWerehouse.Application.Interfaces;
 using MyWerehouse.Application.Pallets.DTOs;
+using MyWerehouse.Application.Pallets.Services;
 
 namespace MyWerehouse.Application.Pallets.Queries.FindPalletsByFilter
 {

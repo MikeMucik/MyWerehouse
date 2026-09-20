@@ -8,7 +8,7 @@ using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 using MyWerehouse.Infrastructure.Persistence.Repositories;

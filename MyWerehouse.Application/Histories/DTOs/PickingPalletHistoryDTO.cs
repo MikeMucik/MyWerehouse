@@ -1,5 +1,5 @@
 ﻿using MyWerehouse.Domain.Histories.Models;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 
 namespace MyWerehouse.Application.Histories.DTOs
 {

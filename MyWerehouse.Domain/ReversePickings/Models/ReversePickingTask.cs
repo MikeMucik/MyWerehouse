@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.ReversePickings.Events;
-using MyWerehouse.Domain.Picking.Models;
+using MyWerehouse.Domain.Pickings.Models;
 using MyWerehouse.Domain.ReversePickings.ReversePickingExceptions;
 
 namespace MyWerehouse.Domain.ReversePickings.Models

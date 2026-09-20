@@ -1,0 +1,237 @@
+﻿using FluentValidation;
+using MyWerehouse.Application.Categories.Services;
+using MyWerehouse.Application.ViewModels.CategoryModels;
+using MyWerehouse.Domain.Common.ValueObject;
+using MyWerehouse.Domain.Products.Models;
+using MyWerehouse.Infrastructure.Common;
+using MyWerehouse.Infrastructure.Persistence.ReadServices;
+using MyWerehouse.Infrastructure.Persistence.Repositories;
+using TestSupport;
+
+namespace MyWerehouse.Api.Tests.Categories
+{
+	public class AddDeleteUpdateCategoryIntegrationTests : SqliteTestDatabase
+	{
+		private readonly CategoryService _categoryService;
+		public AddDeleteUpdateCategoryIntegrationTests()
+		{
+			var _unitOfWork = new UnitOfWork(DbContext);
+			var _categoryRepo = new CategoryRepo(DbContext);
+			var _productRepo = new ProductRepo(DbContext);
+			var _categoryReadService =new CategoryReadService(DbContext);
+			var validator = new CategoryDTOValidation(); 
+			_categoryService = new CategoryService(_unitOfWork, _categoryRepo, _productRepo,validator,_categoryReadService); 
+		}
+		[Fact]
+		public async Task AddCategory_ShouldAddCategory_WhenValidInput()
+		{
+			//Arrange
+			var category = new Category
+			{
+				Id = 1,
+				Name = "TestCategory"
+
+			};
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
+
+			DbContext.Products.Add(product);
+			DbContext.Categories.Add(category);
+			DbContext.SaveChanges();
+			var categoryDTO = new CategoryDTO
+			{
+				Name = "newCategory"
+			};
+			//Act
+			await _categoryService.AddCategoryAsync(categoryDTO, CancellationToken.None);
+			//Assert
+			using var newDbContext = CreateNewContext();
+			var result = newDbContext.Categories.FirstOrDefault(c => c.Name == categoryDTO.Name);
+			Assert.NotNull(result);
+			Assert.Equal(categoryDTO.Name, result.Name);
+		}
+		[Fact]
+		public async Task AddCategory_ShouldNotAddCategory_WhenEmptyInput()
+		{
+			//Arrange
+			var category = new Category
+			{
+				Id = 1,
+				Name = "TestCategory"
+			};
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
+
+			DbContext.Products.Add(product);
+			DbContext.Categories.Add(category);
+			DbContext.SaveChanges();
+			var categoryDTO = new CategoryDTO
+			{
+				Name = ""
+			};
+			//Act&Assert
+			var quantity = DbContext.Categories.Count();
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+			_categoryService.AddCategoryAsync(categoryDTO, CancellationToken.None));
+			using var newDbContext = CreateNewContext();
+			var result = newDbContext.Categories.Count();
+			Assert.Equal(quantity, result);
+			Assert.Contains("Category name is required.", ex.Message);
+		}
+		[Fact]
+		public async Task AddCategory_ShouldNotAddCategory_WhenRepeatedInput()
+		{
+			//Arrange
+			var category = new Category
+			{
+				Id = 1,
+				Name = "TestCategory"
+			};
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
+
+			DbContext.Products.Add(product);
+			DbContext.Categories.Add(category);
+			DbContext.SaveChanges();
+			var categoryDTO = new CategoryDTO
+			{
+				Name = "TestCategory"
+			};
+			//Act
+			var quantity = DbContext.Categories.Count();
+			var result = await _categoryService.AddCategoryAsync(categoryDTO, CancellationToken.None);
+			//Assert
+			using var newDbContext = CreateNewContext();
+			var resultBase = newDbContext.Categories.Count();
+			Assert.Equal(DbContext.Categories.Count(), resultBase);
+			Assert.Equal(ErrorType.Conflict, result.ErrorType);
+			Assert.Contains("A category with this name already exists.", result.Error);
+			Assert.Equal(quantity, resultBase);
+		}
+		[Fact]
+		public async Task DeleteCategoryAsync_ShouldDeleteCategory_WhenCategoryExistNoProduct()
+		{
+			//Arrange
+			var category = new Category
+			{
+				Id = 3,
+				Name = "TestCategory"
+			};
+			DbContext.Categories.Add(category);
+			DbContext.SaveChanges();
+			var categoryId = 3;
+			//Act
+			await _categoryService.DeleteCategoryAsync(categoryId, CancellationToken.None);
+			//Assert
+			using var newDbContext = CreateNewContext();
+			var result = newDbContext.Categories.FirstOrDefault(c => c.Id == categoryId);
+			Assert.Null(result);
+		}
+		[Fact]
+		public async Task DeleteCategory_ShouldHideCategory_WhenCategoryHasProduct()
+		{
+			//Arrange
+			var category = new Category
+			{
+				Id = 1,
+				Name = "TestCategory"
+
+			};
+			var product = Product.Create("fdsfd", "aaa", TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
+
+			DbContext.Products.Add(product);
+			DbContext.Categories.Add(category);
+			DbContext.SaveChanges();
+			var categoryId = category.Id;
+			//Act
+			await _categoryService.DeleteCategoryAsync(categoryId, CancellationToken.None);
+			//Assert
+			using var newDbContext = CreateNewContext();
+			var result = newDbContext.Categories.FirstOrDefault(c => c.Id == categoryId);
+			Assert.NotNull(result);
+			Assert.True(result.IsDeleted);
+		}
+
+		[Fact]
+		public async Task UpdateCategory_ShouldChangeName_WhenValidName()
+		{
+			//Arrange
+			var updatingCategory = new Category { Id = 66, Name = "ToUpdateCategoryAsync" };
+			DbContext.Categories.Add(updatingCategory);
+			DbContext.SaveChanges();
+			//Act
+			var id = 66;
+			var updatedCategory = new CategoryDTO { Name = "NewTestCategoryAsync1" };
+			await _categoryService.UpdateCategoryAsync(id, updatedCategory, CancellationToken.None);
+			//Assert
+			using var newDbContext = CreateNewContext();
+			var result = newDbContext.Categories.Find(updatingCategory.Id);
+			Assert.NotNull(result);
+			Assert.Equal(updatedCategory.Name, result.Name);
+		}
+
+		[Fact]
+		public async Task UpdateCategory_ShouldThrowValidationException_WhenNameIsEMpty() {
+			//Arrange
+			var updatingCategory = new Category { Id = 88, Name = "ToUpdateCategory" };
+			DbContext.Categories.Add(updatingCategory);
+			DbContext.SaveChanges();
+			//Act&Assert
+			var id = 88;
+			var updatedCategory = new CategoryDTO { Name = "" };
+			var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _categoryService.UpdateCategoryAsync(id,updatedCategory, CancellationToken.None));
+			//Assert
+			Assert.NotNull(ex);
+			Assert.Contains("Category name is required.", ex.Message);
+		}
+
+		[Fact]
+		public async Task UpdateCategory_ShouldSucceed_WhenNameBelongsToSameCategory()
+		{
+			// Arrange
+			var category = new Category
+			{
+				Id = 101,
+				Name = "SameCategoryName"
+			};
+			DbContext.Categories.Add(category);
+			await DbContext.SaveChangesAsync();
+
+			// Act
+			var result = await _categoryService.UpdateCategoryAsync(
+				category.Id,
+				new CategoryDTO { Name = category.Name },
+				CancellationToken.None);
+
+			// Assert
+			Assert.True(result.IsSuccess);
+			Assert.Equal("SameCategoryName", category.Name);
+		}
+
+		[Fact]
+		public async Task UpdateCategory_ShouldReturnConflict_WhenNameBelongsToAnotherCategory()
+		{
+			// Arrange
+			var category = new Category
+			{
+				Id = 102,
+				Name = "OriginalCategoryName"
+			};
+			var categoryWithOccupiedName = new Category
+			{
+				Id = 103,
+				Name = "OccupiedCategoryName"
+			};
+			DbContext.Categories.AddRange(category, categoryWithOccupiedName);
+			await DbContext.SaveChangesAsync();
+
+			// Act
+			var result = await _categoryService.UpdateCategoryAsync(
+				category.Id,
+				new CategoryDTO { Name = categoryWithOccupiedName.Name },
+				CancellationToken.None);
+
+			// Assert
+			Assert.False(result.IsSuccess);
+			Assert.Equal(ErrorType.Conflict, result.ErrorType);
+			Assert.Equal("OriginalCategoryName", category.Name);
+		}
+	}
+}

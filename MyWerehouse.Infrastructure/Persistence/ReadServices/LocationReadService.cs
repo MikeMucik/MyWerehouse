@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MyWerehouse.Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using MyWerehouse.Application.Locations.Services;
 using MyWerehouse.Application.ViewModels.LocationModels;
 
 namespace MyWerehouse.Infrastructure.Persistence.ReadServices

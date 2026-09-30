@@ -22,7 +22,7 @@ namespace MyWerehouse.Domain.Inventories.Models
 			ProductId = productId;
 			if (quantity < 0)
 			{
-				throw new DomainInventoryDomainException(ProductId);
+				throw new InventoryQuantityDomainException(ProductId);
 			}
 			Quantity = quantity;
 			LastUpdated = dateTime;
@@ -35,7 +35,7 @@ namespace MyWerehouse.Domain.Inventories.Models
 
 			if (newQuantity < 0)
 			{				
-				throw new DomainInventoryDomainException(ProductId);
+				throw new InventoryQuantityDomainException(ProductId);
 			}
 			LastUpdated = dateTime;
 			Quantity = newQuantity;

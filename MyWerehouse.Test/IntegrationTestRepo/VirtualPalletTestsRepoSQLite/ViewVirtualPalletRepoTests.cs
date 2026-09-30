@@ -25,9 +25,9 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(2, result.Count); // powinny być dwie palety: Q1100 i Q1101
+			Assert.Equal(2, result.Count); // There should be two pallets: Q1100 and Q1101
 
-			// Paleta Q1100
+			// Pallet Q1100
 			var pallet1 = result.FirstOrDefault(vp => vp.Pallet.PalletNumber == "Q1100");
 			Assert.NotNull(pallet1);
 			Assert.Equal(200, pallet1.InitialPalletQuantity);
@@ -36,7 +36,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			Assert.Equal(20, pallet1.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(PickingStatus.Allocated, pallet1.PickingTasks.First().PickingStatus);
 
-			// Paleta Q1101
+			// Pallet Q1101
 			var pallet2 = result.FirstOrDefault(vp => vp.Pallet.PalletNumber == "Q1101");
 			Assert.NotNull(pallet2);
 			Assert.Equal(150, pallet2.InitialPalletQuantity);
@@ -45,7 +45,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			Assert.Equal(50, pallet2.PickingTasks.First().RequestedQuantity);
 			Assert.Equal(PickingStatus.Allocated, pallet2.PickingTasks.First().PickingStatus);
 
-			// Upewnij się, że nie zwrócono palety z innym produktem
+			// Verify that no pallet with a different product was returned
 			Assert.DoesNotContain(result, vp => vp.Pallet.PalletNumber == "Q1200");
 		}
 		[Fact]
@@ -65,13 +65,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
 			Assert.Equal(2, result.Count);
-			// upewniamy się, że to właściwe palety
+			// Verify that these are the correct pallets
 			var palletIds = result.Select(v => v.PalletId).ToList();
 			Assert.Contains(palletGuid5, palletIds);
 			Assert.Contains(palletGuid8, palletIds);
-			// żadna inna spoza zakresu
+			// No other pallets outside the range
 			Assert.DoesNotContain(palletGuid2, palletIds);
-			// opcjonalnie: sprawdzamy daty, że rzeczywiście są w zakresie
+			// Optionally, verify that the dates are within the range
 			Assert.All(result, v =>
 				Assert.InRange(v.DateMoved, startDate, endDate));
 		}

@@ -8,15 +8,15 @@ namespace MyWerehouse.Domain.Histories.Models
 {
 	public enum ReasonForPallet
 	{
-		New = 0, // nowa paleta 
-		Received = 1,//nowa paleta w przyjęciu
-		Picking = 2,//paleta źródło kompletacji
-		Moved = 3,//paleta została przeniesiona z miejsca na inne miejsce
-		Correction = 4,//paleta została poprawiona
-		Merge = 5,//paleta została połączona z inną paletą
-		ToLoad = 6,//paleta dodana do wydania
-		Loaded = 7,//paleta załadowana
-		CancelIssue = 8,//paleta została wycofana z issue z powodu kasacji issue
-		ReversePicking = 9,//paleta pod wpływem działania dekompletacyjnego		
+		New = 0, // New pallet
+		Received = 1,//New pallet in a receipt
+		Picking = 2,//Source pallet for picking
+		Moved = 3,//The pallet was moved to another location
+		Correction = 4,//The pallet was corrected
+		Merge = 5,//The pallet was merged with another pallet
+		ToLoad = 6,//Pallet added to an issue
+		Loaded = 7,//Loaded pallet
+		CancelIssue = 8,//The pallet was removed from the issue because the issue was cancelled
+		ReversePicking = 9,//Pallet affected by reverse picking
 	}
 }

@@ -75,14 +75,14 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 				amountHeight);
 
 			// Assert
-			// 1️⃣ Sprawdź liczbę wygenerowanych lokalizacji
+			// 1️⃣ Check the number of generated locations
 			var expectedCount = (endAisle - startAisle + 1) * amountPosition * amountHeight;
 			Assert.Equal(expectedCount, result.Count());
 
-			// 2️⃣ Sprawdź, że wszystkie lokalizacje mają ten sam bay
+			// 2️⃣ Verify that all locations have the same bay
 			Assert.All(result, loc => Assert.Equal(bay, loc.Bay));
 
-			// 3️⃣ Sprawdź poprawność zakresów wartości
+			// 3️⃣ Check that the value ranges are correct
 			Assert.All(result, loc =>
 			{
 				Assert.InRange(loc.Aisle, startAisle, endAisle);
@@ -90,7 +90,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.LocationTestsRepoSQLite
 				Assert.InRange(loc.Height, 1, amountHeight);
 			});
 
-			// 4️⃣ Sprawdź, że wartości się nie powtarzają (unikalne kombinacje)
+			// 4️⃣ Verify that values do not repeat (unique combinations)
 			var distinctCount = result
 				.Select(l => (l.Aisle, l.Position, l.Height))
 				.Distinct()

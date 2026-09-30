@@ -76,15 +76,15 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 				.ThenInclude(pp => pp.Product)
 				.FirstOrDefault(p => p.Id == pallet.Id);
 
-			Assert.NotNull(createdPallet); // paleta została dodana
-			Assert.Equal(pallet.Id, createdPallet.Id); // identyfikator się zgadza
-			Assert.Equal(pallet.Status, createdPallet.Status); // status ten sam
-			Assert.Equal(pallet.LocationId, createdPallet.LocationId); // przypisana lokalizacja poprawna
-			Assert.Equal(location.Id, createdPallet.LocationId); // zgodność z utworzoną lokalizacją
+			Assert.NotNull(createdPallet); // The pallet was added
+			Assert.Equal(pallet.Id, createdPallet.Id); // The identifier matches
+			Assert.Equal(pallet.Status, createdPallet.Status); // Same status
+			Assert.Equal(pallet.LocationId, createdPallet.LocationId); // The assigned location is correct
+			Assert.Equal(location.Id, createdPallet.LocationId); // Matches the created location
 
-			// sprawdzenie relacji z produktem
+			// Check the relationship with the product
 			Assert.NotNull(createdPallet.ProductsOnPallet);
-			Assert.Single(createdPallet.ProductsOnPallet); // dokładnie jeden produkt na palecie
+			Assert.Single(createdPallet.ProductsOnPallet); // Exactly one product on the pallet
 
 			var productOnPallet = createdPallet.ProductsOnPallet.First();
 			Assert.Equal(product.Id, productOnPallet.ProductId);
@@ -94,7 +94,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			Assert.Equal(category.Id, productOnPallet.Product.CategoryId);
 			Assert.Equal("TestC", productOnPallet.Product.Category.Name);
 
-			// dodatkowa kontrola poprawnego zapisu w kontekście
+			// Additional check that the data was saved correctly in the context
 			Assert.True(DbContext.Pallets.Any(p => p.Id == pallet.Id));
 			Assert.True(DbContext.ProductOnPallet.Any(pop => pop.PalletId == pallet.Id));
 		}
@@ -134,13 +134,13 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 				.ThenInclude(pp => pp.Product)
 				.FirstOrDefault(p => p.Id == pallet.Id);
 
-			Assert.NotNull(createdPallet); // paleta została dodana
-			Assert.Equal(pallet.Id, createdPallet.Id); // identyfikator się zgadza
-			Assert.Equal(pallet.Status, createdPallet.Status); // status ten sam
-			Assert.Equal(pallet.LocationId, createdPallet.LocationId); // przypisana lokalizacja poprawna
-			Assert.Equal(location.Id, createdPallet.LocationId); // zgodność z utworzoną lokalizacją
+			Assert.NotNull(createdPallet); // The pallet was added
+			Assert.Equal(pallet.Id, createdPallet.Id); // The identifier matches
+			Assert.Equal(pallet.Status, createdPallet.Status); // Same status
+			Assert.Equal(pallet.LocationId, createdPallet.LocationId); // The assigned location is correct
+			Assert.Equal(location.Id, createdPallet.LocationId); // Matches the created location
 
-			// sprawdzenie relacji z produktem
+			// Check the relationship with the product
 			Assert.NotNull(createdPallet.ProductsOnPallet);
 			Assert.Equal(2,createdPallet.ProductsOnPallet.Count); 
 
@@ -159,7 +159,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.PalletsTestsRepoSQLite
 			Assert.Equal("1234Test2", productOnPallet2.Product.SKU);
 			Assert.Equal(category.Id, productOnPallet2.Product.CategoryId);
 			Assert.Equal("TestC", productOnPallet2.Product.Category.Name);
-			// dodatkowa kontrola poprawnego zapisu w kontekście
+			// Additional check that the data was saved correctly in the context
 			Assert.True(DbContext.Pallets.Any(p => p.Id == pallet.Id));
 			Assert.True(DbContext.ProductOnPallet.Any(pop => pop.PalletId == pallet.Id));
 		}

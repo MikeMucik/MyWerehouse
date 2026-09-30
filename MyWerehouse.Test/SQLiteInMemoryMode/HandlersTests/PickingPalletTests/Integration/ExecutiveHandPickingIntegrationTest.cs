@@ -106,8 +106,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
-			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // pierwotna
-			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // ręczna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // Original
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // Manual picking
 
 			Assert.Contains("Product was added to the issue.", result.Message);
 			var handTask = DbContext.PickingTasks.Single(h =>
@@ -206,8 +206,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
-			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // pierwotna
-			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // ręczna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // Original
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // Manual picking
 
 			Assert.Contains("Product was added to the issue.", result.Message);
 			var handTask = DbContext.PickingTasks.Single(h =>
@@ -303,8 +303,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var pallets = DbContext.Pallets.Where(p => p.IssueId == issue.Id).ToList();
 			Assert.Equal(2, pallets.Count);
-			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // pierwotna
-			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // ręczna
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1001"); // Original
+			Assert.Contains(pallets, p => p.PalletNumber == "Q1002"); // Manual picking
 
 			Assert.Contains("Product was added to the issue.", result.Message);
 			var handTask = DbContext.PickingTasks.Single(h =>

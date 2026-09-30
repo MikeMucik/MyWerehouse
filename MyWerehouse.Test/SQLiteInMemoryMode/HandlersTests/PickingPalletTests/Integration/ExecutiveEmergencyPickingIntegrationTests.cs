@@ -116,7 +116,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Equal(10, result.Result.PickedQuantity);
 			Assert.Equal(0, result.Result.MissingQuantity);
 
-			// ✅ Paleta została zaktualizowana
+			// ✅ The pallet was updated
 			var updatedPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Include(p => p.Issue)
@@ -125,12 +125,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(updatedPallet);
 			Assert.Equal(PalletStatus.ToPicking, updatedPallet.Status);
 
-			// ✅ Produkt na palecie pozostał ten sam
+			// ✅ The product on the pallet remained unchanged
 			var productOnPallet = updatedPallet.ProductsOnPallet.Single();
 			Assert.Equal(product2.Id, productOnPallet.ProductId);
 			Assert.Equal(10, productOnPallet.Quantity);
 
-			// ✅ Sprawdzenie, że VirtualPallet powiązany jest z paletą
+			// ✅ Verify that VirtualPallet is linked to the pallet
 			var virtualLinked = await DbContext.VirtualPallets
 				.Include(v => v.Pallet)
 				.Include(v => v.PickingTasks)
@@ -139,7 +139,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(virtualLinked);
 			Assert.Equal(newSourcePallet.Id, virtualLinked.Pallet.Id);
 
-			// ✅ Alokacje nie zostały utracone
+			// ✅ Allocations were preserved
 			var pickingTaskAfter = await DbContext.PickingTasks
 				.Include(a => a.Issue)
 				.Include(a => a.VirtualPallet)
@@ -149,12 +149,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(pickingTaskAfter.VirtualPallet);
 			Assert.Equal(PickingStatus.Cancelled, pickingTaskAfter.PickingStatus);
 
-			// Historia ruchu została zapisana 
+			// Movement history was saved
 			var history = await DbContext.HistoryPickings.ToListAsync();
 			Assert.NotEmpty(history);
 			Assert.Contains(history, h => h.PerformedBy == "user1" && h.PalletId == sourcePallet.Id);
 
-			// ✅ Walidacja, że kontekst nie trzyma niezatwierdzonych zmian
+			// ✅ Verify that the context has no pending changes
 			Assert.False(DbContext.ChangeTracker.HasChanges());
 		}
 		[Fact]
@@ -208,7 +208,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.False(result.Result.NewPalletCreated);
 			Assert.Contains("Add the product to the existing picking pallet. Product:", result.Result.Message);
 
-			// ✅ Paleta została zaktualizowana
+			//  The pallet was updated
 			var updatedPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Include(p => p.Issue)
@@ -222,13 +222,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 				.FirstAsync(p => p.Id == oldPalletPallet.Id);
 			Assert.NotNull(oldpickedPallet);
 			Assert.Equal(20, oldPalletPallet.ProductsOnPallet.First().Quantity);
-			// ✅ Produkt na palecie pozostał ten sam
+			// The product on the pallet remained unchanged
 			var productOnPallet = updatedPallet.ProductsOnPallet.Single();
 			Assert.Equal(product2.Id, productOnPallet.ProductId);
 			Assert.Equal(10, productOnPallet.Quantity);
 
 
-			// ✅ Sprawdzenie, że VirtualPallet powiązany jest z paletą
+			// Verify that VirtualPallet is linked to the pallet
 			var virtualLinked = await DbContext.VirtualPallets
 				.Include(v => v.Pallet)
 				.Include(v => v.PickingTasks)
@@ -237,7 +237,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(virtualLinked);
 			Assert.Equal(newToPickPallet.Id, virtualLinked.Pallet.Id);
 
-			// ✅ Alokacje nie zostały utracone
+			// Allocations were preserved
 			var pickingTaskAfter = await DbContext.PickingTasks
 				.Include(a => a.Issue)
 				.Include(a => a.VirtualPallet)
@@ -255,11 +255,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			Assert.NotNull(pickingTaskNew);
 			Assert.Equal(PickingStatus.Picked, pickingTaskNew.PickingStatus);
-			// ✅ Historia ruchu została zapisana 
+			// Movement history was saved
 			var history = await DbContext.HistoryPickings.ToListAsync();
 			Assert.NotEmpty(history);
 
-			// ✅ Walidacja, że kontekst nie trzyma niezatwierdzonych zmian
+			// Verify that the context has no pending changes
 			Assert.False(DbContext.ChangeTracker.HasChanges());
 		}
 		[Fact]
@@ -314,7 +314,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.Equal("Q1002", result.Result.PalletNumber);
 			Assert.Contains("Take a new pallet for the issue. Product:", result.Result.Message);
 
-			// ✅ Paleta została zaktualizowana
+			// The pallet was updated
 			var updatedPallet = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Include(p => p.Issue)
@@ -323,12 +323,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(updatedPallet);
 			Assert.Equal(PalletStatus.Archived, updatedPallet.Status);
 
-			// ✅ Produkt na palecie pozostał ten sam
+			// The product on the pallet remained unchanged
 			var productOnPallet = updatedPallet.ProductsOnPallet.Single();
 			Assert.Equal(product2.Id, productOnPallet.ProductId);
 			Assert.Equal(0, productOnPallet.Quantity);
 
-			// ✅ Sprawdzenie, że VirtualPallet powiązany jest z paletą
+			// Verify that VirtualPallet is linked to the pallet
 			var virtualLinked = await DbContext.VirtualPallets
 				.Include(v => v.Pallet)
 				.Include(v => v.PickingTasks)
@@ -337,7 +337,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(virtualLinked);
 			Assert.Equal(newSourcePallet.Id, virtualLinked.Pallet.Id);
 
-			// ✅ Alokacje nie zostały utracone
+			// Allocations were preserved
 			var pickingTaskAfter = await DbContext.PickingTasks
 				.Include(a => a.Issue)
 				.Include(a => a.VirtualPallet)
@@ -347,12 +347,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(pickingTaskAfter.VirtualPallet);
 			Assert.Equal(PickingStatus.CorrectionPicking, pickingTaskAfter.PickingStatus);
 
-			// ✅ Historia ruchu została zapisana (jeśli masz historię)
+			// Movement history was saved (if history is available)
 			var history = await DbContext.HistoryPickings.ToListAsync();
 			Assert.NotEmpty(history);
 			Assert.Contains(history, h => h.PerformedBy == "user1" && h.PalletId == sourcePallet.Id);
 
-			// ✅ Walidacja, że kontekst nie trzyma niezatwierdzonych zmian
+			// Verify that the context has no pending changes
 			Assert.False(DbContext.ChangeTracker.HasChanges());
 		}
 		[Fact]
@@ -435,16 +435,6 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var ex = await Assert.ThrowsAsync<NotAllowedOperationDomainException>(() => Mediator.Send(new ExecuteEmergencyPickingCommand(
 				emergencyPallet.Id, issue.Id, "user1", location.Id)));
 			Assert.Contains($"Operation forbidden for {issue.IssueNumber}({issueId}), wrong status.", ex.Message);
-			//// Act
-			//var result = await Mediator.Send(new ExecuteEmergencyPickingCommand(
-			//	emergencyPallet.Id, issue.Id, "user1", location.Id));
-
-			//// Assert
-			//Assert.False(result.IsSuccess);
-			//Assert.Equal(ErrorType.Conflict, result.ErrorType);
-			//Assert.Equal("The issue status does not allow emergency picking.", result.Error);
-			//Assert.Equal(PalletStatus.Available, emergencyPallet.Status);
-			//Assert.Equal(10, emergencyPallet.ProductsOnPallet.Single().Quantity);
 		}
 
 		[Fact]

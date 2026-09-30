@@ -230,7 +230,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		[Fact]
 		public async Task GetListToPicking_ReturnListForPickingTask()
 		{			
-			// pojedyncze rekordy dla każdej alokacji(zadania pickingTask) z danego okresu czasu
+			// Individual records for each allocation (picking task) within the time period
 			// Arrange
 			var query = new GetListToPickingQuery(DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-2)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)));
 			// Act
@@ -245,7 +245,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		[Fact]
 		public async Task GetListPickingPallet_ReturnListOfPallets()
 		{
-			//lista palet do zdjęcia przez wózkowego pallet's list for operator
+			//List of pallets for the forklift operator to retrieve
 			// Arrange
 			var query = new GetListPickingPalletQuery(DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-2)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)), 1,5);
 			// Act
@@ -261,7 +261,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 		[Fact]
 		public async Task GetListIssueToPicking_ReturnListByClientAndIssue()
 		{
-			//Lista ile danego towaru dla danego zlecenia posegregowane i zgrupowane po kliencie Product's list by issue&client
+			//Product quantities per issue, sorted and grouped by client
 			// Arrange
 			var query = new GetListIssueToPickingQuery(DateOnly.FromDateTime(TestDates.UtcNow.AddDays(-2)), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)));
 			// Act

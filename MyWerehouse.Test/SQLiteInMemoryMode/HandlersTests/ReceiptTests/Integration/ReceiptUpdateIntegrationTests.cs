@@ -123,12 +123,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == receipt.Id && p.Status == PalletStatus.Receiving);
 			Assert.NotNull(newPallet);
 			Assert.NotEqual(pallet.Id, newPallet.Id);
-			// Sprawdzenie czy na nowej palecie jest produkt o ProductId = 2 i Quantity = 200
+			// Verify that the new pallet contains a product with ProductId = 2 and Quantity = 200
 			var newProduct = await DbContext.ProductOnPallet
 				.FirstOrDefaultAsync(p => p.PalletId == newPallet.Id && p.ProductId == product1.Id);
 			Assert.NotNull(newProduct);
 			Assert.Equal(200, newProduct.Quantity);
-			// Sprawdzenie czy utworzono ruch palety
+			// Verify that a pallet movement was created
 			var movement = await DbContext.HistoryPallet
 				.FirstOrDefaultAsync(m => m.PalletId == newPallet.Id);
 			Assert.NotNull(movement);
@@ -141,18 +141,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 				.Include(r => r.Pallets)
 				.FirstOrDefaultAsync(r => r.Id == receipt.Id);
 			Assert.NotNull(receiptWithPallets);
-			//Nie powinno tam być palety Q1000
+			//Pallet Q1000 should not be present
 			Assert.DoesNotContain(receiptWithPallets.Pallets, p => p.PalletNumber == "Q1000");
 			using var arrangeContext = CreateNewContext();
 			var oldPallet = await arrangeContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q1000");
 			Assert.NotNull(oldPallet);
 			Assert.Equal(PalletStatus.Cancelled, oldPallet.Status);
 			var allPallets = await DbContext.Pallets.Where(p => p.Status != PalletStatus.Cancelled).ToListAsync();
-			Assert.Single(allPallets); // tylko jedna paleta powinna być
+			Assert.Single(allPallets); // There should be only one pallet
 			var allProducts = await DbContext.ProductOnPallet.Where(x => x.Pallet.Status != PalletStatus.Cancelled).ToListAsync();
-			Assert.Single(allProducts); // jeden produkt na jednej palecie
+			Assert.Single(allProducts); // One product on one pallet
 			var allMovements = await DbContext.HistoryPallet.Where(x => x.PalletStatus != PalletStatus.Cancelled).ToListAsync();
-			Assert.Single(allMovements); // jeden ruch powinien być utworzony			
+			Assert.Single(allMovements); // Exactly one movement should be created
 		}
 		[Fact]
 		public async Task UpdateReceipt_ShouldChangeClient_WhenDifferentClientIsProvided()
@@ -287,16 +287,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			Assert.NotNull(result);
 			Assert.True(result.IsSuccess);
 			var updatedReceipt = await DbContext.Receipts.Include(r => r.Pallets).FirstAsync(r => r.Id == receipt.Id);
-			Assert.Equal(client.Id, updatedReceipt.ClientId); // zmiana klienta
+			Assert.Equal(client.Id, updatedReceipt.ClientId); // Change the client
 			var newPallet = await DbContext.Pallets.FirstOrDefaultAsync(p => p.ReceiptId == receipt.Id && p.Status == PalletStatus.Receiving);
 			Assert.NotNull(newPallet);//
 			Assert.NotEqual(pallet.Id, newPallet.Id);
-			// Sprawdzenie czy na nowej palecie jest produkt o ProductId = 2 i Quantity = 50
+			// Verify that the new pallet contains a product with ProductId = 2 and Quantity = 50
 			var newProduct = await DbContext.ProductOnPallet
 				.FirstOrDefaultAsync(p => p.PalletId == newPallet.Id && p.ProductId == product1.Id);
 			Assert.NotNull(newProduct);
 			Assert.Equal(50, newProduct.Quantity);
-			// Sprawdzenie czy utworzono ruch palety
+			// Verify that a pallet movement was created
 			var movement = await DbContext.HistoryPallet
 				.FirstOrDefaultAsync(m => m.PalletId == newPallet.Id && m.Reason == ReasonForPallet.Correction);
 			Assert.NotNull(movement);
@@ -309,14 +309,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 				.Include(r => r.Pallets)
 				.FirstOrDefaultAsync(r => r.Id == receipt.Id);
 			using var arrangeContext = CreateNewContext();
-			//Stara paleta(Q1000) powinna być anulowana
+			//The old pallet (Q1000) should be cancelled
 			var oldPallet = await arrangeContext.Pallets.FirstOrDefaultAsync(x => x.PalletNumber == "Q1000");
 			Assert.NotNull(oldPallet);
 			Assert.Equal(PalletStatus.Cancelled, oldPallet.Status);
 			var allPallets = await DbContext.Pallets.Where(p => p.Status != PalletStatus.Cancelled).ToListAsync();
-			Assert.Single(allPallets); // tylko nowa paleta powinna być
+			Assert.Single(allPallets); // Only the new pallet should be present
 			var allProducts = await DbContext.ProductOnPallet.Where(x => x.Pallet.Status != PalletStatus.Cancelled).ToListAsync();
-			Assert.Single(allProducts); // jeden produkt na jednej palecie
+			Assert.Single(allProducts); // One product on one pallet
 			var allMovements = await DbContext.HistoryPallet.Where(x => x.PalletStatus != PalletStatus.Cancelled).ToListAsync();
 			Assert.Single(allMovements);
 		}

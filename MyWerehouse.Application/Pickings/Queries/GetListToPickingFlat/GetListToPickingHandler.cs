@@ -3,8 +3,8 @@ using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.Picking.Services;
 
 namespace MyWerehouse.Application.Pickings.Queries.GetListToPickingFlat
-{//Lista ile danego towaru dla danej alokacji Product's list by pickingTasks
- //klient -> zamówienie -> produkt -> ilośc -  płasko
+{//Product quantities per allocation (picking task)
+ //Client -> issue -> product -> quantity, as a flat list
 	public class GetListToPickingHandler(IPickingReadService pickingReadService) : IRequestHandler<GetListToPickingQuery, AppResult<List<ProductToIssueDTO>>>
 	{
 		private readonly IPickingReadService _pickingReadService = pickingReadService;

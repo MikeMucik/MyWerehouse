@@ -6,7 +6,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 	public class EditPalletInReceiptDTO 
 	{
 		public Guid Id { get; init; }
-		public string? PalletNumber { get; init; }// Puste PalletNumber oznacza utworzenie nowej palety w ramach edycji przyjęcia.
+		public string? PalletNumber { get; init; }// An empty PalletNumber means a new pallet will be created while editing the receipt.
 		public DateTime DateReceived { get; init; }
 		public int LocationId { get; init; }
 		public PalletStatus Status { get; init; } = 0;

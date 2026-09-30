@@ -155,7 +155,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 			AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));
 		}
 
-		//Detach i Attach tylko dla update - dla historii
+		//Detach and Attach are used only for updates, to preserve history
 		public void AttachPallet(Pallet pallet)
 		{
 			if (!Pallets.Contains(pallet))
@@ -172,7 +172,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 			AddDomainEvent(new AddHistoryReceiptNotification(Id, ReceiptNumber, ClientId, ReceiptStatus, userId, BuildListPalletsForReceipt()));
 		}
 
-		//metody pomocnicze
+		//Helper methods
 		private IReadOnlyCollection<HistoryReceiptIssueDetailDto> BuildListPalletsForReceipt()
 		{
 			return Pallets
@@ -201,10 +201,10 @@ namespace MyWerehouse.Domain.Receiving.Models
 			{
 				if (item.PalletId != Guid.Empty && Pallets.All(p=>p.Id != item.PalletId))
 				{
-					throw new PalletDoesNotBelongToReceiptDomainException(Id, ReceiptNumber, item.PalletId, item.PalletNumber!);//istniejąca paleta nie może nie mieć palletNumber
+					throw new PalletDoesNotBelongToReceiptDomainException(Id, ReceiptNumber, item.PalletId, item.PalletNumber!);//An existing pallet must have a PalletNumber
 				}
 			}
-			//List palet do usunięcia z bazy danych
+			//List of pallets to delete from the database
 			var incomingPalletsIds = pallets
 				.Select(p => p.PalletId)
 				.Where(id => id != Guid.Empty)
@@ -212,14 +212,14 @@ namespace MyWerehouse.Domain.Receiving.Models
 			var palletToDelete = Pallets
 				.Where(p => !incomingPalletsIds.Contains(p.Id))
 				.ToList();
-			//Usuwanie z bazy danych niepotrzebnych pallet
+			//Delete unnecessary pallets from the database
 			foreach (var pallet in palletToDelete)
 			{
-				DetachPallet(pallet);//musi być żeby stworzyć dobrą historię
+				DetachPallet(pallet);//Required to create the correct history
 				pallet.DetachFromReceipt(userId, pallet.Location.ToSnapshot());
 			}
 			var existingPallets = Pallets.ToDictionary(p => p.Id);
-			//Aktualizacja palet
+			//Update pallets
 			foreach (var palletOld in pallets.Where(p => p.PalletId != Guid.Empty))
 			{
 				if (!existingPallets.TryGetValue(palletOld.PalletId!, out var pallet))
@@ -236,7 +236,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 				pallet.ChangeStatus(PalletStatus.Receiving);
 				pallet.AddHistory(ReasonForPallet.Correction, userId, pallet.Location.ToSnapshot());
 			}
-			//Dodanie nowych palet - Adding new palets
+			//Add new pallets
 			var palletsAdded = pallets
 				.Where(p => p.PalletId == Guid.Empty)
 				.ToList();

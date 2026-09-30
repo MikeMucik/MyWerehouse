@@ -7,11 +7,11 @@ using MyWerehouse.Domain.Common;
 
 namespace MyWerehouse.Domain.Inventories.InventoryExceptions
 {
-	public class DomainInventoryDomainException : DomainException
+	public class InventoryQuantityDomainException : DomainException
 	{
 		public Guid ProductId { get; }		
-		public DomainInventoryDomainException(Guid productId)
-			: base($"Product ({productId}) quantity below zero - prohibited condition")
+		public InventoryQuantityDomainException(Guid productId)
+			: base($"Product ({productId}) quantity below zero - prohibited condition", Common.ValueObject.ErrorType.InternalError)
 		{
 			ProductId = productId;			
 		}

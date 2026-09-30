@@ -26,14 +26,14 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 
 		public async Task<AppResult<Unit>> Handle(UpdateReceiptCommand request, CancellationToken ct)
 		{
-			// Palety nie wpływają na stan magazynu do momentu zatwierdzenia przyjęcia
+			// Pallets do not affect stock until the receipt is verified
 			var now = _dateTimeProvider.UtcNow;
 			var existingReceipt = await _receiptRepo.GetReceiptByIdAsync(request.Id, ct);
 			if (existingReceipt == null)
 				return AppResult<Unit>.Fail($"Receipt was not found.");
-			//Sprawdzenie czy wszystkie rodzaje towaru istnieją w bazie
+			//Verify that all products exist in the database
 			var listProducts = request.DTO.Pallets
-				.Select(a => a.ProductsOnPallet.Single().ProductId)//paleta przyjmowana ma tylko jeden produkt
+				.Select(a => a.ProductsOnPallet.Single().ProductId)//A pallet being received contains only one product
 				.Distinct()
 				.ToList();
 			foreach (var item in listProducts)

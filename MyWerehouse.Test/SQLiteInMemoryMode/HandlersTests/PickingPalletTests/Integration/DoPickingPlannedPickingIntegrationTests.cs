@@ -140,17 +140,17 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(updatedPickingTask);
 			Assert.Equal(newPallet.Id, updatedPickingTask.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedPickingTask.PickingStatus);
-			// Assert Source Pallet (powinno zostać 10)
+			// Assert the source pallet (10 units should remain)
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
 			Assert.Equal(10, updatedSourcePallet.ProductsOnPallet.First().Quantity);
-			// Assert New Pallet (powinno powstać 30 sztuk na palecie Picking)
+			// Assert the new pallet (the Picking pallet should contain 30 units)
 			Assert.NotNull(newPallet);
 			Assert.Single(newPallet.ProductsOnPallet);
 			Assert.Equal(product.Id, newPallet.ProductsOnPallet.First().ProductId);
 			Assert.Equal(30, newPallet.ProductsOnPallet.First().Quantity);
 			Assert.Equal(PalletStatus.Picking, newPallet.Status);
 		}
-		//Cała paleta jest pobierana bo to końcówka palety
+		//Pick the entire remaining quantity on the pallet
 		[Fact]
 		public async Task DoPicking_ShouldArchiveSourcePallet_WhenTakedWholePallet()
 		{
@@ -228,11 +228,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			Assert.NotNull(updatedPickingTask);
 			Assert.Equal(newPallet.Id, updatedPickingTask.PickingPalletId);
 			Assert.Equal(PickingStatus.Picked, updatedPickingTask.PickingStatus);
-			// Assert Source Pallet (powinno zostać 0)
+			// Assert the source pallet (0 units should remain)
 			Assert.Single(updatedSourcePallet.ProductsOnPallet);
 			Assert.Equal(0, updatedSourcePallet.ProductsOnPallet.First().Quantity);
 			Assert.Equal(PalletStatus.Archived, updatedSourcePallet.Status);
-			// Assert New Pallet (powinno powstać 40 sztuk na palecie Picking)
+			// Assert the new pallet (the Picking pallet should contain 40 units)
 			Assert.NotNull(newPallet);
 			Assert.Single(newPallet.ProductsOnPallet);
 			Assert.Equal(product.Id, newPallet.ProductsOnPallet.First().ProductId);
@@ -504,14 +504,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			var movements = await DbContext.HistoryPallet
 				.Where(m => m.PalletId == sourcePallet1.Id || m.PalletId == newPallet.Id)
 				.ToListAsync();
-			// powinny być 2 wpisy: jeden dla źródłowej palety, jeden dla kompletacyjnej
+			// There should be 2 entries: one for the source pallet and one for the picking pallet
 			Assert.Equal(2, movements.Count);
-			// źródłowa paleta (powinna mieć ruch typu ToPicking)
+			// Source pallet (should have a ToPicking movement)
 			var sourceMovement = movements.FirstOrDefault(m => m.PalletId == sourcePallet1.Id);
 			Assert.NotNull(sourceMovement);
 			Assert.Equal(ReasonForPallet.Picking, sourceMovement.Reason);
 			Assert.Equal(PalletStatus.ToPicking, sourceMovement.PalletStatus);
-			// paleta kompletacyjna (również powinna mieć ruch typu Picking)
+			// Picking pallet (should also have a Picking movement)
 			var newPalletMovement = movements.FirstOrDefault(m => m.PalletId == newPallet.Id);
 			Assert.NotNull(newPalletMovement);
 			Assert.Equal(ReasonForPallet.Picking, newPalletMovement.Reason);
@@ -620,7 +620,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 
 			var sourcePallet2 = Pallet.CreateForTests("Q12000", new DateTime(2025, 8, 8), 1, PalletStatus.Available, null, null);
 			sourcePallet2.AddProductForTests(product2.Id, 1, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
-			//za mało towaru na source2
+			//Not enough stock on source2
 			var oldPallet = Pallet.CreateForTests("Q1001", new DateTime(2025, 8, 8), 1, PalletStatus.Picking, null, issueId);
 			oldPallet.AddProductForTests(product1.Id, 20, new DateTime(2025, 8, 8), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
 

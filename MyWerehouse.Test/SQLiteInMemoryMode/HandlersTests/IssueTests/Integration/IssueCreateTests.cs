@@ -92,7 +92,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Items = [new IssueItemDTO
 				{
 					ProductId = product.Id,
-					Quantity = 26, // 2 pełne palety + 5 do pickingu
+					Quantity = 26, // 2 full pallets + 5 units to pick
 					BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365))
 				}]
 			};
@@ -115,7 +115,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issue = await DbContext.Issues.FirstOrDefaultAsync();
 			Assert.NotNull(issue);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
-			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
+			Assert.Equal(2, issue.Pallets.Count); // 2 full pallets assigned
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			// Picking pallet
 			var palletToPicking = DbContext.Pallets.FirstOrDefault(p => p.PalletNumber == "P2");
@@ -181,7 +181,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Items = [new IssueItemDTO
 				{
 					ProductId = product.Id,
-					Quantity = 26, // 2 pełne palety + 5 do pickingu
+					Quantity = 26, // 2 full pallets + 5 units to pick
 				BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365))
 				}]
 			};
@@ -198,7 +198,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issue = await DbContext.Issues.FirstOrDefaultAsync();
 			Assert.NotNull(issue);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
-			Assert.Equal(2, issue.Pallets.Count); // 2 pełne palety przypisane
+			Assert.Equal(2, issue.Pallets.Count); // 2 full pallets assigned
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			//Picking pallet
 			var palletToPickingP2 = DbContext.Pallets.FirstOrDefault(p => p.PalletNumber == "P2");
@@ -283,12 +283,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				{   new IssueItemDTO
 					{
 						ProductId = product1.Id,
-						Quantity = 26, // 2 pełne palety + 6 do pickingu
+						Quantity = 26, // 2 full pallets + 6 units to pick
 						BestBefore = DateOnly.FromDateTime(TestDates.Now.AddDays(30)),
 					},  new IssueItemDTO
 					{
 						ProductId = product2.Id,
-						Quantity = 17, // 1 pełne palety + 7 do pickingu
+						Quantity = 17, // 1 full pallet + 7 units to pick
 						BestBefore = DateOnly.FromDateTime(TestDates.Now.AddDays(30)),
 					}
 				}
@@ -301,7 +301,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(resultForIssue.Result);
 			var issue = DbContext.Issues.First();
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
-			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
+			Assert.Equal(3, issue.Pallets.Count); // 3 full pallets assigned
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			// Picking pallet
 			var partialPallets = DbContext.Pallets.Where(p => p.Status == PalletStatus.ToPicking).ToList();
@@ -389,13 +389,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueItem1 = new IssueItemDTO
 			{
 				ProductId = product1.Id,
-				Quantity = 26, // 2 pełne palety + 6 do pickingu
+				Quantity = 26, // 2 full pallets + 6 units to pick
 				BestBefore = DateOnly.FromDateTime(TestDates.Now.AddDays(30)),
 			};
 			var issueItem2 = new IssueItemDTO
 			{
 				ProductId = product2.Id,
-				Quantity = 17, // 1 pełne palety + 7 do pickingu
+				Quantity = 17, // 1 full pallet + 7 units to pick
 				BestBefore = DateOnly.FromDateTime(TestDates.Now.AddDays(30))
 			};
 			var createIssue = new CreateIssueDTO
@@ -415,7 +415,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issue = DbContext.Issues.FirstOrDefault(i => i.IssueNumber == 2);
 			Assert.NotNull(issue);
 			Assert.Equal(IssueStatus.Pending, issue.IssueStatus);
-			Assert.Equal(3, issue.Pallets.Count); // 3 pełne palety przypisane
+			Assert.Equal(3, issue.Pallets.Count); // 3 full pallets assigned
 			Assert.All(issue.Pallets, p => Assert.Equal(PalletStatus.LockedForIssue, p.Status));
 			// Picking pallet
 			var partialPallets = DbContext.Pallets.Where(p => p.Status == PalletStatus.ToPicking).ToList();
@@ -428,7 +428,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(pickingPallet1);
 			Assert.NotNull(pickingPallet1.PickingTasks);
 			Assert.Equal(6, pickingPallet1.PickingTasks.Single(i => i.IssueId == issue.Id).RequestedQuantity);
-			Assert.Equal(2, pickingPallet1.RemainingQuantity); //bo zarezerzowane z innego wydania
+			Assert.Equal(2, pickingPallet1.RemainingQuantity); //Because it is reserved for another issue
 			Assert.Equal(pallet3.Id, pickingPallet1.PalletId);
 			Assert.Equal(PalletStatus.ToPicking, palletToPicking1.Status);
 
@@ -486,7 +486,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Items = [new IssueItemDTO
 				{
 					ProductId = product.Id,
-					Quantity = 31, // 2 pełne palety + 5 do pickingu
+					Quantity = 31, // 2 full pallets + 5 units to pick
 				BestBefore =DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365))
 				}]
 			};
@@ -537,7 +537,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				Items = [new IssueItemDTO
 				{
 					ProductId = product.Id,
-					Quantity = 25, // 2 pełne palety + 5 do pickingu
+					Quantity = 25, // 2 full pallets + 5 units to pick
 					BestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365))
 				}]
 			};

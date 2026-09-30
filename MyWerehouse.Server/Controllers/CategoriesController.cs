@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MyWerehouse.Application.Categories.Services;
 using MyWerehouse.Application.ViewModels.CategoryModels;
 using MyWerehouse.Server.Extensions;
@@ -12,7 +12,7 @@ namespace MyWerehouse.Server.Controllers
 	{
 		private readonly ICategoryService _categoryService = categoryService;
 
-		//Dodaj kategorię
+		//Add Category
 		[HttpPost]
 		public async Task<IActionResult> Create(CategoryDTO categoryDto, CancellationToken ct)
 			=> (await _categoryService.AddCategoryAsync(categoryDto, ct))

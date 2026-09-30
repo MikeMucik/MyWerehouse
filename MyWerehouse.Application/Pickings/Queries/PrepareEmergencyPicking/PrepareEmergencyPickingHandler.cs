@@ -20,7 +20,7 @@ namespace MyWerehouse.Application.Pickings.Queries.PrepareEmergencyPicking
 			{
 				return AppResult<PrepareCorrectedPickingResult>.Fail($"Pallet was not found in warehouse stock.");
 			}
-			var product = pallet.EnsureCanBeUsedForPicking();//to jest walidacja palety źródło
+			var product = pallet.EnsureCanBeUsedForPicking();//Validate the source pallet
 			var properPickingTask = await _pickingReadService.GetProperpickingTask(product.ProductId, request.Start, request.End, ct);
 			var result = PrepareCorrectedPickingResult.RequiresOrder(
 				productInfo: $"{product.PalletId} : {product.Quantity}",

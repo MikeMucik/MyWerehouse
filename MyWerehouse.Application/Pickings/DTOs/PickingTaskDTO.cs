@@ -12,7 +12,7 @@ namespace MyWerehouse.Application.Pickings.DTOs
 		public Guid ProductId { get; init; }
 		public string SKU { get; init; } = string.Empty;
 		public int RequestedQuantity { get; init; }
-		public int PickedQuantity { get; init; }//faktyczna pobrana ilość
+		public int PickedQuantity { get; init; }//Actual picked quantity
 		public PickingStatus PickingStatus { get; init; }
 		public DateOnly? BestBefore { get; init; }	
 	}

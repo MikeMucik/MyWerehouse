@@ -100,7 +100,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -115,7 +115,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			//Assert 1
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).Single();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
@@ -265,7 +265,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Pallets.AddRange(pallet1, pallet2);
 			await DbContext.SaveChangesAsync();
 
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -280,7 +280,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			//Assert
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
@@ -415,7 +415,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -431,7 +431,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.NotNull(created);
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
@@ -584,7 +584,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -600,7 +600,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			//Assert
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet4.Id));
@@ -766,7 +766,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
 
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -782,7 +782,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			//Assert 1
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).Single();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.Single().Status);
 			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet2.Id));
 			Assert.Equal(PalletStatus.ToPicking, await GetPalletStatusFromDatabaseAsync(pallet4.Id));
@@ -790,7 +790,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.NotEmpty(pickingTaskToDo);
 			Assert.Equal(2, pickingTaskToDo.Count);
 
-			//Act 2.1 - wykonanie pickingu - pomijamy strzelenie skanerem w paletę P2
+			//Act 2.1: execute picking, skipping the scan of pallet P2
 			var pickingTaskForProduct = pickingTaskToDo.Single(p => p.ProductId == product.Id);
 			var toPicking = new PickingTaskDTO
 			{
@@ -825,7 +825,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.NotNull(productOnPickingPallet);
 			Assert.Equal(8, productOnPickingPallet.Quantity);
 
-			//Act 2.2 - wykonanie pickingu - pomijamy strzelenie skanerem w paletę P4
+			//Act 2.2: execute picking, skipping the scan of pallet P4
 			var pickingTaskForProduct1 = pickingTaskToDo.Single(p => p.ProductId == product1.Id);
 
 			var toPicking1 = new PickingTaskDTO

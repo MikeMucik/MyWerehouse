@@ -12,7 +12,7 @@ namespace MyWerehouse.Domain.Pickings.PickingExceptions
 		public Guid IssueId { get; }
 		public Guid ProductId { get; }
 		public TooManyTaskDomainException(Guid issueId, Guid productId)
-			: base("Too many tasks, only one can exist.")
+			: base("Too many tasks, only one can exist.", Common.ValueObject.ErrorType.InternalError)
 		{
 			IssueId = issueId;
 			ProductId = productId;

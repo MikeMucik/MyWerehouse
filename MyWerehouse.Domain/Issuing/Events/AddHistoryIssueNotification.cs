@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +9,7 @@ using MyWerehouse.Domain.Receiving.Events;
 
 namespace MyWerehouse.Domain.Issuing.Events
 {
-	public record AddHistoryForIssueNotification(
+	public record AddHistoryIssueNotification(
 		Guid IssueId,
 		int IssueNumber, 
 		int ClientId,

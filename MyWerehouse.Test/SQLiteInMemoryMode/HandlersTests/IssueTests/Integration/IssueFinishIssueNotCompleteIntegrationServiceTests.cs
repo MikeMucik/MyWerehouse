@@ -103,14 +103,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(updatedIssue);
 			Assert.Equal(IssueStatus.IsShipped, updatedIssue.IssueStatus);
 
-			// sprawdź czy P2 została usunięta z przypisania do zlecenia:
+			// Verify that P2 is no longer assigned to the issue:
 			var palletP2 = await DbContext.Pallets
 				.AsNoTracking()
 				.FirstOrDefaultAsync(x => x.PalletNumber == "P2");
 			Assert.NotNull(palletP2);
 			Assert.Equal(PalletStatus.Available, palletP2.Status);
 			Assert.Null(palletP2.IssueId);
-			// Historia palet — sprawdź, czy została utworzona dla załadowanej palety
+			// Pallet history: verify that it was created for the loaded pallet
 			var palletHistories = await DbContext.HistoryPallet
 				.FirstOrDefaultAsync(h => h.PalletNumber == "P1");
 
@@ -118,22 +118,22 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(PalletStatus.Loaded, palletHistories.PalletStatus);
 			Assert.Equal(performedBy, palletHistories.PerformedBy);
 
-			// Sprawdź, że dla palety P2 (niezaładowanej) też utworzono historię zmiany statusu
+			// Verify that status change history was also created for the unloaded pallet P2
 			var palletHistoryP2 = await DbContext.HistoryPallet
 				.FirstOrDefaultAsync(h => h.PalletNumber == "P2");
 			Assert.NotNull(palletHistoryP2);
 			Assert.Equal(PalletStatus.Available, palletHistoryP2.PalletStatus);
 			Assert.Equal(performedBy, palletHistoryP2.PerformedBy);
 
-			// Historia załadunku (np. HistoryLoading) — sprawdź, że powstał wpis dla zlecenia
+			// Loading history (e.g. HistoryLoading): verify that an entry was created for the issue
 			var loadingHistories = await DbContext.HistoryIssues
 				.FirstOrDefaultAsync(h => h.IssueId == issueId);
 			Assert.NotNull(loadingHistories);
 
-			// Sprawdź, że zawiera wpis dla załadowanej palety P1
+			// Verify that it contains an entry for the loaded pallet P1
 			Assert.Contains(loadingHistories.Details, h => h.PalletNumber == "P1");
 
-			// Sprawdź, że status i wykonawca się zgadzają			
+			// Verify that the status and performing user match
 			Assert.Equal(IssueStatus.IsShipped, updatedIssue.IssueStatus);
 			Assert.Equal(performedBy, updatedIssue.PerformedBy);
 		}

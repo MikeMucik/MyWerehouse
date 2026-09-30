@@ -15,10 +15,10 @@ namespace MyWerehouse.Domain.Receiving.Filters
 		public Guid? ProductId { get; set; }
 		public string? SKU { get; set; } 
 		public string? ProductName { get; set; }		
-		public DateOnly? SendDateStart { get; set; } //issue data wysyłki,
-		public DateTime? CreateDateStart { get; set; } // receipt data przyjęcia, issue data utworzenia
-		public DateOnly? SendDateEnd { get; set; } //issue data wysyłki
-		public DateTime? CreateDateEnd { get; set; } // receipt data przyjęcia, issue data utworzenia
+		public DateOnly? SendDateStart { get; set; } //Issue shipping date
+		public DateTime? CreateDateStart { get; set; } // Receipt date or issue creation date
+		public DateOnly? SendDateEnd { get; set; } //Issue shipping date
+		public DateTime? CreateDateEnd { get; set; } // Receipt date or issue creation date
 		public string? UserId { get; set; }
 		
 	}

@@ -42,7 +42,7 @@ namespace MyWerehouse.Server.Controllers
 		public async Task<IActionResult> ManualPicking(ExecuteHandPickingCommand command, CancellationToken ct)
 			=> (await _mediator.Send(command, ct)).ToActionResult();
 
-		//Zakończ planowane/korygowane zadania kompletacyjne, stwórz ręczne
+		//Finish planned/correction picking tasks and create manual tasks
 		[HttpPost("switch-to-manual")]
 		public async Task<IActionResult> SwitchToHandPicking(FinishPlannedPickingPrepareToHandPickingCommand command, CancellationToken ct)
 			=> (await _mediator.Send(command, ct)).ToActionResult();

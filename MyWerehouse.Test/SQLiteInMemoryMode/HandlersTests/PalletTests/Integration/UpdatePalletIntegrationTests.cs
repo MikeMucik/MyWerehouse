@@ -491,10 +491,75 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
 			//Assert
 			Assert.NotNull(resultHandler);
+			Assert.Equal(ErrorType.Conflict, resultHandler.ErrorType);
 			Assert.False(resultHandler.IsSuccess);
 			Assert.Contains("The specified pallet belongs to an issue and cannot be updated until it is removed from the issue.", resultHandler.Error);
 		}
 
+		[Fact]
+		public async Task UpdatePallet_ShouldReturnConflict_WhenPalletInReceving()
+		{
+			//Arange
+			var address = new Address
+			{
+				City = "Warsaw",
+				Country = "Poland",
+				PostalCode = "00-999",
+				StreetName = "Wiejska",
+				Phone = 4444444,
+				Region = "Mazowieckie",
+				StreetNumber = "23/3"
+			};
+			var client = new Client
+			{
+				Id = 1,
+				Name = "TestCompany",
+				Email = "123@op.pl",
+				Description = "Description",
+				FullName = "FullNameCompany",
+				Addresses = [address]
+			};
+			var category = CreateCategory();
+			var product = CreateProduct(productId, "Test", "666666");
+			var product1 = CreateProduct(productId1, "Test1", "55555");
+			var location = CreateLocation(0);
+
+			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "user", new DateTime(2025, 1, 1), ReceiptStatus.InProgress, 1);
+			DbContext.Clients.Add(client);
+			DbContext.Categories.Add(category);
+			DbContext.Products.AddRange(product, product1);
+			DbContext.Locations.Add(location);
+			DbContext.Receipts.Add(receipt);
+			var pallet = Pallet.CreateForTests("Q1010", TestDates.UtcNow, 1, PalletStatus.Receiving, receiptId1, null);
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(360)));
+			DbContext.Pallets.Add(pallet);
+			DbContext.SaveChanges();
+			//Act
+			var id = pallet.Id;
+			var updatedPallet = new UpdatePalletDTO
+			{
+				Status = PalletStatus.ToPicking,
+				UserId = "user",
+				ProductsOnPallet = [ ( new ProductOnPalletUpdateDTO
+				{
+					ProductId = product.Id,
+					Quantity = 100,
+					BestBefore = new DateOnly(2027, 3, 3)
+				}),(new ProductOnPalletUpdateDTO
+				{
+					ProductId = product1.Id,
+					Quantity = 300,
+					BestBefore = new DateOnly(2027, 3, 4) })
+					]
+			};
+			var resultHandler = await Mediator.Send(new UpdatePalletCommand(id, updatedPallet));
+			//Assert
+			Assert.NotNull(resultHandler);
+			Assert.False(resultHandler.IsSuccess);
+			Assert.Equal(ErrorType.Conflict, resultHandler.ErrorType);
+			Assert.Contains("The specified pallet belongs to a receipts and should be updated in receipt.", resultHandler.Error);
+		}
 
 		[Fact]
 		public async Task UpdatePallet_ThrowValidationException_NoNumberProductQuantityZeroWrongBB()

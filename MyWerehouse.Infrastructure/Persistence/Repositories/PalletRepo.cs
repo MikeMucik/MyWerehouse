@@ -45,7 +45,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				var firstNumber = counter.NextNumber;
 				var nextFreeNumber = firstNumber + count;
 
-				//mechanizm zapobiegający dubla i ustawiający nową wartość
+				//Prevent duplicate reservations and set the new value
 				var affectedRows = await _werehouseDbContext.NumberCounters
 						.Where(x => x.Name == "Pallet" && x.NextNumber == firstNumber)
 						.ExecuteUpdateAsync(setters =>

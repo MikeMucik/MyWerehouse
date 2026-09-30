@@ -8,7 +8,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 {
 	public enum IssueAllocationPolicy
 	{
-		FullPalletFirst, //pełne palety 
+		FullPalletFirst, //Full pallets
 		
 	}
 }

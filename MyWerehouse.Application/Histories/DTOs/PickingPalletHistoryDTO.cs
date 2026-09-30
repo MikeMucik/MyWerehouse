@@ -6,7 +6,7 @@ namespace MyWerehouse.Application.Histories.DTOs
 	public class PickingPalletHistoryDTO
 	{
 		public int Id { get; set; }
-		public int? PickingTaskId { get; set; }									  //[JsonIgnore] // Ignoruj przy serializacji
+		public int? PickingTaskId { get; set; }									  //[JsonIgnore] // Ignore during serialization
 		public string PalletId { get; set; } = string.Empty;
 		public int IssueId { get; set; }
 		public int ProductId { get; set; }

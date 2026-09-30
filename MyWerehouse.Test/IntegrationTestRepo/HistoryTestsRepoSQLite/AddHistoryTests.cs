@@ -359,7 +359,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			DbContext.VirtualPallets.AddRange(virtualPallet);
 			DbContext.PickingTasks.Add(pickingTask);
 			DbContext.SaveChanges();
-			//wykonaj picking i utwórz paletę
+			//Execute picking and create a pallet
 			var pickingPallet = Pallet.CreateForTests("Q1001", TestDates.Now, 1, PalletStatus.ToIssue, null, issue.Id);
 			pickingPallet.AddProduct(product.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			

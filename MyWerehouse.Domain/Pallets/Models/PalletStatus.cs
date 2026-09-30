@@ -17,10 +17,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 		Archived = 6,
 		Receiving = 7,
 		InStock = 8,
-		LockedForIssue = 9,//do zlecenia ale jeszcze nie zatwierdzona
-		Picking = 10, //destination	
-		Cancelled = 11, //anulowana				  
-		ReversePicking = 12,//stworzona z pickingu
+		LockedForIssue = 9,//Assigned to an issue but not yet confirmed
+		Picking = 10, //destination, during picking
+		Cancelled = 11, //Cancelled
+		ReversePicking = 12,//Created from picking
 		New = 13, 
 	}
 }

@@ -8,15 +8,15 @@ namespace MyWerehouse.Domain.Issuing.Models
 {
 	public enum IssueStatus
 	{
-		New = 0,//można delete
-		InProgress = 1,//gdy pickowane
-		IsShipped = 2,//załadowane
-		PickingShortage = 3, //nie wystarczająca ilość towaru - wykryto podczas pickingu - fizycznie
-		Archived = 4,//w archiwum
-		ConfirmedToLoad = 5,//zatwierdzone do załadunku
-		ChangingPallet = 6,//nastąpiła podmiana palety
-		RequiresCorrection = 7,//niekompletne do poprawki - wykryto na podstawie systemu
-		Pending = 8,//gdy jest modify
-		Cancelled = 9,//anulowane
+		New = 0,//Can be deleted
+		InProgress = 1,//When picked
+		IsShipped = 2,//Loaded
+		PickingShortage = 3, //Physical stock shortage detected during picking
+		Archived = 4,//Archived
+		ConfirmedToLoad = 5,//Confirmed for loading
+		ChangingPallet = 6,//A pallet was replaced
+		RequiresCorrection = 7,//Incomplete and requires correction, based on system data
+		Pending = 8,//During modification
+		Cancelled = 9,//Cancelled
 	}
 }

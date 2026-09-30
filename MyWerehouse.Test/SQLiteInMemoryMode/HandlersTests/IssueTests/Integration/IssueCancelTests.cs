@@ -84,7 +84,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Pallets.AddRange(palletP1, palletP2);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -99,7 +99,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(created);
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			// Act 2 - cancel issue
 			var issueToCancelId = issue.Id;
@@ -133,7 +133,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Receipts.Add(receipt);
 			DbContext.Pallets.AddRange(palletP1, palletP2);
 			await DbContext.SaveChangesAsync();
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -183,7 +183,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Pallets.AddRange(palletPP1, palletPP2);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -199,7 +199,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(created);
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Single(issue.PickingTasks);
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();
@@ -327,7 +327,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.Receipts.Add(receipt);
 			await DbContext.SaveChangesAsync();
-			// Act 1 – create issue with 1 pallet (10 szt.)
+			// Act 1: create an issue with 1 pallet (10 units)
 			var createIssueDto = new CreateIssueDTO
 			{
 				ClientId = client.Id,
@@ -343,7 +343,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(created);
 			Assert.True(created.IsSuccess);
 			var issue = DbContext.Issues.Include(i => i.Pallets).First();
-			Assert.Single(issue.Pallets); // powinien być przypisany P1 
+			Assert.Single(issue.Pallets); // P1 should be assigned
 			Assert.Equal("P1", issue.Pallets.First().PalletNumber);
 			Assert.Equal(PalletStatus.LockedForIssue, issue.Pallets.First().Status);
 			var pickingTasksToDo = await DbContext.PickingTasks.Where(x => x.IssueId == issue.Id).ToListAsync();

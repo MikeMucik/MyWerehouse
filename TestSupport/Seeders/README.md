@@ -8,8 +8,8 @@ Zachowują dane i identyfikatory dotychczasowego `TestDataSeeder`.
 ```csharp
 using TestSupport.Seeders.Scenarios;
 
-SeederForCategory.SeedDatabase(DbContext); // tylko kategorie
-SeederForIssue.SeedDatabase(DbContext);    // wydanie, pozycje i powiązane dane
+SeederForCategory.SeedDatabase(DbContext); // Categories only
+SeederForIssue.SeedDatabase(DbContext);    // Issue, items, and related data
 ```
 
 `TestDataSeeder.SeedDatabase(DbContext)` nadal przygotowuje pełny zestaw.

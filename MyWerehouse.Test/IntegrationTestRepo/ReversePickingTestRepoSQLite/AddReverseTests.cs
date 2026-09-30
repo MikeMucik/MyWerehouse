@@ -110,30 +110,30 @@ namespace MyWerehouse.Test.IntegrationTestRepo.ReversePickingTestRepoSQLite
 				.SingleOrDefault();
 
 			Assert.NotNull(result);
-			// --- klucze i wymagane pola ---
+			// --- keys and required fields ---
 			Assert.True(result.Id != Guid.Empty);
 
 			Assert.Equal(pickingPallet.Id, result.PickingPalletId);
 			Assert.Equal(pickingTask.Id, result.PickingTaskId);
 			Assert.Equal(product.Id, result.ProductId);
 			Assert.Equal("UserR", result.UserId);
-			// --- dane ilościowe i daty ---
+			// --- quantities and dates ---
 			Assert.Equal(10, result.Quantity);
 			Assert.Equal(
 				pickingPallet.ProductsOnPallet.First().BestBefore,
 				result.BestBefore
 			);
-			// --- status ReversePicking ---
+			// --- ReversePicking status ---
 			Assert.Equal(ReversePickingStatus.Ongoing, result.Status);
-			// --- palety źródłowe / docelowe ---
+			// --- source / destination pallets ---
 			Assert.Null(result.SourcePalletId);
 			Assert.Null(result.DestinationPalletId);
-			// --- relacja ---
+			// --- relationship ---
 			Assert.NotNull(result.PickingTask);
 			Assert.Equal(pickingTask.Id, result.PickingTask.Id);
-			// ilość reverse picking nie może przekraczać alokacji
+			// The reverse picking quantity must not exceed the allocation
 			Assert.True(result.Quantity <= pickingTask.RequestedQuantity);
-			// BestBefore musi dotyczyć tego samego produktu
+			// BestBefore must refer to the same product
 			Assert.Equal(
 				pickingTask.BestBefore,
 				result.BestBefore

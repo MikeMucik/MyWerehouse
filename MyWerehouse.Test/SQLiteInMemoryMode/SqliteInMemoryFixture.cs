@@ -11,16 +11,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 	[CollectionDefinition("QueryCollection")]
 	public class SqliteInMemoryFixture : ICollectionFixture<QueryTestSQLFixture> { }
 
-	public class QueryTestSQLFixture : TestBase  // Dziedziczy po TestBase (SQLite in-memory)
+	public class QueryTestSQLFixture : TestBase  // Inherits from TestBase (SQLite in-memory)
 	{
 		public QueryTestSQLFixture()
-			: base()  // Wywołuje ctor TestBase (connection, options, EnsureCreated)
+			: base()  // Calls the TestBase constructor (connection, options, EnsureCreated)
 		{
 			TestDataSeeder.SeedDatabase(DbContext);
 		}
 		public new WerehouseDbContext DbContext => base.DbContext;
 		
-		public WerehouseDbContext CreateCleanContext() => CreateNewContext();  // Z TestBase
+		public WerehouseDbContext CreateCleanContext() => CreateNewContext();  // From TestBase
 		public IServiceScope CreateIsolatedScope() => _provider.CreateScope();
 	
 	}

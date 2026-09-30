@@ -90,27 +90,27 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(1, palletQ1000.LocationId);
 			Assert.False(string.IsNullOrWhiteSpace(palletQ1000.LocationName));
 
-			// produkty na Q1000
+			// Products on Q1000
 			Assert.NotNull(palletQ1000.ProductOnPalletIssue);
 			Assert.Equal(2, palletQ1000.ProductOnPalletIssue.Count);
 
-			// produkt 10
+			// Product 10
 			var prod10_Q1000 = palletQ1000.ProductOnPalletIssue.First(p => p.ProductId == productId1);
 			Assert.Equal(50, prod10_Q1000.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), prod10_Q1000.BestBefore);
 
-			// produkt 11
+			// Product 11
 			var prod11_Q1000 = palletQ1000.ProductOnPalletIssue.First(p => p.ProductId == productId2);
 			Assert.Equal(200, prod11_Q1000.Quantity);
 			Assert.Equal(DateOnly.FromDateTime(TestDates.TodayDateTime.AddDays(366)), prod11_Q1000.BestBefore);
 
-			// --- Paleta Q2000 ---
+			// --- Pallet Q2000 ---
 			var palletQ2000 = result.Result.Pallets.First(p => p.PalletNumber == "Q2000");
 			Assert.Equal(PalletStatus.ToIssue, palletQ2000.PalletStatus);
 			Assert.Equal(3, palletQ2000.LocationId);
 			Assert.False(string.IsNullOrWhiteSpace(palletQ2000.LocationName));
 
-			// produkty na Q2000
+			// Products on Q2000
 			Assert.NotNull(palletQ2000.ProductOnPalletIssue);
 			Assert.Single(palletQ2000.ProductOnPalletIssue);
 

@@ -13,7 +13,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		public async Task<AppResult<ChangeLocationResults>> Handle(ChangeLocationPalletCommand request, CancellationToken ct)
 		{
-			// Zmiana lokalizacji może zmienić status palety w zależności od typu lokalizacji docelowej.
+			// Changing location may change the pallet status depending on the destination location type.
 			var pallet = await _palletRepo.GetPalletByIdAsync(request.PalletId, ct);
 			if (pallet == null) return AppResult<ChangeLocationResults>.Fail($"Pallet {request.PalletId} does not exist.");
 			//location is occupied?
@@ -38,7 +38,7 @@ namespace MyWerehouse.Application.Pallets.Commands.ChangeLocationPallet
 				};
 				return AppResult<ChangeLocationResults>.Success(answerWhenOccupied, answerWhenOccupied.Message);
 			}
-			//location do factory
+			//Pass the location to the factory
 			var oldSnapShot = pallet.Location.ToSnapshot();
 			var snapShot = location.ToSnapshot();
 			pallet.MoveToLocation(location.Id, snapShot, pallet.LocationId, oldSnapShot, request.UserId);

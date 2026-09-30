@@ -16,7 +16,7 @@ namespace MyWerehouse.Domain.Histories.Models
 		public string? SourceLocationSnapShot { get; set; }
 		public int? DestinationLocationId { get; set; }
 		public string? DestinationLocationSnapShot { get; set; }
-		public ReasonForPallet Reason { get; set; } // np. "Picking", "Correction", "Merge"
+		public ReasonForPallet Reason { get; set; } // e.g. "Picking", "Correction", "Merge"
 		public string PerformedBy { get; set; } = string.Empty;
 		public virtual ICollection<HistoryPalletDetail> HistoryPalletDetails { get; set; } = new List<HistoryPalletDetail>();
 		public DateTime MovementDate { get; set; }

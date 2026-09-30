@@ -41,9 +41,9 @@ namespace MyWerehouse.Infrastructure.Persistence.Configuration
 				.OnDelete(DeleteBehavior.Restrict);
 
 			entity.Property(e => e.RowVersion)
-			  .IsRowVersion()  // To kluczowe! Oznacza pole jako Timestamp/RowVersion
-			  .HasColumnType("rowversion")  // Dla SQL Server; dla innych DB dostosuj
-			  .IsRequired(false);  // Opcjonalne, ale Timestamp jest zwykle nullable
+			  .IsRowVersion()  // Important: marks the field as Timestamp/RowVersion
+			  .HasColumnType("rowversion")  // For SQL Server; adjust for other databases
+			  .IsRequired(false);  // Optional, but Timestamp is usually nullable
 		}
 	}
 }

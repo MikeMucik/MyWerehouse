@@ -42,7 +42,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			{
 				return AppResult<ReversePickingResult>.Fail($"Issue {issueId} was not found.");
 			}
-			//produkt na palecie kompletacyjnej - product on pickingPallet
+			//Product on the picking pallet
 			var productOnPallet = pickingPallet.GetProductOnPalletForReverse(reversePicking.ProductId, reversePicking.BestBefore);
 			reversePicking.Start();
 			ReversePickingResult result;
@@ -81,10 +81,10 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 				default:
 					return AppResult<ReversePickingResult>.Fail($"Unsupported strategy: {command.Strategy}.", ErrorType.Conflict);
 			}
-			//paleta dekompletowana
+			//Pallet being reverse picked
 			productOnPallet.DecreaseQuantity(reversePicking.Quantity);
 			pickingPallet.CkeckIfToArchive(command.UserId, ReasonForPallet.ReversePicking, pickingPallet.Location.ToSnapshot());
-			//zadanie dekompletacyjne
+			//Reverse picking task
 			reversePicking.Complete();
 			reversePicking.AddHistory(command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);
 			await _unitOfWork.SaveChangesAsync(ct);

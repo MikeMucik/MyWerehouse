@@ -41,7 +41,7 @@ namespace MyWerehouse.Application.Locations.Services
 		}
 		public async Task<AppResult<Unit>> DeleteLocationServiceAsync(int id, CancellationToken ct)
 		{
-			//warunek czy jest puste
+			//Check whether it is empty
 			var isEmpty = await _palletRepo.CheckOccupancyAsync(id, ct);
 			if (isEmpty != null)
 			{

@@ -116,7 +116,7 @@ namespace MyWerehouse.Domain.Services
 					vp.PickingTasks.Remove(pickingTask);
 					listPickingTaskToCancel.Add(pickingTask);
 				}
-				//usuń virtualPallet jeśli należy tylko do tego zlecenia
+				//Remove the virtual pallet if it belongs only to this issue
 				if (vp.PickingTasks.Count == 0)
 				{
 					vp.Pallet.ChangeStatus(PalletStatus.Available);
@@ -141,7 +141,7 @@ namespace MyWerehouse.Domain.Services
 				pickingTasks.Add(pickingTask);
 				quantity -= taken;
 				allocatedQuantity += taken;
-				if (quantity <= 0)//tu raczej == 0
+				if (quantity <= 0)//Consider using == 0 here
 				{
 					break;
 				}

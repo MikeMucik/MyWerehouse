@@ -111,19 +111,19 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			var taskReverse = DbContext.ReversePickings.SingleOrDefault();
 			Assert.NotNull(taskReverse);
 
-			// 1. Poprawna paleta źródłowa
+			// 1. Correct source pallet
 			Assert.Equal(pickingPallet.Id, taskReverse.PickingPalletId);
 
-			// 2. Poprawne Issue
+			// 2. Correct Issue
 			Assert.Equal(issue.Id, taskReverse.PickingTask.IssueId);
 
-			// 3. Ilość cofnięta
+			// 3. Reversed quantity
 			Assert.Equal(40, taskReverse.Quantity);
 
-			// 4. Użytkownik wykonujący
+			// 4. User performing the operation
 			Assert.Equal("UserReverse", taskReverse.UserId);
 
-			// 5. Reverse powinien być zapisany w bazie tylko jeden
+			// 5. Exactly one reverse picking task should be saved in the database
 			Assert.Equal(1, DbContext.ReversePickings.Count());
 			}
 		// Sad path

@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Linq;
 using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
@@ -70,20 +70,21 @@ namespace MyWerehouse.Application.Issues.Commands.ModifyIssue
 						var result = await _assignProductToIssueAsync.AssignGoodsToIssue(issue, product,
 							IssueAllocationPolicy.FullPalletFirst, reusablePalletsForProduct, request.DTO.PerformedBy, transactionCt);
 
-						if (!result.Success) //niepowodzenie biznesowe
+						if (!result.Success) //Business operation failed
 						{
 							results.Add(result);
 							anyFailure = true;
 							continue;
 						}
 						var palletAssigned = result.AssignedPallets?.ToList() ?? [];
-						issue.CompleteReallocation(palletAssigned, reusablePalletsForProduct);
+						//Not used pallets return to status available
+						Issue.ReleaseUnusedPalletsToAvailable(palletAssigned, reusablePalletsForProduct);
 						anySuccess = true;
 						results.Add(result);
 					}
 					if (oldPallets.ListPalletsIds.Count != 0)
 					{
-						// Usuwamy tylko puste VirtualPallets; fizyczne palety wracają do dostępnych.
+						// Remove only empty VirtualPallets; physical pallets become available again.
 						foreach (var item in oldPallets.ListPalletsIds)
 						{
 							var vp = await _virtualRepo.GetVirtualPalletByIdAsync(item, transactionCt);

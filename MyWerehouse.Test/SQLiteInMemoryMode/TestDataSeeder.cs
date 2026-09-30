@@ -17,7 +17,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 	{
 		public static void SeedDatabase(WerehouseDbContext context)
 		{
-			// 1. Dane podstawowe
+			// 1. Base data
 			if (!context.Clients.Any())
 			{
 				context.Clients.AddRange(
@@ -63,7 +63,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					new NumberCounter { Name = "Pallet", NextNumber = 5001 });
 			}
 			context.SaveChanges();
-			// 2. Dane zależne od powyższych
+			// 2. Data dependent on the records above
 			var productId1 = Guid.Parse("00000000-0000-0000-0001-000000000000");
 			var productId2 = Guid.Parse("00000000-0000-0000-0002-000000000000");
 			var productId989 = Guid.Parse("00000000-0000-0000-0989-000000000000");
@@ -106,7 +106,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 					Issue.CreateForSeed(issueId2, 2, 11, TestDates.UtcNow.AddDays(-5), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(1)), "U002", IssueStatus.New, issueItems));
 			}
 			context.SaveChanges();
-			// 3. Dane końcowe, zależne od receipt/issue/product
+			// 3. Final data dependent on receipt/issue/product
 			var palletGuid1 = Guid.Parse("00000000-0001-1111-0000-000000000000");
 			var palletGuid2 = Guid.Parse("00000000-0002-1111-0000-000000000000");
 			var palletGuid3 = Guid.Parse("00000000-0003-1111-0000-000000000000");

@@ -10,9 +10,9 @@ namespace MyWerehouse.Domain.Pickings.Models
 	{
 		Available = 0, //handPickingTasks
 		Allocated = 1, //PlannedPickingTasks
-		Picked = 2,//wykonany task
-		CorrectionPicking = 3,//task po redukcji
-		Cancelled = 4,//anulowany task
-		PickedPartially = 5,//pobrany częściowo 
+		Picked = 2,//Completed task
+		CorrectionPicking = 3,//Task after quantity reduction
+		Cancelled = 4,//Cancelled task
+		PickedPartially = 5,//Partially picked
 	}
 }

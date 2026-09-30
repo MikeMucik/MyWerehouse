@@ -215,3 +215,4 @@ Receipt → Pallet → Inventory → Issue → Picking → Loading
 - Add authentication and role-based authorization.
 - Add containerized local and deployment support.
 - Introduce additional allocation policies.
+- Add Optimistic Concurrency with Retry.

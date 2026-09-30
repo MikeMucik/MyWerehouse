@@ -22,9 +22,16 @@ namespace MyWerehouse.Server.Middleware
 			}
 			catch (DomainException ex)
 			{
-				_logger.LogWarning(ex, "Domain exception while processing request {Method} {Path}",
-					context.Request.Method, context.Request.Path);
-
+				if (ex.ErrorType == ErrorType.InternalError)
+				{
+					_logger.LogError(ex, "Domain exception while processing request {Method} {Path}. TraceId: {TraceId}",
+						context.Request.Method, context.Request.Path, context.TraceIdentifier);
+				}
+				else
+				{
+					_logger.LogWarning(ex, "Domain exception while processing request {Method} {Path}",
+						context.Request.Method, context.Request.Path);
+				}
 				await HandleDomainException(context, ex);
 				
 			}
@@ -69,6 +76,8 @@ namespace MyWerehouse.Server.Middleware
 			var response = ApiProblemDetailsFactory.Create(
 					ex.ErrorType,
 					ex.Message);
+
+			response.Extensions["traceId"] = context.TraceIdentifier;
 
 			context.Response.StatusCode =
 				response.Status ?? StatusCodes.Status500InternalServerError;

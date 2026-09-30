@@ -147,7 +147,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 
 			// Assert
 			Assert.NotNull(result);
-			result.Result.Should().HaveCount(5); //5 każdy pickingTask osobno
+			result.Result.Should().HaveCount(5); //5 entries, one for each pickingTask
 												 
 			// Client1, Issue1, Product1 → 10 + 20 = 30
 			result.Result.Should().ContainEquivalentOf(new ProductToIssueDTO
@@ -200,7 +200,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 			});
 		}
 
-		//Nowa metoda inne dane wyjściowe
+		//New method with different output data
 		[Fact]
 		public async Task GetListIssueToPickingAsync_ShouldGroupByClientIssueAndProduct()
 		{
@@ -307,28 +307,28 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 				DateOnly.FromDateTime(TestDates.UtcNow.AddDays(5))));
 
 			// Assert
-			result.Result.Should().HaveCount(2);// Liczba klientów
+			result.Result.Should().HaveCount(2);// Number of clients
 
-			// 1. Sprawdź, że w ogóle mamy jakiegoś klienta
+			// 1. Verify that at least one client exists
 			Assert.NotNull(result);
 			Assert.NotEmpty(result.Result);
 
-			// 2. Pierwszy klient istnieje
+			// 2. The first client exists
 			var firstClient = result.Result.First();
 			Assert.Equal(client1.Id, firstClient.ClientIdOut);
 
-			// 3. Pierwszy klient ma dokładnie 2 zlecenia 
+			// 3. The first client has exactly 2 issues
 			Assert.Equal(2, firstClient.IssuesDetailsForPicking.Count);
 
-			// 4. Pierwsze zlecenie klienta ma 2 produkty
+			// 4. The client's first issue has 2 products
 			var firstIssue = firstClient.IssuesDetailsForPicking.First(x => x.IssueNumber == 101);
 			Assert.Equal(2, firstIssue.Products.Count);
 
-			// 5. Drugie zlecenie pierwszego klienta ma 1 produkt
+			// 5. The first client's second issue has 1 product
 			var secondIssue = firstClient.IssuesDetailsForPicking.First(x => x.IssueNumber == 102);
 			Assert.Single(secondIssue.Products);
 
-			// Klient1, Issue1, Product1 → 10 + 20 = 30
+			// Client1, Issue1, Product1 → 10 + 20 = 30
 			var issue1To1Client = firstClient.IssuesDetailsForPicking.Single(i => i.IssueNumber == issue1.IssueNumber);
 			var issue1Product1 = issue1To1Client.Products.Single(x => x.ProductId == product1.Id);
 			var issue1Product2 = issue1To1Client.Products.Single(x => x.ProductId == product2.Id);
@@ -336,18 +336,18 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.P
 			Assert.Equal(10, issue1Product2.Quantity);
 
 			var client1Result = result.Result.Should().ContainSingle(r => r.ClientIdOut == client1.Id).Subject;
-			// Klient1, Issue2, Product2 → 15
+			// Client1, Issue2, Product2 → 15
 			var issue2Result = client1Result.IssuesDetailsForPicking.Should().ContainSingle(i => i.IssueNumber == issue2.IssueNumber).Subject;
 			issue2Result.Products.Should().ContainSingle(p => p.ProductId == product1.Id && p.Quantity == 15);
 
-			// --- Klient 2 ---
+			// --- Client 2 ---
 			var client2Result = result.Result.Should().ContainSingle(r => r.ClientIdOut == client2.Id).Subject;
 
-			// Klient2 ma 1 zlecenie
+			// Client2 has 1 issue
 			client2Result.IssuesDetailsForPicking.Should().HaveCount(1);
 
-			// Klient2, Issue3, Product1 → 25
-			// Klient2, Issue3, Product2 → 15
+			// Client2, Issue3, Product1 → 25
+			// Client2, Issue3, Product2 → 15
 			var secondClient = result.Result.Skip(1).First();
 			var issue3To2Client = secondClient.IssuesDetailsForPicking.Single(i => i.IssueNumber == issue3.IssueNumber);
 			var issue3Product1 = issue3To2Client.Products.Single(x => x.ProductId == product1.Id);

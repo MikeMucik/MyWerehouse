@@ -92,7 +92,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToPicking, null, issue.Id);
 				pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 				pallets.Add(pallet2);
-				// Dodaj przykładową alokację
+				// Add a sample allocation
 				var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 10,pallet2.LocationId, new DateTime(2025, 8, 12));
 				var pickingTask = PickingTask.CreateForSeed(Guid.NewGuid(), virtualPallet.Id, issue.Id, qty, PickingStatus.Allocated, product.Id,
 					null, null, null, 0);
@@ -115,8 +115,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			// Assert
 			Assert.True(result.IsSuccess);
 			var issueExists = DbContext.Issues.Any(i => i.Id == issueId);
-			Assert.False(issueExists); // fizycznie usunięte
-									   // Brak palet lub alokacji związanych z tym issue
+			Assert.False(issueExists); // Physically deleted
+									   // No pallets or allocations linked to this issue
 			Assert.Empty(DbContext.Pallets.Where(p => p.IssueId == issueId));
 			Assert.Empty(DbContext.PickingTasks.Where(a => a.IssueId == issueId));
 		}
@@ -139,13 +139,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				.Include(i => i.PickingTasks)
 				.First(i => i.Id == issueId);
 			Assert.Equal(IssueStatus.Cancelled, issue.IssueStatus);
-			// Palety uwolnione
+			// Pallets released
 			foreach (var p in issue.Pallets)
 			{
 				Assert.Equal(PalletStatus.Available, p.Status);
 				Assert.Null(p.IssueId);
 			}
-			// Alokacje wyzerowane i anulowane
+			// Allocations cleared and cancelled
 			foreach (var a in issue.PickingTasks)
 			{
 				Assert.Equal(0, a.RequestedQuantity);
@@ -177,13 +177,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				.Include(i => i.PickingTasks)
 				.First(i => i.Id == issueId);
 			Assert.Equal(IssueStatus.Cancelled, issue.IssueStatus);
-			// Palety uwolnione
+			// Pallets released
 			foreach (var p in issue.Pallets)
 			{
 				Assert.Equal(PalletStatus.Available, p.Status);
 				Assert.Null(p.IssueId);
 			}
-			// Alokacje wyzerowane i anulowane
+			// Allocations cleared and cancelled
 			foreach (var a in issue.PickingTasks)
 			{
 				Assert.Equal(0, a.RequestedQuantity);
@@ -214,11 +214,11 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.False(result.IsSuccess);
 			Assert.Contains("cannot be cancelled.", result.Error);
 
-			// Nic nie powinno zostać zmienione
+			// Nothing should have changed
 			var issue = DbContext.Issues.First(i => i.Id == issueId);
 			Assert.Equal(IssueStatus.ConfirmedToLoad, issue.IssueStatus);
 
-			// Palety nienaruszone
+			// Pallets unchanged
 			foreach (var p in issue.Pallets)
 				Assert.NotEqual(PalletStatus.Available, p.Status);
 		}

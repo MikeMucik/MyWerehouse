@@ -11,5 +11,6 @@ namespace MyWerehouse.Domain.Common.ValueObject
 		Validation,
 		NotFound,
 		Conflict,
+		InternalError 
 	}
 }

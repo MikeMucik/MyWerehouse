@@ -20,11 +20,6 @@ namespace MyWerehouse.Api.Tests
 	{
 		private readonly SqliteTestDatabase _database = new();
 
-		//public ApiWebApplicationFactory()
-		//{
-		//	TestDataSeeder.SeedDatabase(_database.DbContext);
-		//}
-
 		protected override void ConfigureWebHost(IWebHostBuilder builder)
 		{
 			builder.UseEnvironment("Testing");

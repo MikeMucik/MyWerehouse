@@ -94,7 +94,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 
 			//Inventory
-			//dla dwóch produktów
+			//For two products
 			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
 			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));
 			DbContext.Inventories.AddRange(inventory1, inventory);
@@ -109,7 +109,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.True(result.IsSuccess);
 			Assert.Equal("Loading confirmed and inventory updated.", result.Message);
 
-			//sprawdzenie zmian w Issue
+			//Check changes to the issue
 			var issueFromDb = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.ThenInclude(p => p.ProductsOnPallet)
@@ -117,16 +117,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(IssueStatus.Archived, issueFromDb.IssueStatus);
 			Assert.Equal("UserTest", issueFromDb.PerformedBy);
 
-			//sprawdzenie statusu palet
+			//Check pallet statuses
 			Assert.All(issueFromDb.Pallets, p => Assert.Equal(PalletStatus.Archived, p.Status));
 
-			//sprawdzenie ilości w Inventory (po odjęciu 10 i 10)
+			//Check quantities in Inventory (after subtracting 10 and 10)
 			var inventoryFromDb = await DbContext.Inventories.FirstAsync(i => i.ProductId == product.Id);
 			var inventory1FromDb = await DbContext.Inventories.FirstAsync(i => i.ProductId == product1.Id);
 			Assert.Equal(90, inventoryFromDb.Quantity);
 			Assert.Equal(90, inventory1FromDb.Quantity);
 
-			//Sprawdzenie zapisu history
+			//Check that history was saved
 			var issueHistory = await DbContext.HistoryIssues
 				.Include(h => h.Details)
 				.FirstAsync(i => i.IssueId == issue.Id);
@@ -169,7 +169,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 
 			//Inventory
-			//dla dwóch produktów
+			//For two products
 			var inventory = Inventory.CreateStockItem(product.Id, 5, TestDates.Now.AddDays(-7));
 			var inventory1 = Inventory.CreateStockItem(product1.Id, 5, TestDates.Now.AddDays(-7));
 
@@ -179,7 +179,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			await DbContext.SaveChangesAsync();
 
 			//Act&Assert
-			var ex = await Assert.ThrowsAsync<DomainInventoryDomainException>(() => Mediator.Send(new ConfirmIssueAfterLoadingCommand(issue.Id, "UserTest")));
+			var ex = await Assert.ThrowsAsync<InventoryQuantityDomainException>(() => Mediator.Send(new ConfirmIssueAfterLoadingCommand(issue.Id, "UserTest")));
 	
 			Assert.Equal($"Product ({product.Id}) quantity below zero - prohibited condition", ex.Message);
 
@@ -224,7 +224,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 
 			//Inventory
-			//dla dwóch produktów
+			//For two products
 			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
 			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));
 
@@ -266,7 +266,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
 
 			//Inventory
-			//dla dwóch produktów
+			//For two products
 			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
 			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));
 
@@ -321,7 +321,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.True(result.IsSuccess);
 			Assert.Equal("Loading confirmed and inventory updated.", result.Message);
 
-			// Sprawdzenie zmian w bazie
+			// Check database changes
 			var updatedIssue = await DbContext.Issues
 				.Include(i => i.Pallets)
 				.FirstAsync(i => i.Id == issue.Id);
@@ -329,13 +329,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(IssueStatus.Archived, updatedIssue.IssueStatus);
 			Assert.All(updatedIssue.Pallets, p => Assert.Equal(PalletStatus.Archived, p.Status));
 
-			// Sprawdzenie historii Issue
+			// Check issue history
 			var issueHistory = await DbContext.HistoryIssues
 				.Include(h => h.Details)
 				.FirstOrDefaultAsync(h => h.IssueId == issue.Id);
 			Assert.NotNull(issueHistory);
 
-			// Sprawdzenie historii palet
+			// Check pallet history
 			var palletHistory = await DbContext.HistoryPallet
 				.Include(h => h.HistoryPalletDetails)
 				.FirstOrDefaultAsync(h => h.PalletId == pallet.Id);

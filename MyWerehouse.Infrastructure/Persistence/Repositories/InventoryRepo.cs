@@ -26,7 +26,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 		}
 		public async Task<int> GetAllocatableQuantityAsync(Guid productId, DateOnly? bestBefore, CancellationToken ct)
 		{
-			// 1. pełne dostępne palety
+			// 1.full available apllets
 			var fullPalletsQuery = _werehouseDbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.Where(p => (p.Status == PalletStatus.Available || p.Status == PalletStatus.InStock)&& p.ProductsOnPallet.Count ==1)
@@ -44,7 +44,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Repositories
 				.Where(pop => pop.ProductId == productId)
 				.SumAsync(pop => pop.Quantity, ct);
 
-			// 2. palety rozbite (ToPicking)
+			// 2. not full pallets (ToPicking)
 			var pickingQuery = _werehouseDbContext.VirtualPallets
 				.Include(pp => pp.Pallet)
 				.Where(pp => pp.Pallet.Status == PalletStatus.ToPicking && pp.Pallet.ProductsOnPallet.Count == 1&&

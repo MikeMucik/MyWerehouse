@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Issues.Commands.ChangePalletDuringLoading
 
 		public async Task<AppResult<Unit>> Handle(ChangePalletInIssueCommand request, CancellationToken ct)
 		{
-			//Można podmieniać tylko palety z jednym towarem, nie palety kompletacyjne
+			//Only pallets containing a single product can be replaced; picking pallets cannot
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");

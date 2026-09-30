@@ -153,7 +153,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, dateAdd, bestBefore));
 		}
 
-		//zmiana sposób zapisywania historii dla rezerwacji bo nowa paleta
+		//Use a different reservation history entry for a new pallet
 		public void ReserveToIssue(Guid issueId, string userId, string snapShot)
 		{
 			if (Status == PalletStatus.ToIssue)
@@ -163,10 +163,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 			{
 				Status = PalletStatus.LockedForIssue;
 			}
-			//żeby można było dalej kompletować na tą samą paletę, status lockedForIssue dla modify
+			//Allow further picking onto the same pallet; LockedForIssue is used during modification
 			else if (Status == PalletStatus.Picking || Status == PalletStatus.LockedForIssue)
 			{
-				// OK – zostaje
+				// OK: leave unchanged
 			}
 			else
 			{
@@ -258,7 +258,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public bool ContainsProduct(Guid productId)
 		{
 			return ProductsOnPallet.Any(p => p.ProductId == productId);
-			//założenie że na palecie tylko jedna data danego produktu 
+			//Assume a single best-before date per product on a pallet
 		}
 
 		public int GetProductQuantity(Guid productId)
@@ -330,7 +330,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			this.Status = status;
 		}
-		//metody pomocnicze
+		//Helper methods
 		public List<StockItemChange> CalculateQuantityDelta(IEnumerable<ProductOnPallet> updatedProducts)//It must be done before update
 		{
 			var result = new List<StockItemChange>();

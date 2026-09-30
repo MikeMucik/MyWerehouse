@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,6 +31,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			Id = id;
 			ProductId = productId;
+			IssueId = issueId;
 			Quantity = quantity;
 			BestBefore = bestBefore;
 			CreatedAt = createAt;

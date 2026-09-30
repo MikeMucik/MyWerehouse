@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
@@ -22,7 +22,12 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 			var date = _dateTimeProvider.TodayDateTime;
 			if (existingPallet == null)
 				return AppResult<Unit>.Fail("The specified pallet does not exist.");
-			if(existingPallet.Issue != null)
+			if (existingPallet.Status == PalletStatus.Receiving)
+			{
+				return AppResult<Unit>.Fail("The specified pallet belongs to a receipts and should be updated in receipt.", ErrorType.Conflict);
+
+			}
+			if (existingPallet.Issue != null)
 			{
 				return AppResult<Unit>.Fail("The specified pallet belongs to an issue and cannot be updated until it is removed from the issue.", ErrorType.Conflict);
 			}

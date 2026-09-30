@@ -30,7 +30,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 			services.AddApplication();
 			services.AddInfrastructure();
 			services.RemoveAll<IDateTimeProvider>();
-			services.AddSingleton<IDateTimeProvider, TestDateTimeProvider>();//stały czas dla testów
+			services.AddSingleton<IDateTimeProvider, TestDateTimeProvider>();//Fixed time for tests
 			_provider = services.BuildServiceProvider();
 			DbContext = _provider.GetRequiredService<WerehouseDbContext>();
 			Mediator = _provider.GetRequiredService<IMediator>();

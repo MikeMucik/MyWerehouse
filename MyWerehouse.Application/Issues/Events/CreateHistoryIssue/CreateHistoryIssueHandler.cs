@@ -8,12 +8,12 @@ using MyWerehouse.Domain.Issuing.Events;
 namespace MyWerehouse.Application.Issues.Events.CreateHistoryIssue
 {
 	public class CreateHistoryIssueHandler(IHistoryIssueRepo historyIssueRepo, IDateTimeProvider dateTimeProvider)
-		: INotificationHandler<DomainEventNotification<AddHistoryForIssueNotification>>
+		: INotificationHandler<DomainEventNotification<AddHistoryIssueNotification>>
 	{
 		private readonly IHistoryIssueRepo _historyIssueRepo = historyIssueRepo;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
-		public Task Handle(DomainEventNotification<AddHistoryForIssueNotification> request, CancellationToken cancellationToken)
+		public Task Handle(DomainEventNotification<AddHistoryIssueNotification> request, CancellationToken cancellationToken)
 		{
 			var domaintEvent = request.DomainEvent;
 

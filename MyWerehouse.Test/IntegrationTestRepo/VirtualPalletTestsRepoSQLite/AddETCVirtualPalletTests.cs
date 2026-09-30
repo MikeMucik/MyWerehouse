@@ -54,20 +54,20 @@ namespace MyWerehouse.Test.IntegrationTestRepo.VirtualPalletTestsRepoSQLite
 
 			Assert.NotNull(createdVirtualPallet);
 			Assert.Equal(virtualPallet.Id, createdVirtualPallet.Id);
-			// Sprawdź relację z Pallet
+			// Check the relationship with Pallet
 			Assert.NotNull(createdVirtualPallet.Pallet);
 			Assert.Equal("Q00001", createdVirtualPallet.Pallet.PalletNumber);
 			Assert.Equal(pallet.LocationId, createdVirtualPallet.LocationId);
-			// Sprawdź ilości
+			// Check quantities
 			Assert.Equal(10, createdVirtualPallet.InitialPalletQuantity);
 			Assert.Empty(createdVirtualPallet.PickingTasks);
-			// Sprawdź powiązany produkt
+			// Check the related product
 			var productOnPallet = createdVirtualPallet.Pallet.ProductsOnPallet.FirstOrDefault();
 			Assert.NotNull(productOnPallet);
 			Assert.Equal("Banana", productOnPallet.Product.Name);
 			Assert.Equal("1234567890", productOnPallet.Product.SKU);
 			Assert.Equal(10, productOnPallet.Quantity);
-			// Sprawdź, że VirtualPallet faktycznie trafił do kolekcji VirtualPallets w DbContext
+			// Verify that VirtualPallet was added to the VirtualPallets collection in DbContext
 			Assert.Contains(DbContext.VirtualPallets, v => v.Id == virtualPallet.Id);
 		}
 		[Fact]

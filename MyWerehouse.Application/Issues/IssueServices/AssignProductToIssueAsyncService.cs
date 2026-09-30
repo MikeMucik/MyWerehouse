@@ -30,12 +30,12 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					issueItem.ProductId,
 					issueItem.Quantity);
 			}
-			oldAssignedPallets ??= [];//pełne palety z wskazanym produktem anulowane przy modyfikacji zlecenia, ale trzymane tymczasowo tylko do tej operacji
+			oldAssignedPallets ??= [];//Full pallets containing the specified product, released during issue modification but temporarily retained for this operation
 			var oldPalletCount = oldAssignedPallets.Count;
-			//1. dostępność towaru	- walidacja
-			//dostępne z bazy
+			//1. Validate stock availability
+			//Available in the database
 			var globallyAvailable = await _inventoryRepo.GetAllocatableQuantityAsync(issueItem.ProductId, issueItem.BestBefore, ct);
-			//dostepne z listy updateowanych, chwilowo wstrzymanych
+			//Available from the updated pallets temporarily held for this operation
 			var reusableQuantity = oldAssignedPallets
 				.Sum(p => p.GetProductQuantity(issueItem.ProductId));
 			var totalAvailable = globallyAvailable + reusableQuantity;
@@ -49,7 +49,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					totalAvailable);
 			}
 			issue.BeginAllocation();
-			//2. Przydzielanie pełnych lub/z datą palet
+			//2. Allocate full pallets, applying the date requirement where applicable
 			var requiredFullPallets = 0;
 			var palletFullSelected = new List<Pallet>();
 			var missingPalletsCount = 0;
@@ -71,7 +71,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 			}
 			var quantityFromPallets = palletFullSelected.Sum(p => p.GetProductQuantity(issueItem.ProductId));
 			var rest = issueItem.Quantity - quantityFromPallets;
-			// zabezpieczenie przed błędnym planem alokacji
+			// Guard against an invalid allocation plan
 			if (rest < 0)
 			{
 				return AssignProductToIssueResult.Fail(
@@ -81,9 +81,9 @@ namespace MyWerehouse.Application.Issues.IssueServices
 					issueItem.Quantity,
 					totalAvailable);
 			}
-			//3. pobierz dostępne virtualPallet;
+			//3. Retrieve available virtual pallets
 			var availableVirtualPalletsQuery = await _virtualPalletRepo.GetVirtualPalletsByBBAsync(issueItem.ProductId, issueItem.BestBefore, ct);
-			//4. Stworzenie zadania picking dla resztówki jeśli rest > 0 -  making picking for rest
+			//4. Create a picking task for the remainder if rest > 0
 			if (rest > 0)
 			{
 				var newPickingTaskFromRest = await _addPickingTaskToIssueService.AddPickingTasksToIssue(
@@ -108,7 +108,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				issueItem.Quantity,
 				totalAvailable);
 		}
-		//pełne palety first
+		//Full pallets first
 		private async Task<List<Pallet>> SelectFullPallets(Product product, DateOnly? bestBefore, List<Pallet> reusablePalletsForProduct, int requiredFullPallets, int missingPalletsCount, CancellationToken ct)
 		{
 			List<Pallet> missingPallets = [];
@@ -122,6 +122,6 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				.Take(requiredFullPallets)];
 			return allNecessaryPallets;
 		}
-		//Obecnie wspierana jest polityka FullPalletFirst; pozostałe strategie mogą zostać dodane jako osobne polityki alokacji.
+		//Only FullPalletFirst is currently supported; other strategies can be added as separate allocation policies.
 	}
 }

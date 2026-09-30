@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,12 +41,12 @@ namespace MyWerehouse.Application.Issues.Commands.CancelIssue
 				if (!resultReverse.Success) return AppResult<Unit>.Fail(resultReverse.Message);
 			}
 			var virtualPallets = await _issueRepo.GetVirtualPalletsAsync(request.IssueId, ct);
-			var result = _pickingDomainService.ListVirtualPalletPickingTaskToCancel(virtualPallets, issue.Id, request.UserId, now);
-			foreach (var virtualPalletToCancel in result.VirtualPallets)
+			var (VirtualPallets, PickingTasks) = _pickingDomainService.ListVirtualPalletPickingTaskToCancel(virtualPallets, issue.Id, request.UserId, now);
+			foreach (var virtualPalletToCancel in VirtualPallets)
 			{
 				_virtualPalletRepo.DeleteVirtualPalletPicking(virtualPalletToCancel);
 			}
-			foreach (var pickingTaksToCancel in result.PickingTasks)
+			foreach (var pickingTaksToCancel in PickingTasks)
 			{
 				_pickingTaskRepo.DeletePickingTask(pickingTaksToCancel);
 			}

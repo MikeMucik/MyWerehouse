@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
@@ -17,7 +17,7 @@ namespace MyWerehouse.Application.Issues.Commands.FinishIssueNotCompleted
 			var issue = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
 			if (issue == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
-			var palletsReturn = issue.RemoveNotLoadedPallets(request.UserId);
+			issue.RemoveNotLoadedPallets(request.UserId);
 			issue.FinishIssueNotCompleted(request.UserId);
 			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Issue {request.IssueId} was closed.");

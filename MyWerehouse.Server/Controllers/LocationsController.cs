@@ -30,12 +30,12 @@ namespace MyWerehouse.Server.Controllers
 			=> (await _locationService.DeleteLocationServiceAsync(id, ct))
 			.ToActionResult();
 
-		[HttpPost("bulk")]//zatwierdzenie prepare
+		[HttpPost("bulk")]//Confirm preparation
 		public async Task<IActionResult> Bulk(List<LocationDTO> locations, CancellationToken ct)
 			=> (await _locationService.CreateManyLocation(locations, ct))
 			.ToActionResult();
 
-		[HttpPost("preview")] //ile regałów alejek etc
+		[HttpPost("preview")] //Number of racks, aisles, etc.
 		public IActionResult Preview(int bay, int startAisle, int endAisle, int amountPosition, int numberOfLevels)
 			=> (_locationService.PrepareLocations(bay, startAisle, endAisle, amountPosition, numberOfLevels))
 			.ToActionResult();

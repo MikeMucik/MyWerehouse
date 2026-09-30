@@ -189,7 +189,7 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 				.AsNoTracking()
 				.Where(p =>
 					p.VirtualPallet!.PalletId == palletId &&
-					DateOnly.FromDateTime(p.Issue.IssueDateTimeCreate) >= pickingDate.AddDays(-14) &&//ustalenie biznesowe
+					DateOnly.FromDateTime(p.Issue.IssueDateTimeCreate) >= pickingDate.AddDays(-14) &&//Business decision
 					p.Issue.IssueDateTimeSend >= pickingDate &&
 					p.Issue.IssueDateTimeSend < pickingDate.AddDays(2) &&
 					p.PickingStatus == PickingStatus.Allocated);

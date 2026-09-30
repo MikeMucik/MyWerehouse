@@ -18,7 +18,7 @@ namespace MyWerehouse.Domain.Pickings.Models
 		public int RequestedQuantity { get; private set; }
 		public PickingStatus PickingStatus { get; private set; }
 		public Guid ProductId { get; private set; }
-		public Product Product { get; private set; } = null!;// potrzebne by wyświetlać SKU dla prodktu w DTO
+		public Product Product { get; private set; } = null!;// Required to display the product SKU in the DTO
 		public DateOnly? BestBefore { get; private set; }
 		public Guid? PickingPalletId { get; private set; }
 		public Pallet? PickingPallet { get; private set; }
@@ -77,7 +77,7 @@ namespace MyWerehouse.Domain.Pickings.Models
 		public static PickingTask CreatePickingTaskForIssue(VirtualPallet vp, Issue issue, int quantity, Guid productId, DateOnly pickingDate, DateOnly? bestBefore, string userId, DateTime now)
 		{
 			var pickingTask = PickingTask.Create(vp.Id, issue.Id, quantity, PickingStatus.Allocated, productId,
-						bestBefore, null, pickingDate, 0);  // PickingDay jest wyliczany jako dwa dni przed planowaną wysyłką.
+						bestBefore, null, pickingDate, 0);  // PickingDay is calculated as two days before the scheduled shipping date.
 			pickingTask.Issue = issue;
 			pickingTask.VirtualPallet = vp;
 			pickingTask.AddHistoryPicking(userId, null, null, PickingStatus.Available, 0, now);
@@ -152,7 +152,7 @@ namespace MyWerehouse.Domain.Pickings.Models
 			pickingPallet.AddHistory(ReasonForPallet.Picking, userId, pickingPallet.Location.ToSnapshot());
 		}
 
-		// Historia pickingu może pochodzić z różnych źródeł, dlatego przeciążenia przekazują jawne dane palet.
+		// Picking history may come from different sources, so the overloads pass explicit pallet data.
 		public void AddHistoryPicking(string userId, Guid? pickingPalletId, string? pickingPalletNumber, PickingStatus statusBefore, int quantityPicked, DateTime createdAt)// PickingStatus statusAfter,
 		{
 
@@ -191,11 +191,10 @@ namespace MyWerehouse.Domain.Pickings.Models
 				userId,
 				createdAt));
 		}
-		public void EnsureSourcePallet(Guid palletId)
+		public void EnsureSourcePallet(Guid palletId)//if use more than one consider another exception
 		{
 			if (VirtualPallet is null)
-				throw new TaskWithOutSourceDomainException();
-
+				throw new WrongWayToDoTaskDomainException();
 			if (VirtualPallet.PalletId != palletId)
 				throw new InvalidSourcePalletDomainException(
 					Id,

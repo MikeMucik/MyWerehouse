@@ -37,7 +37,7 @@ namespace MyWerehouse.Application.Pickings.Commands.ExecuteHandPicking
 				return AppResult<ProcessPickingActionResult>.Fail($"Issue {command.IssueId} was not found.");
 			}
 
-			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource, ct);// W hand picking paleta źródłowa jest wskazywana ręcznie przez biuro.
+			var pallet = await _palletRepo.GetPalletByIdAsync(command.PalletIdSource, ct);// For manual picking, the office selects the source pallet manually.
 			if (pallet == null)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail($"Pallet {command.PalletIdSource} does not exist.");
@@ -46,7 +46,7 @@ namespace MyWerehouse.Application.Pickings.Commands.ExecuteHandPicking
 
 			var tasks = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(command.IssueId, palletItem.ProductId, ct);
 
-			var pickingHandTask = _pickingDomainService.GetSingleHandPickingTask(tasks, command.IssueId, palletItem.ProductId);//sprawdzenie czy został ainicjalizowana ręczna kompletacja
+			var pickingHandTask = _pickingDomainService.GetSingleHandPickingTask(tasks, command.IssueId, palletItem.ProductId);//Check whether manual picking has been initialized
 
 			pickingHandTask.BeginExecuteHandPicking(command.PickedQuantity);
 			pallet.IsCorrectDate(pickingHandTask.BestBefore);
@@ -57,7 +57,7 @@ namespace MyWerehouse.Application.Pickings.Commands.ExecuteHandPicking
 				pallet.AssignToPicking(command.UserId, pallet.Location.ToSnapshot());
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			}
-			// Dostępna ilość wynika ze stanu wirtualnej palety.
+			// The available quantity comes from the virtual pallet's state.
 			var availableQuantity = virtualPallet.RemainingQuantity;
 			if (command.PickedQuantity > availableQuantity)
 			{

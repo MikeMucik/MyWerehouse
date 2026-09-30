@@ -174,14 +174,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.False(result.Result.RequiresConfirmation);
 			Assert.Contains($"Pallet {pallet1.Id} was moved to the location. ", result.Message);
 
-			// sprawdzamy, że obie palety siedzą w tej samej lokalizacji
+			// Verify that both pallets are in the same location
 			var movedPallet = DbContext.Pallets.AsNoTracking().First(x => x.Id == palletId);
 			var existingPallet = DbContext.Pallets.AsNoTracking().First(x => x.Id == pallet2.Id);
 
 			Assert.Equal(destinationLocation, movedPallet.LocationId);
 			Assert.Equal(destinationLocation, existingPallet.LocationId);
 
-			// sprawdzamy, że ruch został zapisany poprawnie			
+			// Verify that the movement was saved correctly
 			var moments = DbContext.HistoryPallet.Where(a => a.PalletId == palletId)
 				.OrderByDescending(a => a.MovementDate)
 				.ToList();

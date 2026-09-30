@@ -136,7 +136,7 @@ namespace MyWerehouse.Application.Clients.Services
 					});
 					continue;
 				}
-				//jeśli jest taki adres(po Id) to podmień wartości
+				//If an address with this ID exists, replace its values
 				if (!existingMap.TryGetValue(incomingItem.Id, out var address))
 				{
 					return AppResult<Unit>.Fail($"Address {incomingItem.Id} was not found.");

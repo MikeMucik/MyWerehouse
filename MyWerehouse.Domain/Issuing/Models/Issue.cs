@@ -1,4 +1,4 @@
-using MyWerehouse.Domain.Clients.ClientsExceptions;
+﻿using MyWerehouse.Domain.Clients.ClientsExceptions;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
@@ -69,21 +69,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			IssueStatus = issueStatus;
 		}
 
-		public void CancelIssue(string userId, DateTime createdAt)
-		{
-			if (IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.Archived)
-				throw new NotAllowedOperationDomainException(Id, IssueNumber);
-			IssueStatus = IssueStatus.Cancelled;
-			AddHistory(userId);
-			foreach (var pallet in Pallets)
-			{
-				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
-			}
-			foreach (var task in PickingTasks)
-			{
-				task.Cancel(userId, createdAt);
-			}
-		}
+
 
 		public int GetQuantityForProduct(Guid productId)
 		{
@@ -129,8 +115,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 				IssueStatus != IssueStatus.InProgress)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
-			}
-			;
+			};
 		}
 
 		public void MarkAllocationCompleted(string userId)
@@ -156,7 +141,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			this.AddHistory(userId);
 		}
 
-		public List<Pallet> RemoveNotLoadedPallets(string userId)
+		public void RemoveNotLoadedPallets(string userId)
 		{
 			var toReturn = Pallets.Where(p => p.Status != PalletStatus.Loaded).ToList();
 			foreach (var pallet in toReturn)
@@ -164,7 +149,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.Correction);
 				Pallets.Remove(pallet);
 			}
-			return toReturn;
 		}
 
 		public void VerifyToLoad(string userId)
@@ -186,11 +170,11 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				throw new NotEndedLoadingDomainException(Id, IssueNumber);
 			}
-			PerformedBy = userId;
 			if (IssueStatus != IssueStatus.IsShipped)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
+			PerformedBy = userId;
 			foreach (var pallet in Pallets)
 			{
 				pallet.ToArchive(userId, ReasonForPallet.Loaded, pallet.Location.ToSnapshot());
@@ -215,16 +199,67 @@ namespace MyWerehouse.Domain.Issuing.Models
 			AddHistory(userId);
 		}
 
-		public void Cancel(string userId)
+
+		public List<Pallet> ReturnPickingPallets()
 		{
-			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.IsShipped)
+			var list = new List<Pallet>();
+			foreach (var item in Pallets)
+			{
+				if (item.ReceiptId == null)
+					list.Add(item);
+			}
+			return list;
+		}
+		public void DetachPallets(string userId)
+		{
+			foreach (var pallet in Pallets)
+			{
+				if (pallet.ReceiptId != null)
+				{
+					// Keep the pallet linked to preserve its entry in the cancelled issue's history.
+					pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
+				}
+			}
+		}
+		public void EnsureCanBeCancelled()
+		{
+			if (IssueStatus == IssueStatus.Archived ||
+				IssueStatus == IssueStatus.Cancelled || 
+				IssueStatus == IssueStatus.IsShipped)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
+		}
 
+		public void Cancel(string userId)
+		{
+			EnsureCanBeCancelled();
 			IssueStatus = IssueStatus.Cancelled;
 			PerformedBy = userId;
 			AddHistory(userId);
+			RemoveReceiptPalletsFromCollection();
+		}
+		public void EnsureCanBeDeleted()
+		{
+			if (PickingTasks.Any(task => task.VirtualPalletId == null))
+			{
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			}
+		}
+		public void CancelIssueForDelete(string userId, DateTime createdAt)
+		{
+			if (IssueStatus != IssueStatus.Pending && IssueStatus != IssueStatus.RequiresCorrection) 
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			IssueStatus = IssueStatus.Cancelled;
+			AddHistory(userId);
+			foreach (var pallet in Pallets)
+			{
+				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
+			}
+			foreach (var task in PickingTasks)
+			{
+				task.Cancel(userId, createdAt);
+			}
 		}
 
 		public void ReplacePalletInIssue(Pallet oldPallet, Pallet newPallet, string userId, DateOnly? bestBefore)
@@ -303,7 +338,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		}
 
 		public void ChangeClient(int clientId)
-		{			
+		{
 			ClientId = clientId;
 		}
 
@@ -311,7 +346,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		{
 			PickingTasks.Remove(pickingTask);
 		}
-		//Detach i Attach tylko dla update, changePallet - dla historii
+		//Detach and Attach are used only for update and changePallet, to preserve history
 		public void DetachPallet(Pallet pallet)
 		{
 			this.Pallets.Remove(pallet);
@@ -341,7 +376,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void AddHistory(string userId)
 		{
-			this.AddDomainEvent(new AddHistoryForIssueNotification(
+			this.AddDomainEvent(new AddHistoryIssueNotification(
 			Id, IssueNumber, ClientId, IssueStatus, userId, BuildListPalletsForIssue(), BuildListItems()));
 		}
 
@@ -367,7 +402,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 				.ToList();
 		}
 
-		private IEnumerable<StockItemChange> CreateStockItem(List<Pallet> pallets)
+		private static IEnumerable<StockItemChange> CreateStockItem(List<Pallet> pallets)
 		{
 			return pallets
 				.SelectMany(p => p.ProductsOnPallet)
@@ -376,14 +411,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 					g.Key,
 					-g.Sum(q => q.Quantity)));
 		}
-		
-		public void EnsureCanBeCancelled()
-		{
-			if (IssueStatus == IssueStatus.Archived || IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.IsShipped)
-			{
-				throw new NotAllowedOperationDomainException(Id, IssueNumber);
-			}
-		}
+
+
 
 		public IssueModificationMode DetremineModificationMode()
 		{
@@ -403,18 +432,18 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public ReallocationPreparation PrepareForReallocation(int clientId, string userId, DateTime now)
 		{
 			this.ChangeClient(clientId);
-			// Odłączamy poprzednie palety i anulujemy dotychczasowe zadania pickingu przed ponowną alokacją.
+			// Detach previous pallets and cancel existing picking tasks before reallocating.
 			var reusablePallets = new List<Pallet>();
 			var listOldPallets = Pallets.ToList();
 			foreach (var pallet in listOldPallets)
 			{
 				DetachPallet(pallet);
 				pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.Correction);
-				pallet.ChangeStatus(PalletStatus.LockedForIssue);// Palety pozostają zablokowane, żeby nie zostały użyte równolegle w innym zleceniu.
+				pallet.ChangeStatus(PalletStatus.LockedForIssue);// Pallets remain locked to prevent concurrent use by another issue.
 				reusablePallets.Add(pallet);
 			}
 			var listOldPickingTask = PickingTasks.ToList();
-			// Anulujemy poprzednie zadania pickingu przed ponowną alokacją.
+			// Cancel previous picking tasks before reallocating.
 			foreach (var pickingTask in listOldPickingTask)
 			{
 				RemovePickingTask(pickingTask);
@@ -428,7 +457,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 			return new ReallocationPreparation(listOldPallets, touchedVirtualPalletIds);
 		}
 
-		public bool CompleteReallocation(List<Pallet> pallets, List<Pallet> oldPallets)
+		public static void ReleaseUnusedPalletsToAvailable(List<Pallet> pallets, List<Pallet> oldPallets)
 		{
 			var assignedIds = pallets.Select(p => p.Id).ToHashSet();
 			var returnPallets = oldPallets
@@ -439,7 +468,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 			{
 				returnPallet.ChangeStatus(PalletStatus.Available);
 			}
-			return true;
 		}
 
 		public void CompletePickingPlanned(bool missingQuantityAllocated, Pallet sourcePallet, string userId)
@@ -470,34 +498,15 @@ namespace MyWerehouse.Domain.Issuing.Models
 				pallet.ReserveToIssue(Id, userId, snapShot);
 			}
 		}
-		public void DetachPallets(string userId)
-		{
-			foreach (var pallet in Pallets)
-			{
-				if (pallet.ReceiptId != null)
-				{
-					// Nie odłączam palety, aby zachować jej wpis w historii anulowanego zlecenia.
-					pallet.DetachFromIssue(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelIssue);
-				}
-			}
-		}
-		public List<Pallet> ReturnPickingPallets()
-		{
-			var list = new List<Pallet>();
-			foreach (var item in Pallets)
-			{
-				if (item.ReceiptId == null)
-					list.Add(item);
-			}
-			return list;
-		}
+
+
 		public IssueVerifyResult CompareGoods(Guid productId)
 		{
 			var isConditional = false;
 			if (IssueStatus != IssueStatus.PickingShortage)
 			{
 				CheckPalletsInIssue();
-			}			
+			}
 			var orderedGood = this.IssueItems
 				.Single(i => i.ProductId == productId);
 			var quantityOrdered = orderedGood.Quantity;
@@ -507,7 +516,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 				.Where(pp => pp.ProductId == productId && (bestBeforeRequired == null
 				|| pp.BestBefore >= bestBeforeRequired))
 				.Sum(pp => pp.Quantity);
-			if(quantityPrepared <  quantityOrdered && IssueStatus == IssueStatus.PickingShortage) {isConditional = true;}
+
+			if (quantityPrepared < quantityOrdered && IssueStatus == IssueStatus.PickingShortage) { isConditional = true; }
 			if (quantityOrdered == quantityPrepared)
 			{
 				return new IssueVerifyResult(true, isConditional, quantityPrepared, quantityOrdered, bestBeforeRequired);
@@ -521,6 +531,16 @@ namespace MyWerehouse.Domain.Issuing.Models
 				if (pallet.Status != PalletStatus.ToIssue && pallet.Status != PalletStatus.LockedForIssue)
 				{
 					throw new PalletsNotReadyToLoadDomainException();
+				}
+			}
+		}
+		public void RemoveReceiptPalletsFromCollection()
+		{
+			foreach(var pallet in Pallets.ToList())
+			{
+				if(pallet.IssueId == null && pallet.ReceiptId != null)
+				{
+					Pallets.Remove(pallet);
 				}
 			}
 		}

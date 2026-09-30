@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
@@ -19,7 +19,7 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 		public async Task<AppResult<Unit>> Handle(DeleteIssueCommand request, CancellationToken ct)
 		{
 			var now = _dateTimeProvider.UtcNow;
-			var issueToDelete = await _issueRepo.GetIssueByIdAsync(request.IssueId, ct);
+			var issueToDelete = await _issueRepo.GetIssueByIdForModifyAsync(request.IssueId, ct);
 			if (issueToDelete == null)
 				return AppResult<Unit>.Fail("Issue was not found.");
 			switch (issueToDelete.IssueStatus)
@@ -29,7 +29,8 @@ namespace MyWerehouse.Application.Issues.Commands.DeleteIssue
 					break;
 				case IssueStatus.Pending:
 				case IssueStatus.RequiresCorrection:
-					issueToDelete.CancelIssue(request.UserId, now);
+					issueToDelete.EnsureCanBeDeleted();
+					issueToDelete.CancelIssueForDelete(request.UserId, now);
 					break;
 				default:
 					return AppResult<Unit>.Fail($"Issue {issueToDelete.Id} cannot be cancelled.", ErrorType.Conflict);

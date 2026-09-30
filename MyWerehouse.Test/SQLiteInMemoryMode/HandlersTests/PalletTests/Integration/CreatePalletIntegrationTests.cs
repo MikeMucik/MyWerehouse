@@ -77,7 +77,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			Assert.True(result.IsSuccess);
 			Assert.Contains("was added to warehouse stock and inventory was updated.", result.Message);
 
-			// weryfikacja, że paleta faktycznie została utworzona w bazie
+			// Verify that the pallet was created in the database
 			var palletInDb = await DbContext.Pallets
 				.Include(p => p.ProductsOnPallet)
 				.FirstOrDefaultAsync();

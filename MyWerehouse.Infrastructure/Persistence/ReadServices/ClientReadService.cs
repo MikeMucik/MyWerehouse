@@ -70,7 +70,7 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 			{
 				result = result.Where(c => c.FullName != null && c.FullName.StartsWith(filter.FullName));
 			}
-			// wyszukiwanie po składowych adresu
+			// Search by address components
 			if (!string.IsNullOrEmpty(filter.Country))
 			{
 				result = result.Where(c => c.Addresses.Any(a => a.Country != null && a.Country.StartsWith(filter.Country)));

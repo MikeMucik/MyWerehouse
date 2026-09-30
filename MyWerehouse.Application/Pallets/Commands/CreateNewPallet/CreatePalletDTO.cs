@@ -9,6 +9,6 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 		public int LocationId { get; init; }		
 		public PalletStatus Status { get; init; } = 0; 
 		public required string UserId { get; init; }
-		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new HashSet<ProductOnPalletCreateDTO>();//tworzę paletę razem z towarem
+		public ICollection<ProductOnPalletCreateDTO> ProductsOnPallet { get; init; } = new HashSet<ProductOnPalletCreateDTO>();//Create the pallet together with its products
 	}
 }

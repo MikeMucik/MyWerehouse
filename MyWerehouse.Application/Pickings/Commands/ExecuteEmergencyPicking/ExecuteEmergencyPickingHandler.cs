@@ -45,7 +45,7 @@ namespace MyWerehouse.Application.Pickings.Commands.ExecuteEmergencyPicking
 			}
 			issue.StartEmergencyPicking();
 
-			// Oblicz, ile faktycznie można/trzeba skompletować
+			// Calculate how much can and needs to be picked
 			var pickingTasksForIssue = await _pickingTaskRepo.GetPickingTasksByIssueIdProductIdAsync(request.IssueId, palletItem.ProductId, ct);
 			if (pickingTasksForIssue.Count == 0) return AppResult<ProcessPickingActionResult>.Fail($"Picking task does not exist.");
 			var virtualPallet = await _virtualPalletRepo.GetVirtualPalletByPalletIdAsync(request.PalletId, ct);
@@ -57,9 +57,9 @@ namespace MyWerehouse.Application.Pickings.Commands.ExecuteEmergencyPicking
 			var reallocation = _pickingDomainService.ReallocateForEmergencyPicking(pickingTasksForIssue,
 				availableQuantity, request.UserId, now, request.IssueId, palletItem.ProductId, pallet.Id, pallet.PalletNumber);
 			var quantityToPick = reallocation.QuantityToPick;
-			//czy paleta ma dobrą BB
+			//Check whether the pallet has a suitable best-before date
 			pallet.IsCorrectDate(reallocation.BestBefore);
-			// W obecnym flow paleta trafia bezpośrednio do ToPicking; osobna akcja zmiany statusu może być dodana później.
+			// In the current flow, the pallet moves directly to ToPicking; a separate status change action may be added later.
 			if (virtualPallet == null)
 			{
 				pallet.AssignToPicking(request.UserId, pallet.Location.ToSnapshot());

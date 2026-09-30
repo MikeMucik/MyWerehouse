@@ -13,9 +13,9 @@ namespace MyWerehouse.Domain.ReversePickings.Models
 	public class ReversePickingTask : AggregateRoots
 	{
 		public Guid Id { get; private set; } 
-		public Guid PickingPalletId { get; private set; }//paleta na której jest towar - kompletacyjna
-		public Guid? SourcePalletId { get; private set; }//paleta źródłowa na nią może wrócić towar 					 
-		public Guid? DestinationPalletId { get; private set; }//paleta nowa jeśli nie ma do czego dołaczyć lub inna o dobrych parametrach															 
+		public Guid PickingPalletId { get; private set; }//Picking pallet currently holding the product
+		public Guid? SourcePalletId { get; private set; }//Source pallet to which the product may be returned
+		public Guid? DestinationPalletId { get; private set; }//A new pallet if none can receive the product, or another suitable pallet
 		public Guid ProductId { get; private set; }
 		public DateOnly? BestBefore { get; private set; }
 		public int Quantity { get; private set; }

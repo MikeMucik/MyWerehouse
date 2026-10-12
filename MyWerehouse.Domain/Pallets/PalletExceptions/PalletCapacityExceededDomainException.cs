@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +11,7 @@ namespace MyWerehouse.Domain.Pallets.PalletExceptions
 	{
 		public Guid PalletId { get; }
 		public PalletCapacityExceededDomainException(Guid palletId)
-			:base("Quantity is greater than pallet capacity.")
+			:base("Quantity is full or greater than pallet capacity.")
 		{
 			PalletId = palletId;
 		}

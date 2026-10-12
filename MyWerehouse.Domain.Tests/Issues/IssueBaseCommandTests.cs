@@ -1,4 +1,5 @@
 ﻿using MyWerehouse.Domain.Clients.ClientsExceptions;
+using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Issuing.IssueExceptions;
@@ -160,6 +161,8 @@ namespace MyWerehouse.Domain.Tests.Issues
 			//Assert
 			Assert.DoesNotContain(pallet1, issue.Pallets);
 			Assert.Equal(PalletStatus.Available, pallet1.Status);
+			Assert.Contains(pallet2, issue.Pallets);
+			Assert.Equal(issue.Id, pallet2.IssueId);
 		}
 		[Fact]
 		public void DetachPallets_ChangePalletStatus_WhenPalletHasReceiptId()

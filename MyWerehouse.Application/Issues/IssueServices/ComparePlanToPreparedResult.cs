@@ -14,6 +14,7 @@ namespace MyWerehouse.Application.Issues.IssueServices
 		public string SKU { get; init; } = string.Empty;
 		public int QuantityRequest { get; init; }
 		public int QuantityPrepared { get; init; }
+		public int? BadPrepared { get; init; }
 		public ComparePlanToPreparedResult() { }
 		public static ComparePlanToPreparedResult Ok(
 			string message,
@@ -45,12 +46,18 @@ namespace MyWerehouse.Application.Issues.IssueServices
 				QuantityPrepared = quantityPrepared
 			};
 		}
-		public static ComparePlanToPreparedResult Fail(string message)
+		public static ComparePlanToPreparedResult Fail(string message,
+			Guid productId, string sku, int quantityRequest, int quantityPrepared, int badPrepared)
 		{
 			return new ComparePlanToPreparedResult
 			{
 				Success = false,
-				Message = message
+				Message = message,
+				ProductId = productId,
+				SKU = sku,
+				QuantityRequest = quantityRequest,
+				QuantityPrepared = quantityPrepared,
+				BadPrepared = badPrepared
 			};
 		}
 		public static ComparePlanToPreparedResult Fail(string message, Guid productId, string sku)

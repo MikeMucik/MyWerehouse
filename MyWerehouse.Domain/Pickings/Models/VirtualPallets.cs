@@ -77,6 +77,6 @@ namespace MyWerehouse.Domain.Pickings.Models
 			if (PickingTasks.Count == 0)
 				return true;
 			return false;
-		}
+		} 
 	}
 }

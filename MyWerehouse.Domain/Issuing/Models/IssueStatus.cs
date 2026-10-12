@@ -16,7 +16,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		ConfirmedToLoad = 5,//Confirmed for loading
 		ChangingPallet = 6,//A pallet was replaced
 		RequiresCorrection = 7,//Incomplete and requires correction, based on system data
-		Pending = 8,//During modification
+		Pending = 8,//During modification can last to Confirmed when no picking start
 		Cancelled = 9,//Cancelled
 	}
 }

@@ -1,4 +1,4 @@
-using MyWerehouse.Application.Pallets.Services;
+﻿using MyWerehouse.Application.Pallets.Services;
 using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
@@ -30,7 +30,7 @@ namespace MyWerehouse.Application.Pallets.Commands.CreateNewPallet
 			}
 			_palletRepo.AddPallet(pallet);
 			var snapShot = location.ToSnapshot();
-			pallet.AssignToWarehouse(location.Id, snapShot, request.UserId);
+			pallet.AssignToWarehouse(snapShot, request.UserId);
 			await _unitOfWork.SaveChangesAsync(ct);
 			return AppResult<Unit>.Success(Unit.Value, $"Pallet {newIdForPallet} was added to warehouse stock and inventory was updated.");
 		}

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MyWerehouse.Domain.Histories.Models
+﻿namespace MyWerehouse.Domain.Histories.Models
 {
 	public class HistoryPalletDetail
 	{
@@ -12,13 +6,14 @@ namespace MyWerehouse.Domain.Histories.Models
 		public int HistoryPalletId { get; set; }
 		public virtual HistoryPallet HistoryPallet { get; set; } = null!;
 		public Guid ProductId { get; set; }
-		public int QuantityChange { get; set; } 
-
+		public int Quantity { get; set; } 
+		public DateOnly? BestBefore { get; set; }
 		public HistoryPalletDetail() { }
-		public HistoryPalletDetail(Guid productId, int quantity)
+		public HistoryPalletDetail(Guid productId, int quantity, DateOnly? bestBefore)
 		{
 			ProductId = productId;
-			QuantityChange = quantity;
+			Quantity = quantity;
+			BestBefore = bestBefore;
 		}	
 	}
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,7 +36,17 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 					return AppResult<List<ComparePlanToPreparedResult>>.Fail("Product does not exist.");
 				}				
 				var issueVerifyResult = issue.CompareGoods(productId);
-				if (!issueVerifyResult.IsMatching && issueVerifyResult.IsConditional)
+				if ( issueVerifyResult.InvalidQuantityBB > 0)
+				{
+					resultComparing.Add(ComparePlanToPreparedResult.Fail(
+						$"Prepared product with bad date. Bad prepared is {issueVerifyResult.InvalidQuantityBB}.",
+						productId,
+						product.SKU,
+						issueVerifyResult.OrderedQuantity,
+						issueVerifyResult.PreparedQuantity,
+						issueVerifyResult.InvalidQuantityBB));
+				}
+				else if (!issueVerifyResult.IsMatching && issueVerifyResult.IsConditional)
 				{
 					resultComparing.Add(ComparePlanToPreparedResult.Ok(
 						"Prepared product conditionally added to the issue.",
@@ -46,6 +56,7 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 						issueVerifyResult.PreparedQuantity));
 					isConditional = true;
 				}
+				
 				else if (issueVerifyResult.IsMatching)
 				{
 					resultComparing.Add(ComparePlanToPreparedResult.Ok(
@@ -55,9 +66,13 @@ namespace MyWerehouse.Application.Issues.Commands.VerifyIssueToLoad
 						issueVerifyResult.OrderedQuantity,
 						issueVerifyResult.PreparedQuantity));
 				}
+
 				else
 				{
-					resultComparing.Add(ComparePlanToPreparedResult.Fail($"Prepared product does not match the issue. Requested {issueVerifyResult.OrderedQuantity} with best-before date {issueVerifyResult.BestBefore}, but prepared {issueVerifyResult.PreparedQuantity}. Check pallet quantities and best-before dates.", productId, product.SKU, issueVerifyResult.OrderedQuantity, issueVerifyResult.PreparedQuantity));
+					resultComparing.Add(ComparePlanToPreparedResult.Fail($"Prepared product does not match the issue. Requested {issueVerifyResult.OrderedQuantity} with best-before date {issueVerifyResult.BestBefore}, but prepared {issueVerifyResult.PreparedQuantity}. Check pallet quantities and best-before dates.",
+						productId, product.SKU,
+						issueVerifyResult.OrderedQuantity,
+						issueVerifyResult.PreparedQuantity));
 				}
 			}
 			if (resultComparing.Any(a => a.Success == false))

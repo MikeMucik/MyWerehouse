@@ -54,11 +54,11 @@ namespace MyWerehouse.Application.Pickings.Commands.ExecuteEmergencyPicking
 			{
 				throw new InsufficientQuantityDomainException(pallet.Id, pallet.PalletNumber);
 			}
-			var reallocation = _pickingDomainService.ReallocateForEmergencyPicking(pickingTasksForIssue,
+			var (QuantityToPick, BestBefore) = _pickingDomainService.ReallocateForEmergencyPicking(pickingTasksForIssue,
 				availableQuantity, request.UserId, now, request.IssueId, palletItem.ProductId, pallet.Id, pallet.PalletNumber);
-			var quantityToPick = reallocation.QuantityToPick;
+			var quantityToPick = QuantityToPick;
 			//Check whether the pallet has a suitable best-before date
-			pallet.IsCorrectDate(reallocation.BestBefore);
+			pallet.IsCorrectDate(BestBefore);
 			// In the current flow, the pallet moves directly to ToPicking; a separate status change action may be added later.
 			if (virtualPallet == null)
 			{
@@ -67,7 +67,7 @@ namespace MyWerehouse.Application.Pickings.Commands.ExecuteEmergencyPicking
 				_virtualPalletRepo.AddPalletToPicking(virtualPallet);
 			}
 
-			var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, palletItem.ProductId, quantityToPick, reallocation.BestBefore, request.UserId, ct);
+			var newPickingTaskInfo = await _addPickingTaskToIssueService.AddOnePickingTaskToIssue(virtualPallet, issue, palletItem.ProductId, quantityToPick, BestBefore, request.UserId, ct);
 			if (!newPickingTaskInfo.Success)
 			{
 				return AppResult<ProcessPickingActionResult>.Fail(

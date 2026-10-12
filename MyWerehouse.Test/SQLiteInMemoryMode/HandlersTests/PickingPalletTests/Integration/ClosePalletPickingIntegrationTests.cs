@@ -143,7 +143,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			await DbContext.SaveChangesAsync();
 			//Act&Assert
 			var ex = await Assert.ThrowsAsync<AlreadyAssignedDomainException>(() => Mediator.Send(new ClosePickingPalletCommand(pickingPallet.Id, issue.Id, "UserPicker")));
-			Assert.Contains("Pallet already assigned.", ex.Message);
+			Assert.Contains("Pallet Q1001 already assigned.", ex.Message);
 		}
 		[Fact]
 		public async Task ClosePalletPicking_ShouldThrowInvalidPalletStatus_WhenPalletIsNotPicking()

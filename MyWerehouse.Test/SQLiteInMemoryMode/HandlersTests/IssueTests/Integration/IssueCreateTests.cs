@@ -521,7 +521,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var pallet2 = Pallet.CreateForTests("P2", new DateTime(2025, 3, 3), 2, PalletStatus.Available, null, null);
 			pallet2.AddProductForTests(product.Id, 10, new DateTime(2025, 4, 4), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet3 = Pallet.CreateForTests("P3", new DateTime(2025, 3, 3), 3, PalletStatus.Available, null, null);
-			pallet3.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2024, 1, 1));
+			pallet3.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(11));
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -546,7 +546,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(resultForIssue);
 			Assert.NotNull(resultForIssue.Result);
 			Assert.NotNull(resultForIssue.Result.Results);
-			var result = resultForIssue.Result.Results.First();
+			var result = resultForIssue.Result.Results[0];
 			// Assert
 			Assert.False(result.Success);
 			Assert.Contains($"Insufficient quantity of product {product.Id}. The product was not added to the issue.", result.Message);

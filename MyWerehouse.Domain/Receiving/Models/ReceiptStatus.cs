@@ -8,12 +8,12 @@ namespace MyWerehouse.Domain.Receiving.Models
 {
 	public enum ReceiptStatus
 	{
-		Planned = 0,
-		InProgress = 1,
-		PhysicallyCompleted = 2,
-		Verified = 3,
-		Correction = 4,		
-		Cancelled = 5,
-		Deleted =6,
+		Planned = 0,//New
+		InProgress = 1,//Receving
+		PhysicallyCompleted = 2,//AfterReceiving Before InStock
+		Verified = 3,//InStock
+		Correction = 4,//Update made
+		Cancelled = 5,//
+		Deleted = 6,//
 	}
 }

@@ -78,7 +78,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var location = CreateLocation(1, 1);
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
-			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			new DateTime(2025, 6, 6), ReceiptStatus.InProgress, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
@@ -183,7 +183,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var location = CreateLocation(1, 1);
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
-			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client, clientNew);
@@ -240,10 +240,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var location = CreateLocation(1, 1);
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
-				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
-			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+				new DateTime(2025, 6, 6), ReceiptStatus.InProgress, 1);
+			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
-			var secondPallet = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			var secondPallet = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			secondPallet.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
@@ -392,7 +392,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var location = CreateLocation(1, 1);
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U002",
-			new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+			new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
 			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
@@ -513,9 +513,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
 				new DateTime(2025, 6, 6), ReceiptStatus.InProgress, 1);
-			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
-			var pallet1 = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+			var pallet1 = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			pallet1.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Clients.AddRange(client);
 			DbContext.Categories.Add(category);
@@ -598,7 +598,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var product = CreateProduct("Test", "666666");
 			var location = CreateLocation(1, 1);
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U001",
-				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+				new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 
 			DbContext.Clients.Add(client);
 			DbContext.Categories.Add(category);
@@ -666,9 +666,9 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var product = CreateProduct("Test", "666666");
 			var location = CreateLocation(1, 1);
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U001",
-				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+				new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			var anotherReceipt = Receipt.CreateForSeed(Guid.NewGuid(), 2, 1, "U002",
-				new DateTime(2025, 6, 6), ReceiptStatus.Planned, 1);
+				new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
 			var receiptPallet = Pallet.CreateForTests(
 				"Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			receiptPallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
@@ -732,7 +732,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			await Assert.ThrowsAnyAsync<PalletDoesNotBelongToReceiptDomainException>(
 				() => Mediator.Send(new UpdateReceiptCommand(receipt.Id, updatingReceipt)));
 
-			Assert.Equal(ReceiptStatus.Planned, receipt.ReceiptStatus);
+			Assert.Equal(ReceiptStatus.PhysicallyCompleted, receipt.ReceiptStatus);
 			Assert.Equal(100, receiptPallet.ProductsOnPallet.Single().Quantity);
 			Assert.Equal(receipt.Id, receiptPallet.ReceiptId);
 			Assert.Equal(anotherReceipt.Id, anotherReceiptPallet.ReceiptId);

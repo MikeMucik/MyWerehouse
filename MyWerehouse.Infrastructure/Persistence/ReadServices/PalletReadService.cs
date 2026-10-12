@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.IO.MemoryMappedFiles;
+using Microsoft.EntityFrameworkCore;
 using MyWerehouse.Application.Common.Pagination;
 using MyWerehouse.Application.Histories.DTOs;
 using MyWerehouse.Application.Pallets.DTOs;
@@ -25,7 +26,7 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 					PalletNumber = p.PalletNumber,
 					DateReceived = p.DateReceived,
 					Status = p.Status,
-					LocationSnapShot =p.Location.ToSnapshot(),					
+					LocationSnapShot = p.Location.ToSnapshot(),
 					ProductsOnPallet = p.ProductsOnPallet
 					.Select(pp => new ProductOnPalletDTO
 					{
@@ -49,7 +50,7 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 						.Select(phd => new HistoryPalletDetailDTO
 						{
 							ProductId = phd.ProductId,
-							QuantityChange = phd.QuantityChange,
+							QuantityChange = phd.Quantity,
 						}).ToList(),
 						MovementDate = ph.MovementDate,
 					}).ToList(),
@@ -91,21 +92,25 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 			{
 				result = result.Where(p => p.PalletNumber == filter.PalletNumber);
 			}
-			if (filter.ProductId.HasValue)
-			{
-				result = result.Where(p => p.ProductsOnPallet.Any(pp => pp.ProductId == filter.ProductId));
-			}
-			if (!string.IsNullOrWhiteSpace(filter.ProductName))
+			var namePattern = string.IsNullOrWhiteSpace(filter.ProductName)
+				? null
+				: $"%{filter.ProductName.ToLower()}";
+			var sku = string.IsNullOrWhiteSpace(filter.SKU)
+				? null
+				: filter.SKU;
+			if(filter.ProductId.HasValue
+				|| namePattern != null
+				|| sku != null
+				|| filter.BestBeforeFrom.HasValue
+				|| filter.BestBeforeTo.HasValue)
 			{
 				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.Product != null &&
-				EF.Functions.Like(pp.Product.Name.ToLower(), $"%{filter.ProductName.ToLower()}%")));
-			}
-			if (!string.IsNullOrWhiteSpace(filter.SKU))
-			{
-				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.Product.SKU == filter.SKU));
-			}
+				(!filter.ProductId.HasValue || pp.ProductId == filter.ProductId)
+				&& (namePattern == null || EF.Functions.Like(pp.Product.Name.ToLower(), namePattern))
+				&& (!filter.BestBeforeFrom.HasValue || pp.BestBefore >= filter.BestBeforeFrom)
+				&& (!filter.BestBeforeTo.HasValue || pp.BestBefore <= filter.BestBeforeTo)
+				));
+			}			
 			if (filter.LocationBay > 0)
 			{
 				result = result.Where(p => p.Location.Bay == filter.LocationBay);
@@ -126,13 +131,7 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 			{
 				result = result.Where(p => p.Status == filter.PalletStatus);
 			}
-			if (filter.BestBeforeFrom != null || filter.BestBeforeTo != null)
-			{
-				var bestBeforeStart = filter.BestBeforeFrom ?? DateOnly.MinValue;
-				var bestBeforeEnd = filter.BestBeforeTo ?? DateOnly.MaxValue;
-				result = result.Where(p => p.ProductsOnPallet.Any(pp =>
-				pp.BestBefore >= bestBeforeStart && pp.BestBefore <= bestBeforeEnd));
-			}
+
 			if (filter.StartDate != null)
 			{
 				var start = filter.StartDate.Value;
@@ -182,7 +181,7 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 					PalletNumber = p.PalletNumber,
 					DateReceived = p.DateReceived,
 					Status = p.Status,
-					LocationSnapShot =p.Location.ToSnapshot(),					
+					LocationSnapShot = p.Location.ToSnapshot(),
 					ProductsOnPallet = p.ProductsOnPallet
 					.Select(pp => new ProductOnPalletToEditDTO
 					{

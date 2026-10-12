@@ -6,6 +6,7 @@ using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using TestSupport;
 
 namespace MyWerehouse.Domain.Tests.Issues
@@ -67,6 +68,43 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(ReasonForPallet.ToLoad, historyPallet2Event.ReasonMovement);
 		}
 		[Theory]
+		[InlineData(IssueStatus.InProgress)]
+		[InlineData(IssueStatus.ChangingPallet)]
+		[InlineData(IssueStatus.PickingShortage)]
+		[InlineData(IssueStatus.Pending)]
+		public void VerifyToLoad_ThrowError_WhenIssueStatusOkWrongPalletStatus(IssueStatus status)
+		{
+			//Arrange
+			var product1 = IssueTestData.CreateProduct("Prod1", 1);
+			var location1 = IssueTestData.CreateLocation(1);
+			var location2 = IssueTestData.CreateLocation(2);
+			var issue = IssueTestData.CreateIssue(status);
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.LockedForIssue, null, issue.Id);
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, location2.Id, PalletStatus.New, null, issue.Id);
+			pallet2.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			typeof(Pallet).GetProperty(nameof(Pallet.Location))!
+				.SetValue(pallet1, location1);
+			typeof(Pallet).GetProperty(nameof(Pallet.Location))!
+				.SetValue(pallet2, location2);
+			issue.Pallets.Add(pallet1);
+			issue.Pallets.Add(pallet2);
+			var user = "User";
+			var previousUser = issue.PerformedBy;
+			//Act&Assert
+			var ex = Assert.Throws<InvalidPalletStatusDomainException>(() => issue.VerifyToLoad(user));
+			Assert.Equal(ErrorType.Conflict, ex.ErrorType);
+			Assert.Equal(PalletStatus.LockedForIssue, pallet1.Status);
+			Assert.Equal(PalletStatus.New, pallet2.Status);
+			Assert.Equal(status, issue.IssueStatus);
+
+			Assert.Equal(previousUser, issue.PerformedBy);
+			Assert.Empty(issue.DomainEvents);
+
+			Assert.Empty(pallet1.DomainEvents);
+			Assert.Empty(pallet2.DomainEvents);
+		}
+		[Theory]
 		[InlineData(IssueStatus.Cancelled)]
 		[InlineData(IssueStatus.New)]		
 		[InlineData(IssueStatus.RequiresCorrection)]
@@ -112,7 +150,7 @@ namespace MyWerehouse.Domain.Tests.Issues
 			var product1 = IssueTestData.CreateProduct("Prod1", 1);
 			var location1 = IssueTestData.CreateLocation(1);
 			var location2 = IssueTestData.CreateLocation(2);
-			var issue = IssueTestData.CreateIssue(IssueStatus.InProgress);
+			var issue = IssueTestData.CreateIssue(IssueStatus.ConfirmedToLoad);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.Loaded, null, issue.Id);
 			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, location2.Id, PalletStatus.Loaded, null, issue.Id);
@@ -137,17 +175,58 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(user, historyEvent.UserId);
 		}
 		[Fact]
-		public void CompletedLoad_ThrowException_WhenPalletsHaveNoStatusLoad()
+		public void CompletedLoad_ThrowError_WhenUseMethodSecondTime()
 		{
 			//Arrange
 			var product1 = IssueTestData.CreateProduct("Prod1", 1);
 			var location1 = IssueTestData.CreateLocation(1);
 			var location2 = IssueTestData.CreateLocation(2);
-			var status = IssueStatus.InProgress;
-			var issue = IssueTestData.CreateIssue(status);
-			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.ToIssue, null, issue.Id);
+			var issue = IssueTestData.CreateIssue(IssueStatus.ConfirmedToLoad);
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.Loaded, null, issue.Id);
 			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, location2.Id, PalletStatus.Loaded, null, issue.Id);
+			pallet2.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			typeof(Pallet).GetProperty(nameof(Pallet.Location))!
+				.SetValue(pallet1, location1);
+			typeof(Pallet).GetProperty(nameof(Pallet.Location))!
+				.SetValue(pallet2, location2);
+			issue.Pallets.Add(pallet1);
+			issue.Pallets.Add(pallet2);
+			var user = "User";
+			issue.CompletedLoad(user);
+			//Act&Assert
+			var ex = Assert.Throws<NotAllowedOperationDomainException>(() =>
+			issue.CompletedLoad(user));
+			Assert.Equal(ErrorType.Conflict, ex.ErrorType);
+		}
+		[Fact]
+		public void CompletedLoad_ThrowError_WhenPalletsListEmpty()
+		{
+			//Arrange			
+			var issue = IssueTestData.CreateIssue(IssueStatus.ConfirmedToLoad);
+			var initUser = issue.PerformedBy;
+			var user = "User";
+			//Act&Assert
+			var ex = Assert.Throws<EmptyListPalletsDoamainException>(()=>
+			issue.CompletedLoad(user));
+			Assert.Equal(ErrorType.Conflict, ex.ErrorType);
+			Assert.Equal(IssueStatus.ConfirmedToLoad, issue.IssueStatus);
+			Assert.Equal(initUser, issue.PerformedBy);
+			Assert.Empty(issue.DomainEvents
+				.OfType<AddHistoryIssueNotification>());
+		}
+		[Fact]
+		public void CompletedLoad_ThrowException_WhenPalletHaveNoStatusLoaded()
+		{
+			//Arrange
+			var product1 = IssueTestData.CreateProduct("Prod1", 1);
+			var location1 = IssueTestData.CreateLocation(1);
+			var location2 = IssueTestData.CreateLocation(2);
+			var status = IssueStatus.ConfirmedToLoad;
+			var issue = IssueTestData.CreateIssue(status);
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.Loaded, null, issue.Id);
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, location2.Id, PalletStatus.ToIssue, null, issue.Id);
 			pallet2.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
 			typeof(Pallet).GetProperty(nameof(Pallet.Location))!
 				.SetValue(pallet1, location1);
@@ -163,7 +242,50 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(status, issue.IssueStatus);
 			Assert.Equal(previousUser, issue.PerformedBy);
 
-			Assert.Equal(PalletStatus.ToIssue, pallet1.Status);
+			Assert.Equal(PalletStatus.Loaded, pallet1.Status);
+			Assert.Equal(PalletStatus.ToIssue, pallet2.Status);
+
+			Assert.Empty(issue.DomainEvents);
+
+			Assert.Empty(pallet1.DomainEvents);
+			Assert.Empty(pallet2.DomainEvents);
+		}
+		[Theory]
+		[InlineData(IssueStatus.New)]
+		[InlineData(IssueStatus.InProgress)]
+		[InlineData(IssueStatus.IsShipped)]
+		[InlineData(IssueStatus.PickingShortage)]
+		[InlineData(IssueStatus.Archived)]
+		[InlineData(IssueStatus.ChangingPallet)]
+		[InlineData(IssueStatus.RequiresCorrection)]
+		[InlineData(IssueStatus.Pending)]
+		[InlineData(IssueStatus.Cancelled)]
+		public void CompletedLoad_ThrowException_WhenIssueStatusNotAllowed(IssueStatus status)
+		{
+			//Arrange
+			var product1 = IssueTestData.CreateProduct("Prod1", 1);
+			var location1 = IssueTestData.CreateLocation(1);
+			var location2 = IssueTestData.CreateLocation(2);
+			var issue = IssueTestData.CreateIssue(status);
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.Loaded, null, issue.Id);
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, location2.Id, PalletStatus.Loaded, null, issue.Id);
+			pallet2.AddProduct(product1.Id, 10, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			typeof(Pallet).GetProperty(nameof(Pallet.Location))!
+				.SetValue(pallet1, location1);
+			typeof(Pallet).GetProperty(nameof(Pallet.Location))!
+				.SetValue(pallet2, location2);
+			issue.Pallets.Add(pallet1);
+			issue.Pallets.Add(pallet2);
+			var previousUser = issue.PerformedBy;
+			var user = "User";
+			//Act&Assert
+			var ex = Assert.ThrowsAny<NotAllowedOperationDomainException>(() => issue.CompletedLoad(user));
+			Assert.Equal(ErrorType.Conflict, ex.ErrorType);
+			Assert.Equal(status, issue.IssueStatus);
+			Assert.Equal(previousUser, issue.PerformedBy);
+
+			Assert.Equal(PalletStatus.Loaded, pallet1.Status);
 			Assert.Equal(PalletStatus.Loaded, pallet2.Status);
 
 			Assert.Empty(issue.DomainEvents);
@@ -389,6 +511,7 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Empty(pallet2.DomainEvents);
 			Assert.Equal(previousUser, issue.PerformedBy);
 			Assert.Equal(status, issue.IssueStatus);
+
 		}
 		[Fact]
 		public void CompareGoods_ReturnIsMatching_WhenAmountOnPalletsIsOK()
@@ -397,8 +520,9 @@ namespace MyWerehouse.Domain.Tests.Issues
 			var product = IssueTestData.CreateProduct("pencil", 1);
 			var issue = IssueTestData.CreateIssue();
 			var requiredBestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366));
+			var requiredBestBefore1 = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(376));
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, requiredBestBefore);
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, requiredBestBefore1);
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.LockedForIssue, null, issue.Id);
 			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow,requiredBestBefore);
 			var pallets = new List<Pallet>();
@@ -451,6 +575,7 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(10, result.PreparedQuantity);
 			Assert.Equal(20, result.OrderedQuantity);
 			Assert.Equal(requiredBestBefore, result.BestBefore);
+			Assert.Equal(10, result.InvalidQuantityBB);
 		}
 		[Fact]
 		public void CompareGoods_ReturnIsMatching_WhenPalletHasBBButIssueItemNo()
@@ -468,7 +593,7 @@ namespace MyWerehouse.Domain.Tests.Issues
 			typeof(Issue).GetProperty(nameof(Issue.Pallets))!
 				.SetValue(issue, pallets);
 			var issueItem = IssueItem.CreateForSeed(1, issue.Id,
-				product.Id, 20, requiredBestBefore, TestDates.DaysAgo(1));
+				product.Id, 20, null, TestDates.DaysAgo(1));
 			var listOfIssueItems = new List<IssueItem>();
 			listOfIssueItems.Add(issueItem);
 			typeof(Issue).GetProperty(nameof(Issue.IssueItems))!
@@ -481,13 +606,15 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.False(result.IsConditional);
 			Assert.Equal(20, result.PreparedQuantity);
 			Assert.Equal(20, result.OrderedQuantity);
-			Assert.Equal(requiredBestBefore, result.BestBefore);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
 		}
 		[Fact]
-		public void CompareGoods_ReturnIsMatching_WhenAmountOnPalletsIsOKAndPickingPallets()
+		public void CompareGoods_ReturnIsMatching_WhenAmountOnPalletsIsOKAndPickingPalletsAlsoContainsOtherProduct()
 		{
 			//Arrange
 			var product = IssueTestData.CreateProduct("pencil", 1);
+			var product1 = IssueTestData.CreateProduct("eggs", 1);
 			var issue = IssueTestData.CreateIssue();
 			var requiredBestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366));
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
@@ -496,6 +623,7 @@ namespace MyWerehouse.Domain.Tests.Issues
 			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, requiredBestBefore);
 			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.ToIssue, null, issue.Id);
 			pallet3.AddProduct(product.Id, 5, TestDates.UtcNow, requiredBestBefore);
+			pallet3.AddProduct(product1.Id, 2, TestDates.UtcNow, requiredBestBefore);
 			
 			var pallets = new List<Pallet>();
 			
@@ -517,6 +645,48 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(25, result.PreparedQuantity);
 			Assert.Equal(25, result.OrderedQuantity);
 			Assert.Equal(requiredBestBefore, result.BestBefore);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
+		}
+		[Fact]
+		public void CompareGoods_ReturnIsMatching_WhenAmountOnPalletsIsOKAndPickingPalletsAndContainsProductWithTwoBB()
+		{
+			//Arrange
+			var product = IssueTestData.CreateProduct("pencil", 1);
+			//var product1 = IssueTestData.CreateProduct("eggs", 1);
+			var issue = IssueTestData.CreateIssue();
+			var requiredBestBefore = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366));
+			var requiredBestBefore1 = DateOnly.FromDateTime(TestDates.UtcNow.AddDays(376));
+			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, requiredBestBefore);
+			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 2, PalletStatus.LockedForIssue, null, issue.Id);
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, requiredBestBefore);
+			var pallet3 = Pallet.CreateForTests("P3", TestDates.UtcNow, 3, PalletStatus.ToIssue, null, issue.Id);
+			pallet3.AddProduct(product.Id, 3, TestDates.UtcNow, requiredBestBefore);
+			pallet3.AddProduct(product.Id, 2, TestDates.UtcNow, requiredBestBefore1);
+
+			var pallets = new List<Pallet>();
+
+			pallets.AddRange(pallet1, pallet2, pallet3);
+			typeof(Issue).GetProperty(nameof(Issue.Pallets))!
+				.SetValue(issue, pallets);
+			var issueItem = IssueItem.CreateForSeed(1, issue.Id,
+				product.Id, 25, requiredBestBefore, TestDates.DaysAgo(1));
+			var listOfIssueItems = new List<IssueItem>();
+			listOfIssueItems.Add(issueItem);
+			typeof(Issue).GetProperty(nameof(Issue.IssueItems))!
+				.SetValue(issue, listOfIssueItems);
+			//Act
+			var result = issue.CompareGoods(product.Id);
+			//Assert
+			Assert.NotNull(result);
+			Assert.True(result.IsMatching);
+			Assert.False(result.IsConditional);
+			Assert.Equal(25, result.PreparedQuantity);
+			Assert.Equal(25, result.OrderedQuantity);
+			Assert.Equal(requiredBestBefore, result.BestBefore);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
 		}
 		[Fact]
 		public void CompareGoods_ReturnIsNotMatching_WhenDatesAreNotCorrect()
@@ -553,6 +723,8 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(15, result.PreparedQuantity);
 			Assert.Equal(25, result.OrderedQuantity);
 			Assert.Equal(requiredBestBefore, result.BestBefore);
+
+			Assert.Equal(10, result.InvalidQuantityBB);
 		}
 		[Fact]
 		public void CompareGoods_ReturnIsNotMatching_WhenQuantityAreNotCorrect()
@@ -589,6 +761,8 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(26, result.PreparedQuantity);
 			Assert.Equal(25, result.OrderedQuantity);
 			Assert.Equal(requiredBestBefore, result.BestBefore);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
 		}
 		[Fact]
 		public void CompareGoods_ThrowException_WhenPickingPalletIsNotClosed()
@@ -654,6 +828,8 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.True(result.IsConditional);
 			Assert.Equal(23, result.PreparedQuantity);
 			Assert.Equal(25, result.OrderedQuantity);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
 		}
 		[Fact]
 		public void CompareGoods_ReturnIsMatching_WhenShouldSkipAnotherProduct()
@@ -689,6 +865,8 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.False(result.IsConditional);
 			Assert.Equal(15, result.PreparedQuantity);
 			Assert.Equal(15, result.OrderedQuantity);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
 		}
 		[Fact]
 		public void CompareGoods_ReturnIsMatching_WhenShouldCheckTwoProduct()
@@ -732,6 +910,8 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.Equal(10, result1.PreparedQuantity);
 			Assert.Equal(13, result.OrderedQuantity);
 			Assert.Equal(10, result1.OrderedQuantity);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
 		}
 		[Fact]
 		public void CompareGoods_ReturnIsNoMatchingAndIsNoConditional_WhenAmountOnPalletsIsAndPickingPalletsIsTooMany()
@@ -766,6 +946,8 @@ namespace MyWerehouse.Domain.Tests.Issues
 			Assert.False(result.IsConditional);
 			Assert.Equal(25, result.PreparedQuantity);
 			Assert.Equal(23, result.OrderedQuantity);
+
+			Assert.Equal(0, result.InvalidQuantityBB);
 		}
 	}
 }

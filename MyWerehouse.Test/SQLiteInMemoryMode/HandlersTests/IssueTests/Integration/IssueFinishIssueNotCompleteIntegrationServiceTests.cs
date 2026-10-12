@@ -74,8 +74,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = issueId1;
 			var issueItem = new List<IssueItem>
 			{
-				IssueItem.CreateForSeed(1, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
-				IssueItem.CreateForSeed(2, issueId, product2.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product1.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product2.Id, 20, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var performedBy = "Janek";
 			var loadedPallet = Pallet.CreateForTests("P1", TestDates.UtcNow, location1.Id, PalletStatus.Loaded, null, issueId);

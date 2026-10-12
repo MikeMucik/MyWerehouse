@@ -1,10 +1,11 @@
-using MyWerehouse.Domain.Clients.ClientsExceptions;
+﻿using MyWerehouse.Domain.Clients.ClientsExceptions;
 using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.DomainExceptions;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Inventories.Events;
 using MyWerehouse.Domain.Pallets.Models;
+using MyWerehouse.Domain.Pallets.PalletExceptions;
 using MyWerehouse.Domain.Receiving.Events;
 using MyWerehouse.Domain.Receiving.ReceivingExceptions;
 
@@ -43,8 +44,8 @@ namespace MyWerehouse.Domain.Receiving.Models
 		public static Receipt Create(int receiptNumber, int clientId, string performedBy, int rampNumber, DateTime createdAt)
 			=> new Receipt(receiptNumber, clientId, performedBy, rampNumber, createdAt);
 
-			private Receipt(Guid id, int receiptNumber, int clientId,
-			string performedBy, DateTime dateTime, ReceiptStatus receiptStatus, int rampNumber)
+		private Receipt(Guid id, int receiptNumber, int clientId,
+		string performedBy, DateTime dateTime, ReceiptStatus receiptStatus, int rampNumber)
 		{
 			Id = id;
 			ReceiptNumber = receiptNumber;
@@ -61,12 +62,6 @@ namespace MyWerehouse.Domain.Receiving.Models
 		public static Receipt CreateForSeed(Guid id, int receiptNumber, int clientId,
 			string performedBy, DateTime dateTime, ReceiptStatus receiptStatus, int rampNumber)
 			=> new Receipt(id, receiptNumber, clientId, performedBy, dateTime, receiptStatus, rampNumber);
-
-		public void Create(string userId)
-		{
-			ReceiptStatus = ReceiptStatus.Planned;
-			AddHistory(userId);
-		}
 
 		public void Delete(string userId)
 		{
@@ -98,10 +93,11 @@ namespace MyWerehouse.Domain.Receiving.Models
 			}
 			foreach (var pallet in Pallets)
 			{
-				pallet.DetachFromReceipt(userId, pallet.Location.ToSnapshot());
+				pallet.DetachFromReceipt(userId, pallet.Location.ToSnapshot(), ReasonForPallet.CancelReceipt);
 			}
 			ReceiptStatus = ReceiptStatus.Cancelled;
 			AddHistory(userId);
+			Pallets.Clear();
 		}
 
 		public void StartReceiving(DateTime now, string userId)
@@ -111,18 +107,6 @@ namespace MyWerehouse.Domain.Receiving.Models
 				throw new InvalidReceiptStateDomainException(Id, ReceiptNumber, ReceiptStatus);
 			ReceiptStatus = ReceiptStatus.InProgress;
 			ReceiptDateTime = now;
-			AddHistory(userId);
-		}
-
-		public void UpdateReceipt(string userId, int clientId, DateTime updatedAt)
-		{
-			if (ReceiptStatus == ReceiptStatus.Verified)
-				throw new ReceiptAlreadyVerifyDomainException(Id, ReceiptNumber);
-
-			PerformedBy = userId;
-			ReceiptStatus = ReceiptStatus.Correction;
-			ClientId = clientId;
-			ReceiptDateTime = updatedAt;
 			AddHistory(userId);
 		}
 
@@ -144,15 +128,26 @@ namespace MyWerehouse.Domain.Receiving.Models
 			{
 				throw new InvalidReceiptStateDomainException(Id, ReceiptNumber, ReceiptStatus);
 			}
-			var toReturn = Pallets.Where(p => p.Status == PalletStatus.Receiving).ToList();
-			foreach (var pallet in toReturn)
+			foreach (var pallet in Pallets)
+			{
+				//if (pallet.Status == PalletStatus.New)
+				//{
+				//	throw new PalletNewNotPreparedToReceiptDomainException(pallet.Id, pallet.PalletNumber); ;
+				//}
+				if (pallet.Status != PalletStatus.Receiving)
+				{
+					throw new InvalidPalletStatusDomainException(pallet.Id, pallet.PalletNumber);
+				}
+			}
+			var toStock = Pallets.Where(p => p.Status == PalletStatus.Receiving).ToList();
+			foreach (var pallet in toStock)
 			{
 				pallet.ChangeStatus(PalletStatus.InStock);
 				pallet.AddHistory(ReasonForPallet.Received, userId, pallet.Location.ToSnapshot());
 			}
 			ReceiptStatus = ReceiptStatus.Verified;
 			AddHistory(userId);
-			AddDomainEvent(new ChangeStockNotification(CreateStockItem(toReturn)));
+			AddDomainEvent(new ChangeStockNotification(CreateStockItem(toStock)));
 		}
 
 		//Detach and Attach are used only for updates, to preserve history
@@ -192,14 +187,35 @@ namespace MyWerehouse.Domain.Receiving.Models
 					g.Key,
 					g.Sum(q => q.Quantity)));
 		}
-		public List<ReceiptPalletUpdate> StartUpdateReceipt(List<ReceiptPalletUpdate> pallets, string userId)
+
+		public void UpdateReceipt(string userId, int clientId, DateTime updatedAt)
+		{
+			CheckToUpdate();			
+				PerformedBy = userId;
+			ReceiptStatus = ReceiptStatus.Correction;
+			ClientId = clientId;
+			ReceiptDateTime = updatedAt;
+			AddHistory(userId);
+			ReceiptStatus = ReceiptStatus.InProgress;
+		}
+
+		public void CheckToUpdate()
 		{
 			if (ReceiptStatus == ReceiptStatus.Verified)
 				throw new ReceiptAlreadyVerifyDomainException(Id, ReceiptNumber);
+			if (ReceiptStatus == ReceiptStatus.Planned ||
+				ReceiptStatus == ReceiptStatus.Correction ||
+				ReceiptStatus == ReceiptStatus.Cancelled ||
+				ReceiptStatus == ReceiptStatus.Deleted)
+				throw new InvalidReceiptStateDomainException(Id, ReceiptNumber, ReceiptStatus);
+		}
 
+		public List<ReceiptPalletUpdate> ChangeValuesReturnNewPallets(List<ReceiptPalletUpdate> pallets, string userId)
+		{
+			CheckToUpdate();
 			foreach (var item in pallets)
 			{
-				if (item.PalletId != Guid.Empty && Pallets.All(p=>p.Id != item.PalletId))
+				if (item.PalletId != Guid.Empty && Pallets.All(p => p.Id != item.PalletId))
 				{
 					throw new PalletDoesNotBelongToReceiptDomainException(Id, ReceiptNumber, item.PalletId, item.PalletNumber!);//An existing pallet must have a PalletNumber
 				}
@@ -216,7 +232,7 @@ namespace MyWerehouse.Domain.Receiving.Models
 			foreach (var pallet in palletToDelete)
 			{
 				DetachPallet(pallet);//Required to create the correct history
-				pallet.DetachFromReceipt(userId, pallet.Location.ToSnapshot());
+				pallet.DetachFromReceipt(userId, pallet.Location.ToSnapshot(), ReasonForPallet.Correction);
 			}
 			var existingPallets = Pallets.ToDictionary(p => p.Id);
 			//Update pallets

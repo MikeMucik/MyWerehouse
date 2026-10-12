@@ -39,7 +39,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				reversePickingTask.BestBefore, sourcePallet.Id, product.CartonsPerPallet, ct);
 			//List of pallets that will receive the product
 			bool canAddedtoExist = false;
-			bool unpickComplete = false;
+			//bool unpickComplete = false;
 			var listPalletsToAdd = new List<Guid>();
 			foreach (var pallet in palletsFromBase)
 			{
@@ -47,10 +47,11 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				var palletLackQuantity = product.CartonsPerPallet - pallet.ProductsOnPallet.Single().Quantity;
 				remainingQuantity -= palletLackQuantity;
 				listPalletsToAdd.Add(pallet.Id);
-				canAddedtoExist = true;
+				
 				if (remainingQuantity <= 0)
 				{
-					unpickComplete = true;
+					canAddedtoExist = true;
+					//unpickComplete = true;
 					break;
 				}
 			}
@@ -65,7 +66,7 @@ namespace MyWerehouse.Application.ReversePickings.Queries.GetReversePickingToDo
 				CanReturnToSource = addSource,
 				CanAddToExistingPallet = canAddedtoExist,//Both must be present or both absent
 				ListPalletsToAdd = listPalletsToAdd,//Both must be present or both absent
-				PickingPalletCompletlyUnpicking = unpickComplete,
+				//PickingPalletCompletlyUnpicking = unpickComplete,
 				ReversePickingDTO = reverseDTO
 			};			
 			return AppResult<ReversePickingDetailsDTO>.Success(response);

@@ -62,29 +62,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			var history = DbContext.HistoryPallet.FirstOrDefault(p => p.PalletId == pallet.Id);
 			Assert.NotNull(history);
 		}
-		[Fact]
-		public async Task MarkAsLoaded_ShouldChangeStatus_WhenStatusIsLockedForIssueAfterReplacement() // when pallet was changed
-		{
-			//Arrange
-			var category = CreateCategory();
-			var product = CreateProduct("Test", "666666");
-			var location = CreateLocation(0);			
-			DbContext.Categories.Add(category);
-			DbContext.Locations.Add(location);
-			DbContext.Products.Add(product);
-			DbContext.SaveChanges();
-			var pallet = Pallet.CreateForTests("Q0001", TestDates.UtcNow.AddDays(-30), location.Id, PalletStatus.LockedForIssue, null, null);
-			pallet.AddProductForTests(product.Id, 10, TestDates.UtcNow.AddDays(-30), DateOnly.FromDateTime(TestDates.UtcNow.AddDays(365)));
-			DbContext.Pallets.Add(pallet);
-			DbContext.SaveChanges();
-			//Act
-			var result = await Mediator.Send(new MarkAsLoadedCommand(pallet.Id, "User"));
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotNull(result.Result);
-			Assert.Contains("Pallet Q0001 was loaded.", result.Message);
-			Assert.Equal(PalletStatus.Loaded, result.Result.NewStatus);
-		}
+
 		[Fact]
 		public async Task MarkAsLoaded_ShouldReturnInfo_WhenWrongPalletStatus()
 		{

@@ -325,7 +325,7 @@ namespace MyWerehouse.Infrastructure.Persistence.Seeding
 					MovementDate = now.AddDays(-6),
 					PalletStatus = pallet.Status,
 					HistoryPalletDetails = pallet.ProductsOnPallet
-						.Select(product => new HistoryPalletDetail(product.ProductId, product.Quantity))
+						.Select(product => new HistoryPalletDetail(product.ProductId, product.Quantity, product.BestBefore))
 						.ToList()
 				});
 			}

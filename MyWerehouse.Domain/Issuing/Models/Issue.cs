@@ -64,12 +64,11 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void ChangeStatus(IssueStatus issueStatus)
 		{
-			if (IssueStatus == IssueStatus.Cancelled || issueStatus == IssueStatus.Archived)
+			if (IssueStatus == IssueStatus.Cancelled || IssueStatus == IssueStatus.Archived
+				 || issueStatus == IssueStatus.Archived)
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			IssueStatus = issueStatus;
 		}
-
-
 
 		public int GetQuantityForProduct(Guid productId)
 		{
@@ -115,7 +114,8 @@ namespace MyWerehouse.Domain.Issuing.Models
 				IssueStatus != IssueStatus.InProgress)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
-			};
+			}
+			;
 		}
 
 		public void MarkAllocationCompleted(string userId)
@@ -156,24 +156,33 @@ namespace MyWerehouse.Domain.Issuing.Models
 			if (!(IssueStatus == IssueStatus.InProgress || IssueStatus == IssueStatus.ChangingPallet
 				|| IssueStatus == IssueStatus.Pending || IssueStatus == IssueStatus.PickingShortage))
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
-			IssueStatus = IssueStatus.ConfirmedToLoad;
+
+			foreach (var pallet in Pallets)
+			{
+				if (pallet.Status != PalletStatus.ToIssue && pallet.Status != PalletStatus.LockedForIssue)
+				{
+					throw new InvalidPalletStatusDomainException(pallet.Id, pallet.PalletNumber);
+				}
+			}
 			foreach (var pallet in Pallets)
 			{
 				pallet.AssignToIssue(Id, userId, pallet.Location.ToSnapshot());
 			}
+			IssueStatus = IssueStatus.ConfirmedToLoad;
 			AddHistory(userId);
 		}
 
 		public void ConfirmAfterLoading(string userId)
 		{
-			if (Pallets.Any(p => p.Status != PalletStatus.Loaded))
-			{
-				throw new NotEndedLoadingDomainException(Id, IssueNumber);
-			}
 			if (IssueStatus != IssueStatus.IsShipped)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			}
+			if (Pallets.Any(p => p.Status != PalletStatus.Loaded))
+			{
+				throw new NotEndedLoadingDomainException(Id, IssueNumber);
+			}
+
 			PerformedBy = userId;
 			foreach (var pallet in Pallets)
 			{
@@ -224,7 +233,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void EnsureCanBeCancelled()
 		{
 			if (IssueStatus == IssueStatus.Archived ||
-				IssueStatus == IssueStatus.Cancelled || 
+				IssueStatus == IssueStatus.Cancelled ||
 				IssueStatus == IssueStatus.IsShipped)
 			{
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
@@ -248,7 +257,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		}
 		public void CancelIssueForDelete(string userId, DateTime createdAt)
 		{
-			if (IssueStatus != IssueStatus.Pending && IssueStatus != IssueStatus.RequiresCorrection) 
+			if (IssueStatus != IssueStatus.Pending && IssueStatus != IssueStatus.RequiresCorrection)
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
 			IssueStatus = IssueStatus.Cancelled;
 			AddHistory(userId);
@@ -265,46 +274,53 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void ReplacePalletInIssue(Pallet oldPallet, Pallet newPallet, string userId, DateOnly? bestBefore)
 		{
 			if (IssueStatus != IssueStatus.ConfirmedToLoad &&
-				IssueStatus != IssueStatus.Pending)
-			{
+				IssueStatus != IssueStatus.Pending &&
+				IssueStatus != IssueStatus.InProgress &&
+				IssueStatus != IssueStatus.PickingShortage)
+
 				throw new NotAllowedOperationDomainException(Id, IssueNumber);
-			}
+
 			if (oldPallet.Status == PalletStatus.Loaded)
-			{
+
 				throw new PalletAlreadyLoadedDomainException(oldPallet.Id, oldPallet.PalletNumber);
-			}
+
+			if (oldPallet.Status != PalletStatus.LockedForIssue &&
+				oldPallet.Status != PalletStatus.ToIssue)
+
+				throw new InvalidPalletStatusDomainException(oldPallet.Id, oldPallet.PalletNumber);
+
 			if (oldPallet.Id == newPallet.Id)
-			{
+
 				throw new CannotReplaceTheSamePalletDomainException(oldPallet.Id);
-			}
+
 			if (!Pallets.Any(p => p.Id == oldPallet.Id) || oldPallet.IssueId != Id)
-			{
+
 				throw new NotBelongsToIssueDomainException(oldPallet.Id, oldPallet.PalletNumber, Id, IssueNumber);
-			}
+
 			if (!(newPallet.Status == PalletStatus.Available || newPallet.Status == PalletStatus.InStock))
-			{
+
 				throw new InvalidPalletStatusDomainException(newPallet.Id, newPallet.PalletNumber);
-			}
+
 			if (newPallet.IssueId != null)
-			{
-				throw new AlreadyAssignedDomainException(newPallet.Id);
-			}
+
+				throw new AlreadyAssignedDomainException(newPallet.Id, newPallet.PalletNumber);
+
 			if (newPallet.ProductsOnPallet.Count != 1)
-			{
+
 				throw new NotOneProductsOnPalletDomainException(newPallet.Id, newPallet.PalletNumber);
-			}
+
 			if (oldPallet.ProductsOnPallet.Count != 1)
-			{
+
 				throw new NotOneProductsOnPalletDomainException(oldPallet.Id, oldPallet.PalletNumber);
-			}
+
 			if (oldPallet.ProductsOnPallet.Single().ProductId != newPallet.ProductsOnPallet.Single().ProductId)
-			{
+
 				throw new ProductOnPalletsAreNotTheSameDomainException(oldPallet.ProductsOnPallet.Single().ProductId, newPallet.ProductsOnPallet.Single().ProductId);
-			}
+
 			if (oldPallet.ProductsOnPallet.Single().Quantity != newPallet.ProductsOnPallet.Single().Quantity)
-			{
+
 				throw new ProductOnPalletsAreNotTheSameAmountDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().Quantity, newPallet.ProductsOnPallet.Single().Quantity);
-			}
+
 			if (bestBefore != null)
 			{
 				if (bestBefore > newPallet.ProductsOnPallet.Single().BestBefore || newPallet.ProductsOnPallet.Single().BestBefore == null)
@@ -312,11 +328,17 @@ namespace MyWerehouse.Domain.Issuing.Models
 					throw new ProductOnPalletsAreNotTheSameBBDomainException(oldPallet.ProductsOnPallet.Single().ProductId, oldPallet.ProductsOnPallet.Single().BestBefore, newPallet.ProductsOnPallet.Single().BestBefore);
 				}
 			}
+			var status = IssueStatus;
 			newPallet.ReserveToIssue(Id, userId, newPallet.Location.ToSnapshot());
+			if (IssueStatus == IssueStatus.ConfirmedToLoad)
+			{
+				newPallet.AssignToIssue(Id, userId, newPallet.Location.ToSnapshot());
+			}
+
 			this.AttachPallet(newPallet);
 			oldPallet.DetachFromIssue(userId, oldPallet.Location.ToSnapshot(), ReasonForPallet.Correction);
 			this.DetachPallet(oldPallet);
-			var status = IssueStatus;
+
 			IssueStatus = IssueStatus.ChangingPallet;
 			PerformedBy = userId;
 			AddHistory(userId);
@@ -325,6 +347,10 @@ namespace MyWerehouse.Domain.Issuing.Models
 
 		public void CompletedLoad(string userId)
 		{
+			if (IssueStatus != IssueStatus.ConfirmedToLoad)
+				throw new NotAllowedOperationDomainException(Id, IssueNumber);
+			if (Pallets.Count == 0)
+				throw new EmptyListPalletsDoamainException(Id, IssueNumber);
 			foreach (var pallet in Pallets)
 			{
 				if (pallet.Status != PalletStatus.Loaded)
@@ -357,7 +383,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 			if (!Pallets.Contains(pallet))
 			{
 				this.Pallets.Add(pallet);
-				pallet.ChangeStatus(PalletStatus.ToIssue);
 			}
 		}
 
@@ -370,7 +395,7 @@ namespace MyWerehouse.Domain.Issuing.Models
 		public void ReservePallet(Pallet pallet)
 		{
 			if (pallet.Status == PalletStatus.ToIssue)
-				throw new AlreadyAssignedDomainException(pallet.Id);
+				throw new AlreadyAssignedDomainException(pallet.Id, pallet.PalletNumber);
 			this.Pallets.Add(pallet);
 		}
 
@@ -411,8 +436,6 @@ namespace MyWerehouse.Domain.Issuing.Models
 					g.Key,
 					-g.Sum(q => q.Quantity)));
 		}
-
-
 
 		public IssueModificationMode DetremineModificationMode()
 		{
@@ -517,12 +540,19 @@ namespace MyWerehouse.Domain.Issuing.Models
 				|| pp.BestBefore >= bestBeforeRequired))
 				.Sum(pp => pp.Quantity);
 
+			var fullQuantity = this.Pallets
+				.SelectMany(p => p.ProductsOnPallet)
+				.Where(pp => pp.ProductId == productId)
+				.Sum(pp => pp.Quantity);
+
+			var invalidQuantityBB = fullQuantity - quantityPrepared;
+
 			if (quantityPrepared < quantityOrdered && IssueStatus == IssueStatus.PickingShortage) { isConditional = true; }
 			if (quantityOrdered == quantityPrepared)
 			{
-				return new IssueVerifyResult(true, isConditional, quantityPrepared, quantityOrdered, bestBeforeRequired);
+				return new IssueVerifyResult(true, isConditional, invalidQuantityBB, quantityPrepared, quantityOrdered, bestBeforeRequired);
 			}
-			return new IssueVerifyResult(false, isConditional, quantityPrepared, quantityOrdered, bestBeforeRequired);
+			return new IssueVerifyResult(false, isConditional, invalidQuantityBB, quantityPrepared, quantityOrdered, bestBeforeRequired);
 		}
 		public void CheckPalletsInIssue()
 		{
@@ -536,9 +566,9 @@ namespace MyWerehouse.Domain.Issuing.Models
 		}
 		public void RemoveReceiptPalletsFromCollection()
 		{
-			foreach(var pallet in Pallets.ToList())
+			foreach (var pallet in Pallets.ToList())
 			{
-				if(pallet.IssueId == null && pallet.ReceiptId != null)
+				if (pallet.IssueId == null && pallet.ReceiptId != null)
 				{
 					Pallets.Remove(pallet);
 				}

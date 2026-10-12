@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyWerehouse.Application.Receipts.Commands.CancelReceipt;
+﻿using MyWerehouse.Application.Receipts.Commands.CancelReceipt;
 using MyWerehouse.Application.Receipts.Commands.DeleteDraftReceipt;
 using MyWerehouse.Domain.Clients.Models;
-using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Products.Models;
@@ -51,7 +45,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 		{
 			return Product.Create(name, sku, TestDates.UtcNow, 1, 56, 30, 30, 30, 30, "TestDetails");
 		}
-		private Location CreateLocation(int id, int position)
+		private static Location CreateLocation(int id, int position)
 		{
 			return new Location
 			{
@@ -74,13 +68,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receiptId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 			var receipt = Receipt.CreateForSeed(receiptId1, 1, 1, "U001",
 				new DateTime(2025, 6, 6), ReceiptStatus.PhysicallyCompleted, 1);
-			var pallet = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
-			var pallet1 = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
-			pallet1.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
+			var pallet1 = Pallet.CreateForTests("Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
+			pallet1.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
+			var pallet2 = Pallet.CreateForTests("Q2000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
+			pallet2.AddProduct(product1.Id, 200, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			DbContext.Categories.Add(category);
 			DbContext.Products.AddRange(product, product1);
-			DbContext.Pallets.AddRange(pallet, pallet1);
+			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.Clients.Add(client);
 			DbContext.Receipts.Add(receipt);
 			DbContext.Locations.Add(location);
@@ -94,13 +88,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			Assert.NotNull(receiptE);
 			Assert.Equal(ReceiptStatus.Cancelled, receiptE.ReceiptStatus);
 			Assert.NotNull(DbContext.Pallets);
-			var pallets = DbContext.Pallets.Where(p => p.ReceiptId == receipt.Id).ToList();
-			foreach (var palet in pallets)
-			{
-				Assert.Equal(PalletStatus.Cancelled, palet.Status);
-			}
+			using var newContext = CreateNewContext();
+			var pallet1AfterMethod = newContext.Pallets.Single(x => x.Id == pallet1.Id);
+			Assert.Equal(PalletStatus.Cancelled, pallet1AfterMethod.Status);
+			Assert.Null(pallet1AfterMethod.ReceiptId);
+			
+			var pallet2AfterMethod = newContext.Pallets.Single(x => x.Id == pallet2.Id);
+			Assert.Equal(PalletStatus.Cancelled, pallet2AfterMethod.Status);
+			Assert.Null(pallet2AfterMethod.ReceiptId);
 			Assert.NotNull(DbContext.ProductOnPallet);
-
 			Assert.Equal(2, DbContext.Products.Count());
 			Assert.Equal(1, DbContext.Categories.Count());
 			Assert.Equal(1, DbContext.Clients.Count());
@@ -119,7 +115,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			var receipt = Receipt.CreateForSeed(Guid.NewGuid(), 1, 1, "U001",
 				new DateTime(2025, 6, 6), receiptStatus, 1);
 			var cancellablePallet = Pallet.CreateForTests(
-				"Q1000", TestDates.UtcNow, 1, PalletStatus.Available, receipt.Id, null);
+				"Q1000", TestDates.UtcNow, 1, PalletStatus.Receiving, receipt.Id, null);
 			cancellablePallet.AddProduct(product.Id, 100, TestDates.UtcNow, new DateOnly(2027, 3, 3));
 			cancellablePallet.AddHistory(ReasonForPallet.Received, "user", "location");
 
@@ -145,7 +141,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReceiptTests.Integra
 			Assert.Equal(receipt.ReceiptNumber, exception.ReceiptNumber);
 			Assert.Equal(receiptStatus, receipt.ReceiptStatus);
 			Assert.Equal(receipt.Id, cancellablePallet.ReceiptId);
-			Assert.Equal(PalletStatus.Available, cancellablePallet.Status);
+			Assert.Equal(PalletStatus.Receiving, cancellablePallet.Status);
 			Assert.Equal(receipt.Id, circulatingPallet.ReceiptId);
 			Assert.Equal(PalletStatus.Available, circulatingPallet.Status);
 		}

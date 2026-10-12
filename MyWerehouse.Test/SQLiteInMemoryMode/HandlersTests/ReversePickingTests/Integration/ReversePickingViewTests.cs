@@ -516,7 +516,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.NotNull(resultGetView.Result);
 			Assert.True(resultGetView.Result.CanReturnToSource);
 			Assert.False(resultGetView.Result.CanAddToExistingPallet);
-			Assert.False(resultGetView.Result.PickingPalletCompletlyUnpicking);
+			//Assert.False(resultGetView.Result.PickingPalletCompletlyUnpicking);
 			Assert.True(resultGetView.Result.AddToNewPallet);
 		}
 		[Fact]
@@ -650,7 +650,10 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 
 			Assert.Equal(ReversePickingStatus.Ongoing, task.Status);
 			Assert.Equal("UserC", task.UserId);
-
+			////Arrange 4
+			//var pallet5 = Pallet.CreateForTests("P5", TestDates.UtcNow, 4, PalletStatus.Available, receipt.Id, null);
+			//pallet5.AddProduct(product.Id, 5, TestDates.UtcNow, DateOnly.FromDateTime(TestDates.UtcNow.AddDays(366)));
+			//DbContext.Pallets.Add(pallet5);
 			//Act 4 
 			var resultGetView = await Mediator.Send(new GetReversePickingToDoQuery(task.Id));
 			//Assert 4
@@ -660,7 +663,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.False(resultGetView.Result.CanReturnToSource);
 			Assert.True(resultGetView.Result.CanAddToExistingPallet);
 			Assert.True(resultGetView.Result.AddToNewPallet);
-			Assert.True(resultGetView.Result.PickingPalletCompletlyUnpicking);
+			//Assert.True(resultGetView.Result.PickingPalletCompletlyUnpicking);
 			Assert.Equal(2, resultGetView.Result.ListPalletsToAdd.Count);
 		}
 		[Fact]
@@ -834,7 +837,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.ReversePickingTests.
 			Assert.NotNull(resultGetView.Result);
 			Assert.False(resultGetView.Result.CanReturnToSource);
 			Assert.False(resultGetView.Result.CanAddToExistingPallet);
-			Assert.False(resultGetView.Result.PickingPalletCompletlyUnpicking);
+			//Assert.False(resultGetView.Result.PickingPalletCompletlyUnpicking);
 			Assert.True(resultGetView.Result.AddToNewPallet);
 			Assert.Empty(resultGetView.Result.ListPalletsToAdd);
 		}

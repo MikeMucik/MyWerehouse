@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
 using MyWerehouse.Application.Common.Results;
 using MyWerehouse.Application.ReversePickings.DTOs;
@@ -83,7 +83,7 @@ namespace MyWerehouse.Application.ReversePickings.Command.ExecutiveReversePickin
 			}
 			//Pallet being reverse picked
 			productOnPallet.DecreaseQuantity(reversePicking.Quantity);
-			pickingPallet.CkeckIfToArchive(command.UserId, ReasonForPallet.ReversePicking, pickingPallet.Location.ToSnapshot());
+			pickingPallet.CheckIfToArchive(command.UserId, ReasonForPallet.ReversePicking, pickingPallet.Location.ToSnapshot());
 			//Reverse picking task
 			reversePicking.Complete();
 			reversePicking.AddHistory(command.UserId, issueId, issueNumber, ReversePickingStatus.InProgress, ReversePickingStatus.Completed);

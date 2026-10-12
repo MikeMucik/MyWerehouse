@@ -82,16 +82,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>
 			{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
-				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
-			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			//Inventory
 			//For two products
@@ -157,16 +157,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>
 			{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
-				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
-			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			//Inventory
 			//For two products
@@ -212,16 +212,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>
 			{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
-				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
-			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
+			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
-			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			//Inventory
 			//For two products
@@ -254,16 +254,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>
 			{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
-				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, null);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, null);
-			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			//Inventory
 			//For two products
@@ -296,16 +296,16 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>
 			{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
-				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product1.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.IsShipped, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.Loaded, null, issueId);
-			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product1.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var inventory = Inventory.CreateStockItem(product.Id, 100, TestDates.Now.AddDays(-7));
 			var inventory1 = Inventory.CreateStockItem(product1.Id, 100, TestDates.Now.AddDays(-7));

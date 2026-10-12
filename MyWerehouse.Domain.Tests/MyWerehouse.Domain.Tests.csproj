@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyWerehouse.Domain\MyWerehouse.Domain.csproj" />
+    <ProjectReference Include="..\MyWerehouse.Test\MyWerehouse.Test.csproj" />
     <ProjectReference Include="..\TestSupport\TestSupport.csproj" />
   </ItemGroup>
 
@@ -27,7 +28,6 @@
     <Folder Include="Products\" />
     <Folder Include="ReversePickings\" />
     <Folder Include="Pickings\" />
-    <Folder Include="Receipts\" />
   </ItemGroup>
 
 </Project>

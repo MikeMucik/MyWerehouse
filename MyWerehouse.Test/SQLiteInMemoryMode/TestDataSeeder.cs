@@ -250,42 +250,42 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode
 						Id = 1,
 						HistoryPalletId = 1,
 						ProductId = productId1,
-						QuantityChange = 100,
+						Quantity = 100,
 					},
 					new HistoryPalletDetail
 					{
 						Id = 6,
 						HistoryPalletId = 1,
 						ProductId = productId2,
-						QuantityChange = 1,
+						Quantity = 1,
 					},
 					new HistoryPalletDetail
 					{
 						Id = 2,
 						HistoryPalletId = 2,
 						ProductId = productId2,
-						QuantityChange = 1,
+						Quantity = 1,
 					},
 					new HistoryPalletDetail
 					{
 						Id = 3,
 						HistoryPalletId = 3,
 						ProductId = productId2,
-						QuantityChange = 1,
+						Quantity = 1,
 					},
 					new HistoryPalletDetail
 					{
 						Id = 4,
 						HistoryPalletId = 4,
 						ProductId = productId1,
-						QuantityChange = 1,
+						Quantity = 1,
 					},
 					new HistoryPalletDetail
 					{
 						Id = 5,
 						HistoryPalletId = 5,
 						ProductId = productId1,
-						QuantityChange = 1,
+						Quantity = 1,
 					});
 			}
 			if (!context.Inventories.Any())

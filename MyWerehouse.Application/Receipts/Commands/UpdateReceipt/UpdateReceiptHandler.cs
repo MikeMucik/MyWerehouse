@@ -1,4 +1,4 @@
-using MyWerehouse.Application.Pallets.Services;
+﻿using MyWerehouse.Application.Pallets.Services;
 using MediatR;
 using MyWerehouse.Application.Common.Interfaces;
 using MyWerehouse.Application.Common.Interfaces.Persistence;
@@ -61,7 +61,7 @@ namespace MyWerehouse.Application.Receipts.Commands.UpdateReceipt
 				);
 				palletsToUpdate.Add(palletTT);
 			}
-			var addingPallets = existingReceipt.StartUpdateReceipt(palletsToUpdate, request.DTO.PerformedBy);
+			var addingPallets = existingReceipt.ChangeValuesReturnNewPallets(palletsToUpdate, request.DTO.PerformedBy);
 			var listOfNewPalletNumbers = await _palletNumberAllocator.ReserveAsync(addingPallets.Count, ct);
 
 			for (var i = 0; i < addingPallets.Count; i++)

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MyWerehouse.Domain.Common;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Inventories.Events;
@@ -12,7 +7,6 @@ using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.PalletExceptions;
-using MyWerehouse.Domain.Products.Models;
 using MyWerehouse.Domain.Receiving.Models;
 using MyWerehouse.Domain.Warehouse.Models;
 
@@ -84,22 +78,50 @@ namespace MyWerehouse.Domain.Pallets.Models
 			AddHistory(ReasonForPallet.ReversePicking, userId, snapShot);
 		}
 
-		public void AssignToWarehouse(int locationId, string snapShot, string userId)
+		public void AssignToWarehouse(string snapShot, string userId)
 		{
 			var listProducts = this.CreateStockItem();
 			Status = PalletStatus.InStock;
 			AddHistory(ReasonForPallet.New, userId, snapShot);
 			this.AddDomainEvent(new ChangeStockNotification(listProducts));
 		}
-
-		public void Update(string userId, List<ProductOnPallet> products, PalletStatus palletStatus, string snapShot)
+		public void StartUpdate(PalletStatus status)
 		{
+			if (Status == PalletStatus.Cancelled || Status == PalletStatus.Archived)
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+			if (status == PalletStatus.Cancelled || status == PalletStatus.Archived)
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+		}
+
+		public void Update(string userId, List<ProductOnPallet> products, PalletStatus status, string snapShot)
+		{
+			StartUpdate(status);
+			if (status == PalletStatus.New || status == PalletStatus.Receiving)
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+			//if (status == PalletStatus.Archived)
+			//{
+			//	products.Clear();
+			//}
 			var changeQuangtityInventory = this.CalculateQuantityDelta(products);
-			Status = palletStatus;
 			this.ReplaceProducts(products);
-			this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
+
+			if (Status == PalletStatus.New || Status == PalletStatus.Receiving)
+			{
+				var stockItemChanges = this.ProductsOnPallet
+					.GroupBy(p => p.ProductId)
+					.Select(g => new StockItemChange(g.Key, g.Sum(q => q.Quantity)))
+					.ToList();
+
+				this.AddDomainEvent(new ChangeStockNotification(stockItemChanges));
+			}
+			else
+			{
+				this.AddDomainEvent(new ChangeStockNotification(changeQuangtityInventory));
+			}
+			Status = status;
 			AddHistory(ReasonForPallet.Correction, userId, snapShot);
 		}
+	//	public void ArchivePallet()
 
 		public void ReplaceProducts(List<ProductOnPallet> updatedProducts)
 		{
@@ -129,8 +151,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void AddProduct(Guid productId, int quantity, DateTime createdAt, DateOnly? bestBefore)
 		{
-			if (quantity <= 0)
-				throw new InvalidQuantityDomainException(Id);
+			//if (quantity <= 0)
+			//	throw new InvalidQuantityDomainException(Id);
+			if (DateOnly.FromDateTime(createdAt) > bestBefore)
+				throw new WrongDateDomainException();
 			this.ProductsOnPallet.Add(ProductOnPallet.Create(productId, Id, quantity, createdAt, bestBefore));
 		}
 
@@ -157,7 +181,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		public void ReserveToIssue(Guid issueId, string userId, string snapShot)
 		{
 			if (Status == PalletStatus.ToIssue)
-				throw new AlreadyAssignedDomainException(Id);
+				throw new AlreadyAssignedDomainException(Id, PalletNumber);
 
 			if (Status == PalletStatus.Available || Status == PalletStatus.InStock)
 			{
@@ -190,29 +214,40 @@ namespace MyWerehouse.Domain.Pallets.Models
 			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
 		}
 
-		public void DetachFromReceipt(string userId, string snapShot)
+		public void DetachFromReceipt(string userId, string snapShot, ReasonForPallet reason)
 		{
+			if (Status != PalletStatus.Receiving && Status != PalletStatus.New)
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			Status = PalletStatus.Cancelled;
 			ReceiptId = null;
-			AddHistory(ReasonForPallet.ToLoad, userId, snapShot);
+			AddHistory(reason, userId, snapShot);
 		}
 
 		public void DetachFromIssue(string userId, string snapShot, ReasonForPallet reason)
 		{
+			if (Status == PalletStatus.Cancelled ||
+				Status == PalletStatus.Archived ||
+				Status == PalletStatus.Loaded)
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+			if (Status == PalletStatus.ToIssue || Status == PalletStatus.LockedForIssue)
+			{ Status = PalletStatus.Available; }
 			IssueId = null;
-			Status = PalletStatus.Available;
 			AddHistory(reason, userId, snapShot);
 		}
 
 		public void AssignToPicking(string userId, string snapShot)
 		{
+			if (Status != PalletStatus.Available &&
+				Status != PalletStatus.InStock)
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			Status = PalletStatus.ToPicking;
 			AddHistory(ReasonForPallet.Picking, userId, snapShot);
 		}
 
 		public void AssignToReceipt(Guid receiptId, string snapshot, string userId)
 		{
-			if (Status == PalletStatus.Receiving) throw new AlreadyAssignedDomainException(Id);
+			if (Status == PalletStatus.Receiving) throw new AlreadyAssignedDomainException(Id, PalletNumber);
+			if (Status != PalletStatus.New) throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			ReceiptId = receiptId;
 			Status = PalletStatus.Receiving;
 			AddHistory(ReasonForPallet.Received, userId, snapshot);
@@ -227,6 +262,12 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void MoveToLocation(int newLocationId, string newLocationSnapShot, int oldLocationId, string oldLocationSnapShot, string userId)
 		{
+			if (Status == PalletStatus.Loaded ||
+				Status == PalletStatus.Cancelled ||
+				Status == PalletStatus.Archived)
+			{
+				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+			}
 			if (this.Status == PalletStatus.InStock)
 			{
 				Status = PalletStatus.Available;
@@ -241,7 +282,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{
 			if (Status == PalletStatus.ToIssue)
 			{
-				throw new AlreadyAssignedDomainException(Id);
+				throw new AlreadyAssignedDomainException(Id, PalletNumber);
 			}
 			if (Status != PalletStatus.Picking)
 				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
@@ -270,11 +311,13 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public bool CanBeCancelled()
 		{
-			if (PalletHistory.Count > 1)
-				return false;
-			return true;
+			if (Status == PalletStatus.New || Status == PalletStatus.Receiving)
+			{ return true; }
+			else { return false; }
+			;
+			//return Status is PalletStatus.New or PalletStatus.Receiving;
 		}
-		public void CkeckIfToArchive(string userId, ReasonForPallet reason, string snapShot)
+		public void CheckIfToArchive(string userId, ReasonForPallet reason, string snapShot)
 		{
 			if (ProductsOnPallet.All(p => p.Quantity == 0))
 			{
@@ -287,14 +330,10 @@ namespace MyWerehouse.Domain.Pallets.Models
 		}
 		public ProductOnPallet GetProductOnPallet(Guid productId, DateOnly? bestBefore)
 		{
+			if (ProductsOnPallet.Count > 1) throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
 			var product = this.ProductsOnPallet.Where(p => p.ProductId == productId
 			&& (bestBefore == null || p.BestBefore >= bestBefore));
-			if (product.Count() > 1)
-			{
-				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
-			}
 			if (!product.Any()) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
-
 			return product.First();
 		}
 		public ProductOnPallet GetProductOnPalletForReverse(Guid productId, DateOnly? bestBefore)
@@ -306,7 +345,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
 			}
 			if (!product.Any()) throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber, productId);
-
 			return product.First();
 		}
 
@@ -316,8 +354,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 			{
 				throw new PalletAlreadyLoadedDomainException(Id, PalletNumber);
 			}
-			if (Status != PalletStatus.ToIssue
-				&& Status != PalletStatus.LockedForIssue)
+			if (Status != PalletStatus.ToIssue)
+				//&& Status != PalletStatus.LockedForIssue
 			{
 				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			}
@@ -327,7 +365,7 @@ namespace MyWerehouse.Domain.Pallets.Models
 
 		public void ChangeStatus(PalletStatus status)
 		{
-			if (Status == PalletStatus.Archived) throw new InvalidPalletStatusDomainException(Id, PalletNumber);
+			if (Status == PalletStatus.Archived || Status == PalletStatus.Cancelled) throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			this.Status = status;
 		}
 		//Helper methods
@@ -355,7 +393,6 @@ namespace MyWerehouse.Domain.Pallets.Models
 				if (delta != 0)
 					result.Add(new StockItemChange(productId, delta));
 			}
-
 			return result;
 		}
 
@@ -365,7 +402,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 				.Select(p => new HistoryPalletDetail
 				(
 					p.ProductId,
-					p.Quantity
+					p.Quantity,
+					p.BestBefore
 				))
 				.ToList();
 		}
@@ -408,14 +446,11 @@ namespace MyWerehouse.Domain.Pallets.Models
 			{
 				throw new InvalidPalletStatusDomainException(Id, PalletNumber);
 			}
-
-			if (ProductsOnPallet.Count > 1)
+			if (ProductsOnPallet.Count != 1)
 			{
 				throw new PalletMustContainSingleProductLineDomainException(Id, PalletNumber);
 			}
-			var product = ProductsOnPallet.SingleOrDefault() ??
-				throw new ProductNotFoundOnPalletDomainException(Id, PalletNumber);
-
+			var product = ProductsOnPallet.Single();
 			if (product.Quantity <= 0)
 				throw new InsufficientQuantityDomainException(Id, PalletNumber);
 			return product;
@@ -434,8 +469,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 				}
 			}
 		}
-		public (int RestQuantity, int AddedQuantity) AddReversePickedProduct(Guid productId, DateOnly? bestBefore,
-			int quantity, int cartonsPerPallet, string userId, string snapshot)
+		public (int RestQuantity, int AddedQuantity) AddReversePickedProduct(Guid productId,
+			DateOnly? bestBefore, int quantity, int cartonsPerPallet, string userId, string snapshot)
 		{
 			if (Status != PalletStatus.Available)
 			{

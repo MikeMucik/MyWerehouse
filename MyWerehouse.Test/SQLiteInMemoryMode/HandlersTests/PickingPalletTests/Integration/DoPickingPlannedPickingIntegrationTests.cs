@@ -533,8 +533,8 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.Products.AddRange(product1, product2);
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product1.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)),
-				IssueItem.CreateForSeed(2, issueId, product2.Id, 10, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product1.Id, 20, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)),
+				IssueItem.CreateForSeed(2, issueId, product2.Id, 10, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
 			DateOnly.FromDateTime( TestDates.Now.AddDays(1)), "TestUser", IssueStatus.New, issueItem);
@@ -610,7 +610,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product1.Id, 30, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product1.Id, 30, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
 			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, issueItem);
@@ -678,7 +678,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PickingPalletTests.I
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product1.Id, 30, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product1.Id, 30, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow,
 			DateOnly.FromDateTime(TestDates.UtcNow.AddDays(7)), "TestUser", IssueStatus.New, issueItem);

@@ -77,15 +77,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 20, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.Pending, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -125,15 +125,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 20, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.Pending, issueItem);
 			var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issueId);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issueId);
-			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			DbContext.Pallets.AddRange(pallet1, pallet2);
 			DbContext.Issues.Add(issue);
@@ -177,15 +177,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 20, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -223,12 +223,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			var issueId = Guid.NewGuid();
 			var issueItem = IssueItem.CreateForSeed(1, issueId, product.Id, 20,
-				new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1));
+				TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1));
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 				DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.PickingShortage,
 				new List<IssueItem> { issueItem });
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			DbContext.Pallets.Add(pallet);
 			DbContext.Issues.Add(issue);
@@ -269,12 +269,12 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 
 			var issueId = Guid.NewGuid();
 			var issueItem = IssueItem.CreateForSeed(1, issueId, product.Id, 20,
-				new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1));
+				TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1));
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 				DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.PickingShortage,
 				new List<IssueItem> { issueItem });
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProduct(product.Id, 30, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 30, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			DbContext.Pallets.Add(pallet);
 			DbContext.Issues.Add(issue);
@@ -312,15 +312,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 20, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.Available, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -347,15 +347,15 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			DbContext.SaveChanges();
 			var issueId = Guid.NewGuid();
 			var issueItem = new List<IssueItem>{
-				IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2027, 1, 1), new DateTime(2025, 1, 1))
+				IssueItem.CreateForSeed(1, issueId, product.Id, 20, TestDates.DateBestBeforeInMonths(24), new DateTime(2025, 1, 1))
 			};
 			var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.Now.AddDays(-7),
 			DateOnly.FromDateTime(TestDates.Now.AddDays(1)), "user1", IssueStatus.InProgress, issueItem);
 			var pallet = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			var pallet1 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToIssue, null, issueId);
-			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+			pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 
 			DbContext.Pallets.AddRange(pallet, pallet1);
 			DbContext.Issues.Add(issue);
@@ -368,7 +368,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.NotNull(result.Result);
 			Assert.Contains("Issue was not approved.", result.Error);
 			Assert.Equal(ErrorType.Validation, result.ErrorType);
-			Assert.Contains(result.Result, x => x.Message.Contains("Prepared product does not match the issue. Requested 20"));
+			Assert.Contains(result.Result, x => x.Message.Contains("Prepared product with bad date."));
 
 			var failedItem = Assert.Single(result.Result, x => !x.Success);
 			var expectedQuantityRequest = issueItem.Single(p => p.ProductId == product.Id).Quantity;
@@ -377,7 +377,7 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 			Assert.Equal(product.SKU, failedItem.SKU);
 			Assert.Equal(expectedQuantityRequest, failedItem.QuantityRequest);
 			Assert.Equal(expectedQuantityPrepared, failedItem.QuantityPrepared);
-			Assert.Contains("Prepared product does not match the issue", failedItem.Message);
+			Assert.Contains("Prepared product with bad date. Bad prepared is 20", failedItem.Message);
 		}
 		[Fact]
 		public async Task VerifyIssueToLoad_NotConfirmIssue_WhenNotExistIssue()

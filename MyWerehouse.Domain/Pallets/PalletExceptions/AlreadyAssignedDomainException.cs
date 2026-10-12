@@ -10,10 +10,12 @@ namespace MyWerehouse.Domain.Pallets.PalletExceptions
 	public class AlreadyAssignedDomainException :DomainException
 	{
 		public Guid PalletId { get; }
-		public AlreadyAssignedDomainException(Guid palletId):
-			base("Pallet already assigned.")
+		public string PalletNumber { get; }
+		public AlreadyAssignedDomainException(Guid palletId, string palletNumber) :
+			base($"Pallet {palletNumber} already assigned.")
 		{
 			PalletId = palletId;
+			PalletNumber = palletNumber;
 		}
 	}
 }

@@ -4,7 +4,6 @@ using MyWerehouse.Domain.Issuing.IssueExceptions;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pickings.Models;
-using MyWerehouse.Domain.Products.Models;
 using TestSupport;
 
 namespace MyWerehouse.Domain.Tests.Issues

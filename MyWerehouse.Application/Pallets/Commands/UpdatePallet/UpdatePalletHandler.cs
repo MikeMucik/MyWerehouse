@@ -18,10 +18,12 @@ namespace MyWerehouse.Application.Pallets.Commands.UpdatePallet
 
 		public async Task<AppResult<Unit>> Handle(UpdatePalletCommand request, CancellationToken ct)
 		{
-			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.Id, ct);
+			var existingPallet = await _palletRepo.GetPalletByIdAsync(request.Id, ct);			
 			var date = _dateTimeProvider.TodayDateTime;
 			if (existingPallet == null)
 				return AppResult<Unit>.Fail("The specified pallet does not exist.");
+			var statusAdded = request.UpdatingPallet.Status;
+			existingPallet.StartUpdate(statusAdded);
 			if (existingPallet.Status == PalletStatus.Receiving)
 			{
 				return AppResult<Unit>.Fail("The specified pallet belongs to a receipts and should be updated in receipt.", ErrorType.Conflict);

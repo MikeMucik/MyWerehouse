@@ -20,7 +20,7 @@ using MyWerehouse.Test.SQLiteInMemoryMode;
 
 namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 {
-	public class AddHistoryTests : TestBase
+	public class AddHistoryTests : TestBase //!!! Quantity Minus
 	{
 		private static Category CreateCategory(string name)
 		{
@@ -73,7 +73,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 				{
 					new HistoryPalletDetail
 					{
-						QuantityChange = -1,
+						Quantity = 1,
 						ProductId =product.Id,
 					}
 				},
@@ -92,7 +92,7 @@ namespace MyWerehouse.Test.IntegrationTestRepo.HistoryTestsRepoSQLite
 			var result = resultList
 				.FirstOrDefault();
 			Assert.NotNull(result);
-			Assert.Equal(-1, resultList.First(p => p.PerformedBy == "U001").HistoryPalletDetails.First().QuantityChange);
+			Assert.Equal(1, resultList.First(p => p.PerformedBy == "U001").HistoryPalletDetails.First().Quantity);
 			Assert.Equal("U001", result.PerformedBy);
 			Assert.Equal(ReasonForPallet.Correction, result.Reason);
 		}

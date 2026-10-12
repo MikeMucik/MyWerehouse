@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace MyWerehouse.Domain.Issuing.Models
 {
-	public record IssueVerifyResult(bool IsMatching, bool IsConditional, int PreparedQuantity, int OrderedQuantity, DateOnly? BestBefore);	
+	public record IssueVerifyResult(bool IsMatching, bool IsConditional, int InvalidQuantityBB, int PreparedQuantity, int OrderedQuantity, DateOnly? BestBefore);	
 }

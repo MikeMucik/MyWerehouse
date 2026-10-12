@@ -1,8 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Histories.Models;
 using MyWerehouse.Domain.Issuing.Events;
@@ -12,7 +7,6 @@ using MyWerehouse.Domain.Pallets.Events;
 using MyWerehouse.Domain.Pallets.Models;
 using MyWerehouse.Domain.Pickings.Events;
 using MyWerehouse.Domain.Pickings.Models;
-using MyWerehouse.Domain.Warehouse.Models;
 using TestSupport;
 
 namespace MyWerehouse.Domain.Tests.Issues
@@ -297,6 +291,7 @@ namespace MyWerehouse.Domain.Tests.Issues
 		[InlineData(IssueStatus.Archived)]
 		[InlineData(IssueStatus.Cancelled)]
 		[InlineData(IssueStatus.IsShipped)]
+		//[InlineData(IssueStatus.IsShippedCancelled)]
 		public void EnsureCanBeCancelled_ReturnError_WhenInvalidStatus(IssueStatus status)
 		{
 			//Arrange

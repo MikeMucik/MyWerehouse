@@ -83,14 +83,14 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.IssueTests.Integrati
 				db.SaveChanges();
 				var pallets = new List<Pallet>();
 				var issueId = Guid.NewGuid();
-				var issueItem = new List<IssueItem> { IssueItem.CreateForSeed(1, issueId, product.Id, 20, new DateOnly(2026, 1, 1), new DateTime(2025, 1, 1)) };
+				var issueItem = new List<IssueItem> { IssueItem.CreateForSeed(1, issueId, product.Id, 20, TestDates.DateBestBeforeInMonths(12), new DateTime(2025, 1, 1)) };
 				var issue = Issue.CreateForSeed(issueId, 1, 1, TestDates.UtcNow.AddDays(-7),
 				DateOnly.FromDateTime( TestDates.UtcNow.AddDays(7)), "UserInit", issueStatus, issueItem);
 				var pallet1 = Pallet.CreateForTests("P1", TestDates.UtcNow, 1, PalletStatus.LockedForIssue, null, issue.Id);
-				pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+				pallet1.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 				pallets.Add(pallet1);
 				var pallet2 = Pallet.CreateForTests("P2", TestDates.UtcNow, 1, PalletStatus.ToPicking, null, issue.Id);
-				pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, new DateOnly(2026, 1, 1));
+				pallet2.AddProduct(product.Id, 10, TestDates.UtcNow, TestDates.DateBestBeforeInMonths(12));
 				pallets.Add(pallet2);
 				// Add a sample allocation
 				var virtualPallet = VirtualPallet.CreateForSeed(Guid.NewGuid(), pallet2.Id, 10,pallet2.LocationId, new DateTime(2025, 8, 12));

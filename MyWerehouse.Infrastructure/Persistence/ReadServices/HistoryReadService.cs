@@ -28,7 +28,7 @@ namespace MyWerehouse.Infrastructure.Persistence.ReadServices
 					.Select(hd => new HistoryPalletDetailDTO
 					{
 						ProductId = hd.ProductId,
-						QuantityChange = hd.QuantityChange
+						QuantityChange = hd.Quantity
 					}).ToList()
 				}).OrderBy(h => h.MovementDate)
 				.ThenBy(h=>h.Id);

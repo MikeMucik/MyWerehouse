@@ -22,10 +22,12 @@ namespace MyWerehouse.Domain.Pallets.Models
 		private ProductOnPallet() { }
 
 		private ProductOnPallet(int id, Guid productId, Guid palletId, int quantity, DateTime dateAdded, DateOnly? bestBefore)
-		{
+		{			
 			Id = id;
 			ProductId = productId;
 			PalletId = palletId;
+			if (quantity <= 0)
+				throw new InvalidQuantityDomainException(PalletId);
 			Quantity = quantity;
 			DateAdded = dateAdded;
 			BestBefore = bestBefore;
@@ -37,6 +39,8 @@ namespace MyWerehouse.Domain.Pallets.Models
 		{			
 			ProductId = productId;
 			PalletId = palletId;
+			if (quantity <= 0)
+				throw new InvalidQuantityDomainException(PalletId);
 			Quantity = quantity;
 			DateAdded = dateAdded;
 			BestBefore = bestBefore;

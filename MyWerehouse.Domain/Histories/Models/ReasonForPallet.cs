@@ -14,9 +14,10 @@ namespace MyWerehouse.Domain.Histories.Models
 		Moved = 3,//The pallet was moved to another location
 		Correction = 4,//The pallet was corrected
 		Merge = 5,//The pallet was merged with another pallet
-		ToLoad = 6,//Pallet added to an issue
+		ToLoad = 6,//Pallet locked to an issue
 		Loaded = 7,//Loaded pallet
 		CancelIssue = 8,//The pallet was removed from the issue because the issue was cancelled
 		ReversePicking = 9,//Pallet affected by reverse picking
+		CancelReceipt = 10,//The pallet was cancelled because the receipt was cancelled
 	}
 }

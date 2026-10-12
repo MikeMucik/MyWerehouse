@@ -79,13 +79,13 @@ namespace MyWerehouse.Test.SQLiteInMemoryMode.HandlersTests.PalletTests.Integrat
 			{
 				HistoryPallet = movement,
 				ProductId = product1.Id,
-				QuantityChange = 1,
+				Quantity = 1,
 			};
 			var movementDetails2 = new HistoryPalletDetail
 			{
 				HistoryPallet = movement2,
 				ProductId = product1.Id,
-				QuantityChange = 1,
+				Quantity = 1,
 			};
 			DbContext.HistoryPalletDetails.AddRange(movementDetails1, movementDetails2);
 			DbContext.HistoryPallet.AddRange(movement, movement2);

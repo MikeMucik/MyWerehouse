@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace MyWerehouse.Application.Receipts.Commands.CreateReceipt
 					var receiptNumber = await _receiptRepo.GetNextNumberOfReceipt(transactionCt);
 					var receipt = Receipt.Create(receiptNumber, request.DTO.ClientId, request.DTO.PerformedBy, request.DTO.RampNumber, now);
 					_receiptRepo.AddReceipt(receipt);
-					receipt.Create(request.DTO.PerformedBy);
+					receipt.AddHistory(request.DTO.PerformedBy);
 					await _unitOfWork.SaveChangesAsync(transactionCt);
 					return AppResult<Unit>.Success(Unit.Value, "Receipt created.");
 				}, IsolationLevel.Serializable, ct);

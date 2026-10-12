@@ -1,4 +1,4 @@
-﻿using MyWerehouse.Domain.Clients.Models;
+using MyWerehouse.Domain.Clients.Models;
 using MyWerehouse.Domain.Common.ValueObject;
 using MyWerehouse.Domain.Issuing.Models;
 using MyWerehouse.Domain.Products.Models;
@@ -43,6 +43,7 @@ namespace MyWerehouse.Domain.Tests.Issues
 		{
 			return new Location
 			{
+			Id = position,
 				Bay = 1,
 				Aisle = 1,
 				Height = 1,

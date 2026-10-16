@@ -2,7 +2,7 @@
 
 [![.NET build and tests](https://github.com/MikeMucik/MyWerehouse/actions/workflows/dotnet.yml/badge.svg?branch=master&event=push)](https://github.com/MikeMucik/MyWerehouse/actions/workflows/dotnet.yml)
 [![Hosted on Azure](https://img.shields.io/badge/hosted%20on-Azure%20App%20Service-0078D4?logo=microsoftazure&logoColor=white)](https://mywarehouse-api-hiermet-ffggb2dwe5crh4gq.polandcentral-01.azurewebsites.net/swagger.html)
-[![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 
 MyWarehouse is a deployed ASP.NET Core REST API that models real warehouse
 operations: receiving, pallet storage, inventory, outbound orders, picking,
@@ -37,7 +37,7 @@ testing, and deployment to Azure App Service.
 - Best-before batch handling and pallet allocation
 - Atomic, concurrency-safe pallet number reservation
 - Operation history created through domain events
-- 416 automated tests covering handlers, repositories, validation and business workflows
+- 1017 automated tests covering handlers, repositories, validation and business workflows
 - Hosting on Azure App Service and Azure SQL, with CI provided by GitHub Actions
 
 ## Ready-to-explore demo scenarios
@@ -63,7 +63,7 @@ The solution is divided into four main layers:
 - **Server** exposes the HTTP API, configures dependency injection, and handles exceptions.
 - **Application** implements use cases through commands, queries, handlers, application services, validation, result types and persistence abstractions.
 - **Domain** contains entities, aggregates, domain services, business rules, domain events and exceptions.
-- **Infrastructure** implements persistency abstractions and provides the EF Core `DbContext`, migrations, repositories, read projections and domain-event dispatching.
+- **Infrastructure** implements persistence abstractions and provides the EF Core `DbContext`, migrations, repositories, read projections and domain-event dispatching.
 
 The current project dependencies are shown below:
 
@@ -80,18 +80,35 @@ graph LR
 
 ## Current architecture milestone
 
-The current release represents a complete and deployable milestone. Core warehouse
-workflows are implemented, hosted on Azure, and covered by automated tests.
+The current milestone combines the Clean Architecture structure with a migration
+to .NET 10 and an expanded, still incomplete automated test suite. Core warehouse
+workflows are implemented, while test coverage continues to grow.
 
-Business invariants and state transitions are implemented in domain entities
-and domain services. Application handlers coordinate use cases, persistence,
-and workflows that span multiple entities. This division is intentional:
-cross-aggregate orchestration remains in the Application layer when moving it
-into the Domain would introduce additional complexity without a meaningful benefit.
+Business invariants and state transitions belong to domain entities and domain
+services. Application handlers coordinate use cases, persistence, and workflows
+that span multiple entities. Cross-aggregate orchestration remains in the
+Application layer where it supports these use cases. Dependencies follow the
+direction shown in the diagram above, and Infrastructure projects read models
+directly with LINQ.
 
-The solution now follows Clean Architecture, with dependencies directed as shown in the diagram above.
+### Unit tests and verification
 
-Read models are projected directly with LINQ in Infrastructure; the current codebase does not use AutoMapper.
+Unit tests have been added for selected domain rules, state transitions,
+application services, and validators. Coverage is partial; additional business
+scenarios and edge cases remain to be tested. Separate domain and application
+test projects are complemented by infrastructure, integration, and API tests,
+with shared fixtures and seed data in `TestSupport`.
+
+After the migration, the solution built successfully and all 1,017 existing
+automated tests passed locally on .NET 10. This total includes unit, integration,
+and API tests.
+
+### Migration to .NET 10
+
+All application, test, and test-support projects now target `net10.0`. ASP.NET Core
+and Entity Framework Core dependencies were updated to the 10.0 release line,
+and Swagger configuration was adapted to the updated OpenAPI packages. MediatR
+remains on 11.1.0 to preserve the existing registration and handler APIs.
 
 ### Error handling
 
@@ -126,16 +143,22 @@ per-product shortages are returned as regular product results.
 ## Solution structure
 
 ```text
-MyWerehouse.Server/          Controllers, middleware, Swagger, and application startup
-MyWerehouse.Application/     Use cases, services, validation, DTOs, and persistence abstractions
-MyWerehouse.Domain/          Aggregates, entities, domain services, rules and exceptions
-MyWerehouse.Infrastructure/  EF Core persistence, read services, configurations, migrations, adapters and repositories
-MyWerehouse.Test/            Handlers, services, validation, workflows and repository tests
+MyWerehouse.Api.Tests/              Api tests, 
+MyWerehouse.Server/                 Controllers, middleware, Swagger, and application startup
+MyWerehouse.Application/            Use cases, services, validation, DTOs, and persistence abstractions
+MyWerehouse.Application.Tests/      Services unit tests
+MyWerehouse.Domain/                 Aggregates, entities, domain services, rules and exceptions
+MyWerehouse.Domain.Tests/           Domain unit tests 
+MyWerehouse.Infrastructure/         EF Core persistence, read services, configurations, migrations, adapters and repositories
+MyWerehouse.Infrastructure.Tests/   Infrastructure tests
+MyWerehouse.Integration.Tests/      Integration tests for handlers and services
+MyWerehouse.Test/                   Handlers, services, validation, workflows and repository tests - they will be moved to proper tests
+TestSupport/                       Shared test fixtures, database setup, and seed data
 ```
 
 ## Technology stack
 
-- .NET 9
+- .NET 10
 - ASP.NET Core Web API
 - Entity Framework Core
 - SQL Server and Azure SQL
@@ -157,7 +180,7 @@ The GitHub Actions workflow restores dependencies, builds the solution in the Re
 
 ### Prerequisites
 
-- .NET 9 SDK
+- .NET 10 SDK
 - SQL Server LocalDB
 - Entity Framework Core CLI tools (`dotnet-ef`)
 
@@ -173,7 +196,7 @@ dotnet ef database update --project MyWerehouse.Infrastructure --startup-project
 Start the API:
 
 ```bash
-dotnet run --project MyWerehouse.Server
+dotnet run --project MyWerehouse.Server --launch-profile https
 ```
 
 Swagger UI is available at:

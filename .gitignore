@@ -10,6 +10,10 @@
 *.userosscache
 *.sln.docstates
 
+# Local notes about known limitations
+/KNOWN_LIMITATION.md
+/KNOWN_LIMITATIONS.txt
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

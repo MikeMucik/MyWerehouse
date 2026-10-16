@@ -55,9 +55,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<AddressDTOValidation>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-	c.MapType<DateOnly>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+	c.MapType<DateOnly>(() => new Microsoft.OpenApi.OpenApiSchema
 	{
-		Type = "string",
+		Type = Microsoft.OpenApi.JsonSchemaType.String,
 		Format = "date"
 	});
 });
@@ -87,7 +87,3 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
-public partial class Program()
-{
-
-}
